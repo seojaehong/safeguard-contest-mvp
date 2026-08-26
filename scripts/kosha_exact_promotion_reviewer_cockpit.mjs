@@ -343,10 +343,16 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     </button>`).join("");
 
   const candidatePanels = candidates.map((candidate, index) => {
-    const evidenceGroups = candidate.semanticGroups.map((group) => `
+    const evidenceGroups = candidate.semanticGroups.map((group) => {
+      const pages = [...new Set(group.pageReceipts.map((receipt) => receipt.pageNumber))];
+      const companionTerms = group.matchedTerms.filter((term) => term !== group.evidenceTerm);
+      const companionText = companionTerms.length > 0
+        ? ` · 함께 일치: ${companionTerms.join(" · ")}`
+        : "";
+      return `
       <article class="evidence-group">
         <header><span>근거 ${group.group}</span><strong>${escapeHtml(group.matchedTerms.join(" · "))}</strong></header>
-        <p>${escapeHtml(group.excerpt)}</p>
+        <p class="evidence-reading-cue"><strong>검토 단서</strong><span>PDF ${escapeHtml(pages.join("·"))}쪽에서 “${escapeHtml(group.evidenceTerm)}” 확인${escapeHtml(companionText)}</span></p>
         <ul class="receipt-list" aria-label="근거 위치 영수증">${group.pageReceipts.map((receipt) => `
           <li data-evidence-receipt="${escapeHtml(candidate.stableKey)}:${group.group}:${receipt.pageNumber}">
             <strong>PDF ${receipt.pageNumber}쪽</strong>
@@ -354,7 +360,9 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
             <code title="${escapeHtml(receipt.normalizedTextSha256)}">${escapeHtml(receipt.normalizedTextSha256.slice(0, 12))}</code>
             ${receipt.ocrCandidate ? "<em>OCR 확인</em>" : ""}
           </li>`).join("")}</ul>
-      </article>`).join("");
+        <details class="evidence-source-excerpt"><summary>원문 발췌 보기</summary><p>${escapeHtml(group.excerpt)}</p></details>
+      </article>`;
+    }).join("");
     const checks = candidate.requiredReviewChecks.map((check, checkIndex) => `
       <label class="check-row">
         <input type="checkbox" data-check="${index}:${checkIndex}">
@@ -424,7 +432,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     .candidate-heading{display:flex;gap:16px;align-items:flex-start}.candidate-heading div{min-width:0}.candidate-heading span{color:var(--accent);font-size:12px;font-weight:700}.candidate-heading h1{font-size:20px;line-height:1.35;margin:4px 0 0}.candidate-heading a{margin-left:auto;white-space:nowrap;color:#075e45;font-weight:700;font-size:13px}
     .identity-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);margin:16px 0 12px}.identity-grid div{padding:9px 10px;border-right:1px solid var(--line)}.identity-grid div:last-child{border:0}dt{font-size:11px;color:var(--muted)}dd{margin:3px 0 0;font-size:13px;font-weight:700}
     .title-provenance{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:start;margin:8px 0 0;padding:7px 9px;border:1px solid #d7b66f;background:#fff6df;font-size:12px}.title-provenance strong{color:#7a4300}.title-provenance span{overflow-wrap:anywhere}.title-provenance em{color:#704100;font-style:normal;font-weight:700;white-space:nowrap}.rationale{border-left:3px solid var(--accent);padding:8px 12px;background:var(--soft)}.rationale p{margin:4px 0 0;font-size:13px}.evidence-stack{display:grid;gap:8px;margin-top:12px}.evidence-group{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:10px 12px}
-    .evidence-group header{display:flex;gap:10px;align-items:center;font-size:12px}.evidence-group header span{color:var(--muted)}.evidence-group p{font-size:13px;line-height:1.55;margin:8px 0 0;overflow-wrap:anywhere}.receipt-list{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:8px 0 0;padding:0}.receipt-list li{display:flex;align-items:center;gap:6px;min-height:28px;border:1px solid var(--line);background:var(--soft);padding:4px 7px;font-size:11px}.receipt-list code{font-family:Consolas,monospace}.receipt-list em{color:var(--warn);font-style:normal;font-weight:700}.hash-details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.hash-details summary{cursor:pointer;font-size:13px;font-weight:700}.hash-details dl{display:grid;gap:8px}.hash-details dd{font-family:Consolas,monospace;font-size:11px;overflow-wrap:anywhere}
+    .evidence-group header{display:flex;gap:10px;align-items:center;font-size:12px}.evidence-group header span{color:var(--muted)}.evidence-reading-cue{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:start;margin:8px 0 0;padding:6px 8px;background:#eef8f2;border-left:3px solid var(--accent);font-size:12px;line-height:1.45}.evidence-reading-cue strong{color:#075e45;white-space:nowrap}.receipt-list{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:8px 0 0;padding:0}.receipt-list li{display:flex;align-items:center;gap:6px;min-height:28px;border:1px solid var(--line);background:var(--soft);padding:4px 7px;font-size:11px}.receipt-list code{font-family:Consolas,monospace}.receipt-list em{color:var(--warn);font-style:normal;font-weight:700}.evidence-source-excerpt{margin-top:8px;border-top:1px dashed var(--line);padding-top:7px}.evidence-source-excerpt summary{cursor:pointer;color:var(--muted);font-size:12px;font-weight:700}.evidence-source-excerpt p{font-size:12px;line-height:1.55;margin:7px 0 0;overflow-wrap:anywhere}.hash-details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.hash-details summary{cursor:pointer;font-size:13px;font-weight:700}.hash-details dl{display:grid;gap:8px}.hash-details dd{font-family:Consolas,monospace;font-size:11px;overflow-wrap:anywhere}
     .review-pane>header{display:flex;justify-content:space-between;align-items:center}.review-pane>header span{font-size:12px;color:var(--muted);font-weight:700}.review-pane>header strong{font-size:13px;color:var(--warn)}.boundary-note{font-size:12px;color:#704100;background:#fff4dd;border:1px solid #e3bf75;padding:8px 10px;border-radius:6px}
     .check-stack{display:grid;gap:6px}.check-row,.human-confirm{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:start;border:1px solid var(--line);background:#fff;padding:9px;border-radius:6px;font-size:12px;line-height:1.4}.check-row input,.human-confirm input{margin:2px 0 0;accent-color:var(--accent)}
     .field-label{display:grid;gap:5px;margin-top:10px;font-size:12px;font-weight:700}.field-label input{width:100%;border:1px solid #aebbb3;background:#fff;padding:9px;border-radius:4px}.human-confirm{margin-top:10px;border-color:#9ec5b2;background:#eef8f2}
@@ -781,6 +789,8 @@ export function runReviewerCockpit(options) {
       candidatePositionLabels: true,
       mobileCandidateScrollSnap: true,
       selectedCandidateAutoReveal: true,
+      readableEvidenceCues: true,
+      rawEvidenceExcerptPreservedInDisclosure: true,
     },
     outputHtml: path.relative(options.rootDir, path.join(outputDir, "index.html")),
     boundary: outputPayload.boundary,
@@ -809,6 +819,8 @@ Verdict: \`${report.verdict}\`
 - Candidate position labels: ${report.accessibilityContract.candidatePositionLabels}
 - Mobile candidate scroll snap: ${report.accessibilityContract.mobileCandidateScrollSnap}
 - Selected candidate auto reveal: ${report.accessibilityContract.selectedCandidateAutoReveal}
+- Readable evidence cues: ${report.accessibilityContract.readableEvidenceCues}
+- Raw evidence excerpt preserved in disclosure: ${report.accessibilityContract.rawEvidenceExcerptPreservedInDisclosure}
 - HTML: \`${report.outputHtml}\`
 
 ## Boundary

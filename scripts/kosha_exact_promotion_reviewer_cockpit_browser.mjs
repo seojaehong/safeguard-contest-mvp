@@ -165,10 +165,16 @@ export async function runBrowserProbe(options) {
           requiredCheckCount: document.querySelectorAll("input[data-check]").length,
           semanticGroupCount: document.querySelectorAll(".evidence-group").length,
           evidenceReceiptCount: document.querySelectorAll("[data-evidence-receipt]").length,
+          evidenceReadingCueCount: document.querySelectorAll(".evidence-reading-cue").length,
+          rawExcerptDisclosureCount: document.querySelectorAll(".evidence-source-excerpt").length,
+          openRawExcerptDisclosureCount: document.querySelectorAll(".evidence-source-excerpt[open]").length,
+          rawExcerptTextPreserved: [...document.querySelectorAll(".evidence-source-excerpt p")]
+            .every((paragraph) => (paragraph.textContent || "").trim().length > 0),
           exportInitiallyDisabled: element("[data-export]") instanceof HTMLButtonElement
             && element("[data-export]").disabled,
           firstEvidenceBottom: rectangle(".evidence-group")?.bottom ?? null,
           firstEvidenceReceiptBottom: rectangle("[data-evidence-receipt]")?.bottom ?? null,
+          firstEvidenceReadingCueBottom: rectangle(".evidence-reading-cue")?.bottom ?? null,
           firstCheckBottom: rectangle(".check-row")?.bottom ?? null,
           horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
         };
@@ -297,6 +303,10 @@ export async function runBrowserProbe(options) {
     && row.requiredCheckCount === 40
     && row.semanticGroupCount === 24
     && row.evidenceReceiptCount >= 24
+    && row.evidenceReadingCueCount === 24
+    && row.rawExcerptDisclosureCount === 24
+    && row.openRawExcerptDisclosureCount === 0
+    && row.rawExcerptTextPreserved
     && row.exportInitiallyDisabled
     && !row.horizontalOverflow
   ));
@@ -311,6 +321,8 @@ export async function runBrowserProbe(options) {
     && typeof desktop.firstEvidenceReceiptBottom === "number"
     && desktop.firstEvidenceReceiptBottom <= desktop.viewport.height
     && desktop.receiptAccess?.fullyVisibleInsidePane === true
+    && typeof desktop.firstEvidenceReadingCueBottom === "number"
+    && desktop.firstEvidenceReadingCueBottom <= desktop.viewport.height
     && typeof desktop.firstCheckBottom === "number"
     && desktop.firstCheckBottom <= desktop.viewport.height,
   );
@@ -340,6 +352,8 @@ export async function runBrowserProbe(options) {
     && typeof mobileEvidence.firstEvidenceReceiptBottom === "number"
     && mobileEvidence.firstEvidenceReceiptBottom <= mobileEvidence.viewport.height
     && mobileEvidence.receiptAccess?.fullyVisibleInsidePane === true
+    && typeof mobileEvidence.firstEvidenceReadingCueBottom === "number"
+    && mobileEvidence.firstEvidenceReadingCueBottom <= mobileEvidence.viewport.height
     && typeof mobileReview.firstCheckBottom === "number"
     && mobileReview.firstCheckBottom <= mobileReview.viewport.height,
   );
@@ -373,6 +387,12 @@ export async function runBrowserProbe(options) {
     && mobileEvidence?.selectedCandidateText.includes("후보 1/8")
     && mobileEvidence?.selectedCandidateText.includes("0/8"),
   );
+  const evidenceReadingHierarchyPass = results.every((row) => (
+    row.evidenceReadingCueCount === 24
+    && row.rawExcerptDisclosureCount === 24
+    && row.openRawExcerptDisclosureCount === 0
+    && row.rawExcerptTextPreserved === true
+  ));
   const verdict = allRowsPass
     && desktopPass
     && mobilePass
@@ -380,6 +400,7 @@ export async function runBrowserProbe(options) {
     && draftStorageIdentityPass
     && titleReconciliationPass
     && candidateNavigationReadabilityPass
+    && evidenceReadingHierarchyPass
     ? "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY"
     : "RED_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY";
   const report = {
@@ -395,6 +416,7 @@ export async function runBrowserProbe(options) {
     draftStorageIdentityPass,
     titleReconciliationPass,
     candidateNavigationReadabilityPass,
+    evidenceReadingHierarchyPass,
     draftStorageIdentity,
     results,
     mutationBoundary: {
@@ -432,6 +454,7 @@ Verdict: \`${report.verdict}\`
 - Candidate-bound draft restore: ${report.draftStorageIdentityPass}
 - Official/corpus title provenance: ${report.titleReconciliationPass}
 - Candidate navigation readability: ${report.candidateNavigationReadabilityPass}
+- Evidence reading hierarchy: ${report.evidenceReadingHierarchyPass}
 - Evidence page receipts visible: ${results.every((row) => row.evidenceReceiptCount >= 24)}
 - Draft fingerprint contains source identity: ${report.draftStorageIdentity?.sourceIdentityPresent}
 - Live progress status: ${results.every((row) => row.progressLiveRole === "status" && row.progressLiveMode === "polite")}
@@ -456,5 +479,6 @@ if (isMain) {
     responsiveTabPanelPass: report.responsiveTabPanelPass,
     draftStorageIdentityPass: report.draftStorageIdentityPass,
     candidateNavigationReadabilityPass: report.candidateNavigationReadabilityPass,
+    evidenceReadingHierarchyPass: report.evidenceReadingHierarchyPass,
   }, null, 2)}\n`);
 }

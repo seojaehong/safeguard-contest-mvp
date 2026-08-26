@@ -9992,6 +9992,8 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && reviewerCockpitAccessibility.candidatePositionLabels === true
     && reviewerCockpitAccessibility.mobileCandidateScrollSnap === true
     && reviewerCockpitAccessibility.selectedCandidateAutoReveal === true
+    && reviewerCockpitAccessibility.readableEvidenceCues === true
+    && reviewerCockpitAccessibility.rawEvidenceExcerptPreservedInDisclosure === true
     && reviewerCockpitBoundary !== null
     && reviewerCockpitBoundary.localReviewOnly === true
     && reviewerCockpitBoundary.dbMutationPerformed === false
@@ -10021,6 +10023,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && reviewerCockpitBrowser.draftStorageIdentityPass === true
     && reviewerCockpitBrowser.titleReconciliationPass === true
     && reviewerCockpitBrowser.candidateNavigationReadabilityPass === true
+    && reviewerCockpitBrowser.evidenceReadingHierarchyPass === true
     && isRecord(reviewerCockpitBrowser.draftStorageIdentity)
     && reviewerCockpitBrowser.draftStorageIdentity.sameFingerprintPreserved === true
     && reviewerCockpitBrowser.draftStorageIdentity.sourceIdentityPresent === true
@@ -10075,6 +10078,10 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
         && readNumber(row.requiredCheckCount) === 40
         && readNumber(row.semanticGroupCount) === 24
         && readNumber(row.evidenceReceiptCount) === 24
+        && readNumber(row.evidenceReadingCueCount) === 24
+        && readNumber(row.rawExcerptDisclosureCount) === 24
+        && readNumber(row.openRawExcerptDisclosureCount) === 0
+        && row.rawExcerptTextPreserved === true
         && (readString(row.name) === "mobile-review-390x723"
           || (isRecord(row.receiptAccess) && row.receiptAccess.fullyVisibleInsidePane === true))
         && row.exportInitiallyDisabled === true
@@ -10092,7 +10099,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && cockpitBrowserBoundary.humanReviewCompleted === false
     && cockpitBrowserBoundary.separatePromotionApprovalRequired === true;
   const reviewerCockpitDetail = reviewerCockpitPass && reviewerCockpitBrowserPass
-    ? ` Reviewer cockpit ${reviewerCockpitPath} presents 8 candidates, 24 bounded excerpts, 24 PDF page/body receipts, 2 reconciled official/corpus title provenance rows, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry ${reviewerCockpitBrowserPath} preserves one visible candidate, explicit official-current and corpus-source titles, 40 checks, receipt access in the bounded evidence pane, three bounded desktop/mobile cases, reciprocal breakpoint-aware tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection with the selected candidate fully visible, a two-card mobile rail with candidate-position/input-progress labels, corpus-title-and-receipt-bound draft restore that rejects stale fingerprints, and polite live progress.`
+    ? ` Reviewer cockpit ${reviewerCockpitPath} presents 8 candidates, 24 readable page-and-term cues with each raw PDF excerpt preserved behind an initially closed disclosure, 24 PDF page/body receipts, 2 reconciled official/corpus title provenance rows, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry ${reviewerCockpitBrowserPath} preserves one visible candidate, explicit official-current and corpus-source titles, 40 checks, receipt access in the bounded evidence pane, three bounded desktop/mobile cases, reciprocal breakpoint-aware tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection with the selected candidate fully visible, a two-card mobile rail with candidate-position/input-progress labels, all 24 reading cues plus 24 closed raw-excerpt disclosures, corpus-title-and-receipt-bound draft restore that rejects stale fingerprints, and polite live progress.`
     : "";
   if (!isRecord(report)) {
     return gateResult({

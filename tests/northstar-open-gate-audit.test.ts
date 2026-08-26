@@ -5340,6 +5340,8 @@ function createFixtureRoot(): string {
       candidatePositionLabels: true,
       mobileCandidateScrollSnap: true,
       selectedCandidateAutoReveal: true,
+      readableEvidenceCues: true,
+      rawEvidenceExcerptPreservedInDisclosure: true,
     },
     boundary: {
       localReviewOnly: true,
@@ -5411,6 +5413,7 @@ function createFixtureRoot(): string {
     draftStorageIdentityPass: true,
     titleReconciliationPass: true,
     candidateNavigationReadabilityPass: true,
+    evidenceReadingHierarchyPass: true,
     draftStorageIdentity: {
       sameFingerprintPreserved: true,
       sourceIdentityPresent: true,
@@ -5461,6 +5464,10 @@ function createFixtureRoot(): string {
       requiredCheckCount: 40,
       semanticGroupCount: 24,
       evidenceReceiptCount: 24,
+      evidenceReadingCueCount: 24,
+      rawExcerptDisclosureCount: 24,
+      openRawExcerptDisclosureCount: 0,
+      rawExcerptTextPreserved: true,
       receiptAccess: row.name === "mobile-review-390x723"
         ? null
         : { fullyVisibleInsidePane: true },
@@ -9051,6 +9058,32 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     };
     browser.candidateNavigationReadabilityPass = false;
     browser.results[1]!.candidateEndState.selectedFullyVisible = false;
+    writeJson(rootDir, path.relative(rootDir, browserPath), browser);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("fails closed when the KOSHA reviewer cockpit hides raw evidence instead of preserving it", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const browserPath = path.join(
+      rootDir,
+      "evaluation",
+      "kosha-exact-promotion-reviewer-cockpit-2026-07-25",
+      "browser-report.json",
+    );
+    const browser = JSON.parse(fs.readFileSync(browserPath, "utf8")) as {
+      evidenceReadingHierarchyPass: boolean;
+      results: Array<{ rawExcerptTextPreserved: boolean }>;
+    };
+    browser.evidenceReadingHierarchyPass = false;
+    browser.results[1]!.rawExcerptTextPreserved = false;
     writeJson(rootDir, path.relative(rootDir, browserPath), browser);
 
     const audit = buildNorthstarOpenGateAudit({

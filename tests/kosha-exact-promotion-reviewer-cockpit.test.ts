@@ -172,6 +172,12 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
     expect(result.html).toContain('End: buttons.length - 1');
     expect(result.html.match(/<input type="checkbox" data-check=/g)).toHaveLength(40);
     expect(result.html.match(/data-evidence-receipt=/g)).toHaveLength(24);
+    expect(result.html.match(/class="evidence-reading-cue"/g)).toHaveLength(24);
+    expect(result.html.match(/class="evidence-source-excerpt"/g)).toHaveLength(24);
+    expect(result.html).toContain("검토 단서");
+    expect(result.html).toContain("PDF 1쪽에서 “term-1” 확인");
+    expect(result.html).toContain("원문 발췌 보기");
+    expect(result.html).toContain("reviewer excerpt 1");
     expect(result.html.match(/data-title-provenance=/g)).toHaveLength(8);
     expect(result.html).toContain("공식 현재 제목 · 건설안전분야");
     expect(result.html).toContain("D-C-1-2026 corpus 원본 제목");
