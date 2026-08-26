@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-26T11:07:24.110Z
-Source HEAD at generation: 5cedcd1efb467bc2ad6de56c68c2448aaf1ec364
-Live commit at generation: 5cedcd1efb467bc2ad6de56c68c2448aaf1ec364
+Generated at: 2026-08-26T11:14:38.346Z
+Source HEAD at generation: 6273fdae2a72360f3e90a8c6f0c73022a080a78a
+Live commit at generation: 6273fdae2a72360f3e90a8c6f0c73022a080a78a
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -454,7 +454,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_editorial_duplicate_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
-| launch_operations_readiness_cockpit | exact | matches_live | evaluation\launch-operations-readiness-2026-08-26\report.json |
+| launch_operations_readiness_cockpit | ancestor | ancestor_of_head | evaluation\launch-operations-readiness-2026-08-26\report.json |
 | document_export_capability_truth | ancestor | ancestor_of_head | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | ontology_viewport_workbench | ancestor | ancestor_of_head | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
 | knowledge_viewport_workbench | ancestor | ancestor_of_head | evaluation\knowledge-viewport-workbench-2026-08-17\report.json |
