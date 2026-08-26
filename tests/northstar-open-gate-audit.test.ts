@@ -2469,7 +2469,7 @@ function createFixtureRoot(): string {
     },
   });
   writeJson(rootDir, path.join("evaluation", "llm-wiki-candidate-content-matrix-2026-08-25", "report.json"), {
-    verdict: "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_EVIDENCE_VISIBILITY_LLM_ENHANCED_RUNTIME_BLOCKED",
+    verdict: "PASS_LIVE_PRODUCTION_WIKI_EVENT_SEMANTIC_AND_EVIDENCE_VISIBILITY_LLM_ENHANCED_RUNTIME_BLOCKED",
     productCommit: "b".repeat(40),
     sourceHead: "a".repeat(40),
     productionCommit: "a".repeat(40),
@@ -2505,6 +2505,21 @@ function createFixtureRoot(): string {
       technicalGuidanceBoundaryCount: 5,
       lawCandidateBoundaryCount: 5,
     },
+    eventSemanticBeforeLive: {
+      verdict: "RED_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+      sourceHead: "a".repeat(40), productionCommit: "a".repeat(40), passedCount: 0, failedCount: 5,
+      eventSemanticGroundingCount: 0, privateEventExposureCount: 0,
+    },
+    eventSemanticAfterLocal: {
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+      sourceHead: "a".repeat(40), passedCount: 5, failedCount: 0,
+      eventSemanticGroundingCount: 5, privateEventExposureCount: 0,
+    },
+    eventSemanticAfterLive: {
+      verdict: "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+      sourceHead: "a".repeat(40), productionCommit: "a".repeat(40), passedCount: 5, failedCount: 0,
+      eventSemanticGroundingCount: 5, privateEventExposureCount: 0,
+    },
     afterLiveProvider: {
       verdict: "RED_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_MATRIX",
       sourceHead: "a".repeat(40),
@@ -2524,6 +2539,9 @@ function createFixtureRoot(): string {
       reviewerVisibleEvidenceTraceRequired: true,
       scenarioSpecificOfficialSourceTermsRequired: true,
       technicalGuidanceAndLawRolesSeparated: true,
+      explicitEventReviewFactsRequired: true,
+      arbitraryRawPayloadAcceptedAsReviewFact: false,
+      privateEventTermExposureAllowed: false,
       placeholderFindingCount: 0,
       legalOverclaimFindingCount: 0,
       humanReviewCompleted: false,
@@ -2536,6 +2554,8 @@ function createFixtureRoot(): string {
       deterministicFallbackProvenCurrentSource: true,
       deterministicFallbackProvenLive: true,
       evidenceVisibilityContractProvenLive: true,
+      eventSemanticGroundingProvenCurrentSource: true,
+      eventSemanticGroundingProvenLive: true,
       enhancedLlmGenerationProvenLive: false,
       enhancedLlmRuntimeState: "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
     },
@@ -5336,6 +5356,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     });
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_matrix")?.detail).toContain("pass 5/5");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_matrix")?.detail).toContain("blocked 0/5");
+    expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_matrix")?.detail).toContain("event review facts separately move 0/5 to 5/5");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_matrix")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("first review state panel-contained=true");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("Wiki publication plus SIF embedding remain APPROVAL_GATED");
@@ -7591,6 +7612,24 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const gate = audit.gates.find((item) => item.id === "llm_wiki_candidate_content_matrix");
     expect(gate?.state).toBe("contradicted");
     expect(gate?.detail).toContain("visibleTrace=4/5");
+  });
+
+  it("fails the Wiki candidate matrix closed when event semantics or privacy regress", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "llm-wiki-candidate-content-matrix-2026-08-25", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      eventSemanticAfterLive: { eventSemanticGroundingCount: number; privateEventExposureCount: number };
+    };
+    report.eventSemanticAfterLive.eventSemanticGroundingCount = 4;
+    report.eventSemanticAfterLive.privateEventExposureCount = 1;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, sourceSha: "fixture-sha" });
+    const gate = audit.gates.find((item) => item.id === "llm_wiki_candidate_content_matrix");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.detail).toContain("eventFacts=4/5");
+    expect(gate?.detail).toContain("privateExposure=1");
   });
 
   it("fails Knowledge viewport workbench closed when progressive disclosures open by default", async () => {

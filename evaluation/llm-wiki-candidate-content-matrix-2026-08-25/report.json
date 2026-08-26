@@ -1,10 +1,10 @@
 {
   "schemaVersion": "safeclaw-llm-wiki-candidate-content-matrix-summary/v1",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_WIKI_EVENT_SEMANTIC_GROUNDING_LIVE_PENDING",
-  "checkedAt": "2026-08-26T01:39:55.270Z",
+  "verdict": "PASS_LIVE_PRODUCTION_WIKI_EVENT_SEMANTIC_AND_EVIDENCE_VISIBILITY_LLM_ENHANCED_RUNTIME_BLOCKED",
+  "checkedAt": "2026-08-26T01:42:26.613Z",
   "productCommit": "4df4dd68f5133f757233bcd34ac247140221220a",
-  "sourceHead": "4df4dd68f5133f757233bcd34ac247140221220a",
-  "productionCommit": "53fb578d3bd19641074502dd3b9a973ca13d5d7a",
+  "sourceHead": "f4ab34d0f8fd204b3d5dfa7ef77bfe183acc7ff2",
+  "productionCommit": "f4ab34d0f8fd204b3d5dfa7ef77bfe183acc7ff2",
   "beforeLive": {
     "path": "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/before-live/report.json",
     "sourceHead": "80a6f43a6aafb894983556bc297fd3f87be61efd",
@@ -67,6 +67,17 @@
     "eventSemanticGroundingCount": 5,
     "privateEventExposureCount": 0
   },
+  "eventSemanticAfterLive": {
+    "path": "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/after-event-semantic-live/report.json",
+    "sourceHead": "f4ab34d0f8fd204b3d5dfa7ef77bfe183acc7ff2",
+    "productionCommit": "f4ab34d0f8fd204b3d5dfa7ef77bfe183acc7ff2",
+    "deploymentUrl": "safeguard-contest-cqcbeyur8-seojaehongs-projects.vercel.app",
+    "verdict": "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+    "passedCount": 5,
+    "failedCount": 0,
+    "eventSemanticGroundingCount": 5,
+    "privateEventExposureCount": 0
+  },
   "afterLocal": {
     "path": "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/after-local/report.json",
     "sourceHead": "db896d45116418c7a185d9dad443a198be7a8de3",
@@ -96,7 +107,7 @@
     "httpStatuses": [503, 503, 503, 503, 503],
     "runtimeBlocker": "distributed_rate_limit_unavailable_before_ai_generation"
   },
-  "liveAfterDeploymentRequired": true,
+  "liveAfterDeploymentRequired": false,
   "contentContract": {
     "scenarioCount": 5,
     "requiredSectionCount": 4,
@@ -138,7 +149,7 @@
     "deterministicFallbackProvenLive": true,
     "evidenceVisibilityContractProvenLive": true,
     "eventSemanticGroundingProvenCurrentSource": true,
-    "eventSemanticGroundingProvenLive": false,
+    "eventSemanticGroundingProvenLive": true,
     "enhancedLlmGenerationProvenLive": false,
     "enhancedLlmRuntimeState": "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION"
   },
