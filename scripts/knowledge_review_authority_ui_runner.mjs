@@ -392,6 +392,7 @@ try {
           selectedBodyOverflowY: getComputedStyle(selectedBody).overflowY,
           eventFactsPanelCount: workbench.querySelectorAll("[data-review-event-facts='true']").length,
           eventFactItemCount: eventFacts?.querySelectorAll("[data-review-event-fact]").length ?? 0,
+          eventFactTexts: Array.from(eventFacts?.querySelectorAll("[data-review-event-fact]") ?? []).map((fact) => fact.textContent?.trim() || ""),
           boundEventFactCount: boundEventFacts.length,
           eventFactEvidenceRowCount: new Set(Array.from(boundEventFacts).map((fact) => fact.closest("li[data-review-evidence-authority]"))).size,
           orphanEventFactCount: Array.from(eventFacts?.querySelectorAll("[data-review-event-fact]") ?? []).filter((fact) => (
@@ -435,13 +436,17 @@ try {
             throw new Error("Missing mobile Hermes evidence pane");
           }
           const list = pane.querySelector("ol");
+          const boundFacts = Array.from(pane.querySelectorAll("[data-review-evidence-fact]"));
           return {
             paneCount: workbench.querySelectorAll("[data-review-pane]").length,
             candidatePaneCount: workbench.querySelectorAll("[data-review-pane='candidate']").length,
             evidenceItemCount: pane.querySelectorAll("li[data-review-evidence-authority]").length,
             publicEvidenceLinkCount: pane.querySelectorAll("a[href^='https://']").length,
             listOverflowY: list instanceof HTMLElement ? getComputedStyle(list).overflowY : null,
-            contained: pane.scrollWidth <= pane.clientWidth + 1
+            contained: pane.scrollWidth <= pane.clientWidth + 1,
+            boundEventFactCount: boundFacts.length,
+            eventFactEvidenceRowCount: new Set(boundFacts.map((fact) => fact.closest("li[data-review-evidence-authority]"))).size,
+            boundEventFactTexts: boundFacts.map((fact) => fact.textContent?.trim() || "")
           };
         });
       }
@@ -531,9 +536,13 @@ try {
         && (!eventFactsMode
           || (metrics.eventFactsPanelCount === 1
             && metrics.eventFactItemCount === 2
-            && metrics.boundEventFactCount === 2
-            && metrics.eventFactEvidenceRowCount === 1
-            && metrics.orphanEventFactCount === 0
+            && (viewport.width > 720
+              ? metrics.boundEventFactCount === 2
+                && metrics.eventFactEvidenceRowCount === 1
+                && metrics.orphanEventFactCount === 0
+              : mobileEvidence?.boundEventFactCount === 2
+                && mobileEvidence.eventFactEvidenceRowCount === 1
+                && metrics.eventFactTexts.every((fact) => mobileEvidence.boundEventFactTexts.includes(fact)))
             && metrics.eventFactsInsideCandidatePane
             && !metrics.candidateBodyContainsEventFactMarker
             && !metrics.privateEventTextExposed))
@@ -675,9 +684,15 @@ const report = {
     expectedFactCount: 2,
     panelCount: Math.min(...results.map((result) => result.metrics.eventFactsPanelCount)),
     visibleFactCount: Math.min(...results.map((result) => result.metrics.eventFactItemCount)),
-    boundFactCount: Math.min(...results.map((result) => result.metrics.boundEventFactCount)),
-    evidenceRowCount: Math.min(...results.map((result) => result.metrics.eventFactEvidenceRowCount)),
-    orphanFactCount: Math.max(...results.map((result) => result.metrics.orphanEventFactCount)),
+    boundFactCount: Math.min(...results.map((result) => result.viewport.width > 720
+      ? result.metrics.boundEventFactCount
+      : result.mobileEvidence?.boundEventFactCount ?? 0)),
+    evidenceRowCount: Math.min(...results.map((result) => result.viewport.width > 720
+      ? result.metrics.eventFactEvidenceRowCount
+      : result.mobileEvidence?.eventFactEvidenceRowCount ?? 0)),
+    orphanFactCount: Math.max(...results.map((result) => result.viewport.width > 720
+      ? result.metrics.orphanEventFactCount
+      : result.metrics.eventFactTexts.filter((fact) => !result.mobileEvidence?.boundEventFactTexts.includes(fact)).length)),
     insideCandidatePane: results.every((result) => result.metrics.eventFactsInsideCandidatePane),
     candidateBodyMarkerDuplicated: results.some((result) => result.metrics.candidateBodyContainsEventFactMarker),
     privateEventTextExposed: results.some((result) => result.metrics.privateEventTextExposed),

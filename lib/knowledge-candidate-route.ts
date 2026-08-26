@@ -10,6 +10,7 @@ import {
   buildKnowledgeCandidateReviewContract,
   classifyKnowledgeEvent,
   evaluateKnowledgeCandidateContentReadiness,
+  readKnowledgeEventReviewFacts,
   type KnowledgeCandidate,
   type KnowledgeTenantContext
 } from "@/lib/knowledge-governance";
@@ -28,17 +29,6 @@ import {
 } from "@/lib/public-ask-admission";
 
 const MAX_TENANT_ID_LENGTH = 128;
-const MAX_EVENT_REVIEW_FACTS = 4;
-const MAX_EVENT_REVIEW_FACT_LENGTH = 120;
-const PRIVATE_EVENT_REVIEW_FACT_PATTERNS = [
-  /\b\d{6}-?\d{7}\b/u,
-  /\b01[016789]-?\d{3,4}-?\d{4}\b/u,
-  /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/iu,
-  /https?:\/\//iu,
-  /\b(?:token|secret|password|resident[-_ ]?id|private[-_ ]?key)\b/iu,
-  /(?:주민번호|휴대폰|전화번호|이메일|비밀번호|비밀키)/u
-] as const;
-
 export type KnowledgeMutationCommand = {
   type: "persist_candidate" | "publish_ontology";
   candidate: KnowledgeCandidate;
@@ -135,28 +125,6 @@ function buildPromptProvenance(
     scope: provenance.scope,
     legalDutyRole: provenance.legalDutyRole
   };
-}
-
-export function readKnowledgeEventReviewFacts(events: KnowledgeRawEvent[]): string[] {
-  const facts: string[] = [];
-
-  for (const event of events) {
-    const payload = event.payload;
-    if (typeof payload !== "object" || payload === null || Array.isArray(payload)) continue;
-    const reviewFacts = (payload as Record<string, unknown>).reviewFacts;
-    if (!Array.isArray(reviewFacts)) continue;
-
-    for (const value of reviewFacts) {
-      if (typeof value !== "string") continue;
-      const fact = value.replace(/\s+/gu, " ").trim();
-      if (!fact || fact.length > MAX_EVENT_REVIEW_FACT_LENGTH) continue;
-      if (PRIVATE_EVENT_REVIEW_FACT_PATTERNS.some((pattern) => pattern.test(fact))) continue;
-      if (!facts.includes(fact)) facts.push(fact);
-      if (facts.length >= MAX_EVENT_REVIEW_FACTS) return facts;
-    }
-  }
-
-  return facts;
 }
 
 export function buildKnowledgePrompt(

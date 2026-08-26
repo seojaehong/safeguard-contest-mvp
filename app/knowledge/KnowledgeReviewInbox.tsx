@@ -62,6 +62,7 @@ type ReviewEvidenceItem = {
   digest: string;
   metadata: Array<{ label: string; value: string }>;
   publicUrl: string | null;
+  reviewFacts: string[];
 };
 
 type ReviewAuthorityId =
@@ -111,6 +112,17 @@ const REVIEW_AUTHORITY_ROLE_BY_EVIDENCE: Record<ReviewEvidenceAuthorityId, Revie
 const PUBLIC_EVIDENCE_HOSTS = ["law.go.kr", "kosha.or.kr", "data.go.kr"] as const;
 
 const MAX_UI_TEXT_LENGTH = 12_000;
+const MAX_REVIEW_FACTS = 4;
+const MAX_REVIEW_FACT_LENGTH = 120;
+const PRIVATE_REVIEW_FACT_PATTERNS = [
+  /\b\d{6}-?\d{7}\b/u,
+  /\b01[016789]-?\d{3,4}-?\d{4}\b/u,
+  /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/iu,
+  /https?:\/\//iu,
+  /\b(?:token|secret|password|resident[-_ ]?id|private[-_ ]?key)\b/iu,
+  /(?:주민번호|휴대폰|전화번호|이메일|비밀번호|비밀키)/u
+] as const;
+const EVENT_FACT_MARKER_PATTERN = /\s*\/\s*원본 이벤트 검토 사실:\s*([^\r\n]*)/u;
 let browserClient: SupabaseClient | null = null;
 
 function getBrowserSupabaseClient(): SupabaseClient | null {
@@ -127,6 +139,32 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function readString(value: unknown, maxLength: number): string {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+}
+
+function readReviewFacts(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const facts: string[] = [];
+  for (const item of value) {
+    if (typeof item !== "string") continue;
+    const fact = item.replace(/\s+/gu, " ").trim();
+    if (!fact || fact.length > MAX_REVIEW_FACT_LENGTH) continue;
+    if (PRIVATE_REVIEW_FACT_PATTERNS.some((pattern) => pattern.test(fact))) continue;
+    if (!facts.includes(fact)) facts.push(fact);
+    if (facts.length >= MAX_REVIEW_FACTS) break;
+  }
+  return facts;
+}
+
+function buildCandidatePresentation(candidateText: string, evidenceItems: ReviewEvidenceItem[]) {
+  const eventFacts = readReviewFacts(evidenceItems.flatMap((evidence) => evidence.reviewFacts));
+  const markerMatch = candidateText.match(EVENT_FACT_MARKER_PATTERN);
+  const markerFacts = markerMatch ? readReviewFacts(markerMatch[1].split("·")) : [];
+  const markerBoundToEvidence = markerFacts.length > 0
+    && markerFacts.every((fact) => eventFacts.includes(fact));
+  return {
+    body: markerBoundToEvidence ? candidateText.replace(EVENT_FACT_MARKER_PATTERN, "").trim() : candidateText,
+    eventFacts
+  };
 }
 
 function readReviewContract(value: unknown): ReviewInboxItem["reviewContract"] {
@@ -206,7 +244,17 @@ function readEvidenceItem(value: unknown): ReviewEvidenceItem | null {
       publicUrl = null;
     }
   }
-  return { id, authorityId: authorityId as ReviewEvidenceAuthorityId, authorityLabel, sourceLabel, capturedAt, digest, metadata, publicUrl };
+  return {
+    id,
+    authorityId: authorityId as ReviewEvidenceAuthorityId,
+    authorityLabel,
+    sourceLabel,
+    capturedAt,
+    digest,
+    metadata,
+    publicUrl,
+    reviewFacts: readReviewFacts(value.reviewFacts)
+  };
 }
 
 function evidenceMatchesReviewContract(
@@ -575,6 +623,7 @@ export function KnowledgeReviewInbox() {
             const selectedIndex = items.findIndex((candidate) => candidate.runId === item.runId);
             const candidatePaneTabId = `knowledge-review-pane-tab-candidate-${selectedIndex}`;
             const evidencePaneTabId = `knowledge-review-pane-tab-evidence-${selectedIndex}`;
+            const candidatePresentation = buildCandidatePresentation(item.candidateText, item.evidenceItems);
             return (
               <article
                 className={styles.reviewItem}
@@ -681,7 +730,24 @@ export function KnowledgeReviewInbox() {
                               </p>
                             </section>
                           ) : null}
-                          <p className={styles.candidateText} data-selected-candidate-body="true">{item.candidateText}</p>
+                          {candidatePresentation.eventFacts.length > 0 ? (
+                            <section
+                              className={styles.reviewEventFacts}
+                              aria-label="원본 이벤트 검토 사실"
+                              data-review-event-facts="true"
+                            >
+                              <div>
+                                <strong>원본 이벤트 검토 사실</strong>
+                                <span>각 근거행에서 출처 확인 · 사람 검증 필요</span>
+                              </div>
+                              <ul>
+                                {candidatePresentation.eventFacts.map((fact) => (
+                                  <li key={fact} data-review-event-fact>{fact}</li>
+                                ))}
+                              </ul>
+                            </section>
+                          ) : null}
+                          <p className={styles.candidateText} data-selected-candidate-body="true">{candidatePresentation.body}</p>
                         </section>
                       ) : null}
                       {!compactViewport || activeReviewPane === "evidence" ? (
@@ -711,6 +777,13 @@ export function KnowledgeReviewInbox() {
                                     <div key={`${evidence.id}-${entry.label}`}><dt>{entry.label}</dt><dd>{entry.value}</dd></div>
                                   ))}
                                 </dl>
+                                {evidence.reviewFacts.length > 0 ? (
+                                  <ul className={styles.evidenceReviewFacts} aria-label={`${evidence.authorityLabel} 원본 이벤트 검토 사실`}>
+                                    {evidence.reviewFacts.map((fact) => (
+                                      <li key={`${evidence.id}-${fact}`} data-review-evidence-fact>{fact}</li>
+                                    ))}
+                                  </ul>
+                                ) : null}
                                 {evidence.publicUrl ? (
                                   <a href={evidence.publicUrl} target="_blank" rel="noreferrer">공식 원문 열기</a>
                                 ) : (

@@ -228,10 +228,6 @@ describe("knowledge review inbox browser", () => {
     expect(await eventFacts.locator("[data-review-event-fact]").count()).toBe(2);
     expect(await eventFacts.getByText("야간 교대 작업", { exact: true }).isVisible()).toBe(true);
     expect(await eventFacts.getByText("청각 경보 보조수단 필요", { exact: true }).isVisible()).toBe(true);
-    const siteEvidence = inbox.locator('[data-review-evidence-authority="site_history"]');
-    expect(await siteEvidence.locator("[data-review-evidence-fact]").count()).toBe(2);
-    expect(await siteEvidence.getByText("야간 교대 작업", { exact: true }).isVisible()).toBe(true);
-    expect(await siteEvidence.getByText("청각 경보 보조수단 필요", { exact: true }).isVisible()).toBe(true);
     expect(await inbox.locator('[data-selected-candidate-body="true"]').textContent()).not.toContain("원본 이벤트 검토 사실");
     expect(await inbox.textContent()).not.toContain("resident-id:");
     expect(await inbox.textContent()).not.toContain("worker-phone:");
@@ -251,6 +247,10 @@ describe("knowledge review inbox browser", () => {
     await evidenceTab.click();
     const evidencePane = inbox.locator('[data-review-pane="evidence"]');
     await evidencePane.waitFor();
+    const siteEvidence = evidencePane.locator('[data-review-evidence-authority="site_history"]');
+    expect(await siteEvidence.locator("[data-review-evidence-fact]").count()).toBe(2);
+    expect(await siteEvidence.getByText("야간 교대 작업", { exact: true }).isVisible()).toBe(true);
+    expect(await siteEvidence.getByText("청각 경보 보조수단 필요", { exact: true }).isVisible()).toBe(true);
     expect(await inbox.locator('[data-review-pane="candidate"]').count()).toBe(0);
     expect(await evidencePane.textContent()).toContain("산업안전보건법 제38조");
     expect(await evidencePane.textContent()).toContain("sha256:1111111111111111");

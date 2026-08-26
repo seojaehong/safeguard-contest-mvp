@@ -16,6 +16,7 @@ import {
   buildKnowledgeCandidateReviewContract,
   evaluateKnowledgeCandidateContentReadiness,
   KNOWLEDGE_REVIEW_AUTHORITY_ORDER,
+  readKnowledgeEventReviewFacts,
   type KnowledgeCandidateContentReadiness,
   type KnowledgeEventProvenance,
   type KnowledgeCandidateReviewContract
@@ -80,6 +81,7 @@ export type KnowledgeReviewEvidenceItem = {
   digest: string;
   metadata: Array<{ label: string; value: string }>;
   publicUrl: string | null;
+  reviewFacts: string[];
 };
 
 const KNOWLEDGE_REVIEW_EVIDENCE_LIMIT = 20;
@@ -152,7 +154,8 @@ function buildKnowledgeReviewEvidenceItems(input: {
       capturedAt: provenance.eventReference.capturedAt,
       digest: `sha256:${provenance.eventReference.digest.slice(0, 16)}`,
       metadata: buildEvidenceMetadata(provenance),
-      publicUrl: isPublic ? readVerifiedPublicEvidenceUrl(rawEvent?.url) : null
+      publicUrl: isPublic ? readVerifiedPublicEvidenceUrl(rawEvent?.url) : null,
+      reviewFacts: rawEvent ? readKnowledgeEventReviewFacts([rawEvent]) : []
     } satisfies KnowledgeReviewEvidenceItem;
   });
   return items

@@ -376,7 +376,16 @@ describe("knowledge review GET", () => {
         captured_at: "2026-07-15T00:01:00.000Z",
         title: "홍길동 현장 비공개 관찰",
         url: "https://attacker.invalid/private-token",
-        payload: { provenanceScope: "site", workerNote: "private-worker-note" },
+        payload: {
+          provenanceScope: "site",
+          workerNote: "private-worker-note",
+          reviewFacts: [
+            "야간 교대 작업",
+            "청각 경보 보조수단 필요",
+            "resident-id: 900101-1234567",
+            "worker-phone: 010-9876-5432"
+          ]
+        },
         related_hazard_ids: ["hazard-fall"],
         reflected_documents: ["위험성평가표"],
         review_status: "pending_review",
@@ -416,7 +425,8 @@ describe("knowledge review GET", () => {
         authorityId: "site_history",
         sourceLabel: "현장 전용 이력",
         metadata: [],
-        publicUrl: null
+        publicUrl: null,
+        reviewFacts: ["야간 교대 작업", "청각 경보 보조수단 필요"]
       })
     ]);
     for (const forbidden of [
@@ -426,6 +436,8 @@ describe("knowledge review GET", () => {
       "private-worker-note",
       "홍길동",
       "private-token",
+      "resident-id",
+      "worker-phone",
       "org-owned",
       "site-1"
     ]) {
