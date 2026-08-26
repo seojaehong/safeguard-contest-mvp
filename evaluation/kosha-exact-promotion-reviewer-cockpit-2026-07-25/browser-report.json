@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-reviewer-cockpit-browser/v1",
   "verdict": "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY",
-  "checkedAt": "2026-08-26T18:44:19.679Z",
-  "sourceHead": "5388509ce3f0f6c845eaeabb32b8018c6d37ebc5",
+  "checkedAt": "2026-08-26T19:07:57.261Z",
+  "sourceHead": "d3ed175cc683a7a2734fd1b3d54f3b951025b4dd",
   "cases": 3,
   "passedCases": 3,
   "desktopPass": true,
@@ -15,6 +15,7 @@
   "mobileCandidateProgressVisibilityPass": true,
   "draftPersistenceVisibilityPass": true,
   "nextIncompleteNavigationPass": true,
+  "futureReviewTimestampPass": true,
   "draftStorageIdentity": {
     "sameFingerprintPreserved": true,
     "sourceIdentityPresent": true,
@@ -28,6 +29,11 @@
     "staleDraftStatus": "로컬 초안 · 이전 초안 제외 · 빈 상태 저장됨",
     "nextIncompleteInitialSelectedIndex": 1,
     "nextIncompleteSkippedCompletedIndex": 2,
+    "futureTimestampState": {
+      "ariaInvalid": "true",
+      "errorVisible": true,
+      "candidateProgress": "0/8"
+    },
     "titleReconciliationAccess": {
       "candidateVisible": true,
       "officialCurrentTitleVisible": true,
@@ -157,6 +163,8 @@
       "exportInitiallyDisabled": true,
       "nextIncompleteVisible": true,
       "nextIncompleteInitiallyEnabled": true,
+      "reviewedAtMaxPresent": true,
+      "futureTimestampErrorInitiallyHidden": true,
       "firstEvidenceBottom": 519.390625,
       "firstEvidenceReceiptBottom": 475.390625,
       "firstEvidenceReadingCueBottom": 439.390625,
@@ -301,6 +309,8 @@
       "exportInitiallyDisabled": true,
       "nextIncompleteVisible": true,
       "nextIncompleteInitiallyEnabled": true,
+      "reviewedAtMaxPresent": true,
+      "futureTimestampErrorInitiallyHidden": true,
       "firstEvidenceBottom": 722.78125,
       "firstEvidenceReceiptBottom": 688.78125,
       "firstEvidenceReadingCueBottom": 658.78125,
@@ -450,6 +460,8 @@
       "exportInitiallyDisabled": true,
       "nextIncompleteVisible": true,
       "nextIncompleteInitiallyEnabled": true,
+      "reviewedAtMaxPresent": true,
+      "futureTimestampErrorInitiallyHidden": true,
       "firstEvidenceBottom": 0,
       "firstEvidenceReceiptBottom": 0,
       "firstEvidenceReadingCueBottom": 0,

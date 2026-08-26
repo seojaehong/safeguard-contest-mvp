@@ -22,6 +22,7 @@ Verdict: `PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY`
 - Mobile candidate progress visibility: true
 - Draft persistence visibility: true
 - Next incomplete navigation: true
+- Future review timestamp blocked: true
 - Evidence page receipts visible: true
 - Draft fingerprint contains source identity: true
 - Live progress status: true
