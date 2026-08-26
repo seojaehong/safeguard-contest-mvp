@@ -16,7 +16,7 @@ const SECTIONS: ReadonlyArray<{ id: KnowledgeSectionId; label: string; hash: str
   { id: "technical", label: "기술 지원", hash: "#technical-support-heading" },
   { id: "references", label: "참고자료", hash: "#reference-library-heading" },
   { id: "wiki", label: "위키", hash: "#wiki-index-heading" },
-  { id: "governance", label: "검토 흐름", hash: "#knowledge-governance-heading" },
+  { id: "governance", label: "검토 흐름", hash: "#knowledge-review-inbox-heading" },
   { id: "diagnostics", label: "진단", hash: "#schema-heading" }
 ];
 

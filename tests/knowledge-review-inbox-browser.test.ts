@@ -249,10 +249,13 @@ describe("knowledge review inbox browser", () => {
     await page.getByRole("tab", { name: "검토 흐름" }).click();
     const inbox = page.locator('[data-knowledge-review-inbox="true"]');
     await inbox.waitFor();
-    await expect.poll(() => inbox.getByRole("heading", { name: "위험성평가표 현장 지식 검토" }).isVisible()).toBe(true);
+    await inbox.locator('[data-selected-review-candidate="true"]').waitFor();
     expect(await inbox.locator('[data-review-workbench="selected-only"]').count()).toBe(1);
     expect(await inbox.locator('[data-selected-review-candidate="true"]').count()).toBe(1);
     expect(await inbox.locator('[data-selected-candidate-body="true"]').count()).toBe(1);
+    const reviewConfirmation = inbox.getByRole("checkbox", { name: "후보 문장·근거 확인" });
+    expect(await reviewConfirmation.isChecked()).toBe(false);
+    expect(await inbox.getByRole("button", { name: "후보 승인" }).isDisabled()).toBe(true);
     const eventFacts = inbox.locator('[data-review-event-facts="true"]');
     expect(await eventFacts.count()).toBe(1);
     expect(await eventFacts.locator("[data-review-event-fact]").count()).toBe(2);
@@ -271,18 +274,48 @@ describe("knowledge review inbox browser", () => {
     const incompleteTraceability = inbox.locator('[data-review-traceability="incomplete"]');
     expect(await incompleteTraceability.count()).toBe(1);
     expect(await incompleteTraceability.locator('[data-review-trace="unresolved"]').count()).toBe(1);
-    expect(await incompleteTraceability.textContent()).toContain("근거 미연결");
+    expect(await incompleteTraceability.getByText("근거", { exact: true }).isVisible()).toBe(true);
+    expect(await incompleteTraceability.getByText("미연결", { exact: true }).isVisible()).toBe(true);
     expect(await inbox.getByRole("button", { name: "후보 승인" }).isDisabled()).toBe(true);
+    expect(await inbox.getByRole("button", { name: "현장 전용 유지" }).isDisabled()).toBe(true);
+    expect(await inbox.getByRole("button", { name: "반려" }).isDisabled()).toBe(true);
     await inbox.getByRole("tab", { name: /위험성평가표 현장 지식 검토/u }).click();
     expect(await inbox.locator('[data-review-content-readiness="ready_for_human_review"]').count()).toBe(1);
     expect(await inbox.getByText(/SIF 근거 본문 확인/u).isVisible()).toBe(true);
-    expect(await inbox.getByRole("button", { name: "후보 승인" }).isDisabled()).toBe(false);
+    expect(await inbox.getByRole("button", { name: "후보 승인" }).isDisabled()).toBe(true);
     const traceability = inbox.locator('[data-review-traceability="complete"]');
     expect(await traceability.count()).toBe(1);
     expect(await traceability.locator('[data-review-trace="resolved"]').count()).toBe(1);
     expect(await traceability.textContent()).toContain("비계·고소작업 추락");
     expect(await traceability.textContent()).toContain("위험성평가표");
     expect(await traceability.textContent()).toContain("현장 전용 이력");
+
+    await page.setViewportSize({ width: 390, height: 723 });
+    const mobileDecisionMetrics = await inbox.evaluate((root) => {
+      const actionGroup = root.querySelector<HTMLElement>('[role="group"][aria-label="검토 결정"]');
+      const firstAction = actionGroup?.querySelector<HTMLElement>("button");
+      if (!actionGroup || !firstAction) throw new Error("mobile review decision rail is unavailable");
+      const workbench = root.querySelector<HTMLElement>('[data-review-workbench="selected-only"]');
+      const detail = root.querySelector<HTMLElement>('[data-selected-review-candidate="true"]');
+      return {
+        bodyHeight: document.documentElement.scrollHeight,
+        viewportHeight: window.innerHeight,
+        inboxTop: root.getBoundingClientRect().top,
+        workbenchTop: workbench?.getBoundingClientRect().top || 0,
+        detailTop: detail?.getBoundingClientRect().top || 0,
+        actionGroupTop: actionGroup.getBoundingClientRect().top,
+        firstActionBottom: firstAction.getBoundingClientRect().bottom,
+        confirmationStatus: actionGroup.getAttribute("data-review-confirmation"),
+        horizontalOverflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth
+      };
+    });
+    expect(mobileDecisionMetrics.bodyHeight).toBeLessThanOrEqual(mobileDecisionMetrics.viewportHeight + 12);
+    expect(
+      mobileDecisionMetrics.firstActionBottom,
+      JSON.stringify(mobileDecisionMetrics)
+    ).toBeLessThanOrEqual(mobileDecisionMetrics.viewportHeight);
+    expect(mobileDecisionMetrics.confirmationStatus).toBe("required");
+    expect(mobileDecisionMetrics.horizontalOverflow).toBeLessThanOrEqual(1);
 
     const evidenceTab = inbox.getByRole("tab", { name: "근거 5", exact: true });
     await evidenceTab.click();
@@ -307,6 +340,7 @@ describe("knowledge review inbox browser", () => {
     await inbox.getByRole("tab", { name: /위험성평가표 현장 지식 검토/u }).click();
 
     await page.setViewportSize({ width: 1440, height: 900 });
+    expect(await inbox.getByRole("heading", { name: "위험성평가표 현장 지식 검토" }).isVisible()).toBe(true);
     await expect.poll(() => inbox.locator('[data-review-pane="evidence"]').count()).toBe(1);
     const workbenchMetrics = await inbox.locator('[data-review-workbench="selected-only"]').evaluate((root) => {
       const navigator = root.querySelector<HTMLElement>('nav[aria-label="지식 후보 목록"]');
@@ -361,6 +395,9 @@ describe("knowledge review inbox browser", () => {
       return {
         detailHeight: detailRect.height,
         actionsContained: actionsRect.bottom <= detailRect.bottom + 1,
+        firstActionBottom: actions.querySelector("button")?.getBoundingClientRect().bottom || Number.POSITIVE_INFINITY,
+        viewportHeight: window.innerHeight,
+        confirmationStatus: actions.getAttribute("data-review-confirmation"),
         paneCount: root.querySelectorAll('[data-review-pane]').length,
         digestWidth: digestRect.width,
         digestHeight: digestRect.height,
@@ -371,6 +408,8 @@ describe("knowledge review inbox browser", () => {
     });
     expect(shortDesktopMetrics.detailHeight).toBeLessThanOrEqual(580);
     expect(shortDesktopMetrics.actionsContained).toBe(true);
+    expect(shortDesktopMetrics.firstActionBottom).toBeLessThanOrEqual(shortDesktopMetrics.viewportHeight);
+    expect(shortDesktopMetrics.confirmationStatus).toBe("required");
     expect(shortDesktopMetrics.paneCount).toBe(2);
     expect(shortDesktopMetrics.digestWidth).toBeGreaterThanOrEqual(160);
     expect(shortDesktopMetrics.digestHeight).toBeLessThanOrEqual(36);
@@ -469,6 +508,10 @@ describe("knowledge review inbox browser", () => {
       expect(control.height, control.label).toBeGreaterThanOrEqual(44);
     }
 
+    await reviewConfirmation.check();
+    expect(await reviewConfirmation.isChecked()).toBe(true);
+    expect(await inbox.locator('[data-review-confirmation="confirmed"]').count()).toBe(1);
+    expect(await inbox.getByRole("button", { name: "후보 승인" }).isDisabled()).toBe(false);
     await page.getByRole("button", { name: "후보 승인" }).click();
     await expect.poll(() => submittedBodies.length).toBe(1);
     expect(submittedBodies[0]).toEqual({

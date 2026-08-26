@@ -883,14 +883,54 @@
   border-top: 1px solid var(--workspace-rule, #e2e5e9);
 }
 
-.reviewActions {
+.reviewDecisionRail {
+  display: grid;
+  grid-template-columns: minmax(200px, 0.8fr) minmax(0, 1.2fr);
+  gap: var(--space-2);
+  align-items: center;
+  margin-top: var(--space-3);
+  border-top: 1px solid var(--workspace-rule, #e2e5e9);
+  border-bottom: 1px solid var(--workspace-rule, #e2e5e9);
+  padding: var(--space-2) 0;
+}
+
+.reviewConfirmation {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 44px;
+  color: var(--workspace-ink, #17191d);
+  font-size: var(--text-support);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.reviewConfirmation input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--workspace-accent, #087f5b);
+}
+
+.reviewConfirmation strong {
+  color: var(--workspace-muted, #606873);
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
+  line-height: var(--leading-hud);
+}
+
+.reviewDecisionRail[data-review-confirmation="confirmed"] .reviewConfirmation strong {
+  color: var(--workspace-accent, #087f5b);
+}
+
+.reviewActionButtons {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-2);
-  margin-top: var(--space-4);
 }
 
-.reviewActions button,
+.reviewActionButtons button,
 .prepareButton {
   min-width: 44px;
   min-height: 44px;
@@ -905,9 +945,9 @@
   cursor: pointer;
 }
 
-.reviewActions button:disabled,
+.reviewActionButtons button:disabled,
 .prepareButton:disabled {
-  cursor: wait;
+  cursor: not-allowed;
   opacity: 0.6;
 }
 
@@ -1548,11 +1588,11 @@
     justify-content: space-between;
   }
 
-  .reviewActions {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .reviewDecisionRail {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .reviewActions button {
+  .reviewActionButtons button {
     padding: var(--space-2);
     font-size: var(--text-caption);
   }
@@ -1710,9 +1750,21 @@
   .reviewWorkbench {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
     min-height: 0;
     height: auto;
     max-height: none;
+    margin-top: 0;
+  }
+
+  .reviewInboxHeader {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 
   .reviewItem {
@@ -1724,17 +1776,56 @@
     overflow-y: hidden;
     border-right: 0;
     border-bottom: 1px solid var(--workspace-rule, #e2e5e9);
-    padding: 0 0 var(--space-3);
+    padding: 0 0 var(--space-2);
+  }
+
+  .reviewNavigatorLabel {
+    display: none;
   }
 
   .reviewList {
     display: flex;
     width: max-content;
     max-width: none;
+    margin-top: 0;
   }
 
   .reviewList li {
     width: min(72vw, 260px);
+  }
+
+  .reviewCandidateButton {
+    min-height: 48px;
+    padding: var(--space-2);
+  }
+
+  .reviewItemHeading {
+    display: none;
+  }
+
+  .reviewDecisionRail {
+    grid-template-columns: minmax(116px, 0.72fr) minmax(0, 1.28fr);
+    gap: var(--space-1);
+    margin-top: var(--space-2);
+    padding: var(--space-1) 0;
+  }
+
+  .reviewConfirmation {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-1);
+    min-height: 44px;
+  }
+
+  .reviewConfirmation strong {
+    grid-column: 2;
+  }
+
+  .reviewActionButtons {
+    gap: var(--space-1);
+  }
+
+  .reviewActionButtons button {
+    padding: var(--space-1);
   }
 
   .candidateText {

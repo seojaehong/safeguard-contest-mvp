@@ -14,7 +14,7 @@ const sectionCases = [
   { label: "기술 지원", panel: "technical", hash: "#technical-support-heading" },
   { label: "참고자료", panel: "references", hash: "#reference-library-heading" },
   { label: "위키", panel: "wiki", hash: "#wiki-index-heading" },
-  { label: "검토 흐름", panel: "governance", hash: "#knowledge-governance-heading" },
+  { label: "검토 흐름", panel: "governance", hash: "#knowledge-review-inbox-heading" },
   { label: "진단", panel: "diagnostics", hash: "#schema-heading" }
 ] as const;
 

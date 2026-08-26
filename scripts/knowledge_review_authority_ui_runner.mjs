@@ -314,7 +314,7 @@ try {
         });
       });
 
-      await page.goto(`${baseUrl}/knowledge?theme=${theme}#knowledge-governance-heading`, {
+      await page.goto(`${baseUrl}/knowledge?theme=${theme}#knowledge-review-inbox-heading`, {
         waitUntil: "networkidle"
       });
       if (viewport.width <= 720) {
@@ -322,7 +322,7 @@ try {
       }
       const inbox = page.locator('[data-knowledge-review-inbox="true"]');
       try {
-        await inbox.getByRole("heading", { name: queueItem.candidateLabel }).waitFor();
+        await inbox.locator('[data-selected-review-candidate="true"]').waitFor();
       } catch (error) {
         const diagnosticText = (await inbox.textContent().catch(() => null))
           || (await page.locator("body").textContent().catch(() => null))
@@ -336,14 +336,42 @@ try {
         const readiness = document.querySelector('[data-review-content-readiness="revision_required"]');
         const actionGroup = document.querySelector('[role="group"][aria-label="검토 결정"]');
         const buttons = actionGroup ? [...actionGroup.querySelectorAll("button")] : [];
+        const confirmation = actionGroup?.querySelector('input[type="checkbox"]');
         return {
           readinessVisible: readiness instanceof HTMLElement,
           approveDisabled: buttons[0]?.disabled === true,
-          keepSiteOnlyEnabled: buttons[1]?.disabled === false,
-          rejectEnabled: buttons[2]?.disabled === false
+          allDecisionButtonsDisabled: buttons.length === 3 && buttons.every((button) => button.disabled),
+          confirmationUnchecked: confirmation instanceof HTMLInputElement && !confirmation.checked,
+          confirmationStatus: actionGroup?.getAttribute("data-review-confirmation") || null
         };
       });
       await candidateTabs.first().click();
+      await inbox.scrollIntoViewIfNeeded();
+      const screenshot = `knowledge-review-authority-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
+      const initialDecisionViewport = await page.evaluate(() => {
+        const actionGroup = document.querySelector("[role='group'][aria-label='검토 결정']");
+        const firstAction = actionGroup?.querySelector("button");
+        if (!(actionGroup instanceof HTMLElement) || !(firstAction instanceof HTMLElement)) {
+          throw new Error("Missing initial Hermes decision rail");
+        }
+        const actionRect = actionGroup.getBoundingClientRect();
+        const firstActionRect = firstAction.getBoundingClientRect();
+        const hitTarget = document.elementFromPoint(
+          firstActionRect.left + firstActionRect.width / 2,
+          firstActionRect.top + firstActionRect.height / 2
+        );
+        return {
+          actionGroupTop: actionRect.top,
+          firstActionTop: firstActionRect.top,
+          firstActionBottom: firstActionRect.bottom,
+          viewportHeight: window.innerHeight,
+          hitTargetVisible: hitTarget === firstAction || firstAction.contains(hitTarget),
+          firstActionVisible: firstActionRect.top >= 0
+            && firstActionRect.bottom <= window.innerHeight
+            && (hitTarget === firstAction || firstAction.contains(hitTarget))
+        };
+      });
+      await page.screenshot({ path: path.join(outputDir, screenshot), fullPage: false });
       await candidateTabs.first().focus();
       await page.keyboard.press("End");
       await page.waitForFunction(() => {
@@ -541,16 +569,15 @@ try {
           firstActionBottom: firstAction.getBoundingClientRect().bottom,
           firstActionDepth: firstAction.getBoundingClientRect().bottom - rootRect.top,
           actionCount: actionGroup.querySelectorAll("button").length,
-          actionContained: actionGroup.scrollWidth <= actionGroup.clientWidth + 1
+          actionContained: actionGroup.scrollWidth <= actionGroup.clientWidth + 1,
+          confirmationCount: actionGroup.querySelectorAll('input[type="checkbox"]').length,
+          confirmationChecked: actionGroup.querySelector('input[type="checkbox"]')?.checked === true,
+          confirmationStatus: actionGroup.getAttribute("data-review-confirmation")
         };
       });
       let mobileEvidence = null;
       let traceScreenshotContextVisible = null;
-      const screenshot = `knowledge-review-authority-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
       const candidateSubjectScreenshot = `knowledge-review-candidate-subject-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
-      if (viewport.width > 720) {
-        await page.screenshot({ path: path.join(outputDir, screenshot), fullPage: false });
-      }
       if (evidenceInspectorMode) {
         await inbox.locator("[data-selected-candidate-body='true']").scrollIntoViewIfNeeded();
         await page.screenshot({ path: path.join(outputDir, candidateSubjectScreenshot), fullPage: false });
@@ -624,9 +651,6 @@ try {
           };
         });
       }
-      if (viewport.width <= 720) {
-        await page.screenshot({ path: path.join(outputDir, screenshot), fullPage: false });
-      }
       if (evidenceInspectorMode) {
         await inbox.locator("[data-review-evidence-digest]").first().scrollIntoViewIfNeeded();
         await page.screenshot({
@@ -637,6 +661,18 @@ try {
           fullPage: false
         });
       }
+      const reviewConfirmation = inbox.getByRole("checkbox", { name: "후보 문장·근거 확인" });
+      await reviewConfirmation.check();
+      const confirmedDecision = await page.evaluate(() => {
+        const actionGroup = document.querySelector("[role='group'][aria-label='검토 결정']");
+        const confirmation = actionGroup?.querySelector('input[type="checkbox"]');
+        const buttons = actionGroup ? [...actionGroup.querySelectorAll("button")] : [];
+        return {
+          checked: confirmation instanceof HTMLInputElement && confirmation.checked,
+          confirmationStatus: actionGroup?.getAttribute("data-review-confirmation") || null,
+          enabledActionCount: buttons.filter((button) => !button.disabled).length
+        };
+      });
       await inbox.getByRole("button", { name: "후보 승인", exact: true }).click();
       await page.waitForFunction(() => (
         document.querySelector("[data-selected-review-candidate='true']")?.getAttribute("aria-busy") === "true"
@@ -777,13 +813,17 @@ try {
                 && metrics.candidatePaneOverflowY === "auto"
                 && metrics.candidatePaneScrollHeight > metrics.candidatePaneClientHeight
                 && traceScreenshotContextVisible === true))
-            && !metrics.approveDisabled))
+            && metrics.approveDisabled))
         && revisionDecision.readinessVisible
         && revisionDecision.approveDisabled
-        && revisionDecision.keepSiteOnlyEnabled
-        && revisionDecision.rejectEnabled
+        && revisionDecision.allDecisionButtonsDisabled
+        && revisionDecision.confirmationUnchecked
+        && revisionDecision.confirmationStatus === "required"
         && metrics.actionCount === 3
         && metrics.actionContained
+        && metrics.confirmationCount === 1
+        && !metrics.confirmationChecked
+        && metrics.confirmationStatus === "required"
         && (viewport.width > 720
           ? metrics.evidencePaneCount === 1
             && metrics.evidenceItemCount === queueItem.evidenceItems.length
@@ -813,7 +853,10 @@ try {
             && mobilePaneKeyboard.homeState.selectedIndex === 0
             && mobilePaneKeyboard.homeState.focusedIndex === 0
             && mobilePaneKeyboard.homeState.mountedPane === "candidate")
-        && metrics.firstActionDepth <= viewport.height * 1.25
+        && initialDecisionViewport.firstActionVisible
+        && confirmedDecision.checked
+        && confirmedDecision.confirmationStatus === "confirmed"
+        && confirmedDecision.enabledActionCount === 3
         && decisionPendingContract
         && browserErrors.length === 0;
       results.push({
@@ -823,8 +866,10 @@ try {
         candidateSubjectScreenshot: evidenceInspectorMode ? candidateSubjectScreenshot : null,
         metrics,
         candidateKeyboard: { endState: candidateEndState, homeState: candidateHomeState },
+        initialDecisionViewport,
         mobilePaneKeyboard,
         mobileEvidence,
+        confirmedDecision,
         decisionPending: {
           reviewPostObserved,
           pending: pendingDecision,
@@ -930,6 +975,17 @@ const report = {
     breakpointOrientationSynchronized: true,
     mobilePaneTabsLinked: true,
     mobilePaneKeyboardNavigation: true,
+    decisionConfirmationRequired: results.every((result) => (
+      result.metrics.confirmationCount === 1
+      && !result.metrics.confirmationChecked
+      && result.metrics.confirmationStatus === "required"
+    )),
+    decisionConfirmationUnlocksAllActions: results.every((result) => (
+      result.confirmedDecision.checked
+      && result.confirmedDecision.confirmationStatus === "confirmed"
+      && result.confirmedDecision.enabledActionCount === 3
+    )),
+    firstDecisionActionInViewport: results.every((result) => result.initialDecisionViewport.firstActionVisible),
     decisionPendingStatusLive: results.every((result) => result.decisionPending.pending.statusText === "검토 결과를 저장하는 중입니다."),
     decisionBusyStateExposed: results.every((result) => result.decisionPending.pending.candidateBusy && result.decisionPending.pending.actionGroupBusy),
     decisionActionsDisabledDuringSave: results.every((result) => result.decisionPending.pending.disabledActionCount === 3),
@@ -1071,7 +1127,7 @@ ${rows}
 - Desktop uses a two-column review workbench; mobile uses one column and keeps the candidate body internally scrollable.
 - Desktop mounts the selected candidate and five-item evidence inspector together; mobile mounts one linked pane behind a keyboard-operable segmented tab control.
 - Evidence digests keep at least ${report.workbenchContract.evidenceDigestMinWidth}px width and at most ${report.workbenchContract.evidenceDigestMaxHeight}px height; readiness cells keep at least ${report.workbenchContract.desktopReadinessSectionMinWidth}px on desktop and ${report.workbenchContract.mobileReadinessSectionMinWidth}px on mobile, with labels no taller than ${report.workbenchContract.readinessLabelMaxHeight}px.
-- Review decisions announce their pending state, expose busy semantics, disable all competing actions, and restore the settled status after the delayed save fixture completes.
+- The first decision action stays inside every measured viewport. All three decisions remain locked until the reviewer confirms the candidate sentence and evidence, then announce pending/busy/settled states around the delayed save fixture.
 - Each selected candidate exposes one server-derived readiness panel with four required sections. A revision-required candidate disables only candidate approval while keeping site-only retention and rejection available.
 - Explicit safe original-event review facts must appear in a distinct reviewer region inside the candidate pane, without duplicating their marker in the candidate body or exposing private event text.
 - Only allowlisted public law, KOSHA, and SIF references expose verified HTTPS links. Organization and site evidence retain generic labels and bounded digests only.
@@ -1386,7 +1442,7 @@ ${traceMatrixMode
   : candidateReadinessMode
     ? "The candidate cockpit derives four required content sections server-side, exposes revision reasons, and blocks approval while keeping site-only and reject decisions available."
     : "The authenticated review candidate cockpit exposes six evidence-role counts, keeps legal-duty claims bound to law provenance, blocks public promotion of tenant memory, and requires site-manager acceptance before workpack use."}
-The candidate navigator keeps one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and keyboard navigation across candidates and compact review panes. Delayed decision saves expose a live pending message, busy semantics, disabled competing actions, and an accessible settled state.
+The candidate navigator keeps one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and keyboard navigation across candidates and compact review panes. The decision rail stays in the first viewport, requires an explicit candidate-and-evidence confirmation, and preserves live pending, busy, disabled, and settled states around save.
 
 ## Boundary
 

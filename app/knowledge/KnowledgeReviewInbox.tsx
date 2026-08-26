@@ -468,6 +468,7 @@ export function KnowledgeReviewInbox() {
   }, []);
   const [pendingRunId, setPendingRunId] = useState<string | null>(null);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
+  const [reviewConfirmations, setReviewConfirmations] = useState<Record<string, boolean>>({});
   const [message, setMessage] = useState("");
   const candidateButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const reviewPaneButtonRefs = useRef<Record<"candidate" | "evidence", HTMLButtonElement | null>>({
@@ -481,6 +482,10 @@ export function KnowledgeReviewInbox() {
   function selectCandidate(runId: string): void {
     setSelectedRunId(runId);
     setActiveReviewPane("candidate");
+  }
+
+  function setReviewConfirmation(runId: string, confirmed: boolean): void {
+    setReviewConfirmations((current) => ({ ...current, [runId]: confirmed }));
   }
 
   function moveCandidateSelection(index: number): void {
@@ -714,6 +719,56 @@ export function KnowledgeReviewInbox() {
 
                 {item.status === "review_required" ? (
                   <>
+                    <div
+                      className={styles.reviewDecisionRail}
+                      role="group"
+                      aria-label="검토 결정"
+                      aria-busy={pending}
+                      data-review-confirmation={reviewConfirmations[item.runId] ? "confirmed" : "required"}
+                    >
+                      <label className={styles.reviewConfirmation}>
+                        <input
+                          type="checkbox"
+                          checked={reviewConfirmations[item.runId] === true}
+                          disabled={pending}
+                          onChange={(event) => setReviewConfirmation(item.runId, event.currentTarget.checked)}
+                        />
+                        <span>후보 문장·근거 확인</span>
+                        <strong aria-live="polite">
+                          {reviewConfirmations[item.runId] ? "결정 가능" : "확인 전"}
+                        </strong>
+                      </label>
+                      <div className={styles.reviewActionButtons}>
+                        <button
+                          type="button"
+                          disabled={pending
+                            || reviewConfirmations[item.runId] !== true
+                            || item.contentReadiness?.status !== "ready_for_human_review"
+                            || !item.traceabilityComplete}
+                          title={reviewConfirmations[item.runId] !== true
+                            ? "후보 문장과 근거를 확인해야 합니다."
+                            : !item.traceabilityComplete
+                              ? "위험요인, 통제대책, 반영 문서와 근거 연결을 먼저 확인해야 합니다."
+                              : item.contentReadiness?.status === "revision_required"
+                                ? "필수 섹션과 근거 준비도를 먼저 보완해야 합니다."
+                                : undefined}
+                          onClick={() => void submit(item.runId, "approve_candidate")}
+                        >후보 승인</button>
+                        <button
+                          type="button"
+                          aria-label="현장 전용 유지"
+                          disabled={pending || reviewConfirmations[item.runId] !== true}
+                          title={reviewConfirmations[item.runId] !== true ? "후보 문장과 근거를 확인해야 합니다." : undefined}
+                          onClick={() => void submit(item.runId, "keep_site_only")}
+                        >현장 유지</button>
+                        <button
+                          type="button"
+                          disabled={pending || reviewConfirmations[item.runId] !== true}
+                          title={reviewConfirmations[item.runId] !== true ? "후보 문장과 근거를 확인해야 합니다." : undefined}
+                          onClick={() => void submit(item.runId, "reject")}
+                        >반려</button>
+                      </div>
+                    </div>
                     <section
                       className={styles.reviewAuthority}
                       aria-label="후보 근거와 적용 경계"
@@ -902,20 +957,6 @@ export function KnowledgeReviewInbox() {
                       <span>법적 확정 아님</span>
                       <span>온톨로지 미반영</span>
                       {item.providerLabel ? <span>{item.providerLabel}</span> : null}
-                    </div>
-                    <div className={styles.reviewActions} role="group" aria-label="검토 결정" aria-busy={pending}>
-                      <button
-                        type="button"
-                        disabled={pending || item.contentReadiness?.status !== "ready_for_human_review" || !item.traceabilityComplete}
-                        title={!item.traceabilityComplete
-                          ? "위험요인, 통제대책, 반영 문서와 근거 연결을 먼저 확인해야 합니다."
-                          : item.contentReadiness?.status === "revision_required"
-                            ? "필수 섹션과 근거 준비도를 먼저 보완해야 합니다."
-                            : undefined}
-                        onClick={() => void submit(item.runId, "approve_candidate")}
-                      >후보 승인</button>
-                      <button type="button" disabled={pending} onClick={() => void submit(item.runId, "keep_site_only")}>현장 전용 유지</button>
-                      <button type="button" disabled={pending} onClick={() => void submit(item.runId, "reject")}>반려</button>
                     </div>
                   </>
                 ) : item.status === "draft" ? (
