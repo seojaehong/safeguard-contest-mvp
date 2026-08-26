@@ -1,11 +1,11 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-26T12:27:20.116Z
-Source HEAD at generation: a6bafc923a5d06af6b3a30a77c93a360559efbc2
-Live commit at generation: a6bafc923a5d06af6b3a30a77c93a360559efbc2
+Generated at: 2026-08-26T12:46:19.859Z
+Source HEAD at generation: a7091395ef372e3ae3ec6ec8f72adcece6f6f4c7
+Live commit at generation: 47a5e49b75e93d2eaa224960a69444a45cf617c9
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
-Overall: `northstar_evidence_missing_or_unknown`
+Overall: `northstar_open_approval_gated`
 
 ## Current Workspace Mobile Geometry
 
@@ -408,6 +408,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | security_upstream_transport_remediation | proven | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |
 | security_safety_reference_surface_remediation | proven | evaluation\security-safety-reference-surface-remediation-2026-08-11\report.json |
 | improvement_photo_analysis_budget | notice | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
+| public_provider_cancellation | notice | evaluation\public-provider-cancellation-2026-08-11\report.json |
 | public_provider_admission | notice | evaluation\public-provider-admission-2026-08-11\report.json |
 | public_ask_distributed_admission | proven | evaluation\public-ask-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_admission | proven | evaluation\public-search-distributed-admission-2026-08-14\report.json |
@@ -445,7 +446,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |

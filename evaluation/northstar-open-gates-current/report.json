@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-26T12:27:18.516Z",
-  "sourceSha": "a6bafc923a5d06af6b3a30a77c93a360559efbc2",
-  "overall": "contradicted",
+  "generatedAt": "2026-08-26T12:46:17.872Z",
+  "sourceSha": "a7091395ef372e3ae3ec6ec8f72adcece6f6f4c7",
+  "overall": "open",
   "gates": [
     {
       "id": "final_99_gate",
@@ -410,12 +410,12 @@
     },
     {
       "id": "public_provider_cancellation",
-      "state": "contradicted",
+      "state": "notice",
       "label": "Public provider cancellation",
       "evidencePath": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
-      "detail": "Provider cancellation verdict=PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_CANCELLATION_SOURCE_PROVEN, sourceCurrent=false, tests=104, liveProviderCall=false, followUp=REQUIRED, noMutation=true, exactShare=MISSING_EVIDENCE.",
+      "detail": "Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests plus a current 1 file / 18 tests Knowledge regeneration cancellation compatibility receipt, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore deployed source alignment, all cancellation contracts, verification totals, no-mutation boundaries, follow-up scan requirement, and exact Share MISSING_EVIDENCE."
+        "Run a fresh full-repository security scan before reclassifying the immutable finding or making a security-complete claim."
       ]
     },
     {

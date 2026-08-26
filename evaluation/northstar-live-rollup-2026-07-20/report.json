@@ -1,23 +1,23 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-26T12:27:20.116Z",
-  "head": "a6bafc923a5d06af6b3a30a77c93a360559efbc2",
+  "generatedAt": "2026-08-26T12:46:19.859Z",
+  "head": "a7091395ef372e3ae3ec6ec8f72adcece6f6f4c7",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "a6bafc923a5d06af6b3a30a77c93a360559efbc2",
+    "commitSha": "47a5e49b75e93d2eaa224960a69444a45cf617c9",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-h8nlerj99-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-phyweklmn-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "overall": "northstar_evidence_missing_or_unknown",
+  "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
   "launchReadiness": false,
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-    "overall": "contradicted",
+    "overall": "open",
     "gateCount": 72
   },
   "provenGates": [
@@ -254,6 +254,12 @@
       "state": "notice",
       "artifact": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
       "detail": "Improvement and dedicated photo analysis now share pre-provider byte, count, MIME/signature, rate, and concurrency controls with 76 tests plus a current 23 files / 215 tests governed-path companion. Production currently reports instance fallback rather than distributed admission, the immutable 14-finding scan remains unchanged, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "public_provider_cancellation",
+      "state": "notice",
+      "artifact": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
+      "detail": "Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests plus a current 1 file / 18 tests Knowledge regeneration cancellation compatibility receipt, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "public_provider_admission",
@@ -1594,10 +1600,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "a6bafc923a5d06af6b3a30a77c93a360559efbc2",
+      "sourceCommit": "a7091395ef372e3ae3ec6ec8f72adcece6f6f4c7",
       "sourceStatus": "exact",
-      "productionCommit": "a6bafc923a5d06af6b3a30a77c93a360559efbc2",
-      "productionStatus": "matches_live"
+      "productionCommit": "a7091395ef372e3ae3ec6ec8f72adcece6f6f4c7",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",

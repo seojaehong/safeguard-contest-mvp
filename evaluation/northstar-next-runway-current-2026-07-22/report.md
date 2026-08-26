@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `a6bafc923a5d06af6b3a30a77c93a360559efbc2`
+Source HEAD: `a7091395ef372e3ae3ec6ec8f72adcece6f6f4c7`
 
-Production `/api/build-info`: `a6bafc923a5d06af6b3a30a77c93a360559efbc2`
+Production `/api/build-info`: `47a5e49b75e93d2eaa224960a69444a45cf617c9`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `evaluation/llm-wiki-sif-evidence-matrix-2026-08-26/report.json`, `evaluation/llm-wiki-sif-evidence-matrix-2026-08-26/report.md`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-open-gate-audit.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `a6bafc923a5d06af6b3a30a77c93a360559efbc2`
+Live rollup source head: `a7091395ef372e3ae3ec6ec8f72adcece6f6f4c7`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `a7091395ef372e3ae3ec6ec8f72adcece6f6f4c7` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `47a5e49b75e93d2eaa224960a69444a45cf617c9`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
