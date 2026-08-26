@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `9dc504ef7686ffb71f13da742a93b97647fcb8a1`
+Source HEAD: `b3d5afe15ba7514214d55b28e47def520162c0a8`
 
-Production `/api/build-info`: `9dc504ef7686ffb71f13da742a93b97647fcb8a1`
+Production `/api/build-info`: `b3d5afe15ba7514214d55b28e47def520162c0a8`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `9dc504ef7686ffb71f13da742a93b97647fcb8a1`
+Live rollup source head: `b3d5afe15ba7514214d55b28e47def520162c0a8`
 
 Live rollup matches production: `true`
 
@@ -77,6 +77,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - MCP generation work-budget security is separately measured: `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING`, POST body budget `98304` bytes, adjacent tests `77`, valid authenticated runtime probe pending=`true`, distributed activation pending=`true`, and fresh rescan required=`true`. This notice preserves the sealed finding and exact saved Share `MISSING_EVIDENCE`.
 - Live Hermes reviewer authority UI is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`, local/live viewport contracts `8/8` and `8/8`, selected-only candidates/selected/body `3/1/1`, desktop/mobile columns `2/1`, and authority order `SIF -> KOSHA -> law -> organization_history -> site_history -> external_context`. Candidate tabs require linked tabpanel semantics, one roving tab stop, breakpoint-aware orientation, and Arrow/Home/End keyboard navigation; compact review panes require linked keyboard-operable tabs. Delayed decisions require live pending/settled status, busy semantics, and disabled competing actions `true/true/true/true`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains `MISSING_EVIDENCE`, while LLM Wiki publication and Supabase RLS remain approval-gated.
 - Live Hermes decision visibility is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_DECISION_FIRST_VIEWPORT`, before/local/live passes `0/8`, `8/8`, and `8/8`. Desktop-short/mobile-short first-action bottoms are `532.44/622.75` inside 723px with `0` hit-test occlusions; every action remains locked until explicit candidate-and-evidence confirmation `true/true`. This does not complete human review `false`; exact saved Share remains `MISSING_EVIDENCE`, and Wiki/RLS/provider persistence remain `APPROVAL_GATED/APPROVAL_GATED/APPROVAL_GATED`.
+- Live Hermes candidate position is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_CANDIDATE_POSITION`, local/live passes `8/8` and `8/8`, with candidate positions `1/3, 2/3, 3/3`. The prior visual/source baseline is not a retroactive RED runner claim `visual and source snapshot; no retroactive RED runner claim`. Human review remains incomplete, exact saved Share remains `MISSING_EVIDENCE`, and Wiki/RLS/provider persistence remain approval-gated.
 - Live Hermes evidence inspector is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR`, local/live viewport contracts `8/8` and `8/8`, budget/items/desktop columns/mobile panes `20/5/2/1`, linked roving candidate tabs and compact-pane keyboard navigation `true/true/true/true/true`, delayed decision status/busy/actions/settled `true/true/true/true`, official HTTPS/private identity exposed `3/false`. Security-complete remains `false`, a fresh full-repository scan remains required, exact saved Share remains `MISSING_EVIDENCE`, and Wiki/RLS/provider persistence remain approval-gated.
 - Live Hermes event-fact traceability is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVENT_FACT_TRACEABILITY`, before/local/live passes `0/8`, `8/8`, and `8/8`; bound/orphan/private facts `2/0/false`. This is reviewer-support traceability, not full hazard-to-control-to-document-to-evidence closure; human review remains incomplete, exact saved Share remains `MISSING_EVIDENCE`, and Wiki/RLS/provider persistence remain approval-gated.
 - Live Hermes hazard-to-evidence trace blocks are measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_BLOCKS`, before/local/live passes `0/8`, `8/8`, and `8/8`; resolved/unresolved/scoped hazards `1/0/1`. This bounded reviewer-support proof leaves all-hazard/all-document closure false, human review incomplete, exact saved Share `MISSING_EVIDENCE`, and Wiki/RLS/provider persistence approval-gated.

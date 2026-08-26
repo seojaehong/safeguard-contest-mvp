@@ -674,6 +674,22 @@ type RollupReport = {
     supabaseRlsLaunchIsolation: string;
     providerDispatchPersistence: string;
   };
+  hermesReviewCandidatePosition: {
+    verdict: string;
+    localPassed: number;
+    localViewportCount: number;
+    livePassed: number;
+    liveViewportCount: number;
+    baselineNumericPositionVisible: boolean;
+    baselineMeasurementMethod: string;
+    localCandidatePositions: string[];
+    liveCandidatePositions: string[];
+    humanReviewCompleted: boolean;
+    exactSavedShareVerdict: string;
+    llmWikiPublication: string;
+    supabaseRlsLaunchIsolation: string;
+    providerDispatchPersistence: string;
+  };
   hermesKnowledgeReviewEvidenceInspector: {
     verdict: string;
     localPassed: number;
@@ -2057,6 +2073,25 @@ function createFixtureRoot(): { root: string; head: string } {
       providerDispatchPersistence: "APPROVAL_GATED",
     },
   });
+  writeJson(root, "evaluation/hermes-review-candidate-position-2026-08-27/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_CANDIDATE_POSITION",
+    sourceHead: "TO_FILL",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    baseline: {
+      numericCandidatePositionVisible: false,
+      measurementMethod: "visual and source snapshot; no retroactive RED runner claim",
+    },
+    afterLocal: { viewportCount: 8, passedCount: 8, failedCount: 0, candidatePositions: ["1/3", "2/3", "3/3"] },
+    afterLive: { viewportCount: 8, passedCount: 8, failedCount: 0, candidatePositions: ["1/3", "2/3", "3/3"] },
+    reviewBoundary: { humanReviewCompleted: false },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+    },
+  });
   writeJson(root, "evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_BLOCKS",
     sourceHead: "TO_FILL",
@@ -2289,6 +2324,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/learning-export-renderer-security-2026-08-02/report.json",
     "evaluation/hermes-knowledge-review-selected-workbench-2026-08-14/report.json",
     "evaluation/hermes-review-decision-first-viewport-2026-08-27/report.json",
+    "evaluation/hermes-review-candidate-position-2026-08-27/report.json",
     "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/report.json",
     "evaluation/hermes-knowledge-review-event-facts-2026-08-26/report.json",
     "evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/report.json",
@@ -3006,6 +3042,7 @@ describe("northstar live rollup", () => {
     });
     expect(report.evidence.find((item) => item.id === "hermes_knowledge_review_ui")?.productionStatus).toBe("ancestor_of_head");
     expect(report.evidence.find((item) => item.id === "hermes_review_decision_first_viewport")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.evidence.find((item) => item.id === "hermes_review_candidate_position")?.productionStatus).toBe("ancestor_of_head");
     expect(report.hermesReviewDecisionFirstViewport).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_DECISION_FIRST_VIEWPORT",
       beforePassed: 0,
@@ -3019,6 +3056,22 @@ describe("northstar live rollup", () => {
       occludedFirstActionCount: 0,
       decisionConfirmationRequired: true,
       decisionConfirmationUnlocksAllActions: true,
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+    });
+    expect(report.hermesReviewCandidatePosition).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_CANDIDATE_POSITION",
+      localPassed: 8,
+      localViewportCount: 8,
+      livePassed: 8,
+      liveViewportCount: 8,
+      baselineNumericPositionVisible: false,
+      baselineMeasurementMethod: "visual and source snapshot; no retroactive RED runner claim",
+      localCandidatePositions: ["1/3", "2/3", "3/3"],
+      liveCandidatePositions: ["1/3", "2/3", "3/3"],
       humanReviewCompleted: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       llmWikiPublication: "APPROVAL_GATED",

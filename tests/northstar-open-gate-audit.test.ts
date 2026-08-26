@@ -2419,6 +2419,54 @@ function createFixtureRoot(): string {
       providerDispatchPersistence: "APPROVAL_GATED",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "hermes-review-candidate-position-2026-08-27", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_CANDIDATE_POSITION",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    baseline: {
+      numericCandidatePositionVisible: false,
+      measurementMethod: "visual and source snapshot; no retroactive RED runner claim",
+    },
+    afterLocal: {
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI",
+      viewportCount: 8,
+      passedCount: 8,
+      failedCount: 0,
+      candidatePositionLabels: true,
+      candidatePositions: ["1/3", "2/3", "3/3"],
+    },
+    afterLive: {
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+      viewportCount: 8,
+      passedCount: 8,
+      failedCount: 0,
+      candidatePositionLabels: true,
+      candidatePositions: ["1/3", "2/3", "3/3"],
+      productionAligned: true,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingOrVectorMutationPerformed: false,
+      ontologyPublicationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    reviewBoundary: {
+      humanReviewCompleted: false,
+      machineEvidenceReplacesHumanReview: false,
+      candidateApproved: false,
+      wikiPublished: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
     sourceHead: "fixture-sha",
@@ -6011,6 +6059,13 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "hermes_review_decision_first_viewport")?.detail).toContain("532.44/622.75");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_decision_first_viewport")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_decision_first_viewport")?.detail).toContain("APPROVAL_GATED");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_candidate_position")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "hermes-review-candidate-position-2026-08-27", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_candidate_position")?.detail).toContain("1/3, 2/3, 3/3");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_candidate_position")?.detail).toContain("no retroactive RED runner claim");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_candidate_position")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "hermes-evidence-digest-readability-2026-08-26", "report.json"),
@@ -8185,6 +8240,25 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const gate = audit.gates.find((item) => item.id === "hermes_review_decision_first_viewport");
     expect(gate?.state).toBe("contradicted");
     expect(gate?.detail).toContain("occluded=1");
+    expect(gate?.detail).toContain("exactShare=PASS");
+  });
+
+  it("fails Hermes candidate positions closed when the sequence or saved Share boundary regresses", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "hermes-review-candidate-position-2026-08-27", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLive: { candidatePositions: string[] };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.afterLive.candidatePositions = ["1/3", "3/3"];
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "hermes_review_candidate_position");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.detail).toContain("1/3,3/3");
     expect(gate?.detail).toContain("exactShare=PASS");
   });
 

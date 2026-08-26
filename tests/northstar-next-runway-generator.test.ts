@@ -546,6 +546,22 @@ type NextRunwayReport = {
     supabaseRlsLaunchIsolation: string;
     providerDispatchPersistence: string;
   };
+  hermesReviewCandidatePosition: {
+    verdict: string;
+    localPassed: number;
+    localViewportCount: number;
+    livePassed: number;
+    liveViewportCount: number;
+    baselineNumericPositionVisible: boolean;
+    baselineMeasurementMethod: string;
+    localCandidatePositions: string[];
+    liveCandidatePositions: string[];
+    humanReviewCompleted: boolean;
+    exactSavedShareVerdict: string;
+    llmWikiPublication: string;
+    supabaseRlsLaunchIsolation: string;
+    providerDispatchPersistence: string;
+  };
   hermesKnowledgeReviewEvidenceInspector: {
     verdict: string;
     localPassed: number;
@@ -2946,6 +2962,25 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       providerDispatchPersistence: "APPROVAL_GATED",
     },
   });
+  writeJson(root, "evaluation/hermes-review-candidate-position-2026-08-27/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_CANDIDATE_POSITION",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    baseline: {
+      numericCandidatePositionVisible: false,
+      measurementMethod: "visual and source snapshot; no retroactive RED runner claim",
+    },
+    afterLocal: { viewportCount: 8, passedCount: 8, failedCount: 0, candidatePositions: ["1/3", "2/3", "3/3"] },
+    afterLive: { viewportCount: 8, passedCount: 8, failedCount: 0, candidatePositions: ["1/3", "2/3", "3/3"] },
+    reviewBoundary: { humanReviewCompleted: false },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+    },
+  });
   writeJson(root, "evaluation/hermes-knowledge-review-event-facts-2026-08-26/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVENT_FACT_TRACEABILITY",
     sourceHead: "fixture-sha",
@@ -3634,6 +3669,7 @@ describe("northstar next runway generator", () => {
     expect(report.provenCurrentState).toContain("hermes_knowledge_review_authority");
     expect(report.provenCurrentState).toContain("hermes_knowledge_review_ui");
     expect(report.provenCurrentState).toContain("hermes_review_decision_first_viewport");
+    expect(report.provenCurrentState).toContain("hermes_review_candidate_position");
     expect(report.hermesKnowledgeReviewAuthorityUi).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
       localPassed: 8,
@@ -3676,6 +3712,22 @@ describe("northstar next runway generator", () => {
       occludedFirstActionCount: 0,
       decisionConfirmationRequired: true,
       decisionConfirmationUnlocksAllActions: true,
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+    });
+    expect(report.hermesReviewCandidatePosition).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_CANDIDATE_POSITION",
+      localPassed: 8,
+      localViewportCount: 8,
+      livePassed: 8,
+      liveViewportCount: 8,
+      baselineNumericPositionVisible: false,
+      baselineMeasurementMethod: "visual and source snapshot; no retroactive RED runner claim",
+      localCandidatePositions: ["1/3", "2/3", "3/3"],
+      liveCandidatePositions: ["1/3", "2/3", "3/3"],
       humanReviewCompleted: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       llmWikiPublication: "APPROVAL_GATED",

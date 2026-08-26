@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "safeclaw-hermes-review-candidate-position/v1",
+  "checkedAt": "2026-08-26T21:58:01.670Z",
+  "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_CANDIDATE_POSITION",
+  "sourceHead": "b3d5afe15ba7514214d55b28e47def520162c0a8",
+  "productCommit": "b3d5afe15ba7514214d55b28e47def520162c0a8",
+  "productionCommit": "b3d5afe15ba7514214d55b28e47def520162c0a8",
+  "scope": {
+    "surface": "/knowledge human-review candidate navigator",
+    "contract": "Every candidate tab exposes an explicit one-based current/total position without adding a separate mobile row or changing the selected-only review workbench.",
+    "routeSplitAcceptedAsFix": false
+  },
+  "baseline": {
+    "path": "evaluation/hermes-review-decision-first-viewport-2026-08-27/after-live/report.json",
+    "sourceHead": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
+    "numericCandidatePositionVisible": false,
+    "measurementMethod": "visual and source snapshot; no retroactive RED runner claim",
+    "mobileScreenshot": "evaluation/hermes-review-decision-first-viewport-2026-08-27/after-live/knowledge-review-authority-day-mobile-short-390x723.png"
+  },
+  "afterLocal": {
+    "path": "evaluation/hermes-review-candidate-position-2026-08-27/after-local/report.json",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI",
+    "viewportCount": 8,
+    "passedCount": 8,
+    "failedCount": 0,
+    "candidatePositionLabels": true,
+    "candidatePositions": ["1/3", "2/3", "3/3"]
+  },
+  "afterLive": {
+    "path": "evaluation/hermes-review-candidate-position-2026-08-27/after-live/report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+    "viewportCount": 8,
+    "passedCount": 8,
+    "failedCount": 0,
+    "candidatePositionLabels": true,
+    "candidatePositions": ["1/3", "2/3", "3/3"],
+    "productionAligned": true,
+    "deploymentUrl": "safeguard-contest-liok7s2yk-seojaehongs-projects.vercel.app",
+    "mobileScreenshot": "evaluation/hermes-review-candidate-position-2026-08-27/after-live/knowledge-review-authority-day-mobile-short-390x723.png"
+  },
+  "verification": {
+    "focusedBrowserAndContract": "PASS 2 files / 19 tests",
+    "typecheck": "PASS",
+    "build": "PASS Next.js 15.5.22 / 28 static pages",
+    "liveAfterDeploymentRequired": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "ontologyPublicationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "reviewBoundary": {
+    "humanReviewCompleted": false,
+    "machineEvidenceReplacesHumanReview": false,
+    "candidateApproved": false,
+    "wikiPublished": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED"
+  }
+}

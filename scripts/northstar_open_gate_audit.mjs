@@ -88,6 +88,7 @@ const EVIDENCE_PATHS = Object.freeze({
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-selected-workbench-2026-08-14", "report.json"),
   hermesReviewDecisionFirstViewport: path.join("evaluation", "hermes-review-decision-first-viewport-2026-08-27", "report.json"),
+  hermesReviewCandidatePosition: path.join("evaluation", "hermes-review-candidate-position-2026-08-27", "report.json"),
   hermesKnowledgeReviewEvidenceInspector: path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"),
   hermesEvidenceDigestReadability: path.join("evaluation", "hermes-evidence-digest-readability-2026-08-26", "report.json"),
   hermesReviewSubjectContext: path.join("evaluation", "hermes-review-subject-context-2026-08-27", "report.json"),
@@ -1678,6 +1679,86 @@ function evaluateHermesReviewDecisionFirstViewportGate(rootDir) {
       ? `Live Hermes review decisions improved from 0/8 to 8/8 Day/Night desktop/mobile viewports. Desktop-short/mobile-short first-action bottoms are ${readNumber(afterLive.desktopShortFirstActionBottom)}/${readNumber(afterLive.mobileShortFirstActionBottom)}px inside 723px, with zero hit-test occlusions. All decisions remain locked until explicit candidate-and-evidence confirmation; human review remains incomplete, no mutation occurred, LLM Wiki/RLS/provider persistence remain APPROVAL_GATED, and exact saved Share remains MISSING_EVIDENCE.`
       : `Hermes first-viewport decision contract failed: before=${readNumber(beforeLive.passedCount)}/${readNumber(beforeLive.viewportCount)}, local=${readNumber(afterLocal.passedCount)}/${readNumber(afterLocal.viewportCount)}, live=${readNumber(afterLive.passedCount)}/${readNumber(afterLive.viewportCount)}, desktopBottom=${readNumber(afterLive.desktopShortFirstActionBottom)}, mobileBottom=${readNumber(afterLive.mobileShortFirstActionBottom)}, occluded=${readNumber(afterLive.occludedFirstActionCount)}, confirmation=${String(afterLive.decisionConfirmationRequired)}/${String(afterLive.decisionConfirmationUnlocksAllActions)}, noMutation=${String(noMutation)}, humanReview=${String(reviewBoundary.humanReviewCompleted)}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass ? [] : ["Restore first-viewport hit-test visibility, confirmation locking, no-mutation, and approval boundaries across all eight live viewports."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateHermesReviewCandidatePositionGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.hermesReviewCandidatePosition;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "hermes_review_candidate_position",
+      label: "Hermes review candidate position",
+      state: "missing",
+      evidencePath,
+      detail: "Live Hermes candidate-position evidence is missing.",
+      nextActions: ["Run the no-mutation Day/Night desktop/mobile candidate-position probe against current production."],
+    });
+  }
+
+  const baseline = isRecord(report.baseline) ? report.baseline : {};
+  const afterLocal = isRecord(report.afterLocal) ? report.afterLocal : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const reviewBoundary = isRecord(report.reviewBoundary) ? report.reviewBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const expectedPositions = ["1/3", "2/3", "3/3"];
+  const localPositions = Array.isArray(afterLocal.candidatePositions) ? afterLocal.candidatePositions : [];
+  const livePositions = Array.isArray(afterLive.candidatePositions) ? afterLive.candidatePositions : [];
+  const positionsComplete = JSON.stringify(localPositions) === JSON.stringify(expectedPositions)
+    && JSON.stringify(livePositions) === JSON.stringify(expectedPositions);
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.embeddingOrVectorMutationPerformed === false
+    && mutationBoundary.ontologyPublicationPerformed === false
+    && mutationBoundary.wikiPublicationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const pass = report.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_CANDIDATE_POSITION"
+    && sourceHead !== ""
+    && sourceHead === productCommit
+    && productCommit === productionCommit
+    && isGitAncestor(rootDir, sourceHead)
+    && baseline.numericCandidatePositionVisible === false
+    && readString(baseline.measurementMethod).includes("no retroactive RED runner claim")
+    && afterLocal.verdict === "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI"
+    && afterLocal.viewportCount === 8
+    && afterLocal.passedCount === 8
+    && afterLocal.failedCount === 0
+    && afterLocal.candidatePositionLabels === true
+    && afterLive.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI"
+    && afterLive.viewportCount === 8
+    && afterLive.passedCount === 8
+    && afterLive.failedCount === 0
+    && afterLive.candidatePositionLabels === true
+    && afterLive.productionAligned === true
+    && positionsComplete
+    && noMutation
+    && reviewBoundary.humanReviewCompleted === false
+    && reviewBoundary.machineEvidenceReplacesHumanReview === false
+    && reviewBoundary.candidateApproved === false
+    && reviewBoundary.wikiPublished === false
+    && remainingBoundaries.exactSavedShareVerdict === "MISSING_EVIDENCE"
+    && remainingBoundaries.llmWikiPublication === "APPROVAL_GATED"
+    && remainingBoundaries.supabaseRlsLaunchIsolation === "APPROVAL_GATED"
+    && remainingBoundaries.providerDispatchPersistence === "APPROVAL_GATED";
+
+  return gateResult({
+    id: "hermes_review_candidate_position",
+    label: "Hermes review candidate position",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live Hermes candidate tabs expose the complete 1/3, 2/3, 3/3 position sequence in all 8/8 Day/Night desktop/mobile viewports. The prior source/screenshot is retained only as a visual baseline with no retroactive RED runner claim. Human review remains incomplete, no mutation occurred, LLM Wiki/RLS/provider persistence remain APPROVAL_GATED, and exact saved Share remains MISSING_EVIDENCE."
+      : `Hermes candidate-position contract failed: local=${readNumber(afterLocal.passedCount)}/${readNumber(afterLocal.viewportCount)}, live=${readNumber(afterLive.passedCount)}/${readNumber(afterLive.viewportCount)}, labels=${String(afterLocal.candidatePositionLabels)}/${String(afterLive.candidatePositionLabels)}, positions=${localPositions.join(",")}/${livePositions.join(",")}, baseline=${String(baseline.numericCandidatePositionVisible)}/${readString(baseline.measurementMethod) || "missing"}, noMutation=${String(noMutation)}, humanReview=${String(reviewBoundary.humanReviewCompleted)}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass ? [] : ["Restore complete candidate positions, the no-retroactive-RED baseline, no-mutation boundaries, and exact Share MISSING_EVIDENCE."],
   });
 }
 
@@ -10443,6 +10524,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateHermesKnowledgeReviewAuthorityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir),
     evaluateHermesReviewDecisionFirstViewportGate(rootDir),
+    evaluateHermesReviewCandidatePositionGate(rootDir),
     evaluateHermesKnowledgeReviewEvidenceInspectorGate(rootDir),
     evaluateHermesReviewEventFactTraceabilityGate(rootDir),
     evaluateHermesReviewTraceBlocksGate(rootDir),
