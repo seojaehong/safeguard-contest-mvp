@@ -461,7 +461,12 @@
   padding: var(--space-3);
 }
 
+.evidencePane {
+  container-type: inline-size;
+}
+
 .candidatePane {
+  container-type: inline-size;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -619,6 +624,16 @@
 .evidenceList a {
   font-size: var(--text-caption);
   line-height: var(--leading-caption);
+}
+
+@container (max-width: 620px) {
+  .evidenceList > li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .evidenceFacts > div {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
 }
 
 .evidenceIdentity span,
@@ -785,6 +800,16 @@
 .reviewReadiness p {
   grid-column: 1 / -1;
   margin: 0;
+}
+
+@container (max-width: 620px) {
+  .reviewReadiness {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .reviewReadiness ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .reviewMeta {

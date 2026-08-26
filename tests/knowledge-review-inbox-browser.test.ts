@@ -286,6 +286,10 @@ describe("knowledge review inbox browser", () => {
     expect(await evidencePane.textContent()).toContain("산업안전보건법 제38조");
     expect(await evidencePane.textContent()).toContain("sha256:1111111111111111");
     expect(await evidencePane.getByRole("link", { name: "공식 원문 열기" }).first().getAttribute("href")).toMatch(/^https:\/\//u);
+    if (process.env.SAFECLAW_KNOWLEDGE_REVIEW_MOBILE_SCREENSHOT_PATH) {
+      await evidencePane.locator('[data-review-evidence-digest]').first().scrollIntoViewIfNeeded();
+      await page.screenshot({ path: process.env.SAFECLAW_KNOWLEDGE_REVIEW_MOBILE_SCREENSHOT_PATH });
+    }
     await inbox.getByRole("tab", { name: /작업계획서 현장 지식 검토/u }).click();
     expect(await inbox.locator('[data-review-pane="candidate"]').count()).toBe(1);
     expect(await inbox.locator('[data-review-pane="evidence"]').count()).toBe(0);
@@ -338,20 +342,35 @@ describe("knowledge review inbox browser", () => {
     const shortDesktopMetrics = await inbox.locator('[data-review-workbench="selected-only"]').evaluate((root) => {
       const detail = root.querySelector<HTMLElement>('[data-selected-review-candidate="true"]');
       const actions = root.querySelector<HTMLElement>('[role="group"][aria-label="검토 결정"]');
-      if (!detail || !actions) throw new Error("short desktop review geometry is incomplete");
+      const digest = root.querySelector<HTMLElement>('[data-review-evidence-digest]');
+      const readinessSections = [...root.querySelectorAll<HTMLElement>('[data-readiness-section]')];
+      if (!detail || !actions || !digest || readinessSections.length !== 4) throw new Error("short desktop review geometry is incomplete");
       const detailRect = detail.getBoundingClientRect();
       const actionsRect = actions.getBoundingClientRect();
+      const digestRect = digest.getBoundingClientRect();
       return {
         detailHeight: detailRect.height,
         actionsContained: actionsRect.bottom <= detailRect.bottom + 1,
         paneCount: root.querySelectorAll('[data-review-pane]').length,
+        digestWidth: digestRect.width,
+        digestHeight: digestRect.height,
+        readinessSectionWidths: readinessSections.map((section) => section.getBoundingClientRect().width),
+        readinessLabelHeights: readinessSections.map((section) => section.querySelector("span")?.getBoundingClientRect().height || 0),
         pageOverflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth
       };
     });
     expect(shortDesktopMetrics.detailHeight).toBeLessThanOrEqual(580);
     expect(shortDesktopMetrics.actionsContained).toBe(true);
     expect(shortDesktopMetrics.paneCount).toBe(2);
+    expect(shortDesktopMetrics.digestWidth).toBeGreaterThanOrEqual(160);
+    expect(shortDesktopMetrics.digestHeight).toBeLessThanOrEqual(36);
+    expect(Math.min(...shortDesktopMetrics.readinessSectionWidths)).toBeGreaterThanOrEqual(120);
+    expect(Math.max(...shortDesktopMetrics.readinessLabelHeights)).toBeLessThanOrEqual(36);
     expect(shortDesktopMetrics.pageOverflow).toBeLessThanOrEqual(1);
+    if (process.env.SAFECLAW_KNOWLEDGE_REVIEW_SCREENSHOT_PATH) {
+      await inbox.locator('[data-review-pane="evidence"]').scrollIntoViewIfNeeded();
+      await page.screenshot({ path: process.env.SAFECLAW_KNOWLEDGE_REVIEW_SCREENSHOT_PATH });
+    }
     expect(await inbox.textContent()).not.toContain("홍길동");
     expect(networkBodies).not.toHaveLength(0);
     for (const forbidden of [

@@ -864,7 +864,7 @@ export function KnowledgeReviewInbox() {
                                 </div>
                                 <dl className={styles.evidenceFacts}>
                                   <div><dt>수집</dt><dd><time dateTime={evidence.capturedAt}>{evidence.capturedAt.slice(0, 10)}</time></dd></div>
-                                  <div><dt>검증</dt><dd>{evidence.digest}</dd></div>
+                                  <div><dt>검증</dt><dd data-review-evidence-digest>{evidence.digest}</dd></div>
                                   {evidence.metadata.map((entry) => (
                                     <div key={`${evidence.id}-${entry.label}`}><dt>{entry.label}</dt><dd>{entry.value}</dd></div>
                                   ))}
