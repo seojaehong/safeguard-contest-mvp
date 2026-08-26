@@ -129,6 +129,17 @@ describe("knowledge governance UI contract", () => {
     expect(browserRunnerSource).toContain("knowledge-review-trace-block-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png");
   });
 
+  it("keeps the canonical hazard trace matrix complete and internally bounded", () => {
+    expect(browserRunnerSource).toContain('process.env.SAFECLAW_KNOWLEDGE_UI_MODE === "trace-matrix"');
+    expect(browserRunnerSource).toContain('schemaVersion: "safeclaw-hermes-review-trace-matrix-summary/v1"');
+    expect(browserRunnerSource).toContain('verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_MATRIX"');
+    expect(browserRunnerSource).toContain("canonicalControlLinkCount");
+    expect(browserRunnerSource).toContain("canonicalDocumentLinkCount");
+    expect(browserRunnerSource).toContain("allCanonicalMappingsClosed: true");
+    expect(browserRunnerSource).toContain("traceListInternalScroll");
+    expect(browserRunnerSource).toContain("machineEvidenceReplacesHumanReview: false");
+  });
+
   it("localizes schema field names at the presentation boundary", () => {
     expect(pageSource).toContain('roleLabel: "문서 역할"');
     expect(pageSource).toContain('shortSummary: "짧은 요약"');
