@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `d025c27e82923e3e13eedcdaac55da9641b7907f`
+Source HEAD: `d41384d488aeb7ca39c0978eeadcb493d99d61ad`
 
-Production `/api/build-info`: `4c35e5a1537ef9a441e062be38fda697a60e105e`
+Production `/api/build-info`: `657fc75fa72abc0d961b504de75f95255e9f083a`
 
 Latest evidence commit live: `false`
 
@@ -14,17 +14,17 @@ Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/hermes-knowledge-review-event-facts-2026-08-26/report.json`, `evaluation/hermes-knowledge-review-event-facts-2026-08-26/report.md`, `scripts/knowledge_review_authority_ui_runner.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-authority-day-desktop-1440x900.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-authority-day-desktop-short-1440x723.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-authority-day-mobile-390x844.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-authority-day-mobile-short-390x723.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-authority-night-desktop-1440x900.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-authority-night-desktop-short-1440x723.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-authority-night-mobile-390x844.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-authority-night-mobile-short-390x723.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-trace-block-day-desktop-1440x900.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-trace-block-day-desktop-short-1440x723.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-trace-block-day-mobile-390x844.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-trace-block-day-mobile-short-390x723.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-trace-block-night-desktop-1440x900.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-trace-block-night-desktop-short-1440x723.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-trace-block-night-mobile-390x844.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/knowledge-review-trace-block-night-mobile-short-390x723.png`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/report.json`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/after-live/report.md`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/report.json`, `evaluation/hermes-knowledge-review-trace-blocks-2026-08-26/report.md`, `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
 Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `d025c27e82923e3e13eedcdaac55da9641b7907f`
+Live rollup source head: `d41384d488aeb7ca39c0978eeadcb493d99d61ad`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `d025c27e82923e3e13eedcdaac55da9641b7907f` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `4c35e5a1537ef9a441e062be38fda697a60e105e`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `d41384d488aeb7ca39c0978eeadcb493d99d61ad` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `657fc75fa72abc0d961b504de75f95255e9f083a`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -76,6 +76,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live Hermes reviewer authority UI is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`, local/live viewport contracts `8/8` and `8/8`, selected-only candidates/selected/body `3/1/1`, desktop/mobile columns `2/1`, and authority order `SIF -> KOSHA -> law -> organization_history -> site_history -> external_context`. Candidate tabs require linked tabpanel semantics, one roving tab stop, breakpoint-aware orientation, and Arrow/Home/End keyboard navigation; compact review panes require linked keyboard-operable tabs. Delayed decisions require live pending/settled status, busy semantics, and disabled competing actions `true/true/true/true`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains `MISSING_EVIDENCE`, while LLM Wiki publication and Supabase RLS remain approval-gated.
 - Live Hermes evidence inspector is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR`, local/live viewport contracts `8/8` and `8/8`, budget/items/desktop columns/mobile panes `20/5/2/1`, linked roving candidate tabs and compact-pane keyboard navigation `true/true/true/true/true`, delayed decision status/busy/actions/settled `true/true/true/true`, official HTTPS/private identity exposed `3/false`. Security-complete remains `false`, a fresh full-repository scan remains required, exact saved Share remains `MISSING_EVIDENCE`, and Wiki/RLS/provider persistence remain approval-gated.
 - Live Hermes event-fact traceability is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVENT_FACT_TRACEABILITY`, before/local/live passes `0/8`, `8/8`, and `8/8`; bound/orphan/private facts `2/0/false`. This is reviewer-support traceability, not full hazard-to-control-to-document-to-evidence closure; human review remains incomplete, exact saved Share remains `MISSING_EVIDENCE`, and Wiki/RLS/provider persistence remain approval-gated.
+- Live Hermes hazard-to-evidence trace blocks are measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_BLOCKS`, before/local/live passes `0/8`, `8/8`, and `8/8`; resolved/unresolved/scoped hazards `1/0/1`. This bounded reviewer-support proof leaves all-hazard/all-document closure false, human review incomplete, exact saved Share `MISSING_EVIDENCE`, and Wiki/RLS/provider persistence approval-gated.
 - Live supporting-document scenario grounding is measured separately: `PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT`, live cases `5/5`, supporting documents `30/30`, cross-scenario leakage `0`, and missingUnexpected `0`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.
 - Live document seed-profile isolation is measured separately: `PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION`, before forbidden fragments `90`, live forbidden fragments `0`, reviewed document surface `60`, and secondary grounding `30/30`. This deterministic gate does not replace broad human wording review or exact saved Share evidence; exact saved Share remains `MISSING_EVIDENCE`.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level. DNS-pinned trusted transport wired=`true`; durable attempt ledger wired/atomic/reservation-bound/digest-only=`true/true/true/true`; live execution claimed=`false`.

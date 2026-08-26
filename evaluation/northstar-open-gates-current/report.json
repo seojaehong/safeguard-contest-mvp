@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-26T03:13:15.163Z",
-  "sourceSha": "d025c27e82923e3e13eedcdaac55da9641b7907f",
+  "generatedAt": "2026-08-26T05:48:32.480Z",
+  "sourceSha": "d41384d488aeb7ca39c0978eeadcb493d99d61ad",
   "overall": "open",
   "gates": [
     {
@@ -523,6 +523,14 @@
       "label": "Hermes review event fact traceability",
       "evidencePath": "evaluation\\hermes-knowledge-review-event-facts-2026-08-26\\report.json",
       "detail": "Live Hermes review event-fact traceability moves from 0/8 to 8/8 and binds two allowlisted event facts to one exact evidence row with zero orphan facts and no private event text. This is reviewer traceability only, not complete hazard-to-control-to-document-to-evidence trace closure. Human verification remains required, publication stays unpublished, the immutable 18-finding baseline is preserved, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED.",
+      "nextActions": []
+    },
+    {
+      "id": "hermes_review_trace_blocks",
+      "state": "proven",
+      "label": "Hermes review hazard-to-evidence trace blocks",
+      "evidencePath": "evaluation\\hermes-knowledge-review-trace-blocks-2026-08-26\\report.json",
+      "detail": "Live Hermes review trace blocks move from 0/8 to 8/8 and bind one scoped hazard to canonical controls, primary document targets, and an exact reviewer evidence row. Approval fails closed for incomplete traces. This is not all-hazard or all-document closure; human review remains incomplete, publication stays unpublished, the immutable 18-finding baseline is preserved, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED.",
       "nextActions": []
     },
     {
