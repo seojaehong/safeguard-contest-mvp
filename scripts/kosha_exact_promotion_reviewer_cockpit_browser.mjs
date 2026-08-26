@@ -60,19 +60,33 @@ export async function runBrowserProbe(options) {
       await page.goto(pathToFileURL(htmlPath).href, { waitUntil: "load" });
       await page.focus('[data-candidate-button="0"]');
       await page.keyboard.press("End");
-      const candidateEndState = await page.evaluate(() => ({
-        selectedIndex: [...document.querySelectorAll("[data-candidate-button]")]
-          .findIndex((button) => button.getAttribute("aria-selected") === "true"),
-        focusedIndex: [...document.querySelectorAll("[data-candidate-button]")]
-          .findIndex((button) => button === document.activeElement),
-      }));
+      const candidateEndState = await page.evaluate(() => {
+        const buttons = [...document.querySelectorAll("[data-candidate-button]")];
+        const selectedIndex = buttons.findIndex((button) => button.getAttribute("aria-selected") === "true");
+        const selectedRect = buttons[selectedIndex]?.getBoundingClientRect();
+        const listRect = document.querySelector(".candidate-list")?.getBoundingClientRect();
+        return {
+          selectedIndex,
+          focusedIndex: buttons.findIndex((button) => button === document.activeElement),
+          selectedFullyVisible: Boolean(selectedRect && listRect
+            && selectedRect.left >= listRect.left
+            && selectedRect.right <= listRect.right),
+        };
+      });
       await page.keyboard.press("Home");
-      const candidateHomeState = await page.evaluate(() => ({
-        selectedIndex: [...document.querySelectorAll("[data-candidate-button]")]
-          .findIndex((button) => button.getAttribute("aria-selected") === "true"),
-        focusedIndex: [...document.querySelectorAll("[data-candidate-button]")]
-          .findIndex((button) => button === document.activeElement),
-      }));
+      const candidateHomeState = await page.evaluate(() => {
+        const buttons = [...document.querySelectorAll("[data-candidate-button]")];
+        const selectedIndex = buttons.findIndex((button) => button.getAttribute("aria-selected") === "true");
+        const selectedRect = buttons[selectedIndex]?.getBoundingClientRect();
+        const listRect = document.querySelector(".candidate-list")?.getBoundingClientRect();
+        return {
+          selectedIndex,
+          focusedIndex: buttons.findIndex((button) => button === document.activeElement),
+          selectedFullyVisible: Boolean(selectedRect && listRect
+            && selectedRect.left >= listRect.left
+            && selectedRect.right <= listRect.right),
+        };
+      });
       let mobileKeyboardState = null;
       if (probe.mobileView) {
         await page.focus('[data-mobile-mode="0:evidence"]');
@@ -106,6 +120,11 @@ export async function runBrowserProbe(options) {
           },
           workspace: rectangle(".workspace"),
           candidateRail: rectangle(".candidate-rail"),
+          candidateList: rectangle(".candidate-list"),
+          candidateRailHeaderDisplay: style(".candidate-rail-header")?.display ?? "",
+          candidateContextText: element("[data-candidate-context]")?.textContent?.trim() ?? "",
+          selectedCandidateText: element('[data-candidate-button][aria-selected="true"]')?.textContent?.replace(/\s+/g, " ").trim() ?? "",
+          firstCandidateButtonWidth: rectangle('[data-candidate-button="0"]')?.width ?? 0,
           candidatePanel: rectangle('[data-candidate-panel="0"]'),
           evidencePane: rectangle(".evidence-pane"),
           reviewPane: rectangle(".review-pane"),
@@ -261,8 +280,12 @@ export async function runBrowserProbe(options) {
     && row.candidateControlLinksValid
     && row.candidateEndState.selectedIndex === 7
     && row.candidateEndState.focusedIndex === 7
+    && row.candidateEndState.selectedFullyVisible
     && row.candidateHomeState.selectedIndex === 0
     && row.candidateHomeState.focusedIndex === 0
+    && row.candidateHomeState.selectedFullyVisible
+    && row.candidateRailHeaderDisplay === (row.viewport.width <= 767 ? "none" : "flex")
+    && row.candidateContextText === "후보 1/8 · 0/8 입력"
     && row.progressLiveRole === "status"
     && row.progressLiveMode === "polite"
     && row.mobileTablistRole === "tablist"
@@ -295,6 +318,11 @@ export async function runBrowserProbe(options) {
     mobileEvidence
     && mobileReview
     && mobileEvidence.mobileModeDisplay === "grid"
+    && mobileEvidence.firstCandidateButtonWidth >= 170
+    && mobileEvidence.selectedCandidateText.includes("후보 1/8")
+    && mobileEvidence.selectedCandidateText.includes("0/8")
+    && mobileEvidence.candidateEndState.selectedFullyVisible
+    && mobileEvidence.candidateHomeState.selectedFullyVisible
     && mobileEvidence.evidenceDisplay !== "none"
     && mobileEvidence.reviewDisplay === "none"
     && mobileReview.evidenceDisplay === "none"
@@ -383,6 +411,9 @@ Verdict: \`${report.verdict}\`
 - Initial export disabled: ${results.every((row) => row.exportInitiallyDisabled)}
 - Candidate tabs: ${results.every((row) => row.selectedCandidateTabCount === 1 && row.tabbableCandidateTabCount === 1)}
 - Candidate End/Home keyboard: ${results.every((row) => row.candidateEndState.selectedIndex === 7 && row.candidateHomeState.selectedIndex === 0)}
+- Candidate End/Home visibility: ${results.every((row) => row.candidateEndState.selectedFullyVisible && row.candidateHomeState.selectedFullyVisible)}
+- Candidate context: ${mobileEvidence?.candidateContextText || "missing"}
+- Mobile candidate width: ${mobileEvidence?.firstCandidateButtonWidth || 0}
 - Mobile evidence/review keyboard: ${[mobileEvidence, mobileReview].every((row) => row?.mobileKeyboardState?.reviewFocused === "0:review" && row?.mobileKeyboardState?.evidenceFocused === "0:evidence")}
 - Breakpoint-correct tabpanels: ${report.responsiveTabPanelPass}
 - Candidate-bound draft restore: ${report.draftStorageIdentityPass}

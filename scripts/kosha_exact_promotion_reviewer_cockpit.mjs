@@ -337,7 +337,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
 
   const candidateButtons = candidates.map((candidate, index) => `
     <button class="candidate-button" type="button" role="tab" id="candidate-tab-${index}" data-candidate-button="${index}" aria-controls="candidate-panel-${index}" aria-selected="${index === 0}" tabindex="${index === 0 ? 0 : -1}">
-      <span>${escapeHtml(candidate.stableKey)}</span>
+      <span>${escapeHtml(candidate.stableKey)} · 후보 ${index + 1}/${candidates.length}</span>
       <strong>${escapeHtml(candidate.version)}</strong>
       <small data-candidate-progress="${index}">0/8</small>
     </button>`).join("");
@@ -417,7 +417,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     button,input{font:inherit}.shell{height:100dvh;min-height:0;overflow:hidden;display:grid;grid-template-rows:auto minmax(0,1fr) auto}.topbar{display:flex;align-items:center;gap:20px;padding:14px 20px;background:#14231c;color:#fff}
     .topbar h1{font-size:18px;margin:0}.topbar p{margin:2px 0 0;color:#c7d5cd;font-size:13px}.metrics{margin-left:auto;display:flex;gap:16px;font-size:13px}.metrics strong{display:block;font-size:16px}
     .workspace{display:grid;grid-template-columns:230px minmax(0,1fr);gap:0;min-height:0;height:auto}.candidate-rail{background:#f7faf8;border-right:1px solid var(--line);padding:12px;overflow:auto}
-    .rail-label{display:block;color:var(--muted);font-size:12px;font-weight:700;margin:4px 4px 10px}.candidate-list{display:grid;gap:6px}
+    .candidate-rail-header{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:4px 4px 10px;color:var(--muted);font-size:12px;font-weight:700}.candidate-context{color:var(--accent);white-space:nowrap}.candidate-list{display:grid;gap:6px}
     .candidate-button{width:100%;border:1px solid transparent;background:transparent;text-align:left;padding:9px 10px;display:grid;grid-template-columns:1fr auto;gap:2px 8px;color:var(--ink);cursor:pointer;border-radius:6px}
     .candidate-button:hover{background:#eaf1ed}.candidate-button[aria-selected="true"]{background:#dcece4;border-color:#9ec5b2}.candidate-button span{font-size:12px;color:var(--muted)}.candidate-button strong{grid-column:1;font-size:13px}.candidate-button small{grid-column:2;grid-row:1/3;align-self:center;color:var(--accent);font-weight:700}
     .content{min-width:0;min-height:0}.candidate-panel{display:grid;grid-template-columns:minmax(0,1fr) 360px;height:100%;min-height:0}.candidate-panel[hidden]{display:none}.evidence-pane,.review-pane{overflow:auto;padding:18px 20px}.review-pane{background:#f8faf9;border-left:1px solid var(--line)}
@@ -430,7 +430,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     .field-label{display:grid;gap:5px;margin-top:10px;font-size:12px;font-weight:700}.field-label input{width:100%;border:1px solid #aebbb3;background:#fff;padding:9px;border-radius:4px}.human-confirm{margin-top:10px;border-color:#9ec5b2;background:#eef8f2}
     .footer-actions{display:flex;justify-content:flex-end;gap:8px;padding:8px 12px;background:#e8eeea;border-top:1px solid var(--line)}.footer-actions button{border:1px solid #295d48;padding:9px 12px;border-radius:5px;background:#fff;color:#184b38;font-weight:700;cursor:pointer}.footer-actions .primary{background:#087f5b;color:#fff;white-space:nowrap}.footer-actions button:disabled{cursor:not-allowed;opacity:.45}
     button:focus-visible,input:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #0b6eeb;outline-offset:2px}.mobile-mode{display:none}.status-live{color:#8ce0bc}.complete .candidate-button small{color:#087f5b}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-    @media(max-width:767px){.topbar{align-items:flex-start;padding:12px;height:68px}.metrics{display:none}.workspace{display:flex;flex-direction:column;height:auto;overflow:hidden}.candidate-rail{flex:none;border-right:0;border-bottom:1px solid var(--line);padding:8px;overflow-x:auto}.rail-label{display:none}.candidate-list{display:flex;width:max-content}.candidate-button{width:132px}.content{flex:1;min-height:0}.candidate-panel{display:flex;flex-direction:column;height:100%;min-height:0}.candidate-panel[hidden]{display:none}.mobile-mode{display:grid;grid-template-columns:1fr 1fr;flex:none;border-bottom:1px solid var(--line);background:#f7faf8;padding:6px 8px}.mobile-mode button{border:0;border-bottom:2px solid transparent;background:transparent;padding:8px;color:var(--muted);font-weight:700}.mobile-mode button[aria-selected="true"]{border-color:var(--accent);color:var(--accent)}.candidate-panel[data-mobile-view="evidence"] .review-pane,.candidate-panel[data-mobile-view="review"] .evidence-pane{display:none}.evidence-pane,.review-pane{flex:1;min-height:0;overflow:auto;padding:14px 12px}.review-pane{border-left:0}.identity-grid{grid-template-columns:repeat(2,1fr)}.identity-grid div:nth-child(2){border-right:0}.candidate-heading{display:block}.candidate-heading a{display:inline-block;margin-top:8px}.evidence-group{padding:8px 10px 0}.receipt-list{margin-top:6px}.receipt-list li{min-height:24px;padding:2px 6px}.footer-actions{padding:7px 8px}.footer-actions button{padding:8px 9px;font-size:13px}}
+    @media(max-width:767px){.topbar{align-items:flex-start;padding:12px;height:68px}.metrics{display:none}.workspace{display:flex;flex-direction:column;height:auto;overflow:hidden}.candidate-rail{flex:none;border-right:0;border-bottom:1px solid var(--line);padding:8px;overflow:hidden}.candidate-rail-header{display:none}.candidate-list{display:flex;gap:6px;width:auto;overflow-x:auto;overscroll-behavior-inline:contain;scroll-padding-inline:0;scroll-snap-type:x mandatory;scrollbar-width:thin}.candidate-button{flex:0 0 calc((100vw - 38px)/2);width:auto;scroll-snap-align:start}.content{flex:1;min-height:0}.candidate-panel{display:flex;flex-direction:column;height:100%;min-height:0}.candidate-panel[hidden]{display:none}.mobile-mode{display:grid;grid-template-columns:1fr 1fr;flex:none;border-bottom:1px solid var(--line);background:#f7faf8;padding:6px 8px}.mobile-mode button{border:0;border-bottom:2px solid transparent;background:transparent;padding:8px;color:var(--muted);font-weight:700}.mobile-mode button[aria-selected="true"]{border-color:var(--accent);color:var(--accent)}.candidate-panel[data-mobile-view="evidence"] .review-pane,.candidate-panel[data-mobile-view="review"] .evidence-pane{display:none}.evidence-pane,.review-pane{flex:1;min-height:0;overflow:auto;padding:14px 12px}.review-pane{border-left:0}.identity-grid{grid-template-columns:repeat(2,1fr)}.identity-grid div:nth-child(2){border-right:0}.candidate-heading{display:block}.candidate-heading a{display:inline-block;margin-top:8px}.evidence-group{padding:8px 10px 0}.receipt-list{margin-top:6px}.receipt-list li{min-height:24px;padding:2px 6px}.footer-actions{padding:7px 8px}.footer-actions button{padding:8px 9px;font-size:13px}}
     @media(max-width:767px){.evidence-pane{display:flex;flex-direction:column}.evidence-pane .candidate-heading{order:1}.evidence-pane .identity-grid{order:2}.evidence-pane .rationale{order:3}.evidence-pane .evidence-stack{order:4}.evidence-pane .title-provenance{order:5}.evidence-pane .hash-details{order:6}}
   </style>
 </head>
@@ -441,7 +441,10 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
       <div class="metrics"><div><strong>${candidates.length}</strong>후보</div><div><strong>${candidates.length * 3}</strong>근거 묶음</div><div><strong>${checklistInputCount}</strong>필수 입력</div><div><strong class="status-live">0</strong>외부 변경</div></div>
     </header>
     <div class="workspace">
-      <aside class="candidate-rail"><span class="rail-label">검토 후보</span><div class="candidate-list" role="tablist" aria-label="KOSHA 검토 후보" aria-orientation="vertical">${candidateButtons}</div></aside>
+      <aside class="candidate-rail">
+        <div class="candidate-rail-header"><span class="rail-label">검토 후보</span><span class="candidate-context" data-candidate-context>후보 1/${candidates.length} · 0/8 입력</span></div>
+        <div class="candidate-list" role="tablist" aria-label="KOSHA 검토 후보" aria-orientation="vertical">${candidateButtons}</div>
+      </aside>
       <div class="content">${candidatePanels}</div>
     </div>
     <div class="footer-actions">
@@ -533,6 +536,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
       const panels = [...document.querySelectorAll("[data-candidate-panel]")];
       const buttons = [...document.querySelectorAll("[data-candidate-button]")];
       const candidateList = document.querySelector(".candidate-list");
+      const candidateContext = document.querySelector("[data-candidate-context]");
       const exportButton = document.querySelector("[data-export]");
       const progressLive = document.querySelector("[data-progress-live]");
       const mobileBreakpoint = window.matchMedia("(max-width: 767px)");
@@ -563,6 +567,12 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
         + (row.reviewer.trim() ? 1 : 0)
         + (row.reviewedAt ? 1 : 0)
         + (row.humanConfirmed ? 1 : 0);
+      const updateCandidateContext = () => {
+        const selectedIndex = buttons.findIndex((button) => button.getAttribute("aria-selected") === "true");
+        const safeIndex = selectedIndex >= 0 ? selectedIndex : 0;
+        candidateContext.textContent = "후보 " + (safeIndex + 1) + "/" + buttons.length
+          + " · " + completedInputs(state[safeIndex]) + "/8 입력";
+      };
       const render = () => {
         state.forEach((row, index) => {
           row.requiredReviewChecks.forEach((check, checkIndex) => {
@@ -588,6 +598,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
         progressLive.textContent = restorationNotice
           ? restorationNotice + " " + progressMessage
           : progressMessage;
+        updateCandidateContext();
         localStorage.setItem(storageKey, JSON.stringify({
           schemaVersion: storageSchemaVersion,
           candidateFingerprint,
@@ -602,6 +613,10 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
           button.setAttribute("aria-selected", String(selected));
           button.tabIndex = selected ? 0 : -1;
         });
+        updateCandidateContext();
+        if (mobileBreakpoint.matches) {
+          buttons[index].scrollIntoView({ block: "nearest", inline: "center" });
+        }
         if (moveFocus) buttons[index].focus();
       };
       buttons.forEach((button, index) => button.addEventListener("click", () => selectCandidate(index)));
