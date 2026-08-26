@@ -1,10 +1,10 @@
 {
   "schemaVersion": "safeclaw-llm-wiki-sif-evidence-matrix-summary/v1",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_SIF_KOSHA_LAW_WIKI_CANDIDATE_LIVE_PENDING",
-  "checkedAt": "2026-08-26T11:37:00.5067540Z",
+  "verdict": "PASS_LIVE_PRODUCTION_SIF_KOSHA_LAW_WIKI_CANDIDATE_EVIDENCE",
+  "checkedAt": "2026-08-26T11:40:21.4314948Z",
   "productCommit": "b777fa07c8fa651931796eb6df933ba0e4de4300",
-  "sourceHead": "b777fa07c8fa651931796eb6df933ba0e4de4300",
-  "productionCommit": null,
+  "sourceHead": "aa4e27df0a917b42556b04f020753bb04dd4c13a",
+  "productionCommit": "aa4e27df0a917b42556b04f020753bb04dd4c13a",
   "priorLiveEvidence": {
     "path": "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/report.json",
     "sourceHead": "f4ab34d0f8fd204b3d5dfa7ef77bfe183acc7ff2",
@@ -27,8 +27,23 @@
     "eventSemanticGroundingCount": 5,
     "privateEventExposureCount": 0
   },
-  "afterLive": null,
-  "liveAfterDeploymentRequired": true,
+  "afterLive": {
+    "path": "evaluation/llm-wiki-sif-evidence-matrix-2026-08-26/after-live/report.json",
+    "sourceHead": "aa4e27df0a917b42556b04f020753bb04dd4c13a",
+    "productionCommit": "aa4e27df0a917b42556b04f020753bb04dd4c13a",
+    "deploymentUrl": "safeguard-contest-j9fhfe5fo-seojaehongs-projects.vercel.app",
+    "verdict": "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+    "generationMode": "deterministic",
+    "totalCount": 5,
+    "passedCount": 5,
+    "failedCount": 0,
+    "sifEvidenceBoundaryCount": 5,
+    "technicalGuidanceBoundaryCount": 5,
+    "lawCandidateBoundaryCount": 5,
+    "eventSemanticGroundingCount": 5,
+    "privateEventExposureCount": 0
+  },
+  "liveAfterDeploymentRequired": false,
   "contentContract": {
     "authorityOrder": ["sif", "kosha", "law"],
     "scenarioCount": 5,
