@@ -427,6 +427,18 @@ try {
         };
       });
       let mobileEvidence = null;
+      const screenshot = `knowledge-review-authority-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
+      if (viewport.width > 720) {
+        await page.screenshot({ path: path.join(outputDir, screenshot), fullPage: false });
+      }
+      if (eventFactsMode) {
+        const eventFactsPanel = inbox.locator('[data-review-event-facts="true"]');
+        await eventFactsPanel.scrollIntoViewIfNeeded();
+        await page.screenshot({
+          path: path.join(outputDir, `knowledge-review-event-facts-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`),
+          fullPage: false
+        });
+      }
       if (viewport.width <= 720) {
         await inbox.getByRole("tab", { name: `근거 ${queueItem.evidenceItems.length}`, exact: true }).click();
         mobileEvidence = await page.evaluate(() => {
@@ -450,8 +462,9 @@ try {
           };
         });
       }
-      const screenshot = `knowledge-review-authority-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
-      await page.screenshot({ path: path.join(outputDir, screenshot), fullPage: false });
+      if (viewport.width <= 720) {
+        await page.screenshot({ path: path.join(outputDir, screenshot), fullPage: false });
+      }
       await inbox.getByRole("button", { name: "후보 승인", exact: true }).click();
       await page.waitForFunction(() => (
         document.querySelector("[data-selected-review-candidate='true']")?.getAttribute("aria-busy") === "true"
