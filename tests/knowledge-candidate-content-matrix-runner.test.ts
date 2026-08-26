@@ -9,7 +9,9 @@ const testCase = {
   requiredEvidenceAnyGroups: [
     ["물질안전보건자료 조회 서비스"],
     ["산업안전보건법"]
-  ]
+  ],
+  requiredEventFactGroups: [["야간 교대 작업"], ["청각 경보 보조수단 필요"]],
+  forbiddenGeneratedTerms: ["resident-id: 900101-1234567"]
 };
 
 function payload() {
@@ -23,7 +25,7 @@ function payload() {
       generatedBy: "hermes_or_llm",
       reviewStatus: "pending_review",
       publicationState: "unpublished",
-      generatedText: "1) 위험요인 요약: 화학물질 누출 위험\n2) 문서 반영 위치: 위험성평가표\n3) 통제대책: MSDS와 보호구 확인\n4) 검수 필요 항목: 근거 구분: KOSHA 기술·공식자료 후보 - 물질안전보건자료 조회 서비스 / 현행 법령 후보 - 산업안전보건법. 현장 책임자 확인",
+      generatedText: "1) 위험요인 요약: 화학물질 누출 위험 / 원본 이벤트 검토 사실: 야간 교대 작업 · 청각 경보 보조수단 필요\n2) 문서 반영 위치: 위험성평가표\n3) 통제대책: MSDS와 보호구 확인\n4) 검수 필요 항목: 근거 구분: KOSHA 기술·공식자료 후보 - 물질안전보건자료 조회 서비스 / 현행 법령 후보 - 산업안전보건법. 현장 책임자 확인",
       matchedHazardIds: ["chemical-msds"],
       dbMutationAllowed: false,
       dbMutationPerformed: false,
@@ -67,9 +69,12 @@ describe("knowledge candidate content matrix runner", () => {
       missingHazardIds: [],
       missingTermGroups: [],
       missingEvidenceTermGroups: [],
+      missingEventFactGroups: [],
+      exposedForbiddenTerms: [],
       reviewerEvidenceTraceVisible: true,
       technicalGuidanceBoundaryVisible: true,
       lawCandidateBoundaryVisible: true,
+      eventSemanticGroundingVisible: true,
       boundary: {
         storageMode: "stateless_candidate",
         savedRunId: null,
@@ -107,6 +112,32 @@ describe("knowledge candidate content matrix runner", () => {
       "technical_guidance_boundary_missing",
       "law_candidate_boundary_missing"
     ]));
+  });
+
+  it("fails closed when explicit event review facts are absent", () => {
+    const unsafe = payload();
+    unsafe.candidate.generatedText = unsafe.candidate.generatedText.replace(
+      " / 원본 이벤트 검토 사실: 야간 교대 작업 · 청각 경보 보조수단 필요",
+      ""
+    );
+
+    const result = evaluateCandidateMatrixPayload(testCase, 200, unsafe);
+    expect(result.ok).toBe(false);
+    expect(result.missingEventFactGroups).toEqual([
+      ["야간 교대 작업"],
+      ["청각 경보 보조수단 필요"]
+    ]);
+    expect(result.failures).toContain("event_semantic_grounding_missing");
+  });
+
+  it("fails closed when a private event term reaches reviewer-visible text", () => {
+    const unsafe = payload();
+    unsafe.candidate.generatedText += "\n내부 메모: resident-id: 900101-1234567";
+
+    const result = evaluateCandidateMatrixPayload(testCase, 200, unsafe);
+    expect(result.ok).toBe(false);
+    expect(result.exposedForbiddenTerms).toEqual(["resident-id: 900101-1234567"]);
+    expect(result.failures).toContain("private_event_term_exposed:resident-id: 900101-1234567");
   });
 
   it("fails closed for publication, mutation, or human-review overclaims", () => {

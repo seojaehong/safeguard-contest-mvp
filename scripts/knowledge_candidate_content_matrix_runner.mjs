@@ -41,15 +41,22 @@ export function evaluateCandidateMatrixPayload(testCase, responseStatus, payload
   const matchedHazardIds = asArray(candidate.matchedHazardIds).filter((value) => typeof value === "string");
   const requiredAnyGroups = asArray(testCase.requiredAnyGroups).map((group) => asArray(group));
   const requiredEvidenceAnyGroups = asArray(testCase.requiredEvidenceAnyGroups).map((group) => asArray(group));
+  const requiredEventFactGroups = asArray(testCase.requiredEventFactGroups).map((group) => asArray(group));
+  const forbiddenGeneratedTerms = asArray(testCase.forbiddenGeneratedTerms).map(readString).filter(Boolean);
   const missingTermGroups = requiredAnyGroups
     .filter((group) => !includesAny(generatedText, group))
     .map((group) => group.map(readString));
   const missingEvidenceTermGroups = requiredEvidenceAnyGroups
     .filter((group) => !includesAny(generatedText, group))
     .map((group) => group.map(readString));
+  const missingEventFactGroups = requiredEventFactGroups
+    .filter((group) => !includesAny(generatedText, group))
+    .map((group) => group.map(readString));
+  const exposedForbiddenTerms = forbiddenGeneratedTerms.filter((term) => includesAny(generatedText, [term]));
   const reviewerEvidenceTraceVisible = includesAny(generatedText, ["근거 구분", "적용 근거 후보"]);
   const technicalGuidanceBoundaryVisible = includesAny(generatedText, ["KOSHA 기술·공식자료 후보", "KOSHA 기술지침 후보"]);
   const lawCandidateBoundaryVisible = includesAny(generatedText, ["현행 법령 후보", "법령 근거 후보"]);
+  const eventSemanticGroundingVisible = includesAny(generatedText, ["원본 이벤트 검토 사실", "현장 이벤트 검토 사실"]);
   const missingHazardIds = asArray(testCase.expectedHazardIds)
     .filter((hazardId) => !matchedHazardIds.includes(readString(hazardId)));
   const failures = [
@@ -82,9 +89,12 @@ export function evaluateCandidateMatrixPayload(testCase, responseStatus, payload
     ...missingHazardIds.map((hazardId) => `missing_hazard:${hazardId}`),
     ...missingTermGroups.map((group) => `missing_term_group:${group.join("|")}`),
     ...missingEvidenceTermGroups.map((group) => `missing_evidence_term_group:${group.join("|")}`),
+    ...missingEventFactGroups.map((group) => `missing_event_fact_group:${group.join("|")}`),
+    ...exposedForbiddenTerms.map((term) => `private_event_term_exposed:${term}`),
     ...(!reviewerEvidenceTraceVisible ? ["reviewer_evidence_trace_missing"] : []),
     ...(!technicalGuidanceBoundaryVisible ? ["technical_guidance_boundary_missing"] : []),
-    ...(!lawCandidateBoundaryVisible ? ["law_candidate_boundary_missing"] : [])
+    ...(!lawCandidateBoundaryVisible ? ["law_candidate_boundary_missing"] : []),
+    ...(!eventSemanticGroundingVisible ? ["event_semantic_grounding_missing"] : [])
   ];
 
   return {
@@ -95,10 +105,13 @@ export function evaluateCandidateMatrixPayload(testCase, responseStatus, payload
     missingHazardIds,
     missingTermGroups,
     missingEvidenceTermGroups,
+    missingEventFactGroups,
+    exposedForbiddenTerms,
     matchedHazardIds,
     reviewerEvidenceTraceVisible,
     technicalGuidanceBoundaryVisible,
     lawCandidateBoundaryVisible,
+    eventSemanticGroundingVisible,
     generatedTextLength: generatedText.length,
     generatedTextExcerpt: compactExcerpt(generatedText),
     readiness: {
@@ -148,9 +161,9 @@ function currentHead() {
 
 function markdownFor(report) {
   const rows = report.results.map((result) => (
-    `| ${result.id} | ${result.responseStatus} | ${result.matchedHazardIds.join(", ")} | ${result.readiness.presentSectionCount}/4 | ${result.reviewerEvidenceTraceVisible ? "visible" : "missing"} | ${result.missingEvidenceTermGroups.length} | ${result.failures.join("; ") || "none"} | ${result.ok ? "PASS" : "RED"} |`
+    `| ${result.id} | ${result.responseStatus} | ${result.matchedHazardIds.join(", ")} | ${result.readiness.presentSectionCount}/4 | ${result.reviewerEvidenceTraceVisible ? "visible" : "missing"} | ${result.eventSemanticGroundingVisible ? "visible" : "missing"} | ${result.missingEventFactGroups.length} | ${result.exposedForbiddenTerms.length} | ${result.failures.join("; ") || "none"} | ${result.ok ? "PASS" : "RED"} |`
   )).join("\n");
-  return `# LLM Wiki Candidate Content Matrix\n\n- Verdict: \`${report.verdict}\`\n- Mode: \`${report.mode}\`\n- Generation mode: \`${report.generationMode}\`\n- Base URL: \`${report.baseUrl}\`\n- Source head: \`${report.sourceHead}\`\n- Production commit: \`${report.productionBuild.commitSha ?? "not-live"}\`\n- Cases: ${report.passedCount}/${report.totalCount} PASS\n- Reviewer-visible source traces: ${report.reviewerEvidenceTraceCount}/${report.totalCount}\n\n| Scenario | HTTP | Matched hazards | Sections | Evidence trace | Missing evidence groups | Failures | Verdict |\n| --- | ---: | --- | ---: | --- | ---: | --- | --- |\n${rows}\n\n## Contract\n\n- Each scenario uses the deployed stateless \`/api/knowledge/regenerate\` path.\n- Deterministic mode proves the built-in safety-knowledge fallback; provider mode separately proves enhanced LLM generation when runtime admission is available.\n- The response must expose the server-derived four-section content-readiness contract.\n- Scenario hazard IDs and scenario-specific term groups must remain grounded in generated text.\n- Scenario-specific KOSHA/official source terms must be visible in the candidate body, not only in server metadata.\n- Candidate text must label KOSHA material as technical/official guidance and law material as a current-law review candidate.\n- Placeholder text, legal overclaim, missing law provenance, and missing hazard grounding fail closed.\n- All candidates remain unpublished and require human review.\n\n## Boundary\n\n- This matrix does not read the actual production candidate queue.\n- No DB write, Wiki publication, provider dispatch, Share-session creation, embedding/vector mutation, or KOSHA registry mutation is performed.\n- Exact saved Share remains \`MISSING_EVIDENCE\`.\n- LLM Wiki publication and Supabase RLS isolation remain \`APPROVAL_GATED\`.\n`;
+  return `# LLM Wiki Candidate Content Matrix\n\n- Verdict: \`${report.verdict}\`\n- Mode: \`${report.mode}\`\n- Generation mode: \`${report.generationMode}\`\n- Base URL: \`${report.baseUrl}\`\n- Source head: \`${report.sourceHead}\`\n- Production commit: \`${report.productionBuild.commitSha ?? "not-live"}\`\n- Cases: ${report.passedCount}/${report.totalCount} PASS\n- Reviewer-visible source traces: ${report.reviewerEvidenceTraceCount}/${report.totalCount}\n- Event semantic grounding: ${report.eventSemanticGroundingCount}/${report.totalCount}\n- Private event term exposure: ${report.privateEventExposureCount}\n\n| Scenario | HTTP | Matched hazards | Sections | Evidence trace | Event facts | Missing fact groups | Private exposure | Failures | Verdict |\n| --- | ---: | --- | ---: | --- | --- | ---: | ---: | --- | --- |\n${rows}\n\n## Contract\n\n- Each scenario uses the deployed stateless \`/api/knowledge/regenerate\` path.\n- Deterministic mode proves the built-in safety-knowledge fallback; provider mode separately proves enhanced LLM generation when runtime admission is available.\n- The response must expose the server-derived four-section content-readiness contract.\n- Scenario hazard IDs and scenario-specific term groups must remain grounded in generated text.\n- Scenario-specific KOSHA/official source terms must be visible in the candidate body, not only in server metadata.\n- Candidate text must label KOSHA material as technical/official guidance and law material as a current-law review candidate.\n- Explicit safe review facts from raw events must remain visible while private payload fields and forbidden terms remain absent.\n- Placeholder text, legal overclaim, missing law provenance, and missing hazard grounding fail closed.\n- All candidates remain unpublished and require human review.\n\n## Boundary\n\n- This matrix does not read the actual production candidate queue.\n- No DB write, Wiki publication, provider dispatch, Share-session creation, embedding/vector mutation, or KOSHA registry mutation is performed.\n- Exact saved Share remains \`MISSING_EVIDENCE\`.\n- LLM Wiki publication and Supabase RLS isolation remain \`APPROVAL_GATED\`.\n`;
 }
 
 export async function runKnowledgeCandidateContentMatrix(options = {}) {
@@ -200,10 +213,13 @@ export async function runKnowledgeCandidateContentMatrix(options = {}) {
         missingHazardIds: asArray(testCase.expectedHazardIds),
         missingTermGroups: asArray(testCase.requiredAnyGroups),
         missingEvidenceTermGroups: asArray(testCase.requiredEvidenceAnyGroups),
+        missingEventFactGroups: asArray(testCase.requiredEventFactGroups),
+        exposedForbiddenTerms: [],
         matchedHazardIds: [],
         reviewerEvidenceTraceVisible: false,
         technicalGuidanceBoundaryVisible: false,
         lawCandidateBoundaryVisible: false,
+        eventSemanticGroundingVisible: false,
         generatedTextLength: 0,
         generatedTextExcerpt: "",
         readiness: {},
@@ -247,6 +263,8 @@ export async function runKnowledgeCandidateContentMatrix(options = {}) {
     reviewerEvidenceTraceCount: results.filter((result) => result.reviewerEvidenceTraceVisible === true).length,
     technicalGuidanceBoundaryCount: results.filter((result) => result.technicalGuidanceBoundaryVisible === true).length,
     lawCandidateBoundaryCount: results.filter((result) => result.lawCandidateBoundaryVisible === true).length,
+    eventSemanticGroundingCount: results.filter((result) => result.eventSemanticGroundingVisible === true).length,
+    privateEventExposureCount: results.reduce((total, result) => total + result.exposedForbiddenTerms.length, 0),
     scenarioCandidateBuildExecuted: results.length,
     llmGenerationAttempted: generationMode === "provider",
     actualProductionCandidateQueueRead: false,
