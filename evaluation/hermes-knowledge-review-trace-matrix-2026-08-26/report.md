@@ -1,8 +1,8 @@
 # Hermes Canonical Hazard Review Trace Matrix
 
 - Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_MATRIX`
-- Product commit: `060956fa3201668b1fe4de5522fc9da7b58d87b5`
-- Production commit: `77de49e5c92824e6b78db4e0dacd605d6f3fa275`
+- Product commit: `05c7657e60c849e35988a478e0afdf1cba9933af`
+- Production commit: `05c7657e60c849e35988a478e0afdf1cba9933af`
 - Local geometry: 8/8 PASS
 - Live geometry: 8/8 PASS
 

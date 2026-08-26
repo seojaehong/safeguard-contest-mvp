@@ -1,9 +1,9 @@
 # Hermes Knowledge Review Authority UI
 
 - Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_MATRIX`
-- Source head: `77de49e5c92824e6b78db4e0dacd605d6f3fa275`
-- Product commit: `060956fa3201668b1fe4de5522fc9da7b58d87b5`
-- Checked at: `2026-08-26T06:15:49.264Z`
+- Source head: `05c7657e60c849e35988a478e0afdf1cba9933af`
+- Product commit: `05c7657e60c849e35988a478e0afdf1cba9933af`
+- Checked at: `2026-08-26T17:32:25.149Z`
 - Scope: live production rendering with an authenticated, route-controlled review candidate fixture.
 - Production aligned: `true`
 
@@ -29,6 +29,7 @@
 - Candidate tabs expose one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and Arrow/Home/End keyboard navigation.
 - Desktop uses a two-column review workbench; mobile uses one column and keeps the candidate body internally scrollable.
 - Desktop mounts the selected candidate and five-item evidence inspector together; mobile mounts one linked pane behind a keyboard-operable segmented tab control.
+- Evidence digests keep at least 242px width and at most 18px height; readiness cells keep at least 167.75px on desktop and 104px on mobile, with labels no taller than 36px.
 - Review decisions announce their pending state, expose busy semantics, disable all competing actions, and restore the settled status after the delayed save fixture completes.
 - Each selected candidate exposes one server-derived readiness panel with four required sections. A revision-required candidate disables only candidate approval while keeping site-only retention and rejection available.
 - Explicit safe original-event review facts must appear in a distinct reviewer region inside the candidate pane, without duplicating their marker in the candidate body or exposing private event text.
