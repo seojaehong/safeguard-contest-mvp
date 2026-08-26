@@ -66,6 +66,7 @@ const ARTIFACTS = Object.freeze({
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-selected-workbench-2026-08-14", "report.json"),
   hermesKnowledgeReviewEvidenceInspector: path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"),
+  hermesReviewEventFactTraceability: path.join("evaluation", "hermes-knowledge-review-event-facts-2026-08-26", "report.json"),
   hermesOpenclawRuntime: path.join("evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
@@ -555,6 +556,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const learningExportRendererSecurity = tryReadJson(rootDir, ARTIFACTS.learningExportRendererSecurity);
   const hermesKnowledgeReviewAuthorityUi = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const hermesKnowledgeReviewEvidenceInspector = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewEvidenceInspector);
+  const hermesReviewEventFactTraceability = tryReadJson(rootDir, ARTIFACTS.hermesReviewEventFactTraceability);
   const hermesOpenclawRuntime = tryReadJson(rootDir, ARTIFACTS.hermesOpenclawRuntime);
   const liveDocumentSecondaryGrounding = tryReadJson(rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = tryReadJson(rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
@@ -682,6 +684,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "learning_export_renderer_security", ARTIFACTS.learningExportRendererSecurity, learningExportRendererSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_knowledge_review_ui", ARTIFACTS.hermesKnowledgeReviewAuthorityUi, hermesKnowledgeReviewAuthorityUi),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_review_evidence_inspector", ARTIFACTS.hermesKnowledgeReviewEvidenceInspector, hermesKnowledgeReviewEvidenceInspector),
+    evidenceStatus(rootDir, currentHead, liveCommit, "hermes_review_event_fact_traceability", ARTIFACTS.hermesReviewEventFactTraceability, hermesReviewEventFactTraceability),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_remote_durable_ledger", ARTIFACTS.hermesOpenclawRuntime, hermesOpenclawRuntime),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_secondary_grounding", ARTIFACTS.liveDocumentSecondaryGrounding, liveDocumentSecondaryGrounding),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_seed_profile_isolation", ARTIFACTS.liveDocumentSeedProfileIsolation, liveDocumentSeedProfileIsolation),
@@ -1762,6 +1765,27 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
           : false,
       },
     },
+    hermesReviewEventFactTraceability: {
+      artifact: ARTIFACTS.hermesReviewEventFactTraceability,
+      verdict: isRecord(hermesReviewEventFactTraceability) ? asString(hermesReviewEventFactTraceability.verdict) : "missing",
+      sourceHead: isRecord(hermesReviewEventFactTraceability) ? asString(hermesReviewEventFactTraceability.sourceHead) : "",
+      productCommit: isRecord(hermesReviewEventFactTraceability) ? asString(hermesReviewEventFactTraceability.productCommit) : "",
+      productionCommit: extractProductionCommit(hermesReviewEventFactTraceability),
+      beforePassed: asNumber(recordAt(hermesReviewEventFactTraceability, "beforeLive")?.passedCount),
+      beforeViewportCount: asNumber(recordAt(hermesReviewEventFactTraceability, "beforeLive")?.viewportCount),
+      localPassed: asNumber(recordAt(hermesReviewEventFactTraceability, "local")?.passedCount),
+      localViewportCount: asNumber(recordAt(hermesReviewEventFactTraceability, "local")?.viewportCount),
+      livePassed: asNumber(recordAt(hermesReviewEventFactTraceability, "afterLive")?.passedCount),
+      liveViewportCount: asNumber(recordAt(hermesReviewEventFactTraceability, "afterLive")?.viewportCount),
+      boundFactCount: asNumber(recordAt(hermesReviewEventFactTraceability, "eventFactsContract")?.boundFactCount),
+      orphanFactCount: asNumber(recordAt(hermesReviewEventFactTraceability, "eventFactsContract")?.orphanFactCount),
+      privateEventTextExposed: recordAt(hermesReviewEventFactTraceability, "eventFactsContract")?.privateEventTextExposed === true,
+      humanReviewCompleted: recordAt(hermesReviewEventFactTraceability, "eventFactsContract")?.humanReviewCompleted === true,
+      exactSavedShareVerdict: asString(recordAt(hermesReviewEventFactTraceability, "remainingBoundaries")?.exactSavedShareVerdict),
+      llmWikiPublication: asString(recordAt(hermesReviewEventFactTraceability, "remainingBoundaries")?.llmWikiPublication),
+      supabaseRlsLaunchIsolation: asString(recordAt(hermesReviewEventFactTraceability, "remainingBoundaries")?.supabaseRlsLaunchIsolation),
+      providerDispatchPersistence: asString(recordAt(hermesReviewEventFactTraceability, "remainingBoundaries")?.providerDispatchPersistence),
+    },
     kosha: {
       artifact: ARTIFACTS.kosha,
       verdict: isRecord(kosha) ? asString(kosha.verdict) : "missing",
@@ -2086,6 +2110,13 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Official HTTPS links/private identity exposed/internal scroll: ${rollup.hermesKnowledgeReviewEvidenceInspector.publicOfficialHttpsLinkCount ?? 0}/${rollup.hermesKnowledgeReviewEvidenceInspector.privateEvidenceRawIdentityExposed}/${rollup.hermesKnowledgeReviewEvidenceInspector.evidenceInternalScroll}`,
     `- Security complete: ${rollup.hermesKnowledgeReviewEvidenceInspector.securityComplete}; fresh full-repository scan required=${rollup.hermesKnowledgeReviewEvidenceInspector.freshFullRepositoryScanRequired}`,
     `- Exact saved Share: ${rollup.hermesKnowledgeReviewEvidenceInspector.exactSavedShareVerdict || "MISSING_EVIDENCE"}; Wiki/RLS/provider persistence: ${rollup.hermesKnowledgeReviewEvidenceInspector.llmWikiPublication || "APPROVAL_GATED"}/${rollup.hermesKnowledgeReviewEvidenceInspector.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}/${rollup.hermesKnowledgeReviewEvidenceInspector.providerDispatchPersistence || "APPROVAL_GATED"}`,
+    "",
+    "## Live Hermes Event Fact Traceability",
+    "",
+    `- Verdict: \`${rollup.hermesReviewEventFactTraceability.verdict}\``,
+    `- Before/local/live viewport passes: ${rollup.hermesReviewEventFactTraceability.beforePassed ?? 0}/${rollup.hermesReviewEventFactTraceability.beforeViewportCount ?? 0}, ${rollup.hermesReviewEventFactTraceability.localPassed ?? 0}/${rollup.hermesReviewEventFactTraceability.localViewportCount ?? 0}, ${rollup.hermesReviewEventFactTraceability.livePassed ?? 0}/${rollup.hermesReviewEventFactTraceability.liveViewportCount ?? 0}`,
+    `- Bound/orphan/private facts: ${rollup.hermesReviewEventFactTraceability.boundFactCount ?? 0}/${rollup.hermesReviewEventFactTraceability.orphanFactCount ?? 0}/${rollup.hermesReviewEventFactTraceability.privateEventTextExposed}`,
+    `- This reviewer-support proof does not close full hazard-to-control-to-document-to-evidence traceability. Human review completed=${rollup.hermesReviewEventFactTraceability.humanReviewCompleted}; exact saved Share=${rollup.hermesReviewEventFactTraceability.exactSavedShareVerdict || "MISSING_EVIDENCE"}; Wiki/RLS/provider persistence=${rollup.hermesReviewEventFactTraceability.llmWikiPublication || "APPROVAL_GATED"}/${rollup.hermesReviewEventFactTraceability.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}/${rollup.hermesReviewEventFactTraceability.providerDispatchPersistence || "APPROVAL_GATED"}`,
     "",
     "## Hermes Remote Durable Ledger",
     "",

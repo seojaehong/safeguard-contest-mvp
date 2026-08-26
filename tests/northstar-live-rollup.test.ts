@@ -683,6 +683,20 @@ type RollupReport = {
     exactSavedShareReproduced: boolean;
     exactSavedShareVerdict: string;
   };
+  hermesReviewEventFactTraceability: {
+    verdict: string;
+    beforePassed: number;
+    beforeViewportCount: number;
+    localPassed: number;
+    localViewportCount: number;
+    livePassed: number;
+    liveViewportCount: number;
+    boundFactCount: number;
+    orphanFactCount: number;
+    privateEventTextExposed: boolean;
+    humanReviewCompleted: boolean;
+    exactSavedShareVerdict: string;
+  };
   final99: {
     twelveDocumentNoMutation: {
       verdict: string;
@@ -1854,6 +1868,22 @@ function createFixtureRoot(): { root: string; head: string } {
       providerDispatchPersistence: "APPROVAL_GATED",
     },
   });
+  writeJson(root, "evaluation/hermes-knowledge-review-event-facts-2026-08-26/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVENT_FACT_TRACEABILITY",
+    sourceHead: "TO_FILL",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    beforeLive: { verdict: "RED_HERMES_REVIEW_EVENT_FACTS", viewportCount: 8, passedCount: 0, failedCount: 8, visibleFactCount: 0, boundFactCount: 0 },
+    local: { verdict: "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVENT_FACTS", viewportCount: 8, passedCount: 8, failedCount: 0 },
+    afterLive: { verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVENT_FACTS", viewportCount: 8, passedCount: 8, failedCount: 0, productionAligned: true, browserErrorCount: 0 },
+    eventFactsContract: { boundFactCount: 2, orphanFactCount: 0, privateEventTextExposed: false, humanReviewCompleted: false },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+    },
+  });
   writeJson(root, "evaluation/public-ask-distributed-admission-2026-08-14/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_PUBLIC_ASK_PROVIDER_MODES_FAIL_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION",
     sourceHead: "TO_FILL",
@@ -2035,6 +2065,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/learning-export-renderer-security-2026-08-02/report.json",
     "evaluation/hermes-knowledge-review-selected-workbench-2026-08-14/report.json",
     "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/report.json",
+    "evaluation/hermes-knowledge-review-event-facts-2026-08-26/report.json",
     "evaluation/live-document-secondary-grounding-2026-07-25/report.json",
     "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json",
     "evaluation/kosha-current-live-gate-2026-07-20/report.json",
@@ -2749,6 +2780,21 @@ describe("northstar live rollup", () => {
       providerDispatchPersistence: "APPROVAL_GATED",
     });
     expect(report.evidence.find((item) => item.id === "hermes_review_evidence_inspector")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.hermesReviewEventFactTraceability).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVENT_FACT_TRACEABILITY",
+      beforePassed: 0,
+      beforeViewportCount: 8,
+      localPassed: 8,
+      localViewportCount: 8,
+      livePassed: 8,
+      liveViewportCount: 8,
+      boundFactCount: 2,
+      orphanFactCount: 0,
+      privateEventTextExposed: false,
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "hermes_review_event_fact_traceability")?.productionStatus).toBe("ancestor_of_head");
     expect(report.liveDocumentSecondaryGrounding).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SECONDARY_DOCUMENT_GROUNDING_CONTRACT",
       livePassed: 5,

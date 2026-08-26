@@ -5003,6 +5003,49 @@ function createFixtureRoot(): string {
       })),
     })),
   });
+  writeJson(rootDir, path.join("evaluation", "hermes-knowledge-review-event-facts-2026-08-26", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVENT_FACT_TRACEABILITY",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    beforeLive: { verdict: "RED_HERMES_REVIEW_EVENT_FACTS", viewportCount: 8, passedCount: 0, failedCount: 8, visibleFactCount: 0, boundFactCount: 0 },
+    local: { verdict: "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVENT_FACTS", viewportCount: 8, passedCount: 8, failedCount: 0 },
+    afterLive: { verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVENT_FACTS", viewportCount: 8, passedCount: 8, failedCount: 0, productionAligned: true, browserErrorCount: 0 },
+    eventFactsContract: {
+      explicitReviewFactsOnly: true,
+      expectedFactCount: 2,
+      panelCount: 1,
+      visibleFactCount: 2,
+      boundFactCount: 2,
+      evidenceRowCount: 1,
+      orphanFactCount: 0,
+      insideCandidatePane: true,
+      candidateBodyMarkerDuplicated: false,
+      privateEventTextExposed: false,
+      humanVerificationRequired: true,
+      beforeVisibleFactCount: 0,
+      beforeBoundFactCount: 0,
+      humanReviewCompleted: false,
+      machineEvidenceReplacesHumanReview: false,
+      publicationState: "unpublished",
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      ontologyPublicationPerformed: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    securityBoundary: { immutableOriginal18FindingBaselinePreserved: true },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-reviewer-cockpit-2026-07-25", "report.json"), {
     schemaVersion: "safeclaw-kosha-exact-promotion-reviewer-cockpit/v1",
     verdict: "PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY",
@@ -5523,6 +5566,13 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("8/8");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("fresh full-repository scan");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_event_fact_traceability")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "hermes-knowledge-review-event-facts-2026-08-26", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_event_fact_traceability")?.detail).toContain("zero orphan facts");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_event_fact_traceability")?.detail).toContain("not complete hazard-to-control-to-document-to-evidence");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_event_fact_traceability")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "live_document_secondary_grounding")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -7056,6 +7106,28 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("securityComplete=true");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("candidateKeyboard=false");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("mobilePaneKeyboard=false");
+  });
+
+  it("fails Hermes event fact traceability closed on orphan facts, private text, or saved Share overclaim", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "hermes-knowledge-review-event-facts-2026-08-26", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      eventFactsContract: { orphanFactCount: number; privateEventTextExposed: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.eventFactsContract.orphanFactCount = 1;
+    report.eventFactsContract.privateEventTextExposed = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_event_fact_traceability")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_event_fact_traceability")?.detail).toContain("orphan=1");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_event_fact_traceability")?.detail).toContain("private=true");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_event_fact_traceability")?.detail).toContain("exactShare=PASS");
   });
 
   it("fails the public Ask distributed admission gate closed on provider execution or saved Share overclaim", async () => {

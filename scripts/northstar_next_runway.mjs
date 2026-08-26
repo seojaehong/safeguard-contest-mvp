@@ -70,6 +70,7 @@ const ARTIFACTS = Object.freeze({
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-selected-workbench-2026-08-14", "report.json"),
   hermesKnowledgeReviewEvidenceInspector: path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"),
+  hermesReviewEventFactTraceability: path.join("evaluation", "hermes-knowledge-review-event-facts-2026-08-26", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
   koshaNextExactCandidateAudit: path.join("evaluation", "kosha-next-exact-candidate-audit-2026-07-22", "report.json"),
@@ -2006,6 +2007,36 @@ function hermesKnowledgeReviewEvidenceInspectorSummary(report) {
 }
 
 /** @param {unknown} report */
+function hermesReviewEventFactTraceabilitySummary(report) {
+  if (!isRecord(report)) return {};
+  const beforeLive = isRecord(report.beforeLive) ? report.beforeLive : {};
+  const local = isRecord(report.local) ? report.local : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const contract = isRecord(report.eventFactsContract) ? report.eventFactsContract : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productCommit: asString(report.productCommit),
+    productionCommit: asString(report.productionCommit),
+    beforePassed: typeof beforeLive.passedCount === "number" ? beforeLive.passedCount : 0,
+    beforeViewportCount: typeof beforeLive.viewportCount === "number" ? beforeLive.viewportCount : 0,
+    localPassed: typeof local.passedCount === "number" ? local.passedCount : 0,
+    localViewportCount: typeof local.viewportCount === "number" ? local.viewportCount : 0,
+    livePassed: typeof afterLive.passedCount === "number" ? afterLive.passedCount : 0,
+    liveViewportCount: typeof afterLive.viewportCount === "number" ? afterLive.viewportCount : 0,
+    boundFactCount: typeof contract.boundFactCount === "number" ? contract.boundFactCount : 0,
+    orphanFactCount: typeof contract.orphanFactCount === "number" ? contract.orphanFactCount : 0,
+    privateEventTextExposed: asBoolean(contract.privateEventTextExposed),
+    humanReviewCompleted: asBoolean(contract.humanReviewCompleted),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+    llmWikiPublication: asString(remaining.llmWikiPublication),
+    supabaseRlsLaunchIsolation: asString(remaining.supabaseRlsLaunchIsolation),
+    providerDispatchPersistence: asString(remaining.providerDispatchPersistence),
+  };
+}
+
+/** @param {unknown} report */
 function securityResourceRemediationSummary(report) {
   if (!isRecord(report)) return {};
   const scan = isRecord(report.sourceScan) ? report.sourceScan : {};
@@ -2824,6 +2855,7 @@ export function buildNorthstarNextRunway(options) {
   const learningExportRendererSecurity = readOptionalJson(options.rootDir, ARTIFACTS.learningExportRendererSecurity);
   const hermesKnowledgeReviewAuthorityUi = readOptionalJson(options.rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
   const hermesKnowledgeReviewEvidenceInspector = readOptionalJson(options.rootDir, ARTIFACTS.hermesKnowledgeReviewEvidenceInspector);
+  const hermesReviewEventFactTraceability = readOptionalJson(options.rootDir, ARTIFACTS.hermesReviewEventFactTraceability);
   const liveDocumentSecondaryGrounding = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSecondaryGrounding);
   const liveDocumentSeedProfileIsolation = readOptionalJson(options.rootDir, ARTIFACTS.liveDocumentSeedProfileIsolation);
   const koshaCandidateAudit = readJson(options.rootDir, ARTIFACTS.koshaNextExactCandidateAudit);
@@ -2960,6 +2992,10 @@ export function buildNorthstarNextRunway(options) {
       "learning_export_renderer_security",
       "hermes_knowledge_review_authority",
       "hermes_knowledge_review_ui",
+      ...(isRecord(hermesReviewEventFactTraceability)
+        && hermesReviewEventFactTraceability.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVENT_FACT_TRACEABILITY"
+        ? ["hermes_review_event_fact_traceability"]
+        : []),
       "kosha_exact_promotion_packet_ready_for_review",
       "ui_documents_share_cockpit",
       "deployment_freshness_guard",
@@ -3172,6 +3208,7 @@ export function buildNorthstarNextRunway(options) {
     learningExportRendererSecurity: learningExportRendererSecurityResult,
     hermesKnowledgeReviewAuthorityUi: hermesKnowledgeReviewAuthorityUiSummary(hermesKnowledgeReviewAuthorityUi),
     hermesKnowledgeReviewEvidenceInspector: hermesKnowledgeReviewEvidenceInspectorSummary(hermesKnowledgeReviewEvidenceInspector),
+    hermesReviewEventFactTraceability: hermesReviewEventFactTraceabilitySummary(hermesReviewEventFactTraceability),
     liveDocumentSecondaryGrounding: liveDocumentSecondaryGroundingSummary(liveDocumentSecondaryGrounding),
     liveDocumentSeedProfileIsolation: liveDocumentSeedProfileIsolationSummary(liveDocumentSeedProfileIsolation),
     koshaNextExactCandidateAudit: koshaCandidateAuditSummary(koshaCandidateAudit),
@@ -3320,6 +3357,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - MCP generation work-budget security is separately measured: \`${report.mcpGenerationWorkBudgetSecurity.verdict || "missing"}\`, POST body budget \`${report.mcpGenerationWorkBudgetSecurity.postBodyMaxBytes ?? "unknown"}\` bytes, adjacent tests \`${report.mcpGenerationWorkBudgetSecurity.adjacentTests ?? "unknown"}\`, valid authenticated runtime probe pending=\`${report.mcpGenerationWorkBudgetSecurity.validAuthenticatedRuntimeProbeRequired === true}\`, distributed activation pending=\`${report.mcpGenerationWorkBudgetSecurity.distributedActivationRequired === true}\`, and fresh rescan required=\`${report.mcpGenerationWorkBudgetSecurity.freshRescanRequired === true}\`. This notice preserves the sealed finding and exact saved Share \`${report.mcpGenerationWorkBudgetSecurity.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live Hermes reviewer authority UI is measured separately: \`${report.hermesKnowledgeReviewAuthorityUi.verdict || "missing"}\`, local/live viewport contracts \`${report.hermesKnowledgeReviewAuthorityUi.localPassed ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.localViewportCount ?? 0}\` and \`${report.hermesKnowledgeReviewAuthorityUi.livePassed ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.liveViewportCount ?? 0}\`, selected-only candidates/selected/body \`${report.hermesKnowledgeReviewAuthorityUi.candidateCount ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.selectedCandidateCount ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.selectedBodyCount ?? 0}\`, desktop/mobile columns \`${report.hermesKnowledgeReviewAuthorityUi.desktopColumns ?? 0}/${report.hermesKnowledgeReviewAuthorityUi.mobileColumns ?? 0}\`, and authority order \`${report.hermesKnowledgeReviewAuthorityUi.sourceOrder?.join(" -> ") || "missing"}\`. Candidate tabs require linked tabpanel semantics, one roving tab stop, breakpoint-aware orientation, and Arrow/Home/End keyboard navigation; compact review panes require linked keyboard-operable tabs. Delayed decisions require live pending/settled status, busy semantics, and disabled competing actions \`${report.hermesKnowledgeReviewAuthorityUi.decisionPendingStatusLive === true}/${report.hermesKnowledgeReviewAuthorityUi.decisionBusyStateExposed === true}/${report.hermesKnowledgeReviewAuthorityUi.decisionActionsDisabledDuringSave === true}/${report.hermesKnowledgeReviewAuthorityUi.decisionSettlesAccessibly === true}\`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains \`${report.hermesKnowledgeReviewAuthorityUi.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, while LLM Wiki publication and Supabase RLS remain approval-gated.
 - Live Hermes evidence inspector is measured separately: \`${report.hermesKnowledgeReviewEvidenceInspector.verdict || "missing"}\`, local/live viewport contracts \`${report.hermesKnowledgeReviewEvidenceInspector.localPassed ?? 0}/${report.hermesKnowledgeReviewEvidenceInspector.localViewportCount ?? 0}\` and \`${report.hermesKnowledgeReviewEvidenceInspector.livePassed ?? 0}/${report.hermesKnowledgeReviewEvidenceInspector.liveViewportCount ?? 0}\`, budget/items/desktop columns/mobile panes \`${report.hermesKnowledgeReviewEvidenceInspector.itemLimit ?? 0}/${report.hermesKnowledgeReviewEvidenceInspector.fixtureItemCount ?? 0}/${report.hermesKnowledgeReviewEvidenceInspector.desktopEvidenceColumns ?? 0}/${report.hermesKnowledgeReviewEvidenceInspector.mobileMountedPaneCount ?? 0}\`, linked roving candidate tabs and compact-pane keyboard navigation \`${report.hermesKnowledgeReviewEvidenceInspector.candidateTablist === true}/${report.hermesKnowledgeReviewEvidenceInspector.candidateRovingTabStop === true}/${report.hermesKnowledgeReviewEvidenceInspector.candidateKeyboardNavigation === true}/${report.hermesKnowledgeReviewEvidenceInspector.mobilePaneTabsLinked === true}/${report.hermesKnowledgeReviewEvidenceInspector.mobilePaneKeyboardNavigation === true}\`, delayed decision status/busy/actions/settled \`${report.hermesKnowledgeReviewEvidenceInspector.decisionPendingStatusLive === true}/${report.hermesKnowledgeReviewEvidenceInspector.decisionBusyStateExposed === true}/${report.hermesKnowledgeReviewEvidenceInspector.decisionActionsDisabledDuringSave === true}/${report.hermesKnowledgeReviewEvidenceInspector.decisionSettlesAccessibly === true}\`, official HTTPS/private identity exposed \`${report.hermesKnowledgeReviewEvidenceInspector.publicOfficialHttpsLinkCount ?? 0}/${report.hermesKnowledgeReviewEvidenceInspector.privateEvidenceRawIdentityExposed === true}\`. Security-complete remains \`${report.hermesKnowledgeReviewEvidenceInspector.securityComplete === true}\`, a fresh full-repository scan remains required, exact saved Share remains \`${report.hermesKnowledgeReviewEvidenceInspector.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, and Wiki/RLS/provider persistence remain approval-gated.
+- Live Hermes event-fact traceability is measured separately: \`${report.hermesReviewEventFactTraceability.verdict || "missing"}\`, before/local/live passes \`${report.hermesReviewEventFactTraceability.beforePassed ?? 0}/${report.hermesReviewEventFactTraceability.beforeViewportCount ?? 0}\`, \`${report.hermesReviewEventFactTraceability.localPassed ?? 0}/${report.hermesReviewEventFactTraceability.localViewportCount ?? 0}\`, and \`${report.hermesReviewEventFactTraceability.livePassed ?? 0}/${report.hermesReviewEventFactTraceability.liveViewportCount ?? 0}\`; bound/orphan/private facts \`${report.hermesReviewEventFactTraceability.boundFactCount ?? 0}/${report.hermesReviewEventFactTraceability.orphanFactCount ?? 0}/${report.hermesReviewEventFactTraceability.privateEventTextExposed === true}\`. This is reviewer-support traceability, not full hazard-to-control-to-document-to-evidence closure; human review remains incomplete, exact saved Share remains \`${report.hermesReviewEventFactTraceability.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, and Wiki/RLS/provider persistence remain approval-gated.
 - Live supporting-document scenario grounding is measured separately: \`${report.liveDocumentSecondaryGrounding.verdict || "missing"}\`, live cases \`${report.liveDocumentSecondaryGrounding.livePassed ?? 0}/5\`, supporting documents \`${report.liveDocumentSecondaryGrounding.secondaryPassed ?? 0}/${report.liveDocumentSecondaryGrounding.secondaryReviewed ?? 0}\`, cross-scenario leakage \`${report.liveDocumentSecondaryGrounding.crossScenarioLeakageCount ?? 0}\`, and missingUnexpected \`${report.liveDocumentSecondaryGrounding.missingUnexpectedCount ?? 0}\`. This deterministic six-secondary-document contract does not replace the six-document wording gate, 12-document presence/applicability gate, broad human review, or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSecondaryGrounding.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live document seed-profile isolation is measured separately: \`${report.liveDocumentSeedProfileIsolation.verdict || "missing"}\`, before forbidden fragments \`${report.liveDocumentSeedProfileIsolation.beforeSeedProfileLeakageCount ?? 0}\`, live forbidden fragments \`${report.liveDocumentSeedProfileIsolation.liveSeedProfileLeakageCount ?? 0}\`, reviewed document surface \`${report.liveDocumentSeedProfileIsolation.reviewedDocumentSurfaceCount ?? 0}\`, and secondary grounding \`${report.liveDocumentSeedProfileIsolation.secondaryGroundingPassed ?? 0}/${report.liveDocumentSeedProfileIsolation.secondaryGroundingReviewed ?? 0}\`. This deterministic gate does not replace broad human wording review or exact saved Share evidence; exact saved Share remains \`${report.liveDocumentSeedProfileIsolation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Hermes/OpenClaw runtime architecture is proven at the adapter, policy, service-auth, route, and fail-closed boundary level. DNS-pinned trusted transport wired=\`${report.hermesOpenclaw.trustedTransportWired === true}\`; durable attempt ledger wired/atomic/reservation-bound/digest-only=\`${report.hermesOpenclaw.durableAttemptLedgerWired === true}/${report.hermesOpenclaw.ledgerAtomicReservation === true}/${report.hermesOpenclaw.ledgerTerminalRequiresReservation === true}/${report.hermesOpenclaw.ledgerStoresTerminalDigestOnly === true}\`; live execution claimed=\`${report.hermesOpenclaw.liveExecutionClaimed === true}\`.
