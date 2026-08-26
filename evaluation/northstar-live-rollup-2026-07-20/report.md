@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-26T12:23:40.246Z
-Source HEAD at generation: be21b445b4e344c5f1f1f0b9c99a8b971c9861f3
-Live commit at generation: aa4e27df0a917b42556b04f020753bb04dd4c13a
+Generated at: 2026-08-26T12:27:20.116Z
+Source HEAD at generation: a6bafc923a5d06af6b3a30a77c93a360559efbc2
+Live commit at generation: a6bafc923a5d06af6b3a30a77c93a360559efbc2
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_evidence_missing_or_unknown`
@@ -445,7 +445,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -466,7 +466,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | knowledge_viewport_workbench | ancestor | ancestor_of_head | evaluation\knowledge-viewport-workbench-2026-08-17\report.json |
 | llm_wiki_candidate_content_readiness | ancestor | ancestor_of_head | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |
 | llm_wiki_candidate_content_matrix | ancestor | ancestor_of_head | evaluation\llm-wiki-candidate-content-matrix-2026-08-25\report.json |
-| llm_wiki_sif_evidence_matrix | ancestor | matches_live | evaluation\llm-wiki-sif-evidence-matrix-2026-08-26\report.json |
+| llm_wiki_sif_evidence_matrix | ancestor | ancestor_of_head | evaluation\llm-wiki-sif-evidence-matrix-2026-08-26\report.json |
 | tenant_authorization_remediation | ancestor | ancestor_of_head | evaluation\tenant-authorization-boundary-preflight-2026-07-29\report.json |
 | spreadsheet_formula_neutralization | ancestor | ancestor_of_head | evaluation\spreadsheet-formula-neutralization-2026-08-01\report.json |
 | public_provider_work_budget | ancestor | ancestor_of_head | evaluation\public-provider-work-budget-2026-08-01\report.json |
