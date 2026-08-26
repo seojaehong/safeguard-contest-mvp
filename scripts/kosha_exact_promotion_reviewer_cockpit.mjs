@@ -438,7 +438,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     .field-label{display:grid;gap:5px;margin-top:10px;font-size:12px;font-weight:700}.field-label input{width:100%;border:1px solid #aebbb3;background:#fff;padding:9px;border-radius:4px}.human-confirm{margin-top:10px;border-color:#9ec5b2;background:#eef8f2}
     .footer-actions{display:flex;justify-content:flex-end;gap:8px;padding:8px 12px;background:#e8eeea;border-top:1px solid var(--line)}.footer-actions button{border:1px solid #295d48;padding:9px 12px;border-radius:5px;background:#fff;color:#184b38;font-weight:700;cursor:pointer}.footer-actions .primary{background:#087f5b;color:#fff;white-space:nowrap}.footer-actions button:disabled{cursor:not-allowed;opacity:.45}
     button:focus-visible,input:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #0b6eeb;outline-offset:2px}.mobile-mode{display:none}.status-live{color:#8ce0bc}.complete .candidate-button small{color:#087f5b}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-    @media(max-width:767px){.topbar{align-items:flex-start;padding:12px;height:68px}.metrics{display:none}.workspace{display:flex;flex-direction:column;height:auto;overflow:hidden}.candidate-rail{flex:none;border-right:0;border-bottom:1px solid var(--line);padding:8px;overflow:hidden}.candidate-rail-header{display:none}.candidate-list{display:flex;gap:6px;width:auto;overflow-x:auto;overscroll-behavior-inline:contain;scroll-padding-inline:0;scroll-snap-type:x mandatory;scrollbar-width:thin}.candidate-button{flex:0 0 calc((100vw - 38px)/2);width:auto;scroll-snap-align:start}.content{flex:1;min-height:0}.candidate-panel{display:flex;flex-direction:column;height:100%;min-height:0}.candidate-panel[hidden]{display:none}.mobile-mode{display:grid;grid-template-columns:1fr 1fr;flex:none;border-bottom:1px solid var(--line);background:#f7faf8;padding:6px 8px}.mobile-mode button{border:0;border-bottom:2px solid transparent;background:transparent;padding:8px;color:var(--muted);font-weight:700}.mobile-mode button[aria-selected="true"]{border-color:var(--accent);color:var(--accent)}.candidate-panel[data-mobile-view="evidence"] .review-pane,.candidate-panel[data-mobile-view="review"] .evidence-pane{display:none}.evidence-pane,.review-pane{flex:1;min-height:0;overflow:auto;padding:14px 12px}.review-pane{border-left:0}.identity-grid{grid-template-columns:repeat(2,1fr)}.identity-grid div:nth-child(2){border-right:0}.candidate-heading{display:block}.candidate-heading a{display:inline-block;margin-top:8px}.evidence-group{padding:8px 10px 0}.receipt-list{margin-top:6px}.receipt-list li{min-height:24px;padding:2px 6px}.footer-actions{padding:7px 8px}.footer-actions button{padding:8px 9px;font-size:13px}}
+    @media(max-width:767px){.topbar{align-items:flex-start;padding:12px;height:68px}.metrics{display:none}.workspace{display:flex;flex-direction:column;height:auto;overflow:hidden}.candidate-rail{flex:none;border-right:0;border-bottom:1px solid var(--line);padding:6px 8px;overflow:hidden}.candidate-rail-header{display:flex;min-height:16px;margin:0 4px 4px}.candidate-rail-header .rail-label{display:none}.candidate-list{display:flex;gap:6px;width:auto;overflow-x:auto;overscroll-behavior-inline:contain;scroll-padding-inline:0;scroll-snap-type:x mandatory;scrollbar-width:thin}.candidate-button{flex:0 0 calc((100vw - 38px)/2);width:auto;min-height:44px;padding:4px 8px;scroll-snap-align:start}.content{flex:1;min-height:0}.candidate-panel{display:flex;flex-direction:column;height:100%;min-height:0}.candidate-panel[hidden]{display:none}.mobile-mode{display:grid;grid-template-columns:1fr 1fr;flex:none;border-bottom:1px solid var(--line);background:#f7faf8;padding:2px 8px}.mobile-mode button{min-height:44px;border:0;border-bottom:2px solid transparent;background:transparent;padding:4px 8px;color:var(--muted);font-weight:700}.mobile-mode button[aria-selected="true"]{border-color:var(--accent);color:var(--accent)}.candidate-panel[data-mobile-view="evidence"] .review-pane,.candidate-panel[data-mobile-view="review"] .evidence-pane{display:none}.evidence-pane,.review-pane{flex:1;min-height:0;overflow:auto;padding:14px 12px}.review-pane{border-left:0}.identity-grid{grid-template-columns:repeat(2,1fr)}.identity-grid div:nth-child(2){border-right:0}.candidate-heading{display:block}.candidate-heading a{display:inline-block;margin-top:8px}.evidence-group{padding:8px 10px 0}.receipt-list{margin-top:6px}.receipt-list li{min-height:24px;padding:2px 6px}.footer-actions{padding:7px 8px}.footer-actions button{padding:8px 9px;font-size:13px}}
     @media(max-width:767px){.evidence-pane{display:flex;flex-direction:column}.evidence-pane .candidate-heading{order:1}.evidence-pane .identity-grid{order:2}.evidence-pane .rationale{order:3}.evidence-pane .evidence-stack{order:4}.evidence-pane .title-provenance{order:5}.evidence-pane .hash-details{order:6}}
   </style>
 </head>
@@ -450,7 +450,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     </header>
     <div class="workspace">
       <aside class="candidate-rail">
-        <div class="candidate-rail-header"><span class="rail-label">검토 후보</span><span class="candidate-context" data-candidate-context>후보 1/${candidates.length} · 0/8 입력</span></div>
+        <div class="candidate-rail-header"><span class="rail-label">검토 후보</span><span class="candidate-context" data-candidate-context>후보 1/${candidates.length} · 현재 0/8 · 전체 0/${checklistInputCount}</span></div>
         <div class="candidate-list" role="tablist" aria-label="KOSHA 검토 후보" aria-orientation="vertical">${candidateButtons}</div>
       </aside>
       <div class="content">${candidatePanels}</div>
@@ -578,8 +578,10 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
       const updateCandidateContext = () => {
         const selectedIndex = buttons.findIndex((button) => button.getAttribute("aria-selected") === "true");
         const safeIndex = selectedIndex >= 0 ? selectedIndex : 0;
+        const completeCount = state.reduce((sum, row) => sum + completedInputs(row), 0);
         candidateContext.textContent = "후보 " + (safeIndex + 1) + "/" + buttons.length
-          + " · " + completedInputs(state[safeIndex]) + "/8 입력";
+          + " · 현재 " + completedInputs(state[safeIndex]) + "/8"
+          + " · 전체 " + completeCount + "/" + payload.checklistInputCount;
       };
       const render = () => {
         state.forEach((row, index) => {
@@ -787,6 +789,7 @@ export function runReviewerCockpit(options) {
       titleProvenanceVisible: true,
       progressLiveRegion: true,
       candidatePositionLabels: true,
+      mobileCandidateProgressVisible: true,
       mobileCandidateScrollSnap: true,
       selectedCandidateAutoReveal: true,
       readableEvidenceCues: true,
@@ -817,6 +820,7 @@ Verdict: \`${report.verdict}\`
 - Title provenance visible: ${report.accessibilityContract.titleProvenanceVisible}
 - Live progress region: ${report.accessibilityContract.progressLiveRegion}
 - Candidate position labels: ${report.accessibilityContract.candidatePositionLabels}
+- Mobile candidate progress visible: ${report.accessibilityContract.mobileCandidateProgressVisible}
 - Mobile candidate scroll snap: ${report.accessibilityContract.mobileCandidateScrollSnap}
 - Selected candidate auto reveal: ${report.accessibilityContract.selectedCandidateAutoReveal}
 - Readable evidence cues: ${report.accessibilityContract.readableEvidenceCues}

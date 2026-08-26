@@ -122,6 +122,7 @@ export async function runBrowserProbe(options) {
           candidateRail: rectangle(".candidate-rail"),
           candidateList: rectangle(".candidate-list"),
           candidateRailHeaderDisplay: style(".candidate-rail-header")?.display ?? "",
+          candidateContext: rectangle("[data-candidate-context]"),
           candidateContextText: element("[data-candidate-context]")?.textContent?.trim() ?? "",
           selectedCandidateText: element('[data-candidate-button][aria-selected="true"]')?.textContent?.replace(/\s+/g, " ").trim() ?? "",
           firstCandidateButtonWidth: rectangle('[data-candidate-button="0"]')?.width ?? 0,
@@ -290,8 +291,10 @@ export async function runBrowserProbe(options) {
     && row.candidateHomeState.selectedIndex === 0
     && row.candidateHomeState.focusedIndex === 0
     && row.candidateHomeState.selectedFullyVisible
-    && row.candidateRailHeaderDisplay === (row.viewport.width <= 767 ? "none" : "flex")
-    && row.candidateContextText === "후보 1/8 · 0/8 입력"
+    && row.candidateRailHeaderDisplay === "flex"
+    && row.candidateContextText === "후보 1/8 · 현재 0/8 · 전체 0/64"
+    && row.candidateContext?.top >= row.candidateRail?.top
+    && row.candidateContext?.bottom <= row.candidateRail?.bottom
     && row.progressLiveRole === "status"
     && row.progressLiveMode === "polite"
     && row.mobileTablistRole === "tablist"
@@ -380,8 +383,10 @@ export async function runBrowserProbe(options) {
     results.every((row) => (
       row.candidateEndState?.selectedFullyVisible === true
       && row.candidateHomeState?.selectedFullyVisible === true
-      && row.candidateContextText === "후보 1/8 · 0/8 입력"
-      && row.candidateRailHeaderDisplay === (row.viewport.width <= 767 ? "none" : "flex")
+      && row.candidateContextText === "후보 1/8 · 현재 0/8 · 전체 0/64"
+      && row.candidateRailHeaderDisplay === "flex"
+      && row.candidateContext?.top >= row.candidateRail?.top
+      && row.candidateContext?.bottom <= row.candidateRail?.bottom
     ))
     && mobileEvidence?.firstCandidateButtonWidth >= 170
     && mobileEvidence?.selectedCandidateText.includes("후보 1/8")
@@ -393,6 +398,12 @@ export async function runBrowserProbe(options) {
     && row.openRawExcerptDisclosureCount === 0
     && row.rawExcerptTextPreserved === true
   ));
+  const mobileCandidateProgressVisibilityPass = results.every((row) => (
+    row.candidateRailHeaderDisplay === "flex"
+    && row.candidateContextText === "후보 1/8 · 현재 0/8 · 전체 0/64"
+    && row.candidateContext?.top >= row.candidateRail?.top
+    && row.candidateContext?.bottom <= row.candidateRail?.bottom
+  ));
   const verdict = allRowsPass
     && desktopPass
     && mobilePass
@@ -401,6 +412,7 @@ export async function runBrowserProbe(options) {
     && titleReconciliationPass
     && candidateNavigationReadabilityPass
     && evidenceReadingHierarchyPass
+    && mobileCandidateProgressVisibilityPass
     ? "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY"
     : "RED_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY";
   const report = {
@@ -417,6 +429,7 @@ export async function runBrowserProbe(options) {
     titleReconciliationPass,
     candidateNavigationReadabilityPass,
     evidenceReadingHierarchyPass,
+    mobileCandidateProgressVisibilityPass,
     draftStorageIdentity,
     results,
     mutationBoundary: {
@@ -455,6 +468,7 @@ Verdict: \`${report.verdict}\`
 - Official/corpus title provenance: ${report.titleReconciliationPass}
 - Candidate navigation readability: ${report.candidateNavigationReadabilityPass}
 - Evidence reading hierarchy: ${report.evidenceReadingHierarchyPass}
+- Mobile candidate progress visibility: ${report.mobileCandidateProgressVisibilityPass}
 - Evidence page receipts visible: ${results.every((row) => row.evidenceReceiptCount >= 24)}
 - Draft fingerprint contains source identity: ${report.draftStorageIdentity?.sourceIdentityPresent}
 - Live progress status: ${results.every((row) => row.progressLiveRole === "status" && row.progressLiveMode === "polite")}

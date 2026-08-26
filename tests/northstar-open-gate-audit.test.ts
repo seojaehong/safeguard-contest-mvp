@@ -5377,6 +5377,7 @@ function createFixtureRoot(): string {
       titleProvenanceVisible: true,
       progressLiveRegion: true,
       candidatePositionLabels: true,
+      mobileCandidateProgressVisible: true,
       mobileCandidateScrollSnap: true,
       selectedCandidateAutoReveal: true,
       readableEvidenceCues: true,
@@ -5453,6 +5454,7 @@ function createFixtureRoot(): string {
     titleReconciliationPass: true,
     candidateNavigationReadabilityPass: true,
     evidenceReadingHierarchyPass: true,
+    mobileCandidateProgressVisibilityPass: true,
     draftStorageIdentity: {
       sameFingerprintPreserved: true,
       sourceIdentityPresent: true,
@@ -5479,6 +5481,8 @@ function createFixtureRoot(): string {
         scrollHeight: row.viewport.height,
         clientHeight: row.viewport.height,
       },
+      candidateRail: { top: 68, bottom: row.viewport.height - 52 },
+      candidateContext: { top: 74, bottom: 90 },
       visibleCandidatePanelCount: 1,
       candidateButtonCount: 8,
       candidateTablistRole: "tablist",
@@ -5488,8 +5492,8 @@ function createFixtureRoot(): string {
       candidateControlLinksValid: true,
       candidateEndState: { selectedIndex: 7, focusedIndex: 7, selectedFullyVisible: true },
       candidateHomeState: { selectedIndex: 0, focusedIndex: 0, selectedFullyVisible: true },
-      candidateContextText: "후보 1/8 · 0/8 입력",
-      candidateRailHeaderDisplay: row.viewport.width <= 767 ? "none" : "flex",
+      candidateContextText: "후보 1/8 · 현재 0/8 · 전체 0/64",
+      candidateRailHeaderDisplay: "flex",
       firstCandidateButtonWidth: row.viewport.width <= 767 ? 176 : 205,
       selectedCandidateText: "D-C-1 · 후보 1/8 D-C-1-2026 0/8",
       progressLiveRole: "status",
@@ -9118,6 +9122,36 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     };
     browser.candidateNavigationReadabilityPass = false;
     browser.results[1]!.candidateEndState.selectedFullyVisible = false;
+    writeJson(rootDir, path.relative(rootDir, browserPath), browser);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("fails closed when the KOSHA mobile candidate rail hides review progress", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const browserPath = path.join(
+      rootDir,
+      "evaluation",
+      "kosha-exact-promotion-reviewer-cockpit-2026-07-25",
+      "browser-report.json",
+    );
+    const browser = JSON.parse(fs.readFileSync(browserPath, "utf8")) as {
+      mobileCandidateProgressVisibilityPass: boolean;
+      results: Array<{
+        candidateRailHeaderDisplay: string;
+        candidateContextText: string;
+      }>;
+    };
+    browser.mobileCandidateProgressVisibilityPass = false;
+    browser.results[1]!.candidateRailHeaderDisplay = "none";
+    browser.results[1]!.candidateContextText = "";
     writeJson(rootDir, path.relative(rootDir, browserPath), browser);
 
     const audit = buildNorthstarOpenGateAudit({

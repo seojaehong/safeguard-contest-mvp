@@ -152,7 +152,9 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
     expect(result.html).toContain('aria-controls="candidate-panel-0" aria-selected="true" tabindex="0"');
     expect(result.html).toContain('aria-controls="candidate-panel-1" aria-selected="false" tabindex="-1"');
     expect(result.html).toContain('role="status" aria-live="polite" data-progress-live');
-    expect(result.html).toContain('data-candidate-context>후보 1/8 · 0/8 입력');
+    expect(result.html).toContain('data-candidate-context>후보 1/8 · 현재 0/8 · 전체 0/64');
+    expect(result.html).toContain('.candidate-rail-header{display:flex;min-height:16px');
+    expect(result.html).toContain('const completeCount = state.reduce((sum, row) => sum + completedInputs(row), 0)');
     expect(result.html).toContain('scroll-snap-type:x mandatory');
     expect(result.html).toContain('scrollIntoView({ block: "nearest", inline: "center" })');
     expect(result.html).toContain('candidateContext.textContent = "후보 "');

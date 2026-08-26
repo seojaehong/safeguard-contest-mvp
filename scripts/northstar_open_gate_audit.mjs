@@ -10029,6 +10029,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && reviewerCockpitAccessibility.titleProvenanceVisible === true
     && reviewerCockpitAccessibility.progressLiveRegion === true
     && reviewerCockpitAccessibility.candidatePositionLabels === true
+    && reviewerCockpitAccessibility.mobileCandidateProgressVisible === true
     && reviewerCockpitAccessibility.mobileCandidateScrollSnap === true
     && reviewerCockpitAccessibility.selectedCandidateAutoReveal === true
     && reviewerCockpitAccessibility.readableEvidenceCues === true
@@ -10063,6 +10064,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && reviewerCockpitBrowser.titleReconciliationPass === true
     && reviewerCockpitBrowser.candidateNavigationReadabilityPass === true
     && reviewerCockpitBrowser.evidenceReadingHierarchyPass === true
+    && reviewerCockpitBrowser.mobileCandidateProgressVisibilityPass === true
     && isRecord(reviewerCockpitBrowser.draftStorageIdentity)
     && reviewerCockpitBrowser.draftStorageIdentity.sameFingerprintPreserved === true
     && reviewerCockpitBrowser.draftStorageIdentity.sourceIdentityPresent === true
@@ -10077,6 +10079,8 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && cockpitBrowserRows.every((row) => {
       const viewport = isRecord(row.viewport) ? row.viewport : null;
       const body = isRecord(row.body) ? row.body : null;
+      const candidateRail = isRecord(row.candidateRail) ? row.candidateRail : null;
+      const candidateContext = isRecord(row.candidateContext) ? row.candidateContext : null;
       const candidateEndState = isRecord(row.candidateEndState) ? row.candidateEndState : null;
       const candidateHomeState = isRecord(row.candidateHomeState) ? row.candidateHomeState : null;
       return viewport !== null
@@ -10099,8 +10103,12 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
         && readNumber(candidateHomeState.selectedIndex) === 0
         && readNumber(candidateHomeState.focusedIndex) === 0
         && candidateHomeState.selectedFullyVisible === true
-        && readString(row.candidateContextText) === "후보 1/8 · 0/8 입력"
-        && readString(row.candidateRailHeaderDisplay) === (readNumber(viewport.width) <= 767 ? "none" : "flex")
+        && candidateRail !== null
+        && candidateContext !== null
+        && readString(row.candidateContextText) === "후보 1/8 · 현재 0/8 · 전체 0/64"
+        && readString(row.candidateRailHeaderDisplay) === "flex"
+        && readNumber(candidateContext.top) >= readNumber(candidateRail.top)
+        && readNumber(candidateContext.bottom) <= readNumber(candidateRail.bottom)
         && (readNumber(viewport.width) > 767 || (
           readNumber(row.firstCandidateButtonWidth) >= 170
           && readString(row.selectedCandidateText).includes("후보 1/8")
@@ -10138,7 +10146,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && cockpitBrowserBoundary.humanReviewCompleted === false
     && cockpitBrowserBoundary.separatePromotionApprovalRequired === true;
   const reviewerCockpitDetail = reviewerCockpitPass && reviewerCockpitBrowserPass
-    ? ` Reviewer cockpit ${reviewerCockpitPath} presents 8 candidates, 24 readable page-and-term cues with each raw PDF excerpt preserved behind an initially closed disclosure, 24 PDF page/body receipts, 2 reconciled official/corpus title provenance rows, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry ${reviewerCockpitBrowserPath} preserves one visible candidate, explicit official-current and corpus-source titles, 40 checks, receipt access in the bounded evidence pane, three bounded desktop/mobile cases, reciprocal breakpoint-aware tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection with the selected candidate fully visible, a two-card mobile rail with candidate-position/input-progress labels, all 24 reading cues plus 24 closed raw-excerpt disclosures, corpus-title-and-receipt-bound draft restore that rejects stale fingerprints, and polite live progress.`
+    ? ` Reviewer cockpit ${reviewerCockpitPath} presents 8 candidates, 24 readable page-and-term cues with each raw PDF excerpt preserved behind an initially closed disclosure, 24 PDF page/body receipts, 2 reconciled official/corpus title provenance rows, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry ${reviewerCockpitBrowserPath} preserves one visible candidate, explicit official-current and corpus-source titles, 40 checks, receipt access in the bounded evidence pane, three bounded desktop/mobile cases, reciprocal breakpoint-aware tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection with the selected candidate fully visible, a two-card mobile rail with an always-visible \`후보 1/8 · 현재 0/8 · 전체 0/64\` candidate/current/global progress row, all 24 reading cues plus 24 closed raw-excerpt disclosures, corpus-title-and-receipt-bound draft restore that rejects stale fingerprints, and polite live progress.`
     : "";
   if (!isRecord(report)) {
     return gateResult({
