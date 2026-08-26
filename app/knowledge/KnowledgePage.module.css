@@ -475,6 +475,32 @@
   flex: 0 0 auto;
 }
 
+.evidenceSubjectContext {
+  display: grid;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  border-bottom: 1px solid var(--workspace-rule, #e2e5e9);
+  padding-bottom: var(--space-2);
+}
+
+.evidenceSubjectContext span {
+  color: var(--workspace-muted, #606873);
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
+  font-weight: 700;
+  line-height: var(--leading-hud);
+}
+
+.evidenceSubjectContext strong {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .reviewEventFacts {
   display: grid;
   gap: var(--space-2);

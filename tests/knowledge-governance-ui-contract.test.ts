@@ -73,6 +73,17 @@ describe("knowledge governance UI contract", () => {
     expect(cssSource).toMatch(/\.candidateText\s*\{[\s\S]*?overflow:\s*auto;/u);
   });
 
+  it("keeps the review subject ahead of readiness and visible beside evidence", () => {
+    const candidateBodyIndex = inboxSource.indexOf('data-selected-candidate-body="true"');
+    const readinessIndex = inboxSource.indexOf("data-review-content-readiness");
+    expect(candidateBodyIndex).toBeGreaterThan(0);
+    expect(candidateBodyIndex).toBeLessThan(readinessIndex);
+    expect(inboxSource).toContain('data-review-evidence-subject-context="true"');
+    expect(inboxSource).toContain("검토 대상");
+    expect(inboxSource).toContain("candidatePresentation.subject");
+    expect(cssSource).toMatch(/\.evidenceSubjectContext strong\s*\{[\s\S]*?-webkit-line-clamp:\s*2;/u);
+  });
+
   it("exposes linked roving candidate tabs and keyboard-operable mobile review panes", () => {
     expect(inboxSource).toContain('role="tablist"');
     expect(inboxSource).toContain('aria-orientation={compactViewport ? "horizontal" : "vertical"}');
@@ -124,6 +135,16 @@ describe("knowledge governance UI contract", () => {
     expect(browserRunnerSource).toContain("metrics.readinessSectionMinWidth >= (viewport.width > 720 ? 120 : 96)");
     expect(browserRunnerSource).toContain("metrics.readinessLabelMaxHeight <= 36");
     expect(browserRunnerSource).toContain("knowledge-review-evidence-readability-${theme}-${viewport.name}");
+  });
+
+  it("fails the browser contract closed when the candidate subject loses evidence context", () => {
+    expect(browserRunnerSource).toContain("metrics.selectedBodyBeforeReadiness");
+    expect(browserRunnerSource).toContain('metrics.selectedBodyText.startsWith("1) 위험요인 요약:")');
+    expect(browserRunnerSource).toContain("metrics.selectedBodyTopVisible");
+    expect(browserRunnerSource).toContain("metrics.evidenceSubjectContextCount === 1");
+    expect(browserRunnerSource).toContain("mobileEvidence.subjectContextCount === 1");
+    expect(browserRunnerSource).toContain("mobileEvidence.subjectVisible");
+    expect(browserRunnerSource).toContain("knowledge-review-candidate-subject-${theme}-${viewport.name}");
   });
 
   it("keeps hazard-to-evidence trace evidence scoped and fail closed", () => {

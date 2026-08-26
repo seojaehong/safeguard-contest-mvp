@@ -176,8 +176,10 @@ function buildCandidatePresentation(candidateText: string, evidenceItems: Review
   const markerFacts = markerMatch ? readReviewFacts(markerMatch[1].split("·")) : [];
   const markerBoundToEvidence = markerFacts.length > 0
     && markerFacts.every((fact) => eventFacts.includes(fact));
+  const body = markerBoundToEvidence ? candidateText.replace(EVENT_FACT_MARKER_PATTERN, "").trim() : candidateText;
   return {
-    body: markerBoundToEvidence ? candidateText.replace(EVENT_FACT_MARKER_PATTERN, "").trim() : candidateText,
+    body,
+    subject: body.split(/\r?\n/u).map((line) => line.trim()).find(Boolean) ?? "후보 문장 확인 필요",
     eventFacts
   };
 }
@@ -769,6 +771,7 @@ export function KnowledgeReviewInbox() {
                           data-review-pane="candidate"
                         >
                           <span className={styles.reviewPaneLabel}>후보 문장</span>
+                          <p className={styles.candidateText} data-selected-candidate-body="true">{candidatePresentation.body}</p>
                           {item.contentReadiness ? (
                             <section
                               className={styles.reviewReadiness}
@@ -839,7 +842,6 @@ export function KnowledgeReviewInbox() {
                               </ul>
                             </section>
                           ) : null}
-                          <p className={styles.candidateText} data-selected-candidate-body="true">{candidatePresentation.body}</p>
                         </section>
                       ) : null}
                       {!compactViewport || activeReviewPane === "evidence" ? (
@@ -854,6 +856,10 @@ export function KnowledgeReviewInbox() {
                           <div className={styles.evidencePaneHeader}>
                             <span className={styles.reviewPaneLabel}>검증 근거</span>
                             <small>최대 20건 · 원문 식별자 비공개</small>
+                          </div>
+                          <div className={styles.evidenceSubjectContext} data-review-evidence-subject-context="true">
+                            <span>검토 대상</span>
+                            <strong>{candidatePresentation.subject}</strong>
                           </div>
                           <ol className={styles.evidenceList}>
                             {item.evidenceItems.map((evidence) => (

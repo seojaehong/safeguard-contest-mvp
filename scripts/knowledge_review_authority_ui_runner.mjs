@@ -406,6 +406,7 @@ try {
         const boundEventFacts = workbench.querySelectorAll("[data-review-evidence-fact]");
         const evidenceWorkbench = workbench?.querySelector("[data-review-evidence-workbench='true']");
         const evidencePane = workbench?.querySelector("[data-review-pane='evidence']");
+        const evidenceSubjectContext = evidencePane?.querySelector("[data-review-evidence-subject-context='true']");
         const evidenceDigest = evidencePane?.querySelector("[data-review-evidence-digest]");
         const authority = document.querySelector("[data-review-authority-contract='true']");
         const readiness = document.querySelector("[data-review-content-readiness='ready_for_human_review']");
@@ -431,6 +432,8 @@ try {
         const rootRect = root.getBoundingClientRect();
         const navigatorRect = navigator.getBoundingClientRect();
         const selectedCandidateRect = selectedCandidate.getBoundingClientRect();
+        const selectedBodyRect = selectedBody.getBoundingClientRect();
+        const candidatePaneRect = candidatePane.getBoundingClientRect();
         const authorityRect = authority.getBoundingClientRect();
         const actionRect = actionGroup.getBoundingClientRect();
         const candidateTabs = Array.from(candidateTablist.querySelectorAll('[role="tab"]'));
@@ -461,6 +464,10 @@ try {
           selectedCandidateCount: workbench.querySelectorAll("[data-selected-review-candidate='true']").length,
           selectedBodyCount: workbench.querySelectorAll("[data-selected-candidate-body='true']").length,
           selectedBodyOverflowY: getComputedStyle(selectedBody).overflowY,
+          selectedBodyBeforeReadiness: Boolean(selectedBody.compareDocumentPosition(readiness) & Node.DOCUMENT_POSITION_FOLLOWING),
+          selectedBodyText: selectedBody.textContent?.trim() || "",
+          selectedBodyTopVisible: selectedBodyRect.top >= candidatePaneRect.top - 1
+            && selectedBodyRect.top < candidatePaneRect.bottom,
           eventFactsPanelCount: workbench.querySelectorAll("[data-review-event-facts='true']").length,
           eventFactItemCount: eventFacts?.querySelectorAll("[data-review-event-fact]").length ?? 0,
           eventFactTexts: Array.from(eventFacts?.querySelectorAll("[data-review-event-fact]") ?? []).map((fact) => fact.textContent?.trim() || ""),
@@ -505,6 +512,11 @@ try {
           evidenceDigestHeight: evidenceDigest instanceof HTMLElement
             ? evidenceDigest.getBoundingClientRect().height
             : 0,
+          evidenceSubjectContextCount: evidencePane?.querySelectorAll("[data-review-evidence-subject-context='true']").length ?? 0,
+          evidenceSubjectText: evidenceSubjectContext?.querySelector("strong")?.textContent?.trim() || "",
+          evidenceSubjectHeight: evidenceSubjectContext instanceof HTMLElement
+            ? evidenceSubjectContext.getBoundingClientRect().height
+            : 0,
           publicEvidenceLinkCount: evidencePane?.querySelectorAll("a[href^='https://']").length ?? 0,
           navigatorBeforeDetail: navigatorRect.right <= selectedCandidateRect.left + 1,
           selectedCandidateHeight: selectedCandidateRect.height,
@@ -532,8 +544,13 @@ try {
       });
       let mobileEvidence = null;
       const screenshot = `knowledge-review-authority-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
+      const candidateSubjectScreenshot = `knowledge-review-candidate-subject-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
       if (viewport.width > 720) {
         await page.screenshot({ path: path.join(outputDir, screenshot), fullPage: false });
+      }
+      if (evidenceInspectorMode) {
+        await inbox.locator("[data-selected-candidate-body='true']").scrollIntoViewIfNeeded();
+        await page.screenshot({ path: path.join(outputDir, candidateSubjectScreenshot), fullPage: false });
       }
       if (eventFactsMode) {
         const eventFactsPanel = inbox.locator('[data-review-event-facts="true"]');
@@ -566,7 +583,10 @@ try {
           }
           const list = pane.querySelector("ol");
           const digest = pane.querySelector("[data-review-evidence-digest]");
+          const subjectContext = pane.querySelector("[data-review-evidence-subject-context='true']");
           const boundFacts = Array.from(pane.querySelectorAll("[data-review-evidence-fact]"));
+          const paneRect = pane.getBoundingClientRect();
+          const subjectRect = subjectContext?.getBoundingClientRect();
           return {
             paneCount: workbench.querySelectorAll("[data-review-pane]").length,
             candidatePaneCount: workbench.querySelectorAll("[data-review-pane='candidate']").length,
@@ -575,6 +595,12 @@ try {
             listOverflowY: list instanceof HTMLElement ? getComputedStyle(list).overflowY : null,
             digestWidth: digest instanceof HTMLElement ? digest.getBoundingClientRect().width : 0,
             digestHeight: digest instanceof HTMLElement ? digest.getBoundingClientRect().height : 0,
+            subjectContextCount: pane.querySelectorAll("[data-review-evidence-subject-context='true']").length,
+            subjectText: subjectContext?.querySelector("strong")?.textContent?.trim() || "",
+            subjectHeight: subjectRect?.height ?? 0,
+            subjectVisible: Boolean(subjectRect
+              && subjectRect.top >= paneRect.top - 1
+              && subjectRect.bottom <= paneRect.bottom + 1),
             contained: pane.scrollWidth <= pane.clientWidth + 1,
             boundEventFactCount: boundFacts.length,
             eventFactEvidenceRowCount: new Set(boundFacts.map((fact) => fact.closest("li[data-review-evidence-authority]"))).size,
@@ -689,6 +715,9 @@ try {
         && metrics.selectedCandidateCount === 1
         && metrics.selectedBodyCount === 1
         && metrics.selectedBodyOverflowY === "auto"
+        && metrics.selectedBodyBeforeReadiness
+        && metrics.selectedBodyText.startsWith("1) 위험요인 요약:")
+        && metrics.selectedBodyTopVisible
         && (viewport.width > 720
           ? metrics.workbenchColumns === 2 && metrics.navigatorBeforeDetail && metrics.selectedCandidateHeight <= 580
           : metrics.workbenchColumns === 1)
@@ -743,6 +772,9 @@ try {
             && metrics.evidenceInternalScroll === "auto"
             && metrics.evidenceDigestWidth >= 160
             && metrics.evidenceDigestHeight <= 36
+            && metrics.evidenceSubjectContextCount === 1
+            && metrics.evidenceSubjectText.startsWith("1) 위험요인 요약:")
+            && metrics.evidenceSubjectHeight <= 64
             && metrics.publicEvidenceLinkCount === 3
           : mobileEvidence?.paneCount === 1
             && mobileEvidence.candidatePaneCount === 0
@@ -751,6 +783,10 @@ try {
             && mobileEvidence.listOverflowY === "auto"
             && mobileEvidence.digestWidth >= 160
             && mobileEvidence.digestHeight <= 36
+            && mobileEvidence.subjectContextCount === 1
+            && mobileEvidence.subjectText.startsWith("1) 위험요인 요약:")
+            && mobileEvidence.subjectHeight <= 64
+            && mobileEvidence.subjectVisible
             && mobileEvidence.contained
             && mobilePaneKeyboard?.endState.selectedIndex === 1
             && mobilePaneKeyboard.endState.focusedIndex === 1
@@ -765,6 +801,7 @@ try {
         theme,
         viewport,
         screenshot,
+        candidateSubjectScreenshot: evidenceInspectorMode ? candidateSubjectScreenshot : null,
         metrics,
         candidateKeyboard: { endState: candidateEndState, homeState: candidateHomeState },
         mobilePaneKeyboard,
