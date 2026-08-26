@@ -527,6 +527,25 @@ type NextRunwayReport = {
     llmWikiPublication: string;
     supabaseRlsLaunchIsolation: string;
   };
+  hermesReviewDecisionFirstViewport: {
+    verdict: string;
+    beforePassed: number;
+    beforeViewportCount: number;
+    localPassed: number;
+    localViewportCount: number;
+    livePassed: number;
+    liveViewportCount: number;
+    desktopShortFirstActionBottom: number;
+    mobileShortFirstActionBottom: number;
+    occludedFirstActionCount: number;
+    decisionConfirmationRequired: boolean;
+    decisionConfirmationUnlocksAllActions: boolean;
+    humanReviewCompleted: boolean;
+    exactSavedShareVerdict: string;
+    llmWikiPublication: string;
+    supabaseRlsLaunchIsolation: string;
+    providerDispatchPersistence: string;
+  };
   hermesKnowledgeReviewEvidenceInspector: {
     verdict: string;
     localPassed: number;
@@ -2896,6 +2915,37 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       fullyAutomatedLaunchClaimAllowed: false,
     },
   });
+  writeJson(root, "evaluation/hermes-review-decision-first-viewport-2026-08-27/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_DECISION_FIRST_VIEWPORT",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    beforeLive: {
+      viewportCount: 8,
+      passedCount: 0,
+      failedCount: 8,
+      desktopShortFirstActionBottom: 957.39,
+      mobileShortFirstActionBottom: 818.8,
+    },
+    afterLocal: { viewportCount: 8, passedCount: 8, failedCount: 0 },
+    afterLive: {
+      viewportCount: 8,
+      passedCount: 8,
+      failedCount: 0,
+      desktopShortFirstActionBottom: 532.44,
+      mobileShortFirstActionBottom: 622.75,
+      occludedFirstActionCount: 0,
+      decisionConfirmationRequired: true,
+      decisionConfirmationUnlocksAllActions: true,
+    },
+    reviewBoundary: { humanReviewCompleted: false },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+    },
+  });
   writeJson(root, "evaluation/hermes-knowledge-review-event-facts-2026-08-26/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVENT_FACT_TRACEABILITY",
     sourceHead: "fixture-sha",
@@ -3583,6 +3633,7 @@ describe("northstar next runway generator", () => {
     });
     expect(report.provenCurrentState).toContain("hermes_knowledge_review_authority");
     expect(report.provenCurrentState).toContain("hermes_knowledge_review_ui");
+    expect(report.provenCurrentState).toContain("hermes_review_decision_first_viewport");
     expect(report.hermesKnowledgeReviewAuthorityUi).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
       localPassed: 8,
@@ -3611,6 +3662,25 @@ describe("northstar next runway generator", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       llmWikiPublication: "APPROVAL_GATED",
       supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+    });
+    expect(report.hermesReviewDecisionFirstViewport).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_DECISION_FIRST_VIEWPORT",
+      beforePassed: 0,
+      beforeViewportCount: 8,
+      localPassed: 8,
+      localViewportCount: 8,
+      livePassed: 8,
+      liveViewportCount: 8,
+      desktopShortFirstActionBottom: 532.44,
+      mobileShortFirstActionBottom: 622.75,
+      occludedFirstActionCount: 0,
+      decisionConfirmationRequired: true,
+      decisionConfirmationUnlocksAllActions: true,
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
     });
     expect(report.hermesKnowledgeReviewEvidenceInspector).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",

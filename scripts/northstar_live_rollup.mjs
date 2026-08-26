@@ -67,6 +67,7 @@ const ARTIFACTS = Object.freeze({
   mcpGenerationWorkBudgetSecurity: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-selected-workbench-2026-08-14", "report.json"),
+  hermesReviewDecisionFirstViewport: path.join("evaluation", "hermes-review-decision-first-viewport-2026-08-27", "report.json"),
   hermesKnowledgeReviewEvidenceInspector: path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"),
   hermesReviewEventFactTraceability: path.join("evaluation", "hermes-knowledge-review-event-facts-2026-08-26", "report.json"),
   hermesReviewTraceBlocks: path.join("evaluation", "hermes-knowledge-review-trace-blocks-2026-08-26", "report.json"),
@@ -580,6 +581,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const mcpGenerationWorkBudgetSecurity = tryReadJson(rootDir, ARTIFACTS.mcpGenerationWorkBudgetSecurity);
   const learningExportRendererSecurity = tryReadJson(rootDir, ARTIFACTS.learningExportRendererSecurity);
   const hermesKnowledgeReviewAuthorityUi = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewAuthorityUi);
+  const hermesReviewDecisionFirstViewport = tryReadJson(rootDir, ARTIFACTS.hermesReviewDecisionFirstViewport);
   const hermesKnowledgeReviewEvidenceInspector = tryReadJson(rootDir, ARTIFACTS.hermesKnowledgeReviewEvidenceInspector);
   const hermesReviewEventFactTraceability = tryReadJson(rootDir, ARTIFACTS.hermesReviewEventFactTraceability);
   const hermesReviewTraceBlocks = tryReadJson(rootDir, ARTIFACTS.hermesReviewTraceBlocks);
@@ -712,6 +714,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "mcp_generation_work_budget_security", ARTIFACTS.mcpGenerationWorkBudgetSecurity, mcpGenerationWorkBudgetSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "learning_export_renderer_security", ARTIFACTS.learningExportRendererSecurity, learningExportRendererSecurity),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_knowledge_review_ui", ARTIFACTS.hermesKnowledgeReviewAuthorityUi, hermesKnowledgeReviewAuthorityUi),
+    evidenceStatus(rootDir, currentHead, liveCommit, "hermes_review_decision_first_viewport", ARTIFACTS.hermesReviewDecisionFirstViewport, hermesReviewDecisionFirstViewport),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_review_evidence_inspector", ARTIFACTS.hermesKnowledgeReviewEvidenceInspector, hermesKnowledgeReviewEvidenceInspector),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_review_event_fact_traceability", ARTIFACTS.hermesReviewEventFactTraceability, hermesReviewEventFactTraceability),
     evidenceStatus(rootDir, currentHead, liveCommit, "hermes_review_trace_blocks", ARTIFACTS.hermesReviewTraceBlocks, hermesReviewTraceBlocks),
@@ -1705,6 +1708,29 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       llmWikiPublication: asString(recordAt(hermesKnowledgeReviewAuthorityUi, "remainingBoundaries")?.llmWikiPublication),
       supabaseRlsLaunchIsolation: asString(recordAt(hermesKnowledgeReviewAuthorityUi, "remainingBoundaries")?.supabaseRlsLaunchIsolation),
     },
+    hermesReviewDecisionFirstViewport: {
+      artifact: ARTIFACTS.hermesReviewDecisionFirstViewport,
+      verdict: isRecord(hermesReviewDecisionFirstViewport) ? asString(hermesReviewDecisionFirstViewport.verdict) : "missing",
+      sourceHead: isRecord(hermesReviewDecisionFirstViewport) ? asString(hermesReviewDecisionFirstViewport.sourceHead) : "",
+      productCommit: isRecord(hermesReviewDecisionFirstViewport) ? asString(hermesReviewDecisionFirstViewport.productCommit) : "",
+      productionCommit: isRecord(hermesReviewDecisionFirstViewport) ? asString(hermesReviewDecisionFirstViewport.productionCommit) : "",
+      beforePassed: asNumber(recordAt(hermesReviewDecisionFirstViewport, "beforeLive")?.passedCount),
+      beforeViewportCount: asNumber(recordAt(hermesReviewDecisionFirstViewport, "beforeLive")?.viewportCount),
+      localPassed: asNumber(recordAt(hermesReviewDecisionFirstViewport, "afterLocal")?.passedCount),
+      localViewportCount: asNumber(recordAt(hermesReviewDecisionFirstViewport, "afterLocal")?.viewportCount),
+      livePassed: asNumber(recordAt(hermesReviewDecisionFirstViewport, "afterLive")?.passedCount),
+      liveViewportCount: asNumber(recordAt(hermesReviewDecisionFirstViewport, "afterLive")?.viewportCount),
+      desktopShortFirstActionBottom: asNumber(recordAt(hermesReviewDecisionFirstViewport, "afterLive")?.desktopShortFirstActionBottom),
+      mobileShortFirstActionBottom: asNumber(recordAt(hermesReviewDecisionFirstViewport, "afterLive")?.mobileShortFirstActionBottom),
+      occludedFirstActionCount: asNumber(recordAt(hermesReviewDecisionFirstViewport, "afterLive")?.occludedFirstActionCount),
+      decisionConfirmationRequired: recordAt(hermesReviewDecisionFirstViewport, "afterLive")?.decisionConfirmationRequired === true,
+      decisionConfirmationUnlocksAllActions: recordAt(hermesReviewDecisionFirstViewport, "afterLive")?.decisionConfirmationUnlocksAllActions === true,
+      humanReviewCompleted: recordAt(hermesReviewDecisionFirstViewport, "reviewBoundary")?.humanReviewCompleted === true,
+      exactSavedShareVerdict: asString(recordAt(hermesReviewDecisionFirstViewport, "remainingBoundaries")?.exactSavedShareVerdict),
+      llmWikiPublication: asString(recordAt(hermesReviewDecisionFirstViewport, "remainingBoundaries")?.llmWikiPublication),
+      supabaseRlsLaunchIsolation: asString(recordAt(hermesReviewDecisionFirstViewport, "remainingBoundaries")?.supabaseRlsLaunchIsolation),
+      providerDispatchPersistence: asString(recordAt(hermesReviewDecisionFirstViewport, "remainingBoundaries")?.providerDispatchPersistence),
+    },
     hermesKnowledgeReviewEvidenceInspector: {
       artifact: ARTIFACTS.hermesKnowledgeReviewEvidenceInspector,
       verdict: isRecord(hermesKnowledgeReviewEvidenceInspector) ? asString(hermesKnowledgeReviewEvidenceInspector.verdict) : "missing",
@@ -2261,6 +2287,14 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Decision pending live/busy/actions-disabled/settled: ${rollup.hermesKnowledgeReviewAuthorityUi.decisionPendingStatusLive}/${rollup.hermesKnowledgeReviewAuthorityUi.decisionBusyStateExposed}/${rollup.hermesKnowledgeReviewAuthorityUi.decisionActionsDisabledDuringSave}/${rollup.hermesKnowledgeReviewAuthorityUi.decisionSettlesAccessibly}`,
     `- Mutation boundary DB/provider/share/publication: ${rollup.hermesKnowledgeReviewAuthorityUi.dbMutationPerformed}/${rollup.hermesKnowledgeReviewAuthorityUi.providerDispatchCalled}/${rollup.hermesKnowledgeReviewAuthorityUi.shareSessionCreated}/${rollup.hermesKnowledgeReviewAuthorityUi.ontologyPublicationPerformed}`,
     `- Exact saved Share: ${rollup.hermesKnowledgeReviewAuthorityUi.exactSavedShareVerdict || "MISSING_EVIDENCE"}; LLM Wiki/RLS: ${rollup.hermesKnowledgeReviewAuthorityUi.llmWikiPublication || "APPROVAL_GATED"}/${rollup.hermesKnowledgeReviewAuthorityUi.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}`,
+    "",
+    "## Live Hermes Review Decision First Viewport",
+    "",
+    `- Verdict: \`${rollup.hermesReviewDecisionFirstViewport.verdict}\``,
+    `- Before/local/live viewport contracts: ${rollup.hermesReviewDecisionFirstViewport.beforePassed ?? 0}/${rollup.hermesReviewDecisionFirstViewport.beforeViewportCount ?? 0}, ${rollup.hermesReviewDecisionFirstViewport.localPassed ?? 0}/${rollup.hermesReviewDecisionFirstViewport.localViewportCount ?? 0}, and ${rollup.hermesReviewDecisionFirstViewport.livePassed ?? 0}/${rollup.hermesReviewDecisionFirstViewport.liveViewportCount ?? 0}`,
+    `- Desktop-short/mobile-short first-action bottoms: ${rollup.hermesReviewDecisionFirstViewport.desktopShortFirstActionBottom ?? 0}/${rollup.hermesReviewDecisionFirstViewport.mobileShortFirstActionBottom ?? 0}px inside 723px; hit-test occlusions=${rollup.hermesReviewDecisionFirstViewport.occludedFirstActionCount ?? 0}`,
+    `- Confirmation required/unlocks all actions: ${rollup.hermesReviewDecisionFirstViewport.decisionConfirmationRequired}/${rollup.hermesReviewDecisionFirstViewport.decisionConfirmationUnlocksAllActions}`,
+    `- Human review completed: ${rollup.hermesReviewDecisionFirstViewport.humanReviewCompleted}; exact saved Share=${rollup.hermesReviewDecisionFirstViewport.exactSavedShareVerdict || "MISSING_EVIDENCE"}; Wiki/RLS/provider persistence=${rollup.hermesReviewDecisionFirstViewport.llmWikiPublication || "APPROVAL_GATED"}/${rollup.hermesReviewDecisionFirstViewport.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}/${rollup.hermesReviewDecisionFirstViewport.providerDispatchPersistence || "APPROVAL_GATED"}`,
     "",
     "## Live Hermes Evidence Inspector",
     "",

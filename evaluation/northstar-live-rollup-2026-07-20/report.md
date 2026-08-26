@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-26T20:14:41.659Z
-Source HEAD at generation: 1e7ae8249b67e833d8cc035d3339bb3ff4b417bb
-Live commit at generation: 1e7ae8249b67e833d8cc035d3339bb3ff4b417bb
+Generated at: 2026-08-26T21:38:26.812Z
+Source HEAD at generation: 9dc504ef7686ffb71f13da742a93b97647fcb8a1
+Live commit at generation: 9dc504ef7686ffb71f13da742a93b97647fcb8a1
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -306,6 +306,14 @@ Overall: `northstar_open_approval_gated`
 - Mutation boundary DB/provider/share/publication: false/false/false/false
 - Exact saved Share: MISSING_EVIDENCE; LLM Wiki/RLS: APPROVAL_GATED/APPROVAL_GATED
 
+## Live Hermes Review Decision First Viewport
+
+- Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_DECISION_FIRST_VIEWPORT`
+- Before/local/live viewport contracts: 0/8, 8/8, and 8/8
+- Desktop-short/mobile-short first-action bottoms: 532.44/622.75px inside 723px; hit-test occlusions=0
+- Confirmation required/unlocks all actions: true/true
+- Human review completed: false; exact saved Share=MISSING_EVIDENCE; Wiki/RLS/provider persistence=APPROVAL_GATED/APPROVAL_GATED/APPROVAL_GATED
+
 ## Live Hermes Evidence Inspector
 
 - Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR`
@@ -421,6 +429,7 @@ Overall: `northstar_open_approval_gated`
 | hermes_remote_durable_ledger | proven | evaluation\hermes-openclaw-runtime-current-gate-2026-07-20\report.json |
 | hermes_knowledge_review_authority | proven | evaluation\hermes-knowledge-review-contract-live-2026-07-25\report.json |
 | hermes_knowledge_review_ui | proven | evaluation\hermes-knowledge-review-selected-workbench-2026-08-14\report.json |
+| hermes_review_decision_first_viewport | proven | evaluation\hermes-review-decision-first-viewport-2026-08-27\report.json |
 | hermes_review_evidence_inspector | proven | evaluation\hermes-evidence-digest-readability-2026-08-26\report.json |
 | hermes_review_event_fact_traceability | proven | evaluation\hermes-knowledge-review-event-facts-2026-08-26\report.json |
 | hermes_review_trace_blocks | proven | evaluation\hermes-knowledge-review-trace-blocks-2026-08-26\report.json |
@@ -458,7 +467,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_wording_review | ancestor | ancestor_of_head | evaluation\live-document-wording-review-2026-07-24\report.json |
 | live_document_broad_review | ancestor | ancestor_of_head | evaluation\live-document-broad-review-2026-07-25\report.json |
 | live_document_editorial_review | missing | ancestor_of_head | evaluation\live-document-editorial-review-2026-07-25\report.json |
-| document_editorial_review_cockpit | exact | matches_live | evaluation\document-editorial-review-cockpit-2026-08-16\report.json |
+| document_editorial_review_cockpit | ancestor | ancestor_of_head | evaluation\document-editorial-review-cockpit-2026-08-16\report.json |
 | live_document_editorial_duplicate_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
@@ -498,6 +507,7 @@ Overall: `northstar_open_approval_gated`
 | mcp_generation_work_budget_security | ancestor | ancestor_of_head | evaluation\security-mcp-generation-work-budget-2026-08-04\report.json |
 | learning_export_renderer_security | ancestor | ancestor_of_head | evaluation\learning-export-renderer-security-2026-08-02\report.json |
 | hermes_knowledge_review_ui | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-selected-workbench-2026-08-14\report.json |
+| hermes_review_decision_first_viewport | exact | matches_live | evaluation\hermes-review-decision-first-viewport-2026-08-27\report.json |
 | hermes_review_evidence_inspector | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-evidence-inspector-2026-08-14\report.json |
 | hermes_review_event_fact_traceability | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-event-facts-2026-08-26\report.json |
 | hermes_review_trace_blocks | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-trace-blocks-2026-08-26\report.json |

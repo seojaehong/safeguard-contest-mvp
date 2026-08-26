@@ -2361,6 +2361,64 @@ function createFixtureRoot(): string {
       providerDispatchCalled: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "hermes-review-decision-first-viewport-2026-08-27", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_DECISION_FIRST_VIEWPORT",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    beforeLive: {
+      verdict: "RED_HERMES_REVIEW_AUTHORITY_UI",
+      viewportCount: 8,
+      passedCount: 0,
+      failedCount: 8,
+      desktopShortFirstActionBottom: 957.39,
+      mobileShortFirstActionBottom: 818.8,
+    },
+    afterLocal: {
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI",
+      viewportCount: 8,
+      passedCount: 8,
+      failedCount: 0,
+      decisionConfirmationRequired: true,
+      decisionConfirmationUnlocksAllActions: true,
+      firstDecisionActionInViewport: true,
+      horizontalOverflowCount: 0,
+    },
+    afterLive: {
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+      viewportCount: 8,
+      passedCount: 8,
+      failedCount: 0,
+      desktopShortFirstActionBottom: 532.44,
+      mobileShortFirstActionBottom: 622.75,
+      occludedFirstActionCount: 0,
+      decisionConfirmationRequired: true,
+      decisionConfirmationUnlocksAllActions: true,
+      firstDecisionActionInViewport: true,
+      horizontalOverflowCount: 0,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingOrVectorMutationPerformed: false,
+      ontologyPublicationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    reviewBoundary: {
+      humanReviewCompleted: false,
+      machineEvidenceReplacesHumanReview: false,
+      candidateApproved: false,
+      wikiPublished: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
     sourceHead: "fixture-sha",
@@ -5945,6 +6003,14 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("8/8");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("APPROVAL_GATED");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_decision_first_viewport")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "hermes-review-decision-first-viewport-2026-08-27", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_decision_first_viewport")?.detail).toContain("0/8 to 8/8");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_decision_first_viewport")?.detail).toContain("532.44/622.75");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_decision_first_viewport")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_decision_first_viewport")?.detail).toContain("APPROVAL_GATED");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "hermes-evidence-digest-readability-2026-08-26", "report.json"),
@@ -8101,6 +8167,25 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "document-authoring-pane-margin-2026-08-02", "report.json"));
     expect(gate?.detail).toContain("48/48 all-document selected-authoring and raw-source containment");
+  });
+
+  it("fails Hermes first-viewport decisions closed when hit testing or saved Share boundaries regress", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "hermes-review-decision-first-viewport-2026-08-27", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLive: { occludedFirstActionCount: number };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.afterLive.occludedFirstActionCount = 1;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "hermes_review_decision_first_viewport");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.detail).toContain("occluded=1");
+    expect(gate?.detail).toContain("exactShare=PASS");
   });
 
   it("contradicts the UI gate when the live mobile document shell regains horizontal overflow", async () => {

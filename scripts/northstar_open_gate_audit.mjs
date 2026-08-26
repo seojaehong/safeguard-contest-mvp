@@ -87,6 +87,7 @@ const EVIDENCE_PATHS = Object.freeze({
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-selected-workbench-2026-08-14", "report.json"),
+  hermesReviewDecisionFirstViewport: path.join("evaluation", "hermes-review-decision-first-viewport-2026-08-27", "report.json"),
   hermesKnowledgeReviewEvidenceInspector: path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"),
   hermesEvidenceDigestReadability: path.join("evaluation", "hermes-evidence-digest-readability-2026-08-26", "report.json"),
   hermesReviewSubjectContext: path.join("evaluation", "hermes-review-subject-context-2026-08-27", "report.json"),
@@ -1591,6 +1592,92 @@ function evaluateProductCapabilityTruthGate(rootDir) {
     evidencePath,
     detail: `Capability verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, dispatch=${readString(providerDispatch.mode) || "unknown"}/${readString(providerDispatch.reason) || "unknown"}, providerCalled=${providerDispatch.providerCalled === true}, briefingEmailReady=${briefing.emailReady === true}, photoReady=${photo.ready === true}, photoAcceptedOnly=${photo.acceptedOnly === true}, photoPost=${photo.photoPostAnalysisExecuted === true}, uiTruthPass=${uiTruthPass}, entryTruthPass=${entryTruthPass}, landingTruthPass=${landingTruthPass}, viewportIaPass=${currentViewportIaPass}, aiModes=${sortedModes || "missing"}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, ia=${readString(remainingBoundaries.documentsShareIaVerdict) || "missing"}.`,
     nextActions: ["Restore the fail-closed capability boundaries and rerun current-production truth evidence without mutation."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateHermesReviewDecisionFirstViewportGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.hermesReviewDecisionFirstViewport;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "hermes_review_decision_first_viewport",
+      label: "Hermes review decision first viewport",
+      state: "missing",
+      evidencePath,
+      detail: "Live Hermes first-viewport review decision evidence is missing.",
+      nextActions: ["Run the no-mutation Day/Night desktop/mobile decision-rail probe against current production."],
+    });
+  }
+
+  const beforeLive = isRecord(report.beforeLive) ? report.beforeLive : {};
+  const afterLocal = isRecord(report.afterLocal) ? report.afterLocal : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const reviewBoundary = isRecord(report.reviewBoundary) ? report.reviewBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.embeddingOrVectorMutationPerformed === false
+    && mutationBoundary.ontologyPublicationPerformed === false
+    && mutationBoundary.wikiPublicationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const pass = report.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_DECISION_FIRST_VIEWPORT"
+    && sourceHead !== ""
+    && sourceHead === productCommit
+    && productCommit === productionCommit
+    && isGitAncestor(rootDir, sourceHead)
+    && beforeLive.verdict === "RED_HERMES_REVIEW_AUTHORITY_UI"
+    && beforeLive.viewportCount === 8
+    && beforeLive.passedCount === 0
+    && beforeLive.failedCount === 8
+    && readNumber(beforeLive.desktopShortFirstActionBottom) > 723
+    && readNumber(beforeLive.mobileShortFirstActionBottom) > 723
+    && afterLocal.verdict === "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI"
+    && afterLocal.viewportCount === 8
+    && afterLocal.passedCount === 8
+    && afterLocal.failedCount === 0
+    && afterLocal.decisionConfirmationRequired === true
+    && afterLocal.decisionConfirmationUnlocksAllActions === true
+    && afterLocal.firstDecisionActionInViewport === true
+    && afterLocal.horizontalOverflowCount === 0
+    && afterLive.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI"
+    && afterLive.viewportCount === 8
+    && afterLive.passedCount === 8
+    && afterLive.failedCount === 0
+    && readNumber(afterLive.desktopShortFirstActionBottom) <= 723
+    && readNumber(afterLive.mobileShortFirstActionBottom) <= 723
+    && afterLive.occludedFirstActionCount === 0
+    && afterLive.decisionConfirmationRequired === true
+    && afterLive.decisionConfirmationUnlocksAllActions === true
+    && afterLive.firstDecisionActionInViewport === true
+    && afterLive.horizontalOverflowCount === 0
+    && noMutation
+    && reviewBoundary.humanReviewCompleted === false
+    && reviewBoundary.machineEvidenceReplacesHumanReview === false
+    && reviewBoundary.candidateApproved === false
+    && reviewBoundary.wikiPublished === false
+    && remainingBoundaries.exactSavedShareVerdict === "MISSING_EVIDENCE"
+    && remainingBoundaries.llmWikiPublication === "APPROVAL_GATED"
+    && remainingBoundaries.supabaseRlsLaunchIsolation === "APPROVAL_GATED"
+    && remainingBoundaries.providerDispatchPersistence === "APPROVAL_GATED";
+
+  return gateResult({
+    id: "hermes_review_decision_first_viewport",
+    label: "Hermes review decision first viewport",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? `Live Hermes review decisions improved from 0/8 to 8/8 Day/Night desktop/mobile viewports. Desktop-short/mobile-short first-action bottoms are ${readNumber(afterLive.desktopShortFirstActionBottom)}/${readNumber(afterLive.mobileShortFirstActionBottom)}px inside 723px, with zero hit-test occlusions. All decisions remain locked until explicit candidate-and-evidence confirmation; human review remains incomplete, no mutation occurred, LLM Wiki/RLS/provider persistence remain APPROVAL_GATED, and exact saved Share remains MISSING_EVIDENCE.`
+      : `Hermes first-viewport decision contract failed: before=${readNumber(beforeLive.passedCount)}/${readNumber(beforeLive.viewportCount)}, local=${readNumber(afterLocal.passedCount)}/${readNumber(afterLocal.viewportCount)}, live=${readNumber(afterLive.passedCount)}/${readNumber(afterLive.viewportCount)}, desktopBottom=${readNumber(afterLive.desktopShortFirstActionBottom)}, mobileBottom=${readNumber(afterLive.mobileShortFirstActionBottom)}, occluded=${readNumber(afterLive.occludedFirstActionCount)}, confirmation=${String(afterLive.decisionConfirmationRequired)}/${String(afterLive.decisionConfirmationUnlocksAllActions)}, noMutation=${String(noMutation)}, humanReview=${String(reviewBoundary.humanReviewCompleted)}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass ? [] : ["Restore first-viewport hit-test visibility, confirmation locking, no-mutation, and approval boundaries across all eight live viewports."],
   });
 }
 
@@ -10355,6 +10442,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateHermesRemoteDurableLedgerGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityGate(rootDir),
     evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir),
+    evaluateHermesReviewDecisionFirstViewportGate(rootDir),
     evaluateHermesKnowledgeReviewEvidenceInspectorGate(rootDir),
     evaluateHermesReviewEventFactTraceabilityGate(rootDir),
     evaluateHermesReviewTraceBlocksGate(rootDir),

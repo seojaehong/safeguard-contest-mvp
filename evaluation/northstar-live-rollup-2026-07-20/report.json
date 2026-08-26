@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-26T20:14:41.659Z",
-  "head": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
+  "generatedAt": "2026-08-26T21:38:26.812Z",
+  "head": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
+    "commitSha": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-trlphkt4r-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-9cgxpecox-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 72
+    "gateCount": 73
   },
   "provenGates": [
     {
@@ -326,6 +326,12 @@
       "state": "proven",
       "artifact": "evaluation\\hermes-knowledge-review-selected-workbench-2026-08-14\\report.json",
       "detail": "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases with three navigable candidates, exactly one selected candidate/body, desktop two-column and mobile one-column containment, and internal candidate-body scroll. Candidate tabs keep one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, Arrow/Home/End navigation, and keyboard-operable compact panes. Delayed review decisions announce pending and settled states, expose busy semantics, and disable competing actions during save. It exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "hermes_review_decision_first_viewport",
+      "state": "proven",
+      "artifact": "evaluation\\hermes-review-decision-first-viewport-2026-08-27\\report.json",
+      "detail": "Live Hermes review decisions improved from 0/8 to 8/8 Day/Night desktop/mobile viewports. Desktop-short/mobile-short first-action bottoms are 532.44/622.75px inside 723px, with zero hit-test occlusions. All decisions remain locked until explicit candidate-and-evidence confirmation; human review remains incomplete, no mutation occurred, LLM Wiki/RLS/provider persistence remain APPROVAL_GATED, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "hermes_review_evidence_inspector",
@@ -1380,6 +1386,29 @@
     "llmWikiPublication": "APPROVAL_GATED",
     "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
   },
+  "hermesReviewDecisionFirstViewport": {
+    "artifact": "evaluation\\hermes-review-decision-first-viewport-2026-08-27\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_DECISION_FIRST_VIEWPORT",
+    "sourceHead": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
+    "productCommit": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
+    "productionCommit": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
+    "beforePassed": 0,
+    "beforeViewportCount": 8,
+    "localPassed": 8,
+    "localViewportCount": 8,
+    "livePassed": 8,
+    "liveViewportCount": 8,
+    "desktopShortFirstActionBottom": 532.44,
+    "mobileShortFirstActionBottom": 622.75,
+    "occludedFirstActionCount": 0,
+    "decisionConfirmationRequired": true,
+    "decisionConfirmationUnlocksAllActions": true,
+    "humanReviewCompleted": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED"
+  },
   "hermesKnowledgeReviewEvidenceInspector": {
     "artifact": "evaluation\\hermes-knowledge-review-evidence-inspector-2026-08-14\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
@@ -1607,9 +1636,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
+      "sourceCommit": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
       "sourceStatus": "exact",
-      "productionCommit": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
+      "productionCommit": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
       "productionStatus": "matches_live"
     },
     {
@@ -1696,9 +1725,9 @@
       "id": "document_editorial_review_cockpit",
       "artifact": "evaluation\\document-editorial-review-cockpit-2026-08-16\\report.json",
       "sourceCommit": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "live_document_editorial_duplicate_classification",
@@ -2011,6 +2040,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "7ff45318ba8a8a0c411eb402bfa90c880c38015d",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "hermes_review_decision_first_viewport",
+      "artifact": "evaluation\\hermes-review-decision-first-viewport-2026-08-27\\report.json",
+      "sourceCommit": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
+      "sourceStatus": "exact",
+      "productionCommit": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
+      "productionStatus": "matches_live"
     },
     {
       "id": "hermes_review_evidence_inspector",

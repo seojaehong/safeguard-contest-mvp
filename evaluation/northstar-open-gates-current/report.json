@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-26T20:14:34.986Z",
-  "sourceSha": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
+  "generatedAt": "2026-08-26T21:38:19.996Z",
+  "sourceSha": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
   "overall": "open",
   "gates": [
     {
@@ -527,6 +527,14 @@
       "label": "Hermes knowledge reviewer UI",
       "evidencePath": "evaluation\\hermes-knowledge-review-selected-workbench-2026-08-14\\report.json",
       "detail": "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases with three navigable candidates, exactly one selected candidate/body, desktop two-column and mobile one-column containment, and internal candidate-body scroll. Candidate tabs keep one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, Arrow/Home/End navigation, and keyboard-operable compact panes. Delayed review decisions announce pending and settled states, expose busy semantics, and disable competing actions during save. It exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": []
+    },
+    {
+      "id": "hermes_review_decision_first_viewport",
+      "state": "proven",
+      "label": "Hermes review decision first viewport",
+      "evidencePath": "evaluation\\hermes-review-decision-first-viewport-2026-08-27\\report.json",
+      "detail": "Live Hermes review decisions improved from 0/8 to 8/8 Day/Night desktop/mobile viewports. Desktop-short/mobile-short first-action bottoms are 532.44/622.75px inside 723px, with zero hit-test occlusions. All decisions remain locked until explicit candidate-and-evidence confirmation; human review remains incomplete, no mutation occurred, LLM Wiki/RLS/provider persistence remain APPROVAL_GATED, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": []
     },
     {

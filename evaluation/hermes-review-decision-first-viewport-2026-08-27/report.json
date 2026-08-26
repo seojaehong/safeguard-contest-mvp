@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "safeclaw-hermes-review-decision-first-viewport/v1",
+  "checkedAt": "2026-08-26T21:39:23.904Z",
+  "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_DECISION_FIRST_VIEWPORT",
+  "sourceHead": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
+  "productCommit": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
+  "productionCommit": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
+  "scope": {
+    "surface": "/knowledge human-review workbench",
+    "contract": "The first review decision remains visibly hit-testable in the initial viewport, while every decision stays locked until the reviewer confirms the candidate sentence and evidence.",
+    "routeSplitAcceptedAsFix": false
+  },
+  "beforeLive": {
+    "path": "evaluation/hermes-review-decision-first-viewport-2026-08-27/before-live/report.json",
+    "verdict": "RED_HERMES_REVIEW_AUTHORITY_UI",
+    "sourceHead": "8ffec03ddecccfc19a4cea0234b641ae2110cffc",
+    "productionCommit": "8ffec03ddecccfc19a4cea0234b641ae2110cffc",
+    "viewportCount": 8,
+    "passedCount": 0,
+    "failedCount": 8,
+    "desktopShortFirstActionBottom": 957.39,
+    "mobileShortFirstActionBottom": 818.8
+  },
+  "afterLocal": {
+    "path": "evaluation/hermes-review-decision-first-viewport-2026-08-27/after-local/report.json",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI",
+    "sourceHead": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
+    "productCommit": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
+    "viewportCount": 8,
+    "passedCount": 8,
+    "failedCount": 0,
+    "decisionConfirmationRequired": true,
+    "decisionConfirmationUnlocksAllActions": true,
+    "firstDecisionActionInViewport": true,
+    "horizontalOverflowCount": 0
+  },
+  "afterLive": {
+    "path": "evaluation/hermes-review-decision-first-viewport-2026-08-27/after-live/report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
+    "sourceHead": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
+    "productCommit": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
+    "productionCommit": "9dc504ef7686ffb71f13da742a93b97647fcb8a1",
+    "deploymentUrl": "safeguard-contest-9cgxpecox-seojaehongs-projects.vercel.app",
+    "viewportCount": 8,
+    "passedCount": 8,
+    "failedCount": 0,
+    "desktopShortFirstActionBottom": 532.44,
+    "mobileShortFirstActionBottom": 622.75,
+    "occludedFirstActionCount": 0,
+    "decisionConfirmationRequired": true,
+    "decisionConfirmationUnlocksAllActions": true,
+    "firstDecisionActionInViewport": true,
+    "horizontalOverflowCount": 0,
+    "desktopScreenshot": "evaluation/hermes-review-decision-first-viewport-2026-08-27/after-live/knowledge-review-authority-day-desktop-short-1440x723.png",
+    "mobileScreenshot": "evaluation/hermes-review-decision-first-viewport-2026-08-27/after-live/knowledge-review-authority-day-mobile-short-390x723.png"
+  },
+  "verification": {
+    "knowledgeUiRegression": "PASS 5 files / 43 tests; 1 environment-gated file skipped",
+    "typecheck": "PASS",
+    "build": "PASS Next.js 15.5.22 / 28 static pages",
+    "liveAfterDeploymentRequired": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "ontologyPublicationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "reviewBoundary": {
+    "humanReviewCompleted": false,
+    "machineEvidenceReplacesHumanReview": false,
+    "candidateApproved": false,
+    "wikiPublished": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED"
+  }
+}
