@@ -1,0 +1,295 @@
+{
+  "schemaVersion": "safeclaw-llm-wiki-candidate-content-matrix/v1",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+  "checkedAt": "2026-08-26T01:38:49.400Z",
+  "mode": "current-source-local-production",
+  "generationMode": "deterministic",
+  "baseUrl": "http://127.0.0.1:3083",
+  "sourceHead": "4df4dd68f5133f757233bcd34ac247140221220a",
+  "productionBuild": {
+    "status": null,
+    "ok": false,
+    "commitSha": null,
+    "branch": null,
+    "environment": "local",
+    "deploymentUrl": null
+  },
+  "productionAligned": false,
+  "totalCount": 5,
+  "passedCount": 5,
+  "failedCount": 0,
+  "requiredSectionCount": 4,
+  "reviewerEvidenceTraceCount": 5,
+  "technicalGuidanceBoundaryCount": 5,
+  "lawCandidateBoundaryCount": 5,
+  "eventSemanticGroundingCount": 5,
+  "privateEventExposureCount": 0,
+  "scenarioCandidateBuildExecuted": 5,
+  "llmGenerationAttempted": false,
+  "actualProductionCandidateQueueRead": false,
+  "routeControlledBrowserFixtureIsNotActualProductionQueue": true,
+  "humanReviewCompleted": false,
+  "publicationState": "unpublished",
+  "publishAllowed": false,
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "ontologyPublicationPerformed": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
+  },
+  "results": [
+    {
+      "id": "chemical-cleaning",
+      "ok": true,
+      "responseStatus": 200,
+      "failures": [],
+      "missingHazardIds": [],
+      "missingTermGroups": [],
+      "missingEvidenceTermGroups": [],
+      "missingEventFactGroups": [],
+      "exposedForbiddenTerms": [],
+      "matchedHazardIds": [
+        "chemical-msds"
+      ],
+      "reviewerEvidenceTraceVisible": true,
+      "technicalGuidanceBoundaryVisible": true,
+      "lawCandidateBoundaryVisible": true,
+      "eventSemanticGroundingVisible": true,
+      "generatedTextLength": 397,
+      "generatedTextExcerpt": "1) 위험요인 요약: 화학물질·세척제 노출 / 원본 이벤트 검토 사실: 야간 교대 작업 · 청각 경보 보조수단 필요 2) 문서 반영 위치: 위험성평가표 · 안전보건교육 · 비상대응 절차 · 외국인 근로자 안내문 3) 통제대책: MSDS 확인 · 보안경·장갑·호흡보호구 지정 · 누출 시 대피·환기·차단 절차 공유 · 외국인 근로자 쉬운 문장 안내 4) 검수 필요 항목: 근거 구분: KOSHA 기술·공식자료 후보 - 물질안전보건자료 조회 서비스 · 안전보건자료 링크 서비스 (기술 참고 후보로만 사용) / 현행 법령 후보 - 법제처 국가법령정보 산업안전보건법 (현장 적용 여부 별도 확인). 현장 책임자가 실제 작업조건, 담당자, 확인시각과 적용 근거를 검토합니다. 이 후보는 사람 검토 전 게시하지 않습니다.",
+      "readiness": {
+        "status": "ready_for_human_review",
+        "requiredSectionCount": 4,
+        "presentSectionCount": 4,
+        "nonEmptySectionCount": 4,
+        "placeholderFindingCount": 0,
+        "legalOverclaimFindingCount": 0,
+        "statutoryClaimDetected": false,
+        "lawProvenancePresent": true,
+        "hazardGroundingPresent": true,
+        "unresolvedReviewItems": []
+      },
+      "boundary": {
+        "storageMode": "stateless_candidate",
+        "savedRunId": null,
+        "publicationState": "unpublished",
+        "dbMutationAllowed": false,
+        "dbMutationPerformed": false,
+        "publishAllowed": false,
+        "humanReviewRequired": true,
+        "machineEvidenceReplacesHumanReview": false
+      },
+      "generation": {
+        "mode": "deterministic",
+        "configured": false,
+        "generatedBy": "safeclaw_candidate_builder",
+        "fallbackUsed": true,
+        "providerLabel": null
+      }
+    },
+    {
+      "id": "hot-work-fire",
+      "ok": true,
+      "responseStatus": 200,
+      "failures": [],
+      "missingHazardIds": [],
+      "missingTermGroups": [],
+      "missingEvidenceTermGroups": [],
+      "missingEventFactGroups": [],
+      "exposedForbiddenTerms": [],
+      "matchedHazardIds": [
+        "hot-work-fire"
+      ],
+      "reviewerEvidenceTraceVisible": true,
+      "technicalGuidanceBoundaryVisible": true,
+      "lawCandidateBoundaryVisible": true,
+      "eventSemanticGroundingVisible": true,
+      "generatedTextLength": 432,
+      "generatedTextExcerpt": "1) 위험요인 요약: 용접·절단 화기작업 화재 / 원본 이벤트 검토 사실: 상부 양중과 하부 화기 동시작업 · 작업 종료 후 30분 잔불 감시 2) 문서 반영 위치: 위험성평가표 · 작업계획서 · TBM 브리핑 · 비상대응 절차 3) 통제대책: 화기작업 허가와 화재감시자 지정 · 가연물 제거 또는 방염포 설치 · 소화기와 비상대응 경로 확인 · 작업 후 잔불 확인 4) 검수 필요 항목: 근거 구분: KOSHA 기술·공식자료 후보 - 화기작업 화재·폭발 예방 매뉴얼 · 물질안전보건자료 조회 서비스 · 사고사망 게시판 정보 조회서비스 (기술 참고 후보로만 사용) / 현행 법령 후보 - 법제처 국가법령정보 산업안전보건법 (현장 적용 여부 별도 확인). 현장 책임자가 실제 작업조건, 담당자, 확인시각과 적용 근거를 검토합니다. 이 후보는 사람 검토 전 게시하지 않습니다.",
+      "readiness": {
+        "status": "ready_for_human_review",
+        "requiredSectionCount": 4,
+        "presentSectionCount": 4,
+        "nonEmptySectionCount": 4,
+        "placeholderFindingCount": 0,
+        "legalOverclaimFindingCount": 0,
+        "statutoryClaimDetected": false,
+        "lawProvenancePresent": true,
+        "hazardGroundingPresent": true,
+        "unresolvedReviewItems": []
+      },
+      "boundary": {
+        "storageMode": "stateless_candidate",
+        "savedRunId": null,
+        "publicationState": "unpublished",
+        "dbMutationAllowed": false,
+        "dbMutationPerformed": false,
+        "publishAllowed": false,
+        "humanReviewRequired": true,
+        "machineEvidenceReplacesHumanReview": false
+      },
+      "generation": {
+        "mode": "deterministic",
+        "configured": false,
+        "generatedBy": "safeclaw_candidate_builder",
+        "fallbackUsed": true,
+        "providerLabel": null
+      }
+    },
+    {
+      "id": "confined-space",
+      "ok": true,
+      "responseStatus": 200,
+      "failures": [],
+      "missingHazardIds": [],
+      "missingTermGroups": [],
+      "missingEvidenceTermGroups": [],
+      "missingEventFactGroups": [],
+      "exposedForbiddenTerms": [],
+      "matchedHazardIds": [
+        "confined-space"
+      ],
+      "reviewerEvidenceTraceVisible": true,
+      "technicalGuidanceBoundaryVisible": true,
+      "lawCandidateBoundaryVisible": true,
+      "eventSemanticGroundingVisible": true,
+      "generatedTextLength": 391,
+      "generatedTextExcerpt": "1) 위험요인 요약: 밀폐공간 산소결핍·중독 / 원본 이벤트 검토 사실: 입구 감시인 1명 상시 배치 · 구조 삼각대 현장 비치 2) 문서 반영 위치: 위험성평가표 · TBM 브리핑 · 안전보건교육 · 비상대응 절차 3) 통제대책: 출입 전 산소·유해가스 측정 · 환기와 감시인 배치 · 구조장비와 구조절차 공유 · 단독작업 금지 4) 검수 필요 항목: 근거 구분: KOSHA 기술·공식자료 후보 - 안전보건법령 스마트검색 · 국내재해사례 게시판 정보 조회서비스 (기술 참고 후보로만 사용) / 현행 법령 후보 - 법제처 국가법령정보 산업안전보건법 (현장 적용 여부 별도 확인). 현장 책임자가 실제 작업조건, 담당자, 확인시각과 적용 근거를 검토합니다. 이 후보는 사람 검토 전 게시하지 않습니다.",
+      "readiness": {
+        "status": "ready_for_human_review",
+        "requiredSectionCount": 4,
+        "presentSectionCount": 4,
+        "nonEmptySectionCount": 4,
+        "placeholderFindingCount": 0,
+        "legalOverclaimFindingCount": 0,
+        "statutoryClaimDetected": false,
+        "lawProvenancePresent": true,
+        "hazardGroundingPresent": true,
+        "unresolvedReviewItems": []
+      },
+      "boundary": {
+        "storageMode": "stateless_candidate",
+        "savedRunId": null,
+        "publicationState": "unpublished",
+        "dbMutationAllowed": false,
+        "dbMutationPerformed": false,
+        "publishAllowed": false,
+        "humanReviewRequired": true,
+        "machineEvidenceReplacesHumanReview": false
+      },
+      "generation": {
+        "mode": "deterministic",
+        "configured": false,
+        "generatedBy": "safeclaw_candidate_builder",
+        "fallbackUsed": true,
+        "providerLabel": null
+      }
+    },
+    {
+      "id": "forklift-traffic",
+      "ok": true,
+      "responseStatus": 200,
+      "failures": [],
+      "missingHazardIds": [],
+      "missingTermGroups": [],
+      "missingEvidenceTermGroups": [],
+      "missingEventFactGroups": [],
+      "exposedForbiddenTerms": [],
+      "matchedHazardIds": [
+        "forklift-traffic"
+      ],
+      "reviewerEvidenceTraceVisible": true,
+      "technicalGuidanceBoundaryVisible": true,
+      "lawCandidateBoundaryVisible": true,
+      "eventSemanticGroundingVisible": true,
+      "generatedTextLength": 429,
+      "generatedTextExcerpt": "1) 위험요인 요약: 지게차·보행자 동선 충돌 / 원본 이벤트 검토 사실: 북문 상하차 통로 폭 2.4m · 점심 교대시간 보행자 집중 2) 문서 반영 위치: 위험성평가표 · 작업계획서 · TBM 브리핑 · TBM 기록 3) 통제대책: 지게차 운행경로와 보행동선 분리 · 신호수 배치와 사각지대 확인 · 하역구역 접근금지 표시 · 운전 전 점검과 후진 경보 확인 4) 검수 필요 항목: 근거 구분: KOSHA 기술·공식자료 후보 - 지게차의 안전작업계획서 작성지침 · 국내재해사례 게시판 정보 조회서비스 · 안전보건법령 스마트검색 (기술 참고 후보로만 사용) / 현행 법령 후보 - 법제처 국가법령정보 산업안전보건법 (현장 적용 여부 별도 확인). 현장 책임자가 실제 작업조건, 담당자, 확인시각과 적용 근거를 검토합니다. 이 후보는 사람 검토 전 게시하지 않습니다.",
+      "readiness": {
+        "status": "ready_for_human_review",
+        "requiredSectionCount": 4,
+        "presentSectionCount": 4,
+        "nonEmptySectionCount": 4,
+        "placeholderFindingCount": 0,
+        "legalOverclaimFindingCount": 0,
+        "statutoryClaimDetected": false,
+        "lawProvenancePresent": true,
+        "hazardGroundingPresent": true,
+        "unresolvedReviewItems": []
+      },
+      "boundary": {
+        "storageMode": "stateless_candidate",
+        "savedRunId": null,
+        "publicationState": "unpublished",
+        "dbMutationAllowed": false,
+        "dbMutationPerformed": false,
+        "publishAllowed": false,
+        "humanReviewRequired": true,
+        "machineEvidenceReplacesHumanReview": false
+      },
+      "generation": {
+        "mode": "deterministic",
+        "configured": false,
+        "generatedBy": "safeclaw_candidate_builder",
+        "fallbackUsed": true,
+        "providerLabel": null
+      }
+    },
+    {
+      "id": "fall-foreign-worker",
+      "ok": true,
+      "responseStatus": 200,
+      "failures": [],
+      "missingHazardIds": [],
+      "missingTermGroups": [],
+      "missingEvidenceTermGroups": [],
+      "missingEventFactGroups": [],
+      "exposedForbiddenTerms": [],
+      "matchedHazardIds": [
+        "fall-scaffold",
+        "foreign-worker-briefing"
+      ],
+      "reviewerEvidenceTraceVisible": true,
+      "technicalGuidanceBoundaryVisible": true,
+      "lawCandidateBoundaryVisible": true,
+      "eventSemanticGroundingVisible": true,
+      "generatedTextLength": 557,
+      "generatedTextExcerpt": "1) 위험요인 요약: 비계·고소작업 추락 · 외국인 근로자 안전교육·전송 / 원본 이벤트 검토 사실: 베트남어 브리핑 필요 · 오후 돌풍 예보 시 작업 중지 2) 문서 반영 위치: 위험성평가표 · TBM 브리핑 · 안전보건교육 · 사진 증빙 · 외국인 근로자 안내문 · 외국인 근로자 전파문 · 현장 전파 3) 통제대책: 작업발판·난간·바퀴 잠금 확인 · 안전대와 안전모 착용 확인 · 강풍·우천 시 작업중지 기준 공유 · 추락 위험구역 출입통제 · 쉬운 한국어 우선 작성 · 국적·주 사용 언어별 핵심 문장 제공 · 관리자 또는 통역 확인 문구 포함 · 전송 로그와 교육 확인 기록 연결 4) 검수 필요 항목: 근거 구분: KOSHA 기술·공식자료 후보 - KOSHA 위험성평가 사업안내 · KOSHA 4M 기법 위험성평가 메뉴얼 · 안전보건법령 스마트검색 (기술 참고 후보로만 사용) / 현행 법령 후보 - 법제처 국가법령정보 산업안전보건법 (현장 적용 여부 별도 확인). 현장 책임자가 실제 작업조건, 담당자, 확인시각과 적용 근거를 검토합니다. 이 후보는 사람 검토 전 게시하지 않습니다.",
+      "readiness": {
+        "status": "ready_for_human_review",
+        "requiredSectionCount": 4,
+        "presentSectionCount": 4,
+        "nonEmptySectionCount": 4,
+        "placeholderFindingCount": 0,
+        "legalOverclaimFindingCount": 0,
+        "statutoryClaimDetected": false,
+        "lawProvenancePresent": true,
+        "hazardGroundingPresent": true,
+        "unresolvedReviewItems": []
+      },
+      "boundary": {
+        "storageMode": "stateless_candidate",
+        "savedRunId": null,
+        "publicationState": "unpublished",
+        "dbMutationAllowed": false,
+        "dbMutationPerformed": false,
+        "publishAllowed": false,
+        "humanReviewRequired": true,
+        "machineEvidenceReplacesHumanReview": false
+      },
+      "generation": {
+        "mode": "deterministic",
+        "configured": false,
+        "generatedBy": "safeclaw_candidate_builder",
+        "fallbackUsed": true,
+        "providerLabel": null
+      }
+    }
+  ]
+}
