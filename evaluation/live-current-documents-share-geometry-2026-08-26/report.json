@@ -1,0 +1,145 @@
+{
+  "schemaVersion": "safeclaw-live-current-documents-share-geometry/v1",
+  "checkedAt": "2026-08-26T13:01:04.3724629Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_MOBILE_DOCUMENT_CONTAINMENT_LIVE_PENDING_WITH_SCOPED_LIVE_GEOMETRY",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "660c9b0d7efef1f96fa05719193ec5ebcd1208f8",
+  "productCommit": "660c9b0d7efef1f96fa05719193ec5ebcd1208f8",
+  "productionBuild": {
+    "commitSha": "e99fce9fefbb96709d93afd39421b748d35237f1",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-j4161jfow-seojaehongs-projects.vercel.app"
+  },
+  "documents": {
+    "route": "/documents?theme=day",
+    "desktop1440x723": {
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "horizontalOverflow": false,
+      "workbench": {
+        "top": 204.4,
+        "height": 448,
+        "columns": [252, 912]
+      },
+      "editor": {
+        "clientHeight": 448,
+        "scrollHeight": 864,
+        "scrollRatio": 1.93,
+        "overflowY": "auto"
+      },
+      "supportingDocumentsOpenDefault": false,
+      "legacyInnerNavigatorDisplay": "none"
+    },
+    "mobile390x723": {
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "horizontalOverflow": false,
+      "coreLauncher": {
+        "top": 178,
+        "bottom": 306,
+        "labels": [
+          "위험성평가표",
+          "TBM 브리핑",
+          "TBM 기록"
+        ]
+      },
+      "editor": {
+        "top": 318,
+        "bottom": 670,
+        "clientHeight": 337,
+        "scrollHeight": 898,
+        "scrollRatio": 2.66,
+        "overflowY": "auto"
+      },
+      "supportingDocumentsOpenDefault": false,
+      "supportingDocumentsVisibleDefault": 0
+    },
+    "observedLivePolishFinding": {
+      "sourceCommit": "e99fce9fefbb96709d93afd39421b748d35237f1",
+      "viewport": "390x723",
+      "workpackShellClientWidth": 327,
+      "workpackShellScrollWidth": 360,
+      "workpackShellOverflowX": "auto",
+      "riskRowOverflowRight": 17.8,
+      "finding": "The page-level geometry passed, but the selected risk row expanded the editor shell and exposed an internal horizontal scrollbar."
+    },
+    "afterLocalRemediation": {
+      "sourceCommit": "660c9b0d7efef1f96fa05719193ec5ebcd1208f8",
+      "baseUrl": "http://127.0.0.1:3083",
+      "measuredViewport": "389x722",
+      "documentHeight": 722,
+      "horizontalOverflow": false,
+      "workpackShellClientWidth": 327,
+      "workpackShellScrollWidth": 327,
+      "riskRowClientWidth": 264,
+      "riskRowScrollWidth": 264,
+      "visualHorizontalScrollbarPresent": false,
+      "focusedBrowserTest": "1/1 PASS",
+      "fullDocumentsBrowserSuite": "42/42 PASS",
+      "typecheck": "PASS",
+      "build": "PASS",
+      "staticPages": "28/28"
+    },
+    "interpretation": "The live default Documents route was viewport-contained, but current-source remediation additionally removes an internal mobile risk-row horizontal scrollbar. Long document content remains inside the selected editor scroll shell; this is not a claim that every explicit raw or deep-review drilldown is one viewport tall."
+  },
+  "workspaceShare": {
+    "route": "/workspace after selecting the Share step with a stored current workpack",
+    "desktop1440x723": {
+      "pageHeight": 723,
+      "bodyHeight": 723,
+      "horizontalOverflow": 0,
+      "root": {
+        "left": 130,
+        "top": 194,
+        "width": 1180,
+        "height": 521.2,
+        "columns": [508.6, 399.6, 227]
+      },
+      "primaryActionBottom": 387,
+      "preview": {
+        "left": 653.4,
+        "right": 1052.9,
+        "bottom": 569
+      },
+      "statusRail": {
+        "display": "grid",
+        "left": 1059,
+        "right": 1286,
+        "bottom": 674.8
+      },
+      "stageColumnCount": 4,
+      "channelCardWidths": [159.7, 159.7, 159.7],
+      "visiblePhoneShellCount": 0
+    },
+    "mobile390x723": {
+      "pageHeight": 723,
+      "bodyHeight": 723,
+      "horizontalOverflow": 0,
+      "root": {
+        "left": 26.8,
+        "top": 273.1,
+        "width": 336.8,
+        "height": 431.2,
+        "columns": [304]
+      },
+      "previewBottom": 635.7,
+      "primaryActionBottom": 694.5,
+      "desktopStatusRailDisplay": "none",
+      "mobileConfigExpandedDefault": false,
+      "visibleConfigCardCountDefault": 0
+    },
+    "interpretation": "The current Workspace Share step uses a three-zone desktop workbench and a distinct one-column mobile cockpit. It is not the same mobile-card composition at both widths."
+  },
+  "boundaries": {
+    "routeSplitAloneAcceptedAsFix": false,
+    "exactSavedUserSessionReproduced": false,
+    "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+    "invitedFixtureAcceptedAsExactSavedSessionProof": false,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "securityCompleteClaimAllowed": false,
+    "liveAfterDeploymentRequired": true
+  }
+}
