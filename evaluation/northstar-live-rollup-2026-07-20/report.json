@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-26T02:01:52.568Z",
-  "head": "886278c36ab6196e4877cd49ecd39b0b292d1bcf",
+  "generatedAt": "2026-08-26T03:13:17.808Z",
+  "head": "d025c27e82923e3e13eedcdaac55da9641b7907f",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f4ab34d0f8fd204b3d5dfa7ef77bfe183acc7ff2",
+    "commitSha": "4c35e5a1537ef9a441e062be38fda697a60e105e",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-cqcbeyur8-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-i9xg8x56y-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 67
+    "gateCount": 68
   },
   "provenGates": [
     {
@@ -247,7 +247,7 @@
       "id": "public_provider_cancellation",
       "state": "notice",
       "artifact": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
-      "detail": "Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests plus a current 1 file / 18 tests Knowledge regeneration cancellation compatibility receipt, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests plus a current governed-path companion, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "public_provider_admission",
@@ -320,6 +320,12 @@
       "state": "proven",
       "artifact": "evaluation\\hermes-knowledge-review-evidence-inspector-2026-08-14\\report.json",
       "detail": "Live Hermes review evidence inspector passes 8/8 Day/Night desktop and mobile cases. It binds five displayed evidence items to the existing authority counts, mounts candidate plus evidence on desktop and one linked keyboard-operable pane on mobile, exposes only allowlisted official HTTPS references, keeps tenant evidence generic, and performs no mutation. Candidate navigation retains a single roving tab stop, linked panels, and breakpoint-aware keyboard semantics; delayed review decisions expose live pending/settled status, busy semantics, and disabled competing actions. The immutable 18-finding baseline remains preserved, a fresh full-repository scan is still required, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
+    },
+    {
+      "id": "hermes_review_event_fact_traceability",
+      "state": "proven",
+      "artifact": "evaluation\\hermes-knowledge-review-event-facts-2026-08-26\\report.json",
+      "detail": "Live Hermes review event-fact traceability moves from 0/8 to 8/8 and binds two allowlisted event facts to one exact evidence row with zero orphan facts and no private event text. This is reviewer traceability only, not complete hazard-to-control-to-document-to-evidence trace closure. Human verification remains required, publication stays unpublished, the immutable 18-finding baseline is preserved, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
     },
     {
       "id": "live_document_secondary_grounding",
@@ -1443,6 +1449,27 @@
       "fullyAutomatedLaunchClaimAllowed": false
     }
   },
+  "hermesReviewEventFactTraceability": {
+    "artifact": "evaluation\\hermes-knowledge-review-event-facts-2026-08-26\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVENT_FACT_TRACEABILITY",
+    "sourceHead": "06036c4fd9353c64a5f25399455eaabbd9c7054b",
+    "productCommit": "06d36befa2d1971cb4de55441e2405d0224f5b40",
+    "productionCommit": "06036c4fd9353c64a5f25399455eaabbd9c7054b",
+    "beforePassed": 0,
+    "beforeViewportCount": 8,
+    "localPassed": 8,
+    "localViewportCount": 8,
+    "livePassed": 8,
+    "liveViewportCount": 8,
+    "boundFactCount": 2,
+    "orphanFactCount": 0,
+    "privateEventTextExposed": false,
+    "humanReviewCompleted": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED"
+  },
   "kosha": {
     "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
     "verdict": "pass_current_kosha_exact_trust_and_corpus_gate",
@@ -1457,9 +1484,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "886278c36ab6196e4877cd49ecd39b0b292d1bcf",
+      "sourceCommit": "d025c27e82923e3e13eedcdaac55da9641b7907f",
       "sourceStatus": "exact",
-      "productionCommit": "886278c36ab6196e4877cd49ecd39b0b292d1bcf",
+      "productionCommit": "d025c27e82923e3e13eedcdaac55da9641b7907f",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -1612,7 +1639,7 @@
       "sourceCommit": "f4ab34d0f8fd204b3d5dfa7ef77bfe183acc7ff2",
       "sourceStatus": "ancestor",
       "productionCommit": "f4ab34d0f8fd204b3d5dfa7ef77bfe183acc7ff2",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "tenant_authorization_remediation",
@@ -1852,6 +1879,14 @@
       "sourceCommit": "7ff45318ba8a8a0c411eb402bfa90c880c38015d",
       "sourceStatus": "ancestor",
       "productionCommit": "7ff45318ba8a8a0c411eb402bfa90c880c38015d",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "hermes_review_event_fact_traceability",
+      "artifact": "evaluation\\hermes-knowledge-review-event-facts-2026-08-26\\report.json",
+      "sourceCommit": "06036c4fd9353c64a5f25399455eaabbd9c7054b",
+      "sourceStatus": "ancestor",
+      "productionCommit": "06036c4fd9353c64a5f25399455eaabbd9c7054b",
       "productionStatus": "ancestor_of_head"
     },
     {
