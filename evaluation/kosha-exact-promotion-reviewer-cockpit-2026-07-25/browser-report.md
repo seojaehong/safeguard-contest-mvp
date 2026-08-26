@@ -18,6 +18,7 @@ Verdict: `PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY`
 - Candidate-bound draft restore: true
 - Official/corpus title provenance: true
 - Candidate navigation readability: true
+- Evidence reading hierarchy: true
 - Evidence page receipts visible: true
 - Draft fingerprint contains source identity: true
 - Live progress status: true

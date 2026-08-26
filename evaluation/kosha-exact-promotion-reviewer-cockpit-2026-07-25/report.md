@@ -21,6 +21,8 @@ Verdict: `PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY`
 - Candidate position labels: true
 - Mobile candidate scroll snap: true
 - Selected candidate auto reveal: true
+- Readable evidence cues: true
+- Raw evidence excerpt preserved in disclosure: true
 - HTML: `evaluation\kosha-exact-promotion-reviewer-cockpit-2026-07-25\index.html`
 
 ## Boundary
