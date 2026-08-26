@@ -528,12 +528,15 @@ try {
           fullPage: false
         });
       }
-      if (traceBlocksMode) {
+      if (traceContractMode) {
         const traceabilityPanel = inbox.locator("[data-review-traceability]");
         if (await traceabilityPanel.count() === 1) {
           await traceabilityPanel.scrollIntoViewIfNeeded();
           await page.screenshot({
-            path: path.join(outputDir, `knowledge-review-trace-block-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`),
+            path: path.join(
+              outputDir,
+              `knowledge-review-${traceMatrixMode ? "trace-matrix" : "trace-block"}-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`
+            ),
             fullPage: false
           });
         }

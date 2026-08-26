@@ -126,7 +126,7 @@ describe("knowledge governance UI contract", () => {
     expect(browserRunnerSource).toContain("allDocumentsClosed: false");
     expect(browserRunnerSource).toContain("machineEvidenceReplacesHumanReview: false");
     expect(browserRunnerSource).toContain('exactSavedShareVerdict: "MISSING_EVIDENCE"');
-    expect(browserRunnerSource).toContain("knowledge-review-trace-block-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png");
+    expect(browserRunnerSource).toContain('traceMatrixMode ? "trace-matrix" : "trace-block"');
   });
 
   it("keeps the canonical hazard trace matrix complete and internally bounded", () => {

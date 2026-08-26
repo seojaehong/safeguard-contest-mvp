@@ -183,6 +183,7 @@ function buildKnowledgeReviewEvidenceItems(input: {
 const TRACE_DOCUMENT_LABELS: Record<string, string> = {
   riskAssessment: "위험성평가표",
   workPlan: "작업계획서",
+  workpackSummary: "작업 요약",
   tbmBriefing: "TBM 브리핑",
   tbmLog: "TBM 기록",
   safetyEducation: "안전보건교육",
@@ -192,6 +193,7 @@ const TRACE_DOCUMENT_LABELS: Record<string, string> = {
   foreignWorkerTransmission: "외국인 근로자 전파문",
   dispatch: "현장 전파"
 };
+const KNOWLEDGE_REVIEW_TRACE_MAPPING_LIMIT = 12;
 
 function buildKnowledgeReviewTraceItems(input: {
   candidate: NonNullable<ReturnType<typeof readCurrentSourceBoundCandidate>>;
@@ -213,12 +215,16 @@ function buildKnowledgeReviewTraceItems(input: {
   const knownIds = new Set(knownHazards.map((hazard) => hazard.id));
   const traces = knownHazards.map((hazard) => {
     const evidenceIds = [...(evidenceIdsByHazard.get(hazard.id) ?? [])];
-    const controls = [...new Set(hazard.controls.map((item) => item.trim()).filter(Boolean))].slice(0, 4);
-    const primaryDocuments = [...new Set(hazard.primaryDocuments.map((item) => TRACE_DOCUMENT_LABELS[item] ?? item))].slice(0, 4);
+    const canonicalControls = [...new Set(hazard.controls.map((item) => item.trim()).filter(Boolean))];
+    const canonicalPrimaryDocuments = [...new Set(hazard.primaryDocuments.map((item) => TRACE_DOCUMENT_LABELS[item] ?? item))];
+    const controls = canonicalControls.slice(0, KNOWLEDGE_REVIEW_TRACE_MAPPING_LIMIT);
+    const primaryDocuments = canonicalPrimaryDocuments.slice(0, KNOWLEDGE_REVIEW_TRACE_MAPPING_LIMIT);
     const unresolvedReviewItems = [
       ...(controls.length === 0 ? ["missing_controls"] : []),
       ...(primaryDocuments.length === 0 ? ["missing_primary_documents"] : []),
-      ...(evidenceIds.length === 0 ? ["missing_bound_evidence"] : [])
+      ...(evidenceIds.length === 0 ? ["missing_bound_evidence"] : []),
+      ...(canonicalControls.length > controls.length ? ["control_mapping_limit_exceeded"] : []),
+      ...(canonicalPrimaryDocuments.length > primaryDocuments.length ? ["document_mapping_limit_exceeded"] : [])
     ];
     return {
       id: `trace-${hazard.id}`,

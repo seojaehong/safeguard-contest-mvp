@@ -366,6 +366,68 @@ describe("knowledge review GET", () => {
     });
   });
 
+  it("preserves every canonical control and document mapping in a resolved trace", async () => {
+    const fake = makeReadClient({
+      knowledge_events: [{
+        id: "event-loop",
+        organization_id: "org-owned",
+        site_id: "site-1",
+        source: "manual",
+        source_id: "manual-loop",
+        captured_at: "2026-07-15T00:00:00.000Z",
+        title: "위험성평가 TBM 교육 루프",
+        url: null,
+        payload: {},
+        related_hazard_ids: ["risk-assessment-tbm-loop"],
+        reflected_documents: ["위험성평가표", "TBM 브리핑", "안전보건교육"],
+        review_status: "pending_review",
+        created_at: "2026-07-15T00:01:00.000Z"
+      }],
+      knowledge_regeneration_runs: [{
+        id: "run-loop",
+        organization_id: "org-owned",
+        site_id: "site-1",
+        question: "위험성평가 TBM 교육 루프 검토",
+        raw_event_ids: ["event-loop"],
+        generated_output: { candidate: "검토 초안" },
+        provider: "template",
+        status: "review_required",
+        created_at: "2026-07-15T00:02:00.000Z"
+      }]
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: "reviewer@example.com" });
+    const { GET } = await import("@/app/api/knowledge/review/route");
+
+    const response = await GET(new NextRequest("http://localhost/api/knowledge/review", {
+      headers: { authorization: "Bearer test-token" }
+    }));
+    const payload = await response.json();
+    const trace = payload.queue[0].traceItems[0];
+
+    expect(response.status).toBe(200);
+    expect(payload.queue[0].traceabilityComplete).toBe(true);
+    expect(trace).toMatchObject({
+      hazardId: "risk-assessment-tbm-loop",
+      resolved: true,
+      unresolvedReviewItems: []
+    });
+    expect(trace.controls).toEqual([
+      "위험요인 파악",
+      "감소대책 수립",
+      "TBM 공유",
+      "교육 확인",
+      "사진·증빙 보관"
+    ]);
+    expect(trace.primaryDocuments).toEqual([
+      "작업 요약",
+      "위험성평가표",
+      "TBM 브리핑",
+      "TBM 기록",
+      "안전보건교육"
+    ]);
+  });
+
   it("exposes only bounded public references while keeping tenant evidence generic", async () => {
     const fake = makeReadClient({
       knowledge_events: [{

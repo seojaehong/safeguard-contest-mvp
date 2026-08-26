@@ -296,8 +296,8 @@ function readTraceItem(value: unknown, evidenceIds: ReadonlySet<string>): Review
         }))].slice(0, maxItems)
       : []
   );
-  const controls = readList(value.controls, 4, 180);
-  const primaryDocuments = readList(value.primaryDocuments, 4, 80);
+  const controls = readList(value.controls, 12, 180);
+  const primaryDocuments = readList(value.primaryDocuments, 12, 80);
   const traceEvidenceIds = readList(value.evidenceIds, 20, 160)
     .filter((evidenceId) => evidenceIds.has(evidenceId));
   const unresolvedReviewItems = readList(value.unresolvedReviewItems, 8, 96);
