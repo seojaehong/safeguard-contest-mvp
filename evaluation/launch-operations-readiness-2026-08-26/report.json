@@ -1,0 +1,274 @@
+{
+  "schemaVersion": "safeclaw-launch-operations-readiness/v1",
+  "generatedAt": "2026-08-26T10:33:33.964Z",
+  "mode": "current-source-local-production",
+  "baseUrl": "http://127.0.0.1:3090",
+  "sourceHead": "654188d102bed618a5df14933e6c815a65f1b2e3",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
+  "rows": [
+    {
+      "name": "desktop-day",
+      "width": 1440,
+      "height": 723,
+      "theme": "day",
+      "viewportWidth": 1440,
+      "viewportHeight": 723,
+      "bodyWidth": 1440,
+      "bodyHeight": 2250,
+      "horizontalOverflow": false,
+      "root": {
+        "left": 260,
+        "top": 233.390625,
+        "right": 1416,
+        "bottom": 503.390625,
+        "width": 1156,
+        "height": 270
+      },
+      "columns": "288.5px 288.5px 288.5px 288.5px",
+      "cardCount": 4,
+      "cardRects": [
+        {
+          "left": 261,
+          "top": 234.390625,
+          "right": 549.5,
+          "bottom": 502.390625,
+          "width": 288.5,
+          "height": 268
+        },
+        {
+          "left": 549.5,
+          "top": 234.390625,
+          "right": 838,
+          "bottom": 502.390625,
+          "width": 288.5,
+          "height": 268
+        },
+        {
+          "left": 838,
+          "top": 234.390625,
+          "right": 1126.5,
+          "bottom": 502.390625,
+          "width": 288.5,
+          "height": 268
+        },
+        {
+          "left": 1126.5,
+          "top": 234.390625,
+          "right": 1415,
+          "bottom": 502.390625,
+          "width": 288.5,
+          "height": 268
+        }
+      ],
+      "localHorizontalScroll": false,
+      "publicAdmission": "unavailable",
+      "providerDispatch": "preview_only",
+      "photoVision": "unconfigured",
+      "text": "현재 운영 경계운영 설정 필요설정과 승인 상태를 분리해 표시합니다.공개 AI 작업 보호분산 설정 필요설정 전 공개 생성·검색은 안전하게 차단됩니다.실제 이메일 전파승인 전 잠금미리보기는 유지하고 provider 호출은 허용하지 않습니다.사진 Vision/OCR설정 필요사진 저장은 유지하고 분석은 보류합니다.",
+      "firstViewport": true,
+      "screenshot": "evaluation/launch-operations-readiness-2026-08-26/desktop-day.png"
+    },
+    {
+      "name": "desktop-night",
+      "width": 1440,
+      "height": 723,
+      "theme": "night",
+      "viewportWidth": 1440,
+      "viewportHeight": 723,
+      "bodyWidth": 1440,
+      "bodyHeight": 2250,
+      "horizontalOverflow": false,
+      "root": {
+        "left": 260,
+        "top": 233.390625,
+        "right": 1416,
+        "bottom": 503.390625,
+        "width": 1156,
+        "height": 270
+      },
+      "columns": "288.5px 288.5px 288.5px 288.5px",
+      "cardCount": 4,
+      "cardRects": [
+        {
+          "left": 261,
+          "top": 234.390625,
+          "right": 549.5,
+          "bottom": 502.390625,
+          "width": 288.5,
+          "height": 268
+        },
+        {
+          "left": 549.5,
+          "top": 234.390625,
+          "right": 838,
+          "bottom": 502.390625,
+          "width": 288.5,
+          "height": 268
+        },
+        {
+          "left": 838,
+          "top": 234.390625,
+          "right": 1126.5,
+          "bottom": 502.390625,
+          "width": 288.5,
+          "height": 268
+        },
+        {
+          "left": 1126.5,
+          "top": 234.390625,
+          "right": 1415,
+          "bottom": 502.390625,
+          "width": 288.5,
+          "height": 268
+        }
+      ],
+      "localHorizontalScroll": false,
+      "publicAdmission": "unavailable",
+      "providerDispatch": "preview_only",
+      "photoVision": "unconfigured",
+      "text": "현재 운영 경계운영 설정 필요설정과 승인 상태를 분리해 표시합니다.공개 AI 작업 보호분산 설정 필요설정 전 공개 생성·검색은 안전하게 차단됩니다.실제 이메일 전파승인 전 잠금미리보기는 유지하고 provider 호출은 허용하지 않습니다.사진 Vision/OCR설정 필요사진 저장은 유지하고 분석은 보류합니다.",
+      "firstViewport": true,
+      "screenshot": "evaluation/launch-operations-readiness-2026-08-26/desktop-night.png"
+    },
+    {
+      "name": "mobile-day",
+      "width": 390,
+      "height": 723,
+      "theme": "day",
+      "viewportWidth": 390,
+      "viewportHeight": 723,
+      "bodyWidth": 390,
+      "bodyHeight": 3799,
+      "horizontalOverflow": false,
+      "root": {
+        "left": 16,
+        "top": 292.96875,
+        "right": 374,
+        "bottom": 491.765625,
+        "width": 358,
+        "height": 198.796875
+      },
+      "columns": "280px 280px 280px 280px",
+      "cardCount": 4,
+      "cardRects": [
+        {
+          "left": 17,
+          "top": 293.96875,
+          "right": 297,
+          "bottom": 490.765625,
+          "width": 280,
+          "height": 196.796875
+        },
+        {
+          "left": 297,
+          "top": 293.96875,
+          "right": 577,
+          "bottom": 490.765625,
+          "width": 280,
+          "height": 196.796875
+        },
+        {
+          "left": 577,
+          "top": 293.96875,
+          "right": 857,
+          "bottom": 490.765625,
+          "width": 280,
+          "height": 196.796875
+        },
+        {
+          "left": 857,
+          "top": 293.96875,
+          "right": 1137,
+          "bottom": 490.765625,
+          "width": 280,
+          "height": 196.796875
+        }
+      ],
+      "localHorizontalScroll": true,
+      "publicAdmission": "unavailable",
+      "providerDispatch": "preview_only",
+      "photoVision": "unconfigured",
+      "text": "현재 운영 경계운영 설정 필요설정과 승인 상태를 분리해 표시합니다.공개 AI 작업 보호분산 설정 필요설정 전 공개 생성·검색은 안전하게 차단됩니다.실제 이메일 전파승인 전 잠금미리보기는 유지하고 provider 호출은 허용하지 않습니다.사진 Vision/OCR설정 필요사진 저장은 유지하고 분석은 보류합니다.",
+      "firstViewport": true,
+      "screenshot": "evaluation/launch-operations-readiness-2026-08-26/mobile-day.png"
+    },
+    {
+      "name": "mobile-night",
+      "width": 390,
+      "height": 723,
+      "theme": "night",
+      "viewportWidth": 390,
+      "viewportHeight": 723,
+      "bodyWidth": 390,
+      "bodyHeight": 3799,
+      "horizontalOverflow": false,
+      "root": {
+        "left": 16,
+        "top": 292.96875,
+        "right": 374,
+        "bottom": 491.765625,
+        "width": 358,
+        "height": 198.796875
+      },
+      "columns": "280px 280px 280px 280px",
+      "cardCount": 4,
+      "cardRects": [
+        {
+          "left": 17,
+          "top": 293.96875,
+          "right": 297,
+          "bottom": 490.765625,
+          "width": 280,
+          "height": 196.796875
+        },
+        {
+          "left": 297,
+          "top": 293.96875,
+          "right": 577,
+          "bottom": 490.765625,
+          "width": 280,
+          "height": 196.796875
+        },
+        {
+          "left": 577,
+          "top": 293.96875,
+          "right": 857,
+          "bottom": 490.765625,
+          "width": 280,
+          "height": 196.796875
+        },
+        {
+          "left": 857,
+          "top": 293.96875,
+          "right": 1137,
+          "bottom": 490.765625,
+          "width": 280,
+          "height": 196.796875
+        }
+      ],
+      "localHorizontalScroll": true,
+      "publicAdmission": "unavailable",
+      "providerDispatch": "preview_only",
+      "photoVision": "unconfigured",
+      "text": "현재 운영 경계운영 설정 필요설정과 승인 상태를 분리해 표시합니다.공개 AI 작업 보호분산 설정 필요설정 전 공개 생성·검색은 안전하게 차단됩니다.실제 이메일 전파승인 전 잠금미리보기는 유지하고 provider 호출은 허용하지 않습니다.사진 Vision/OCR설정 필요사진 저장은 유지하고 분석은 보류합니다.",
+      "firstViewport": true,
+      "screenshot": "evaluation/launch-operations-readiness-2026-08-26/mobile-night.png"
+    }
+  ],
+  "boundaries": {
+    "distributedAdmissionConfigured": false,
+    "providerDispatchReady": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "wikiPublished": false,
+    "koshaRegistryMutated": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "fullyAutomatedLaunchClaimAllowed": false
+  },
+  "verification": {
+    "focusedTests": "3 files; 12 passed; 2 skipped",
+    "typecheck": "PASS",
+    "build": "PASS; 28 static pages"
+  }
+}
