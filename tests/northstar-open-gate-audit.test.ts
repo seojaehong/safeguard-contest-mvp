@@ -2287,6 +2287,30 @@ function createFixtureRoot(): string {
       },
     ],
   });
+  writeJson(rootDir, path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-product-sha",
+    productionBuild: { commitSha: "fixture-sha", environment: "production" },
+    rows: [
+      { name: "desktop-day", cardCount: 4, firstViewport: true, horizontalOverflow: false, browserConsoleErrors: [], publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", localHorizontalScroll: false, root: { bottom: 503 } },
+      { name: "desktop-night", cardCount: 4, firstViewport: true, horizontalOverflow: false, browserConsoleErrors: [], publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", localHorizontalScroll: false, root: { bottom: 503 } },
+      { name: "mobile-day", cardCount: 4, firstViewport: true, horizontalOverflow: false, browserConsoleErrors: [], publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", localHorizontalScroll: true, root: { bottom: 492 } },
+      { name: "mobile-night", cardCount: 4, firstViewport: true, horizontalOverflow: false, browserConsoleErrors: [], publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", localHorizontalScroll: true, root: { bottom: 492 } },
+    ],
+    boundaries: {
+      distributedAdmissionConfigured: false,
+      providerDispatchReady: false,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      wikiPublished: false,
+      embeddingOrVectorMutationPerformed: false,
+      koshaRegistryMutated: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "documents-mobile-review-launch-2026-08-17", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_REVIEW_LAUNCH_CONTAINMENT",
     sourceHead: "product-sha",
@@ -5482,6 +5506,13 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("landing-human-review-boundary");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("Scoped Documents and Workspace/fixture Share viewport IA");
+    expect(audit.gates.find((gate) => gate.id === "launch_operations_readiness_cockpit")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "launch_operations_readiness_cockpit")?.detail).toContain("passes 4/4");
+    expect(audit.gates.find((gate) => gate.id === "launch_operations_readiness_cockpit")?.detail).toContain("provider dispatch preview-only");
+    expect(audit.gates.find((gate) => gate.id === "launch_operations_readiness_cockpit")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
@@ -7234,6 +7265,25 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("securityComplete=true");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("candidateKeyboard=false");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("mobilePaneKeyboard=false");
+  });
+
+  it("fails launch operations readiness closed when automatic launch or exact Share is overclaimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "launch-operations-readiness-2026-08-26", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      boundaries: { fullyAutomatedLaunchClaimAllowed: boolean; exactSavedShareVerdict: string };
+    };
+    report.boundaries.fullyAutomatedLaunchClaimAllowed = true;
+    report.boundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-26T00:00:00.000Z" });
+    expect(audit.gates.find((gate) => gate.id === "launch_operations_readiness_cockpit")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "launch_operations_readiness_cockpit")?.detail).toContain("fullyAutomated=true");
+    expect(audit.gates.find((gate) => gate.id === "launch_operations_readiness_cockpit")?.detail).toContain("exactShare=PASS");
   });
 
   it("fails Hermes event fact traceability closed on orphan facts, private text, or saved Share overclaim", async () => {

@@ -31,6 +31,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  launchOperationsReadiness: path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"),
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
   knowledgeViewportWorkbench: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
@@ -523,6 +524,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveDocumentEditorialDuplicateClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialDuplicateClassification);
   const liveDocumentEditorialNearClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialNearClassification);
   const productCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.productCapabilityTruth);
+  const launchOperationsReadiness = tryReadJson(rootDir, ARTIFACTS.launchOperationsReadiness);
   const documentExportCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.documentExportCapabilityTruth);
   const ontologyViewportWorkbench = tryReadJson(rootDir, ARTIFACTS.ontologyViewportWorkbench);
   const knowledgeViewportWorkbench = tryReadJson(rootDir, ARTIFACTS.knowledgeViewportWorkbench);
@@ -653,6 +655,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_duplicate_classification", ARTIFACTS.liveDocumentEditorialDuplicateClassification, liveDocumentEditorialDuplicateClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_near_classification", ARTIFACTS.liveDocumentEditorialNearClassification, liveDocumentEditorialNearClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "product_capability_truth", ARTIFACTS.productCapabilityTruth, productCapabilityTruth),
+    evidenceStatus(rootDir, currentHead, liveCommit, "launch_operations_readiness_cockpit", ARTIFACTS.launchOperationsReadiness, launchOperationsReadiness),
     evidenceStatus(rootDir, currentHead, liveCommit, "document_export_capability_truth", ARTIFACTS.documentExportCapabilityTruth, documentExportCapabilityTruth),
     evidenceStatus(rootDir, currentHead, liveCommit, "ontology_viewport_workbench", ARTIFACTS.ontologyViewportWorkbench, ontologyViewportWorkbench),
     evidenceStatus(rootDir, currentHead, liveCommit, "knowledge_viewport_workbench", ARTIFACTS.knowledgeViewportWorkbench, knowledgeViewportWorkbench),
@@ -1391,6 +1394,47 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareVerdict: asString(recordAt(productCapabilityTruth, "remainingBoundaries")?.exactSavedShareVerdict),
       documentsShareIaVerdict: asString(recordAt(productCapabilityTruth, "remainingBoundaries")?.documentsShareIaVerdict),
     },
+    launchOperationsReadiness: {
+      artifact: ARTIFACTS.launchOperationsReadiness,
+      verdict: isRecord(launchOperationsReadiness) ? asString(launchOperationsReadiness.verdict) : "missing",
+      sourceHead: isRecord(launchOperationsReadiness) ? asString(launchOperationsReadiness.sourceHead) : "",
+      productCommit: isRecord(launchOperationsReadiness) ? asString(launchOperationsReadiness.productCommit) : "",
+      productionCommit: extractProductionCommit(launchOperationsReadiness),
+      rowCount: Array.isArray(launchOperationsReadiness?.rows) ? launchOperationsReadiness.rows.length : 0,
+      firstViewportCount: Array.isArray(launchOperationsReadiness?.rows)
+        ? launchOperationsReadiness.rows.filter((row) => isRecord(row) && row.firstViewport === true).length
+        : 0,
+      desktopFourColumnCount: Array.isArray(launchOperationsReadiness?.rows)
+        ? launchOperationsReadiness.rows.filter((row) => isRecord(row)
+          && asString(row.name).startsWith("desktop-")
+          && row.localHorizontalScroll === false
+          && asNumber(row.cardCount) === 4).length
+        : 0,
+      mobileLocalScrollCount: Array.isArray(launchOperationsReadiness?.rows)
+        ? launchOperationsReadiness.rows.filter((row) => isRecord(row)
+          && asString(row.name).startsWith("mobile-")
+          && row.localHorizontalScroll === true
+          && asNumber(row.cardCount) === 4).length
+        : 0,
+      browserConsoleErrorCount: Array.isArray(launchOperationsReadiness?.rows)
+        ? launchOperationsReadiness.rows.reduce((sum, row) => sum + (
+          isRecord(row) && Array.isArray(row.browserConsoleErrors) ? row.browserConsoleErrors.length : 0
+        ), 0)
+        : 0,
+      publicAdmission: Array.isArray(launchOperationsReadiness?.rows) && isRecord(launchOperationsReadiness.rows[0])
+        ? asString(launchOperationsReadiness.rows[0].publicAdmission)
+        : "",
+      providerDispatch: Array.isArray(launchOperationsReadiness?.rows) && isRecord(launchOperationsReadiness.rows[0])
+        ? asString(launchOperationsReadiness.rows[0].providerDispatch)
+        : "",
+      photoVision: Array.isArray(launchOperationsReadiness?.rows) && isRecord(launchOperationsReadiness.rows[0])
+        ? asString(launchOperationsReadiness.rows[0].photoVision)
+        : "",
+      distributedAdmissionConfigured: recordAt(launchOperationsReadiness, "boundaries")?.distributedAdmissionConfigured === true,
+      providerDispatchReady: recordAt(launchOperationsReadiness, "boundaries")?.providerDispatchReady === true,
+      fullyAutomatedLaunchClaimAllowed: recordAt(launchOperationsReadiness, "boundaries")?.fullyAutomatedLaunchClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(launchOperationsReadiness, "boundaries")?.exactSavedShareVerdict),
+    },
     documentExportCapabilityTruth: {
       artifact: ARTIFACTS.documentExportCapabilityTruth,
       verdict: isRecord(documentExportCapabilityTruth) ? asString(documentExportCapabilityTruth.verdict) : "missing",
@@ -2101,6 +2145,15 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Exact saved Share: ${rollup.productCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     `- Documents/Share IA: ${rollup.productCapabilityTruth.documentsShareIaVerdict || "OPEN_SEPARATE_VIEWPORT_IA_WAVE"}`,
     "- Boundary: capability truth does not unlock provider persistence, exact saved Share, or Documents/Share viewport IA.",
+    "",
+    "## Live Launch Operations Readiness",
+    "",
+    `- Verdict: \`${rollup.launchOperationsReadiness.verdict}\``,
+    `- Viewport receipts: ${rollup.launchOperationsReadiness.firstViewportCount}/${rollup.launchOperationsReadiness.rowCount}; desktop four-column=${rollup.launchOperationsReadiness.desktopFourColumnCount}/2; mobile local-scroll=${rollup.launchOperationsReadiness.mobileLocalScrollCount}/2; console errors=${rollup.launchOperationsReadiness.browserConsoleErrorCount}`,
+    `- Runtime truth: admission=${rollup.launchOperationsReadiness.publicAdmission || "unknown"}; provider dispatch=${rollup.launchOperationsReadiness.providerDispatch || "unknown"}; photo Vision=${rollup.launchOperationsReadiness.photoVision || "unknown"}`,
+    `- Activation boundaries: distributed configured=${rollup.launchOperationsReadiness.distributedAdmissionConfigured}; provider ready=${rollup.launchOperationsReadiness.providerDispatchReady}; fully automated launch=${rollup.launchOperationsReadiness.fullyAutomatedLaunchClaimAllowed}`,
+    `- Exact saved Share: ${rollup.launchOperationsReadiness.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "- Boundary: this proves an operator-facing cockpit reports current launch truth; it does not configure distributed admission, authorize provider persistence, or approve automatic launch.",
     "",
     "## Live Document Export Capability Truth",
     "",

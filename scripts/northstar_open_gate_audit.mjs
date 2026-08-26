@@ -44,6 +44,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   liveDocumentRainContextIsolation: path.join("evaluation", "live-document-rain-context-isolation-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  launchOperationsReadiness: path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"),
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
   knowledgeViewportWorkbench: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
@@ -1586,6 +1587,81 @@ function evaluateProductCapabilityTruthGate(rootDir) {
     evidencePath,
     detail: `Capability verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, dispatch=${readString(providerDispatch.mode) || "unknown"}/${readString(providerDispatch.reason) || "unknown"}, providerCalled=${providerDispatch.providerCalled === true}, briefingEmailReady=${briefing.emailReady === true}, photoReady=${photo.ready === true}, photoAcceptedOnly=${photo.acceptedOnly === true}, photoPost=${photo.photoPostAnalysisExecuted === true}, uiTruthPass=${uiTruthPass}, entryTruthPass=${entryTruthPass}, landingTruthPass=${landingTruthPass}, viewportIaPass=${currentViewportIaPass}, aiModes=${sortedModes || "missing"}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, ia=${readString(remainingBoundaries.documentsShareIaVerdict) || "missing"}.`,
     nextActions: ["Restore the fail-closed capability boundaries and rerun current-production truth evidence without mutation."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateLaunchOperationsReadinessGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.launchOperationsReadiness;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "launch_operations_readiness_cockpit",
+      label: "Live launch operations readiness cockpit",
+      state: "missing",
+      evidencePath,
+      detail: "Launch operations readiness evidence is missing or invalid.",
+      nextActions: ["Rerun the read-only /ops/api Day/Night desktop/mobile production geometry contract."],
+    });
+  }
+
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const rows = Array.isArray(report.rows) ? report.rows.filter(isRecord) : [];
+  const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
+  const expectedCases = new Set(["desktop-day", "desktop-night", "mobile-day", "mobile-night"]);
+  const sourceMatchesProduction = readString(report.sourceHead).length > 0
+    && readString(report.sourceHead) === readString(productionBuild.commitSha)
+    && readString(productionBuild.environment) === "production";
+  const geometryPass = rows.length === 4
+    && rows.every((row) => {
+      const name = readString(row.name);
+      const root = isRecord(row.root) ? row.root : {};
+      const browserErrors = Array.isArray(row.browserConsoleErrors) ? row.browserConsoleErrors : [];
+      const desktop = name.startsWith("desktop-");
+      const mobile = name.startsWith("mobile-");
+      return expectedCases.delete(name)
+        && readNumber(row.cardCount) === 4
+        && row.firstViewport === true
+        && row.horizontalOverflow === false
+        && browserErrors.length === 0
+        && readString(row.publicAdmission) === "unavailable"
+        && readString(row.providerDispatch) === "preview_only"
+        && readString(row.photoVision) === "ready"
+        && readNumber(root.bottom) <= 723
+        && ((desktop && row.localHorizontalScroll === false)
+          || (mobile && row.localHorizontalScroll === true));
+    })
+    && expectedCases.size === 0;
+  const noMutation = boundaries.dbMutationPerformed === false
+    && boundaries.providerDispatchCalled === false
+    && boundaries.shareSessionCreated === false
+    && boundaries.wikiPublished === false
+    && boundaries.embeddingOrVectorMutationPerformed === false
+    && boundaries.koshaRegistryMutated === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS"
+    && sourceMatchesProduction
+    && readString(report.productCommit).length > 0
+    && geometryPass
+    && boundaries.distributedAdmissionConfigured === false
+    && boundaries.providerDispatchReady === false
+    && boundaries.fullyAutomatedLaunchClaimAllowed === false
+    && readString(boundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && noMutation;
+
+  return gateResult({
+    id: "launch_operations_readiness_cockpit",
+    label: "Live launch operations readiness cockpit",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live /ops/api passes 4/4 Day/Night desktop-short and mobile-short cases with four capability states inside the first viewport, desktop four-column presentation, mobile local-scroll containment, zero page overflow, and zero browser console errors. Production truth remains distributed admission unavailable, provider dispatch preview-only, and Vision ready. This is operator readiness, not automatic launch approval; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      : `Launch readiness verdict=${readString(report.verdict) || "missing"}, sourceMatchesProduction=${sourceMatchesProduction}, geometryPass=${geometryPass}, noMutation=${noMutation}, distributedConfigured=${boundaries.distributedAdmissionConfigured}, providerReady=${boundaries.providerDispatchReady}, fullyAutomated=${boundaries.fullyAutomatedLaunchClaimAllowed}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Configure distributed admission and obtain provider persistence approval separately; do not infer automatic launch approval from this cockpit."]
+      : ["Restore the four-case viewport contract and preserved approval boundaries, then rerun live evidence without mutation."],
   });
 }
 
@@ -9897,6 +9973,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateDocumentEditorialReviewCockpitGate(rootDir),
     evaluateCurrentLiveDocumentEditorialRuntimeGate(rootDir),
     evaluateProductCapabilityTruthGate(rootDir),
+    evaluateLaunchOperationsReadinessGate(rootDir),
     evaluateDocumentExportCapabilityTruthGate(rootDir),
     evaluateOntologyViewportWorkbenchGate(rootDir),
     evaluateKnowledgeViewportWorkbenchGate(rootDir),

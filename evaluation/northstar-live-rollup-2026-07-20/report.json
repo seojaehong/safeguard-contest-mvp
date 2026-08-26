@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-26T09:12:04.353Z",
-  "head": "f0507643399ea7b26295084782f1dc749435156d",
+  "generatedAt": "2026-08-26T11:07:24.110Z",
+  "head": "5cedcd1efb467bc2ad6de56c68c2448aaf1ec364",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "77de49e5c92824e6b78db4e0dacd605d6f3fa275",
+    "commitSha": "5cedcd1efb467bc2ad6de56c68c2448aaf1ec364",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-hnuxj8nz0-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-5bzq3hsrv-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 70
+    "gateCount": 71
   },
   "provenGates": [
     {
@@ -98,6 +98,12 @@
       "state": "proven",
       "artifact": "evaluation\\product-capability-truth-2026-07-25\\report.json",
       "detail": "Manual email/SMS/Kakao and scheduled briefing email are fail-closed preview-only because persistent idempotency is unavailable. Live dispatch entry copy distinguishes preview/readiness from approved results (evaluation\\dispatch-entry-capability-truth-2026-07-28\\report.json), and the public landing keeps safety judgment and final confirmation with a human instead of claiming role replacement (evaluation\\landing-human-review-boundary-2026-07-28\\report.json). Live photo Vision/OCR readiness is accepted-only, AI generation modes are template/enhanced/full, and no DB/share/provider/photo POST mutation occurred. Scoped Documents and Workspace/fixture Share viewport IA is separately proven without accepting route split alone; provider approval and broad human/legal review remain open, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "launch_operations_readiness_cockpit",
+      "state": "proven",
+      "artifact": "evaluation\\launch-operations-readiness-2026-08-26\\report.json",
+      "detail": "Live /ops/api passes 4/4 Day/Night desktop-short and mobile-short cases with four capability states inside the first viewport, desktop four-column presentation, mobile local-scroll containment, zero page overflow, and zero browser console errors. Production truth remains distributed admission unavailable, provider dispatch preview-only, and Vision ready. This is operator readiness, not automatic launch approval; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "document_export_capability_truth",
@@ -1090,6 +1096,25 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "documentsShareIaVerdict": "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP"
   },
+  "launchOperationsReadiness": {
+    "artifact": "evaluation\\launch-operations-readiness-2026-08-26\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
+    "sourceHead": "5cedcd1efb467bc2ad6de56c68c2448aaf1ec364",
+    "productCommit": "654188d102bed618a5df14933e6c815a65f1b2e3",
+    "productionCommit": "5cedcd1efb467bc2ad6de56c68c2448aaf1ec364",
+    "rowCount": 4,
+    "firstViewportCount": 4,
+    "desktopFourColumnCount": 2,
+    "mobileLocalScrollCount": 2,
+    "browserConsoleErrorCount": 0,
+    "publicAdmission": "unavailable",
+    "providerDispatch": "preview_only",
+    "photoVision": "ready",
+    "distributedAdmissionConfigured": false,
+    "providerDispatchReady": false,
+    "fullyAutomatedLaunchClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
   "documentExportCapabilityTruth": {
     "artifact": "evaluation\\document-export-capability-truth-2026-08-17\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
@@ -1542,10 +1567,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "f0507643399ea7b26295084782f1dc749435156d",
+      "sourceCommit": "5cedcd1efb467bc2ad6de56c68c2448aaf1ec364",
       "sourceStatus": "exact",
-      "productionCommit": "f0507643399ea7b26295084782f1dc749435156d",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "5cedcd1efb467bc2ad6de56c68c2448aaf1ec364",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -1658,6 +1683,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "0e09f9e8b2d8a413e0d500919424b4b918a6cd83",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "launch_operations_readiness_cockpit",
+      "artifact": "evaluation\\launch-operations-readiness-2026-08-26\\report.json",
+      "sourceCommit": "5cedcd1efb467bc2ad6de56c68c2448aaf1ec364",
+      "sourceStatus": "exact",
+      "productionCommit": "5cedcd1efb467bc2ad6de56c68c2448aaf1ec364",
+      "productionStatus": "matches_live"
     },
     {
       "id": "document_export_capability_truth",
@@ -1961,7 +1994,7 @@
       "sourceCommit": "77de49e5c92824e6b78db4e0dacd605d6f3fa275",
       "sourceStatus": "ancestor",
       "productionCommit": "77de49e5c92824e6b78db4e0dacd605d6f3fa275",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "hermes_remote_durable_ledger",

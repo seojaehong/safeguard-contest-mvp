@@ -203,6 +203,21 @@ type NextRunwayReport = {
     exactSavedShareVerdict: string;
     documentsShareIaVerdict: string;
   };
+  launchOperationsReadiness: {
+    verdict: string;
+    rowCount: number;
+    firstViewportCount: number;
+    desktopFourColumnCount: number;
+    mobileLocalScrollCount: number;
+    browserConsoleErrorCount: number;
+    publicAdmission: string;
+    providerDispatch: string;
+    photoVision: string;
+    distributedAdmissionConfigured: boolean;
+    providerDispatchReady: boolean;
+    fullyAutomatedLaunchClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   documentExportCapabilityTruth: {
     verdict: string;
     admissionMode: string;
@@ -1685,6 +1700,30 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     remainingBoundaries: {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
+    },
+  });
+  writeJson(root, "evaluation/launch-operations-readiness-2026-08-26/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-product",
+    productionBuild: { commitSha: "fixture-sha", environment: "production" },
+    rows: [
+      { name: "desktop-day", cardCount: 4, firstViewport: true, horizontalOverflow: false, localHorizontalScroll: false, publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", browserConsoleErrors: [], root: { bottom: 503 } },
+      { name: "desktop-night", cardCount: 4, firstViewport: true, horizontalOverflow: false, localHorizontalScroll: false, publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", browserConsoleErrors: [], root: { bottom: 503 } },
+      { name: "mobile-day", cardCount: 4, firstViewport: true, horizontalOverflow: false, localHorizontalScroll: true, publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", browserConsoleErrors: [], root: { bottom: 492 } },
+      { name: "mobile-night", cardCount: 4, firstViewport: true, horizontalOverflow: false, localHorizontalScroll: true, publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", browserConsoleErrors: [], root: { bottom: 492 } },
+    ],
+    boundaries: {
+      distributedAdmissionConfigured: false,
+      providerDispatchReady: false,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      wikiPublished: false,
+      embeddingOrVectorMutationPerformed: false,
+      koshaRegistryMutated: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
     },
   });
   writeJson(root, "evaluation/dependency-security-remediation-2026-07-28/report.json", {
@@ -3263,6 +3302,22 @@ describe("northstar next runway generator", () => {
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
     });
     expect(report.provenCurrentState).toContain("product_capability_truth");
+    expect(report.launchOperationsReadiness).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
+      rowCount: 4,
+      firstViewportCount: 4,
+      desktopFourColumnCount: 2,
+      mobileLocalScrollCount: 2,
+      browserConsoleErrorCount: 0,
+      publicAdmission: "unavailable",
+      providerDispatch: "preview_only",
+      photoVision: "ready",
+      distributedAdmissionConfigured: false,
+      providerDispatchReady: false,
+      fullyAutomatedLaunchClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.provenCurrentState).toContain("launch_operations_readiness_cockpit");
     expect(report.documentExportCapabilityTruth).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
       admissionMode: "unavailable",

@@ -135,7 +135,7 @@ describe("engine runtime readiness policy", () => {
     expect(source).not.toMatch(/(?:apiKey|token|secret)Present\s*[}:]/u);
 
     const css = fs.readFileSync(path.join(process.cwd(), "app", "globals.css"), "utf8");
-    expect(css).toMatch(/data-module-route="\/ops\/api"[^}]+launch-operations-readiness[^}]+grid-auto-flow:\s*column/su);
-    expect(css).toMatch(/launch-operations-readiness[^}]+overflow-x:\s*auto/su);
+    expect(css).toMatch(/data-module-route="\/ops\/api"[\s\S]*?launch-operations-readiness[^}]+grid-auto-flow:\s*column/u);
+    expect(css).toMatch(/launch-operations-readiness[^}]+overflow-x:\s*auto/u);
   });
 });

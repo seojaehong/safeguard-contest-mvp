@@ -34,6 +34,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  launchOperationsReadiness: path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"),
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
   knowledgeViewportWorkbench: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
@@ -679,6 +680,60 @@ function productCapabilityTruthSummary(report) {
     exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
     documentsShareIaVerdict: asString(remainingBoundaries.documentsShareIaVerdict),
   };
+}
+
+/**
+ * @param {unknown} report
+ */
+function launchOperationsReadinessSummary(report) {
+  if (!isRecord(report)) return {};
+  const rows = Array.isArray(report.rows) ? report.rows.filter(isRecord) : [];
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productCommit: asString(report.productCommit),
+    productionCommit: asString(productionBuild.commitSha),
+    rowCount: rows.length,
+    firstViewportCount: rows.filter((row) => row.firstViewport === true).length,
+    desktopFourColumnCount: rows.filter((row) => asString(row.name).startsWith("desktop-")
+      && row.localHorizontalScroll === false
+      && row.cardCount === 4).length,
+    mobileLocalScrollCount: rows.filter((row) => asString(row.name).startsWith("mobile-")
+      && row.localHorizontalScroll === true
+      && row.cardCount === 4).length,
+    browserConsoleErrorCount: rows.reduce((sum, row) => sum + (
+      Array.isArray(row.browserConsoleErrors) ? row.browserConsoleErrors.length : 0
+    ), 0),
+    publicAdmission: rows.length ? asString(rows[0].publicAdmission) : "",
+    providerDispatch: rows.length ? asString(rows[0].providerDispatch) : "",
+    photoVision: rows.length ? asString(rows[0].photoVision) : "",
+    distributedAdmissionConfigured: asBoolean(boundaries.distributedAdmissionConfigured),
+    providerDispatchReady: asBoolean(boundaries.providerDispatchReady),
+    fullyAutomatedLaunchClaimAllowed: asBoolean(boundaries.fullyAutomatedLaunchClaimAllowed),
+    exactSavedShareVerdict: asString(boundaries.exactSavedShareVerdict),
+  };
+}
+
+/**
+ * @param {Record<string, unknown>} summary
+ */
+function launchOperationsReadinessProven(summary) {
+  return summary.verdict === "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS"
+    && summary.sourceHead === summary.productionCommit
+    && summary.rowCount === 4
+    && summary.firstViewportCount === 4
+    && summary.desktopFourColumnCount === 2
+    && summary.mobileLocalScrollCount === 2
+    && summary.browserConsoleErrorCount === 0
+    && summary.publicAdmission === "unavailable"
+    && summary.providerDispatch === "preview_only"
+    && summary.photoVision === "ready"
+    && summary.distributedAdmissionConfigured === false
+    && summary.providerDispatchReady === false
+    && summary.fullyAutomatedLaunchClaimAllowed === false
+    && summary.exactSavedShareVerdict === "MISSING_EVIDENCE";
 }
 
 /**
@@ -2823,6 +2878,8 @@ export function buildNorthstarNextRunway(options) {
     ARTIFACTS.liveDocumentEditorialNearClassification,
   );
   const productCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.productCapabilityTruth);
+  const launchOperationsReadiness = readOptionalJson(options.rootDir, ARTIFACTS.launchOperationsReadiness);
+  const launchOperationsReadinessResult = launchOperationsReadinessSummary(launchOperationsReadiness);
   const documentExportCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.documentExportCapabilityTruth);
   const knowledgeViewportWorkbench = readOptionalJson(options.rootDir, ARTIFACTS.knowledgeViewportWorkbench);
   const llmWikiCandidateContentReadiness = readOptionalJson(options.rootDir, ARTIFACTS.llmWikiCandidateContentReadiness);
@@ -3035,6 +3092,9 @@ export function buildNorthstarNextRunway(options) {
       "live_document_editorial_review",
       "document_editorial_review_cockpit",
       "product_capability_truth",
+      ...(launchOperationsReadinessProven(launchOperationsReadinessResult)
+        ? ["launch_operations_readiness_cockpit"]
+        : []),
       "document_export_capability_truth",
       "ontology_viewport_workbench",
       "knowledge_viewport_workbench",
@@ -3248,6 +3308,7 @@ export function buildNorthstarNextRunway(options) {
       liveDocumentEditorialNearClassification,
     ),
     productCapabilityTruth: productCapabilityTruthSummary(productCapabilityTruth),
+    launchOperationsReadiness: launchOperationsReadinessResult,
     documentExportCapabilityTruth: documentExportCapabilityTruthSummary(documentExportCapabilityTruth),
     ontologyViewportWorkbench: ontologyViewportWorkbenchSummary(ontologyViewportWorkbench),
     knowledgeViewportWorkbench: knowledgeViewportWorkbenchSummary(knowledgeViewportWorkbench),
@@ -3412,6 +3473,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Live editorial duplicate classification is measured separately: \`${report.liveDocumentEditorialDuplicateClassification.verdict || "missing"}\`, generic template overuse \`${report.liveDocumentEditorialDuplicateClassification.beforeGenericTemplateOveruseCount ?? 0}->${report.liveDocumentEditorialDuplicateClassification.liveGenericTemplateOveruseCount ?? 0}\`, retained reviewer findings exact/near \`${report.liveDocumentEditorialDuplicateClassification.exactLineOveruseCount ?? 0}/${report.liveDocumentEditorialDuplicateClassification.nearDuplicateLineOveruseCount ?? 0}\`, and humanReviewCompleted=\`${report.liveDocumentEditorialDuplicateClassification.humanReviewCompleted === true}\`. Only generic template overuse fails automatically; safety-control and legal-reference repetition remains visible, and exact saved Share remains \`${report.liveDocumentEditorialDuplicateClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live editorial near-duplicate classification preserves \`${report.liveDocumentEditorialNearClassification.beforeNearDuplicateLineOveruseCount ?? 0}->${report.liveDocumentEditorialNearClassification.liveNearDuplicateLineOveruseCount ?? 0}\` findings while reducing unclassified human-review-required \`${report.liveDocumentEditorialNearClassification.beforeHumanReviewRequiredCount ?? 0}->${report.liveDocumentEditorialNearClassification.liveHumanReviewRequiredCount ?? 0}\`. The retained role-prefix/context/hazard/control categories are \`${report.liveDocumentEditorialNearClassification.rolePrefixVariantCount ?? 0}/${report.liveDocumentEditorialNearClassification.independentContextCount ?? 0}/${report.liveDocumentEditorialNearClassification.hazardConsistencyCount ?? 0}/${report.liveDocumentEditorialNearClassification.controlConsistencyCount ?? 0}\`; humanReviewCompleted=\`${report.liveDocumentEditorialNearClassification.humanReviewCompleted === true}\` and exact saved Share remains \`${report.liveDocumentEditorialNearClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live product capability truth is measured separately: \`${report.productCapabilityTruth.verdict || "missing"}\`; manual/provider dispatch is \`${report.productCapabilityTruth.dispatchMode || "unknown"}\` with reason \`${report.productCapabilityTruth.dispatchReason || "unknown"}\`, scheduled briefing email ready=\`${report.productCapabilityTruth.briefingEmailReady === true}\`, photo Vision/OCR ready/accepted-only=\`${report.productCapabilityTruth.photoVisionReady === true}/${report.productCapabilityTruth.photoAcceptedOnly === true}\`, and AI modes are \`${report.productCapabilityTruth.aiModes?.join(", ") || "missing"}\`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains \`${report.productCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\` and Documents/Share IA remains \`${report.productCapabilityTruth.documentsShareIaVerdict || "OPEN_SEPARATE_VIEWPORT_IA_WAVE"}\`.
+- Live launch operations readiness is measured separately: \`${report.launchOperationsReadiness.verdict || "missing"}\`; first-viewport receipts \`${report.launchOperationsReadiness.firstViewportCount ?? 0}/${report.launchOperationsReadiness.rowCount ?? 0}\`, desktop four-column \`${report.launchOperationsReadiness.desktopFourColumnCount ?? 0}/2\`, mobile local-scroll \`${report.launchOperationsReadiness.mobileLocalScrollCount ?? 0}/2\`, and console errors \`${report.launchOperationsReadiness.browserConsoleErrorCount ?? 0}\`. Runtime truth remains admission \`${report.launchOperationsReadiness.publicAdmission || "unknown"}\`, dispatch \`${report.launchOperationsReadiness.providerDispatch || "unknown"}\`, and photo Vision \`${report.launchOperationsReadiness.photoVision || "unknown"}\`; distributed configured/provider ready/fully automated remain \`${report.launchOperationsReadiness.distributedAdmissionConfigured === true}/${report.launchOperationsReadiness.providerDispatchReady === true}/${report.launchOperationsReadiness.fullyAutomatedLaunchClaimAllowed === true}\`, and exact saved Share remains \`${report.launchOperationsReadiness.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live document export capability truth is measured separately: \`${report.documentExportCapabilityTruth.verdict || "missing"}\`; admission is \`${report.documentExportCapabilityTruth.admissionMode || "unknown"}/${report.documentExportCapabilityTruth.admissionReason || "unknown"}\` with ready=\`${report.documentExportCapabilityTruth.admissionReady === true}\`. Desktop panel/beta width is \`${report.documentExportCapabilityTruth.desktopPanelWidth ?? 0}/${report.documentExportCapabilityTruth.desktopBetaButtonWidth ?? 0}px\`; mobile is \`${report.documentExportCapabilityTruth.mobilePanelWidth ?? 0}/${report.documentExportCapabilityTruth.mobileBetaButtonWidth ?? 0}px\`. This proves fail-closed export truth and browser fallbacks, not distributed activation; activation remains \`${report.documentExportCapabilityTruth.distributedAdmissionActivation || "OPERATOR_CONFIGURATION_REQUIRED"}\`, fully automated launch remains \`${report.documentExportCapabilityTruth.fullyAutomatedLaunchClaimAllowed === true}\`, and exact saved Share remains \`${report.documentExportCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live Ontology viewport workbench is measured separately: \`${report.ontologyViewportWorkbench.verdict || "missing"}\`; browser rows \`${report.ontologyViewportWorkbench.passCount ?? 0}/${report.ontologyViewportWorkbench.rowCount ?? 0}\`, maximum body ratio \`${report.ontologyViewportWorkbench.maxBodyRatio ?? 0}\`, mobile task switches \`${report.ontologyViewportWorkbench.mobileTaskSwitchVerifiedCount ?? 0}/4\`. Route splitting alone is not treated as the fix; long content remains in local-scroll panes. Exact saved Share remains \`${report.ontologyViewportWorkbench.exactSavedShareVerdict || "MISSING_EVIDENCE"}\` and fully automated launch remains \`${report.ontologyViewportWorkbench.fullyAutomatedLaunchClaimAllowed === true}\`.
 - Live Knowledge viewport workbench is measured separately: \`${report.knowledgeViewportWorkbench.verdict || "missing"}\`; browser rows \`${report.knowledgeViewportWorkbench.passCount ?? "unknown"}/${report.knowledgeViewportWorkbench.rowCount ?? "unknown"}\`, maximum body ratio \`${report.knowledgeViewportWorkbench.maxBodyRatio ?? "unknown"}\`, selected exposure \`${report.knowledgeViewportWorkbench.visiblePanelCountPerRow ?? "unknown"}\` visible panel and \`${report.knowledgeViewportWorkbench.reachableSectionCountPerRow ?? "unknown"}\` reachable tasks. Progressive disclosures technical/reference/wiki/governance are \`${report.knowledgeViewportWorkbench.technicalDisclosureCount ?? "unknown"}/${report.knowledgeViewportWorkbench.referenceDisclosureCount ?? "unknown"}/${report.knowledgeViewportWorkbench.wikiDisclosureCount ?? "unknown"}/${report.knowledgeViewportWorkbench.governanceDisclosureCount ?? "unknown"}\`, default open \`${report.knowledgeViewportWorkbench.defaultOpenDisclosureCount ?? "unknown"}\`, exclusive groups \`${report.knowledgeViewportWorkbench.exclusiveDisclosureGroups === true}\`, mobile ratios \`${report.knowledgeViewportWorkbench.maxMobileTechnicalScrollRatio ?? "unknown"}/${report.knowledgeViewportWorkbench.maxMobileReferenceScrollRatio ?? "unknown"}/${report.knowledgeViewportWorkbench.maxMobileWikiScrollRatio ?? "unknown"}/${report.knowledgeViewportWorkbench.maxMobileGovernanceScrollRatio ?? "unknown"}\`, and first item/review state panel-contained \`${report.knowledgeViewportWorkbench.firstDisclosureInsidePanel === true}/${report.knowledgeViewportWorkbench.firstReviewStateInsidePanel === true}\`. Route splitting alone is not treated as the fix; long content remains in local-scroll panels. Exact saved Share remains \`${report.knowledgeViewportWorkbench.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, Wiki publication remains \`${report.knowledgeViewportWorkbench.llmWikiPublicationVerdict || "APPROVAL_GATED"}\`, and SIF embedding remains \`${report.knowledgeViewportWorkbench.sifEmbeddingRuntimeVerdict || "APPROVAL_GATED"}\`.

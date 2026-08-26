@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `f0507643399ea7b26295084782f1dc749435156d`
+Source HEAD: `5cedcd1efb467bc2ad6de56c68c2448aaf1ec364`
 
-Production `/api/build-info`: `77de49e5c92824e6b78db4e0dacd605d6f3fa275`
+Production `/api/build-info`: `5cedcd1efb467bc2ad6de56c68c2448aaf1ec364`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-authority-day-desktop-1440x900.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-authority-day-desktop-short-1440x723.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-authority-day-mobile-390x844.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-authority-day-mobile-short-390x723.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-authority-night-desktop-1440x900.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-authority-night-desktop-short-1440x723.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-authority-night-mobile-390x844.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-authority-night-mobile-short-390x723.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-trace-matrix-day-desktop-1440x900.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-trace-matrix-day-desktop-short-1440x723.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-trace-matrix-day-mobile-390x844.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-trace-matrix-day-mobile-short-390x723.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-trace-matrix-night-desktop-1440x900.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-trace-matrix-night-desktop-short-1440x723.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-trace-matrix-night-mobile-390x844.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/knowledge-review-trace-matrix-night-mobile-short-390x723.png`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/report.json`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/after-live/report.md`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/report.json`, `evaluation/hermes-knowledge-review-trace-matrix-2026-08-26/report.md`, `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `none`
 
-Current head is evidence-only pending: `true`
+Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `f0507643399ea7b26295084782f1dc749435156d`
+Live rollup source head: `5cedcd1efb467bc2ad6de56c68c2448aaf1ec364`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `f0507643399ea7b26295084782f1dc749435156d` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `77de49e5c92824e6b78db4e0dacd605d6f3fa275`, and the live rollup remains exact for that deployed marker.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -52,6 +52,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live editorial duplicate classification is measured separately: `PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY`, generic template overuse `4->0`, retained reviewer findings exact/near `31/100`, and humanReviewCompleted=`false`. Only generic template overuse fails automatically; safety-control and legal-reference repetition remains visible, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live editorial near-duplicate classification preserves `100->100` findings while reducing unclassified human-review-required `54->0`. The retained role-prefix/context/hazard/control categories are `81/9/8/2`; humanReviewCompleted=`false` and exact saved Share remains `MISSING_EVIDENCE`.
 - Live product capability truth is measured separately: `PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH`; manual/provider dispatch is `preview_only` with reason `persistent_idempotency_unavailable`, scheduled briefing email ready=`false`, photo Vision/OCR ready/accepted-only=`true/true`, and AI modes are `template, enhanced, full`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains `MISSING_EVIDENCE` and Documents/Share IA remains `PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP`.
+- Live launch operations readiness is measured separately: `PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS`; first-viewport receipts `4/4`, desktop four-column `2/2`, mobile local-scroll `2/2`, and console errors `0`. Runtime truth remains admission `unavailable`, dispatch `preview_only`, and photo Vision `ready`; distributed configured/provider ready/fully automated remain `false/false/false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live document export capability truth is measured separately: `PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH`; admission is `unavailable/distributed_limiter_unavailable` with ready=`false`. Desktop panel/beta width is `843/191.25px`; mobile is `262/220px`. This proves fail-closed export truth and browser fallbacks, not distributed activation; activation remains `OPERATOR_CONFIGURATION_REQUIRED`, fully automated launch remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live Ontology viewport workbench is measured separately: `PASS_LIVE_PRODUCTION_ONTOLOGY_VIEWPORT_WORKBENCH`; browser rows `10/10`, maximum body ratio `1`, mobile task switches `4/4`. Route splitting alone is not treated as the fix; long content remains in local-scroll panes. Exact saved Share remains `MISSING_EVIDENCE` and fully automated launch remains `false`.
 - Live Knowledge viewport workbench is measured separately: `PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH`; browser rows `10/10`, maximum body ratio `1.02`, selected exposure `1` visible panel and `6` reachable tasks. Progressive disclosures technical/reference/wiki/governance are `6/7/2/2`, default open `0`, exclusive groups `true`, mobile ratios `4.47/3.68/2.03/2.2`, and first item/review state panel-contained `true/true`. Route splitting alone is not treated as the fix; long content remains in local-scroll panels. Exact saved Share remains `MISSING_EVIDENCE`, Wiki publication remains `APPROVAL_GATED`, and SIF embedding remains `APPROVAL_GATED`.

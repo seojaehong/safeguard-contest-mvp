@@ -152,6 +152,21 @@ type RollupReport = {
     exactSavedShareVerdict: string;
     documentsShareIaVerdict: string;
   };
+  launchOperationsReadiness: {
+    verdict: string;
+    rowCount: number;
+    firstViewportCount: number;
+    desktopFourColumnCount: number;
+    mobileLocalScrollCount: number;
+    browserConsoleErrorCount: number;
+    publicAdmission: string;
+    providerDispatch: string;
+    photoVision: string;
+    distributedAdmissionConfigured: boolean;
+    providerDispatchReady: boolean;
+    fullyAutomatedLaunchClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   documentExportCapabilityTruth: {
     verdict: string;
     admissionMode: string;
@@ -1227,6 +1242,30 @@ function createFixtureRoot(): { root: string; head: string } {
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
     },
   });
+  writeJson(root, "evaluation/launch-operations-readiness-2026-08-26/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
+    sourceHead: "TO_FILL",
+    productCommit: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL", environment: "production" },
+    rows: [
+      { name: "desktop-day", cardCount: 4, firstViewport: true, horizontalOverflow: false, localHorizontalScroll: false, publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", browserConsoleErrors: [], root: { bottom: 503 } },
+      { name: "desktop-night", cardCount: 4, firstViewport: true, horizontalOverflow: false, localHorizontalScroll: false, publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", browserConsoleErrors: [], root: { bottom: 503 } },
+      { name: "mobile-day", cardCount: 4, firstViewport: true, horizontalOverflow: false, localHorizontalScroll: true, publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", browserConsoleErrors: [], root: { bottom: 492 } },
+      { name: "mobile-night", cardCount: 4, firstViewport: true, horizontalOverflow: false, localHorizontalScroll: true, publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", browserConsoleErrors: [], root: { bottom: 492 } },
+    ],
+    boundaries: {
+      distributedAdmissionConfigured: false,
+      providerDispatchReady: false,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      wikiPublished: false,
+      embeddingOrVectorMutationPerformed: false,
+      koshaRegistryMutated: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    },
+  });
   writeJson(root, "evaluation/document-export-capability-truth-2026-08-17/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
     sourceHead: "TO_FILL",
@@ -2110,6 +2149,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-document-editorial-duplicate-classification-2026-07-25/report.json",
     "evaluation/live-document-editorial-near-classification-2026-07-25/report.json",
     "evaluation/product-capability-truth-2026-07-25/report.json",
+    "evaluation/launch-operations-readiness-2026-08-26/report.json",
     "evaluation/document-export-capability-truth-2026-08-17/report.json",
     "evaluation/ontology-viewport-workbench-2026-08-17/report.json",
     "evaluation/knowledge-viewport-workbench-2026-08-17/report.json",
@@ -2333,6 +2373,22 @@ describe("northstar live rollup", () => {
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
     });
     expect(report.evidence.find((item) => item.id === "product_capability_truth")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.launchOperationsReadiness).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
+      rowCount: 4,
+      firstViewportCount: 4,
+      desktopFourColumnCount: 2,
+      mobileLocalScrollCount: 2,
+      browserConsoleErrorCount: 0,
+      publicAdmission: "unavailable",
+      providerDispatch: "preview_only",
+      photoVision: "ready",
+      distributedAdmissionConfigured: false,
+      providerDispatchReady: false,
+      fullyAutomatedLaunchClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "launch_operations_readiness_cockpit")?.productionStatus).toBe("ancestor_of_head");
     expect(report.documentExportCapabilityTruth).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
       admissionMode: "unavailable",

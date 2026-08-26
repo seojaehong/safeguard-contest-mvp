@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-26T09:12:01.373Z",
-  "sourceSha": "f0507643399ea7b26295084782f1dc749435156d",
+  "generatedAt": "2026-08-26T11:07:12.985Z",
+  "sourceSha": "5cedcd1efb467bc2ad6de56c68c2448aaf1ec364",
   "overall": "open",
   "gates": [
     {
@@ -137,6 +137,16 @@
       "nextActions": [
         "Keep provider dispatch persistence approval-gated.",
         "Measure exact saved Share geometry with a concrete existing session URL or separately approved creation flow."
+      ]
+    },
+    {
+      "id": "launch_operations_readiness_cockpit",
+      "state": "proven",
+      "label": "Live launch operations readiness cockpit",
+      "evidencePath": "evaluation\\launch-operations-readiness-2026-08-26\\report.json",
+      "detail": "Live /ops/api passes 4/4 Day/Night desktop-short and mobile-short cases with four capability states inside the first viewport, desktop four-column presentation, mobile local-scroll containment, zero page overflow, and zero browser console errors. Production truth remains distributed admission unavailable, provider dispatch preview-only, and Vision ready. This is operator readiness, not automatic launch approval; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Configure distributed admission and obtain provider persistence approval separately; do not infer automatic launch approval from this cockpit."
       ]
     },
     {
