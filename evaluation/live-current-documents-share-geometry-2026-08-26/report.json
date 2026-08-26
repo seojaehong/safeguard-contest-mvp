@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-live-current-documents-share-geometry/v1",
   "checkedAt": "2026-08-26T13:01:04.3724629Z",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_MOBILE_DOCUMENT_CONTAINMENT_LIVE_PENDING_WITH_SCOPED_LIVE_GEOMETRY",
+  "verdict": "PASS_LIVE_PRODUCTION_CURRENT_DOCUMENTS_AND_SCOPED_WORKSPACE_SHARE_GEOMETRY",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "660c9b0d7efef1f96fa05719193ec5ebcd1208f8",
+  "sourceHead": "c6874aaeef4e769e380cead5ca03f48412708dad",
   "productCommit": "660c9b0d7efef1f96fa05719193ec5ebcd1208f8",
   "productionBuild": {
-    "commitSha": "e99fce9fefbb96709d93afd39421b748d35237f1",
+    "commitSha": "660c9b0d7efef1f96fa05719193ec5ebcd1208f8",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-j4161jfow-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-ayqdg0yes-seojaehongs-projects.vercel.app"
   },
   "documents": {
     "route": "/documents?theme=day",
@@ -81,6 +81,22 @@
       "build": "PASS",
       "staticPages": "28/28"
     },
+    "afterLiveRemediation": {
+      "sourceCommit": "c6874aaeef4e769e380cead5ca03f48412708dad",
+      "productCommit": "660c9b0d7efef1f96fa05719193ec5ebcd1208f8",
+      "productionCommit": "660c9b0d7efef1f96fa05719193ec5ebcd1208f8",
+      "baseUrl": "https://www.safeclaw.kr",
+      "viewport": "390x723",
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "horizontalOverflow": false,
+      "workpackShellClientWidth": 327,
+      "workpackShellScrollWidth": 327,
+      "workpackShellScrollHeight": 898,
+      "riskRowClientWidth": 264,
+      "riskRowScrollWidth": 264,
+      "visualHorizontalScrollbarPresent": false
+    },
     "interpretation": "The live default Documents route was viewport-contained, but current-source remediation additionally removes an internal mobile risk-row horizontal scrollbar. Long document content remains inside the selected editor scroll shell; this is not a claim that every explicit raw or deep-review drilldown is one viewport tall."
   },
   "workspaceShare": {
@@ -140,6 +156,6 @@
     "shareSessionCreated": false,
     "providerDispatchCalled": false,
     "securityCompleteClaimAllowed": false,
-    "liveAfterDeploymentRequired": true
+    "liveAfterDeploymentRequired": false
   }
 }

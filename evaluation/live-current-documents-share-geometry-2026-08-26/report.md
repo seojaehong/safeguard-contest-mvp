@@ -1,8 +1,8 @@
 # Live current Documents and Workspace Share geometry
 
-Verdict: `PASS_CURRENT_SOURCE_LOCAL_MOBILE_DOCUMENT_CONTAINMENT_LIVE_PENDING_WITH_SCOPED_LIVE_GEOMETRY`
+Verdict: `PASS_LIVE_PRODUCTION_CURRENT_DOCUMENTS_AND_SCOPED_WORKSPACE_SHARE_GEOMETRY`
 
-The live build marker used for the scoped baseline is `e99fce9fefbb96709d93afd39421b748d35237f1`. Current-source product commit `660c9b0d` removes the additional mobile editor overflow found during visual inspection; deployment proof is pending.
+The live product marker is `660c9b0d7efef1f96fa05719193ec5ebcd1208f8`; evidence source is `c6874aaeef4e769e380cead5ca03f48412708dad`.
 
 ## Documents
 
@@ -15,7 +15,7 @@ The fresh live default state does not reproduce the reported 2070 px body-level 
 
 ### Mobile risk-row polish
 
-The live 390 px editor passed page-level overflow checks but exposed an internal horizontal scrollbar: shell client/scroll width was `327/360 px`, and the selected risk row extended `17.8 px` past the shell. Current source constrains the risk-row summary flex item to the available width. Local production now measures shell `327/327 px` and risk row `264/264 px`, with no visual horizontal scrollbar.
+The pre-remediation live 390 px editor passed page-level overflow checks but exposed an internal horizontal scrollbar: shell client/scroll width was `327/360 px`, and the selected risk row extended `17.8 px` past the shell. Product commit `660c9b0d` constrains the risk-row summary flex item to the available width. Live production now measures shell `327/327 px` and risk row `264/264 px`, with body height `723 px`, global overflow 0, and no visual horizontal scrollbar.
 
 Verification: focused browser `1/1 PASS`, full Documents browser suite `42/42 PASS`, strict typecheck `PASS`, production build `PASS`, static pages `28/28`.
 
@@ -34,4 +34,4 @@ Desktop has three distinct regions and no visible phone shell. Mobile intentiona
 - This is scoped proof for `/documents` and the stored-current-workpack Workspace Share step.
 - No exact saved user `/share/[sessionId]` was reproduced. Its verdict remains `MISSING_EVIDENCE`.
 - No database mutation, Share-session creation, or provider dispatch occurred.
-- Product commit `660c9b0d` still requires a live deployment recheck before the mobile scrollbar remediation is promoted to live PASS.
+- Product commit `660c9b0d` is live and the mobile scrollbar remediation is production-measured.

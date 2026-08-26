@@ -2287,6 +2287,62 @@ function createFixtureRoot(): string {
       },
     ],
   });
+  writeJson(rootDir, path.join("evaluation", "live-current-documents-share-geometry-2026-08-26", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_CURRENT_DOCUMENTS_AND_SCOPED_WORKSPACE_SHARE_GEOMETRY",
+    sourceHead: "fixture-evidence-sha",
+    productCommit: "fixture-product-sha",
+    productionBuild: {
+      commitSha: "fixture-product-sha",
+      branch: "master",
+      environment: "production",
+    },
+    documents: {
+      desktop1440x723: {
+        documentHeight: 723,
+        bodyHeight: 723,
+        horizontalOverflow: false,
+      },
+      mobile390x723: {
+        documentHeight: 723,
+        bodyHeight: 723,
+        horizontalOverflow: false,
+      },
+      afterLiveRemediation: {
+        productCommit: "fixture-product-sha",
+        productionCommit: "fixture-product-sha",
+        viewport: "390x723",
+        horizontalOverflow: false,
+        workpackShellClientWidth: 327,
+        workpackShellScrollWidth: 327,
+        riskRowClientWidth: 264,
+        riskRowScrollWidth: 264,
+        visualHorizontalScrollbarPresent: false,
+      },
+    },
+    workspaceShare: {
+      desktop1440x723: {
+        pageHeight: 723,
+        horizontalOverflow: 0,
+        visiblePhoneShellCount: 0,
+        root: { columns: [509, 400, 227] },
+      },
+      mobile390x723: {
+        pageHeight: 723,
+        horizontalOverflow: 0,
+        desktopStatusRailDisplay: "none",
+        root: { columns: [304] },
+      },
+    },
+    boundaries: {
+      routeSplitAloneAcceptedAsFix: false,
+      exactSavedUserSessionReproduced: false,
+      exactSavedSessionVerdict: "MISSING_EVIDENCE",
+      invitedFixtureAcceptedAsExactSavedSessionProof: false,
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
     sourceHead: "fixture-sha",
@@ -5800,6 +5856,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("Scoped first-task cockpit proof only, not full Documents/Share IA completion");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 unique document keys");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exactly 3 visible core launchers");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("327/360px to 327/327px");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("active risk row at 264/264px");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("mobile document-review launcher overlap moved from 1 to 0");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("44px section actions");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("44px risk-row selectors");
@@ -7848,6 +7906,26 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "document-authoring-pane-margin-2026-08-02", "report.json"));
     expect(gate?.detail).toContain("48/48 all-document selected-authoring and raw-source containment");
+  });
+
+  it("contradicts the UI gate when the live mobile document shell regains horizontal overflow", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "live-current-documents-share-geometry-2026-08-26", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      documents: { afterLiveRemediation: { workpackShellScrollWidth: number } };
+    };
+    report.documents.afterLiveRemediation.workpackShellScrollWidth = 360;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-08-26T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+    const gate = audit.gates.find((item) => item.id === "ui_documents_share_cockpit");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.evidencePath).toBe(path.join("evaluation", "live-current-documents-share-geometry-2026-08-26", "report.json"));
   });
 
   it("fails document export capability truth closed when locked server actions are enabled", async () => {
