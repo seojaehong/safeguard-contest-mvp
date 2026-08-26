@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-26T22:18:54.144Z",
-  "sourceSha": "b3d5afe15ba7514214d55b28e47def520162c0a8",
+  "generatedAt": "2026-08-26T23:20:34.250Z",
+  "sourceSha": "79718c2bf35e6d5ac6163eb375346ddb0e39d74c",
   "overall": "open",
   "gates": [
     {
@@ -639,8 +639,8 @@
       "id": "dispatch_standalone_cockpit",
       "state": "proven",
       "label": "Standalone dispatch viewport cockpit",
-      "evidencePath": "evaluation\\dispatch-standalone-viewport-2026-07-28\\report.json",
-      "detail": "Production /dispatch keeps the legacy desktop/sample resilience proof and now requires the viewport companion: 1440x723 preview bottom=717, primary bottom=538, mobile Day/Night primary bottom=581/581, local scroll retained, route split alone false, exact saved Share MISSING_EVIDENCE. Legacy seeded pageHeight 1116 (1.24x), sample panels 635px/413px.",
+      "evidencePath": "evaluation\\dispatch-first-viewport-containment-2026-08-27\\report.json",
+      "detail": "Production /dispatch keeps the legacy desktop/mobile resilience proof and adds fail-closed first-viewport containment: hidden root scroll debt 232->1px, desktop Day/Night channel action bottom=706.390625/706.390625, three 193/193/193px channel columns, mobile Day/Night primary bottom=580.59375/580.59375, route split alone false, exact saved Share MISSING_EVIDENCE. Legacy seeded pageHeight 1116 (1.24x), sample panels 635px/413px.",
       "nextActions": [
         "Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved."
       ]

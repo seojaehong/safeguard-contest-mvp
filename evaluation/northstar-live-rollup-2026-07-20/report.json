@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-26T22:18:56.363Z",
-  "head": "b3d5afe15ba7514214d55b28e47def520162c0a8",
+  "generatedAt": "2026-08-26T23:20:36.121Z",
+  "head": "79718c2bf35e6d5ac6163eb375346ddb0e39d74c",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "b3d5afe15ba7514214d55b28e47def520162c0a8",
+    "commitSha": "79718c2bf35e6d5ac6163eb375346ddb0e39d74c",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-liok7s2yk-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-p99nvd26m-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -396,8 +396,8 @@
     {
       "id": "dispatch_standalone_cockpit",
       "state": "proven",
-      "artifact": "evaluation\\dispatch-standalone-viewport-2026-07-28\\report.json",
-      "detail": "Production /dispatch keeps the legacy desktop/sample resilience proof and now requires the viewport companion: 1440x723 preview bottom=717, primary bottom=538, mobile Day/Night primary bottom=581/581, local scroll retained, route split alone false, exact saved Share MISSING_EVIDENCE. Legacy seeded pageHeight 1116 (1.24x), sample panels 635px/413px."
+      "artifact": "evaluation\\dispatch-first-viewport-containment-2026-08-27\\report.json",
+      "detail": "Production /dispatch keeps the legacy desktop/mobile resilience proof and adds fail-closed first-viewport containment: hidden root scroll debt 232->1px, desktop Day/Night channel action bottom=706.390625/706.390625, three 193/193/193px channel columns, mobile Day/Night primary bottom=580.59375/580.59375, route split alone false, exact saved Share MISSING_EVIDENCE. Legacy seeded pageHeight 1116 (1.24x), sample panels 635px/413px."
     },
     {
       "id": "share_result_fixture_cockpit",
@@ -585,7 +585,64 @@
       "horizontalOverflow": 0,
       "verdict": "PASS"
     },
-    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "firstViewportContainmentArtifact": "evaluation\\dispatch-first-viewport-containment-2026-08-27\\report.json",
+    "firstViewportContainmentVerdict": "PASS_LIVE_PRODUCTION_STANDALONE_DISPATCH_FIRST_VIEWPORT_CONTAINMENT",
+    "beforeDesktopShort": {
+      "viewportWidth": 1440,
+      "viewportHeight": 723,
+      "rootClientHeight": 382,
+      "rootScrollHeight": 614,
+      "rootScrollDebt": 232,
+      "titleFontSize": 40,
+      "statusReasonFontSize": 40,
+      "channelHeadingFontSize": 40,
+      "channelActionBottom": 892,
+      "channelCardTops": [
+        636,
+        688,
+        740
+      ]
+    },
+    "liveDesktopShort": {
+      "pageHeight": 771,
+      "viewportHeight": 723,
+      "rootClientHeight": 398,
+      "rootScrollHeight": 399,
+      "rootScrollDebt": 1,
+      "primaryBottom": 448.390625,
+      "previewBottom": 639.390625,
+      "channelActionBottom": 706.390625,
+      "titleFontSize": 20,
+      "statusReasonFontSize": 12,
+      "channelHeadingFontSize": 12,
+      "channelCardWidths": [
+        193,
+        193,
+        193
+      ],
+      "channelCardTops": [
+        616,
+        616,
+        616
+      ],
+      "horizontalOverflow": 0
+    },
+    "liveMobileShortDay": {
+      "viewportHeight": 723,
+      "summaryBottom": 521.59375,
+      "primaryBottom": 580.59375,
+      "visibleConfigCardCount": 0,
+      "horizontalOverflow": 0
+    },
+    "liveMobileShortNight": {
+      "viewportHeight": 723,
+      "summaryBottom": 521.59375,
+      "primaryBottom": 580.59375,
+      "visibleConfigCardCount": 0,
+      "horizontalOverflow": 0
+    },
+    "containmentExactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "fullRepositorySecurityScan": {
     "artifact": "evaluation\\follow-up-full-repository-security-scan-2026-08-02\\report.json",
@@ -1670,9 +1727,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "b3d5afe15ba7514214d55b28e47def520162c0a8",
+      "sourceCommit": "79718c2bf35e6d5ac6163eb375346ddb0e39d74c",
       "sourceStatus": "exact",
-      "productionCommit": "b3d5afe15ba7514214d55b28e47def520162c0a8",
+      "productionCommit": "79718c2bf35e6d5ac6163eb375346ddb0e39d74c",
       "productionStatus": "matches_live"
     },
     {
@@ -2087,9 +2144,9 @@
       "id": "hermes_review_candidate_position",
       "artifact": "evaluation\\hermes-review-candidate-position-2026-08-27\\report.json",
       "sourceCommit": "b3d5afe15ba7514214d55b28e47def520162c0a8",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "b3d5afe15ba7514214d55b28e47def520162c0a8",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "hermes_review_evidence_inspector",
@@ -2218,6 +2275,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "db2e88ed6b5ab652a5717e05ae3ba984da00db3e",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "dispatch_first_viewport_containment",
+      "artifact": "evaluation\\dispatch-first-viewport-containment-2026-08-27\\report.json",
+      "sourceCommit": "79718c2bf35e6d5ac6163eb375346ddb0e39d74c",
+      "sourceStatus": "exact",
+      "productionCommit": "79718c2bf35e6d5ac6163eb375346ddb0e39d74c",
+      "productionStatus": "matches_live"
     },
     {
       "id": "provider_dispatch_persistence",

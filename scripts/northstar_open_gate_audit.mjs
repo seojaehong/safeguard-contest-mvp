@@ -143,6 +143,7 @@ const EVIDENCE_PATHS = Object.freeze({
   sharePublicSessionStorageApproval: path.join("evaluation", "share-public-session-storage-approval-2026-07-23", "report.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
   dispatchStandaloneViewport: path.join("evaluation", "dispatch-standalone-viewport-2026-07-28", "report.json"),
+  dispatchFirstViewportContainment: path.join("evaluation", "dispatch-first-viewport-containment-2026-08-27", "report.json"),
   providerDispatchIdempotency: path.join("evaluation", "provider-dispatch-idempotency-gate-2026-07-19", "report.json"),
   workspaceIaLiveRefinement: path.join("evaluation", "workspace-ia-live-f67-2026-07-21", "report.json"),
   workspaceEditorDetailLanding: path.join("evaluation", "workspace-editor-detail-landing-2026-07-21", "report.json"),
@@ -4394,16 +4395,18 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
 function evaluateDispatchStandaloneCockpitGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.dispatchStandalone;
   const viewportEvidencePath = EVIDENCE_PATHS.dispatchStandaloneViewport;
+  const containmentEvidencePath = EVIDENCE_PATHS.dispatchFirstViewportContainment;
   const report = readJsonFile(rootDir, evidencePath);
   const viewportReport = readJsonFile(rootDir, viewportEvidencePath);
-  if (!isRecord(report) || !isRecord(viewportReport)) {
+  const containmentReport = readJsonFile(rootDir, containmentEvidencePath);
+  if (!isRecord(report) || !isRecord(viewportReport) || !isRecord(containmentReport)) {
     return gateResult({
       id: "dispatch_standalone_cockpit",
       label: "Standalone dispatch viewport cockpit",
       state: "missing",
-      evidencePath: !isRecord(report) ? evidencePath : viewportEvidencePath,
-      detail: "Standalone dispatch desktop or viewport companion report is missing or invalid.",
-      nextActions: ["Run the standalone /dispatch desktop-short and mobile-short cockpit gates before claiming dispatch UI closure."],
+      evidencePath: !isRecord(report) ? evidencePath : !isRecord(viewportReport) ? viewportEvidencePath : containmentEvidencePath,
+      detail: "Standalone dispatch desktop, viewport, or first-viewport containment companion report is missing or invalid.",
+      nextActions: ["Run the standalone /dispatch desktop-short and mobile-short cockpit gates, including hidden root-scroll debt, before claiming dispatch UI closure."],
     });
   }
 
@@ -4424,6 +4427,18 @@ function evaluateDispatchStandaloneCockpitGate(rootDir) {
   const viewportAcceptance = isRecord(viewportReport.acceptanceContract) ? viewportReport.acceptanceContract : {};
   const viewportMutation = isRecord(viewportReport.mutationBoundary) ? viewportReport.mutationBoundary : {};
   const viewportBoundaries = isRecord(viewportReport.remainingBoundaries) ? viewportReport.remainingBoundaries : {};
+  const containmentBefore = isRecord(containmentReport.beforeLive) ? containmentReport.beforeLive : {};
+  const containmentBeforeDesktop = isRecord(containmentBefore.desktopShort) ? containmentBefore.desktopShort : {};
+  const containmentAfter = isRecord(containmentReport.afterLive) ? containmentReport.afterLive : {};
+  const containmentDesktop = isRecord(containmentAfter.desktopShort) ? containmentAfter.desktopShort : {};
+  const containmentDesktopDay = isRecord(containmentDesktop.day) ? containmentDesktop.day : {};
+  const containmentDesktopNight = isRecord(containmentDesktop.night) ? containmentDesktop.night : {};
+  const containmentMobile = isRecord(containmentAfter.mobileShort) ? containmentAfter.mobileShort : {};
+  const containmentMobileDay = isRecord(containmentMobile.day) ? containmentMobile.day : {};
+  const containmentMobileNight = isRecord(containmentMobile.night) ? containmentMobile.night : {};
+  const containmentAcceptance = isRecord(containmentReport.acceptanceContract) ? containmentReport.acceptanceContract : {};
+  const containmentMutation = isRecord(containmentReport.mutationBoundary) ? containmentReport.mutationBoundary : {};
+  const containmentBoundaries = isRecord(containmentReport.remainingBoundaries) ? containmentReport.remainingBoundaries : {};
   const productionVerified = production.liveVerified === true
     && readString(production.commitSha)
     && isGitAncestor(rootDir, readString(production.commitSha));
@@ -4433,6 +4448,68 @@ function evaluateDispatchStandaloneCockpitGate(rootDir) {
   const viewportProductionVerified = readString(viewportReport.sourceHead) === readString(viewportProduction.commitSha)
     && readString(viewportProduction.commitSha)
     && isGitAncestor(rootDir, readString(viewportProduction.commitSha));
+  const containmentProductionVerified = readString(containmentReport.sourceHead) === readString(containmentReport.productCommit)
+    && readString(containmentReport.productCommit) === readString(containmentReport.productionCommit)
+    && readString(containmentReport.productionCommit)
+    && isGitAncestor(rootDir, readString(containmentReport.productionCommit));
+  const containmentDesktopRowsPass = [containmentDesktopDay, containmentDesktopNight].every((row) => {
+    const widths = Array.isArray(row.channelCardWidths) ? row.channelCardWidths.map(readNumber) : [];
+    const tops = Array.isArray(row.channelCardTops) ? row.channelCardTops.map(readNumber) : [];
+    return readNumber(row.viewportHeight) === 723
+      && readNumber(row.rootScrollDebt) !== null
+      && (readNumber(row.rootScrollDebt) || 0) <= 1
+      && readNumber(row.primaryBottom) !== null
+      && (readNumber(row.primaryBottom) || 0) <= 723
+      && readNumber(row.previewBottom) !== null
+      && (readNumber(row.previewBottom) || 0) <= 723
+      && readNumber(row.channelActionBottom) !== null
+      && (readNumber(row.channelActionBottom) || 0) <= 723
+      && readNumber(row.horizontalOverflow) === 0
+      && widths.length === 3
+      && widths.every((width) => width !== null && width >= 150)
+      && tops.length === 3
+      && new Set(tops).size === 1;
+  });
+  const containmentMobileRowsPass = [containmentMobileDay, containmentMobileNight].every((row) => (
+    readNumber(row.viewportHeight) === 723
+    && readNumber(row.summaryBottom) !== null
+    && (readNumber(row.summaryBottom) || 0) <= 723
+    && readNumber(row.primaryBottom) !== null
+    && (readNumber(row.primaryBottom) || 0) <= 723
+    && readNumber(row.visibleConfigCardCount) === 0
+    && readNumber(row.horizontalOverflow) === 0
+  ));
+  const containmentPass = readString(containmentReport.verdict) === "PASS_LIVE_PRODUCTION_STANDALONE_DISPATCH_FIRST_VIEWPORT_CONTAINMENT"
+    && containmentProductionVerified
+    && readString(containmentBefore.verdict) === "RED_DESKTOP_CONTROLS_HIDDEN_IN_INTERNAL_SCROLL_MOBILE_CARD_METAPHOR"
+    && readNumber(containmentBeforeDesktop.rootScrollDebt) !== null
+    && (readNumber(containmentBeforeDesktop.rootScrollDebt) || 0) > 1
+    && readNumber(containmentBeforeDesktop.channelActionBottom) !== null
+    && (readNumber(containmentBeforeDesktop.channelActionBottom) || 0) > 723
+    && readNumber(containmentAfter.total) === 4
+    && readNumber(containmentAfter.pass) === 4
+    && readNumber(containmentAfter.fail) === 0
+    && containmentDesktopRowsPass
+    && containmentMobileRowsPass
+    && readNumber(containmentDesktopDay.titleFontSize) !== null
+    && (readNumber(containmentDesktopDay.titleFontSize) || 0) <= 20
+    && readNumber(containmentDesktopDay.statusReasonFontSize) !== null
+    && (readNumber(containmentDesktopDay.statusReasonFontSize) || 0) <= 14
+    && readNumber(containmentDesktopDay.channelHeadingFontSize) !== null
+    && (readNumber(containmentDesktopDay.channelHeadingFontSize) || 0) <= 14
+    && readBoolean(containmentAcceptance.routeSplitAloneAcceptedAsFix) === false
+    && readBoolean(containmentAcceptance.desktopRequiresTwoPaneWorkbench) === true
+    && readBoolean(containmentAcceptance.desktopRootScrollDebtAtMostOnePixel) === true
+    && readBoolean(containmentAcceptance.desktopPrimaryPreviewAndChannelActionsInFirstViewport) === true
+    && readBoolean(containmentAcceptance.desktopChannelCardsUseThreeReadableColumns) === true
+    && readBoolean(containmentAcceptance.desktopComponentTypographyNotHeroTypography) === true
+    && readBoolean(containmentAcceptance.mobilePrimaryActionContainedInFirstViewport) === true
+    && readBoolean(containmentAcceptance.mobileConfigurationCollapsedByDefault) === true
+    && readBoolean(containmentAcceptance.longPreviewUsesInternalScroll) === true
+    && Object.values(containmentMutation).every((value) => value === false)
+    && readString(containmentBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readBoolean(containmentBoundaries.exactSavedShareUserSessionReproduced) === false
+    && readBoolean(containmentBoundaries.workspaceShareEvidenceSubstitutesForExactSavedSession) === false;
   const viewportPass = readString(viewportReport.verdict) === "PASS_LIVE_PRODUCTION_STANDALONE_DISPATCH_VIEWPORT_COCKPIT"
     && viewportProductionVerified
     && readString(viewportProduction.branch) === "master"
@@ -4473,6 +4550,7 @@ function evaluateDispatchStandaloneCockpitGate(rootDir) {
     && productionVerified
     && sampleProductionVerified
     && viewportPass
+    && containmentPass
     && acceptance.pageHeightWithin135Viewport === true
     && acceptance.rootWidthAtLeast1040 === true
     && acceptance.primaryCtaInsideViewport === true
@@ -4498,8 +4576,8 @@ function evaluateDispatchStandaloneCockpitGate(rootDir) {
       id: "dispatch_standalone_cockpit",
       label: "Standalone dispatch viewport cockpit",
       state: "proven",
-      evidencePath: viewportEvidencePath,
-      detail: `Production /dispatch keeps the legacy desktop/sample resilience proof and now requires the viewport companion: 1440x723 preview bottom=${readNumber(viewportDesktop.previewBottom) ?? "unknown"}, primary bottom=${readNumber(viewportDesktop.primaryBottom) ?? "unknown"}, mobile Day/Night primary bottom=${readNumber(viewportMobileDay.primaryBottom) ?? "unknown"}/${readNumber(viewportMobileNight.primaryBottom) ?? "unknown"}, local scroll retained, route split alone false, exact saved Share MISSING_EVIDENCE. Legacy seeded pageHeight ${pageHeight ?? "unknown"} (${heightRatio ?? "unknown"}x), sample panels ${readNumber(sampleDesktop.firstPanel?.width) ?? "unknown"}px/${readNumber(sampleDesktop.secondPanel?.width) ?? "unknown"}px.`,
+      evidencePath: containmentEvidencePath,
+      detail: `Production /dispatch keeps the legacy desktop/mobile resilience proof and adds fail-closed first-viewport containment: hidden root scroll debt ${readNumber(containmentBeforeDesktop.rootScrollDebt) ?? "unknown"}->${readNumber(containmentDesktopDay.rootScrollDebt) ?? "unknown"}px, desktop Day/Night channel action bottom=${readNumber(containmentDesktopDay.channelActionBottom) ?? "unknown"}/${readNumber(containmentDesktopNight.channelActionBottom) ?? "unknown"}, three ${Array.isArray(containmentDesktopDay.channelCardWidths) ? containmentDesktopDay.channelCardWidths.join("/") : "unknown"}px channel columns, mobile Day/Night primary bottom=${readNumber(containmentMobileDay.primaryBottom) ?? "unknown"}/${readNumber(containmentMobileNight.primaryBottom) ?? "unknown"}, route split alone false, exact saved Share MISSING_EVIDENCE. Legacy seeded pageHeight ${pageHeight ?? "unknown"} (${heightRatio ?? "unknown"}x), sample panels ${readNumber(sampleDesktop.firstPanel?.width) ?? "unknown"}px/${readNumber(sampleDesktop.secondPanel?.width) ?? "unknown"}px.`,
       nextActions: [
         "Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved.",
       ],
@@ -4510,9 +4588,9 @@ function evaluateDispatchStandaloneCockpitGate(rootDir) {
     id: "dispatch_standalone_cockpit",
     label: "Standalone dispatch viewport cockpit",
     state: "contradicted",
-    evidencePath: viewportPass ? evidencePath : viewportEvidencePath,
-    detail: "Standalone dispatch reports no longer prove desktop two-pane, desktop-short preview containment, mobile-short first action, compact controls, and exact-session non-closure together.",
-    nextActions: ["Re-run standalone /dispatch desktop-short and mobile-short browser gates and fix the layout before claiming closure."],
+    evidencePath: !viewportPass ? viewportEvidencePath : !containmentPass ? containmentEvidencePath : evidencePath,
+    detail: "Standalone dispatch reports no longer prove desktop two-pane, desktop-short hidden-scroll closure, first-viewport channel actions, mobile-short first action, compact controls, and exact-session non-closure together.",
+    nextActions: ["Re-run standalone /dispatch desktop-short and mobile-short browser gates, including root scroll debt and channel action geometry, before claiming closure."],
   });
 }
 

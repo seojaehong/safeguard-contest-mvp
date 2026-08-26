@@ -1,0 +1,239 @@
+{
+  "schemaVersion": "safeclaw-dispatch-first-viewport-containment-stage/v1",
+  "checkedAt": "2026-08-26T22:45:52.632Z",
+  "mode": "live-production",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "79718c2bf35e6d5ac6163eb375346ddb0e39d74c",
+  "productionBuild": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "79718c2bf35e6d5ac6163eb375346ddb0e39d74c",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-p99nvd26m-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "route": "/dispatch",
+  "total": 4,
+  "pass": 4,
+  "fail": 0,
+  "verdict": "PASS",
+  "rows": [
+    {
+      "id": "desktop-day",
+      "theme": "day",
+      "width": 1440,
+      "height": 723,
+      "route": "/dispatch?theme=day",
+      "verdict": "PASS",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 771,
+        "rootTop": 323.390625,
+        "rootBottom": 723.390625,
+        "rootWidth": 1156,
+        "rootHeight": 400,
+        "rootClientHeight": 398,
+        "rootScrollHeight": 399,
+        "rootOverflowY": "auto",
+        "previewTop": 416.390625,
+        "previewBottom": 639.390625,
+        "previewLeft": 883,
+        "primaryTop": 404.390625,
+        "primaryBottom": 448.390625,
+        "primaryRight": 875,
+        "linesClientHeight": 106,
+        "linesScrollHeight": 248,
+        "linesOverflowY": "auto",
+        "titleFontSize": 20,
+        "statusReasonFontSize": 12,
+        "horizontalOverflow": 0,
+        "channelHeadingFontSize": 12,
+        "channelActionBottom": 706.390625,
+        "channelCards": [
+          {
+            "left": 278,
+            "top": 616,
+            "width": 193,
+            "height": 44
+          },
+          {
+            "left": 477,
+            "top": 616,
+            "width": 193,
+            "height": 44
+          },
+          {
+            "left": 677,
+            "top": 616,
+            "width": 193,
+            "height": 44
+          }
+        ]
+      },
+      "screenshot": "desktop-day.png"
+    },
+    {
+      "id": "desktop-night",
+      "theme": "night",
+      "width": 1440,
+      "height": 723,
+      "route": "/dispatch?theme=night",
+      "verdict": "PASS",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 771,
+        "rootTop": 323.390625,
+        "rootBottom": 723.390625,
+        "rootWidth": 1156,
+        "rootHeight": 400,
+        "rootClientHeight": 398,
+        "rootScrollHeight": 399,
+        "rootOverflowY": "auto",
+        "previewTop": 416.390625,
+        "previewBottom": 639.390625,
+        "previewLeft": 883,
+        "primaryTop": 404.390625,
+        "primaryBottom": 448.390625,
+        "primaryRight": 875,
+        "linesClientHeight": 106,
+        "linesScrollHeight": 248,
+        "linesOverflowY": "auto",
+        "titleFontSize": 20,
+        "statusReasonFontSize": 12,
+        "horizontalOverflow": 0,
+        "channelHeadingFontSize": 12,
+        "channelActionBottom": 706.390625,
+        "channelCards": [
+          {
+            "left": 278,
+            "top": 616,
+            "width": 193,
+            "height": 44
+          },
+          {
+            "left": 477,
+            "top": 616,
+            "width": 193,
+            "height": 44
+          },
+          {
+            "left": 677,
+            "top": 616,
+            "width": 193,
+            "height": 44
+          }
+        ]
+      },
+      "screenshot": "desktop-night.png"
+    },
+    {
+      "id": "mobile-day",
+      "theme": "day",
+      "width": 390,
+      "height": 723,
+      "route": "/dispatch?theme=day",
+      "verdict": "PASS",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 743,
+        "rootTop": 262.796875,
+        "rootBottom": 693.796875,
+        "rootWidth": 356,
+        "rootHeight": 431,
+        "rootClientHeight": 429,
+        "rootScrollHeight": 616,
+        "rootOverflowY": "auto",
+        "previewTop": 595.59375,
+        "previewBottom": 821.390625,
+        "previewLeft": 26,
+        "primaryTop": 536.59375,
+        "primaryBottom": 580.59375,
+        "primaryRight": 355,
+        "linesClientHeight": 107,
+        "linesScrollHeight": 303,
+        "linesOverflowY": "auto",
+        "titleFontSize": 20,
+        "statusReasonFontSize": 12,
+        "horizontalOverflow": 0,
+        "summaryBottom": 521.59375,
+        "configCards": [
+          {
+            "display": "none",
+            "height": 0
+          },
+          {
+            "display": "none",
+            "height": 0
+          },
+          {
+            "display": "none",
+            "height": 0
+          }
+        ]
+      },
+      "screenshot": "mobile-day.png"
+    },
+    {
+      "id": "mobile-night",
+      "theme": "night",
+      "width": 390,
+      "height": 723,
+      "route": "/dispatch?theme=night",
+      "verdict": "PASS",
+      "metrics": {
+        "viewportHeight": 723,
+        "pageHeight": 743,
+        "rootTop": 262.796875,
+        "rootBottom": 693.796875,
+        "rootWidth": 356,
+        "rootHeight": 431,
+        "rootClientHeight": 429,
+        "rootScrollHeight": 616,
+        "rootOverflowY": "auto",
+        "previewTop": 595.59375,
+        "previewBottom": 821.390625,
+        "previewLeft": 26,
+        "primaryTop": 536.59375,
+        "primaryBottom": 580.59375,
+        "primaryRight": 355,
+        "linesClientHeight": 107,
+        "linesScrollHeight": 303,
+        "linesOverflowY": "auto",
+        "titleFontSize": 20,
+        "statusReasonFontSize": 12,
+        "horizontalOverflow": 0,
+        "summaryBottom": 521.59375,
+        "configCards": [
+          {
+            "display": "none",
+            "height": 0
+          },
+          {
+            "display": "none",
+            "height": 0
+          },
+          {
+            "display": "none",
+            "height": 0
+          }
+        ]
+      },
+      "screenshot": "mobile-night.png"
+    }
+  ],
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "exactSavedShareUserSessionReproduced": false,
+    "routeSplitAloneAcceptedAsFix": false
+  }
+}

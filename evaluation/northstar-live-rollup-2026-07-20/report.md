@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-26T22:18:56.363Z
-Source HEAD at generation: b3d5afe15ba7514214d55b28e47def520162c0a8
-Live commit at generation: b3d5afe15ba7514214d55b28e47def520162c0a8
+Generated at: 2026-08-26T23:20:36.121Z
+Source HEAD at generation: 79718c2bf35e6d5ac6163eb375346ddb0e39d74c
+Live commit at generation: 79718c2bf35e6d5ac6163eb375346ddb0e39d74c
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -35,6 +35,11 @@ Overall: `northstar_open_approval_gated`
 - Desktop-short preview/primary bottom: 717/538
 - Mobile-short Day/Night primary bottom: 581/581
 - Exact saved Share: MISSING_EVIDENCE
+- First-viewport containment: `PASS_LIVE_PRODUCTION_STANDALONE_DISPATCH_FIRST_VIEWPORT_CONTAINMENT`
+- Hidden root scroll debt: 232 -> 1px
+- Live desktop channel action / preview bottom: 706.390625/639.390625
+- Live containment mobile Day/Night primary bottom: 580.59375/580.59375
+- Containment exact saved Share: MISSING_EVIDENCE
 
 ## Live Multi-Scenario Document Quality
 
@@ -448,7 +453,7 @@ Overall: `northstar_open_approval_gated`
 | ui_documents_share_cockpit | proven | evaluation\document-risk-row-mobile-label-2026-08-02\after-live\report.json |
 | live_documents_share_route_perception | proven | evaluation\live-documents-share-route-perception-2026-08-14\report.json |
 | deployment_freshness_guard | proven | evaluation\deployment-freshness-guard-2026-08-14\report.json |
-| dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-viewport-2026-07-28\report.json |
+| dispatch_standalone_cockpit | proven | evaluation\dispatch-first-viewport-containment-2026-08-27\report.json |
 | share_result_fixture_cockpit | proven | evaluation\share-result-drilldown-2026-07-21\report.json |
 | share_recipient_long_content_fixture | proven | evaluation\share-recipient-long-content-fixture-2026-07-25\report.json |
 | share_exact_saved_session_boundary | notice | evaluation\share-exact-session-boundary-2026-07-22\report.json |
@@ -517,7 +522,7 @@ Overall: `northstar_open_approval_gated`
 | learning_export_renderer_security | ancestor | ancestor_of_head | evaluation\learning-export-renderer-security-2026-08-02\report.json |
 | hermes_knowledge_review_ui | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-selected-workbench-2026-08-14\report.json |
 | hermes_review_decision_first_viewport | ancestor | ancestor_of_head | evaluation\hermes-review-decision-first-viewport-2026-08-27\report.json |
-| hermes_review_candidate_position | exact | matches_live | evaluation\hermes-review-candidate-position-2026-08-27\report.json |
+| hermes_review_candidate_position | ancestor | ancestor_of_head | evaluation\hermes-review-candidate-position-2026-08-27\report.json |
 | hermes_review_evidence_inspector | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-evidence-inspector-2026-08-14\report.json |
 | hermes_review_event_fact_traceability | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-event-facts-2026-08-26\report.json |
 | hermes_review_trace_blocks | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-trace-blocks-2026-08-26\report.json |
@@ -534,6 +539,7 @@ Overall: `northstar_open_approval_gated`
 | document_authoring_pane_margin | missing | ancestor_of_head | evaluation\document-authoring-pane-margin-2026-08-02\report.json |
 | dispatch_standalone_cockpit | ancestor | ancestor_of_head | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | dispatch_standalone_viewport_companion | ancestor | ancestor_of_head | evaluation\dispatch-standalone-viewport-2026-07-28\report.json |
+| dispatch_first_viewport_containment | exact | matches_live | evaluation\dispatch-first-viewport-containment-2026-08-27\report.json |
 | provider_dispatch_persistence | ancestor | ancestor_of_head | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json |
 | northstar_approval_runway | ancestor | ancestor_of_head | evaluation\northstar-approval-runway-2026-07-21\report.json |
 

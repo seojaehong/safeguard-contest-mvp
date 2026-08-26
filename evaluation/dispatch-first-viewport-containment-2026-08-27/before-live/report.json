@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "safeclaw-dispatch-first-viewport-containment-before/v1",
+  "checkedAt": "2026-08-27T07:25:00+09:00",
+  "mode": "live-production-pre-remediation",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "eef938663fa2de3515302bf1691f2522940e7b8f",
+  "productionBuild": {
+    "commitSha": "eef938663fa2de3515302bf1691f2522940e7b8f",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-7wzupupzd-seojaehongs-projects.vercel.app"
+  },
+  "route": "/dispatch?theme=day",
+  "viewport": {
+    "width": 1440,
+    "height": 723
+  },
+  "verdict": "RED_DESKTOP_CONTROLS_HIDDEN_IN_INTERNAL_SCROLL_MOBILE_CARD_METAPHOR",
+  "metrics": {
+    "pageHeight": 755,
+    "rootTop": 323,
+    "rootBottom": 707,
+    "rootClientHeight": 382,
+    "rootScrollHeight": 614,
+    "rootGridTemplateColumns": "572px 520px",
+    "headerHeight": 142,
+    "formHeight": 408,
+    "primaryBottom": 538,
+    "previewBottom": 717,
+    "titleFontSize": 40,
+    "statusReasonFontSize": 40,
+    "channelHeadingFontSize": 40,
+    "channelGridTemplateColumns": "165px",
+    "channelCardTops": [636, 688, 740],
+    "channelActionBottom": 892,
+    "horizontalOverflow": 0
+  },
+  "evidenceSources": [
+    {
+      "path": "evaluation/dispatch-standalone-viewport-2026-07-28/report.json",
+      "fields": "afterLive.desktopShort root, primary, preview, channel width, and overflow metrics"
+    },
+    {
+      "kind": "same-session-pre-patch-read-only-browser-probe",
+      "fields": "heading typography, vertical channel positions, channel action bottom, header and form height"
+    }
+  ],
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "exactSavedShareUserSessionReproduced": false,
+    "routeSplitAloneAcceptedAsFix": false
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "schemaVersion": "safeclaw-dispatch-first-viewport-containment/v1",
+  "checkedAt": "2026-08-27T07:45:52+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_STANDALONE_DISPATCH_FIRST_VIEWPORT_CONTAINMENT",
+  "sourceHead": "79718c2bf35e6d5ac6163eb375346ddb0e39d74c",
+  "productCommit": "79718c2bf35e6d5ac6163eb375346ddb0e39d74c",
+  "productionCommit": "79718c2bf35e6d5ac6163eb375346ddb0e39d74c",
+  "productionDeploymentUrl": "safeguard-contest-p99nvd26m-seojaehongs-projects.vercel.app",
+  "route": "/dispatch",
+  "beforeLive": {
+    "artifact": "evaluation/dispatch-first-viewport-containment-2026-08-27/before-live/report.json",
+    "commitSha": "eef938663fa2de3515302bf1691f2522940e7b8f",
+    "verdict": "RED_DESKTOP_CONTROLS_HIDDEN_IN_INTERNAL_SCROLL_MOBILE_CARD_METAPHOR",
+    "desktopShort": {
+      "viewportWidth": 1440,
+      "viewportHeight": 723,
+      "rootClientHeight": 382,
+      "rootScrollHeight": 614,
+      "rootScrollDebt": 232,
+      "titleFontSize": 40,
+      "statusReasonFontSize": 40,
+      "channelHeadingFontSize": 40,
+      "channelActionBottom": 892,
+      "channelCardTops": [636, 688, 740]
+    }
+  },
+  "afterLive": {
+    "artifact": "evaluation/dispatch-first-viewport-containment-2026-08-27/after-live/report.json",
+    "commitSha": "79718c2bf35e6d5ac6163eb375346ddb0e39d74c",
+    "verdict": "PASS",
+    "total": 4,
+    "pass": 4,
+    "fail": 0,
+    "desktopShort": {
+      "day": {
+        "pageHeight": 771,
+        "viewportHeight": 723,
+        "rootClientHeight": 398,
+        "rootScrollHeight": 399,
+        "rootScrollDebt": 1,
+        "primaryBottom": 448.390625,
+        "previewBottom": 639.390625,
+        "channelActionBottom": 706.390625,
+        "titleFontSize": 20,
+        "statusReasonFontSize": 12,
+        "channelHeadingFontSize": 12,
+        "channelCardWidths": [193, 193, 193],
+        "channelCardTops": [616, 616, 616],
+        "horizontalOverflow": 0
+      },
+      "night": {
+        "viewportHeight": 723,
+        "rootClientHeight": 398,
+        "rootScrollHeight": 399,
+        "rootScrollDebt": 1,
+        "primaryBottom": 448.390625,
+        "previewBottom": 639.390625,
+        "channelActionBottom": 706.390625,
+        "channelCardWidths": [193, 193, 193],
+        "channelCardTops": [616, 616, 616],
+        "horizontalOverflow": 0
+      }
+    },
+    "mobileShort": {
+      "day": {
+        "viewportHeight": 723,
+        "summaryBottom": 521.59375,
+        "primaryBottom": 580.59375,
+        "visibleConfigCardCount": 0,
+        "horizontalOverflow": 0
+      },
+      "night": {
+        "viewportHeight": 723,
+        "summaryBottom": 521.59375,
+        "primaryBottom": 580.59375,
+        "visibleConfigCardCount": 0,
+        "horizontalOverflow": 0
+      }
+    }
+  },
+  "acceptanceContract": {
+    "routeSplitAloneAcceptedAsFix": false,
+    "desktopRequiresTwoPaneWorkbench": true,
+    "desktopRootScrollDebtAtMostOnePixel": true,
+    "desktopPrimaryPreviewAndChannelActionsInFirstViewport": true,
+    "desktopChannelCardsUseThreeReadableColumns": true,
+    "desktopComponentTypographyNotHeroTypography": true,
+    "mobilePrimaryActionContainedInFirstViewport": true,
+    "mobileConfigurationCollapsedByDefault": true,
+    "longPreviewUsesInternalScroll": true
+  },
+  "verification": {
+    "shareBrowser": {
+      "command": "npm.cmd exec -- vitest run tests\\workspace-share-mobile-browser.test.ts tests\\workspace-share-simplification.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=120000",
+      "status": "PASS",
+      "filesPassed": 2,
+      "testsPassed": 16
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "staticPagesGenerated": 28
+    },
+    "liveGeometry": {
+      "command": "node evaluation/dispatch-first-viewport-containment-2026-08-27/run-dispatch-first-viewport-containment.mjs --base-url https://www.safeclaw.kr --expected-commit 79718c2bf35e6d5ac6163eb375346ddb0e39d74c --output after-live",
+      "status": "PASS",
+      "rowsPassed": 4
+    },
+    "northstar": {
+      "command": "npm.cmd exec -- vitest run tests\\northstar-open-gate-audit.test.ts tests\\northstar-live-rollup.test.ts tests\\northstar-next-runway-generator.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 3,
+      "testsPassed": 160
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "exactSavedShareUserSessionReproduced": false,
+    "exactSavedShareRequiresConcreteUrlOrApprovedCreationFlow": true,
+    "workspaceShareEvidenceSubstitutesForExactSavedSession": false,
+    "broadHumanWordingReviewRequired": true
+  }
+}

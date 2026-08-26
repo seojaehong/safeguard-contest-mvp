@@ -5571,6 +5571,89 @@ function createFixtureRoot(): string {
       exactSavedShareUserSessionReproduced: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "dispatch-first-viewport-containment-2026-08-27", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_STANDALONE_DISPATCH_FIRST_VIEWPORT_CONTAINMENT",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    beforeLive: {
+      verdict: "RED_DESKTOP_CONTROLS_HIDDEN_IN_INTERNAL_SCROLL_MOBILE_CARD_METAPHOR",
+      desktopShort: {
+        rootScrollDebt: 232,
+        channelActionBottom: 892,
+      },
+    },
+    afterLive: {
+      total: 4,
+      pass: 4,
+      fail: 0,
+      desktopShort: {
+        day: {
+          viewportHeight: 723,
+          rootScrollDebt: 1,
+          primaryBottom: 448,
+          previewBottom: 639,
+          channelActionBottom: 706,
+          titleFontSize: 20,
+          statusReasonFontSize: 12,
+          channelHeadingFontSize: 12,
+          channelCardWidths: [193, 193, 193],
+          channelCardTops: [616, 616, 616],
+          horizontalOverflow: 0,
+        },
+        night: {
+          viewportHeight: 723,
+          rootScrollDebt: 1,
+          primaryBottom: 448,
+          previewBottom: 639,
+          channelActionBottom: 706,
+          channelCardWidths: [193, 193, 193],
+          channelCardTops: [616, 616, 616],
+          horizontalOverflow: 0,
+        },
+      },
+      mobileShort: {
+        day: {
+          viewportHeight: 723,
+          summaryBottom: 522,
+          primaryBottom: 581,
+          visibleConfigCardCount: 0,
+          horizontalOverflow: 0,
+        },
+        night: {
+          viewportHeight: 723,
+          summaryBottom: 522,
+          primaryBottom: 581,
+          visibleConfigCardCount: 0,
+          horizontalOverflow: 0,
+        },
+      },
+    },
+    acceptanceContract: {
+      routeSplitAloneAcceptedAsFix: false,
+      desktopRequiresTwoPaneWorkbench: true,
+      desktopRootScrollDebtAtMostOnePixel: true,
+      desktopPrimaryPreviewAndChannelActionsInFirstViewport: true,
+      desktopChannelCardsUseThreeReadableColumns: true,
+      desktopComponentTypographyNotHeroTypography: true,
+      mobilePrimaryActionContainedInFirstViewport: true,
+      mobileConfigurationCollapsedByDefault: true,
+      longPreviewUsesInternalScroll: true,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      providerDispatchCalled: false,
+      embeddingOrVectorMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      exactSavedShareUserSessionReproduced: false,
+      workspaceShareEvidenceSubstitutesForExactSavedSession: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-reviewer-cockpit-2026-07-25", "browser-report.json"), {
     schemaVersion: "safeclaw-kosha-exact-promotion-reviewer-cockpit-browser/v1",
     verdict: "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY",
@@ -6185,8 +6268,9 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "deployment_freshness_guard")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.evidencePath).toBe(
-      path.join("evaluation", "dispatch-standalone-viewport-2026-07-28", "report.json"),
+      path.join("evaluation", "dispatch-first-viewport-containment-2026-08-27", "report.json"),
     );
+    expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.detail).toContain("hidden root scroll debt 232->1px");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.detail).toContain("mobile Day/Night primary bottom=581/581");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.detail).toContain("exact saved Share MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "share_result_fixture_cockpit")?.state).toBe("proven");
@@ -7675,6 +7759,28 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("securityComplete=true");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("candidateKeyboard=false");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("mobilePaneKeyboard=false");
+  });
+
+  it("fails the standalone dispatch gate closed when desktop hidden root scroll debt returns", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "dispatch-first-viewport-containment-2026-08-27", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLive: { desktopShort: { day: { rootScrollDebt: number } } };
+    };
+    report.afterLive.desktopShort.day.rootScrollDebt = 2;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-08-27T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")).toMatchObject({
+      state: "contradicted",
+      evidencePath: path.join("evaluation", "dispatch-first-viewport-containment-2026-08-27", "report.json"),
+    });
   });
 
   it("fails Hermes evidence inspector closed when live digest readability collapses", async () => {

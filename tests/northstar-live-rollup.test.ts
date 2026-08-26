@@ -167,6 +167,14 @@ type RollupReport = {
     fullyAutomatedLaunchClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  dispatchStandaloneCockpit: {
+    firstViewportContainmentVerdict: string;
+    beforeDesktopShort: { rootScrollDebt: number };
+    liveDesktopShort: { rootScrollDebt: number; channelActionBottom: number; previewBottom: number };
+    liveMobileShortDay: { primaryBottom: number };
+    liveMobileShortNight: { primaryBottom: number };
+    containmentExactSavedShareVerdict: string;
+  };
   documentExportCapabilityTruth: {
     verdict: string;
     admissionMode: string;
@@ -2249,6 +2257,18 @@ function createFixtureRoot(): { root: string; head: string } {
     afterLive: { paneMarginBelow16Count: 0, minimumPaneMargin: 16, maximumShellRatio: 2.36 },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
+  writeJson(root, "evaluation/dispatch-first-viewport-containment-2026-08-27/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_STANDALONE_DISPATCH_FIRST_VIEWPORT_CONTAINMENT",
+    sourceHead: "TO_FILL",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    beforeLive: { desktopShort: { rootScrollDebt: 232 } },
+    afterLive: {
+      desktopShort: { day: { rootScrollDebt: 1, channelActionBottom: 706, previewBottom: 639 } },
+      mobileShort: { day: { primaryBottom: 581 }, night: { primaryBottom: 581 } },
+    },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  });
   writeJson(root, "evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.json", {
     verdict: "adapter_boundary_pass_live_execution_not_claimed",
     sourceShaForFocusedTests: "TO_FILL",
@@ -2340,6 +2360,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/mobile-p0-workspace-gate-2026-07-20/report.json",
     "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
     "evaluation/document-authoring-pane-margin-2026-08-02/report.json",
+    "evaluation/dispatch-first-viewport-containment-2026-08-27/report.json",
     "evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.json",
   ].forEach((relativePath) => replaceToken(relativePath));
   const head = commitAll(root, "bind evidence");
@@ -2387,6 +2408,15 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "document_authoring_pane_margin")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.dispatchStandaloneCockpit).toMatchObject({
+      firstViewportContainmentVerdict: "PASS_LIVE_PRODUCTION_STANDALONE_DISPATCH_FIRST_VIEWPORT_CONTAINMENT",
+      beforeDesktopShort: { rootScrollDebt: 232 },
+      liveDesktopShort: { rootScrollDebt: 1, channelActionBottom: 706, previewBottom: 639 },
+      liveMobileShortDay: { primaryBottom: 581 },
+      liveMobileShortNight: { primaryBottom: 581 },
+      containmentExactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "dispatch_first_viewport_containment")?.productionStatus).toBe("ancestor_of_head");
     expect(report.liveCritical.findings).toBe(0);
     expect(report.liveDocumentQualityMatrix).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_MULTI_SCENARIO_DOCUMENT_QUALITY",
