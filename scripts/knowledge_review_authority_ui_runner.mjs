@@ -535,6 +535,8 @@ try {
           })),
           readinessInsideCandidatePane: candidatePane.contains(readiness),
           candidatePaneOverflowY: getComputedStyle(candidatePane).overflowY,
+          candidatePaneClientHeight: candidatePane.clientHeight,
+          candidatePaneScrollHeight: candidatePane.scrollHeight,
           actionGroupTop: actionRect.top,
           firstActionBottom: firstAction.getBoundingClientRect().bottom,
           firstActionDepth: firstAction.getBoundingClientRect().bottom - rootRect.top,
@@ -543,6 +545,7 @@ try {
         };
       });
       let mobileEvidence = null;
+      let traceScreenshotContextVisible = null;
       const screenshot = `knowledge-review-authority-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
       const candidateSubjectScreenshot = `knowledge-review-candidate-subject-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
       if (viewport.width > 720) {
@@ -564,6 +567,19 @@ try {
         const traceabilityPanel = inbox.locator("[data-review-traceability]");
         if (await traceabilityPanel.count() === 1) {
           await traceabilityPanel.scrollIntoViewIfNeeded();
+          traceScreenshotContextVisible = await traceabilityPanel.evaluate((panel) => {
+            const candidatePane = panel.closest("[data-review-pane='candidate']");
+            if (!(candidatePane instanceof HTMLElement)) return false;
+            const panelRect = panel.getBoundingClientRect();
+            const paneRect = candidatePane.getBoundingClientRect();
+            candidatePane.scrollTop += panelRect.top - paneRect.top - 8;
+            const firstHazard = panel.querySelector("ol > li > strong");
+            if (!(firstHazard instanceof HTMLElement)) return false;
+            const firstHazardRect = firstHazard.getBoundingClientRect();
+            const scrolledPaneRect = candidatePane.getBoundingClientRect();
+            return firstHazardRect.top >= scrolledPaneRect.top
+              && firstHazardRect.bottom <= scrolledPaneRect.bottom;
+          });
           await page.screenshot({
             path: path.join(
               outputDir,
@@ -756,8 +772,11 @@ try {
             && (!traceMatrixMode
               || (traceMatrixComplete
                 && metrics.traceRows.length === canonicalTraceItems.length
-                && metrics.traceListOverflowY === "auto"
-                && metrics.traceListScrollHeight > metrics.traceListClientHeight))
+                && metrics.traceListOverflowY === "visible"
+                && metrics.traceListScrollHeight <= metrics.traceListClientHeight + 1
+                && metrics.candidatePaneOverflowY === "auto"
+                && metrics.candidatePaneScrollHeight > metrics.candidatePaneClientHeight
+                && traceScreenshotContextVisible === true))
             && !metrics.approveDisabled))
         && revisionDecision.readinessVisible
         && revisionDecision.approveDisabled
@@ -815,6 +834,7 @@ try {
         revisionDecision,
         traceMatrixCoverage,
         traceMatrixComplete,
+        traceScreenshotContextVisible,
         browserErrors,
         passed
       });
@@ -972,10 +992,15 @@ const report = {
     canonicalControlLinkCount: canonicalTraceControlLinkCount,
     canonicalDocumentLinkCount: canonicalTraceDocumentLinkCount,
     canonicalMatrixComplete: traceMatrixMode && results.every((result) => result.traceMatrixComplete),
-    traceListInternalScroll: traceMatrixMode && results.every((result) => (
-      result.metrics.traceListOverflowY === "auto"
-      && result.metrics.traceListScrollHeight > result.metrics.traceListClientHeight
+    traceListInternalScroll: false,
+    traceScrollOwner: traceMatrixMode ? "candidate-pane" : null,
+    candidatePaneInternalScroll: traceMatrixMode && results.every((result) => (
+      result.metrics.candidatePaneOverflowY === "auto"
+      && result.metrics.candidatePaneScrollHeight > result.metrics.candidatePaneClientHeight
+      && result.metrics.traceListOverflowY === "visible"
+      && result.metrics.traceListScrollHeight <= result.metrics.traceListClientHeight + 1
     )),
+    traceScreenshotContextVisible: traceMatrixMode && results.every((result) => result.traceScreenshotContextVisible === true),
     missingControls: traceMatrixMode
       ? [...new Set(results.flatMap((result) => result.traceMatrixCoverage.flatMap((item) => item.missingControls)))]
       : [],

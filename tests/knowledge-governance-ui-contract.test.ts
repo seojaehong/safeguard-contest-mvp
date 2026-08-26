@@ -166,7 +166,14 @@ describe("knowledge governance UI contract", () => {
     expect(browserRunnerSource).toContain("canonicalControlLinkCount");
     expect(browserRunnerSource).toContain("canonicalDocumentLinkCount");
     expect(browserRunnerSource).toContain("allCanonicalMappingsClosed: true");
-    expect(browserRunnerSource).toContain("traceListInternalScroll");
+    expect(browserRunnerSource).toContain('traceScrollOwner: traceMatrixMode ? "candidate-pane" : null');
+    expect(browserRunnerSource).toContain("candidatePaneInternalScroll");
+    expect(browserRunnerSource).toContain("candidatePane.scrollTop += panelRect.top - paneRect.top - 8");
+    expect(browserRunnerSource).toContain("traceScreenshotContextVisible === true");
+    expect(browserRunnerSource).toContain('metrics.traceListOverflowY === "visible"');
+    expect(browserRunnerSource).toContain("metrics.candidatePaneScrollHeight > metrics.candidatePaneClientHeight");
+    expect(inboxSource).toContain("className={styles.reviewTraceLinks}");
+    expect(cssSource).toMatch(/\.reviewTraceability ol\s*\{[\s\S]*?overflow:\s*visible;/u);
     expect(browserRunnerSource).toContain("machineEvidenceReplacesHumanReview: false");
   });
 

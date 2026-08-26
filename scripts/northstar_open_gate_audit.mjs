@@ -7320,7 +7320,10 @@ function evaluateHermesReviewTraceMatrixGate(rootDir) {
     && contract.canonicalControlLinkCount === 33
     && contract.canonicalDocumentLinkCount === 33
     && contract.canonicalMatrixComplete === true
-    && contract.traceListInternalScroll === true
+    && contract.traceListInternalScroll === false
+    && contract.traceScrollOwner === "candidate-pane"
+    && contract.candidatePaneInternalScroll === true
+    && contract.traceScreenshotContextVisible === true
     && missingControls.length === 0
     && missingDocuments.length === 0
     && contract.hazardBound === true
@@ -7348,8 +7351,8 @@ function evaluateHermesReviewTraceMatrixGate(rootDir) {
     state: pass ? "proven" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Live Hermes review trace matrix closes the canonical 8 hazards, 33 controls, and 33 primary-document bindings with exact evidence rows and bounded internal scroll. The prior 32/33 truncation remains preserved as RED evidence. Human review remains incomplete, publication stays unpublished, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
-      : `Hermes trace matrix is contradicted: verdict=${readString(report.verdict) || "missing"}, before=${readString(beforeLive.verdict) || "missing"}, local=${readString(local.verdict) || "missing"}, live=${readString(afterLive.verdict) || "missing"}, hazards=${String(contract.canonicalHazardCount)}, controls=${String(contract.canonicalControlLinkCount)}, documents=${String(contract.canonicalDocumentLinkCount)}, complete=${String(contract.canonicalMatrixComplete)}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+      ? "Live Hermes review trace matrix closes the canonical 8 hazards, 33 controls, and 33 primary-document bindings with exact evidence rows. The candidate pane is the single bounded scroll owner; the trace list remains fully expanded inside it, avoiding nested-scroll context loss. The prior 32/33 truncation remains preserved as RED evidence. Human review remains incomplete, publication stays unpublished, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
+      : `Hermes trace matrix is contradicted: verdict=${readString(report.verdict) || "missing"}, before=${readString(beforeLive.verdict) || "missing"}, local=${readString(local.verdict) || "missing"}, live=${readString(afterLive.verdict) || "missing"}, hazards=${String(contract.canonicalHazardCount)}, controls=${String(contract.canonicalControlLinkCount)}, documents=${String(contract.canonicalDocumentLinkCount)}, complete=${String(contract.canonicalMatrixComplete)}, traceScroll=${String(contract.traceListInternalScroll)}/${readString(contract.traceScrollOwner) || "missing"}/${String(contract.candidatePaneInternalScroll)}, screenshotContext=${String(contract.traceScreenshotContextVisible)}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass ? [] : ["Restore all 8 canonical hazards and every 33/33 control and document binding without weakening human-review or approval boundaries, then rerun local and live probes."],
   });
 }

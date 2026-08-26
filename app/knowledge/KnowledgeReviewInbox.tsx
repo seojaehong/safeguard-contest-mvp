@@ -811,13 +811,18 @@ export function KnowledgeReviewInbox() {
                                 {item.traceItems.map((trace) => (
                                   <li key={trace.id} data-review-trace={trace.resolved ? "resolved" : "unresolved"}>
                                     <strong>{trace.hazardTitle}</strong>
-                                    <span>조치 {trace.controls.join(" · ") || "누락"}</span>
-                                    <span>문서 {trace.primaryDocuments.join(" · ") || "누락"}</span>
-                                    <span>
-                                      근거 {trace.evidenceIds.map((evidenceId) => (
-                                        item.evidenceItems.find((evidence) => evidence.id === evidenceId)?.sourceLabel
-                                      )).filter(Boolean).join(" · ") || "미연결"}
-                                    </span>
+                                    <dl className={styles.reviewTraceLinks}>
+                                      <div><dt>조치</dt><dd>{trace.controls.join(" · ") || "누락"}</dd></div>
+                                      <div><dt>문서</dt><dd>{trace.primaryDocuments.join(" · ") || "누락"}</dd></div>
+                                      <div>
+                                        <dt>근거</dt>
+                                        <dd>
+                                          {trace.evidenceIds.map((evidenceId) => (
+                                            item.evidenceItems.find((evidence) => evidence.id === evidenceId)?.sourceLabel
+                                          )).filter(Boolean).join(" · ") || "미연결"}
+                                        </dd>
+                                      </div>
+                                    </dl>
                                   </li>
                                 ))}
                               </ol>

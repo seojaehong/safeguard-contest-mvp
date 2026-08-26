@@ -524,24 +524,58 @@
   gap: var(--space-1);
 }
 
+.reviewTraceability li {
+  border-bottom: 1px solid var(--workspace-rule, #e2e5e9);
+  padding-bottom: var(--space-2);
+}
+
+.reviewTraceability li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
 .reviewTraceability > div {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: baseline;
 }
 
 .reviewTraceability > div span,
-.reviewTraceability li span {
+.reviewTraceLinks dd {
   color: var(--workspace-muted, #606873);
 }
 
 .reviewTraceability ol {
   display: grid;
   gap: var(--space-2);
-  max-height: 180px;
   margin: 0;
   padding-left: 20px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow: visible;
+}
+
+.reviewTraceLinks {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.reviewTraceLinks > div {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.reviewTraceLinks dt,
+.reviewTraceLinks dd {
+  min-width: 0;
+  margin: 0;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  overflow-wrap: anywhere;
+}
+
+.reviewTraceLinks dt {
+  color: var(--workspace-ink, #17191d);
+  font-weight: 700;
 }
 
 .reviewTraceability > p {
@@ -552,7 +586,9 @@
 }
 
 .reviewTraceability strong,
-.reviewTraceability span {
+.reviewTraceability span,
+.reviewTraceability dt,
+.reviewTraceability dd {
   font-size: var(--text-caption);
   line-height: var(--leading-caption);
 }

@@ -592,6 +592,9 @@ type NextRunwayReport = {
     canonicalDocumentLinkCount: number;
     canonicalMatrixComplete: boolean;
     traceListInternalScroll: boolean;
+    traceScrollOwner: string;
+    candidatePaneInternalScroll: boolean;
+    traceScreenshotContextVisible: boolean;
     humanReviewCompleted: boolean;
     exactSavedShareVerdict: string;
   };
@@ -2928,7 +2931,10 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       canonicalControlLinkCount: 33,
       canonicalDocumentLinkCount: 33,
       canonicalMatrixComplete: true,
-      traceListInternalScroll: true,
+      traceListInternalScroll: false,
+      traceScrollOwner: "candidate-pane",
+      candidatePaneInternalScroll: true,
+      traceScreenshotContextVisible: true,
       humanReviewCompleted: false,
     },
     remainingBoundaries: {
@@ -4659,7 +4665,10 @@ describe("northstar next runway generator", () => {
       canonicalControlLinkCount: 33,
       canonicalDocumentLinkCount: 33,
       canonicalMatrixComplete: true,
-      traceListInternalScroll: true,
+      traceListInternalScroll: false,
+      traceScrollOwner: "candidate-pane",
+      candidatePaneInternalScroll: true,
+      traceScreenshotContextVisible: true,
       humanReviewCompleted: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
