@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `c6c6b8a60b4f570928cb017bd4ceb23495fb7846`
+Source HEAD: `6ac28333501dd4a9fe940f2bb1ca2fcccbdbbf75`
 
-Production `/api/build-info`: `eb247dbedc85c0b8d89e5c2de9c69dda2fec2776`
+Production `/api/build-info`: `d3ed175cc683a7a2734fd1b3d54f3b951025b4dd`
 
 Latest evidence commit live: `false`
 
@@ -14,17 +14,17 @@ Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/kosha-exact-promotion-reviewer-cockpit-2026-07-25/browser-report.json`, `evaluation/kosha-exact-promotion-reviewer-cockpit-2026-07-25/browser-report.md`, `evaluation/kosha-exact-promotion-reviewer-cockpit-2026-07-25/desktop-1440x723.png`, `evaluation/kosha-exact-promotion-reviewer-cockpit-2026-07-25/desktop-title-provenance-1440x723.png`, `evaluation/kosha-exact-promotion-reviewer-cockpit-2026-07-25/index.html`, `evaluation/kosha-exact-promotion-reviewer-cockpit-2026-07-25/mobile-evidence-390x723.png`, `evaluation/kosha-exact-promotion-reviewer-cockpit-2026-07-25/mobile-review-390x723.png`, `evaluation/kosha-exact-promotion-reviewer-cockpit-2026-07-25/report.json`, `evaluation/kosha-exact-promotion-reviewer-cockpit-2026-07-25/report.md`, `scripts/kosha_exact_promotion_reviewer_cockpit.mjs`, `scripts/kosha_exact_promotion_reviewer_cockpit_browser.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/kosha-exact-promotion-reviewer-cockpit.test.ts`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `evaluation/kosha-exact-promotion-reviewer-cockpit-2026-07-25/browser-report.json`, `evaluation/kosha-exact-promotion-reviewer-cockpit-2026-07-25/browser-report.md`, `evaluation/kosha-exact-promotion-reviewer-cockpit-2026-07-25/desktop-1440x723.png`, `evaluation/kosha-exact-promotion-reviewer-cockpit-2026-07-25/index.html`, `evaluation/kosha-exact-promotion-reviewer-cockpit-2026-07-25/report.json`, `evaluation/kosha-exact-promotion-reviewer-cockpit-2026-07-25/report.md`
 
 Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `c6c6b8a60b4f570928cb017bd4ceb23495fb7846`
+Live rollup source head: `6ac28333501dd4a9fe940f2bb1ca2fcccbdbbf75`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `c6c6b8a60b4f570928cb017bd4ceb23495fb7846` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `eb247dbedc85c0b8d89e5c2de9c69dda2fec2776`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `6ac28333501dd4a9fe940f2bb1ca2fcccbdbbf75` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `d3ed175cc683a7a2734fd1b3d54f3b951025b4dd`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
