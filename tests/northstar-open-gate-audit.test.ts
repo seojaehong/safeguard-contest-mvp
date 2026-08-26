@@ -5103,6 +5103,64 @@ function createFixtureRoot(): string {
       providerDispatchPersistence: "APPROVAL_GATED",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "hermes-knowledge-review-trace-matrix-2026-08-26", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_MATRIX",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    beforeLive: {
+      verdict: "RED_HERMES_REVIEW_TRACE_MATRIX",
+      viewportCount: 8,
+      passedCount: 0,
+      failedCount: 8,
+      canonicalMatrixComplete: false,
+      missingControls: ["사진·증빙 보관"],
+      missingPrimaryDocuments: ["안전보건교육"],
+    },
+    local: { verdict: "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_TRACE_MATRIX", viewportCount: 8, passedCount: 8, failedCount: 0 },
+    afterLive: { verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_MATRIX", viewportCount: 8, passedCount: 8, failedCount: 0, productionAligned: true, browserErrorCount: 0 },
+    traceabilityContract: {
+      expectedTraceCount: 8,
+      panelCount: 1,
+      resolvedTraceCount: 8,
+      unresolvedTraceCount: 0,
+      canonicalHazardCount: 8,
+      canonicalControlLinkCount: 33,
+      canonicalDocumentLinkCount: 33,
+      canonicalMatrixComplete: true,
+      traceListInternalScroll: true,
+      missingControls: [],
+      missingPrimaryDocuments: [],
+      hazardBound: true,
+      controlsBound: true,
+      primaryDocumentsBound: true,
+      evidenceRowsBound: true,
+      insideCandidatePane: true,
+      approvalFailsClosedWhenIncomplete: true,
+      humanReviewCompleted: false,
+      publicationState: "unpublished",
+      beforeCanonicalMatrixComplete: false,
+      allHazardsClosed: true,
+      allCanonicalMappingsClosed: true,
+      machineEvidenceReplacesHumanReview: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      ontologyPublicationPerformed: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    securityBoundary: { immutableOriginal18FindingBaselinePreserved: true },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-reviewer-cockpit-2026-07-25", "report.json"), {
     schemaVersion: "safeclaw-kosha-exact-promotion-reviewer-cockpit/v1",
     verdict: "PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY",
@@ -5637,6 +5695,12 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "hermes_review_trace_blocks")?.detail).toContain("one scoped hazard");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_trace_blocks")?.detail).toContain("not all-hazard or all-document closure");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_trace_blocks")?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_trace_matrix")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "hermes-knowledge-review-trace-matrix-2026-08-26", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_trace_matrix")?.detail).toContain("8 hazards, 33 controls, and 33 primary-document bindings");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_trace_matrix")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "live_document_secondary_grounding")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
@@ -7212,6 +7276,24 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "hermes_review_trace_blocks")?.detail).toContain("unresolved=1");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_trace_blocks")?.detail).toContain("allHazards=true");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_trace_blocks")?.detail).toContain("exactShare=PASS");
+  });
+
+  it("fails the Hermes canonical trace matrix closed on incomplete mappings or saved Share overclaim", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "hermes-knowledge-review-trace-matrix-2026-08-26", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      traceabilityContract: { canonicalControlLinkCount: number };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.traceabilityContract.canonicalControlLinkCount = 32;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_trace_matrix")).toMatchObject({ state: "contradicted" });
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_trace_matrix")?.detail).toContain("controls=32");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_trace_matrix")?.detail).toContain("exactShare=PASS");
   });
 
   it("fails the public Ask distributed admission gate closed on provider execution or saved Share overclaim", async () => {

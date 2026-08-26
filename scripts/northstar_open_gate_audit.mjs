@@ -88,6 +88,7 @@ const EVIDENCE_PATHS = Object.freeze({
   hermesKnowledgeReviewEvidenceInspector: path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"),
   hermesReviewEventFactTraceability: path.join("evaluation", "hermes-knowledge-review-event-facts-2026-08-26", "report.json"),
   hermesReviewTraceBlocks: path.join("evaluation", "hermes-knowledge-review-trace-blocks-2026-08-26", "report.json"),
+  hermesReviewTraceMatrix: path.join("evaluation", "hermes-knowledge-review-trace-matrix-2026-08-26", "report.json"),
   hermesOpenclawRuntime: path.join("evaluation", "hermes-openclaw-runtime-current-gate-2026-07-20", "report.json"),
   liveDocumentSecondaryGrounding: path.join("evaluation", "live-document-secondary-grounding-2026-07-25", "report.json"),
   liveDocumentSeedProfileIsolation: path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"),
@@ -6945,6 +6946,107 @@ function evaluateHermesReviewTraceBlocksGate(rootDir) {
   });
 }
 
+/** @param {string} rootDir */
+function evaluateHermesReviewTraceMatrixGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.hermesReviewTraceMatrix;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "hermes_review_trace_matrix",
+      label: "Hermes canonical hazard trace matrix",
+      state: "contradicted",
+      evidencePath,
+      detail: "Hermes canonical hazard trace matrix evidence is missing or invalid.",
+      nextActions: ["Run the canonical 8-hazard trace matrix against current source and live production."],
+    });
+  }
+
+  const beforeLive = isRecord(report.beforeLive) ? report.beforeLive : {};
+  const local = isRecord(report.local) ? report.local : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const contract = isRecord(report.traceabilityContract) ? report.traceabilityContract : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const security = isRecord(report.securityBoundary) ? report.securityBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const beforeMissingControls = Array.isArray(beforeLive.missingControls) ? beforeLive.missingControls : [];
+  const beforeMissingDocuments = Array.isArray(beforeLive.missingPrimaryDocuments) ? beforeLive.missingPrimaryDocuments : [];
+  const missingControls = Array.isArray(contract.missingControls) ? contract.missingControls : [];
+  const missingDocuments = Array.isArray(contract.missingPrimaryDocuments) ? contract.missingPrimaryDocuments : [];
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.ontologyPublicationPerformed === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = report.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_MATRIX"
+    && productCommit !== ""
+    && productionCommit !== ""
+    && isGitAncestor(rootDir, productCommit)
+    && isGitAncestor(rootDir, productionCommit)
+    && beforeLive.verdict === "RED_HERMES_REVIEW_TRACE_MATRIX"
+    && beforeLive.viewportCount === 8
+    && beforeLive.passedCount === 0
+    && beforeLive.failedCount === 8
+    && beforeLive.canonicalMatrixComplete === false
+    && beforeMissingControls.length === 1
+    && beforeMissingControls[0] === "사진·증빙 보관"
+    && beforeMissingDocuments.length === 1
+    && beforeMissingDocuments[0] === "안전보건교육"
+    && local.verdict === "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_TRACE_MATRIX"
+    && local.viewportCount === 8
+    && local.passedCount === 8
+    && local.failedCount === 0
+    && afterLive.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_MATRIX"
+    && afterLive.viewportCount === 8
+    && afterLive.passedCount === 8
+    && afterLive.failedCount === 0
+    && afterLive.productionAligned === true
+    && afterLive.browserErrorCount === 0
+    && contract.expectedTraceCount === 8
+    && contract.panelCount === 1
+    && contract.resolvedTraceCount === 8
+    && contract.unresolvedTraceCount === 0
+    && contract.canonicalHazardCount === 8
+    && contract.canonicalControlLinkCount === 33
+    && contract.canonicalDocumentLinkCount === 33
+    && contract.canonicalMatrixComplete === true
+    && contract.traceListInternalScroll === true
+    && missingControls.length === 0
+    && missingDocuments.length === 0
+    && contract.hazardBound === true
+    && contract.controlsBound === true
+    && contract.primaryDocumentsBound === true
+    && contract.evidenceRowsBound === true
+    && contract.insideCandidatePane === true
+    && contract.approvalFailsClosedWhenIncomplete === true
+    && contract.humanReviewCompleted === false
+    && contract.publicationState === "unpublished"
+    && contract.beforeCanonicalMatrixComplete === false
+    && contract.allHazardsClosed === true
+    && contract.allCanonicalMappingsClosed === true
+    && contract.machineEvidenceReplacesHumanReview === false
+    && noMutation
+    && security.immutableOriginal18FindingBaselinePreserved === true
+    && remaining.exactSavedShareVerdict === "MISSING_EVIDENCE"
+    && remaining.llmWikiPublication === "APPROVAL_GATED"
+    && remaining.supabaseRlsLaunchIsolation === "APPROVAL_GATED"
+    && remaining.providerDispatchPersistence === "APPROVAL_GATED";
+
+  return gateResult({
+    id: "hermes_review_trace_matrix",
+    label: "Hermes canonical hazard trace matrix",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live Hermes review trace matrix closes the canonical 8 hazards, 33 controls, and 33 primary-document bindings with exact evidence rows and bounded internal scroll. The prior 32/33 truncation remains preserved as RED evidence. Human review remains incomplete, publication stays unpublished, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
+      : `Hermes trace matrix is contradicted: verdict=${readString(report.verdict) || "missing"}, before=${readString(beforeLive.verdict) || "missing"}, local=${readString(local.verdict) || "missing"}, live=${readString(afterLive.verdict) || "missing"}, hazards=${String(contract.canonicalHazardCount)}, controls=${String(contract.canonicalControlLinkCount)}, documents=${String(contract.canonicalDocumentLinkCount)}, complete=${String(contract.canonicalMatrixComplete)}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass ? [] : ["Restore all 8 canonical hazards and every 33/33 control and document binding without weakening human-review or approval boundaries, then rerun local and live probes."],
+  });
+}
+
 /**
  * @param {string} rootDir
  * @param {string} gateId
@@ -9835,6 +9937,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateHermesKnowledgeReviewEvidenceInspectorGate(rootDir),
     evaluateHermesReviewEventFactTraceabilityGate(rootDir),
     evaluateHermesReviewTraceBlocksGate(rootDir),
+    evaluateHermesReviewTraceMatrixGate(rootDir),
     evaluateLiveDocumentSecondaryGroundingGate(rootDir),
     evaluateLiveDocumentSeedProfileIsolationGate(rootDir),
     evaluateUiDocumentsShareCockpitGate(rootDir),
