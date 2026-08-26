@@ -406,8 +406,10 @@ try {
         const boundEventFacts = workbench.querySelectorAll("[data-review-evidence-fact]");
         const evidenceWorkbench = workbench?.querySelector("[data-review-evidence-workbench='true']");
         const evidencePane = workbench?.querySelector("[data-review-pane='evidence']");
+        const evidenceDigest = evidencePane?.querySelector("[data-review-evidence-digest]");
         const authority = document.querySelector("[data-review-authority-contract='true']");
         const readiness = document.querySelector("[data-review-content-readiness='ready_for_human_review']");
+        const readinessSections = Array.from(readiness?.querySelectorAll("[data-readiness-section]") ?? []);
         const candidatePane = document.querySelector("[data-review-pane='candidate']");
         const actionGroup = document.querySelector("[role='group'][aria-label='검토 결정']");
         const firstAction = actionGroup?.querySelector("button");
@@ -497,6 +499,12 @@ try {
           evidenceInternalScroll: evidencePane?.querySelector("ol") instanceof HTMLElement
             ? getComputedStyle(evidencePane.querySelector("ol")).overflowY
             : null,
+          evidenceDigestWidth: evidenceDigest instanceof HTMLElement
+            ? evidenceDigest.getBoundingClientRect().width
+            : 0,
+          evidenceDigestHeight: evidenceDigest instanceof HTMLElement
+            ? evidenceDigest.getBoundingClientRect().height
+            : 0,
           publicEvidenceLinkCount: evidencePane?.querySelectorAll("a[href^='https://']").length ?? 0,
           navigatorBeforeDetail: navigatorRect.right <= selectedCandidateRect.left + 1,
           selectedCandidateHeight: selectedCandidateRect.height,
@@ -506,6 +514,13 @@ try {
           readinessPanelCount: document.querySelectorAll("[data-review-content-readiness]").length,
           readinessSectionCount: readiness.querySelectorAll("[data-readiness-section]").length,
           readySectionCount: readiness.querySelectorAll('[data-readiness-section][data-ready="true"]').length,
+          readinessSectionMinWidth: Math.min(...readinessSections.map((section) => (
+            section instanceof HTMLElement ? section.getBoundingClientRect().width : 0
+          ))),
+          readinessLabelMaxHeight: Math.max(...readinessSections.map((section) => {
+            const label = section.querySelector("span");
+            return label instanceof HTMLElement ? label.getBoundingClientRect().height : 0;
+          })),
           readinessInsideCandidatePane: candidatePane.contains(readiness),
           candidatePaneOverflowY: getComputedStyle(candidatePane).overflowY,
           actionGroupTop: actionRect.top,
@@ -550,6 +565,7 @@ try {
             throw new Error("Missing mobile Hermes evidence pane");
           }
           const list = pane.querySelector("ol");
+          const digest = pane.querySelector("[data-review-evidence-digest]");
           const boundFacts = Array.from(pane.querySelectorAll("[data-review-evidence-fact]"));
           return {
             paneCount: workbench.querySelectorAll("[data-review-pane]").length,
@@ -557,6 +573,8 @@ try {
             evidenceItemCount: pane.querySelectorAll("li[data-review-evidence-authority]").length,
             publicEvidenceLinkCount: pane.querySelectorAll("a[href^='https://']").length,
             listOverflowY: list instanceof HTMLElement ? getComputedStyle(list).overflowY : null,
+            digestWidth: digest instanceof HTMLElement ? digest.getBoundingClientRect().width : 0,
+            digestHeight: digest instanceof HTMLElement ? digest.getBoundingClientRect().height : 0,
             contained: pane.scrollWidth <= pane.clientWidth + 1,
             boundEventFactCount: boundFacts.length,
             eventFactEvidenceRowCount: new Set(boundFacts.map((fact) => fact.closest("li[data-review-evidence-authority]"))).size,
@@ -566,6 +584,16 @@ try {
       }
       if (viewport.width <= 720) {
         await page.screenshot({ path: path.join(outputDir, screenshot), fullPage: false });
+      }
+      if (evidenceInspectorMode) {
+        await inbox.locator("[data-review-evidence-digest]").first().scrollIntoViewIfNeeded();
+        await page.screenshot({
+          path: path.join(
+            outputDir,
+            `knowledge-review-evidence-readability-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`
+          ),
+          fullPage: false
+        });
       }
       await inbox.getByRole("button", { name: "후보 승인", exact: true }).click();
       await page.waitForFunction(() => (
@@ -668,6 +696,8 @@ try {
         && metrics.authorityContained
         && metrics.readinessPanelCount === 1
         && metrics.readinessSectionCount === 4
+        && metrics.readinessSectionMinWidth >= (viewport.width > 720 ? 120 : 96)
+        && metrics.readinessLabelMaxHeight <= 36
         && metrics.readySectionCount === 4
         && metrics.readinessInsideCandidatePane
         && metrics.candidatePaneOverflowY === "auto"
@@ -711,12 +741,16 @@ try {
             && metrics.evidenceItemCount === queueItem.evidenceItems.length
             && metrics.evidenceWorkbenchColumns === 2
             && metrics.evidenceInternalScroll === "auto"
+            && metrics.evidenceDigestWidth >= 160
+            && metrics.evidenceDigestHeight <= 36
             && metrics.publicEvidenceLinkCount === 3
           : mobileEvidence?.paneCount === 1
             && mobileEvidence.candidatePaneCount === 0
             && mobileEvidence.evidenceItemCount === queueItem.evidenceItems.length
             && mobileEvidence.publicEvidenceLinkCount === 3
             && mobileEvidence.listOverflowY === "auto"
+            && mobileEvidence.digestWidth >= 160
+            && mobileEvidence.digestHeight <= 36
             && mobileEvidence.contained
             && mobilePaneKeyboard?.endState.selectedIndex === 1
             && mobilePaneKeyboard.endState.focusedIndex === 1
@@ -849,7 +883,24 @@ const report = {
     mobileMountedPaneCount: 1,
     publicEvidenceLinkCount: 3,
     privateEvidenceRawIdentityExposed: false,
-    evidenceInternalScroll: true
+    evidenceInternalScroll: true,
+    evidenceDigestMinWidth: Math.min(...results.map((result) => (
+      result.viewport.width > 720
+        ? result.metrics.evidenceDigestWidth
+        : result.mobileEvidence?.digestWidth ?? 0
+    ))),
+    evidenceDigestMaxHeight: Math.max(...results.map((result) => (
+      result.viewport.width > 720
+        ? result.metrics.evidenceDigestHeight
+        : result.mobileEvidence?.digestHeight ?? 0
+    ))),
+    desktopReadinessSectionMinWidth: Math.min(...results
+      .filter((result) => result.viewport.width > 720)
+      .map((result) => result.metrics.readinessSectionMinWidth)),
+    mobileReadinessSectionMinWidth: Math.min(...results
+      .filter((result) => result.viewport.width <= 720)
+      .map((result) => result.metrics.readinessSectionMinWidth)),
+    readinessLabelMaxHeight: Math.max(...results.map((result) => result.metrics.readinessLabelMaxHeight))
   },
   eventFactsContract: {
     explicitReviewFactsOnly: true,
@@ -957,6 +1008,7 @@ ${rows}
 - Candidate tabs expose one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and Arrow/Home/End keyboard navigation.
 - Desktop uses a two-column review workbench; mobile uses one column and keeps the candidate body internally scrollable.
 - Desktop mounts the selected candidate and five-item evidence inspector together; mobile mounts one linked pane behind a keyboard-operable segmented tab control.
+- Evidence digests keep at least ${report.workbenchContract.evidenceDigestMinWidth}px width and at most ${report.workbenchContract.evidenceDigestMaxHeight}px height; readiness cells keep at least ${report.workbenchContract.desktopReadinessSectionMinWidth}px on desktop and ${report.workbenchContract.mobileReadinessSectionMinWidth}px on mobile, with labels no taller than ${report.workbenchContract.readinessLabelMaxHeight}px.
 - Review decisions announce their pending state, expose busy semantics, disable all competing actions, and restore the settled status after the delayed save fixture completes.
 - Each selected candidate exposes one server-derived readiness panel with four required sections. A revision-required candidate disables only candidate approval while keeping site-only retention and rejection available.
 - Explicit safe original-event review facts must appear in a distinct reviewer region inside the candidate pane, without duplicating their marker in the candidate body or exposing private event text.

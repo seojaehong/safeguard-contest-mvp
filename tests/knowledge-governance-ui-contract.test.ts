@@ -117,6 +117,15 @@ describe("knowledge governance UI contract", () => {
     );
   });
 
+  it("fails the live review runner closed when evidence digests or readiness labels collapse", () => {
+    expect(browserRunnerSource).toContain("metrics.evidenceDigestWidth >= 160");
+    expect(browserRunnerSource).toContain("metrics.evidenceDigestHeight <= 36");
+    expect(browserRunnerSource).toContain("mobileEvidence.digestWidth >= 160");
+    expect(browserRunnerSource).toContain("metrics.readinessSectionMinWidth >= (viewport.width > 720 ? 120 : 96)");
+    expect(browserRunnerSource).toContain("metrics.readinessLabelMaxHeight <= 36");
+    expect(browserRunnerSource).toContain("knowledge-review-evidence-readability-${theme}-${viewport.name}");
+  });
+
   it("keeps hazard-to-evidence trace evidence scoped and fail closed", () => {
     expect(browserRunnerSource).toContain('process.env.SAFECLAW_KNOWLEDGE_UI_MODE === "trace-blocks"');
     expect(browserRunnerSource).toContain('schemaVersion: "safeclaw-hermes-review-trace-block-summary/v1"');
