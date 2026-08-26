@@ -21,6 +21,7 @@ const baseUrl = process.env.SAFECLAW_EDITORIAL_BASE_URL || "https://www.safeclaw
 const liveEnabled = process.env.SAFECLAW_EDITORIAL_LIVE === "1";
 const timeoutMs = Number.parseInt(process.env.SAFECLAW_EDITORIAL_TIMEOUT_MS || "60000", 10);
 const localProduction = /^https?:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?(?:\/|$)/iu.test(baseUrl);
+const editorialAiMode = "template";
 
 const placeholderPatterns = [
   { id: "unfinished-writing", pattern: /작성\s*(?:필요|예정|중)|추후\s*작성|입력\s*필요/iu },
@@ -76,6 +77,31 @@ export function classifyEditorialRuntimeBlock(api, payload) {
   return status === 503 && EDITORIAL_RUNTIME_BLOCK_CODES.has(code)
     ? { blocked: true, code }
     : { blocked: false, code: "" };
+}
+
+export function evaluateEditorialRuntimeContract(api) {
+  if (!api) {
+    return {
+      evaluated: false,
+      ok: true,
+      expectedAiMode: editorialAiMode,
+      expectedWorkUnit: "0",
+      observedAiMode: "",
+      observedWorkUnit: "",
+    };
+  }
+  const observedAiMode = text(api.aiMode);
+  const observedWorkUnit = text(api.workUnit);
+  return {
+    evaluated: true,
+    ok: Number(api.status) === 200
+      && observedAiMode === editorialAiMode
+      && observedWorkUnit === "0",
+    expectedAiMode: editorialAiMode,
+    expectedWorkUnit: "0",
+    observedAiMode,
+    observedWorkUnit,
+  };
 }
 
 export function summarizeEditorialExecution(results, options = {}) {
@@ -413,7 +439,7 @@ async function fetchPayload(testCase) {
     const response = await fetch(`${baseUrl.replace(/\/+$/gu, "")}/api/ask`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ question: testCase.question }),
+      body: JSON.stringify({ question: testCase.question, aiMode: editorialAiMode }),
       signal: controller.signal
     });
     const body = await response.text();
@@ -429,6 +455,9 @@ async function fetchPayload(testCase) {
         status: response.status,
         ok: response.ok,
         elapsedMs: Date.now() - startedAt,
+        aiMode: response.headers.get("x-safeclaw-ai-mode") || "",
+        workUnit: response.headers.get("x-safeclaw-work-unit") || "",
+        rateLimitMode: response.headers.get("x-ratelimit-mode") || "",
         errorCode: payload && typeof payload === "object" && !Array.isArray(payload)
           ? text(payload.code)
           : ""
@@ -478,6 +507,9 @@ function writeMarkdown(report) {
 - Cases: ${report.total}, pass ${report.pass}, fail ${report.fail}, blocked ${report.blocked}
 - Content reviews executed: ${report.contentReviewExecutedCount}
 - Runtime block codes: \`${JSON.stringify(report.runtimeBlockCodeCounts)}\`
+- Requested AI mode / expected provider work unit: \`${report.requestedAiMode}\` / \`${report.expectedProviderWorkUnit}\`
+- Provider generation requested: \`${report.providerGenerationRequested}\`
+- Runtime contract passes: ${report.runtimeContractPassCount}/${report.runtimeContractEvaluatedCount}
 - Requested document surfaces: ${report.requestedDocumentSurfaceCount}
 - Reviewed document surfaces: ${report.reviewedDocumentSurfaceCount}
 - Placeholder/template findings: ${report.placeholderFindingCount}
@@ -506,6 +538,7 @@ ${rows}
 - Generic fallback or disclaimer lines copied across four or more independent documents fail closed.
 - Exact and near-duplicate lines are recorded as reviewer findings. They do not fail automatically because bounded operational controls may intentionally repeat across documents.
 - Supporting nine documents use the same automated editorial failure budget as the core three; UI visibility is a separate layout contract.
+- Live runs explicitly request deterministic \`template\` mode and require response headers \`X-SafeClaw-AI-Mode: template\` and \`X-SafeClaw-Work-Unit: 0\`.
 
 ## Boundary
 
@@ -543,7 +576,8 @@ async function main() {
     }
     const review = reviewEditorialPayload(payload, testCase.question, testCase.expected);
     const runtimeBlock = classifyEditorialRuntimeBlock(api, payload);
-    const ok = !runnerError && (!api || api.ok) && review.ok;
+    const runtimeContract = evaluateEditorialRuntimeContract(api);
+    const ok = !runnerError && (!api || api.ok) && runtimeContract.ok && review.ok;
     const reviewedDocuments = runtimeBlock.blocked
       ? review.documents.map((document) => ({
           ...document,
@@ -556,6 +590,7 @@ async function main() {
       verdict: runtimeBlock.blocked ? "BLOCKED" : ok ? "PASS" : "RED",
       contentQualityVerdict: runtimeBlock.blocked ? "NOT_EVALUATED" : review.ok ? "PASS" : "RED",
       runtimeBlockCode: runtimeBlock.code,
+      runtimeContract,
       elapsedMs: Date.now() - caseStartedAt,
       api,
       runnerError,
@@ -583,6 +618,11 @@ async function main() {
     blocked: execution.blocked,
     contentReviewExecutedCount: execution.contentReviewExecutedCount,
     runtimeBlockCodeCounts: execution.runtimeBlockCodeCounts,
+    requestedAiMode: editorialAiMode,
+    expectedProviderWorkUnit: 0,
+    providerGenerationRequested: false,
+    runtimeContractEvaluatedCount: results.filter((item) => item.runtimeContract.evaluated).length,
+    runtimeContractPassCount: results.filter((item) => item.runtimeContract.evaluated && item.runtimeContract.ok).length,
     canonicalDocumentCount: canonicalDocuments.length,
     requestedDocumentSurfaceCount: results.reduce((sum, item) => sum + item.requestedDocumentCount, 0),
     reviewedDocumentSurfaceCount: results.reduce((sum, item) => sum + item.reviewedDocumentCount, 0),

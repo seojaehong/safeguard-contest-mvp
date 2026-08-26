@@ -18,6 +18,9 @@ type EditorialReport = {
   scenarioIrrelevantContextFindingCount: number;
   evidenceDomainMismatchCount: number;
   genericTemplateOveruseCount: number;
+  requestedAiMode: string;
+  expectedProviderWorkUnit: number;
+  providerGenerationRequested: boolean;
   exactLineOveruseCount: number;
   displayedExactLineOveruseCount: number;
   duplicateReviewCategoryCounts: {
@@ -103,6 +106,27 @@ function runFixture(
 }
 
 describe("SafeClaw 12-deliverable editorial review", () => {
+  it("requires live editorial review to use the zero-provider template contract", () => {
+    const moduleUrl = pathToFileURL(SCRIPT_PATH).href;
+    const source = `
+      import { evaluateEditorialRuntimeContract } from ${JSON.stringify(moduleUrl)};
+      const pass = evaluateEditorialRuntimeContract({ status: 200, aiMode: "template", workUnit: "0" });
+      const providerMode = evaluateEditorialRuntimeContract({ status: 200, aiMode: "enhanced", workUnit: "2" });
+      const missingHeaders = evaluateEditorialRuntimeContract({ status: 200 });
+      process.stdout.write(JSON.stringify({ pass, providerMode, missingHeaders }));
+    `;
+    const result = spawnSync(process.execPath, ["--input-type=module", "-e", source], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(0);
+    const output = JSON.parse(result.stdout) as Record<string, { ok: boolean }>;
+    expect(output.pass?.ok).toBe(true);
+    expect(output.providerMode?.ok).toBe(false);
+    expect(output.missingHeaders?.ok).toBe(false);
+  });
+
   it("separates distributed admission outages from document quality failures", () => {
     const moduleUrl = pathToFileURL(SCRIPT_PATH).href;
     const source = `
@@ -158,6 +182,9 @@ describe("SafeClaw 12-deliverable editorial review", () => {
       fail: 0,
       reviewedDocumentSurfaceCount: 12,
       humanReviewCompleted: false,
+      requestedAiMode: "template",
+      expectedProviderWorkUnit: 0,
+      providerGenerationRequested: false,
       evidenceBoundary: {
         sixCoreWordingGateCombinedAsHumanPass: false,
         twelveDeliverablePresenceGateCombinedAsHumanPass: false,
