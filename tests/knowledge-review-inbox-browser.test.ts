@@ -15,7 +15,12 @@ const queueItem = {
   statusLabel: "검토 대기",
   sourceEventCount: 5,
   candidateLabel: "위험성평가표 현장 지식 검토",
-  candidateText: "작업발판 단부의 안전난간 상태를 확인하고 현장 책임자가 적용 여부를 검토합니다.",
+  candidateText: [
+    "1) 위험요인 요약: 작업발판 단부 추락 위험 / 원본 이벤트 검토 사실: 야간 교대 작업 · 청각 경보 보조수단 필요",
+    "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
+    "3) 통제대책: 안전난간 상태와 추락방지 조치를 작업 전 확인",
+    "4) 검수 필요 항목: 현장 책임자가 실제 적용 상태 확인"
+  ].join("\n"),
   matchedHazardCount: 1,
   providerLabel: "fixture-provider",
   evidenceItems: [{
@@ -26,7 +31,8 @@ const queueItem = {
     capturedAt: "2026-07-16T00:00:00.000Z",
     digest: "sha256:1111111111111111",
     metadata: [{ label: "조문", value: "제38조" }],
-    publicUrl: "https://www.law.go.kr/법령/산업안전보건법"
+    publicUrl: "https://www.law.go.kr/법령/산업안전보건법",
+    reviewFacts: []
   }, {
     id: "evidence-2222222222222222",
     authorityId: "sif",
@@ -35,7 +41,8 @@ const queueItem = {
     capturedAt: "2026-07-16T00:01:00.000Z",
     digest: "sha256:2222222222222222",
     metadata: [{ label: "자료 유형", value: "sif-case" }],
-    publicUrl: "https://www.kosha.or.kr/kosha/data/industrialAccidentStatus.do"
+    publicUrl: "https://www.kosha.or.kr/kosha/data/industrialAccidentStatus.do",
+    reviewFacts: []
   }, {
     id: "evidence-3333333333333333",
     authorityId: "kosha",
@@ -44,7 +51,8 @@ const queueItem = {
     capturedAt: "2026-07-16T00:02:00.000Z",
     digest: "sha256:3333333333333333",
     metadata: [{ label: "가이드 코드", value: "C-49" }],
-    publicUrl: "https://portal.kosha.or.kr/archive/resources/tech-support/search/all"
+    publicUrl: "https://portal.kosha.or.kr/archive/resources/tech-support/search/all",
+    reviewFacts: []
   }, {
     id: "evidence-4444444444444444",
     authorityId: "organization_history",
@@ -53,7 +61,8 @@ const queueItem = {
     capturedAt: "2026-07-16T00:03:00.000Z",
     digest: "sha256:4444444444444444",
     metadata: [],
-    publicUrl: null
+    publicUrl: null,
+    reviewFacts: []
   }, {
     id: "evidence-5555555555555555",
     authorityId: "site_history",
@@ -62,7 +71,13 @@ const queueItem = {
     capturedAt: "2026-07-16T00:04:00.000Z",
     digest: "sha256:5555555555555555",
     metadata: [],
-    publicUrl: null
+    publicUrl: null,
+    reviewFacts: [
+      "야간 교대 작업",
+      "청각 경보 보조수단 필요",
+      "resident-id: 900101-1234567",
+      "worker-phone: 010-9876-5432"
+    ]
   }],
   reviewContract: {
     contractVersion: "knowledge-candidate-review.v1",
@@ -208,7 +223,19 @@ describe("knowledge review inbox browser", () => {
     expect(await inbox.locator('[data-review-workbench="selected-only"]').count()).toBe(1);
     expect(await inbox.locator('[data-selected-review-candidate="true"]').count()).toBe(1);
     expect(await inbox.locator('[data-selected-candidate-body="true"]').count()).toBe(1);
-    await expect.poll(() => inbox.getByText(queueItem.candidateText).isVisible()).toBe(true);
+    const eventFacts = inbox.locator('[data-review-event-facts="true"]');
+    expect(await eventFacts.count()).toBe(1);
+    expect(await eventFacts.locator("[data-review-event-fact]").count()).toBe(2);
+    expect(await eventFacts.getByText("야간 교대 작업", { exact: true }).isVisible()).toBe(true);
+    expect(await eventFacts.getByText("청각 경보 보조수단 필요", { exact: true }).isVisible()).toBe(true);
+    const siteEvidence = inbox.locator('[data-review-evidence-authority="site_history"]');
+    expect(await siteEvidence.locator("[data-review-evidence-fact]").count()).toBe(2);
+    expect(await siteEvidence.getByText("야간 교대 작업", { exact: true }).isVisible()).toBe(true);
+    expect(await siteEvidence.getByText("청각 경보 보조수단 필요", { exact: true }).isVisible()).toBe(true);
+    expect(await inbox.locator('[data-selected-candidate-body="true"]').textContent()).not.toContain("원본 이벤트 검토 사실");
+    expect(await inbox.textContent()).not.toContain("resident-id:");
+    expect(await inbox.textContent()).not.toContain("worker-phone:");
+    await expect.poll(() => inbox.locator('[data-selected-candidate-body="true"]').getByText("1) 위험요인 요약: 작업발판 단부 추락 위험", { exact: false }).isVisible()).toBe(true);
     expect(await inbox.getByText(secondQueueItem.candidateText).isVisible()).toBe(false);
     await inbox.getByRole("tab", { name: /작업계획서 현장 지식 검토/u }).click();
     await expect.poll(() => inbox.getByText(secondQueueItem.candidateText).isVisible()).toBe(true);

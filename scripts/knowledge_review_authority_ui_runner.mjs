@@ -20,6 +20,9 @@ const authStorageKey = process.env.SAFECLAW_SUPABASE_STORAGE_KEY || "sb-fixture-
 const liveMode = /^https:\/\/www\.safeclaw\.kr(?:\/|$)/u.test(baseUrl);
 const evidenceInspectorMode = process.env.SAFECLAW_KNOWLEDGE_UI_MODE === "evidence-inspector";
 const candidateReadinessMode = process.env.SAFECLAW_KNOWLEDGE_UI_MODE === "candidate-readiness";
+const eventFactsMode = process.env.SAFECLAW_KNOWLEDGE_UI_MODE === "event-facts";
+const eventFactsFixtureEnabled = eventFactsMode
+  && process.env.SAFECLAW_KNOWLEDGE_UI_EVENT_FACTS_FIXTURE !== "0";
 const baseOrigin = new URL(baseUrl).origin;
 const productionBuild = liveMode
   ? await fetch(`${baseUrl}/api/build-info?codexCacheBust=${encodeURIComponent(checkedAt)}`)
@@ -72,7 +75,9 @@ const queueItem = {
   sourceEventCount: 5,
   candidateLabel: "고소작업 지식 후보 검토",
   candidateText: [
-    "1) 위험요인 요약: 작업발판 단부 추락 위험",
+    eventFactsFixtureEnabled
+      ? "1) 위험요인 요약: 작업발판 단부 추락 위험 / 원본 이벤트 검토 사실: 야간 교대 작업 · 청각 경보 보조수단 필요"
+      : "1) 위험요인 요약: 작업발판 단부 추락 위험",
     "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
     "3) 통제대책: 안전난간 상태와 추락방지 조치를 작업 전 확인",
     "4) 검수 필요 항목: 현장 책임자가 실제 적용 상태 확인"
@@ -80,11 +85,11 @@ const queueItem = {
   matchedHazardCount: 1,
   providerLabel: "SafeClaw candidate builder",
   evidenceItems: [
-    { id: "evidence-1111111111111111", authorityId: "law", authorityLabel: "법령 근거", sourceLabel: "산업안전보건법 제38조", capturedAt: "2026-08-14T00:00:00.000Z", digest: "sha256:1111111111111111", metadata: [{ label: "조문", value: "제38조" }], publicUrl: "https://www.law.go.kr/법령/산업안전보건법" },
-    { id: "evidence-2222222222222222", authorityId: "sif", authorityLabel: "SIF 통제 근거", sourceLabel: "추락 재해 통제 사례", capturedAt: "2026-08-14T00:01:00.000Z", digest: "sha256:2222222222222222", metadata: [{ label: "자료 유형", value: "sif-case" }], publicUrl: "https://www.kosha.or.kr/kosha/data/industrialAccidentStatus.do" },
-    { id: "evidence-3333333333333333", authorityId: "kosha", authorityLabel: "KOSHA 기술 지침", sourceLabel: "추락 방지 기술 지침", capturedAt: "2026-08-14T00:02:00.000Z", digest: "sha256:3333333333333333", metadata: [{ label: "가이드 코드", value: "C-49" }], publicUrl: "https://portal.kosha.or.kr/archive/resources/tech-support/search/all" },
-    { id: "evidence-4444444444444444", authorityId: "organization_history", authorityLabel: "조직 전용 이력", sourceLabel: "조직 전용 이력", capturedAt: "2026-08-14T00:03:00.000Z", digest: "sha256:4444444444444444", metadata: [], publicUrl: null },
-    { id: "evidence-5555555555555555", authorityId: "site_history", authorityLabel: "현장 전용 이력", sourceLabel: "현장 전용 이력", capturedAt: "2026-08-14T00:04:00.000Z", digest: "sha256:5555555555555555", metadata: [], publicUrl: null }
+    { id: "evidence-1111111111111111", authorityId: "law", authorityLabel: "법령 근거", sourceLabel: "산업안전보건법 제38조", capturedAt: "2026-08-14T00:00:00.000Z", digest: "sha256:1111111111111111", metadata: [{ label: "조문", value: "제38조" }], publicUrl: "https://www.law.go.kr/법령/산업안전보건법", ...(eventFactsFixtureEnabled ? { reviewFacts: [] } : {}) },
+    { id: "evidence-2222222222222222", authorityId: "sif", authorityLabel: "SIF 통제 근거", sourceLabel: "추락 재해 통제 사례", capturedAt: "2026-08-14T00:01:00.000Z", digest: "sha256:2222222222222222", metadata: [{ label: "자료 유형", value: "sif-case" }], publicUrl: "https://www.kosha.or.kr/kosha/data/industrialAccidentStatus.do", ...(eventFactsFixtureEnabled ? { reviewFacts: [] } : {}) },
+    { id: "evidence-3333333333333333", authorityId: "kosha", authorityLabel: "KOSHA 기술 지침", sourceLabel: "추락 방지 기술 지침", capturedAt: "2026-08-14T00:02:00.000Z", digest: "sha256:3333333333333333", metadata: [{ label: "가이드 코드", value: "C-49" }], publicUrl: "https://portal.kosha.or.kr/archive/resources/tech-support/search/all", ...(eventFactsFixtureEnabled ? { reviewFacts: [] } : {}) },
+    { id: "evidence-4444444444444444", authorityId: "organization_history", authorityLabel: "조직 전용 이력", sourceLabel: "조직 전용 이력", capturedAt: "2026-08-14T00:03:00.000Z", digest: "sha256:4444444444444444", metadata: [], publicUrl: null, ...(eventFactsFixtureEnabled ? { reviewFacts: [] } : {}) },
+    { id: "evidence-5555555555555555", authorityId: "site_history", authorityLabel: "현장 전용 이력", sourceLabel: "현장 전용 이력", capturedAt: "2026-08-14T00:04:00.000Z", digest: "sha256:5555555555555555", metadata: [], publicUrl: null, ...(eventFactsFixtureEnabled ? { reviewFacts: ["야간 교대 작업", "청각 경보 보조수단 필요", "resident-id: 900101-1234567", "worker-phone: 010-9876-5432"] } : {}) }
   ],
   reviewContract: {
     contractVersion: "knowledge-candidate-review.v1",
@@ -248,7 +253,14 @@ try {
         await page.getByRole("tab", { name: "검토 흐름" }).click();
       }
       const inbox = page.locator('[data-knowledge-review-inbox="true"]');
-      await inbox.getByRole("heading", { name: queueItem.candidateLabel }).waitFor();
+      try {
+        await inbox.getByRole("heading", { name: queueItem.candidateLabel }).waitFor();
+      } catch (error) {
+        const diagnosticText = (await inbox.textContent().catch(() => null))
+          || (await page.locator("body").textContent().catch(() => null))
+          || "unavailable";
+        throw new Error(`Hermes review fixture did not mount: ${diagnosticText.slice(0, 1200)}`, { cause: error });
+      }
       await inbox.scrollIntoViewIfNeeded();
       const candidateTabs = inbox.locator('[role="tablist"][aria-label="지식 후보"] [role="tab"]');
       await candidateTabs.nth(1).click();
@@ -321,6 +333,8 @@ try {
         const navigator = workbench?.querySelector("nav[aria-label='지식 후보 목록']");
         const selectedCandidate = workbench?.querySelector("[data-selected-review-candidate='true']");
         const selectedBody = workbench?.querySelector("[data-selected-candidate-body='true']");
+        const eventFacts = workbench?.querySelector("[data-review-event-facts='true']");
+        const boundEventFacts = workbench.querySelectorAll("[data-review-evidence-fact]");
         const evidenceWorkbench = workbench?.querySelector("[data-review-evidence-workbench='true']");
         const evidencePane = workbench?.querySelector("[data-review-pane='evidence']");
         const authority = document.querySelector("[data-review-authority-contract='true']");
@@ -376,6 +390,17 @@ try {
           selectedCandidateCount: workbench.querySelectorAll("[data-selected-review-candidate='true']").length,
           selectedBodyCount: workbench.querySelectorAll("[data-selected-candidate-body='true']").length,
           selectedBodyOverflowY: getComputedStyle(selectedBody).overflowY,
+          eventFactsPanelCount: workbench.querySelectorAll("[data-review-event-facts='true']").length,
+          eventFactItemCount: eventFacts?.querySelectorAll("[data-review-event-fact]").length ?? 0,
+          boundEventFactCount: boundEventFacts.length,
+          eventFactEvidenceRowCount: new Set(Array.from(boundEventFacts).map((fact) => fact.closest("li[data-review-evidence-authority]"))).size,
+          orphanEventFactCount: Array.from(eventFacts?.querySelectorAll("[data-review-event-fact]") ?? []).filter((fact) => (
+            !Array.from(boundEventFacts).some((boundFact) => boundFact.textContent?.trim() === fact.textContent?.trim())
+          )).length,
+          eventFactsInsideCandidatePane: eventFacts instanceof HTMLElement && candidatePane.contains(eventFacts),
+          candidateBodyContainsEventFactMarker: selectedBody.textContent?.includes("원본 이벤트 검토 사실") === true,
+          privateEventTextExposed: workbench.textContent?.includes("resident-id:") === true
+            || workbench.textContent?.includes("worker-phone:") === true,
           evidencePaneCount: workbench.querySelectorAll("[data-review-pane='evidence']").length,
           evidenceItemCount: evidencePane?.querySelectorAll("li[data-review-evidence-authority]").length ?? 0,
           evidenceWorkbenchColumns: getComputedStyle(evidenceWorkbench).gridTemplateColumns.split(" ").length,
@@ -503,6 +528,15 @@ try {
         && metrics.readySectionCount === 4
         && metrics.readinessInsideCandidatePane
         && metrics.candidatePaneOverflowY === "auto"
+        && (!eventFactsMode
+          || (metrics.eventFactsPanelCount === 1
+            && metrics.eventFactItemCount === 2
+            && metrics.boundEventFactCount === 2
+            && metrics.eventFactEvidenceRowCount === 1
+            && metrics.orphanEventFactCount === 0
+            && metrics.eventFactsInsideCandidatePane
+            && !metrics.candidateBodyContainsEventFactMarker
+            && !metrics.privateEventTextExposed))
         && revisionDecision.readinessVisible
         && revisionDecision.approveDisabled
         && revisionDecision.keepSiteOnlyEnabled
@@ -563,24 +597,32 @@ const productionAligned = liveMode
   && productionBuild.environment === "production";
 const report = {
   schemaVersion: "safeclaw-hermes-knowledge-review-authority-ui/v2",
-  contractMode: evidenceInspectorMode
+  contractMode: eventFactsMode
+    ? "event-facts"
+    : evidenceInspectorMode
     ? "evidence-inspector"
     : candidateReadinessMode
       ? "candidate-content-readiness"
       : "authority-ui",
   verdict: failed.length === 0 && productionAligned
-    ? evidenceInspectorMode
+    ? eventFactsMode
+      ? "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVENT_FACTS"
+      : evidenceInspectorMode
       ? "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR"
       : candidateReadinessMode
         ? "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS"
         : "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI"
     : failed.length === 0 && !liveMode
-      ? evidenceInspectorMode
+      ? eventFactsMode
+        ? "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVENT_FACTS"
+        : evidenceInspectorMode
         ? "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVIDENCE_INSPECTOR"
         : candidateReadinessMode
           ? "PASS_CURRENT_SOURCE_LOCAL_LLM_WIKI_CANDIDATE_CONTENT_READINESS"
           : "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_AUTHORITY_UI"
-      : evidenceInspectorMode
+      : eventFactsMode
+        ? "RED_HERMES_REVIEW_EVENT_FACTS"
+        : evidenceInspectorMode
         ? "RED_HERMES_REVIEW_EVIDENCE_INSPECTOR"
         : candidateReadinessMode
           ? "RED_LLM_WIKI_CANDIDATE_CONTENT_READINESS"
@@ -627,6 +669,19 @@ const report = {
     publicEvidenceLinkCount: 3,
     privateEvidenceRawIdentityExposed: false,
     evidenceInternalScroll: true
+  },
+  eventFactsContract: {
+    explicitReviewFactsOnly: true,
+    expectedFactCount: 2,
+    panelCount: Math.min(...results.map((result) => result.metrics.eventFactsPanelCount)),
+    visibleFactCount: Math.min(...results.map((result) => result.metrics.eventFactItemCount)),
+    boundFactCount: Math.min(...results.map((result) => result.metrics.boundEventFactCount)),
+    evidenceRowCount: Math.min(...results.map((result) => result.metrics.eventFactEvidenceRowCount)),
+    orphanFactCount: Math.max(...results.map((result) => result.metrics.orphanEventFactCount)),
+    insideCandidatePane: results.every((result) => result.metrics.eventFactsInsideCandidatePane),
+    candidateBodyMarkerDuplicated: results.some((result) => result.metrics.candidateBodyContainsEventFactMarker),
+    privateEventTextExposed: results.some((result) => result.metrics.privateEventTextExposed),
+    humanVerificationRequired: true
   },
   contentReadinessContract: {
     contractVersion: "knowledge-candidate-content-readiness.v1",
@@ -689,6 +744,7 @@ ${rows}
 - Desktop mounts the selected candidate and five-item evidence inspector together; mobile mounts one linked pane behind a keyboard-operable segmented tab control.
 - Review decisions announce their pending state, expose busy semantics, disable all competing actions, and restore the settled status after the delayed save fixture completes.
 - Each selected candidate exposes one server-derived readiness panel with four required sections. A revision-required candidate disables only candidate approval while keeping site-only retention and rejection available.
+- Explicit safe original-event review facts must appear in a distinct reviewer region inside the candidate pane, without duplicating their marker in the candidate body or exposing private event text.
 - Only allowlisted public law, KOSHA, and SIF references expose verified HTTPS links. Organization and site evidence retain generic labels and bounded digests only.
 
 ## Boundary
