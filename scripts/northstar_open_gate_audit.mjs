@@ -88,6 +88,7 @@ const EVIDENCE_PATHS = Object.freeze({
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-selected-workbench-2026-08-14", "report.json"),
   hermesKnowledgeReviewEvidenceInspector: path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"),
+  hermesEvidenceDigestReadability: path.join("evaluation", "hermes-evidence-digest-readability-2026-08-26", "report.json"),
   hermesReviewEventFactTraceability: path.join("evaluation", "hermes-knowledge-review-event-facts-2026-08-26", "report.json"),
   hermesReviewTraceBlocks: path.join("evaluation", "hermes-knowledge-review-trace-blocks-2026-08-26", "report.json"),
   hermesReviewTraceMatrix: path.join("evaluation", "hermes-knowledge-review-trace-matrix-2026-08-26", "report.json"),
@@ -5295,15 +5296,17 @@ function evaluateCurrentLiveDocumentEditorialRuntimeGate(rootDir) {
  * @returns {GateResult}
  */
 function evaluateHermesKnowledgeReviewEvidenceInspectorGate(rootDir) {
-  const evidencePath = EVIDENCE_PATHS.hermesKnowledgeReviewEvidenceInspector;
-  const report = readJsonFile(rootDir, evidencePath);
-  if (!isRecord(report)) {
+  const inspectorPath = EVIDENCE_PATHS.hermesKnowledgeReviewEvidenceInspector;
+  const evidencePath = EVIDENCE_PATHS.hermesEvidenceDigestReadability;
+  const report = readJsonFile(rootDir, inspectorPath);
+  const readability = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report) || !isRecord(readability)) {
     return gateResult({
       id: "hermes_review_evidence_inspector",
       label: "Hermes review evidence inspector",
       state: "missing",
       evidencePath,
-      detail: "Hermes selected-candidate evidence inspector evidence is missing.",
+      detail: "Hermes selected-candidate evidence inspector or live readability companion evidence is missing.",
       nextActions: ["Run the bounded authenticated evidence-inspector probe against local and live production."],
     });
   }
@@ -5314,6 +5317,8 @@ function evaluateHermesKnowledgeReviewEvidenceInspectorGate(rootDir) {
   const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
   const security = isRecord(report.securityBoundary) ? report.securityBoundary : {};
   const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const readabilityLive = isRecord(readability.afterLive) ? readability.afterLive : {};
+  const readabilityBoundaries = isRecord(readability.boundaries) ? readability.boundaries : {};
   const productCommit = readString(report.productCommit);
   const productionCommit = readString(report.productionCommit);
   const noMutation = mutation.dbMutationPerformed === false
@@ -5366,7 +5371,32 @@ function evaluateHermesKnowledgeReviewEvidenceInspectorGate(rootDir) {
     && remaining.exactSavedShareVerdict === "MISSING_EVIDENCE"
     && remaining.llmWikiPublication === "APPROVAL_GATED"
     && remaining.supabaseRlsLaunchIsolation === "APPROVAL_GATED"
-    && remaining.providerDispatchPersistence === "APPROVAL_GATED";
+    && remaining.providerDispatchPersistence === "APPROVAL_GATED"
+    && readability.verdict === "PASS_LIVE_PRODUCTION_HERMES_EVIDENCE_READABILITY"
+    && readString(readability.productCommit) !== ""
+    && isGitAncestor(rootDir, readString(readability.productCommit))
+    && readString(readability.sourceHead) !== ""
+    && isGitAncestor(rootDir, readString(readability.sourceHead))
+    && readabilityLive.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR"
+    && readabilityLive.viewportCount === 8
+    && readabilityLive.passedCount === 8
+    && readabilityLive.failedCount === 0
+    && readString(readabilityLive.productionCommit) !== ""
+    && isGitAncestor(rootDir, readString(readabilityLive.productionCommit))
+    && readNumber(readabilityLive.evidenceDigestMinWidth) >= 160
+    && readNumber(readabilityLive.evidenceDigestMaxHeight) <= 36
+    && readNumber(readabilityLive.desktopReadinessSectionMinWidth) >= 120
+    && readNumber(readabilityLive.mobileReadinessSectionMinWidth) >= 96
+    && readNumber(readabilityLive.readinessLabelMaxHeight) <= 36
+    && readabilityLive.horizontalOverflow === false
+    && readabilityBoundaries.humanReviewCompleted === false
+    && readabilityBoundaries.wikiPublished === false
+    && readabilityBoundaries.dbMutationPerformed === false
+    && readabilityBoundaries.providerCallPerformed === false
+    && readabilityBoundaries.shareSessionCreated === false
+    && readString(readabilityBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(readabilityBoundaries.llmWikiPublicationVerdict) === "APPROVAL_GATED"
+    && readabilityBoundaries.liveAfterDeploymentRequired === false;
 
   return gateResult({
     id: "hermes_review_evidence_inspector",
@@ -5374,8 +5404,8 @@ function evaluateHermesKnowledgeReviewEvidenceInspectorGate(rootDir) {
     state: pass ? "proven" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Live Hermes review evidence inspector passes 8/8 Day/Night desktop and mobile cases. It binds five displayed evidence items to the existing authority counts, mounts candidate plus evidence on desktop and one linked keyboard-operable pane on mobile, exposes only allowlisted official HTTPS references, keeps tenant evidence generic, and performs no mutation. Candidate navigation retains a single roving tab stop, linked panels, and breakpoint-aware keyboard semantics; delayed review decisions expose live pending/settled status, busy semantics, and disabled competing actions. The immutable 18-finding baseline remains preserved, a fresh full-repository scan is still required, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
-      : `Hermes evidence-inspector contract is contradicted: verdict=${readString(report.verdict) || "missing"}, local=${readString(local.verdict) || "missing"}, live=${readString(afterLive.verdict) || "missing"}, candidateKeyboard=${String(contract.candidateKeyboardNavigation)}, mobilePaneKeyboard=${String(contract.mobilePaneKeyboardNavigation)}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}, securityComplete=${String(security.securityComplete)}.`,
+      ? `Live Hermes review evidence inspector passes 8/8 Day/Night desktop and mobile cases. Its live readability companion proves digest ${readNumber(readabilityLive.evidenceDigestMinWidth)}x${readNumber(readabilityLive.evidenceDigestMaxHeight)}px minimum-width/maximum-height bounds, readiness cells at ${readNumber(readabilityLive.desktopReadinessSectionMinWidth)}px desktop and ${readNumber(readabilityLive.mobileReadinessSectionMinWidth)}px mobile minimum widths, labels no taller than ${readNumber(readabilityLive.readinessLabelMaxHeight)}px, and zero horizontal overflow. It binds five displayed evidence items to the existing authority counts, mounts candidate plus evidence on desktop and one linked keyboard-operable pane on mobile, exposes only allowlisted official HTTPS references, keeps tenant evidence generic, and performs no mutation. Candidate navigation retains a single roving tab stop, linked panels, and breakpoint-aware keyboard semantics; delayed review decisions expose live pending/settled status, busy semantics, and disabled competing actions. The immutable 18-finding baseline remains preserved, a fresh full-repository scan is still required, human review and Wiki publication remain incomplete, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED.`
+      : `Hermes evidence-inspector contract is contradicted: verdict=${readString(report.verdict) || "missing"}, local=${readString(local.verdict) || "missing"}, live=${readString(afterLive.verdict) || "missing"}, readability=${readString(readability.verdict) || "missing"}, digest=${readNumber(readabilityLive.evidenceDigestMinWidth)}x${readNumber(readabilityLive.evidenceDigestMaxHeight)}, readiness=${readNumber(readabilityLive.desktopReadinessSectionMinWidth)}/${readNumber(readabilityLive.mobileReadinessSectionMinWidth)}/${readNumber(readabilityLive.readinessLabelMaxHeight)}, candidateKeyboard=${String(contract.candidateKeyboardNavigation)}, mobilePaneKeyboard=${String(contract.mobilePaneKeyboardNavigation)}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}, readabilityExactShare=${readString(readabilityBoundaries.exactSavedShareVerdict) || "missing"}, securityComplete=${String(security.securityComplete)}.`,
     nextActions: pass ? [] : ["Restore the evidence-count, privacy, geometry, no-mutation, security-baseline, and approval boundaries, then rerun local and live probes."],
   });
 }

@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-hermes-evidence-digest-readability/v1",
-  "checkedAt": "2026-08-26T23:09:00+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_EVIDENCE_READABILITY_LIVE_PENDING",
-  "sourceHead": "5f3982a13fcde79d97c3d1acf7c998f85f5d14ef",
+  "checkedAt": "2026-08-26T15:14:24.669Z",
+  "verdict": "PASS_LIVE_PRODUCTION_HERMES_EVIDENCE_READABILITY",
+  "sourceHead": "c3a47b61549253620b33e39acd30f149ea9d1c56",
   "productCommit": "5f3982a13fcde79d97c3d1acf7c998f85f5d14ef",
   "scope": "Hermes and LLM Wiki knowledge-review candidate/evidence workbench presentation only",
   "beforeLive": {
@@ -32,8 +32,30 @@
     "visualDigestReadable": true,
     "visualReadinessLabelsReadable": true
   },
+  "afterLive": {
+    "path": "evaluation/hermes-evidence-digest-readability-2026-08-26/after-live/report.json",
+    "sourceHead": "c3a47b61549253620b33e39acd30f149ea9d1c56",
+    "productCommit": "5f3982a13fcde79d97c3d1acf7c998f85f5d14ef",
+    "productionCommit": "c3a47b61549253620b33e39acd30f149ea9d1c56",
+    "deploymentUrl": "safeguard-contest-bx9rar119-seojaehongs-projects.vercel.app",
+    "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
+    "viewportCount": 8,
+    "passedCount": 8,
+    "failedCount": 0,
+    "evidenceDigestMinWidth": 242,
+    "evidenceDigestMaxHeight": 18,
+    "desktopReadinessSectionMinWidth": 167.75,
+    "mobileReadinessSectionMinWidth": 104,
+    "readinessLabelMaxHeight": 36,
+    "horizontalOverflow": false,
+    "desktopScreenshot": "evaluation/hermes-evidence-digest-readability-2026-08-26/after-live/knowledge-review-evidence-readability-day-desktop-short-1440x723.png",
+    "mobileScreenshot": "evaluation/hermes-evidence-digest-readability-2026-08-26/after-live/knowledge-review-evidence-readability-day-mobile-short-390x723.png"
+  },
   "verification": {
     "knowledgeReviewBrowser": "2/2 PASS",
+    "knowledgeGovernanceAndBrowser": "17/17 PASS",
+    "liveKnowledgeReviewEvidenceInspector": "8/8 PASS",
+    "northstarGenerators": "3 files / 148 tests PASS; one combined-suite timeout rerun independently and full open-gate 134/134 PASS",
     "adjacentKnowledgeUi": "14/14 PASS; 1 environment-dependent browser case skipped",
     "typecheck": "PASS",
     "build": "PASS",
@@ -47,6 +69,6 @@
     "shareSessionCreated": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "llmWikiPublicationVerdict": "APPROVAL_GATED",
-    "liveAfterDeploymentRequired": true
+    "liveAfterDeploymentRequired": false
   }
 }

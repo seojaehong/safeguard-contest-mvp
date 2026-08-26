@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-26T13:36:55.845Z",
-  "head": "c6874aaeef4e769e380cead5ca03f48412708dad",
+  "generatedAt": "2026-08-26T15:16:08.831Z",
+  "head": "c3a47b61549253620b33e39acd30f149ea9d1c56",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "c6874aaeef4e769e380cead5ca03f48412708dad",
+    "commitSha": "c3a47b61549253620b33e39acd30f149ea9d1c56",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-3zfh07e9q-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-bx9rar119-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -330,8 +330,8 @@
     {
       "id": "hermes_review_evidence_inspector",
       "state": "proven",
-      "artifact": "evaluation\\hermes-knowledge-review-evidence-inspector-2026-08-14\\report.json",
-      "detail": "Live Hermes review evidence inspector passes 8/8 Day/Night desktop and mobile cases. It binds five displayed evidence items to the existing authority counts, mounts candidate plus evidence on desktop and one linked keyboard-operable pane on mobile, exposes only allowlisted official HTTPS references, keeps tenant evidence generic, and performs no mutation. Candidate navigation retains a single roving tab stop, linked panels, and breakpoint-aware keyboard semantics; delayed review decisions expose live pending/settled status, busy semantics, and disabled competing actions. The immutable 18-finding baseline remains preserved, a fresh full-repository scan is still required, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
+      "artifact": "evaluation\\hermes-evidence-digest-readability-2026-08-26\\report.json",
+      "detail": "Live Hermes review evidence inspector passes 8/8 Day/Night desktop and mobile cases. Its live readability companion proves digest 242x18px minimum-width/maximum-height bounds, readiness cells at 167.75px desktop and 104px mobile minimum widths, labels no taller than 36px, and zero horizontal overflow. It binds five displayed evidence items to the existing authority counts, mounts candidate plus evidence on desktop and one linked keyboard-operable pane on mobile, exposes only allowlisted official HTTPS references, keeps tenant evidence generic, and performs no mutation. Candidate navigation retains a single roving tab stop, linked panels, and breakpoint-aware keyboard semantics; delayed review decisions expose live pending/settled status, busy semantics, and disabled competing actions. The immutable 18-finding baseline remains preserved, a fresh full-repository scan is still required, human review and Wiki publication remain incomplete, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
     },
     {
       "id": "hermes_review_event_fact_traceability",
@@ -1600,9 +1600,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "c6874aaeef4e769e380cead5ca03f48412708dad",
+      "sourceCommit": "c3a47b61549253620b33e39acd30f149ea9d1c56",
       "sourceStatus": "exact",
-      "productionCommit": "c6874aaeef4e769e380cead5ca03f48412708dad",
+      "productionCommit": "c3a47b61549253620b33e39acd30f149ea9d1c56",
       "productionStatus": "matches_live"
     },
     {

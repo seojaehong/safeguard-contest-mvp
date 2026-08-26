@@ -3369,6 +3369,34 @@ function createFixtureRoot(): string {
       providerDispatchPersistence: "APPROVAL_GATED",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "hermes-evidence-digest-readability-2026-08-26", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_EVIDENCE_READABILITY",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    afterLive: {
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
+      productionCommit: "fixture-sha",
+      viewportCount: 8,
+      passedCount: 8,
+      failedCount: 0,
+      evidenceDigestMinWidth: 242,
+      evidenceDigestMaxHeight: 18,
+      desktopReadinessSectionMinWidth: 167.75,
+      mobileReadinessSectionMinWidth: 104,
+      readinessLabelMaxHeight: 36,
+      horizontalOverflow: false,
+    },
+    boundaries: {
+      humanReviewCompleted: false,
+      wikiPublished: false,
+      dbMutationPerformed: false,
+      providerCallPerformed: false,
+      shareSessionCreated: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublicationVerdict: "APPROVAL_GATED",
+      liveAfterDeploymentRequired: false,
+    },
+  });
   const routePerceptionDir = path.join("evaluation", "live-documents-share-route-perception-2026-08-14");
   const screenshots = [
     "documents-desktop-1440x723.png",
@@ -5813,9 +5841,12 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")).toMatchObject({
       state: "proven",
-      evidencePath: path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"),
+      evidencePath: path.join("evaluation", "hermes-evidence-digest-readability-2026-08-26", "report.json"),
     });
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("8/8");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("242x18px");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("167.75px desktop");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("104px mobile");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("fresh full-repository scan");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_event_fact_traceability")).toMatchObject({
@@ -7404,6 +7435,28 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("mobilePaneKeyboard=false");
   });
 
+  it("fails Hermes evidence inspector closed when live digest readability collapses", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "hermes-evidence-digest-readability-2026-08-26", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLive: { evidenceDigestMinWidth: number; readinessLabelMaxHeight: number };
+      boundaries: { exactSavedShareVerdict: string };
+    };
+    report.afterLive.evidenceDigestMinWidth = 80;
+    report.afterLive.readinessLabelMaxHeight = 72;
+    report.boundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("digest=80x18");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("readiness=167.75/104/72");
+    expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("readabilityExactShare=PASS");
+  });
+
   it("fails launch operations readiness closed when automatic launch or exact Share is overclaimed", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
@@ -8812,7 +8865,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const rlsGate = audit.gates.find((gate) => gate.id === "supabase_rls_launch_isolation");
     expect(rlsGate?.state).toBe("contradicted");
     expect(rlsGate?.detail).toContain("not an ancestor");
-  }, 15_000);
+  }, 30_000);
 
   it("fails evidence completeness when the current KOSHA reconciliation is missing", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-26T13:36:55.845Z
-Source HEAD at generation: c6874aaeef4e769e380cead5ca03f48412708dad
-Live commit at generation: c6874aaeef4e769e380cead5ca03f48412708dad
+Generated at: 2026-08-26T15:16:08.831Z
+Source HEAD at generation: c3a47b61549253620b33e39acd30f149ea9d1c56
+Live commit at generation: c3a47b61549253620b33e39acd30f149ea9d1c56
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -420,7 +420,7 @@ Overall: `northstar_open_approval_gated`
 | hermes_remote_durable_ledger | proven | evaluation\hermes-openclaw-runtime-current-gate-2026-07-20\report.json |
 | hermes_knowledge_review_authority | proven | evaluation\hermes-knowledge-review-contract-live-2026-07-25\report.json |
 | hermes_knowledge_review_ui | proven | evaluation\hermes-knowledge-review-selected-workbench-2026-08-14\report.json |
-| hermes_review_evidence_inspector | proven | evaluation\hermes-knowledge-review-evidence-inspector-2026-08-14\report.json |
+| hermes_review_evidence_inspector | proven | evaluation\hermes-evidence-digest-readability-2026-08-26\report.json |
 | hermes_review_event_fact_traceability | proven | evaluation\hermes-knowledge-review-event-facts-2026-08-26\report.json |
 | hermes_review_trace_blocks | proven | evaluation\hermes-knowledge-review-trace-blocks-2026-08-26\report.json |
 | hermes_review_trace_matrix | proven | evaluation\hermes-knowledge-review-trace-matrix-2026-08-26\report.json |
