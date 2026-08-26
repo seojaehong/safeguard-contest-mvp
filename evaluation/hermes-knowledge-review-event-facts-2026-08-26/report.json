@@ -50,6 +50,22 @@
     "machineEvidenceReplacesHumanReview": false,
     "publicationState": "unpublished"
   },
+  "compatibilityContracts": {
+    "providerCancellation": {
+      "verdict": "PASS_CURRENT_SOURCE_HERMES_EVENT_FACT_PROVIDER_CANCELLATION_COMPATIBILITY",
+      "sourceHead": "06d36befa2d1971cb4de55441e2405d0224f5b40",
+      "changedGovernedPath": "lib/knowledge-candidate-route.ts",
+      "focusedVitest": {
+        "file": "tests/knowledge-regenerate-route.test.ts",
+        "files": 1,
+        "tests": 18,
+        "failed": 0
+      },
+      "requestSignalForwardedToGeneration": true,
+      "abortSkipsProviderFallback": true,
+      "originalSecurityBaselineRewritten": false
+    }
+  },
   "mutationBoundary": {
     "dbMutationPerformed": false,
     "providerDispatchCalled": false,

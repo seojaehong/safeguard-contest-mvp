@@ -5,6 +5,7 @@
 - Production commit: `06036c4fd9353c64a5f25399455eaabbd9c7054b`
 - Local geometry: 8/8 PASS
 - Live geometry: 8/8 PASS
+- Provider cancellation compatibility: `PASS_CURRENT_SOURCE_HERMES_EVENT_FACT_PROVIDER_CANCELLATION_COMPATIBILITY` (18/18 focused tests)
 
 ## Result
 

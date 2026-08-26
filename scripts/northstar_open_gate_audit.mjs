@@ -7807,6 +7807,42 @@ function isWikiCandidateProviderCancellationCompatibilityCurrent(rootDir, origin
     && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE";
 }
 
+/** @param {string} rootDir @param {string} originalSourceHead */
+function isHermesEventFactProviderCancellationCompatibilityCurrent(rootDir, originalSourceHead) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.hermesReviewEventFactTraceability);
+  if (!isRecord(report)) {
+    return false;
+  }
+  const compatibilityContracts = isRecord(report.compatibilityContracts) ? report.compatibilityContracts : {};
+  const compatibility = isRecord(compatibilityContracts.providerCancellation)
+    ? compatibilityContracts.providerCancellation
+    : {};
+  const tests = isRecord(compatibility.focusedVitest) ? compatibility.focusedVitest : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(compatibility.sourceHead);
+  return readString(compatibility.verdict) === "PASS_CURRENT_SOURCE_HERMES_EVENT_FACT_PROVIDER_CANCELLATION_COMPATIBILITY"
+    && sourceHead === readString(report.productCommit)
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, ["lib/knowledge-candidate-route.ts"])
+    && isEvidenceCurrentForPaths(rootDir, originalSourceHead, PUBLIC_PROVIDER_CANCELLATION_UNCHANGED_PATHS)
+    && readString(compatibility.changedGovernedPath) === "lib/knowledge-candidate-route.ts"
+    && readString(tests.file) === "tests/knowledge-regenerate-route.test.ts"
+    && readNumber(tests.files) === 1
+    && readNumber(tests.tests) === 18
+    && readNumber(tests.failed) === 0
+    && compatibility.requestSignalForwardedToGeneration === true
+    && compatibility.abortSkipsProviderFallback === true
+    && compatibility.originalSecurityBaselineRewritten === false
+    && mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.ontologyPublicationPerformed === false
+    && mutationBoundary.vectorOrEmbeddingMutationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+}
+
 /**
  * @param {string} rootDir
  * @returns {GateResult}
@@ -7838,13 +7874,15 @@ function evaluatePublicProviderCancellationGate(rootDir) {
   const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
   const sourceHead = readString(report.sourceHead);
   const wikiCandidateCancellationCompatibility = isWikiCandidateProviderCancellationCompatibilityCurrent(rootDir, sourceHead);
+  const eventFactCancellationCompatibility = isHermesEventFactProviderCancellationCompatibilityCurrent(rootDir, sourceHead);
   const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isPublicAskDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isPublicSearchDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isSecurityUpstreamTransportCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
-    || wikiCandidateCancellationCompatibility;
+    || wikiCandidateCancellationCompatibility
+    || eventFactCancellationCompatibility;
   const noMutation = mutation.dbMutationPerformed === false
     && mutation.providerDispatchCalled === false
     && mutation.shareSessionCreated === false

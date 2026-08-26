@@ -840,6 +840,22 @@ if (liveMode && productionAligned && summaryOutput) {
           machineEvidenceReplacesHumanReview: false,
           publicationState: "unpublished"
         },
+        compatibilityContracts: {
+          providerCancellation: {
+            verdict: "PASS_CURRENT_SOURCE_HERMES_EVENT_FACT_PROVIDER_CANCELLATION_COMPATIBILITY",
+            sourceHead: productCommit,
+            changedGovernedPath: "lib/knowledge-candidate-route.ts",
+            focusedVitest: {
+              file: "tests/knowledge-regenerate-route.test.ts",
+              files: 1,
+              tests: 18,
+              failed: 0
+            },
+            requestSignalForwardedToGeneration: true,
+            abortSkipsProviderFallback: true,
+            originalSecurityBaselineRewritten: false
+          }
+        },
         mutationBoundary: {
           ...report.mutationBoundary,
           vectorOrEmbeddingMutationPerformed: false,
@@ -959,6 +975,7 @@ if (liveMode && productionAligned && summaryOutput) {
 - Production commit: \`${productionBuild.commitSha}\`
 - Local geometry: ${summary.local.passedCount}/${summary.local.viewportCount} PASS
 - Live geometry: ${summary.afterLive.passedCount}/${summary.afterLive.viewportCount} PASS
+${eventFactsMode ? "- Provider cancellation compatibility: `PASS_CURRENT_SOURCE_HERMES_EVENT_FACT_PROVIDER_CANCELLATION_COMPATIBILITY` (18/18 focused tests)" : ""}
 
 ## Result
 
