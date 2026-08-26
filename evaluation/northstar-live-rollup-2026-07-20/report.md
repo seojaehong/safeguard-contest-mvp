@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-26T19:09:00.960Z
-Source HEAD at generation: 6ac28333501dd4a9fe940f2bb1ca2fcccbdbbf75
-Live commit at generation: d3ed175cc683a7a2734fd1b3d54f3b951025b4dd
+Generated at: 2026-08-26T20:14:41.659Z
+Source HEAD at generation: 1e7ae8249b67e833d8cc035d3339bb3ff4b417bb
+Live commit at generation: 1e7ae8249b67e833d8cc035d3339bb3ff4b417bb
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -91,6 +91,7 @@ Overall: `northstar_open_approval_gated`
 - Verdict: `PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT`
 - Live geometry: pass=4/4, fail=0; documents/checks=12/5; desktop/mobile zones=3/1
 - Keyboard and screen reader: cases=4/4; roving tabs=true; labelled tabpanel=true; Escape focus restore=true; cockpit ready=true
+- Browser-local persistence: reviewer hydration preserved=true; lifecycle visible=true; failure visible=true; denial probe=true
 - Human review completed: false; broad human wording review required: true
 - Local review receipt: verdict=PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT; ready=true; locked cases=2/2; documents/checks=12/5; findings bound/count/reviewed=true/27/true; API requests=0
 - Receipt boundary: reviewer self-attested=true; identity verified=false; server recorded=false; approval granted=false; proves human identity=false
@@ -446,7 +447,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -457,7 +458,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_wording_review | ancestor | ancestor_of_head | evaluation\live-document-wording-review-2026-07-24\report.json |
 | live_document_broad_review | ancestor | ancestor_of_head | evaluation\live-document-broad-review-2026-07-25\report.json |
 | live_document_editorial_review | missing | ancestor_of_head | evaluation\live-document-editorial-review-2026-07-25\report.json |
-| document_editorial_review_cockpit | ancestor | ancestor_of_head | evaluation\document-editorial-review-cockpit-2026-08-16\report.json |
+| document_editorial_review_cockpit | exact | matches_live | evaluation\document-editorial-review-cockpit-2026-08-16\report.json |
 | live_document_editorial_duplicate_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |

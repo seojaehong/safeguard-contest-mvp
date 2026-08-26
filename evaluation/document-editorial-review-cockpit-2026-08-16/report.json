@@ -1,17 +1,17 @@
 {
   "schemaVersion": "safeclaw-document-editorial-review-cockpit/v1",
-  "checkedAt": "2026-08-16T11:29:15.792Z",
+  "checkedAt": "2026-08-26T20:13:39.265Z",
   "mode": "live-production",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHead": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
+  "sourceHead": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
+    "commitSha": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-owh8jlaeq-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-trlphkt4r-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "sourceHeadMatchesProduction": true,
@@ -19,6 +19,7 @@
   "total": 4,
   "pass": 4,
   "fail": 0,
+  "storageFailureProbePass": true,
   "acceptanceContract": {
     "canonicalDocumentCount": 12,
     "includesRiskAssessment": true,
@@ -28,6 +29,9 @@
     "bodyHeightUnchangedWhileOpen": true,
     "longCopyContained": true,
     "reviewStateStoredSeparately": true,
+    "reviewerHydrationDoesNotOverwriteStorage": true,
+    "storageLifecycleVisible": true,
+    "storageFailureVisible": true,
     "editedTextInvalidatesCompletion": true,
     "automaticReviewCannotClaimHumanCompletion": true,
     "keyboardRovingTabNavigation": true,
@@ -52,12 +56,17 @@
   "verification": {
     "documentsEditorLayout": {
       "filesPassed": 1,
-      "testsPassed": 40,
+      "testsPassed": 43,
+      "status": "pass"
+    },
+    "userVisibleKoreanCopy": {
+      "filesPassed": 1,
+      "testsPassed": 8,
       "status": "pass"
     },
     "focusedEditorialReview": {
       "filesPassed": 1,
-      "testsPassed": 1,
+      "testsPassed": 2,
       "status": "pass"
     },
     "typecheck": {
@@ -68,6 +77,17 @@
       "nextVersion": "15.5.22",
       "staticPages": 28
     }
+  },
+  "storageFailureProbe": {
+    "viewport": {
+      "width": 390,
+      "height": 723
+    },
+    "status": "error",
+    "message": "브라우저 저장소 오류로 검토 기록을 복원하거나 저장할 수 없습니다.",
+    "visible": true,
+    "screenshot": "storage-error-mobile-390x723.png",
+    "verdict": "PASS"
   },
   "results": [
     {
@@ -95,7 +115,8 @@
         "selectedDocumentTitle": "위험성평가표",
         "navScrollable": true,
         "copyOverflow": "auto",
-        "checklistOverflow": "auto"
+        "checklistOverflow": "auto",
+        "storageStatus": "empty"
       },
       "accessibility": {
         "initialFocusLabel": "문서 사람 검토 닫기",
@@ -107,6 +128,7 @@
         "tabCount": 12,
         "selectedTabCount": 1,
         "tabbableTabCount": 1,
+        "mode": "desktop-roving-tabs",
         "arrowNavigationPass": true,
         "tabpanelLinked": true,
         "homeNavigationPass": true,
@@ -116,8 +138,16 @@
       "afterCompletion": {
         "currentWorkpackUnchanged": true,
         "reviewStorageKeyCount": 1,
+        "reviewerStorageKeyCount": 1,
+        "storageStatus": "saved",
         "dialogScrollTop": 0,
-        "apiRequestCount": 0
+        "apiRequestCount": 0,
+        "totalApiRequestCountIncludingReload": 2
+      },
+      "afterReload": {
+        "storageStatus": "restored",
+        "reviewerInputValue": "자동 검증 검토자",
+        "persistedReviewer": "자동 검증 검토자"
       },
       "screenshots": {
         "open": "day-desktop-short-1440x723-open.png",
@@ -150,7 +180,8 @@
         "selectedDocumentTitle": "위험성평가표",
         "navScrollable": true,
         "copyOverflow": "auto",
-        "checklistOverflow": "auto"
+        "checklistOverflow": "auto",
+        "storageStatus": "empty"
       },
       "accessibility": {
         "initialFocusLabel": "문서 사람 검토 닫기",
@@ -162,6 +193,7 @@
         "tabCount": 12,
         "selectedTabCount": 1,
         "tabbableTabCount": 1,
+        "mode": "desktop-roving-tabs",
         "arrowNavigationPass": true,
         "tabpanelLinked": true,
         "homeNavigationPass": true,
@@ -171,8 +203,16 @@
       "afterCompletion": {
         "currentWorkpackUnchanged": true,
         "reviewStorageKeyCount": 1,
+        "reviewerStorageKeyCount": 1,
+        "storageStatus": "saved",
         "dialogScrollTop": 0,
-        "apiRequestCount": 0
+        "apiRequestCount": 0,
+        "totalApiRequestCountIncludingReload": 2
+      },
+      "afterReload": {
+        "storageStatus": "restored",
+        "reviewerInputValue": "자동 검증 검토자",
+        "persistedReviewer": "자동 검증 검토자"
       },
       "screenshots": {
         "open": "night-desktop-short-1440x723-open.png",
@@ -203,9 +243,10 @@
         "includesRiskAssessment": true,
         "checkboxCount": 5,
         "selectedDocumentTitle": "위험성평가표",
-        "navScrollable": true,
+        "navScrollable": false,
         "copyOverflow": "auto",
-        "checklistOverflow": "auto"
+        "checklistOverflow": "auto",
+        "storageStatus": "empty"
       },
       "accessibility": {
         "initialFocusLabel": "문서 사람 검토 닫기",
@@ -217,6 +258,7 @@
         "tabCount": 12,
         "selectedTabCount": 1,
         "tabbableTabCount": 1,
+        "mode": "mobile-select-buttons",
         "arrowNavigationPass": true,
         "tabpanelLinked": true,
         "homeNavigationPass": true,
@@ -226,8 +268,16 @@
       "afterCompletion": {
         "currentWorkpackUnchanged": true,
         "reviewStorageKeyCount": 1,
+        "reviewerStorageKeyCount": 1,
+        "storageStatus": "saved",
         "dialogScrollTop": 0,
-        "apiRequestCount": 0
+        "apiRequestCount": 0,
+        "totalApiRequestCountIncludingReload": 2
+      },
+      "afterReload": {
+        "storageStatus": "restored",
+        "reviewerInputValue": "자동 검증 검토자",
+        "persistedReviewer": "자동 검증 검토자"
       },
       "screenshots": {
         "open": "day-mobile-short-390x723-open.png",
@@ -258,9 +308,10 @@
         "includesRiskAssessment": true,
         "checkboxCount": 5,
         "selectedDocumentTitle": "위험성평가표",
-        "navScrollable": true,
+        "navScrollable": false,
         "copyOverflow": "auto",
-        "checklistOverflow": "auto"
+        "checklistOverflow": "auto",
+        "storageStatus": "empty"
       },
       "accessibility": {
         "initialFocusLabel": "문서 사람 검토 닫기",
@@ -272,6 +323,7 @@
         "tabCount": 12,
         "selectedTabCount": 1,
         "tabbableTabCount": 1,
+        "mode": "mobile-select-buttons",
         "arrowNavigationPass": true,
         "tabpanelLinked": true,
         "homeNavigationPass": true,
@@ -281,8 +333,16 @@
       "afterCompletion": {
         "currentWorkpackUnchanged": true,
         "reviewStorageKeyCount": 1,
+        "reviewerStorageKeyCount": 1,
+        "storageStatus": "saved",
         "dialogScrollTop": 0,
-        "apiRequestCount": 0
+        "apiRequestCount": 0,
+        "totalApiRequestCountIncludingReload": 2
+      },
+      "afterReload": {
+        "storageStatus": "restored",
+        "reviewerInputValue": "자동 검증 검토자",
+        "persistedReviewer": "자동 검증 검토자"
       },
       "screenshots": {
         "open": "night-mobile-short-390x723-open.png",

@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-26T19:09:00.960Z",
-  "head": "6ac28333501dd4a9fe940f2bb1ca2fcccbdbbf75",
+  "generatedAt": "2026-08-26T20:14:41.659Z",
+  "head": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "d3ed175cc683a7a2734fd1b3d54f3b951025b4dd",
+    "commitSha": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-lnq8g1pmq-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-trlphkt4r-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -85,7 +85,7 @@
       "id": "document_editorial_review_cockpit",
       "state": "proven",
       "artifact": "evaluation\\document-editorial-review-cockpit-2026-08-16\\report.json",
-      "detail": "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. All four cases also prove deterministic close-button entry focus, one selected and tabbable document tab, Arrow/Home roving navigation, a labelled tabpanel, and Escape focus restoration. A separate live desktop/mobile receipt contract proves a fail-closed local JSON export for 12 documents x 5 checks with current text fingerprints plus bound editorial finding IDs, categories, and fingerprints, a recorded self-attested reviewer, and zero API calls. It does not prove reviewer identity, server recording, completed human review, or approval: automatedInteractionOnly=true, humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Live Day/Night desktop-short 1440x723 and mobile-short 390x723 pass 4/4 with 12 canonical documents including riskAssessmentDraft, five explicit reviewer checks, a three-zone desktop and one-column mobile cockpit, unchanged page-body height, local-scroll containment, separate stale-aware review storage, zero API calls, and no current-workpack mutation. All four cases prove empty -> saved -> reload-restored storage state without overwriting the self-attested reviewer, while a separate mobile storage-denial probe fails visibly. They also prove deterministic close-button entry focus, one selected and tabbable document tab, Arrow/Home roving navigation, a labelled tabpanel, and Escape focus restoration. A separate live desktop/mobile receipt contract proves a fail-closed local JSON export for 12 documents x 5 checks with current text fingerprints plus bound editorial finding IDs, categories, and fingerprints, a recorded self-attested reviewer, and zero API calls. It does not prove reviewer identity, server recording, completed human review, or approval: automatedInteractionOnly=true, humanReviewCompleted=false, broad human wording review remains required, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_live_document_editorial_runtime",
@@ -1007,8 +1007,8 @@
   "documentEditorialReviewCockpit": {
     "artifact": "evaluation\\document-editorial-review-cockpit-2026-08-16\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_COCKPIT",
-    "sourceHead": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
-    "productionCommit": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
+    "sourceHead": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
+    "productionCommit": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
     "livePassed": 4,
     "liveFailed": 0,
     "canonicalDocumentCount": 12,
@@ -1019,6 +1019,10 @@
     "screenReaderTabPanelContract": true,
     "escapeRestoresLaunchFocus": true,
     "accessibilityRowsPassed": 4,
+    "reviewerHydrationDoesNotOverwriteStorage": true,
+    "storageLifecycleVisible": true,
+    "storageFailureVisible": true,
+    "storageFailureProbePass": true,
     "cockpitReady": true,
     "receiptArtifact": "evaluation\\document-editorial-review-receipt-2026-08-17\\report.json",
     "receiptVerdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
@@ -1603,10 +1607,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "6ac28333501dd4a9fe940f2bb1ca2fcccbdbbf75",
+      "sourceCommit": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
       "sourceStatus": "exact",
-      "productionCommit": "6ac28333501dd4a9fe940f2bb1ca2fcccbdbbf75",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -1691,10 +1695,10 @@
     {
       "id": "document_editorial_review_cockpit",
       "artifact": "evaluation\\document-editorial-review-cockpit-2026-08-16\\report.json",
-      "sourceCommit": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
-      "sourceStatus": "ancestor",
-      "productionCommit": "50f62c7884ade697ee1e6375bdde8497b12d4d7c",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
+      "sourceStatus": "exact",
+      "productionCommit": "1e7ae8249b67e833d8cc035d3339bb3ff4b417bb",
+      "productionStatus": "matches_live"
     },
     {
       "id": "live_document_editorial_duplicate_classification",
