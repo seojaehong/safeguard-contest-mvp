@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "safeclaw-hermes-review-subject-context/v1",
+  "checkedAt": "2026-08-26T16:28:27.957Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_SUBJECT_CONTEXT_LIVE_PENDING",
+  "sourceHead": "800a96883a1f77904a8b6aa57c6b165ff3a0e450",
+  "productCommit": "800a96883a1f77904a8b6aa57c6b165ff3a0e450",
+  "scope": {
+    "surface": "/knowledge human-review workbench",
+    "contract": "The selected candidate body precedes readiness details, and evidence review retains a bounded candidate-subject cue.",
+    "routeSplitAcceptedAsFix": false
+  },
+  "beforeVisualFinding": {
+    "status": "SCOPED_VISUAL_CONTEXT_GAP",
+    "productionCommit": "288b6c5bdc68b3295778efae6b8397463bc8a102",
+    "evidenceScreenshot": "evaluation/hermes-evidence-digest-readability-2026-08-26/after-live/knowledge-review-evidence-readability-day-mobile-short-390x723.png",
+    "finding": "The mobile evidence pane showed verification metadata without the selected candidate subject in the evidence panel. Candidate content also followed readiness and traceability blocks in the candidate pane."
+  },
+  "afterLocal": {
+    "path": "evaluation/hermes-review-subject-context-2026-08-27/after-local/report.json",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_EVIDENCE_INSPECTOR",
+    "sourceHead": "800a96883a1f77904a8b6aa57c6b165ff3a0e450",
+    "viewportCount": 8,
+    "passedCount": 8,
+    "failedCount": 0,
+    "candidateBodyBeforeReadinessCount": 8,
+    "candidateBodyTopVisibleCount": 8,
+    "desktopEvidenceSubjectContextCount": 4,
+    "mobileEvidenceSubjectContextVisibleCount": 4,
+    "maxEvidenceSubjectContextHeight": 47,
+    "horizontalOverflowCount": 0,
+    "desktopScreenshot": "evaluation/hermes-review-subject-context-2026-08-27/after-local/knowledge-review-evidence-readability-day-desktop-short-1440x723.png",
+    "mobileCandidateScreenshot": "evaluation/hermes-review-subject-context-2026-08-27/after-local/knowledge-review-candidate-subject-day-mobile-short-390x723.png",
+    "mobileEvidenceScreenshot": "evaluation/hermes-review-subject-context-2026-08-27/after-local/knowledge-review-evidence-readability-day-mobile-short-390x723.png"
+  },
+  "verification": {
+    "staticContract": "PASS 1 file / 17 tests",
+    "focusedBrowserAndViewport": "PASS 2 files / 19 tests; 1 environment-gated file skipped",
+    "typecheck": "PASS",
+    "build": "PASS Next.js 15.5.22 / 28 static pages",
+    "liveAfterDeploymentRequired": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "ontologyPublicationPerformed": false,
+    "wikiPublicationPerformed": false
+  },
+  "reviewBoundary": {
+    "humanReviewCompleted": false,
+    "machineEvidenceReplacesHumanReview": false,
+    "candidateApproved": false,
+    "wikiPublished": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
+  }
+}
