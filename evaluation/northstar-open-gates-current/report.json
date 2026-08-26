@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-26T16:38:43.556Z",
-  "sourceSha": "8eac8508b8fcd6af4ec7d7fe485ece029798ee31",
+  "generatedAt": "2026-08-26T17:34:06.451Z",
+  "sourceSha": "c1f74b1452893221db858a5685a5d52eaf4d46ad",
   "overall": "open",
   "gates": [
     {
@@ -558,7 +558,7 @@
       "state": "proven",
       "label": "Hermes canonical hazard trace matrix",
       "evidencePath": "evaluation\\hermes-knowledge-review-trace-matrix-2026-08-26\\report.json",
-      "detail": "Live Hermes review trace matrix closes the canonical 8 hazards, 33 controls, and 33 primary-document bindings with exact evidence rows and bounded internal scroll. The prior 32/33 truncation remains preserved as RED evidence. Human review remains incomplete, publication stays unpublished, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED.",
+      "detail": "Live Hermes review trace matrix closes the canonical 8 hazards, 33 controls, and 33 primary-document bindings with exact evidence rows. The candidate pane is the single bounded scroll owner; the trace list remains fully expanded inside it, avoiding nested-scroll context loss. The prior 32/33 truncation remains preserved as RED evidence. Human review remains incomplete, publication stays unpublished, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED.",
       "nextActions": []
     },
     {

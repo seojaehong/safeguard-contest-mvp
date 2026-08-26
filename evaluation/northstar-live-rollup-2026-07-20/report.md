@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-26T16:39:00.326Z
-Source HEAD at generation: 8eac8508b8fcd6af4ec7d7fe485ece029798ee31
-Live commit at generation: f98d83995152394dbb2e76d018003299bc1d6b7a
+Generated at: 2026-08-26T17:34:08.501Z
+Source HEAD at generation: c1f74b1452893221db858a5685a5d52eaf4d46ad
+Live commit at generation: 05c7657e60c849e35988a478e0afdf1cba9933af
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -335,7 +335,7 @@ Overall: `northstar_open_approval_gated`
 - Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_MATRIX`
 - Before/local/live viewport passes: 0/8, 8/8, 8/8
 - Canonical hazards/control links/document links: 8/33/33
-- Complete/internal scroll=true/true; human review completed=false; exact saved Share=MISSING_EVIDENCE; Wiki/RLS/provider persistence=APPROVAL_GATED/APPROVAL_GATED/APPROVAL_GATED
+- Complete/trace-list internal scroll/scroll owner/candidate-pane scroll/screenshot context=true/false/candidate-pane/true/true; human review completed=false; exact saved Share=MISSING_EVIDENCE; Wiki/RLS/provider persistence=APPROVAL_GATED/APPROVAL_GATED/APPROVAL_GATED
 
 ## Hermes Remote Durable Ledger
 
@@ -500,7 +500,7 @@ Overall: `northstar_open_approval_gated`
 | hermes_review_evidence_inspector | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-evidence-inspector-2026-08-14\report.json |
 | hermes_review_event_fact_traceability | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-event-facts-2026-08-26\report.json |
 | hermes_review_trace_blocks | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-trace-blocks-2026-08-26\report.json |
-| hermes_review_trace_matrix | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-trace-matrix-2026-08-26\report.json |
+| hermes_review_trace_matrix | ancestor | matches_live | evaluation\hermes-knowledge-review-trace-matrix-2026-08-26\report.json |
 | hermes_remote_durable_ledger | ancestor | ancestor_of_head | evaluation\hermes-openclaw-runtime-current-gate-2026-07-20\report.json |
 | live_document_secondary_grounding | ancestor | ancestor_of_head | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | ancestor | ancestor_of_head | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |

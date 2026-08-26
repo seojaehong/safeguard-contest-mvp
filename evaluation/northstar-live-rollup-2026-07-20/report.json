@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-26T16:39:00.326Z",
-  "head": "8eac8508b8fcd6af4ec7d7fe485ece029798ee31",
+  "generatedAt": "2026-08-26T17:34:08.501Z",
+  "head": "c1f74b1452893221db858a5685a5d52eaf4d46ad",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f98d83995152394dbb2e76d018003299bc1d6b7a",
+    "commitSha": "05c7657e60c849e35988a478e0afdf1cba9933af",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-o472d81p8-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-4csz0l46c-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -349,7 +349,7 @@
       "id": "hermes_review_trace_matrix",
       "state": "proven",
       "artifact": "evaluation\\hermes-knowledge-review-trace-matrix-2026-08-26\\report.json",
-      "detail": "Live Hermes review trace matrix closes the canonical 8 hazards, 33 controls, and 33 primary-document bindings with exact evidence rows and bounded internal scroll. The prior 32/33 truncation remains preserved as RED evidence. Human review remains incomplete, publication stays unpublished, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
+      "detail": "Live Hermes review trace matrix closes the canonical 8 hazards, 33 controls, and 33 primary-document bindings with exact evidence rows. The candidate pane is the single bounded scroll owner; the trace list remains fully expanded inside it, avoiding nested-scroll context loss. The prior 32/33 truncation remains preserved as RED evidence. Human review remains incomplete, publication stays unpublished, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
     },
     {
       "id": "live_document_secondary_grounding",
@@ -1566,9 +1566,9 @@
   "hermesReviewTraceMatrix": {
     "artifact": "evaluation\\hermes-knowledge-review-trace-matrix-2026-08-26\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_MATRIX",
-    "sourceHead": "77de49e5c92824e6b78db4e0dacd605d6f3fa275",
-    "productCommit": "060956fa3201668b1fe4de5522fc9da7b58d87b5",
-    "productionCommit": "77de49e5c92824e6b78db4e0dacd605d6f3fa275",
+    "sourceHead": "05c7657e60c849e35988a478e0afdf1cba9933af",
+    "productCommit": "05c7657e60c849e35988a478e0afdf1cba9933af",
+    "productionCommit": "05c7657e60c849e35988a478e0afdf1cba9933af",
     "beforePassed": 0,
     "beforeViewportCount": 8,
     "localPassed": 8,
@@ -1579,7 +1579,10 @@
     "canonicalControlLinkCount": 33,
     "canonicalDocumentLinkCount": 33,
     "canonicalMatrixComplete": true,
-    "traceListInternalScroll": true,
+    "traceListInternalScroll": false,
+    "traceScrollOwner": "candidate-pane",
+    "candidatePaneInternalScroll": true,
+    "traceScreenshotContextVisible": true,
     "humanReviewCompleted": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "llmWikiPublication": "APPROVAL_GATED",
@@ -1600,9 +1603,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "8eac8508b8fcd6af4ec7d7fe485ece029798ee31",
+      "sourceCommit": "c1f74b1452893221db858a5685a5d52eaf4d46ad",
       "sourceStatus": "exact",
-      "productionCommit": "8eac8508b8fcd6af4ec7d7fe485ece029798ee31",
+      "productionCommit": "c1f74b1452893221db858a5685a5d52eaf4d46ad",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -2032,10 +2035,10 @@
     {
       "id": "hermes_review_trace_matrix",
       "artifact": "evaluation\\hermes-knowledge-review-trace-matrix-2026-08-26\\report.json",
-      "sourceCommit": "77de49e5c92824e6b78db4e0dacd605d6f3fa275",
+      "sourceCommit": "05c7657e60c849e35988a478e0afdf1cba9933af",
       "sourceStatus": "ancestor",
-      "productionCommit": "77de49e5c92824e6b78db4e0dacd605d6f3fa275",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "05c7657e60c849e35988a478e0afdf1cba9933af",
+      "productionStatus": "matches_live"
     },
     {
       "id": "hermes_remote_durable_ledger",
