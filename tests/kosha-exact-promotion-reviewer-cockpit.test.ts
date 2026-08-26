@@ -152,6 +152,14 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
     expect(result.html).toContain('aria-controls="candidate-panel-0" aria-selected="true" tabindex="0"');
     expect(result.html).toContain('aria-controls="candidate-panel-1" aria-selected="false" tabindex="-1"');
     expect(result.html).toContain('role="status" aria-live="polite" data-progress-live');
+    expect(result.html).toContain('class="draft-status" role="status" aria-live="polite" data-draft-status');
+    expect(result.html).toContain("로컬 초안 · 빈 상태 저장됨");
+    expect(result.html).toContain("로컬 초안 · 저장된 입력 복원됨");
+    expect(result.html).toContain("로컬 초안 · 이전 초안 제외 · 빈 상태 저장됨");
+    expect(result.html).toContain("로컬 초안 · 변경사항 저장됨");
+    expect(result.html).toContain("로컬 초안 · 입력 초기화됨");
+    expect(result.html).toContain("로컬 초안 · 저장 실패 · 입력은 현재 화면에만 유지");
+    expect(result.html).toContain("KOSHA reviewer cockpit local state could not be saved");
     expect(result.html).toContain('data-candidate-context>후보 1/8 · 현재 0/8 · 전체 0/64');
     expect(result.html).toContain('.candidate-rail-header{display:flex;min-height:16px');
     expect(result.html).toContain('const completeCount = state.reduce((sum, row) => sum + completedInputs(row), 0)');

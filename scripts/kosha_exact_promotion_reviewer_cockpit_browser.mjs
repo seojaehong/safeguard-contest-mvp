@@ -147,6 +147,11 @@ export async function runBrowserProbe(options) {
             }),
           progressLiveRole: element("[data-progress-live]")?.getAttribute("role") ?? "",
           progressLiveMode: element("[data-progress-live]")?.getAttribute("aria-live") ?? "",
+          draftStatusRole: element("[data-draft-status]")?.getAttribute("role") ?? "",
+          draftStatusLiveMode: element("[data-draft-status]")?.getAttribute("aria-live") ?? "",
+          draftStatusText: element("[data-draft-status]")?.textContent?.trim() ?? "",
+          draftStatusVisible: element("[data-draft-status]") instanceof HTMLElement
+            && element("[data-draft-status]").getClientRects().length > 0,
           mobileTablistRole: element(".mobile-mode")?.getAttribute("role") ?? "",
           selectedMobileTabCount: document.querySelectorAll('[data-candidate-panel="0"] [data-mobile-mode][aria-selected="true"]').length,
           tabbableMobileTabCount: [...document.querySelectorAll('[data-candidate-panel="0"] [data-mobile-mode]')]
@@ -212,9 +217,14 @@ export async function runBrowserProbe(options) {
     }
     const storagePage = await browser.newPage({ viewport: { width: 1440, height: 723 } });
     await storagePage.goto(pathToFileURL(htmlPath).href, { waitUntil: "load" });
+    await storagePage.evaluate(() => localStorage.clear());
+    await storagePage.reload({ waitUntil: "load" });
+    const emptyDraftStatus = (await storagePage.textContent("[data-draft-status]")) || "";
     await storagePage.check('[data-check="0:0"]');
+    const changedDraftStatus = (await storagePage.textContent("[data-draft-status]")) || "";
     await storagePage.reload({ waitUntil: "load" });
     const sameFingerprintPreserved = await storagePage.isChecked('[data-check="0:0"]');
+    const restoredDraftStatus = (await storagePage.textContent("[data-draft-status]")) || "";
     const staleEnvelopeResult = await storagePage.evaluate(() => {
       const storageKey = "safeclaw-kosha-reviewer-cockpit-v4";
       const stored = JSON.parse(localStorage.getItem(storageKey) || "null");
@@ -242,6 +252,7 @@ export async function runBrowserProbe(options) {
     const staleFingerprintDiscarded = !(await storagePage.isChecked('[data-check="0:0"]'));
     const staleExportDisabled = await storagePage.isDisabled("[data-export]");
     const staleDraftNotice = (await storagePage.textContent("[data-progress-live]")) || "";
+    const staleDraftStatus = (await storagePage.textContent("[data-draft-status]")) || "";
     await storagePage.click('[data-candidate-button="2"]');
     const titleReconciliationAccess = await storagePage.evaluate(() => {
       const panel = document.querySelector('[data-candidate-panel="2"]');
@@ -264,10 +275,23 @@ export async function runBrowserProbe(options) {
       staleFingerprintDiscarded,
       staleExportDisabled,
       staleDraftNotice,
+      emptyDraftStatus,
+      changedDraftStatus,
+      restoredDraftStatus,
+      staleDraftStatus,
     };
     draftStorageIdentity.titleReconciliationAccess = titleReconciliationAccess;
     draftStorageIdentity.titleReconciliationScreenshot = path.relative(options.rootDir, titleReconciliationScreenshot);
     await storagePage.close();
+    const failurePage = await browser.newPage({ viewport: { width: 390, height: 723 } });
+    await failurePage.addInitScript(() => {
+      Storage.prototype.setItem = () => {
+        throw new DOMException("storage unavailable", "QuotaExceededError");
+      };
+    });
+    await failurePage.goto(pathToFileURL(htmlPath).href, { waitUntil: "load" });
+    draftStorageIdentity.saveFailureStatus = (await failurePage.textContent("[data-draft-status]")) || "";
+    await failurePage.close();
   } finally {
     await browser.close();
   }
@@ -371,7 +395,12 @@ export async function runBrowserProbe(options) {
     && draftStorageIdentity?.staleEnvelopeInjected
     && draftStorageIdentity?.staleFingerprintDiscarded
     && draftStorageIdentity?.staleExportDisabled
-    && draftStorageIdentity?.staleDraftNotice.includes("후보 구성이 변경되어 이전 검토 초안을 복원하지 않았습니다."),
+    && draftStorageIdentity?.staleDraftNotice.includes("후보 구성이 변경되어 이전 검토 초안을 복원하지 않았습니다.")
+    && draftStorageIdentity?.emptyDraftStatus === "로컬 초안 · 빈 상태 저장됨"
+    && draftStorageIdentity?.changedDraftStatus === "로컬 초안 · 변경사항 저장됨"
+    && draftStorageIdentity?.restoredDraftStatus === "로컬 초안 · 저장된 입력 복원됨"
+    && draftStorageIdentity?.staleDraftStatus === "로컬 초안 · 이전 초안 제외 · 빈 상태 저장됨"
+    && draftStorageIdentity?.saveFailureStatus === "로컬 초안 · 저장 실패 · 입력은 현재 화면에만 유지",
   );
   const titleReconciliationPass = Boolean(
     draftStorageIdentity?.titleReconciliationAccess?.candidateVisible
@@ -404,6 +433,13 @@ export async function runBrowserProbe(options) {
     && row.candidateContext?.top >= row.candidateRail?.top
     && row.candidateContext?.bottom <= row.candidateRail?.bottom
   ));
+  const draftPersistenceVisibilityPass = results.every((row) => (
+    row.draftStatusRole === "status"
+    && row.draftStatusLiveMode === "polite"
+    && row.draftStatusVisible === true
+    && row.draftStatusText.startsWith("로컬 초안 ·")
+  ))
+    && draftStorageIdentityPass;
   const verdict = allRowsPass
     && desktopPass
     && mobilePass
@@ -413,6 +449,7 @@ export async function runBrowserProbe(options) {
     && candidateNavigationReadabilityPass
     && evidenceReadingHierarchyPass
     && mobileCandidateProgressVisibilityPass
+    && draftPersistenceVisibilityPass
     ? "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY"
     : "RED_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY";
   const report = {
@@ -430,6 +467,7 @@ export async function runBrowserProbe(options) {
     candidateNavigationReadabilityPass,
     evidenceReadingHierarchyPass,
     mobileCandidateProgressVisibilityPass,
+    draftPersistenceVisibilityPass,
     draftStorageIdentity,
     results,
     mutationBoundary: {
@@ -469,6 +507,7 @@ Verdict: \`${report.verdict}\`
 - Candidate navigation readability: ${report.candidateNavigationReadabilityPass}
 - Evidence reading hierarchy: ${report.evidenceReadingHierarchyPass}
 - Mobile candidate progress visibility: ${report.mobileCandidateProgressVisibilityPass}
+- Draft persistence visibility: ${report.draftPersistenceVisibilityPass}
 - Evidence page receipts visible: ${results.every((row) => row.evidenceReceiptCount >= 24)}
 - Draft fingerprint contains source identity: ${report.draftStorageIdentity?.sourceIdentityPresent}
 - Live progress status: ${results.every((row) => row.progressLiveRole === "status" && row.progressLiveMode === "polite")}

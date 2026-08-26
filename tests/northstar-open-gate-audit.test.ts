@@ -5378,6 +5378,9 @@ function createFixtureRoot(): string {
       progressLiveRegion: true,
       candidatePositionLabels: true,
       mobileCandidateProgressVisible: true,
+      visibleDraftPersistenceStatus: true,
+      draftRestoreStatusVisible: true,
+      draftSaveFailureVisible: true,
       mobileCandidateScrollSnap: true,
       selectedCandidateAutoReveal: true,
       readableEvidenceCues: true,
@@ -5455,6 +5458,7 @@ function createFixtureRoot(): string {
     candidateNavigationReadabilityPass: true,
     evidenceReadingHierarchyPass: true,
     mobileCandidateProgressVisibilityPass: true,
+    draftPersistenceVisibilityPass: true,
     draftStorageIdentity: {
       sameFingerprintPreserved: true,
       sourceIdentityPresent: true,
@@ -5462,6 +5466,11 @@ function createFixtureRoot(): string {
       staleFingerprintDiscarded: true,
       staleExportDisabled: true,
       staleDraftNotice: "후보 구성이 변경되어 이전 검토 초안을 복원하지 않았습니다. 0개 완료, 64개 입력이 남았습니다.",
+      emptyDraftStatus: "로컬 초안 · 빈 상태 저장됨",
+      changedDraftStatus: "로컬 초안 · 변경사항 저장됨",
+      restoredDraftStatus: "로컬 초안 · 저장된 입력 복원됨",
+      staleDraftStatus: "로컬 초안 · 이전 초안 제외 · 빈 상태 저장됨",
+      saveFailureStatus: "로컬 초안 · 저장 실패 · 입력은 현재 화면에만 유지",
       titleReconciliationAccess: {
         candidateVisible: true,
         officialCurrentTitleVisible: true,
@@ -5498,6 +5507,10 @@ function createFixtureRoot(): string {
       selectedCandidateText: "D-C-1 · 후보 1/8 D-C-1-2026 0/8",
       progressLiveRole: "status",
       progressLiveMode: "polite",
+      draftStatusRole: "status",
+      draftStatusLiveMode: "polite",
+      draftStatusText: "로컬 초안 · 빈 상태 저장됨",
+      draftStatusVisible: true,
       mobileTablistRole: "tablist",
       selectedMobileTabCount: 1,
       tabbableMobileTabCount: 1,
@@ -9228,6 +9241,32 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       draftStorageIdentityPass: boolean;
     };
     browser.draftStorageIdentityPass = false;
+    writeJson(rootDir, path.relative(rootDir, browserPath), browser);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("fails closed when the KOSHA reviewer cockpit hides draft persistence status", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const browserPath = path.join(
+      rootDir,
+      "evaluation",
+      "kosha-exact-promotion-reviewer-cockpit-2026-07-25",
+      "browser-report.json",
+    );
+    const browser = JSON.parse(fs.readFileSync(browserPath, "utf8")) as {
+      draftPersistenceVisibilityPass: boolean;
+      results: Array<{ draftStatusVisible: boolean }>;
+    };
+    browser.draftPersistenceVisibilityPass = false;
+    browser.results[1]!.draftStatusVisible = false;
     writeJson(rootDir, path.relative(rootDir, browserPath), browser);
 
     const audit = buildNorthstarOpenGateAudit({
