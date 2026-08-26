@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "safeclaw-hermes-review-trace-block-summary/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_BLOCKS",
+  "checkedAt": "2026-08-26T05:31:47.802Z",
+  "sourceHead": "657fc75fa72abc0d961b504de75f95255e9f083a",
+  "productCommit": "7bf1ff3114a95f980e11617ac98b2c4afa26a912",
+  "productionCommit": "657fc75fa72abc0d961b504de75f95255e9f083a",
+  "deploymentUrl": "safeguard-contest-7tqrn2pe1-seojaehongs-projects.vercel.app",
+  "beforeLive": {
+    "path": "evaluation\\hermes-knowledge-review-trace-blocks-2026-08-26\\before-live\\report.json",
+    "verdict": "RED_HERMES_REVIEW_TRACE_BLOCKS",
+    "viewportCount": 8,
+    "passedCount": 0,
+    "failedCount": 8,
+    "panelCount": 0,
+    "resolvedTraceCount": 0,
+    "unresolvedTraceCount": 0
+  },
+  "local": {
+    "path": "evaluation\\hermes-knowledge-review-trace-blocks-2026-08-26\\after-local\\report.json",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_TRACE_BLOCKS",
+    "viewportCount": 8,
+    "passedCount": 8,
+    "failedCount": 0
+  },
+  "afterLive": {
+    "path": "evaluation\\hermes-knowledge-review-trace-blocks-2026-08-26\\after-live\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_BLOCKS",
+    "viewportCount": 8,
+    "passedCount": 8,
+    "failedCount": 0,
+    "productionAligned": true,
+    "browserErrorCount": 0
+  },
+  "liveAfterDeploymentRequired": false,
+  "traceabilityContract": {
+    "expectedTraceCount": 1,
+    "panelCount": 1,
+    "resolvedTraceCount": 1,
+    "unresolvedTraceCount": 0,
+    "hazardBound": true,
+    "controlsBound": true,
+    "primaryDocumentsBound": true,
+    "evidenceRowsBound": true,
+    "insideCandidatePane": true,
+    "approvalFailsClosedWhenIncomplete": true,
+    "humanReviewCompleted": false,
+    "publicationState": "unpublished",
+    "beforePanelCount": 0,
+    "beforeResolvedTraceCount": 0,
+    "beforeUnresolvedTraceCount": 0,
+    "scopedFixtureHazardCount": 1,
+    "allHazardsClosed": false,
+    "allDocumentsClosed": false,
+    "machineEvidenceReplacesHumanReview": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "ontologyPublicationPerformed": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "securityBoundary": {
+    "immutableOriginal18FindingBaselinePreserved": true
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED"
+  }
+}
