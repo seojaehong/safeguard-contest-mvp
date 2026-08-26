@@ -11,6 +11,7 @@ import {
   classifyKnowledgeEvent,
   evaluateKnowledgeCandidateContentReadiness,
   readKnowledgeEventReviewFacts,
+  readKnowledgeSifReviewTitles,
   type KnowledgeCandidate,
   type KnowledgeTenantContext
 } from "@/lib/knowledge-governance";
@@ -196,6 +197,7 @@ export function buildDeterministicKnowledgeCandidateText(
     .filter((source) => source.sourceType === "law" || source.agency === "MOLEG")
     .map((source) => source.title)
     .slice(0, 2);
+  const sifSourceTitles = readKnowledgeSifReviewTitles(bundle.rawEvents);
   const hazardSummary = hazards.length > 0
     ? hazards.join(" · ")
     : "매칭된 내장 위험요인이 없어 현장 책임자의 위험요인 확인이 필요합니다.";
@@ -211,6 +213,9 @@ export function buildDeterministicKnowledgeCandidateText(
   const lawEvidenceText = lawSourceTitles.length > 0
     ? lawSourceTitles.join(" · ")
     : "현행 법령 근거를 검토자가 별도 확인";
+  const sifEvidenceText = sifSourceTitles.length > 0
+    ? sifSourceTitles.join(" · ")
+    : "연결된 SIF 사례 없음(검토 필요)";
   const reviewFacts = readKnowledgeEventReviewFacts(bundle.rawEvents);
   const eventFactText = reviewFacts.length > 0
     ? ` / 원본 이벤트 검토 사실: ${reviewFacts.join(" · ")}`
@@ -220,7 +225,7 @@ export function buildDeterministicKnowledgeCandidateText(
     `1) 위험요인 요약: ${hazardSummary}${eventFactText}`,
     `2) 문서 반영 위치: ${documentTargets}`,
     `3) 통제대책: ${controlText}`,
-    `4) 검수 필요 항목: 근거 구분: KOSHA 기술·공식자료 후보 - ${koshaEvidenceText} (기술 참고 후보로만 사용) / 현행 법령 후보 - ${lawEvidenceText} (현장 적용 여부 별도 확인). 현장 책임자가 실제 작업조건, 담당자, 확인시각과 적용 근거를 검토합니다. 이 후보는 사람 검토 전 게시하지 않습니다.`
+    `4) 검수 필요 항목: 근거 구분: SIF 재해·통제 근거 - ${sifEvidenceText} (위험 우선순위·사고 통제 참고 후보로만 사용) / KOSHA 기술·공식자료 후보 - ${koshaEvidenceText} (기술 참고 후보로만 사용) / 현행 법령 후보 - ${lawEvidenceText} (현장 적용 여부 별도 확인). 현장 책임자가 실제 작업조건, 담당자, 확인시각과 적용 근거를 검토합니다. 이 후보는 사람 검토 전 게시하지 않습니다.`
   ].join("\n");
 }
 

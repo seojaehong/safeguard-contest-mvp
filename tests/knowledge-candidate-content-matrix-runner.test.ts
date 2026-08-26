@@ -10,6 +10,7 @@ const testCase = {
     ["물질안전보건자료 조회 서비스"],
     ["산업안전보건법"]
   ],
+  requiredSifEvidenceAnyGroups: [["SIF 화학물질 누출·접촉 사고 통제 사례"]],
   requiredEventFactGroups: [["야간 교대 작업"], ["청각 경보 보조수단 필요"]],
   forbiddenGeneratedTerms: ["resident-id: 900101-1234567"]
 };
@@ -25,7 +26,7 @@ function payload() {
       generatedBy: "hermes_or_llm",
       reviewStatus: "pending_review",
       publicationState: "unpublished",
-      generatedText: "1) 위험요인 요약: 화학물질 누출 위험 / 원본 이벤트 검토 사실: 야간 교대 작업 · 청각 경보 보조수단 필요\n2) 문서 반영 위치: 위험성평가표\n3) 통제대책: MSDS와 보호구 확인\n4) 검수 필요 항목: 근거 구분: KOSHA 기술·공식자료 후보 - 물질안전보건자료 조회 서비스 / 현행 법령 후보 - 산업안전보건법. 현장 책임자 확인",
+      generatedText: "1) 위험요인 요약: 화학물질 누출 위험 / 원본 이벤트 검토 사실: 야간 교대 작업 · 청각 경보 보조수단 필요\n2) 문서 반영 위치: 위험성평가표\n3) 통제대책: MSDS와 보호구 확인\n4) 검수 필요 항목: 근거 구분: SIF 재해·통제 근거 - SIF 화학물질 누출·접촉 사고 통제 사례 (사고 통제 참고 후보) / KOSHA 기술·공식자료 후보 - 물질안전보건자료 조회 서비스 / 현행 법령 후보 - 산업안전보건법. 현장 책임자 확인",
       matchedHazardIds: ["chemical-msds"],
       dbMutationAllowed: false,
       dbMutationPerformed: false,
@@ -34,6 +35,8 @@ function payload() {
     reviewContract: {
       status: "human_review_required",
       humanReviewRequired: true,
+      presentAuthorityIds: ["sif", "law"],
+      sourceRoleCounts: { sifIncidentControlEvidence: 1, lawStatutorySource: 1 },
       machineEvidenceReplacesHumanReview: false,
       dbMutationAllowed: false,
       publishAllowed: false
@@ -48,8 +51,10 @@ function payload() {
       legalOverclaimFindingCount: 0,
       statutoryClaimDetected: false,
       lawProvenancePresent: true,
+      sifProvenancePresent: true,
+      sifEvidenceVisible: true,
       hazardGroundingPresent: true,
-      unresolvedReviewItems: [],
+      unresolvedReviewItems: [] as string[],
       humanReviewCompleted: false,
       publicationState: "unpublished",
       publishAllowed: false
@@ -69,9 +74,12 @@ describe("knowledge candidate content matrix runner", () => {
       missingHazardIds: [],
       missingTermGroups: [],
       missingEvidenceTermGroups: [],
+      missingSifEvidenceTermGroups: [],
       missingEventFactGroups: [],
       exposedForbiddenTerms: [],
       reviewerEvidenceTraceVisible: true,
+      sifEvidenceBoundaryVisible: true,
+      sifProvenancePresent: true,
       technicalGuidanceBoundaryVisible: true,
       lawCandidateBoundaryVisible: true,
       eventSemanticGroundingVisible: true,
@@ -109,8 +117,29 @@ describe("knowledge candidate content matrix runner", () => {
     ]);
     expect(result.failures).toEqual(expect.arrayContaining([
       "reviewer_evidence_trace_missing",
+      "sif_evidence_boundary_missing",
       "technical_guidance_boundary_missing",
       "law_candidate_boundary_missing"
+    ]));
+  });
+
+  it("fails closed when linked SIF evidence is absent from reviewer-visible text", () => {
+    const unsafe = payload();
+    unsafe.candidate.generatedText = unsafe.candidate.generatedText.replace(
+      "SIF 재해·통제 근거 - SIF 화학물질 누출·접촉 사고 통제 사례 (사고 통제 참고 후보) / ",
+      ""
+    );
+    unsafe.contentReadiness.sifEvidenceVisible = false;
+    unsafe.contentReadiness.unresolvedReviewItems = ["sif_provenance_not_visible"];
+    unsafe.contentReadiness.status = "revision_required";
+
+    const result = evaluateCandidateMatrixPayload(testCase, 200, unsafe);
+    expect(result.ok).toBe(false);
+    expect(result.missingSifEvidenceTermGroups).toEqual([["SIF 화학물질 누출·접촉 사고 통제 사례"]]);
+    expect(result.failures).toEqual(expect.arrayContaining([
+      "sif_readiness_evidence_missing",
+      "sif_evidence_boundary_missing",
+      "missing_sif_evidence_term_group:SIF 화학물질 누출·접촉 사고 통제 사례"
     ]));
   });
 

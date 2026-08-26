@@ -125,6 +125,8 @@ const queueItem = {
     legalOverclaimFindingCount: 0,
     statutoryClaimDetected: true,
     lawProvenancePresent: true,
+    sifProvenancePresent: true,
+    sifEvidenceVisible: true,
     hazardGroundingPresent: true,
     unresolvedReviewItems: [] as string[],
     humanReviewCompleted: false,
@@ -263,6 +265,7 @@ describe("knowledge review inbox browser", () => {
     expect(await inbox.getByRole("button", { name: "후보 승인" }).isDisabled()).toBe(true);
     await inbox.getByRole("tab", { name: /위험성평가표 현장 지식 검토/u }).click();
     expect(await inbox.locator('[data-review-content-readiness="ready_for_human_review"]').count()).toBe(1);
+    expect(await inbox.getByText(/SIF 근거 본문 확인/u).isVisible()).toBe(true);
     expect(await inbox.getByRole("button", { name: "후보 승인" }).isDisabled()).toBe(false);
     const traceability = inbox.locator('[data-review-traceability="complete"]');
     expect(await traceability.count()).toBe(1);

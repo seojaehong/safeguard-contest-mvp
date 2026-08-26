@@ -48,6 +48,8 @@ type ReviewContentReadiness = {
   legalOverclaimFindingCount: number;
   statutoryClaimDetected: boolean;
   lawProvenancePresent: boolean;
+  sifProvenancePresent: boolean;
+  sifEvidenceVisible: boolean;
   hazardGroundingPresent: boolean;
   unresolvedReviewItems: string[];
   humanReviewCompleted: false;
@@ -369,6 +371,8 @@ function readContentReadiness(value: unknown): ReviewContentReadiness | null {
     legalOverclaimFindingCount: value.legalOverclaimFindingCount as number,
     statutoryClaimDetected: value.statutoryClaimDetected as boolean,
     lawProvenancePresent: value.lawProvenancePresent as boolean,
+    sifProvenancePresent: value.sifProvenancePresent === true,
+    sifEvidenceVisible: value.sifEvidenceVisible === true,
     hazardGroundingPresent: value.hazardGroundingPresent as boolean,
     unresolvedReviewItems: (value.unresolvedReviewItems as string[]).slice(0, 12),
     humanReviewCompleted: false,
@@ -786,6 +790,7 @@ export function KnowledgeReviewInbox() {
                               <p>
                                 placeholder {item.contentReadiness.placeholderFindingCount} · 법적 과장 {item.contentReadiness.legalOverclaimFindingCount}
                                 {item.contentReadiness.statutoryClaimDetected ? ` · 법령 근거 ${item.contentReadiness.lawProvenancePresent ? "확인" : "누락"}` : ""}
+                                {item.contentReadiness.sifProvenancePresent ? ` · SIF 근거 ${item.contentReadiness.sifEvidenceVisible ? "본문 확인" : "본문 누락"}` : ""}
                               </p>
                             </section>
                           ) : null}

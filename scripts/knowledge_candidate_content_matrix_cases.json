@@ -13,11 +13,21 @@
         ["물질안전보건자료 조회 서비스", "안전보건자료 링크 서비스"],
         ["법제처 국가법령정보 산업안전보건법", "산업안전보건법"]
       ],
+      "requiredSifEvidenceAnyGroups": [["SIF 화학물질 누출·접촉 사고 통제 사례"]],
       "requiredEventFactGroups": [
         ["야간 교대 작업"],
         ["청각 경보 보조수단 필요"]
       ],
       "forbiddenGeneratedTerms": ["resident-id: 900101-1234567"],
+      "sifEvents": [{
+        "source": "kosha-accident",
+        "sourceId": "matrix-sif-chemical",
+        "capturedAt": "2026-08-25T00:00:01.000Z",
+        "title": "SIF 화학물질 누출·접촉 사고 통제 사례",
+        "payload": { "item_type": "sif-case" },
+        "relatedHazardIds": ["chemical-msds"],
+        "reflectedDocuments": ["위험성평가표", "안전보건교육", "비상대응 절차"]
+      }],
       "rawEvent": {
         "source": "lawgo",
         "sourceId": "matrix-law-chemical",
@@ -45,11 +55,21 @@
         ["화기작업 화재·폭발 예방 매뉴얼", "사고사망 게시판 정보 조회서비스"],
         ["법제처 국가법령정보 산업안전보건법", "산업안전보건법"]
       ],
+      "requiredSifEvidenceAnyGroups": [["SIF 용접 불티 화재 사고 통제 사례"]],
       "requiredEventFactGroups": [
         ["상부 양중과 하부 화기 동시작업"],
         ["작업 종료 후 30분 잔불 감시"]
       ],
       "forbiddenGeneratedTerms": ["private-token-hot-work"],
+      "sifEvents": [{
+        "source": "kosha-accident",
+        "sourceId": "matrix-sif-hot-work",
+        "capturedAt": "2026-08-25T00:01:01.000Z",
+        "title": "SIF 용접 불티 화재 사고 통제 사례",
+        "payload": { "item_type": "sif-case" },
+        "relatedHazardIds": ["hot-work-fire"],
+        "reflectedDocuments": ["위험성평가표", "작업계획서", "TBM 브리핑"]
+      }],
       "rawEvent": {
         "source": "lawgo",
         "sourceId": "matrix-law-hot-work",
@@ -77,11 +97,21 @@
         ["안전보건법령 스마트검색", "국내재해사례 게시판 정보 조회서비스"],
         ["법제처 국가법령정보 산업안전보건법", "산업안전보건법"]
       ],
+      "requiredSifEvidenceAnyGroups": [["SIF 밀폐공간 질식 사고 통제 사례"]],
       "requiredEventFactGroups": [
         ["입구 감시인 1명 상시 배치"],
         ["구조 삼각대 현장 비치"]
       ],
       "forbiddenGeneratedTerms": ["worker-phone: 010-9876-5432"],
+      "sifEvents": [{
+        "source": "kosha-accident",
+        "sourceId": "matrix-sif-confined-space",
+        "capturedAt": "2026-08-25T00:02:01.000Z",
+        "title": "SIF 밀폐공간 질식 사고 통제 사례",
+        "payload": { "item_type": "sif-case" },
+        "relatedHazardIds": ["confined-space"],
+        "reflectedDocuments": ["위험성평가표", "TBM 브리핑", "비상대응 절차"]
+      }],
       "rawEvent": {
         "source": "lawgo",
         "sourceId": "matrix-law-confined-space",
@@ -110,11 +140,21 @@
         ["지게차의 안전작업계획서 작성지침"],
         ["법제처 국가법령정보 산업안전보건법", "산업안전보건법"]
       ],
+      "requiredSifEvidenceAnyGroups": [["SIF 지게차·보행자 충돌 사고 통제 사례"]],
       "requiredEventFactGroups": [
         ["북문 상하차 통로 폭 2.4m"],
         ["점심 교대시간 보행자 집중"]
       ],
       "forbiddenGeneratedTerms": ["private-email: worker@example.com"],
+      "sifEvents": [{
+        "source": "kosha-accident",
+        "sourceId": "matrix-sif-forklift",
+        "capturedAt": "2026-08-25T00:03:01.000Z",
+        "title": "SIF 지게차·보행자 충돌 사고 통제 사례",
+        "payload": { "item_type": "sif-case" },
+        "relatedHazardIds": ["forklift-traffic"],
+        "reflectedDocuments": ["위험성평가표", "작업계획서", "TBM 기록"]
+      }],
       "rawEvent": {
         "source": "lawgo",
         "sourceId": "matrix-law-forklift",
@@ -143,11 +183,21 @@
         ["KOSHA 위험성평가 사업안내", "KOSHA 4M 기법 위험성평가 메뉴얼"],
         ["법제처 국가법령정보 산업안전보건법", "산업안전보건법"]
       ],
+      "requiredSifEvidenceAnyGroups": [["SIF 비계 추락 사고 통제 사례"]],
       "requiredEventFactGroups": [
         ["베트남어 브리핑 필요"],
         ["오후 돌풍 예보 시 작업 중지"]
       ],
       "forbiddenGeneratedTerms": ["resident-id: 880202-2345678"],
+      "sifEvents": [{
+        "source": "kosha-accident",
+        "sourceId": "matrix-sif-fall-foreign",
+        "capturedAt": "2026-08-25T00:04:01.000Z",
+        "title": "SIF 비계 추락 사고 통제 사례",
+        "payload": { "item_type": "sif-case" },
+        "relatedHazardIds": ["fall-scaffold", "foreign-worker-briefing"],
+        "reflectedDocuments": ["위험성평가표", "TBM 브리핑", "외국인 근로자 안내문"]
+      }],
       "rawEvent": {
         "source": "lawgo",
         "sourceId": "matrix-law-fall-foreign",

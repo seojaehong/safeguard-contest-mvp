@@ -6,7 +6,8 @@ import {
   buildKnowledgeCandidate,
   buildKnowledgeCandidateReviewContract,
   classifyKnowledgeEvent,
-  evaluateKnowledgeCandidateContentReadiness
+  evaluateKnowledgeCandidateContentReadiness,
+  readKnowledgeSifReviewTitles
 } from "@/lib/knowledge-governance";
 
 const lawEvent: KnowledgeRawEvent = {
@@ -26,6 +27,23 @@ const tenantContext = {
 };
 
 describe("knowledge governance contract", () => {
+  it("keeps only bounded public SIF titles for reviewer-visible evidence", () => {
+    const baseSif: KnowledgeRawEvent = {
+      ...lawEvent,
+      source: "kosha-accident",
+      sourceId: "sif-safe",
+      title: "SIF 비계 추락 사고 통제 사례",
+      payload: { item_type: "sif-case" }
+    };
+
+    expect(readKnowledgeSifReviewTitles([
+      baseSif,
+      { ...baseSif, sourceId: "sif-private", title: "SIF 사고 worker@example.com" },
+      { ...baseSif, sourceId: "generic", title: "일반 사고", payload: { item_type: "accident" } },
+      { ...baseSif, sourceId: "duplicate" }
+    ])).toEqual(["SIF 비계 추락 사고 통제 사례"]);
+  });
+
   it("keeps the promotion path explicit and blocks machine publication", () => {
     expect(KNOWLEDGE_PROMOTION_STAGES.map((stage) => stage.id)).toEqual([
       "knowledge_event",
@@ -368,6 +386,36 @@ describe("knowledge governance contract", () => {
       lawProvenancePresent: false
     });
     expect(readiness.unresolvedReviewItems).toContain("statutory_claim_without_law_provenance");
+  });
+
+  it("fails Wiki review readiness when linked SIF provenance is not visible", () => {
+    const sifEvent: KnowledgeRawEvent = {
+      ...lawEvent,
+      source: "kosha-accident",
+      sourceId: "sif-fall",
+      title: "SIF 추락 사고 통제 사례",
+      payload: { item_type: "sif-case" }
+    };
+    const candidate = buildKnowledgeCandidate({
+      question: "추락 위험 통제대책을 검토해줘",
+      rawEvents: [lawEvent, sifEvent],
+      matchedHazardIds: ["hazard-fall"],
+      generatedText: [
+        "1) 위험요인 요약: 작업발판 단부 추락 위험",
+        "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
+        "3) 통제대책: 안전난간 설치 상태를 작업 전 확인",
+        "4) 검수 필요 항목: KOSHA 기술자료와 현행 법령 후보를 확인"
+      ].join("\n"),
+      providerLabel: "Hermes",
+      tenantContext
+    });
+
+    expect(evaluateKnowledgeCandidateContentReadiness(candidate)).toMatchObject({
+      status: "revision_required",
+      sifProvenancePresent: true,
+      sifEvidenceVisible: false,
+      unresolvedReviewItems: ["sif_provenance_not_visible"]
+    });
   });
 
   it("does not treat matched hazard metadata as textual hazard grounding", () => {

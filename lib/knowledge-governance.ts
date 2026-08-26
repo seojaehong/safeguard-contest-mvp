@@ -3,6 +3,7 @@ import type { KnowledgeRawEvent } from "@/lib/safety-knowledge";
 
 const MAX_EVENT_REVIEW_FACTS = 4;
 const MAX_EVENT_REVIEW_FACT_LENGTH = 120;
+const MAX_SIF_REVIEW_TITLES = 3;
 const PRIVATE_EVENT_REVIEW_FACT_PATTERNS = [
   /\b\d{6}-?\d{7}\b/u,
   /\b01[016789]-?\d{3,4}-?\d{4}\b/u,
@@ -32,6 +33,23 @@ export function readKnowledgeEventReviewFacts(events: readonly KnowledgeRawEvent
   }
 
   return facts;
+}
+
+export function readKnowledgeSifReviewTitles(events: readonly KnowledgeRawEvent[]): string[] {
+  const titles: string[] = [];
+
+  for (const event of events) {
+    if (event.source !== "kosha-accident") continue;
+    const itemType = event.payload.item_type ?? event.payload.itemType;
+    if (typeof itemType !== "string" || itemType.trim().toLowerCase() !== "sif-case") continue;
+    const title = event.title.replace(/\s+/gu, " ").trim();
+    if (!title || title.length > MAX_EVENT_REVIEW_FACT_LENGTH) continue;
+    if (PRIVATE_EVENT_REVIEW_FACT_PATTERNS.some((pattern) => pattern.test(title))) continue;
+    if (!titles.includes(title)) titles.push(title);
+    if (titles.length >= MAX_SIF_REVIEW_TITLES) return titles;
+  }
+
+  return titles;
 }
 
 export type KnowledgePromotionStageId =
@@ -212,6 +230,8 @@ export type KnowledgeCandidateContentReadiness = {
   legalOverclaimFindingCount: number;
   statutoryClaimDetected: boolean;
   lawProvenancePresent: boolean;
+  sifProvenancePresent: boolean;
+  sifEvidenceVisible: boolean;
   hazardGroundingPresent: boolean;
   unresolvedReviewItems: string[];
   humanReviewCompleted: false;
@@ -241,6 +261,7 @@ const STATUTORY_CLAIM_PATTERNS = [
   /(?:법률|시행령|시행규칙)(?:에|에\s*따라|상)/u
 ] as const;
 const HAZARD_GROUNDING_PATTERN = /추락|끼임|감전|화재|폭발|충돌|전도|질식|양중|화학|유해|고소|굴착|밀폐|산소결핍|누출|지게차/u;
+const SIF_EVIDENCE_PATTERN = /SIF\s*(?:재해|사고)[·ㆍ\s]*(?:통제)?\s*근거/iu;
 
 function readKnowledgeCandidateSections(text: string): Map<KnowledgeCandidateRequiredSectionId, string> {
   const labelToId = new Map<string, KnowledgeCandidateRequiredSectionId>(
@@ -281,6 +302,8 @@ export function evaluateKnowledgeCandidateContentReadiness(
   const legalOverclaimFindingCount = LEGAL_OVERCLAIM_PATTERNS.filter((pattern) => pattern.test(candidate.generatedText)).length;
   const statutoryClaimDetected = STATUTORY_CLAIM_PATTERNS.some((pattern) => pattern.test(candidate.generatedText));
   const lawProvenancePresent = candidate.provenance.some((item) => item.authorityId === "law");
+  const sifProvenancePresent = candidate.provenance.some((item) => item.authorityId === "sif");
+  const sifEvidenceVisible = SIF_EVIDENCE_PATTERN.test(sectionText.get("review_items") ?? "");
   const hazardGroundingPresent = HAZARD_GROUNDING_PATTERN.test(sectionText.get("hazard_summary") ?? "");
   const unresolvedReviewItems = [
     ...sections.filter((section) => !section.present).map((section) => `missing_section:${section.id}`),
@@ -288,6 +311,7 @@ export function evaluateKnowledgeCandidateContentReadiness(
     ...(placeholderFindingCount > 0 ? ["placeholder_content"] : []),
     ...(legalOverclaimFindingCount > 0 ? ["legal_overclaim"] : []),
     ...(statutoryClaimDetected && !lawProvenancePresent ? ["statutory_claim_without_law_provenance"] : []),
+    ...(sifProvenancePresent && !sifEvidenceVisible ? ["sif_provenance_not_visible"] : []),
     ...(!hazardGroundingPresent ? ["hazard_grounding_missing"] : [])
   ];
 
@@ -302,6 +326,8 @@ export function evaluateKnowledgeCandidateContentReadiness(
     legalOverclaimFindingCount,
     statutoryClaimDetected,
     lawProvenancePresent,
+    sifProvenancePresent,
+    sifEvidenceVisible,
     hazardGroundingPresent,
     unresolvedReviewItems,
     humanReviewCompleted: false,

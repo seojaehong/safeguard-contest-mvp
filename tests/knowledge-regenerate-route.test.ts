@@ -297,6 +297,14 @@ describe("knowledge candidate API", () => {
           },
           relatedHazardIds: ["confined-space"],
           reflectedDocuments: ["위험성평가표", "비상대응 절차"]
+        }, {
+          source: "kosha-accident",
+          sourceId: "sif-confined-space",
+          capturedAt: "2026-08-25T00:00:01.000Z",
+          title: "SIF 밀폐공간 질식 사고 통제 사례",
+          payload: { item_type: "sif-case" },
+          relatedHazardIds: ["confined-space"],
+          reflectedDocuments: ["위험성평가표", "TBM 브리핑", "비상대응 절차"]
         }]
       })
     }));
@@ -322,6 +330,8 @@ describe("knowledge candidate API", () => {
         placeholderFindingCount: 0,
         legalOverclaimFindingCount: 0,
         lawProvenancePresent: true,
+        sifProvenancePresent: true,
+        sifEvidenceVisible: true,
         hazardGroundingPresent: true,
         unresolvedReviewItems: [],
         humanReviewCompleted: false,
@@ -339,8 +349,19 @@ describe("knowledge candidate API", () => {
     expect(payload.candidate.generatedText).not.toContain("worker-phone");
     expect(payload.candidate.generatedText).not.toContain("010-9876-5432");
     expect(payload.candidate.generatedText).toContain("출입 전 산소·유해가스 측정");
+    expect(payload.candidate.generatedText).toContain("SIF 재해·통제 근거 - SIF 밀폐공간 질식 사고 통제 사례");
     expect(payload.candidate.generatedText).toContain("KOSHA 기술·공식자료 후보 - 안전보건법령 스마트검색");
     expect(payload.candidate.generatedText).toContain("현행 법령 후보 - 법제처 국가법령정보 산업안전보건법");
+    expect(payload.candidate.generatedText.indexOf("SIF 재해·통제 근거")).toBeLessThan(
+      payload.candidate.generatedText.indexOf("KOSHA 기술·공식자료 후보")
+    );
+    expect(payload.candidate.generatedText.indexOf("KOSHA 기술·공식자료 후보")).toBeLessThan(
+      payload.candidate.generatedText.indexOf("현행 법령 후보")
+    );
+    expect(payload.reviewContract).toMatchObject({
+      presentAuthorityIds: ["sif", "law"],
+      sourceRoleCounts: { sifIncidentControlEvidence: 1, lawStatutorySource: 1 }
+    });
     expect(payload.candidate.generatedText).toContain("기술 참고 후보로만 사용");
     expect(payload.candidate.generatedText).toContain("이 후보는 사람 검토 전 게시하지 않습니다");
   });
