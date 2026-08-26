@@ -291,7 +291,10 @@ describe("knowledge candidate API", () => {
           sourceId: "law-confined-space",
           capturedAt: "2026-08-25T00:00:00.000Z",
           title: "밀폐공간 작업 현행 법령 검토 이벤트",
-          payload: { scenario: "탱크 내부 산소결핍" },
+          payload: {
+            scenario: "탱크 내부 산소결핍",
+            reviewFacts: ["입구 감시인 1명 상시 배치", "worker-phone: 010-9876-5432"]
+          },
           relatedHazardIds: ["confined-space"],
           reflectedDocuments: ["위험성평가표", "비상대응 절차"]
         }]
@@ -332,6 +335,9 @@ describe("knowledge candidate API", () => {
       }
     });
     expect(payload.candidate.generatedText).toContain("밀폐공간 산소결핍·중독");
+    expect(payload.candidate.generatedText).toContain("원본 이벤트 검토 사실: 입구 감시인 1명 상시 배치");
+    expect(payload.candidate.generatedText).not.toContain("worker-phone");
+    expect(payload.candidate.generatedText).not.toContain("010-9876-5432");
     expect(payload.candidate.generatedText).toContain("출입 전 산소·유해가스 측정");
     expect(payload.candidate.generatedText).toContain("KOSHA 기술·공식자료 후보 - 안전보건법령 스마트검색");
     expect(payload.candidate.generatedText).toContain("현행 법령 후보 - 법제처 국가법령정보 산업안전보건법");
@@ -535,6 +541,7 @@ describe("knowledge candidate API", () => {
           payload: {
             provenanceScope: "site",
             article: `42-${"x".repeat(160)}`,
+            reviewFacts: ["작업 전 보호구 상태 재확인", "resident-id: 900101-1234567"],
             privateWorkerNote: sensitivePayload
           },
           relatedHazardIds: ["hazard-fall"],
@@ -573,8 +580,8 @@ describe("knowledge candidate API", () => {
       },
       payloadEvidence: {
         digestAlgorithm: "sha256",
-        topLevelKeyCount: 3,
-        omittedTopLevelKeyCount: 1,
+        topLevelKeyCount: 4,
+        omittedTopLevelKeyCount: 2,
         reviewMetadata: {
           provenanceScope: "site"
         },
@@ -596,6 +603,8 @@ describe("knowledge candidate API", () => {
     expect(prompt).not.toContain(sensitiveUrlToken);
     expect(prompt).not.toContain("manual-event-77");
     expect(prompt).not.toContain("provenanceScope");
+    expect(prompt).toContain("원본 이벤트 검토 사실(명시적 reviewFacts만 사용)");
+    expect(prompt).toContain("작업 전 보호구 상태 재확인");
     expect(prompt).toContain("SIF 재해·통제 근거 → KOSHA 기술지침 → 현행 법령");
     expect(prompt).toContain("문서팩 적용 전 현장 책임자 확인");
     expect(payload.reviewContract).toMatchObject({

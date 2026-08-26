@@ -28,6 +28,16 @@ import {
 } from "@/lib/public-ask-admission";
 
 const MAX_TENANT_ID_LENGTH = 128;
+const MAX_EVENT_REVIEW_FACTS = 4;
+const MAX_EVENT_REVIEW_FACT_LENGTH = 120;
+const PRIVATE_EVENT_REVIEW_FACT_PATTERNS = [
+  /\b\d{6}-?\d{7}\b/u,
+  /\b01[016789]-?\d{3,4}-?\d{4}\b/u,
+  /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/iu,
+  /https?:\/\//iu,
+  /\b(?:token|secret|password|resident[-_ ]?id|private[-_ ]?key)\b/iu,
+  /(?:주민번호|휴대폰|전화번호|이메일|비밀번호|비밀키)/u
+] as const;
 
 export type KnowledgeMutationCommand = {
   type: "persist_candidate" | "publish_ontology";
@@ -127,6 +137,28 @@ function buildPromptProvenance(
   };
 }
 
+export function readKnowledgeEventReviewFacts(events: KnowledgeRawEvent[]): string[] {
+  const facts: string[] = [];
+
+  for (const event of events) {
+    const payload = event.payload;
+    if (typeof payload !== "object" || payload === null || Array.isArray(payload)) continue;
+    const reviewFacts = (payload as Record<string, unknown>).reviewFacts;
+    if (!Array.isArray(reviewFacts)) continue;
+
+    for (const value of reviewFacts) {
+      if (typeof value !== "string") continue;
+      const fact = value.replace(/\s+/gu, " ").trim();
+      if (!fact || fact.length > MAX_EVENT_REVIEW_FACT_LENGTH) continue;
+      if (PRIVATE_EVENT_REVIEW_FACT_PATTERNS.some((pattern) => pattern.test(fact))) continue;
+      if (!facts.includes(fact)) facts.push(fact);
+      if (facts.length >= MAX_EVENT_REVIEW_FACTS) return facts;
+    }
+  }
+
+  return facts;
+}
+
 export function buildKnowledgePrompt(
   bundle: ReturnType<typeof buildKnowledgeRegenerationBundle>,
   tenantContext: KnowledgeTenantContext
@@ -137,6 +169,7 @@ export function buildKnowledgePrompt(
     `- 통제대책: ${hazard.controls.join(" / ")}`,
     `- 근거: ${hazard.sources.map((source) => source.title).join(" / ") || "기초 지식 DB"}`
   ].join("\n"));
+  const reviewFacts = readKnowledgeEventReviewFacts(bundle.rawEvents);
 
   return [
     "당신은 산업안전 지식 위키 편집자다.",
@@ -150,6 +183,9 @@ export function buildKnowledgePrompt(
     `질문: ${bundle.question}`,
     "매칭 위험요인:",
     ...hazards,
+    ...(reviewFacts.length > 0
+      ? ["원본 이벤트 검토 사실(명시적 reviewFacts만 사용):", ...reviewFacts.map((fact) => `- ${fact}`)]
+      : []),
     "원본 이벤트 provenance:",
     JSON.stringify(
       bundle.rawEvents.map((event) => buildPromptProvenance(event, tenantContext)),
@@ -207,9 +243,13 @@ export function buildDeterministicKnowledgeCandidateText(
   const lawEvidenceText = lawSourceTitles.length > 0
     ? lawSourceTitles.join(" · ")
     : "현행 법령 근거를 검토자가 별도 확인";
+  const reviewFacts = readKnowledgeEventReviewFacts(bundle.rawEvents);
+  const eventFactText = reviewFacts.length > 0
+    ? ` / 원본 이벤트 검토 사실: ${reviewFacts.join(" · ")}`
+    : "";
 
   return [
-    `1) 위험요인 요약: ${hazardSummary}`,
+    `1) 위험요인 요약: ${hazardSummary}${eventFactText}`,
     `2) 문서 반영 위치: ${documentTargets}`,
     `3) 통제대책: ${controlText}`,
     `4) 검수 필요 항목: 근거 구분: KOSHA 기술·공식자료 후보 - ${koshaEvidenceText} (기술 참고 후보로만 사용) / 현행 법령 후보 - ${lawEvidenceText} (현장 적용 여부 별도 확인). 현장 책임자가 실제 작업조건, 담당자, 확인시각과 적용 근거를 검토합니다. 이 후보는 사람 검토 전 게시하지 않습니다.`
