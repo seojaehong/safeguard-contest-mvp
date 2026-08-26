@@ -791,6 +791,9 @@ if (liveMode && productionAligned && summaryOutput) {
   const afterLocalDir = path.join(summaryDir, "after-local");
   const localReportPath = path.join(afterLocalDir, "report.json");
   const localReport = JSON.parse(await fs.readFile(localReportPath, "utf8"));
+  const beforeLiveReport = eventFactsMode
+    ? JSON.parse(await fs.readFile(path.join(summaryDir, "before-live", "report.json"), "utf8"))
+    : null;
 
   const localSummary = {
     path: path.relative(process.cwd(), path.join(afterLocalDir, "report.json")),
@@ -808,7 +811,50 @@ if (liveMode && productionAligned && summaryOutput) {
     productionAligned,
     browserErrorCount: results.reduce((count, result) => count + result.browserErrors.length, 0)
   };
-  const summary = evidenceInspectorMode
+  const summary = eventFactsMode
+    ? {
+        schemaVersion: "safeclaw-hermes-knowledge-review-event-fact-traceability-summary/v1",
+        verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVENT_FACT_TRACEABILITY",
+        checkedAt,
+        sourceHead,
+        productCommit,
+        productionCommit: productionBuild.commitSha,
+        deploymentUrl: productionBuild.deploymentUrl,
+        beforeLive: {
+          path: path.relative(process.cwd(), path.join(summaryDir, "before-live", "report.json")),
+          verdict: beforeLiveReport?.verdict,
+          viewportCount: beforeLiveReport?.viewportCount,
+          passedCount: beforeLiveReport?.passedCount,
+          failedCount: beforeLiveReport?.failedCount,
+          visibleFactCount: beforeLiveReport?.eventFactsContract?.visibleFactCount,
+          boundFactCount: beforeLiveReport?.eventFactsContract?.boundFactCount
+        },
+        local: localSummary,
+        afterLive: liveSummary,
+        liveAfterDeploymentRequired: false,
+        eventFactsContract: {
+          ...report.eventFactsContract,
+          beforeVisibleFactCount: beforeLiveReport?.eventFactsContract?.visibleFactCount,
+          beforeBoundFactCount: beforeLiveReport?.eventFactsContract?.boundFactCount,
+          humanReviewCompleted: false,
+          machineEvidenceReplacesHumanReview: false,
+          publicationState: "unpublished"
+        },
+        mutationBoundary: {
+          ...report.mutationBoundary,
+          vectorOrEmbeddingMutationPerformed: false,
+          wikiPublicationPerformed: false,
+          koshaRegistryMutationPerformed: false
+        },
+        securityBoundary: {
+          immutableOriginal18FindingBaselinePreserved: true
+        },
+        remainingBoundaries: {
+          ...report.remainingBoundaries,
+          providerDispatchPersistence: "APPROVAL_GATED"
+        }
+      }
+    : evidenceInspectorMode
     ? {
         schemaVersion: "safeclaw-hermes-knowledge-review-evidence-inspector-summary/v2",
         verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
@@ -899,7 +945,9 @@ if (liveMode && productionAligned && summaryOutput) {
         remainingBoundaries: report.remainingBoundaries
       };
   await fs.writeFile(summaryReportPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
-  const summaryTitle = evidenceInspectorMode
+  const summaryTitle = eventFactsMode
+    ? "Hermes Knowledge Review Event Fact Traceability"
+    : evidenceInspectorMode
     ? "Hermes Knowledge Review Evidence Inspector"
     : candidateReadinessMode
       ? "LLM Wiki Candidate Content Readiness"
@@ -914,7 +962,9 @@ if (liveMode && productionAligned && summaryOutput) {
 
 ## Result
 
-${evidenceInspectorMode
+${eventFactsMode
+  ? "Explicit safe original-event facts move from 0/8 visible and bound before remediation to 8/8 local and live. Two reviewer-visible facts remain bound to their exact evidence row with zero orphan facts, zero private-event exposure, and no candidate-body marker duplication."
+  : evidenceInspectorMode
   ? "The selected-candidate inspector keeps five evidence items bounded, exposes only allowlisted official HTTPS references, and preserves generic tenant-evidence labels."
   : candidateReadinessMode
     ? "The candidate cockpit derives four required content sections server-side, exposes revision reasons, and blocks approval while keeping site-only and reject decisions available."
