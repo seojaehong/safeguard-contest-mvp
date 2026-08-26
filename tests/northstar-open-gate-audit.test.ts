@@ -5337,6 +5337,9 @@ function createFixtureRoot(): string {
       draftBoundToCorpusIdentity: true,
       titleProvenanceVisible: true,
       progressLiveRegion: true,
+      candidatePositionLabels: true,
+      mobileCandidateScrollSnap: true,
+      selectedCandidateAutoReveal: true,
     },
     boundary: {
       localReviewOnly: true,
@@ -5407,6 +5410,7 @@ function createFixtureRoot(): string {
     responsiveTabPanelPass: true,
     draftStorageIdentityPass: true,
     titleReconciliationPass: true,
+    candidateNavigationReadabilityPass: true,
     draftStorageIdentity: {
       sameFingerprintPreserved: true,
       sourceIdentityPresent: true,
@@ -5440,8 +5444,12 @@ function createFixtureRoot(): string {
       selectedCandidateTabCount: 1,
       tabbableCandidateTabCount: 1,
       candidateControlLinksValid: true,
-      candidateEndState: { selectedIndex: 7, focusedIndex: 7 },
-      candidateHomeState: { selectedIndex: 0, focusedIndex: 0 },
+      candidateEndState: { selectedIndex: 7, focusedIndex: 7, selectedFullyVisible: true },
+      candidateHomeState: { selectedIndex: 0, focusedIndex: 0, selectedFullyVisible: true },
+      candidateContextText: "후보 1/8 · 0/8 입력",
+      candidateRailHeaderDisplay: row.viewport.width <= 767 ? "none" : "flex",
+      firstCandidateButtonWidth: row.viewport.width <= 767 ? 176 : 205,
+      selectedCandidateText: "D-C-1 · 후보 1/8 D-C-1-2026 0/8",
       progressLiveRole: "status",
       progressLiveMode: "polite",
       mobileTablistRole: "tablist",
@@ -9017,6 +9025,32 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       results: Array<{ candidateControlLinksValid: boolean }>;
     };
     browser.results[0]!.candidateControlLinksValid = false;
+    writeJson(rootDir, path.relative(rootDir, browserPath), browser);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("fails closed when the KOSHA mobile candidate rail can hide the selected review", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const browserPath = path.join(
+      rootDir,
+      "evaluation",
+      "kosha-exact-promotion-reviewer-cockpit-2026-07-25",
+      "browser-report.json",
+    );
+    const browser = JSON.parse(fs.readFileSync(browserPath, "utf8")) as {
+      candidateNavigationReadabilityPass: boolean;
+      results: Array<{ candidateEndState: { selectedFullyVisible: boolean } }>;
+    };
+    browser.candidateNavigationReadabilityPass = false;
+    browser.results[1]!.candidateEndState.selectedFullyVisible = false;
     writeJson(rootDir, path.relative(rootDir, browserPath), browser);
 
     const audit = buildNorthstarOpenGateAudit({

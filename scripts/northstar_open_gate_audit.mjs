@@ -9989,6 +9989,9 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && reviewerCockpitAccessibility.draftBoundToCorpusIdentity === true
     && reviewerCockpitAccessibility.titleProvenanceVisible === true
     && reviewerCockpitAccessibility.progressLiveRegion === true
+    && reviewerCockpitAccessibility.candidatePositionLabels === true
+    && reviewerCockpitAccessibility.mobileCandidateScrollSnap === true
+    && reviewerCockpitAccessibility.selectedCandidateAutoReveal === true
     && reviewerCockpitBoundary !== null
     && reviewerCockpitBoundary.localReviewOnly === true
     && reviewerCockpitBoundary.dbMutationPerformed === false
@@ -10017,6 +10020,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && reviewerCockpitBrowser.responsiveTabPanelPass === true
     && reviewerCockpitBrowser.draftStorageIdentityPass === true
     && reviewerCockpitBrowser.titleReconciliationPass === true
+    && reviewerCockpitBrowser.candidateNavigationReadabilityPass === true
     && isRecord(reviewerCockpitBrowser.draftStorageIdentity)
     && reviewerCockpitBrowser.draftStorageIdentity.sameFingerprintPreserved === true
     && reviewerCockpitBrowser.draftStorageIdentity.sourceIdentityPresent === true
@@ -10048,9 +10052,18 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
         && candidateEndState !== null
         && readNumber(candidateEndState.selectedIndex) === 7
         && readNumber(candidateEndState.focusedIndex) === 7
+        && candidateEndState.selectedFullyVisible === true
         && candidateHomeState !== null
         && readNumber(candidateHomeState.selectedIndex) === 0
         && readNumber(candidateHomeState.focusedIndex) === 0
+        && candidateHomeState.selectedFullyVisible === true
+        && readString(row.candidateContextText) === "후보 1/8 · 0/8 입력"
+        && readString(row.candidateRailHeaderDisplay) === (readNumber(viewport.width) <= 767 ? "none" : "flex")
+        && (readNumber(viewport.width) > 767 || (
+          readNumber(row.firstCandidateButtonWidth) >= 170
+          && readString(row.selectedCandidateText).includes("후보 1/8")
+          && readString(row.selectedCandidateText).includes("0/8")
+        ))
         && readString(row.progressLiveRole) === "status"
         && readString(row.progressLiveMode) === "polite"
         && readString(row.mobileTablistRole) === "tablist"
@@ -10079,7 +10092,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && cockpitBrowserBoundary.humanReviewCompleted === false
     && cockpitBrowserBoundary.separatePromotionApprovalRequired === true;
   const reviewerCockpitDetail = reviewerCockpitPass && reviewerCockpitBrowserPass
-    ? ` Reviewer cockpit ${reviewerCockpitPath} presents 8 candidates, 24 bounded excerpts, 24 PDF page/body receipts, 2 reconciled official/corpus title provenance rows, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry ${reviewerCockpitBrowserPath} preserves one visible candidate, explicit official-current and corpus-source titles, 40 checks, receipt access in the bounded evidence pane, three bounded desktop/mobile cases, reciprocal breakpoint-aware tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection, corpus-title-and-receipt-bound draft restore that rejects stale fingerprints, and polite live progress.`
+    ? ` Reviewer cockpit ${reviewerCockpitPath} presents 8 candidates, 24 bounded excerpts, 24 PDF page/body receipts, 2 reconciled official/corpus title provenance rows, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry ${reviewerCockpitBrowserPath} preserves one visible candidate, explicit official-current and corpus-source titles, 40 checks, receipt access in the bounded evidence pane, three bounded desktop/mobile cases, reciprocal breakpoint-aware tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection with the selected candidate fully visible, a two-card mobile rail with candidate-position/input-progress labels, corpus-title-and-receipt-bound draft restore that rejects stale fingerprints, and polite live progress.`
     : "";
   if (!isRecord(report)) {
     return gateResult({

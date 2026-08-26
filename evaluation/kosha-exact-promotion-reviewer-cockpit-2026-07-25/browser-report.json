@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-reviewer-cockpit-browser/v1",
   "verdict": "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY",
-  "checkedAt": "2026-08-16T16:59:10.570Z",
-  "sourceHead": "63fa3d39478c03d840bbb18fe98bb8e82576ddda",
+  "checkedAt": "2026-08-26T15:29:16.829Z",
+  "sourceHead": "8ee6b6ab4abc36bca1d7d12fa4f9bffb555b56b4",
   "cases": 3,
   "passedCases": 3,
   "desktopPass": true,
@@ -10,6 +10,7 @@
   "responsiveTabPanelPass": true,
   "draftStorageIdentityPass": true,
   "titleReconciliationPass": true,
+  "candidateNavigationReadabilityPass": true,
   "draftStorageIdentity": {
     "sameFingerprintPreserved": true,
     "sourceIdentityPresent": true,
@@ -58,6 +59,20 @@
         "bottom": 662,
         "left": 0
       },
+      "candidateList": {
+        "x": 12,
+        "y": 118,
+        "width": 205,
+        "height": 490,
+        "top": 118,
+        "right": 217,
+        "bottom": 608,
+        "left": 12
+      },
+      "candidateRailHeaderDisplay": "flex",
+      "candidateContextText": "후보 1/8 · 0/8 입력",
+      "selectedCandidateText": "D-C-10 · 후보 1/8 D-C-10-2026 0/8",
+      "firstCandidateButtonWidth": 205,
       "candidatePanel": {
         "x": 230,
         "y": 75,
@@ -117,11 +132,13 @@
       "horizontalOverflow": false,
       "candidateEndState": {
         "selectedIndex": 7,
-        "focusedIndex": 7
+        "focusedIndex": 7,
+        "selectedFullyVisible": true
       },
       "candidateHomeState": {
         "selectedIndex": 0,
-        "focusedIndex": 0
+        "focusedIndex": 0,
+        "selectedFullyVisible": true
       },
       "mobileKeyboardState": null,
       "receiptAccess": {
@@ -159,28 +176,42 @@
         "x": 0,
         "y": 68,
         "width": 390,
-        "height": 72,
+        "height": 73,
         "top": 68,
         "right": 390,
-        "bottom": 140,
+        "bottom": 141,
         "left": 0
       },
+      "candidateList": {
+        "x": 8,
+        "y": 76,
+        "width": 374,
+        "height": 56,
+        "top": 76,
+        "right": 382,
+        "bottom": 132,
+        "left": 8
+      },
+      "candidateRailHeaderDisplay": "none",
+      "candidateContextText": "후보 1/8 · 0/8 입력",
+      "selectedCandidateText": "D-C-10 · 후보 1/8 D-C-10-2026 0/8",
+      "firstCandidateButtonWidth": 176,
       "candidatePanel": {
         "x": 0,
-        "y": 140,
+        "y": 141,
         "width": 390,
-        "height": 531,
-        "top": 140,
+        "height": 530,
+        "top": 141,
         "right": 390,
         "bottom": 671,
         "left": 0
       },
       "evidencePane": {
         "x": 0,
-        "y": 195,
+        "y": 196,
         "width": 390,
-        "height": 476,
-        "top": 195,
+        "height": 475,
+        "top": 196,
         "right": 390,
         "bottom": 671,
         "left": 0
@@ -218,17 +249,19 @@
       "semanticGroupCount": 24,
       "evidenceReceiptCount": 24,
       "exportInitiallyDisabled": true,
-      "firstEvidenceBottom": 721.5625,
-      "firstEvidenceReceiptBottom": 720.5625,
+      "firstEvidenceBottom": 722.5625,
+      "firstEvidenceReceiptBottom": 721.5625,
       "firstCheckBottom": 0,
       "horizontalOverflow": false,
       "candidateEndState": {
         "selectedIndex": 7,
-        "focusedIndex": 7
+        "focusedIndex": 7,
+        "selectedFullyVisible": true
       },
       "candidateHomeState": {
         "selectedIndex": 0,
-        "focusedIndex": 0
+        "focusedIndex": 0,
+        "selectedFullyVisible": true
       },
       "mobileKeyboardState": {
         "reviewSelected": "true",
@@ -237,9 +270,9 @@
         "evidenceFocused": "0:evidence"
       },
       "receiptAccess": {
-        "receiptTop": 420.5625,
-        "receiptBottom": 444.5625,
-        "paneTop": 195,
+        "receiptTop": 421.5625,
+        "receiptBottom": 445.5625,
+        "paneTop": 196,
         "paneBottom": 671,
         "fullyVisibleInsidePane": true
       },
@@ -271,18 +304,32 @@
         "x": 0,
         "y": 68,
         "width": 390,
-        "height": 72,
+        "height": 73,
         "top": 68,
         "right": 390,
-        "bottom": 140,
+        "bottom": 141,
         "left": 0
       },
+      "candidateList": {
+        "x": 8,
+        "y": 76,
+        "width": 374,
+        "height": 56,
+        "top": 76,
+        "right": 382,
+        "bottom": 132,
+        "left": 8
+      },
+      "candidateRailHeaderDisplay": "none",
+      "candidateContextText": "후보 1/8 · 0/8 입력",
+      "selectedCandidateText": "D-C-10 · 후보 1/8 D-C-10-2026 0/8",
+      "firstCandidateButtonWidth": 176,
       "candidatePanel": {
         "x": 0,
-        "y": 140,
+        "y": 141,
         "width": 390,
-        "height": 531,
-        "top": 140,
+        "height": 530,
+        "top": 141,
         "right": 390,
         "bottom": 671,
         "left": 0
@@ -299,10 +346,10 @@
       },
       "reviewPane": {
         "x": 0,
-        "y": 195,
+        "y": 196,
         "width": 390,
-        "height": 476,
-        "top": 195,
+        "height": 475,
+        "top": 196,
         "right": 390,
         "bottom": 671,
         "left": 0
@@ -332,15 +379,17 @@
       "exportInitiallyDisabled": true,
       "firstEvidenceBottom": 0,
       "firstEvidenceReceiptBottom": 0,
-      "firstCheckBottom": 323.796875,
+      "firstCheckBottom": 324.796875,
       "horizontalOverflow": false,
       "candidateEndState": {
         "selectedIndex": 7,
-        "focusedIndex": 7
+        "focusedIndex": 7,
+        "selectedFullyVisible": true
       },
       "candidateHomeState": {
         "selectedIndex": 0,
-        "focusedIndex": 0
+        "focusedIndex": 0,
+        "selectedFullyVisible": true
       },
       "mobileKeyboardState": {
         "reviewSelected": "true",

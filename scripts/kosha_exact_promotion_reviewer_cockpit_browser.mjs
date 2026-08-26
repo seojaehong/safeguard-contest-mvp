@@ -362,12 +362,24 @@ export async function runBrowserProbe(options) {
     && draftStorageIdentity?.titleReconciliationAccess?.corpusSourceTitleVisible
     && draftStorageIdentity?.titleReconciliationAccess?.provenanceFullyVisible,
   );
+  const candidateNavigationReadabilityPass = Boolean(
+    results.every((row) => (
+      row.candidateEndState?.selectedFullyVisible === true
+      && row.candidateHomeState?.selectedFullyVisible === true
+      && row.candidateContextText === "후보 1/8 · 0/8 입력"
+      && row.candidateRailHeaderDisplay === (row.viewport.width <= 767 ? "none" : "flex")
+    ))
+    && mobileEvidence?.firstCandidateButtonWidth >= 170
+    && mobileEvidence?.selectedCandidateText.includes("후보 1/8")
+    && mobileEvidence?.selectedCandidateText.includes("0/8"),
+  );
   const verdict = allRowsPass
     && desktopPass
     && mobilePass
     && responsiveTabPanelPass
     && draftStorageIdentityPass
     && titleReconciliationPass
+    && candidateNavigationReadabilityPass
     ? "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY"
     : "RED_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY";
   const report = {
@@ -382,6 +394,7 @@ export async function runBrowserProbe(options) {
     responsiveTabPanelPass,
     draftStorageIdentityPass,
     titleReconciliationPass,
+    candidateNavigationReadabilityPass,
     draftStorageIdentity,
     results,
     mutationBoundary: {
@@ -418,6 +431,7 @@ Verdict: \`${report.verdict}\`
 - Breakpoint-correct tabpanels: ${report.responsiveTabPanelPass}
 - Candidate-bound draft restore: ${report.draftStorageIdentityPass}
 - Official/corpus title provenance: ${report.titleReconciliationPass}
+- Candidate navigation readability: ${report.candidateNavigationReadabilityPass}
 - Evidence page receipts visible: ${results.every((row) => row.evidenceReceiptCount >= 24)}
 - Draft fingerprint contains source identity: ${report.draftStorageIdentity?.sourceIdentityPresent}
 - Live progress status: ${results.every((row) => row.progressLiveRole === "status" && row.progressLiveMode === "polite")}
@@ -441,5 +455,6 @@ if (isMain) {
     mobilePass: report.mobilePass,
     responsiveTabPanelPass: report.responsiveTabPanelPass,
     draftStorageIdentityPass: report.draftStorageIdentityPass,
+    candidateNavigationReadabilityPass: report.candidateNavigationReadabilityPass,
   }, null, 2)}\n`);
 }

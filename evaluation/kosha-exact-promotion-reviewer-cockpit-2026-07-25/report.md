@@ -18,6 +18,9 @@ Verdict: `PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY`
 - Draft bound to corpus identity: true
 - Title provenance visible: true
 - Live progress region: true
+- Candidate position labels: true
+- Mobile candidate scroll snap: true
+- Selected candidate auto reveal: true
 - HTML: `evaluation\kosha-exact-promotion-reviewer-cockpit-2026-07-25\index.html`
 
 ## Boundary

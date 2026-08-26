@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-reviewer-cockpit/v1",
   "verdict": "PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY",
-  "checkedAt": "2026-08-16T16:58:57.968Z",
-  "sourceHead": "63fa3d39478c03d840bbb18fe98bb8e82576ddda",
+  "checkedAt": "2026-08-26T15:29:14.442Z",
+  "sourceHead": "8ee6b6ab4abc36bca1d7d12fa4f9bffb555b56b4",
   "candidateCount": 8,
   "semanticGroupCount": 24,
   "pageReceiptCount": 24,
@@ -30,7 +30,10 @@
     "evidencePageReceipts": true,
     "draftBoundToCorpusIdentity": true,
     "titleProvenanceVisible": true,
-    "progressLiveRegion": true
+    "progressLiveRegion": true,
+    "candidatePositionLabels": true,
+    "mobileCandidateScrollSnap": true,
+    "selectedCandidateAutoReveal": true
   },
   "outputHtml": "evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\index.html",
   "boundary": {

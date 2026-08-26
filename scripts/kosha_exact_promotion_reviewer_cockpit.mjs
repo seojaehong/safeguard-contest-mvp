@@ -778,6 +778,9 @@ export function runReviewerCockpit(options) {
       draftBoundToCorpusIdentity: true,
       titleProvenanceVisible: true,
       progressLiveRegion: true,
+      candidatePositionLabels: true,
+      mobileCandidateScrollSnap: true,
+      selectedCandidateAutoReveal: true,
     },
     outputHtml: path.relative(options.rootDir, path.join(outputDir, "index.html")),
     boundary: outputPayload.boundary,
@@ -803,6 +806,9 @@ Verdict: \`${report.verdict}\`
 - Draft bound to corpus identity: ${report.accessibilityContract.draftBoundToCorpusIdentity}
 - Title provenance visible: ${report.accessibilityContract.titleProvenanceVisible}
 - Live progress region: ${report.accessibilityContract.progressLiveRegion}
+- Candidate position labels: ${report.accessibilityContract.candidatePositionLabels}
+- Mobile candidate scroll snap: ${report.accessibilityContract.mobileCandidateScrollSnap}
+- Selected candidate auto reveal: ${report.accessibilityContract.selectedCandidateAutoReveal}
 - HTML: \`${report.outputHtml}\`
 
 ## Boundary
