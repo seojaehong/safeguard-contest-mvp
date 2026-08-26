@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-26T23:20:36.121Z
-Source HEAD at generation: 79718c2bf35e6d5ac6163eb375346ddb0e39d74c
-Live commit at generation: 79718c2bf35e6d5ac6163eb375346ddb0e39d74c
+Generated at: 2026-08-26T23:53:29.990Z
+Source HEAD at generation: e740b92ef3192caeefa06634dca0e70ad9791db6
+Live commit at generation: e740b92ef3192caeefa06634dca0e70ad9791db6
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -402,7 +402,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_broad_review | proven | evaluation\live-document-broad-review-2026-07-25\report.json |
 | live_document_editorial_review | proven | evaluation\live-document-editorial-review-2026-07-25\report.json |
 | document_editorial_review_cockpit | proven | evaluation\document-editorial-review-cockpit-2026-08-16\report.json |
-| current_live_document_editorial_runtime | notice | evaluation\live-document-editorial-review-current-2026-08-16\report.json |
+| current_live_document_editorial_runtime | proven | evaluation\live-document-editorial-template-runtime-2026-08-27\report.json |
 | product_capability_truth | proven | evaluation\product-capability-truth-2026-07-25\report.json |
 | launch_operations_readiness_cockpit | proven | evaluation\launch-operations-readiness-2026-08-26\report.json |
 | document_export_capability_truth | proven | evaluation\document-export-capability-truth-2026-08-17\report.json |
@@ -539,7 +539,7 @@ Overall: `northstar_open_approval_gated`
 | document_authoring_pane_margin | missing | ancestor_of_head | evaluation\document-authoring-pane-margin-2026-08-02\report.json |
 | dispatch_standalone_cockpit | ancestor | ancestor_of_head | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json |
 | dispatch_standalone_viewport_companion | ancestor | ancestor_of_head | evaluation\dispatch-standalone-viewport-2026-07-28\report.json |
-| dispatch_first_viewport_containment | exact | matches_live | evaluation\dispatch-first-viewport-containment-2026-08-27\report.json |
+| dispatch_first_viewport_containment | ancestor | ancestor_of_head | evaluation\dispatch-first-viewport-containment-2026-08-27\report.json |
 | provider_dispatch_persistence | ancestor | ancestor_of_head | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json |
 | northstar_approval_runway | ancestor | ancestor_of_head | evaluation\northstar-approval-runway-2026-07-21\report.json |
 

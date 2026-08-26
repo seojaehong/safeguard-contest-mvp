@@ -37,7 +37,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
   liveDocumentEditorialReview: path.join("evaluation", "live-document-editorial-review-2026-07-25", "report.json"),
-  currentLiveDocumentEditorialRuntime: path.join("evaluation", "live-document-editorial-review-current-2026-08-16", "report.json"),
+  currentLiveDocumentEditorialRuntime: path.join("evaluation", "live-document-editorial-template-runtime-2026-08-27", "report.json"),
   documentEditorialReviewCockpit: path.join("evaluation", "document-editorial-review-cockpit-2026-08-16", "report.json"),
   documentEditorialReviewReceipt: path.join("evaluation", "document-editorial-review-receipt-2026-08-17", "report.json"),
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
@@ -5487,40 +5487,49 @@ function evaluateCurrentLiveDocumentEditorialRuntimeGate(rootDir) {
   }
 
   const beforeLive = isRecord(report.beforeLive) ? report.beforeLive : {};
-  const afterLocal = isRecord(report.afterLocal) ? report.afterLocal : {};
-  const automatedFindingCounts = isRecord(afterLocal.automatedFindingCounts) ? afterLocal.automatedFindingCounts : {};
-  const retainedReviewerFindings = isRecord(afterLocal.retainedReviewerFindings) ? afterLocal.retainedReviewerFindings : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const automatedFindingCounts = isRecord(afterLive.automatedFindingCounts) ? afterLive.automatedFindingCounts : {};
+  const retainedReviewerFindings = isRecord(afterLive.retainedReviewerFindings) ? afterLive.retainedReviewerFindings : {};
+  const providerBoundary = isRecord(report.providerBoundary) ? report.providerBoundary : {};
   const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
   const runtimeCodes = isRecord(beforeLive.runtimeBlockCodeCounts) ? beforeLive.runtimeBlockCodeCounts : {};
   const sourceAligned = readString(report.sourceHead).length > 0
-    && readString(report.sourceHead) === readString(afterLocal.sourceHead);
-  const runtimeBoundaryHonest = readString(report.verdict) === "PASS_CURRENT_SOURCE_LOCAL_CONTENT_LIVE_RUNTIME_BLOCKED"
-    && readString(beforeLive.verdict) === "BLOCKED_LIVE_PRODUCTION_EDITORIAL_REVIEW_RUNTIME_UNAVAILABLE"
+    && readString(report.sourceHead) === readString(report.productionCommit)
+    && readString(report.sourceHead) === readString(afterLive.sourceHead)
+    && readString(report.productionCommit) === readString(afterLive.productionCommit);
+  const historicalRuntimeBoundaryHonest = readString(beforeLive.verdict)
+      === "BLOCKED_LIVE_PRODUCTION_EDITORIAL_REVIEW_RUNTIME_UNAVAILABLE"
     && readNumber(beforeLive.total) === 5
     && readNumber(beforeLive.pass) === 0
     && readNumber(beforeLive.fail) === 0
     && readNumber(beforeLive.blocked) === 5
     && readNumber(beforeLive.contentReviewExecutedCount) === 0
-    && readNumber(beforeLive.requestedDocumentSurfaceCount) === 60
-    && readNumber(beforeLive.reviewedDocumentSurfaceCount) === 0
     && readNumber(runtimeCodes.DISTRIBUTED_RATE_LIMIT_UNAVAILABLE) === 5;
-  const localContentReady = readString(afterLocal.verdict)
-      === "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY"
+  const liveTemplateReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_TEMPLATE_EDITORIAL_RUNTIME"
+    && readString(afterLive.verdict)
+      === "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY"
     && sourceAligned
-    && readNumber(afterLocal.total) === 5
-    && readNumber(afterLocal.pass) === 5
-    && readNumber(afterLocal.fail) === 0
-    && readNumber(afterLocal.blocked) === 0
-    && readNumber(afterLocal.canonicalDocumentCount) === 12
-    && readNumber(afterLocal.requestedDocumentSurfaceCount) === 60
-    && readNumber(afterLocal.reviewedDocumentSurfaceCount) === 60
+    && readNumber(afterLive.total) === 5
+    && readNumber(afterLive.pass) === 5
+    && readNumber(afterLive.fail) === 0
+    && readNumber(afterLive.blocked) === 0
+    && readNumber(afterLive.canonicalDocumentCount) === 12
+    && readNumber(afterLive.requestedDocumentSurfaceCount) === 60
+    && readNumber(afterLive.reviewedDocumentSurfaceCount) === 60
+    && readString(afterLive.requestedAiMode) === "template"
+    && readNumber(afterLive.expectedProviderWorkUnit) === 0
+    && afterLive.providerGenerationRequested === false
+    && readNumber(afterLive.runtimeContractPassCount) === 5
+    && readNumber(afterLive.runtimeContractEvaluatedCount) === 5
     && Object.values(automatedFindingCounts).every((value) => readNumber(value) === 0)
     && readNumber(retainedReviewerFindings.exactLineOveruse) > 0
     && readNumber(retainedReviewerFindings.nearDuplicateLineOveruse) > 0;
-  const boundaryPass = boundaries.liveContentQualityPassClaimed === false
-    && boundaries.liveAfterDeploymentRequired === true
-    && readString(boundaries.distributedAdmissionBackend) === "OPERATOR_CONFIGURATION_REQUIRED"
-    && boundaries.broadHumanReviewRequired === true
+  const providerBoundaryPass = readNumber(providerBoundary.enhancedStatus) === 503
+    && readNumber(providerBoundary.fullStatus) === 503
+    && readString(providerBoundary.code) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+    && providerBoundary.distributedAdmissionRequirementPreserved === true
+    && providerBoundary.providerBackedLiveEditorialPassClaimed === false;
+  const boundaryPass = boundaries.broadHumanReviewRequired === true
     && boundaries.humanReviewCompleted === false
     && boundaries.dbMutationPerformed === false
     && boundaries.shareSessionCreated === false
@@ -5530,15 +5539,15 @@ function evaluateCurrentLiveDocumentEditorialRuntimeGate(rootDir) {
     && boundaries.koshaRegistryMutationPerformed === false
     && readString(boundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE";
 
-  if (runtimeBoundaryHonest && localContentReady && boundaryPass) {
+  if (historicalRuntimeBoundaryHonest && liveTemplateReady && providerBoundaryPass && boundaryPass) {
     return gateResult({
       id: "current_live_document_editorial_runtime",
       label: "Current live document editorial runtime",
-      state: "notice",
+      state: "proven",
       evidencePath,
-      detail: "Current-source local production passes 5/5 scenarios and 60/60 document surfaces with zero automated editorial findings, while current live production blocks all 5 cases before content review with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE. This is an operator-configuration availability notice, not a live content RED or PASS; 31 exact and 100 near-duplicate findings remain reviewer-visible, humanReviewCompleted=false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      detail: `Current live deterministic template editorial runtime passes 5/5 scenarios and 60/60 document surfaces with runtime mode/work-unit contract 5/5, zero automated editorial failures, and ${readNumber(retainedReviewerFindings.exactLineOveruse)} exact plus ${readNumber(retainedReviewerFindings.nearDuplicateLineOveruse)} near-duplicate reviewer findings retained. The historical implicit provider-default run remains recorded as 5/5 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE blocks; enhanced/full still fail closed at distributed admission, no provider-backed editorial PASS is claimed, humanReviewCompleted=false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`,
       nextActions: [
-        "Configure the approved distributed admission backend and rerun the unchanged live five-by-twelve editorial contract.",
+        "Configure the approved distributed admission backend before any provider-backed enhanced/full live editorial claim.",
         "Keep broad human review and exact saved Share evidence separate from automated runtime readiness.",
       ],
     });
@@ -5549,8 +5558,8 @@ function evaluateCurrentLiveDocumentEditorialRuntimeGate(rootDir) {
     label: "Current live document editorial runtime",
     state: "contradicted",
     evidencePath,
-    detail: `Current editorial runtime contract drifted: runtimeBoundaryHonest=${runtimeBoundaryHonest}, localContentReady=${localContentReady}, sourceAligned=${sourceAligned}, boundaryPass=${boundaryPass}.`,
-    nextActions: ["Restore fail-closed runtime/content separation and regenerate current live plus local editorial evidence."],
+    detail: `Current editorial runtime contract drifted: historicalRuntimeBoundaryHonest=${historicalRuntimeBoundaryHonest}, liveTemplateReady=${liveTemplateReady}, providerBoundaryPass=${providerBoundaryPass}, sourceAligned=${sourceAligned}, boundaryPass=${boundaryPass}.`,
+    nextActions: ["Restore fail-closed template/provider separation and regenerate source-aligned live editorial evidence."],
   });
 }
 

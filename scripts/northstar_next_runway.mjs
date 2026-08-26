@@ -3273,6 +3273,7 @@ export function buildNorthstarNextRunway(options) {
       "live_document_secondary_grounding",
       "live_document_seed_profile_isolation",
       "live_document_editorial_review",
+      "current_live_document_editorial_runtime",
       "document_editorial_review_cockpit",
       "product_capability_truth",
       ...(launchOperationsReadinessProven(launchOperationsReadinessResult)
@@ -3350,11 +3351,6 @@ export function buildNorthstarNextRunway(options) {
         gate: "public_search_distributed_rate_limit_readiness",
         state: "notice",
         reason: "live capability is verified with X-SafeClaw-Rate-Limit=instance; production distributed configuration remains pending",
-      },
-      {
-        gate: "current_live_document_editorial_runtime",
-        state: "notice",
-        reason: "current-source local production passes 5x12 editorial review while live production blocks before content evaluation with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; operator configuration and a fresh unchanged live rerun remain required",
       },
       {
         gate: "public_generation_admission_security",

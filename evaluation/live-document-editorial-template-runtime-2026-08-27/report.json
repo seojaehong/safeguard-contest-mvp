@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "safeclaw-live-document-editorial-template-runtime/v1",
+  "generatedAt": "2026-08-26T23:41:18.880Z",
+  "verdict": "PASS_LIVE_PRODUCTION_TEMPLATE_EDITORIAL_RUNTIME",
+  "sourceHead": "e740b92ef3192caeefa06634dca0e70ad9791db6",
+  "productionCommit": "e740b92ef3192caeefa06634dca0e70ad9791db6",
+  "deploymentUrl": "safeguard-contest-2l0se8gza-seojaehongs-projects.vercel.app",
+  "beforeLive": {
+    "path": "evaluation/live-document-editorial-review-current-2026-08-16/before-live-blocked/report.json",
+    "sourceHead": "94554af349449cf5b7020faed73aa7e880d0ae33",
+    "productionCommit": "94554af349449cf5b7020faed73aa7e880d0ae33",
+    "verdict": "BLOCKED_LIVE_PRODUCTION_EDITORIAL_REVIEW_RUNTIME_UNAVAILABLE",
+    "total": 5,
+    "pass": 0,
+    "fail": 0,
+    "blocked": 5,
+    "contentReviewExecutedCount": 0,
+    "runtimeBlockCodeCounts": {
+      "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE": 5
+    },
+    "rootCause": "The editorial runner omitted aiMode, so production resolved the request to its provider-backed default before document content could be reviewed."
+  },
+  "afterLive": {
+    "path": "evaluation/live-document-editorial-template-runtime-2026-08-27/after-live/report.json",
+    "sourceHead": "e740b92ef3192caeefa06634dca0e70ad9791db6",
+    "productionCommit": "e740b92ef3192caeefa06634dca0e70ad9791db6",
+    "verdict": "PASS_LIVE_PRODUCTION_12_DELIVERABLE_EDITORIAL_CONTRACT_REVIEWER_READY",
+    "total": 5,
+    "pass": 5,
+    "fail": 0,
+    "blocked": 0,
+    "canonicalDocumentCount": 12,
+    "requestedDocumentSurfaceCount": 60,
+    "reviewedDocumentSurfaceCount": 60,
+    "requestedAiMode": "template",
+    "expectedProviderWorkUnit": 0,
+    "providerGenerationRequested": false,
+    "runtimeContractPassCount": 5,
+    "runtimeContractEvaluatedCount": 5,
+    "automatedFindingCounts": {
+      "placeholder": 0,
+      "legalOverclaim": 0,
+      "awkwardComposition": 0,
+      "scenarioIrrelevantContext": 0,
+      "evidenceDomainMismatch": 0,
+      "genericTemplateOveruse": 0
+    },
+    "retainedReviewerFindings": {
+      "exactLineOveruse": 15,
+      "nearDuplicateLineOveruse": 100
+    }
+  },
+  "providerBoundary": {
+    "enhancedStatus": 503,
+    "fullStatus": 503,
+    "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "distributedAdmissionRequirementPreserved": true,
+    "providerBackedLiveEditorialPassClaimed": false
+  },
+  "verification": {
+    "focusedTests": {
+      "files": 3,
+      "tests": 30,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28
+  },
+  "boundaries": {
+    "humanReviewCompleted": false,
+    "broadHumanReviewRequired": true,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}

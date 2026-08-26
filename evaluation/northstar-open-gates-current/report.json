@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-26T23:20:34.250Z",
-  "sourceSha": "79718c2bf35e6d5ac6163eb375346ddb0e39d74c",
+  "generatedAt": "2026-08-26T23:53:28.012Z",
+  "sourceSha": "e740b92ef3192caeefa06634dca0e70ad9791db6",
   "overall": "open",
   "gates": [
     {
@@ -119,12 +119,12 @@
     },
     {
       "id": "current_live_document_editorial_runtime",
-      "state": "notice",
+      "state": "proven",
       "label": "Current live document editorial runtime",
-      "evidencePath": "evaluation\\live-document-editorial-review-current-2026-08-16\\report.json",
-      "detail": "Current-source local production passes 5/5 scenarios and 60/60 document surfaces with zero automated editorial findings, while current live production blocks all 5 cases before content review with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE. This is an operator-configuration availability notice, not a live content RED or PASS; 31 exact and 100 near-duplicate findings remain reviewer-visible, humanReviewCompleted=false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "evidencePath": "evaluation\\live-document-editorial-template-runtime-2026-08-27\\report.json",
+      "detail": "Current live deterministic template editorial runtime passes 5/5 scenarios and 60/60 document surfaces with runtime mode/work-unit contract 5/5, zero automated editorial failures, and 15 exact plus 100 near-duplicate reviewer findings retained. The historical implicit provider-default run remains recorded as 5/5 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE blocks; enhanced/full still fail closed at distributed admission, no provider-backed editorial PASS is claimed, humanReviewCompleted=false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Configure the approved distributed admission backend and rerun the unchanged live five-by-twelve editorial contract.",
+        "Configure the approved distributed admission backend before any provider-backed enhanced/full live editorial claim.",
         "Keep broad human review and exact saved Share evidence separate from automated runtime readiness."
       ]
     },

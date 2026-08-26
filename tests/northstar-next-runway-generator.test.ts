@@ -3411,9 +3411,9 @@ describe("northstar next runway generator", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.provenCurrentState).toContain("live_document_editorial_review");
-    expect(report.noticeState).toContainEqual(expect.objectContaining({
+    expect(report.provenCurrentState).toContain("current_live_document_editorial_runtime");
+    expect(report.noticeState).not.toContainEqual(expect.objectContaining({
       gate: "current_live_document_editorial_runtime",
-      state: "notice",
     }));
     expect(report.productCapabilityTruth).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH",
