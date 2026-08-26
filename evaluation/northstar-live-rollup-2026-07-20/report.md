@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-26T05:48:34.797Z
-Source HEAD at generation: d41384d488aeb7ca39c0978eeadcb493d99d61ad
-Live commit at generation: 657fc75fa72abc0d961b504de75f95255e9f083a
+Generated at: 2026-08-26T09:12:04.353Z
+Source HEAD at generation: f0507643399ea7b26295084782f1dc749435156d
+Live commit at generation: 77de49e5c92824e6b78db4e0dacd605d6f3fa275
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -315,6 +315,13 @@ Overall: `northstar_open_approval_gated`
 - Resolved/unresolved/scoped hazards: 1/0/1
 - All hazards/documents closed=false/false; human review completed=false; exact saved Share=MISSING_EVIDENCE; Wiki/RLS/provider persistence=APPROVAL_GATED/APPROVAL_GATED/APPROVAL_GATED
 
+## Hermes Canonical Hazard Trace Matrix
+
+- Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_MATRIX`
+- Before/local/live viewport passes: 0/8, 8/8, 8/8
+- Canonical hazards/control links/document links: 8/33/33
+- Complete/internal scroll=true/true; human review completed=false; exact saved Share=MISSING_EVIDENCE; Wiki/RLS/provider persistence=APPROVAL_GATED/APPROVAL_GATED/APPROVAL_GATED
+
 ## Hermes Remote Durable Ledger
 
 - Verdict: `adapter_boundary_pass_live_execution_not_claimed`
@@ -399,6 +406,7 @@ Overall: `northstar_open_approval_gated`
 | hermes_review_evidence_inspector | proven | evaluation\hermes-knowledge-review-evidence-inspector-2026-08-14\report.json |
 | hermes_review_event_fact_traceability | proven | evaluation\hermes-knowledge-review-event-facts-2026-08-26\report.json |
 | hermes_review_trace_blocks | proven | evaluation\hermes-knowledge-review-trace-blocks-2026-08-26\report.json |
+| hermes_review_trace_matrix | proven | evaluation\hermes-knowledge-review-trace-matrix-2026-08-26\report.json |
 | live_document_secondary_grounding | proven | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | proven | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |
 | ui_documents_share_cockpit | proven | evaluation\document-risk-row-mobile-label-2026-08-02\after-live\report.json |
@@ -472,7 +480,8 @@ Overall: `northstar_open_approval_gated`
 | hermes_knowledge_review_ui | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-selected-workbench-2026-08-14\report.json |
 | hermes_review_evidence_inspector | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-evidence-inspector-2026-08-14\report.json |
 | hermes_review_event_fact_traceability | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-event-facts-2026-08-26\report.json |
-| hermes_review_trace_blocks | ancestor | matches_live | evaluation\hermes-knowledge-review-trace-blocks-2026-08-26\report.json |
+| hermes_review_trace_blocks | ancestor | ancestor_of_head | evaluation\hermes-knowledge-review-trace-blocks-2026-08-26\report.json |
+| hermes_review_trace_matrix | ancestor | matches_live | evaluation\hermes-knowledge-review-trace-matrix-2026-08-26\report.json |
 | hermes_remote_durable_ledger | ancestor | ancestor_of_head | evaluation\hermes-openclaw-runtime-current-gate-2026-07-20\report.json |
 | live_document_secondary_grounding | ancestor | ancestor_of_head | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | ancestor | ancestor_of_head | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |

@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-26T05:48:34.797Z",
-  "head": "d41384d488aeb7ca39c0978eeadcb493d99d61ad",
+  "generatedAt": "2026-08-26T09:12:04.353Z",
+  "head": "f0507643399ea7b26295084782f1dc749435156d",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "657fc75fa72abc0d961b504de75f95255e9f083a",
+    "commitSha": "77de49e5c92824e6b78db4e0dacd605d6f3fa275",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-7tqrn2pe1-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-hnuxj8nz0-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 69
+    "gateCount": 70
   },
   "provenGates": [
     {
@@ -332,6 +332,12 @@
       "state": "proven",
       "artifact": "evaluation\\hermes-knowledge-review-trace-blocks-2026-08-26\\report.json",
       "detail": "Live Hermes review trace blocks move from 0/8 to 8/8 and bind one scoped hazard to canonical controls, primary document targets, and an exact reviewer evidence row. Approval fails closed for incomplete traces. This is not all-hazard or all-document closure; human review remains incomplete, publication stays unpublished, the immutable 18-finding baseline is preserved, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
+    },
+    {
+      "id": "hermes_review_trace_matrix",
+      "state": "proven",
+      "artifact": "evaluation\\hermes-knowledge-review-trace-matrix-2026-08-26\\report.json",
+      "detail": "Live Hermes review trace matrix closes the canonical 8 hazards, 33 controls, and 33 primary-document bindings with exact evidence rows and bounded internal scroll. The prior 32/33 truncation remains preserved as RED evidence. Human review remains incomplete, publication stays unpublished, exact saved Share remains MISSING_EVIDENCE, and Wiki/RLS/provider persistence remain APPROVAL_GATED."
     },
     {
       "id": "live_document_secondary_grounding",
@@ -1499,6 +1505,29 @@
     "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
     "providerDispatchPersistence": "APPROVAL_GATED"
   },
+  "hermesReviewTraceMatrix": {
+    "artifact": "evaluation\\hermes-knowledge-review-trace-matrix-2026-08-26\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_HERMES_REVIEW_TRACE_MATRIX",
+    "sourceHead": "77de49e5c92824e6b78db4e0dacd605d6f3fa275",
+    "productCommit": "060956fa3201668b1fe4de5522fc9da7b58d87b5",
+    "productionCommit": "77de49e5c92824e6b78db4e0dacd605d6f3fa275",
+    "beforePassed": 0,
+    "beforeViewportCount": 8,
+    "localPassed": 8,
+    "localViewportCount": 8,
+    "livePassed": 8,
+    "liveViewportCount": 8,
+    "canonicalHazardCount": 8,
+    "canonicalControlLinkCount": 33,
+    "canonicalDocumentLinkCount": 33,
+    "canonicalMatrixComplete": true,
+    "traceListInternalScroll": true,
+    "humanReviewCompleted": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED"
+  },
   "kosha": {
     "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
     "verdict": "pass_current_kosha_exact_trust_and_corpus_gate",
@@ -1513,9 +1542,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "d41384d488aeb7ca39c0978eeadcb493d99d61ad",
+      "sourceCommit": "f0507643399ea7b26295084782f1dc749435156d",
       "sourceStatus": "exact",
-      "productionCommit": "d41384d488aeb7ca39c0978eeadcb493d99d61ad",
+      "productionCommit": "f0507643399ea7b26295084782f1dc749435156d",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -1924,6 +1953,14 @@
       "sourceCommit": "657fc75fa72abc0d961b504de75f95255e9f083a",
       "sourceStatus": "ancestor",
       "productionCommit": "657fc75fa72abc0d961b504de75f95255e9f083a",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "hermes_review_trace_matrix",
+      "artifact": "evaluation\\hermes-knowledge-review-trace-matrix-2026-08-26\\report.json",
+      "sourceCommit": "77de49e5c92824e6b78db4e0dacd605d6f3fa275",
+      "sourceStatus": "ancestor",
+      "productionCommit": "77de49e5c92824e6b78db4e0dacd605d6f3fa275",
       "productionStatus": "matches_live"
     },
     {
