@@ -120,4 +120,22 @@ describe("engine runtime readiness policy", () => {
     expect(example).not.toMatch(/SAFECLAW_SMOKE_BEARER_TOKEN=\S+/u);
     expect(example).not.toMatch(/SAFECLAW_HERMES_BOUND_(?:ORGANIZATION|SITE)_ID=\S+/u);
   });
+
+  it("keeps the operations page explicit about configuration, approval, and human review boundaries", () => {
+    const source = fs.readFileSync(path.join(process.cwd(), "app", "ops", "api", "page.tsx"), "utf8");
+
+    expect(source).toContain("getPublicDistributedAdmissionReadiness");
+    expect(source).toContain("resolveBriefingEmailDispatchStatus");
+    expect(source).toContain("getPhotoVisionReadiness");
+    expect(source).toContain('data-testid="launch-operations-readiness"');
+    expect(source).toContain("분산 설정 필요");
+    expect(source).toContain("승인 전 잠금");
+    expect(source).toContain("채택한 위험 후보만 문서에 반영합니다.");
+    expect(source).toContain("완전 자동 런칭 승인을 뜻하지 않습니다.");
+    expect(source).not.toMatch(/(?:apiKey|token|secret)Present\s*[}:]/u);
+
+    const css = fs.readFileSync(path.join(process.cwd(), "app", "globals.css"), "utf8");
+    expect(css).toMatch(/data-module-route="\/ops\/api"[^}]+launch-operations-readiness[^}]+grid-auto-flow:\s*column/su);
+    expect(css).toMatch(/launch-operations-readiness[^}]+overflow-x:\s*auto/su);
+  });
 });

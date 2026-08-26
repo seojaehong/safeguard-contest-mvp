@@ -7,6 +7,9 @@ import {
   assessEngineRuntimeReadiness,
   type EngineRuntimeReadiness,
 } from "@/lib/engine-runtime-readiness-policy";
+import { getPhotoVisionReadiness } from "@/lib/photo-vision-analysis";
+import { getPublicDistributedAdmissionReadiness } from "@/lib/public-distributed-rate-limit";
+import { resolveBriefingEmailDispatchStatus } from "@/lib/server/briefing-dispatch-status";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +69,19 @@ export default async function ApiOperationsPage() {
   }
   const safetyDb = await getSafetyReferenceStats();
   const engine = enginePresentation(assessEngineRuntimeReadiness(process.env));
+  const publicAdmission = getPublicDistributedAdmissionReadiness({
+    environment: process.env,
+    requireDistributedInProduction: true,
+  });
+  const dispatch = resolveBriefingEmailDispatchStatus();
+  const photoVision = getPhotoVisionReadiness(process.env);
+  const configurationRequired = !publicAdmission.ready;
+  const approvalRequired = !dispatch.emailReady;
+  const operationsBoundary = configurationRequired
+    ? "운영 설정 필요"
+    : approvalRequired
+      ? "승인 전 제한"
+      : "실행 준비";
 
   return (
     <SafeClawModuleShell
@@ -77,6 +93,45 @@ export default async function ApiOperationsPage() {
       activeHref="/ops/api"
       actions={<Link href="/knowledge">지식 DB 보기</Link>}
     >
+      <section
+        className="safeclaw-module-grid four"
+        aria-label="런칭 실행 준비 경계"
+        data-testid="launch-operations-readiness"
+        data-public-admission={publicAdmission.mode}
+        data-provider-dispatch={dispatch.mode}
+        data-photo-vision={photoVision.status}
+      >
+        <article>
+          <span>현재 운영 경계</span>
+          <strong>{operationsBoundary}</strong>
+          <p>설정과 승인 상태를 분리해 표시합니다.</p>
+        </article>
+        <article>
+          <span>공개 AI 작업 보호</span>
+          <strong>{publicAdmission.ready ? "분산 보호 준비" : "분산 설정 필요"}</strong>
+          <p>{publicAdmission.ready ? "공개 생성·검색 작업을 분산 제어합니다." : "설정 전 공개 생성·검색은 안전하게 차단됩니다."}</p>
+        </article>
+        <article>
+          <span>실제 이메일 전파</span>
+          <strong>{dispatch.emailReady ? "실행 준비" : "승인 전 잠금"}</strong>
+          <p>{dispatch.emailReady ? "지속 중복 방지 경계를 통과했습니다." : "미리보기는 유지하고 provider 호출은 허용하지 않습니다."}</p>
+        </article>
+        <article>
+          <span>사진 Vision/OCR</span>
+          <strong>{photoVision.ok ? "분석 준비" : "설정 필요"}</strong>
+          <p>{photoVision.ok ? "채택한 위험 후보만 문서에 반영합니다." : "사진 저장은 유지하고 분석은 보류합니다."}</p>
+        </article>
+      </section>
+      <section className="safeclaw-module-panel" aria-labelledby="launch-boundary-title">
+        <span>운영자 다음 조치</span>
+        <h2 id="launch-boundary-title">자동 런칭 승인과 기능 준비를 구분합니다.</h2>
+        <ol>
+          <li>분산 요청 보호가 준비되지 않으면 공개 생성·검색의 fail-closed 상태를 유지합니다.</li>
+          <li>지속 중복 방지와 provider 승인이 끝나기 전에는 실제 전파를 미리보기로 유지합니다.</li>
+          <li>사진 분석 결과는 사람이 채택한 위험 후보만 문서와 개선 메모리에 반영합니다.</li>
+        </ol>
+        <p>이 화면의 준비 표시는 DB 변경, provider 발송, Wiki 게시, KOSHA 승격 또는 완전 자동 런칭 승인을 뜻하지 않습니다.</p>
+      </section>
       <section className="safeclaw-module-grid four">
         <article><span>실행 ID</span><strong>{snapshot?.runId || "대기"}</strong></article>
         <article><span>성공</span><strong>{snapshot ? `${snapshot.okCount}/${snapshot.totalRuns}` : "미확인"}</strong></article>

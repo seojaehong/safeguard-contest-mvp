@@ -9284,6 +9284,21 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-panel {
     padding: var(--space-4);
   }
+
+  .safeclaw-module-shell[data-module-route="/ops/api"] [data-testid="launch-operations-readiness"] {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(280px, 88%);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline mandatory;
+    scrollbar-gutter: stable;
+  }
+
+  .safeclaw-module-shell[data-module-route="/ops/api"] [data-testid="launch-operations-readiness"] > article {
+    min-height: 172px;
+    scroll-snap-align: start;
+  }
 }
 
 .safeclaw-report-controls {
