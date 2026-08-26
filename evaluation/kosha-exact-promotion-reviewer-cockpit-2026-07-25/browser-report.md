@@ -11,7 +11,7 @@ Verdict: `PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY`
 - Candidate tabs: true
 - Candidate End/Home keyboard: true
 - Candidate End/Home visibility: true
-- Candidate context: 후보 1/8 · 0/8 입력
+- Candidate context: 후보 1/8 · 현재 0/8 · 전체 0/64
 - Mobile candidate width: 176
 - Mobile evidence/review keyboard: true
 - Breakpoint-correct tabpanels: true
@@ -19,6 +19,7 @@ Verdict: `PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY`
 - Official/corpus title provenance: true
 - Candidate navigation readability: true
 - Evidence reading hierarchy: true
+- Mobile candidate progress visibility: true
 - Evidence page receipts visible: true
 - Draft fingerprint contains source identity: true
 - Live progress status: true
