@@ -622,7 +622,11 @@ describe("documents editor layout", () => {
           firstRiskRowHeader: rect('[data-testid="risk-row-editor-row"] summary'),
           firstRiskHazardField: rect('[aria-label="행 1 유해·위험요인"]'),
           secondaryTools: rect('[data-testid="editor-secondary-tools"]'),
+          workpackShellClientWidth: document.querySelector<HTMLElement>(".workpack-shell")?.clientWidth || 0,
+          workpackShellScrollWidth: document.querySelector<HTMLElement>(".workpack-shell")?.scrollWidth || 0,
           workpackShellScrollHeight: document.querySelector<HTMLElement>(".workpack-shell")?.scrollHeight || 0,
+          firstRiskRowClientWidth: document.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"]')?.clientWidth || 0,
+          firstRiskRowScrollWidth: document.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"]')?.scrollWidth || 0,
           riskRowSelectorCount: document.querySelectorAll('[data-testid="risk-row-selector"]').length,
           mountedRiskRowPanelCount: document.querySelectorAll('[data-testid="risk-row-editor-row"]').length,
           defaultOpenSectionCount: Array.from(
@@ -656,6 +660,8 @@ describe("documents editor layout", () => {
       });
 
       expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth + 1);
+      expect(metrics.workpackShellScrollWidth).toBeLessThanOrEqual(metrics.workpackShellClientWidth + 1);
+      expect(metrics.firstRiskRowScrollWidth).toBeLessThanOrEqual(metrics.firstRiskRowClientWidth + 1);
       expect(metrics.bodyHeight / metrics.viewportHeight).toBeLessThanOrEqual(viewport.maxRatio);
       expect(metrics.selectedDocumentTitle).toBe("위험성평가표");
       expect(metrics.workpackShell.overflowY).toBe("auto");
