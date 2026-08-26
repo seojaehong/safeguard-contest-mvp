@@ -1,24 +1,24 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-26T11:14:38.346Z",
-  "head": "6273fdae2a72360f3e90a8c6f0c73022a080a78a",
+  "generatedAt": "2026-08-26T12:23:40.246Z",
+  "head": "be21b445b4e344c5f1f1f0b9c99a8b971c9861f3",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "6273fdae2a72360f3e90a8c6f0c73022a080a78a",
+    "commitSha": "aa4e27df0a917b42556b04f020753bb04dd4c13a",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2qjb07elp-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-j9fhfe5fo-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "overall": "northstar_open_approval_gated",
+  "overall": "northstar_evidence_missing_or_unknown",
   "dbMutationPerformed": false,
   "launchReadiness": false,
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-    "overall": "open",
-    "gateCount": 71
+    "overall": "contradicted",
+    "gateCount": 72
   },
   "provenGates": [
     {
@@ -136,6 +136,12 @@
       "detail": "Current-source and production stateless fallback candidates pass 5/5 chemical, hot-work, confined-space, forklift, and foreign-worker fall scenarios with four non-empty sections, textual hazard grounding, and reviewer-visible source grounding. Visible evidence roles move 0/5 to 5/5, and explicit safe original-event review facts separately move 0/5 to 5/5 while private event-term exposure remains 0. Arbitrary raw payload is not accepted as reviewer-visible context. The enhanced LLM probe remains explicitly blocked 0/5 by distributed admission before AI generation; this gate does not claim enhanced LLM quality or read the production candidate queue. Human review remains incomplete, publication is disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus Supabase RLS remain APPROVAL_GATED."
     },
     {
+      "id": "llm_wiki_sif_evidence_matrix",
+      "state": "proven",
+      "artifact": "evaluation\\llm-wiki-sif-evidence-matrix-2026-08-26\\report.json",
+      "detail": "Current-source and production stateless Wiki candidates pass 5/5 scenarios with reviewer-visible SIF provenance, KOSHA technical guidance, and current-law boundaries in SIF -> KOSHA -> law order. Event facts pass 5/5, private SIF/event exposure is 0, human review remains incomplete, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and enhanced runtime plus Wiki/RLS remain blocked or APPROVAL_GATED."
+    },
+    {
       "id": "dependency_security_remediation",
       "state": "proven",
       "artifact": "evaluation\\dependency-security-remediation-2026-07-28\\report.json",
@@ -248,12 +254,6 @@
       "state": "notice",
       "artifact": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
       "detail": "Improvement and dedicated photo analysis now share pre-provider byte, count, MIME/signature, rate, and concurrency controls with 76 tests plus a current 23 files / 215 tests governed-path companion. Production currently reports instance fallback rather than distributed admission, the immutable 14-finding scan remains unchanged, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
-    },
-    {
-      "id": "public_provider_cancellation",
-      "state": "notice",
-      "artifact": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
-      "detail": "Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests plus a current governed-path companion, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "public_provider_admission",
@@ -1248,6 +1248,33 @@
     "llmWikiPublication": "APPROVAL_GATED",
     "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
   },
+  "llmWikiSifEvidenceMatrix": {
+    "artifact": "evaluation\\llm-wiki-sif-evidence-matrix-2026-08-26\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_SIF_KOSHA_LAW_WIKI_CANDIDATE_EVIDENCE",
+    "productCommit": "b777fa07c8fa651931796eb6df933ba0e4de4300",
+    "sourceHead": "aa4e27df0a917b42556b04f020753bb04dd4c13a",
+    "productionCommit": "aa4e27df0a917b42556b04f020753bb04dd4c13a",
+    "localPassed": 5,
+    "livePassed": 5,
+    "liveSifEvidenceBoundaryCount": 5,
+    "liveTechnicalGuidanceBoundaryCount": 5,
+    "liveLawCandidateBoundaryCount": 5,
+    "liveEventSemanticGroundingCount": 5,
+    "livePrivateEventExposureCount": 0,
+    "authorityOrder": [
+      "sif",
+      "kosha",
+      "law"
+    ],
+    "humanReviewCompleted": false,
+    "actualProductionCandidateQueueRead": false,
+    "enhancedLlmRuntime": "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
+    "dbMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
+  },
   "tenantAuthorizationRemediation": {
     "artifact": "evaluation\\tenant-authorization-boundary-preflight-2026-07-29\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
@@ -1567,10 +1594,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "6273fdae2a72360f3e90a8c6f0c73022a080a78a",
+      "sourceCommit": "be21b445b4e344c5f1f1f0b9c99a8b971c9861f3",
       "sourceStatus": "exact",
-      "productionCommit": "6273fdae2a72360f3e90a8c6f0c73022a080a78a",
-      "productionStatus": "matches_live"
+      "productionCommit": "be21b445b4e344c5f1f1f0b9c99a8b971c9861f3",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -1731,6 +1758,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "f4ab34d0f8fd204b3d5dfa7ef77bfe183acc7ff2",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "llm_wiki_sif_evidence_matrix",
+      "artifact": "evaluation\\llm-wiki-sif-evidence-matrix-2026-08-26\\report.json",
+      "sourceCommit": "aa4e27df0a917b42556b04f020753bb04dd4c13a",
+      "sourceStatus": "ancestor",
+      "productionCommit": "aa4e27df0a917b42556b04f020753bb04dd4c13a",
+      "productionStatus": "matches_live"
     },
     {
       "id": "tenant_authorization_remediation",

@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `6273fdae2a72360f3e90a8c6f0c73022a080a78a`
+Source HEAD: `be21b445b4e344c5f1f1f0b9c99a8b971c9861f3`
 
-Production `/api/build-info`: `6273fdae2a72360f3e90a8c6f0c73022a080a78a`
+Production `/api/build-info`: `aa4e27df0a917b42556b04f020753bb04dd4c13a`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `evaluation/llm-wiki-sif-evidence-matrix-2026-08-26/after-live/report.json`, `evaluation/llm-wiki-sif-evidence-matrix-2026-08-26/after-live/report.md`, `evaluation/llm-wiki-sif-evidence-matrix-2026-08-26/report.json`, `evaluation/llm-wiki-sif-evidence-matrix-2026-08-26/report.md`, `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `6273fdae2a72360f3e90a8c6f0c73022a080a78a`
+Live rollup source head: `be21b445b4e344c5f1f1f0b9c99a8b971c9861f3`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `be21b445b4e344c5f1f1f0b9c99a8b971c9861f3` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `aa4e27df0a917b42556b04f020753bb04dd4c13a`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -58,6 +58,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live Knowledge viewport workbench is measured separately: `PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH`; browser rows `10/10`, maximum body ratio `1.02`, selected exposure `1` visible panel and `6` reachable tasks. Progressive disclosures technical/reference/wiki/governance are `6/7/2/2`, default open `0`, exclusive groups `true`, mobile ratios `4.47/3.68/2.03/2.2`, and first item/review state panel-contained `true/true`. Route splitting alone is not treated as the fix; long content remains in local-scroll panels. Exact saved Share remains `MISSING_EVIDENCE`, Wiki publication remains `APPROVAL_GATED`, and SIF embedding remains `APPROVAL_GATED`.
 - LLM Wiki candidate content readiness is measured separately: `PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS`; local/live viewport rows `8/8` and `8/8`, required sections `4`, ready/revision fixtures `2/1`, approval fail-closed `true`, and site-only/reject availability `true/true`. Human review remains `false`, publication remains `unpublished` with publishAllowed=`false`; exact saved Share remains `MISSING_EVIDENCE`, while Wiki publication and Supabase RLS remain `APPROVAL_GATED/APPROVAL_GATED`.
 - Wiki candidate generation content is measured separately from that browser fixture: `PASS_LIVE_PRODUCTION_WIKI_EVENT_SEMANTIC_AND_EVIDENCE_VISIBILITY_LLM_ENHANCED_RUNTIME_BLOCKED`; deterministic fallback local/live scenarios `5/5` and `5/5`. Reviewer-visible evidence traces move `0->5/5`; live KOSHA technical/official-source and current-law candidate boundaries are `5/5` and `5/5`. Explicit safe event semantics move `0->5/5` with private exposure `0`; arbitrary raw payload accepted=`false`. The enhanced provider remains `0/5` with blocker `distributed_rate_limit_unavailable_before_ai_generation`. This does not read the production candidate queue or claim enhanced LLM quality: queueRead=`false`, fixtureAcceptedAsGenerationProof=`false`, enhancedLive=`false`, humanReviewCompleted=`false`, exact saved Share=`MISSING_EVIDENCE`, Wiki/RLS=`APPROVAL_GATED/APPROVAL_GATED`.
+- Reviewer-visible SIF evidence is measured by a separate companion matrix: `PASS_LIVE_PRODUCTION_SIF_KOSHA_LAW_WIKI_CANDIDATE_EVIDENCE`; local/live `5/5` and `5/5`, authority order `sif -> kosha -> law`, live SIF/KOSHA/law boundaries `5/5/5` of 5, event facts `5/5`, and private exposure `0`. This does not read the production candidate queue, complete human review, enable enhanced runtime, publish Wiki content, mutate DB/vector/KOSHA registry state, or close exact saved Share `MISSING_EVIDENCE`.
 - Public generation admission security is measured separately: `PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN`, live mode `instance`, dependency vulnerabilities `0`, distributed hardening open=`true`, and fresh diff scan required=`true`. This notice does not close multi-instance protection, the immutable scan finding, approval-gated operations, or exact saved Share; exact saved Share remains `MISSING_EVIDENCE`.
 - Security follow-up remediation is separately proven: `PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP`, sealed findings `3`, focused tests `129`, and remaining security work `0`. The immutable original baseline remains `18` findings with rewritten=`false`; two deferred candidates and the separate public-admission notice remain visible, no live provider cancellation probe is claimed, and exact saved Share remains `MISSING_EVIDENCE`.
 - Fresh security resource remediation is scoped rather than security-complete: `PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION`, remediated `6/20`, remaining `14`, provider persistence `APPROVAL_GATED`, exact saved Share `MISSING_EVIDENCE`.

@@ -1,11 +1,11 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-26T11:14:38.346Z
-Source HEAD at generation: 6273fdae2a72360f3e90a8c6f0c73022a080a78a
-Live commit at generation: 6273fdae2a72360f3e90a8c6f0c73022a080a78a
+Generated at: 2026-08-26T12:23:40.246Z
+Source HEAD at generation: be21b445b4e344c5f1f1f0b9c99a8b971c9861f3
+Live commit at generation: aa4e27df0a917b42556b04f020753bb04dd4c13a
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
-Overall: `northstar_open_approval_gated`
+Overall: `northstar_evidence_missing_or_unknown`
 
 ## Current Workspace Mobile Geometry
 
@@ -286,6 +286,12 @@ Overall: `northstar_open_approval_gated`
 - Enhanced provider remains 0/5 with verdict `RED_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_MATRIX` and runtime blocker `distributed_rate_limit_unavailable_before_ai_generation`; enhanced live quality proven=false.
 - Boundaries: actual production queue read=false; route fixture accepted as generation proof=false; human review complete=false; publication=unpublished; DB/Wiki mutation=false/false; exact saved Share=MISSING_EVIDENCE; Wiki/RLS=APPROVAL_GATED/APPROVAL_GATED.
 
+## Wiki SIF evidence matrix
+
+- Verdict: `PASS_LIVE_PRODUCTION_SIF_KOSHA_LAW_WIKI_CANDIDATE_EVIDENCE`; local/live 5/5 and 5/5.
+- Reviewer-visible authority order: sif -> kosha -> law; live SIF/KOSHA/law boundaries 5/5/5 of 5; event facts 5/5; private exposure 0.
+- Boundaries: actual production queue read=false; enhanced runtime=BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION; human review complete=false; DB/Wiki mutation=false/false; exact saved Share=MISSING_EVIDENCE; Wiki/RLS=APPROVAL_GATED/APPROVAL_GATED.
+
 ## Live Hermes Reviewer Authority UI
 
 - Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`
@@ -382,6 +388,7 @@ Overall: `northstar_open_approval_gated`
 | knowledge_viewport_workbench | proven | evaluation\knowledge-viewport-workbench-2026-08-17\report.json |
 | llm_wiki_candidate_content_readiness | proven | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |
 | llm_wiki_candidate_content_matrix | proven | evaluation\llm-wiki-candidate-content-matrix-2026-08-25\report.json |
+| llm_wiki_sif_evidence_matrix | proven | evaluation\llm-wiki-sif-evidence-matrix-2026-08-26\report.json |
 | dependency_security_remediation | proven | evaluation\dependency-security-remediation-2026-07-28\report.json |
 | tenant_authorization_remediation | proven | evaluation\tenant-authorization-boundary-preflight-2026-07-29\report.json |
 | spreadsheet_formula_neutralization | proven | evaluation\spreadsheet-formula-neutralization-2026-08-01\report.json |
@@ -401,7 +408,6 @@ Overall: `northstar_open_approval_gated`
 | security_upstream_transport_remediation | proven | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |
 | security_safety_reference_surface_remediation | proven | evaluation\security-safety-reference-surface-remediation-2026-08-11\report.json |
 | improvement_photo_analysis_budget | notice | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
-| public_provider_cancellation | notice | evaluation\public-provider-cancellation-2026-08-11\report.json |
 | public_provider_admission | notice | evaluation\public-provider-admission-2026-08-11\report.json |
 | public_ask_distributed_admission | proven | evaluation\public-ask-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_admission | proven | evaluation\public-search-distributed-admission-2026-08-14\report.json |
@@ -439,7 +445,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -460,6 +466,7 @@ Overall: `northstar_open_approval_gated`
 | knowledge_viewport_workbench | ancestor | ancestor_of_head | evaluation\knowledge-viewport-workbench-2026-08-17\report.json |
 | llm_wiki_candidate_content_readiness | ancestor | ancestor_of_head | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |
 | llm_wiki_candidate_content_matrix | ancestor | ancestor_of_head | evaluation\llm-wiki-candidate-content-matrix-2026-08-25\report.json |
+| llm_wiki_sif_evidence_matrix | ancestor | matches_live | evaluation\llm-wiki-sif-evidence-matrix-2026-08-26\report.json |
 | tenant_authorization_remediation | ancestor | ancestor_of_head | evaluation\tenant-authorization-boundary-preflight-2026-07-29\report.json |
 | spreadsheet_formula_neutralization | ancestor | ancestor_of_head | evaluation\spreadsheet-formula-neutralization-2026-08-01\report.json |
 | public_provider_work_budget | ancestor | ancestor_of_head | evaluation\public-provider-work-budget-2026-08-01\report.json |

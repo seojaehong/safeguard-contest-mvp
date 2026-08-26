@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-26T11:14:37.367Z",
-  "sourceSha": "6273fdae2a72360f3e90a8c6f0c73022a080a78a",
-  "overall": "open",
+  "generatedAt": "2026-08-26T12:23:28.131Z",
+  "sourceSha": "be21b445b4e344c5f1f1f0b9c99a8b971c9861f3",
+  "overall": "contradicted",
   "gates": [
     {
       "id": "final_99_gate",
@@ -191,6 +191,16 @@
       "detail": "Current-source and production stateless fallback candidates pass 5/5 chemical, hot-work, confined-space, forklift, and foreign-worker fall scenarios with four non-empty sections, textual hazard grounding, and reviewer-visible source grounding. Visible evidence roles move 0/5 to 5/5, and explicit safe original-event review facts separately move 0/5 to 5/5 while private event-term exposure remains 0. Arbitrary raw payload is not accepted as reviewer-visible context. The enhanced LLM probe remains explicitly blocked 0/5 by distributed admission before AI generation; this gate does not claim enhanced LLM quality or read the production candidate queue. Human review remains incomplete, publication is disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus Supabase RLS remain APPROVAL_GATED.",
       "nextActions": [
         "Configure distributed provider admission, then rerun the five-scenario provider matrix without weakening fail-closed admission."
+      ]
+    },
+    {
+      "id": "llm_wiki_sif_evidence_matrix",
+      "state": "proven",
+      "label": "Live Wiki SIF evidence matrix",
+      "evidencePath": "evaluation\\llm-wiki-sif-evidence-matrix-2026-08-26\\report.json",
+      "detail": "Current-source and production stateless Wiki candidates pass 5/5 scenarios with reviewer-visible SIF provenance, KOSHA technical guidance, and current-law boundaries in SIF -> KOSHA -> law order. Event facts pass 5/5, private SIF/event exposure is 0, human review remains incomplete, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and enhanced runtime plus Wiki/RLS remain blocked or APPROVAL_GATED.",
+      "nextActions": [
+        "Keep enhanced LLM runtime, actual candidate-queue review, Wiki publication, and Supabase RLS as separate approval/configuration gates."
       ]
     },
     {
@@ -400,12 +410,12 @@
     },
     {
       "id": "public_provider_cancellation",
-      "state": "notice",
+      "state": "contradicted",
       "label": "Public provider cancellation",
       "evidencePath": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
-      "detail": "Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests plus a current governed-path companion, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Provider cancellation verdict=PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_CANCELLATION_SOURCE_PROVEN, sourceCurrent=false, tests=104, liveProviderCall=false, followUp=REQUIRED, noMutation=true, exactShare=MISSING_EVIDENCE.",
       "nextActions": [
-        "Run a fresh full-repository security scan before reclassifying the immutable finding or making a security-complete claim."
+        "Restore deployed source alignment, all cancellation contracts, verification totals, no-mutation boundaries, follow-up scan requirement, and exact Share MISSING_EVIDENCE."
       ]
     },
     {
