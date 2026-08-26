@@ -1,0 +1,1654 @@
+{
+  "schemaVersion": "safeclaw-hermes-knowledge-review-authority-ui/v2",
+  "contractMode": "trace-matrix",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_REVIEW_TRACE_MATRIX",
+  "checkedAt": "2026-08-26T06:11:36.470Z",
+  "sourceHead": "060956fa3201668b1fe4de5522fc9da7b58d87b5",
+  "productCommit": "060956fa3201668b1fe4de5522fc9da7b58d87b5",
+  "baseUrl": "http://127.0.0.1:3092",
+  "mode": "current-source-local-production",
+  "productionBuild": {
+    "status": null,
+    "ok": false,
+    "commitSha": null,
+    "branch": null,
+    "environment": "local",
+    "deploymentUrl": null
+  },
+  "productionAligned": false,
+  "viewportCount": 8,
+  "passedCount": 8,
+  "failedCount": 0,
+  "authorityContract": {
+    "sourceOrder": [
+      "SIF",
+      "KOSHA",
+      "law",
+      "organization_history",
+      "site_history",
+      "external_context"
+    ],
+    "statutoryClaimsRequireLawProvenance": true,
+    "tenantMemoryPublicPromotionAllowed": false,
+    "siteManagerAcceptanceRequiredBeforeWorkpackUse": true,
+    "humanReviewRequired": true,
+    "machineEvidenceReplacesHumanReview": false
+  },
+  "workbenchContract": {
+    "candidateCount": 3,
+    "selectedCandidateCount": 1,
+    "selectedBodyCount": 1,
+    "desktopColumns": 2,
+    "mobileColumns": 1,
+    "candidateBodyInternalScroll": true,
+    "candidateTablist": true,
+    "candidateRovingTabStop": true,
+    "candidateKeyboardNavigation": true,
+    "breakpointOrientationSynchronized": true,
+    "mobilePaneTabsLinked": true,
+    "mobilePaneKeyboardNavigation": true,
+    "decisionPendingStatusLive": true,
+    "decisionBusyStateExposed": true,
+    "decisionActionsDisabledDuringSave": true,
+    "decisionSettlesAccessibly": true,
+    "evidenceItemLimit": 20,
+    "evidenceItemCount": 5,
+    "desktopEvidenceColumns": 2,
+    "mobileMountedPaneCount": 1,
+    "publicEvidenceLinkCount": 3,
+    "privateEvidenceRawIdentityExposed": false,
+    "evidenceInternalScroll": true
+  },
+  "eventFactsContract": {
+    "explicitReviewFactsOnly": true,
+    "expectedFactCount": 2,
+    "panelCount": 0,
+    "visibleFactCount": 0,
+    "boundFactCount": 0,
+    "evidenceRowCount": 0,
+    "orphanFactCount": 0,
+    "insideCandidatePane": false,
+    "candidateBodyMarkerDuplicated": false,
+    "privateEventTextExposed": false,
+    "humanVerificationRequired": true
+  },
+  "traceabilityContract": {
+    "expectedTraceCount": 8,
+    "panelCount": 1,
+    "resolvedTraceCount": 8,
+    "unresolvedTraceCount": 0,
+    "hazardBound": true,
+    "controlsBound": true,
+    "primaryDocumentsBound": true,
+    "evidenceRowsBound": true,
+    "insideCandidatePane": true,
+    "canonicalHazardCount": 8,
+    "canonicalControlLinkCount": 33,
+    "canonicalDocumentLinkCount": 33,
+    "canonicalMatrixComplete": true,
+    "traceListInternalScroll": true,
+    "missingControls": [],
+    "missingPrimaryDocuments": [],
+    "approvalFailsClosedWhenIncomplete": true,
+    "humanReviewCompleted": false,
+    "publicationState": "unpublished"
+  },
+  "contentReadinessContract": {
+    "contractVersion": "knowledge-candidate-content-readiness.v1",
+    "requiredSectionCount": 4,
+    "readyFixtureCount": 2,
+    "revisionRequiredFixtureCount": 1,
+    "selectedReadinessPanelCount": 1,
+    "approvalFailsClosedForRevision": true,
+    "keepSiteOnlyAvailableForRevision": true,
+    "rejectAvailableForRevision": true,
+    "humanReviewCompleted": false,
+    "publicationState": "unpublished",
+    "publishAllowed": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "ontologyPublicationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
+  },
+  "results": [
+    {
+      "theme": "day",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "screenshot": "knowledge-review-authority-day-desktop-1440x900.png",
+      "metrics": {
+        "bodyHeight": 900,
+        "viewportHeight": 900,
+        "horizontalOverflow": false,
+        "rootWidth": 1156,
+        "rootWidthRatio": 0.8,
+        "rootTop": 326.390625,
+        "workbenchColumns": 2,
+        "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "vertical",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "eventFactsPanelCount": 0,
+        "eventFactItemCount": 0,
+        "eventFactTexts": [],
+        "boundEventFactCount": 0,
+        "eventFactEvidenceRowCount": 0,
+        "orphanEventFactCount": 0,
+        "eventFactsInsideCandidatePane": false,
+        "candidateBodyContainsEventFactMarker": false,
+        "privateEventTextExposed": false,
+        "traceabilityPanelCount": 1,
+        "traceabilityStatus": "complete",
+        "resolvedTraceCount": 8,
+        "unresolvedTraceCount": 0,
+        "traceRows": [
+          "비계·고소작업 추락조치 작업발판·난간·바퀴 잠금 확인 · 안전대와 안전모 착용 확인 · 강풍·우천 시 작업중지 기준 공유 · 추락 위험구역 출입통제문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 사진 증빙근거 산업안전보건법 제38조",
+          "지게차·보행자 동선 충돌조치 지게차 운행경로와 보행동선 분리 · 신호수 배치와 사각지대 확인 · 하역구역 접근금지 표시 · 운전 전 점검과 후진 경보 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · TBM 기록근거 추락 재해 통제 사례",
+          "용접·절단 화기작업 화재조치 화기작업 허가와 화재감시자 지정 · 가연물 제거 또는 방염포 설치 · 소화기와 비상대응 경로 확인 · 작업 후 잔불 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · 비상대응 절차근거 추락 방지 기술 지침",
+          "밀폐공간 산소결핍·중독조치 출입 전 산소·유해가스 측정 · 환기와 감시인 배치 · 구조장비와 구조절차 공유 · 단독작업 금지문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 비상대응 절차근거 조직 전용 이력",
+          "화학물질·세척제 노출조치 MSDS 확인 · 보안경·장갑·호흡보호구 지정 · 누출 시 대피·환기·차단 절차 공유 · 외국인 근로자 쉬운 문장 안내문서 위험성평가표 · 안전보건교육 · 비상대응 절차 · 외국인 근로자 안내문근거 현장 전용 이력",
+          "강풍·우천·폭염 작업조건조치 기상청 현재·예보 신호 확인 · 작업중지 판단자 지정 · 미끄럼·전도 위험구역 통제 · 휴식·수분·그늘 기준 공유문서 위험성평가표 · TBM 브리핑 · TBM 기록 · 작업계획서근거 산업안전보건법 제38조",
+          "외국인 근로자 안전교육·전송조치 쉬운 한국어 우선 작성 · 국적·주 사용 언어별 핵심 문장 제공 · 관리자 또는 통역 확인 문구 포함 · 전송 로그와 교육 확인 기록 연결문서 외국인 근로자 안내문 · 외국인 근로자 전파문 · 안전보건교육 · 현장 전파근거 추락 재해 통제 사례",
+          "위험성평가·TBM·교육 닫힌 루프조치 위험요인 파악 · 감소대책 수립 · TBM 공유 · 교육 확인 · 사진·증빙 보관문서 작업 요약 · 위험성평가표 · TBM 브리핑 · TBM 기록 · 안전보건교육근거 추락 방지 기술 지침"
+        ],
+        "traceListOverflowY": "auto",
+        "traceListClientHeight": 180,
+        "traceListScrollHeight": 998,
+        "traceContainsHazard": true,
+        "traceContainsControl": true,
+        "traceContainsDocument": true,
+        "traceContainsEvidence": true,
+        "traceInsideCandidatePane": true,
+        "approveDisabled": false,
+        "evidencePaneCount": 1,
+        "evidenceItemCount": 5,
+        "evidenceWorkbenchColumns": 2,
+        "evidenceInternalScroll": "auto",
+        "publicEvidenceLinkCount": 3,
+        "navigatorBeforeDetail": true,
+        "selectedCandidateHeight": 580,
+        "authorityWidth": 826,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "readinessPanelCount": 1,
+        "readinessSectionCount": 4,
+        "readySectionCount": 4,
+        "readinessInsideCandidatePane": true,
+        "candidatePaneOverflowY": "auto",
+        "actionGroupTop": 937.390625,
+        "firstActionBottom": 981.390625,
+        "firstActionDepth": 655,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": null,
+      "mobileEvidence": null,
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
+      },
+      "revisionDecision": {
+        "readinessVisible": true,
+        "approveDisabled": true,
+        "keepSiteOnlyEnabled": true,
+        "rejectEnabled": true
+      },
+      "traceMatrixCoverage": [
+        {
+          "hazardId": "fall-scaffold",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "forklift-traffic",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "hot-work-fire",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "confined-space",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "chemical-msds",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "weather-wind-rain-heat",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "foreign-worker-briefing",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "risk-assessment-tbm-loop",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        }
+      ],
+      "traceMatrixComplete": true,
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "day",
+      "viewport": {
+        "name": "desktop-short",
+        "width": 1440,
+        "height": 723
+      },
+      "screenshot": "knowledge-review-authority-day-desktop-short-1440x723.png",
+      "metrics": {
+        "bodyHeight": 723,
+        "viewportHeight": 723,
+        "horizontalOverflow": false,
+        "rootWidth": 1156,
+        "rootWidthRatio": 0.8,
+        "rootTop": 302.390625,
+        "workbenchColumns": 2,
+        "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "vertical",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "eventFactsPanelCount": 0,
+        "eventFactItemCount": 0,
+        "eventFactTexts": [],
+        "boundEventFactCount": 0,
+        "eventFactEvidenceRowCount": 0,
+        "orphanEventFactCount": 0,
+        "eventFactsInsideCandidatePane": false,
+        "candidateBodyContainsEventFactMarker": false,
+        "privateEventTextExposed": false,
+        "traceabilityPanelCount": 1,
+        "traceabilityStatus": "complete",
+        "resolvedTraceCount": 8,
+        "unresolvedTraceCount": 0,
+        "traceRows": [
+          "비계·고소작업 추락조치 작업발판·난간·바퀴 잠금 확인 · 안전대와 안전모 착용 확인 · 강풍·우천 시 작업중지 기준 공유 · 추락 위험구역 출입통제문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 사진 증빙근거 산업안전보건법 제38조",
+          "지게차·보행자 동선 충돌조치 지게차 운행경로와 보행동선 분리 · 신호수 배치와 사각지대 확인 · 하역구역 접근금지 표시 · 운전 전 점검과 후진 경보 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · TBM 기록근거 추락 재해 통제 사례",
+          "용접·절단 화기작업 화재조치 화기작업 허가와 화재감시자 지정 · 가연물 제거 또는 방염포 설치 · 소화기와 비상대응 경로 확인 · 작업 후 잔불 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · 비상대응 절차근거 추락 방지 기술 지침",
+          "밀폐공간 산소결핍·중독조치 출입 전 산소·유해가스 측정 · 환기와 감시인 배치 · 구조장비와 구조절차 공유 · 단독작업 금지문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 비상대응 절차근거 조직 전용 이력",
+          "화학물질·세척제 노출조치 MSDS 확인 · 보안경·장갑·호흡보호구 지정 · 누출 시 대피·환기·차단 절차 공유 · 외국인 근로자 쉬운 문장 안내문서 위험성평가표 · 안전보건교육 · 비상대응 절차 · 외국인 근로자 안내문근거 현장 전용 이력",
+          "강풍·우천·폭염 작업조건조치 기상청 현재·예보 신호 확인 · 작업중지 판단자 지정 · 미끄럼·전도 위험구역 통제 · 휴식·수분·그늘 기준 공유문서 위험성평가표 · TBM 브리핑 · TBM 기록 · 작업계획서근거 산업안전보건법 제38조",
+          "외국인 근로자 안전교육·전송조치 쉬운 한국어 우선 작성 · 국적·주 사용 언어별 핵심 문장 제공 · 관리자 또는 통역 확인 문구 포함 · 전송 로그와 교육 확인 기록 연결문서 외국인 근로자 안내문 · 외국인 근로자 전파문 · 안전보건교육 · 현장 전파근거 추락 재해 통제 사례",
+          "위험성평가·TBM·교육 닫힌 루프조치 위험요인 파악 · 감소대책 수립 · TBM 공유 · 교육 확인 · 사진·증빙 보관문서 작업 요약 · 위험성평가표 · TBM 브리핑 · TBM 기록 · 안전보건교육근거 추락 방지 기술 지침"
+        ],
+        "traceListOverflowY": "auto",
+        "traceListClientHeight": 180,
+        "traceListScrollHeight": 998,
+        "traceContainsHazard": true,
+        "traceContainsControl": true,
+        "traceContainsDocument": true,
+        "traceContainsEvidence": true,
+        "traceInsideCandidatePane": true,
+        "approveDisabled": false,
+        "evidencePaneCount": 1,
+        "evidenceItemCount": 5,
+        "evidenceWorkbenchColumns": 2,
+        "evidenceInternalScroll": "auto",
+        "publicEvidenceLinkCount": 3,
+        "navigatorBeforeDetail": true,
+        "selectedCandidateHeight": 580,
+        "authorityWidth": 826,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "readinessPanelCount": 1,
+        "readinessSectionCount": 4,
+        "readySectionCount": 4,
+        "readinessInsideCandidatePane": true,
+        "candidatePaneOverflowY": "auto",
+        "actionGroupTop": 913.390625,
+        "firstActionBottom": 957.390625,
+        "firstActionDepth": 655,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": null,
+      "mobileEvidence": null,
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
+      },
+      "revisionDecision": {
+        "readinessVisible": true,
+        "approveDisabled": true,
+        "keepSiteOnlyEnabled": true,
+        "rejectEnabled": true
+      },
+      "traceMatrixCoverage": [
+        {
+          "hazardId": "fall-scaffold",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "forklift-traffic",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "hot-work-fire",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "confined-space",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "chemical-msds",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "weather-wind-rain-heat",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "foreign-worker-briefing",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "risk-assessment-tbm-loop",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        }
+      ],
+      "traceMatrixComplete": true,
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "day",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "screenshot": "knowledge-review-authority-day-mobile-390x844.png",
+      "metrics": {
+        "bodyHeight": 854,
+        "viewportHeight": 844,
+        "horizontalOverflow": false,
+        "rootWidth": 358,
+        "rootWidthRatio": 0.92,
+        "rootTop": 39.96875,
+        "workbenchColumns": 1,
+        "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "horizontal",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "eventFactsPanelCount": 0,
+        "eventFactItemCount": 0,
+        "eventFactTexts": [],
+        "boundEventFactCount": 0,
+        "eventFactEvidenceRowCount": 0,
+        "orphanEventFactCount": 0,
+        "eventFactsInsideCandidatePane": false,
+        "candidateBodyContainsEventFactMarker": false,
+        "privateEventTextExposed": false,
+        "traceabilityPanelCount": 1,
+        "traceabilityStatus": "complete",
+        "resolvedTraceCount": 8,
+        "unresolvedTraceCount": 0,
+        "traceRows": [
+          "비계·고소작업 추락조치 작업발판·난간·바퀴 잠금 확인 · 안전대와 안전모 착용 확인 · 강풍·우천 시 작업중지 기준 공유 · 추락 위험구역 출입통제문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 사진 증빙근거 산업안전보건법 제38조",
+          "지게차·보행자 동선 충돌조치 지게차 운행경로와 보행동선 분리 · 신호수 배치와 사각지대 확인 · 하역구역 접근금지 표시 · 운전 전 점검과 후진 경보 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · TBM 기록근거 추락 재해 통제 사례",
+          "용접·절단 화기작업 화재조치 화기작업 허가와 화재감시자 지정 · 가연물 제거 또는 방염포 설치 · 소화기와 비상대응 경로 확인 · 작업 후 잔불 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · 비상대응 절차근거 추락 방지 기술 지침",
+          "밀폐공간 산소결핍·중독조치 출입 전 산소·유해가스 측정 · 환기와 감시인 배치 · 구조장비와 구조절차 공유 · 단독작업 금지문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 비상대응 절차근거 조직 전용 이력",
+          "화학물질·세척제 노출조치 MSDS 확인 · 보안경·장갑·호흡보호구 지정 · 누출 시 대피·환기·차단 절차 공유 · 외국인 근로자 쉬운 문장 안내문서 위험성평가표 · 안전보건교육 · 비상대응 절차 · 외국인 근로자 안내문근거 현장 전용 이력",
+          "강풍·우천·폭염 작업조건조치 기상청 현재·예보 신호 확인 · 작업중지 판단자 지정 · 미끄럼·전도 위험구역 통제 · 휴식·수분·그늘 기준 공유문서 위험성평가표 · TBM 브리핑 · TBM 기록 · 작업계획서근거 산업안전보건법 제38조",
+          "외국인 근로자 안전교육·전송조치 쉬운 한국어 우선 작성 · 국적·주 사용 언어별 핵심 문장 제공 · 관리자 또는 통역 확인 문구 포함 · 전송 로그와 교육 확인 기록 연결문서 외국인 근로자 안내문 · 외국인 근로자 전파문 · 안전보건교육 · 현장 전파근거 추락 재해 통제 사례",
+          "위험성평가·TBM·교육 닫힌 루프조치 위험요인 파악 · 감소대책 수립 · TBM 공유 · 교육 확인 · 사진·증빙 보관문서 작업 요약 · 위험성평가표 · TBM 브리핑 · TBM 기록 · 안전보건교육근거 추락 방지 기술 지침"
+        ],
+        "traceListOverflowY": "auto",
+        "traceListClientHeight": 180,
+        "traceListScrollHeight": 1124,
+        "traceContainsHazard": true,
+        "traceContainsControl": true,
+        "traceContainsDocument": true,
+        "traceContainsEvidence": true,
+        "traceInsideCandidatePane": true,
+        "approveDisabled": false,
+        "evidencePaneCount": 0,
+        "evidenceItemCount": 0,
+        "evidenceWorkbenchColumns": 1,
+        "evidenceInternalScroll": null,
+        "publicEvidenceLinkCount": 0,
+        "navigatorBeforeDetail": false,
+        "selectedCandidateHeight": 618.4375,
+        "authorityWidth": 332,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "readinessPanelCount": 1,
+        "readinessSectionCount": 4,
+        "readySectionCount": 4,
+        "readinessInsideCandidatePane": true,
+        "candidatePaneOverflowY": "auto",
+        "actionGroupTop": 834.796875,
+        "firstActionBottom": 878.796875,
+        "firstActionDepth": 838.828125,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": {
+        "endState": {
+          "selectedIndex": 1,
+          "focusedIndex": 1,
+          "mountedPane": "evidence"
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0,
+          "mountedPane": "candidate"
+        }
+      },
+      "mobileEvidence": {
+        "paneCount": 1,
+        "candidatePaneCount": 0,
+        "evidenceItemCount": 5,
+        "publicEvidenceLinkCount": 3,
+        "listOverflowY": "auto",
+        "contained": true,
+        "boundEventFactCount": 0,
+        "eventFactEvidenceRowCount": 0,
+        "boundEventFactTexts": []
+      },
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
+      },
+      "revisionDecision": {
+        "readinessVisible": true,
+        "approveDisabled": true,
+        "keepSiteOnlyEnabled": true,
+        "rejectEnabled": true
+      },
+      "traceMatrixCoverage": [
+        {
+          "hazardId": "fall-scaffold",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "forklift-traffic",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "hot-work-fire",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "confined-space",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "chemical-msds",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "weather-wind-rain-heat",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "foreign-worker-briefing",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "risk-assessment-tbm-loop",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        }
+      ],
+      "traceMatrixComplete": true,
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "day",
+      "viewport": {
+        "name": "mobile-short",
+        "width": 390,
+        "height": 723
+      },
+      "screenshot": "knowledge-review-authority-day-mobile-short-390x723.png",
+      "metrics": {
+        "bodyHeight": 733,
+        "viewportHeight": 723,
+        "horizontalOverflow": false,
+        "rootWidth": 358,
+        "rootWidthRatio": 0.92,
+        "rootTop": -20.03125,
+        "workbenchColumns": 1,
+        "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "horizontal",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "eventFactsPanelCount": 0,
+        "eventFactItemCount": 0,
+        "eventFactTexts": [],
+        "boundEventFactCount": 0,
+        "eventFactEvidenceRowCount": 0,
+        "orphanEventFactCount": 0,
+        "eventFactsInsideCandidatePane": false,
+        "candidateBodyContainsEventFactMarker": false,
+        "privateEventTextExposed": false,
+        "traceabilityPanelCount": 1,
+        "traceabilityStatus": "complete",
+        "resolvedTraceCount": 8,
+        "unresolvedTraceCount": 0,
+        "traceRows": [
+          "비계·고소작업 추락조치 작업발판·난간·바퀴 잠금 확인 · 안전대와 안전모 착용 확인 · 강풍·우천 시 작업중지 기준 공유 · 추락 위험구역 출입통제문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 사진 증빙근거 산업안전보건법 제38조",
+          "지게차·보행자 동선 충돌조치 지게차 운행경로와 보행동선 분리 · 신호수 배치와 사각지대 확인 · 하역구역 접근금지 표시 · 운전 전 점검과 후진 경보 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · TBM 기록근거 추락 재해 통제 사례",
+          "용접·절단 화기작업 화재조치 화기작업 허가와 화재감시자 지정 · 가연물 제거 또는 방염포 설치 · 소화기와 비상대응 경로 확인 · 작업 후 잔불 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · 비상대응 절차근거 추락 방지 기술 지침",
+          "밀폐공간 산소결핍·중독조치 출입 전 산소·유해가스 측정 · 환기와 감시인 배치 · 구조장비와 구조절차 공유 · 단독작업 금지문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 비상대응 절차근거 조직 전용 이력",
+          "화학물질·세척제 노출조치 MSDS 확인 · 보안경·장갑·호흡보호구 지정 · 누출 시 대피·환기·차단 절차 공유 · 외국인 근로자 쉬운 문장 안내문서 위험성평가표 · 안전보건교육 · 비상대응 절차 · 외국인 근로자 안내문근거 현장 전용 이력",
+          "강풍·우천·폭염 작업조건조치 기상청 현재·예보 신호 확인 · 작업중지 판단자 지정 · 미끄럼·전도 위험구역 통제 · 휴식·수분·그늘 기준 공유문서 위험성평가표 · TBM 브리핑 · TBM 기록 · 작업계획서근거 산업안전보건법 제38조",
+          "외국인 근로자 안전교육·전송조치 쉬운 한국어 우선 작성 · 국적·주 사용 언어별 핵심 문장 제공 · 관리자 또는 통역 확인 문구 포함 · 전송 로그와 교육 확인 기록 연결문서 외국인 근로자 안내문 · 외국인 근로자 전파문 · 안전보건교육 · 현장 전파근거 추락 재해 통제 사례",
+          "위험성평가·TBM·교육 닫힌 루프조치 위험요인 파악 · 감소대책 수립 · TBM 공유 · 교육 확인 · 사진·증빙 보관문서 작업 요약 · 위험성평가표 · TBM 브리핑 · TBM 기록 · 안전보건교육근거 추락 방지 기술 지침"
+        ],
+        "traceListOverflowY": "auto",
+        "traceListClientHeight": 180,
+        "traceListScrollHeight": 1124,
+        "traceContainsHazard": true,
+        "traceContainsControl": true,
+        "traceContainsDocument": true,
+        "traceContainsEvidence": true,
+        "traceInsideCandidatePane": true,
+        "approveDisabled": false,
+        "evidencePaneCount": 0,
+        "evidenceItemCount": 0,
+        "evidenceWorkbenchColumns": 1,
+        "evidenceInternalScroll": null,
+        "publicEvidenceLinkCount": 0,
+        "navigatorBeforeDetail": false,
+        "selectedCandidateHeight": 618.4375,
+        "authorityWidth": 332,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "readinessPanelCount": 1,
+        "readinessSectionCount": 4,
+        "readySectionCount": 4,
+        "readinessInsideCandidatePane": true,
+        "candidatePaneOverflowY": "auto",
+        "actionGroupTop": 774.796875,
+        "firstActionBottom": 818.796875,
+        "firstActionDepth": 838.828125,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": {
+        "endState": {
+          "selectedIndex": 1,
+          "focusedIndex": 1,
+          "mountedPane": "evidence"
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0,
+          "mountedPane": "candidate"
+        }
+      },
+      "mobileEvidence": {
+        "paneCount": 1,
+        "candidatePaneCount": 0,
+        "evidenceItemCount": 5,
+        "publicEvidenceLinkCount": 3,
+        "listOverflowY": "auto",
+        "contained": true,
+        "boundEventFactCount": 0,
+        "eventFactEvidenceRowCount": 0,
+        "boundEventFactTexts": []
+      },
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
+      },
+      "revisionDecision": {
+        "readinessVisible": true,
+        "approveDisabled": true,
+        "keepSiteOnlyEnabled": true,
+        "rejectEnabled": true
+      },
+      "traceMatrixCoverage": [
+        {
+          "hazardId": "fall-scaffold",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "forklift-traffic",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "hot-work-fire",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "confined-space",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "chemical-msds",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "weather-wind-rain-heat",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "foreign-worker-briefing",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "risk-assessment-tbm-loop",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        }
+      ],
+      "traceMatrixComplete": true,
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "night",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "screenshot": "knowledge-review-authority-night-desktop-1440x900.png",
+      "metrics": {
+        "bodyHeight": 900,
+        "viewportHeight": 900,
+        "horizontalOverflow": false,
+        "rootWidth": 1156,
+        "rootWidthRatio": 0.8,
+        "rootTop": 326.390625,
+        "workbenchColumns": 2,
+        "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "vertical",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "eventFactsPanelCount": 0,
+        "eventFactItemCount": 0,
+        "eventFactTexts": [],
+        "boundEventFactCount": 0,
+        "eventFactEvidenceRowCount": 0,
+        "orphanEventFactCount": 0,
+        "eventFactsInsideCandidatePane": false,
+        "candidateBodyContainsEventFactMarker": false,
+        "privateEventTextExposed": false,
+        "traceabilityPanelCount": 1,
+        "traceabilityStatus": "complete",
+        "resolvedTraceCount": 8,
+        "unresolvedTraceCount": 0,
+        "traceRows": [
+          "비계·고소작업 추락조치 작업발판·난간·바퀴 잠금 확인 · 안전대와 안전모 착용 확인 · 강풍·우천 시 작업중지 기준 공유 · 추락 위험구역 출입통제문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 사진 증빙근거 산업안전보건법 제38조",
+          "지게차·보행자 동선 충돌조치 지게차 운행경로와 보행동선 분리 · 신호수 배치와 사각지대 확인 · 하역구역 접근금지 표시 · 운전 전 점검과 후진 경보 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · TBM 기록근거 추락 재해 통제 사례",
+          "용접·절단 화기작업 화재조치 화기작업 허가와 화재감시자 지정 · 가연물 제거 또는 방염포 설치 · 소화기와 비상대응 경로 확인 · 작업 후 잔불 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · 비상대응 절차근거 추락 방지 기술 지침",
+          "밀폐공간 산소결핍·중독조치 출입 전 산소·유해가스 측정 · 환기와 감시인 배치 · 구조장비와 구조절차 공유 · 단독작업 금지문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 비상대응 절차근거 조직 전용 이력",
+          "화학물질·세척제 노출조치 MSDS 확인 · 보안경·장갑·호흡보호구 지정 · 누출 시 대피·환기·차단 절차 공유 · 외국인 근로자 쉬운 문장 안내문서 위험성평가표 · 안전보건교육 · 비상대응 절차 · 외국인 근로자 안내문근거 현장 전용 이력",
+          "강풍·우천·폭염 작업조건조치 기상청 현재·예보 신호 확인 · 작업중지 판단자 지정 · 미끄럼·전도 위험구역 통제 · 휴식·수분·그늘 기준 공유문서 위험성평가표 · TBM 브리핑 · TBM 기록 · 작업계획서근거 산업안전보건법 제38조",
+          "외국인 근로자 안전교육·전송조치 쉬운 한국어 우선 작성 · 국적·주 사용 언어별 핵심 문장 제공 · 관리자 또는 통역 확인 문구 포함 · 전송 로그와 교육 확인 기록 연결문서 외국인 근로자 안내문 · 외국인 근로자 전파문 · 안전보건교육 · 현장 전파근거 추락 재해 통제 사례",
+          "위험성평가·TBM·교육 닫힌 루프조치 위험요인 파악 · 감소대책 수립 · TBM 공유 · 교육 확인 · 사진·증빙 보관문서 작업 요약 · 위험성평가표 · TBM 브리핑 · TBM 기록 · 안전보건교육근거 추락 방지 기술 지침"
+        ],
+        "traceListOverflowY": "auto",
+        "traceListClientHeight": 180,
+        "traceListScrollHeight": 998,
+        "traceContainsHazard": true,
+        "traceContainsControl": true,
+        "traceContainsDocument": true,
+        "traceContainsEvidence": true,
+        "traceInsideCandidatePane": true,
+        "approveDisabled": false,
+        "evidencePaneCount": 1,
+        "evidenceItemCount": 5,
+        "evidenceWorkbenchColumns": 2,
+        "evidenceInternalScroll": "auto",
+        "publicEvidenceLinkCount": 3,
+        "navigatorBeforeDetail": true,
+        "selectedCandidateHeight": 580,
+        "authorityWidth": 826,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "readinessPanelCount": 1,
+        "readinessSectionCount": 4,
+        "readySectionCount": 4,
+        "readinessInsideCandidatePane": true,
+        "candidatePaneOverflowY": "auto",
+        "actionGroupTop": 937.390625,
+        "firstActionBottom": 981.390625,
+        "firstActionDepth": 655,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": null,
+      "mobileEvidence": null,
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
+      },
+      "revisionDecision": {
+        "readinessVisible": true,
+        "approveDisabled": true,
+        "keepSiteOnlyEnabled": true,
+        "rejectEnabled": true
+      },
+      "traceMatrixCoverage": [
+        {
+          "hazardId": "fall-scaffold",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "forklift-traffic",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "hot-work-fire",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "confined-space",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "chemical-msds",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "weather-wind-rain-heat",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "foreign-worker-briefing",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "risk-assessment-tbm-loop",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        }
+      ],
+      "traceMatrixComplete": true,
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "night",
+      "viewport": {
+        "name": "desktop-short",
+        "width": 1440,
+        "height": 723
+      },
+      "screenshot": "knowledge-review-authority-night-desktop-short-1440x723.png",
+      "metrics": {
+        "bodyHeight": 723,
+        "viewportHeight": 723,
+        "horizontalOverflow": false,
+        "rootWidth": 1156,
+        "rootWidthRatio": 0.8,
+        "rootTop": 302.390625,
+        "workbenchColumns": 2,
+        "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "vertical",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "eventFactsPanelCount": 0,
+        "eventFactItemCount": 0,
+        "eventFactTexts": [],
+        "boundEventFactCount": 0,
+        "eventFactEvidenceRowCount": 0,
+        "orphanEventFactCount": 0,
+        "eventFactsInsideCandidatePane": false,
+        "candidateBodyContainsEventFactMarker": false,
+        "privateEventTextExposed": false,
+        "traceabilityPanelCount": 1,
+        "traceabilityStatus": "complete",
+        "resolvedTraceCount": 8,
+        "unresolvedTraceCount": 0,
+        "traceRows": [
+          "비계·고소작업 추락조치 작업발판·난간·바퀴 잠금 확인 · 안전대와 안전모 착용 확인 · 강풍·우천 시 작업중지 기준 공유 · 추락 위험구역 출입통제문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 사진 증빙근거 산업안전보건법 제38조",
+          "지게차·보행자 동선 충돌조치 지게차 운행경로와 보행동선 분리 · 신호수 배치와 사각지대 확인 · 하역구역 접근금지 표시 · 운전 전 점검과 후진 경보 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · TBM 기록근거 추락 재해 통제 사례",
+          "용접·절단 화기작업 화재조치 화기작업 허가와 화재감시자 지정 · 가연물 제거 또는 방염포 설치 · 소화기와 비상대응 경로 확인 · 작업 후 잔불 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · 비상대응 절차근거 추락 방지 기술 지침",
+          "밀폐공간 산소결핍·중독조치 출입 전 산소·유해가스 측정 · 환기와 감시인 배치 · 구조장비와 구조절차 공유 · 단독작업 금지문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 비상대응 절차근거 조직 전용 이력",
+          "화학물질·세척제 노출조치 MSDS 확인 · 보안경·장갑·호흡보호구 지정 · 누출 시 대피·환기·차단 절차 공유 · 외국인 근로자 쉬운 문장 안내문서 위험성평가표 · 안전보건교육 · 비상대응 절차 · 외국인 근로자 안내문근거 현장 전용 이력",
+          "강풍·우천·폭염 작업조건조치 기상청 현재·예보 신호 확인 · 작업중지 판단자 지정 · 미끄럼·전도 위험구역 통제 · 휴식·수분·그늘 기준 공유문서 위험성평가표 · TBM 브리핑 · TBM 기록 · 작업계획서근거 산업안전보건법 제38조",
+          "외국인 근로자 안전교육·전송조치 쉬운 한국어 우선 작성 · 국적·주 사용 언어별 핵심 문장 제공 · 관리자 또는 통역 확인 문구 포함 · 전송 로그와 교육 확인 기록 연결문서 외국인 근로자 안내문 · 외국인 근로자 전파문 · 안전보건교육 · 현장 전파근거 추락 재해 통제 사례",
+          "위험성평가·TBM·교육 닫힌 루프조치 위험요인 파악 · 감소대책 수립 · TBM 공유 · 교육 확인 · 사진·증빙 보관문서 작업 요약 · 위험성평가표 · TBM 브리핑 · TBM 기록 · 안전보건교육근거 추락 방지 기술 지침"
+        ],
+        "traceListOverflowY": "auto",
+        "traceListClientHeight": 180,
+        "traceListScrollHeight": 998,
+        "traceContainsHazard": true,
+        "traceContainsControl": true,
+        "traceContainsDocument": true,
+        "traceContainsEvidence": true,
+        "traceInsideCandidatePane": true,
+        "approveDisabled": false,
+        "evidencePaneCount": 1,
+        "evidenceItemCount": 5,
+        "evidenceWorkbenchColumns": 2,
+        "evidenceInternalScroll": "auto",
+        "publicEvidenceLinkCount": 3,
+        "navigatorBeforeDetail": true,
+        "selectedCandidateHeight": 580,
+        "authorityWidth": 826,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "readinessPanelCount": 1,
+        "readinessSectionCount": 4,
+        "readySectionCount": 4,
+        "readinessInsideCandidatePane": true,
+        "candidatePaneOverflowY": "auto",
+        "actionGroupTop": 913.390625,
+        "firstActionBottom": 957.390625,
+        "firstActionDepth": 655,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": null,
+      "mobileEvidence": null,
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
+      },
+      "revisionDecision": {
+        "readinessVisible": true,
+        "approveDisabled": true,
+        "keepSiteOnlyEnabled": true,
+        "rejectEnabled": true
+      },
+      "traceMatrixCoverage": [
+        {
+          "hazardId": "fall-scaffold",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "forklift-traffic",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "hot-work-fire",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "confined-space",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "chemical-msds",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "weather-wind-rain-heat",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "foreign-worker-briefing",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "risk-assessment-tbm-loop",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        }
+      ],
+      "traceMatrixComplete": true,
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "night",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "screenshot": "knowledge-review-authority-night-mobile-390x844.png",
+      "metrics": {
+        "bodyHeight": 854,
+        "viewportHeight": 844,
+        "horizontalOverflow": false,
+        "rootWidth": 358,
+        "rootWidthRatio": 0.92,
+        "rootTop": 39.96875,
+        "workbenchColumns": 1,
+        "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "horizontal",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "eventFactsPanelCount": 0,
+        "eventFactItemCount": 0,
+        "eventFactTexts": [],
+        "boundEventFactCount": 0,
+        "eventFactEvidenceRowCount": 0,
+        "orphanEventFactCount": 0,
+        "eventFactsInsideCandidatePane": false,
+        "candidateBodyContainsEventFactMarker": false,
+        "privateEventTextExposed": false,
+        "traceabilityPanelCount": 1,
+        "traceabilityStatus": "complete",
+        "resolvedTraceCount": 8,
+        "unresolvedTraceCount": 0,
+        "traceRows": [
+          "비계·고소작업 추락조치 작업발판·난간·바퀴 잠금 확인 · 안전대와 안전모 착용 확인 · 강풍·우천 시 작업중지 기준 공유 · 추락 위험구역 출입통제문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 사진 증빙근거 산업안전보건법 제38조",
+          "지게차·보행자 동선 충돌조치 지게차 운행경로와 보행동선 분리 · 신호수 배치와 사각지대 확인 · 하역구역 접근금지 표시 · 운전 전 점검과 후진 경보 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · TBM 기록근거 추락 재해 통제 사례",
+          "용접·절단 화기작업 화재조치 화기작업 허가와 화재감시자 지정 · 가연물 제거 또는 방염포 설치 · 소화기와 비상대응 경로 확인 · 작업 후 잔불 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · 비상대응 절차근거 추락 방지 기술 지침",
+          "밀폐공간 산소결핍·중독조치 출입 전 산소·유해가스 측정 · 환기와 감시인 배치 · 구조장비와 구조절차 공유 · 단독작업 금지문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 비상대응 절차근거 조직 전용 이력",
+          "화학물질·세척제 노출조치 MSDS 확인 · 보안경·장갑·호흡보호구 지정 · 누출 시 대피·환기·차단 절차 공유 · 외국인 근로자 쉬운 문장 안내문서 위험성평가표 · 안전보건교육 · 비상대응 절차 · 외국인 근로자 안내문근거 현장 전용 이력",
+          "강풍·우천·폭염 작업조건조치 기상청 현재·예보 신호 확인 · 작업중지 판단자 지정 · 미끄럼·전도 위험구역 통제 · 휴식·수분·그늘 기준 공유문서 위험성평가표 · TBM 브리핑 · TBM 기록 · 작업계획서근거 산업안전보건법 제38조",
+          "외국인 근로자 안전교육·전송조치 쉬운 한국어 우선 작성 · 국적·주 사용 언어별 핵심 문장 제공 · 관리자 또는 통역 확인 문구 포함 · 전송 로그와 교육 확인 기록 연결문서 외국인 근로자 안내문 · 외국인 근로자 전파문 · 안전보건교육 · 현장 전파근거 추락 재해 통제 사례",
+          "위험성평가·TBM·교육 닫힌 루프조치 위험요인 파악 · 감소대책 수립 · TBM 공유 · 교육 확인 · 사진·증빙 보관문서 작업 요약 · 위험성평가표 · TBM 브리핑 · TBM 기록 · 안전보건교육근거 추락 방지 기술 지침"
+        ],
+        "traceListOverflowY": "auto",
+        "traceListClientHeight": 180,
+        "traceListScrollHeight": 1124,
+        "traceContainsHazard": true,
+        "traceContainsControl": true,
+        "traceContainsDocument": true,
+        "traceContainsEvidence": true,
+        "traceInsideCandidatePane": true,
+        "approveDisabled": false,
+        "evidencePaneCount": 0,
+        "evidenceItemCount": 0,
+        "evidenceWorkbenchColumns": 1,
+        "evidenceInternalScroll": null,
+        "publicEvidenceLinkCount": 0,
+        "navigatorBeforeDetail": false,
+        "selectedCandidateHeight": 618.4375,
+        "authorityWidth": 332,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "readinessPanelCount": 1,
+        "readinessSectionCount": 4,
+        "readySectionCount": 4,
+        "readinessInsideCandidatePane": true,
+        "candidatePaneOverflowY": "auto",
+        "actionGroupTop": 834.796875,
+        "firstActionBottom": 878.796875,
+        "firstActionDepth": 838.828125,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": {
+        "endState": {
+          "selectedIndex": 1,
+          "focusedIndex": 1,
+          "mountedPane": "evidence"
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0,
+          "mountedPane": "candidate"
+        }
+      },
+      "mobileEvidence": {
+        "paneCount": 1,
+        "candidatePaneCount": 0,
+        "evidenceItemCount": 5,
+        "publicEvidenceLinkCount": 3,
+        "listOverflowY": "auto",
+        "contained": true,
+        "boundEventFactCount": 0,
+        "eventFactEvidenceRowCount": 0,
+        "boundEventFactTexts": []
+      },
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
+      },
+      "revisionDecision": {
+        "readinessVisible": true,
+        "approveDisabled": true,
+        "keepSiteOnlyEnabled": true,
+        "rejectEnabled": true
+      },
+      "traceMatrixCoverage": [
+        {
+          "hazardId": "fall-scaffold",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "forklift-traffic",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "hot-work-fire",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "confined-space",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "chemical-msds",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "weather-wind-rain-heat",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "foreign-worker-briefing",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "risk-assessment-tbm-loop",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        }
+      ],
+      "traceMatrixComplete": true,
+      "browserErrors": [],
+      "passed": true
+    },
+    {
+      "theme": "night",
+      "viewport": {
+        "name": "mobile-short",
+        "width": 390,
+        "height": 723
+      },
+      "screenshot": "knowledge-review-authority-night-mobile-short-390x723.png",
+      "metrics": {
+        "bodyHeight": 733,
+        "viewportHeight": 723,
+        "horizontalOverflow": false,
+        "rootWidth": 358,
+        "rootWidthRatio": 0.92,
+        "rootTop": -20.03125,
+        "workbenchColumns": 1,
+        "navigatorCandidateCount": 3,
+        "candidateTablistRole": "tablist",
+        "candidateTablistOrientation": "horizontal",
+        "candidateTabCount": 3,
+        "selectedCandidateTabCount": 1,
+        "tabbableCandidateTabCount": 1,
+        "candidateControlIdsPresent": true,
+        "candidateControlIdsUnique": true,
+        "selectedCandidateControlLinked": true,
+        "selectedCandidatePanelRole": "tabpanel",
+        "selectedCandidatePanelLabelledBy": true,
+        "selectedCandidateCount": 1,
+        "selectedBodyCount": 1,
+        "selectedBodyOverflowY": "auto",
+        "eventFactsPanelCount": 0,
+        "eventFactItemCount": 0,
+        "eventFactTexts": [],
+        "boundEventFactCount": 0,
+        "eventFactEvidenceRowCount": 0,
+        "orphanEventFactCount": 0,
+        "eventFactsInsideCandidatePane": false,
+        "candidateBodyContainsEventFactMarker": false,
+        "privateEventTextExposed": false,
+        "traceabilityPanelCount": 1,
+        "traceabilityStatus": "complete",
+        "resolvedTraceCount": 8,
+        "unresolvedTraceCount": 0,
+        "traceRows": [
+          "비계·고소작업 추락조치 작업발판·난간·바퀴 잠금 확인 · 안전대와 안전모 착용 확인 · 강풍·우천 시 작업중지 기준 공유 · 추락 위험구역 출입통제문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 사진 증빙근거 산업안전보건법 제38조",
+          "지게차·보행자 동선 충돌조치 지게차 운행경로와 보행동선 분리 · 신호수 배치와 사각지대 확인 · 하역구역 접근금지 표시 · 운전 전 점검과 후진 경보 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · TBM 기록근거 추락 재해 통제 사례",
+          "용접·절단 화기작업 화재조치 화기작업 허가와 화재감시자 지정 · 가연물 제거 또는 방염포 설치 · 소화기와 비상대응 경로 확인 · 작업 후 잔불 확인문서 위험성평가표 · 작업계획서 · TBM 브리핑 · 비상대응 절차근거 추락 방지 기술 지침",
+          "밀폐공간 산소결핍·중독조치 출입 전 산소·유해가스 측정 · 환기와 감시인 배치 · 구조장비와 구조절차 공유 · 단독작업 금지문서 위험성평가표 · TBM 브리핑 · 안전보건교육 · 비상대응 절차근거 조직 전용 이력",
+          "화학물질·세척제 노출조치 MSDS 확인 · 보안경·장갑·호흡보호구 지정 · 누출 시 대피·환기·차단 절차 공유 · 외국인 근로자 쉬운 문장 안내문서 위험성평가표 · 안전보건교육 · 비상대응 절차 · 외국인 근로자 안내문근거 현장 전용 이력",
+          "강풍·우천·폭염 작업조건조치 기상청 현재·예보 신호 확인 · 작업중지 판단자 지정 · 미끄럼·전도 위험구역 통제 · 휴식·수분·그늘 기준 공유문서 위험성평가표 · TBM 브리핑 · TBM 기록 · 작업계획서근거 산업안전보건법 제38조",
+          "외국인 근로자 안전교육·전송조치 쉬운 한국어 우선 작성 · 국적·주 사용 언어별 핵심 문장 제공 · 관리자 또는 통역 확인 문구 포함 · 전송 로그와 교육 확인 기록 연결문서 외국인 근로자 안내문 · 외국인 근로자 전파문 · 안전보건교육 · 현장 전파근거 추락 재해 통제 사례",
+          "위험성평가·TBM·교육 닫힌 루프조치 위험요인 파악 · 감소대책 수립 · TBM 공유 · 교육 확인 · 사진·증빙 보관문서 작업 요약 · 위험성평가표 · TBM 브리핑 · TBM 기록 · 안전보건교육근거 추락 방지 기술 지침"
+        ],
+        "traceListOverflowY": "auto",
+        "traceListClientHeight": 180,
+        "traceListScrollHeight": 1124,
+        "traceContainsHazard": true,
+        "traceContainsControl": true,
+        "traceContainsDocument": true,
+        "traceContainsEvidence": true,
+        "traceInsideCandidatePane": true,
+        "approveDisabled": false,
+        "evidencePaneCount": 0,
+        "evidenceItemCount": 0,
+        "evidenceWorkbenchColumns": 1,
+        "evidenceInternalScroll": null,
+        "publicEvidenceLinkCount": 0,
+        "navigatorBeforeDetail": false,
+        "selectedCandidateHeight": 618.4375,
+        "authorityWidth": 332,
+        "authorityRoleCount": 6,
+        "authorityContained": true,
+        "readinessPanelCount": 1,
+        "readinessSectionCount": 4,
+        "readySectionCount": 4,
+        "readinessInsideCandidatePane": true,
+        "candidatePaneOverflowY": "auto",
+        "actionGroupTop": 774.796875,
+        "firstActionBottom": 818.796875,
+        "firstActionDepth": 838.828125,
+        "actionCount": 3,
+        "actionContained": true
+      },
+      "candidateKeyboard": {
+        "endState": {
+          "selectedIndex": 2,
+          "focusedIndex": 2
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0
+        }
+      },
+      "mobilePaneKeyboard": {
+        "endState": {
+          "selectedIndex": 1,
+          "focusedIndex": 1,
+          "mountedPane": "evidence"
+        },
+        "homeState": {
+          "selectedIndex": 0,
+          "focusedIndex": 0,
+          "mountedPane": "candidate"
+        }
+      },
+      "mobileEvidence": {
+        "paneCount": 1,
+        "candidatePaneCount": 0,
+        "evidenceItemCount": 5,
+        "publicEvidenceLinkCount": 3,
+        "listOverflowY": "auto",
+        "contained": true,
+        "boundEventFactCount": 0,
+        "eventFactEvidenceRowCount": 0,
+        "boundEventFactTexts": []
+      },
+      "decisionPending": {
+        "reviewPostObserved": true,
+        "pending": {
+          "candidateBusy": true,
+          "pendingDataState": true,
+          "actionGroupBusy": true,
+          "disabledActionCount": 3,
+          "statusText": "검토 결과를 저장하는 중입니다."
+        },
+        "settled": {
+          "candidateBusy": false,
+          "pendingDataState": false,
+          "actionGroupBusy": false,
+          "enabledActionCount": 3,
+          "statusText": "검토 결과를 저장했습니다. 게시되지는 않았습니다."
+        },
+        "passed": true
+      },
+      "revisionDecision": {
+        "readinessVisible": true,
+        "approveDisabled": true,
+        "keepSiteOnlyEnabled": true,
+        "rejectEnabled": true
+      },
+      "traceMatrixCoverage": [
+        {
+          "hazardId": "fall-scaffold",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "forklift-traffic",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "hot-work-fire",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "confined-space",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "chemical-msds",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "weather-wind-rain-heat",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "foreign-worker-briefing",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        },
+        {
+          "hazardId": "risk-assessment-tbm-loop",
+          "hazardTitlePresent": true,
+          "missingControls": [],
+          "missingPrimaryDocuments": [],
+          "evidenceRowPresent": true
+        }
+      ],
+      "traceMatrixComplete": true,
+      "browserErrors": [],
+      "passed": true
+    }
+  ]
+}
