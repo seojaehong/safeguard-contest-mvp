@@ -672,12 +672,16 @@ export function KnowledgeReviewInbox() {
                       aria-controls={`knowledge-review-candidate-panel-${index}`}
                       className={styles.reviewCandidateButton}
                       aria-selected={selected}
+                      data-review-candidate-position={`${index + 1}/${items.length}`}
                       tabIndex={selected ? 0 : -1}
                       ref={(node) => { candidateButtonRefs.current[index] = node; }}
                       onClick={() => selectCandidate(item.runId)}
                       onKeyDown={(event) => handleCandidateKeyDown(event, index)}
                     >
-                      <span>{item.status === "review_required" ? "검토 대기" : "후보 준비 전"}</span>
+                      <span>
+                        {item.status === "review_required" ? "검토 대기" : "후보 준비 전"}
+                        {` · 후보 ${index + 1}/${items.length}`}
+                      </span>
                       <strong>{item.candidateLabel}</strong>
                       <small>근거 {item.sourceEventCount} · 위험 {item.matchedHazardCount}</small>
                     </button>

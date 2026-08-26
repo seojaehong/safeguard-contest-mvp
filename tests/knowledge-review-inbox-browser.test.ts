@@ -253,6 +253,7 @@ describe("knowledge review inbox browser", () => {
     expect(await inbox.locator('[data-review-workbench="selected-only"]').count()).toBe(1);
     expect(await inbox.locator('[data-selected-review-candidate="true"]').count()).toBe(1);
     expect(await inbox.locator('[data-selected-candidate-body="true"]').count()).toBe(1);
+    expect(await inbox.getByRole("tab", { name: /위험성평가표 현장 지식 검토/u }).getAttribute("data-review-candidate-position")).toBe("1/2");
     const reviewConfirmation = inbox.getByRole("checkbox", { name: "후보 문장·근거 확인" });
     expect(await reviewConfirmation.isChecked()).toBe(false);
     expect(await inbox.getByRole("button", { name: "후보 승인" }).isDisabled()).toBe(true);
@@ -267,6 +268,7 @@ describe("knowledge review inbox browser", () => {
     await expect.poll(() => inbox.locator('[data-selected-candidate-body="true"]').getByText("1) 위험요인 요약: 작업발판 단부 추락 위험", { exact: false }).isVisible()).toBe(true);
     expect(await inbox.getByText(secondQueueItem.candidateText).isVisible()).toBe(false);
     await inbox.getByRole("tab", { name: /작업계획서 현장 지식 검토/u }).click();
+    expect(await inbox.getByRole("tab", { name: /작업계획서 현장 지식 검토/u }).getAttribute("data-review-candidate-position")).toBe("2/2");
     await expect.poll(() => inbox.getByText(secondQueueItem.candidateText).isVisible()).toBe(true);
     expect(await inbox.getByText(queueItem.candidateText).isVisible()).toBe(false);
     expect(await inbox.getByText("위험 2").isVisible()).toBe(true);

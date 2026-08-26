@@ -89,6 +89,8 @@ describe("knowledge governance UI contract", () => {
     expect(inboxSource).toContain('aria-orientation={compactViewport ? "horizontal" : "vertical"}');
     expect(inboxSource).toContain('role="tab"');
     expect(inboxSource).toContain('aria-controls={`knowledge-review-candidate-panel-${index}`}');
+    expect(inboxSource).toContain('data-review-candidate-position={`${index + 1}/${items.length}`}');
+    expect(inboxSource).toContain('{` · 후보 ${index + 1}/${items.length}`}');
     expect(inboxSource).toContain('tabIndex={selected ? 0 : -1}');
     expect(inboxSource).toContain('role="tabpanel"');
     expect(inboxSource).toContain('ArrowDown: (index + 1) % items.length');
@@ -141,6 +143,8 @@ describe("knowledge governance UI contract", () => {
     expect(browserRunnerSource).toContain("metrics.selectedBodyBeforeReadiness");
     expect(browserRunnerSource).toContain('metrics.selectedBodyText.startsWith("1) 위험요인 요약:")');
     expect(browserRunnerSource).toContain("metrics.selectedBodyTopVisible");
+    expect(browserRunnerSource).toContain("metrics.candidatePositionsComplete");
+    expect(browserRunnerSource).toContain("candidatePositionLabels: results.every");
     expect(browserRunnerSource).toContain("metrics.evidenceSubjectContextCount === 1");
     expect(browserRunnerSource).toContain("mobileEvidence.subjectContextCount === 1");
     expect(browserRunnerSource).toContain("mobileEvidence.subjectVisible");

@@ -467,6 +467,7 @@ try {
         const candidateTabs = Array.from(candidateTablist.querySelectorAll('[role="tab"]'));
         const selectedCandidateTab = candidateTabs.find((tab) => tab.getAttribute("aria-selected") === "true");
         const candidateControlIds = candidateTabs.map((tab) => tab.getAttribute("aria-controls") || "");
+        const candidatePositions = candidateTabs.map((tab) => tab.getAttribute("data-review-candidate-position") || "");
         return {
           bodyHeight: document.documentElement.scrollHeight,
           viewportHeight: window.innerHeight,
@@ -486,6 +487,8 @@ try {
           tabbableCandidateTabCount: candidateTabs.filter((tab) => tab.getAttribute("tabindex") === "0").length,
           candidateControlIdsPresent: candidateControlIds.every(Boolean),
           candidateControlIdsUnique: new Set(candidateControlIds).size === candidateTabs.length,
+          candidatePositions,
+          candidatePositionsComplete: candidatePositions.every((position, index) => position === `${index + 1}/${candidateTabs.length}`),
           selectedCandidateControlLinked: selectedCandidateTab?.getAttribute("aria-controls") === selectedCandidate.id,
           selectedCandidatePanelRole: selectedCandidate.getAttribute("role"),
           selectedCandidatePanelLabelledBy: selectedCandidate.getAttribute("aria-labelledby") === selectedCandidateTab?.id,
@@ -757,6 +760,7 @@ try {
         && metrics.tabbableCandidateTabCount === 1
         && metrics.candidateControlIdsPresent
         && metrics.candidateControlIdsUnique
+        && metrics.candidatePositionsComplete
         && metrics.selectedCandidateControlLinked
         && metrics.selectedCandidatePanelRole === "tabpanel"
         && metrics.selectedCandidatePanelLabelledBy
@@ -972,6 +976,7 @@ const report = {
     candidateTablist: true,
     candidateRovingTabStop: true,
     candidateKeyboardNavigation: true,
+    candidatePositionLabels: results.every((result) => result.metrics.candidatePositionsComplete),
     breakpointOrientationSynchronized: true,
     mobilePaneTabsLinked: true,
     mobilePaneKeyboardNavigation: true,
