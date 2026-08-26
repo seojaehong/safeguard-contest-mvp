@@ -582,7 +582,29 @@ describe("workspace mobile share presentation", () => {
           .filter((element) => getComputedStyle(element).display !== "none")[0];
         const root = document.querySelector<HTMLElement>("[data-share-root]");
         const channelCards = [...document.querySelectorAll<HTMLElement>(".channel-grid .channel-card")];
-        if (!preview || !lines || !primary || !root) throw new Error("Missing standalone dispatch presentation target");
+        const title = document.querySelector<HTMLElement>(".share-workflow-header > div:first-child > strong");
+        const statusReason = document.querySelector<HTMLElement>(".share-status-pill strong");
+        const channelHeading = document.querySelector<HTMLElement>("[data-share-owner='channels'] .share-form-card-head strong");
+        const channelActions = [...document.querySelectorAll<HTMLElement>("[data-share-owner='channels'] .command-actions :is(a, button)")];
+        const header = document.querySelector<HTMLElement>(".share-workflow-header");
+        const form = document.querySelector<HTMLElement>(".share-form-shell");
+        const recipientCard = document.querySelector<HTMLElement>("[data-share-owner='targets']");
+        const languageCard = document.querySelector<HTMLElement>("[data-share-owner='language-preview']");
+        const channelCard = document.querySelector<HTMLElement>("[data-share-owner='channels']");
+        if (!preview || !lines || !primary || !root || !title || !statusReason || !channelHeading
+          || !header || !form || !recipientCard || !languageCard || !channelCard) {
+          throw new Error("Missing standalone dispatch presentation target");
+        }
+        const rectOf = (element: HTMLElement) => {
+          const rect = element.getBoundingClientRect();
+          return {
+            top: Math.round(rect.top),
+            bottom: Math.round(rect.bottom),
+            height: Math.round(rect.height),
+            clientHeight: element.clientHeight,
+            scrollHeight: element.scrollHeight,
+          };
+        };
         const previewRect = preview.getBoundingClientRect();
         const primaryRect = primary.getBoundingClientRect();
         const rootRect = root.getBoundingClientRect();
@@ -591,6 +613,8 @@ describe("workspace mobile share presentation", () => {
           pageHeight: document.documentElement.scrollHeight,
           rootWidth: rootRect.width,
           rootHeight: rootRect.height,
+          rootClientHeight: root.clientHeight,
+          rootScrollHeight: root.scrollHeight,
           previewLeft: previewRect.left,
           previewBottom: previewRect.bottom,
           primaryRight: primaryRect.right,
@@ -598,9 +622,20 @@ describe("workspace mobile share presentation", () => {
           linesClientHeight: lines.clientHeight,
           linesScrollHeight: lines.scrollHeight,
           linesOverflowY: getComputedStyle(lines).overflowY,
+          titleFontSize: Number.parseFloat(getComputedStyle(title).fontSize),
+          statusReasonFontSize: Number.parseFloat(getComputedStyle(statusReason).fontSize),
+          channelHeadingFontSize: Number.parseFloat(getComputedStyle(channelHeading).fontSize),
+          channelActionBottom: Math.max(...channelActions.map((action) => action.getBoundingClientRect().bottom)),
+          layoutParts: {
+            header: rectOf(header),
+            form: rectOf(form),
+            recipient: rectOf(recipientCard),
+            language: rectOf(languageCard),
+            channels: rectOf(channelCard),
+          },
           channelCards: channelCards.map((card) => {
             const rect = card.getBoundingClientRect();
-            return { width: Math.round(rect.width), height: Math.round(rect.height) };
+            return { left: Math.round(rect.left), top: Math.round(rect.top), width: Math.round(rect.width), height: Math.round(rect.height) };
           }),
           horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
         };
@@ -621,13 +656,20 @@ describe("workspace mobile share presentation", () => {
       expect.soft(metrics.pageHeight, "standalone dispatch desktop task distance").toBeLessThanOrEqual(metrics.viewportHeight * 1.35);
       expect.soft(metrics.rootWidth, "standalone dispatch uses desktop canvas width").toBeGreaterThanOrEqual(1040);
       expect.soft(metrics.rootHeight, "standalone dispatch share panel is bounded").toBeLessThanOrEqual(720);
+      expect.soft(metrics.rootScrollHeight, "standalone dispatch desktop avoids hidden internal scroll debt").toBeLessThanOrEqual(metrics.rootClientHeight + 1);
       expect.soft(metrics.primaryBottom, "standalone dispatch CTA in first viewport").toBeLessThanOrEqual(metrics.viewportHeight);
       expect.soft(metrics.previewBottom, "standalone dispatch preview in first viewport").toBeLessThanOrEqual(metrics.viewportHeight);
+      expect.soft(metrics.channelActionBottom, "standalone dispatch channel actions in first viewport").toBeLessThanOrEqual(metrics.viewportHeight);
       expect.soft(metrics.previewLeft, "standalone dispatch preview right pane").toBeGreaterThanOrEqual(metrics.primaryRight);
       expect.soft(metrics.linesClientHeight, "standalone dispatch bounded preview height").toBeLessThanOrEqual(430);
       expect.soft(metrics.linesScrollHeight, "standalone dispatch full message retained").toBeGreaterThanOrEqual(metrics.linesClientHeight);
       expect.soft(metrics.linesOverflowY, "standalone dispatch preview scroll").toBe("auto");
+      expect.soft(metrics.titleFontSize, "standalone dispatch title does not inherit hero typography").toBeLessThanOrEqual(20);
+      expect.soft(metrics.statusReasonFontSize, "standalone dispatch status does not inherit hero typography").toBeLessThanOrEqual(14);
+      expect.soft(metrics.channelHeadingFontSize, "standalone dispatch card heading does not inherit hero typography").toBeLessThanOrEqual(14);
       expect.soft(metrics.channelCards.length, "standalone dispatch channel card count").toBe(3);
+      expect.soft(new Set(metrics.channelCards.map((card) => card.left)).size, "standalone dispatch channels use three desktop columns").toBe(3);
+      expect.soft(new Set(metrics.channelCards.map((card) => card.top)).size, "standalone dispatch channels share one desktop row").toBe(1);
       for (const card of metrics.channelCards) {
         expect.soft(card.width, "standalone dispatch channel card readable width").toBeGreaterThanOrEqual(150);
         expect.soft(card.height, "standalone dispatch channel card compact height").toBeLessThanOrEqual(80);
