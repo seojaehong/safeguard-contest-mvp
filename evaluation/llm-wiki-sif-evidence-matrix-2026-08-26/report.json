@@ -67,6 +67,22 @@
     "build": "PASS",
     "staticPages": 28
   },
+  "compatibilityContracts": {
+    "providerCancellation": {
+      "verdict": "PASS_CURRENT_SOURCE_WIKI_SIF_PROVIDER_CANCELLATION_COMPATIBILITY",
+      "sourceHead": "b777fa07c8fa651931796eb6df933ba0e4de4300",
+      "changedGovernedPath": "lib/knowledge-candidate-route.ts",
+      "focusedVitest": {
+        "file": "tests/knowledge-regenerate-route.test.ts",
+        "files": 1,
+        "tests": 18,
+        "failed": 0
+      },
+      "requestSignalForwardedToGeneration": true,
+      "abortSkipsProviderFallback": true,
+      "originalSecurityBaselineRewritten": false
+    }
+  },
   "mutationBoundary": {
     "dbMutationPerformed": false,
     "providerDispatchCalled": false,

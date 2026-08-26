@@ -24,6 +24,7 @@ SIF titles are bounded, deduplicated, and filtered with the same private-data pa
 - Live production matrix: `evaluation/llm-wiki-sif-evidence-matrix-2026-08-26/after-live/report.json`
 - Prior live matrix: `evaluation/llm-wiki-candidate-content-matrix-2026-08-25/report.json`
 - Focused Vitest: 4 files / 41 tests PASS
+- Provider cancellation compatibility: `tests/knowledge-regenerate-route.test.ts` 18/18 PASS at product commit `b777fa07c8fa651931796eb6df933ba0e4de4300`; request abort remains forwarded and skips provider fallback.
 - Strict TypeScript check: PASS
 - Next production build: PASS, 28 static pages
 
@@ -35,6 +36,7 @@ The prior live matrix proved KOSHA/law evidence visibility and event facts, but 
 - The actual production candidate queue was not read.
 - Human review is not complete and candidates remain unpublished.
 - No DB write, Wiki publication, provider dispatch, Share-session creation, embedding/vector mutation, or KOSHA registry mutation was performed.
+- The immutable provider-cancellation security finding is not rewritten; this is a current governed-path compatibility receipt only.
 - Enhanced LLM generation remains blocked by distributed runtime admission configuration.
 - Exact saved Share remains `MISSING_EVIDENCE`.
 - LLM Wiki publication and Supabase RLS launch isolation remain `APPROVAL_GATED`.

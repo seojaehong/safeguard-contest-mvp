@@ -8174,6 +8174,42 @@ function isWikiCandidateProviderCancellationCompatibilityCurrent(rootDir, origin
 }
 
 /** @param {string} rootDir @param {string} originalSourceHead */
+function isWikiSifProviderCancellationCompatibilityCurrent(rootDir, originalSourceHead) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.llmWikiSifEvidenceMatrix);
+  if (!isRecord(report)) {
+    return false;
+  }
+  const compatibilityContracts = isRecord(report.compatibilityContracts) ? report.compatibilityContracts : {};
+  const compatibility = isRecord(compatibilityContracts.providerCancellation)
+    ? compatibilityContracts.providerCancellation
+    : {};
+  const tests = isRecord(compatibility.focusedVitest) ? compatibility.focusedVitest : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(compatibility.sourceHead);
+  return readString(compatibility.verdict) === "PASS_CURRENT_SOURCE_WIKI_SIF_PROVIDER_CANCELLATION_COMPATIBILITY"
+    && sourceHead === readString(report.productCommit)
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, ["lib/knowledge-candidate-route.ts"])
+    && isEvidenceCurrentForPaths(rootDir, originalSourceHead, PUBLIC_PROVIDER_CANCELLATION_UNCHANGED_PATHS)
+    && readString(compatibility.changedGovernedPath) === "lib/knowledge-candidate-route.ts"
+    && readString(tests.file) === "tests/knowledge-regenerate-route.test.ts"
+    && readNumber(tests.files) === 1
+    && readNumber(tests.tests) === 18
+    && readNumber(tests.failed) === 0
+    && compatibility.requestSignalForwardedToGeneration === true
+    && compatibility.abortSkipsProviderFallback === true
+    && compatibility.originalSecurityBaselineRewritten === false
+    && mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.ontologyPublicationPerformed === false
+    && mutationBoundary.vectorOrEmbeddingMutationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+}
+
+/** @param {string} rootDir @param {string} originalSourceHead */
 function isHermesEventFactProviderCancellationCompatibilityCurrent(rootDir, originalSourceHead) {
   const report = readJsonFile(rootDir, EVIDENCE_PATHS.hermesReviewEventFactTraceability);
   if (!isRecord(report)) {
@@ -8240,6 +8276,7 @@ function evaluatePublicProviderCancellationGate(rootDir) {
   const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
   const sourceHead = readString(report.sourceHead);
   const wikiCandidateCancellationCompatibility = isWikiCandidateProviderCancellationCompatibilityCurrent(rootDir, sourceHead);
+  const wikiSifCancellationCompatibility = isWikiSifProviderCancellationCompatibilityCurrent(rootDir, sourceHead);
   const eventFactCancellationCompatibility = isHermesEventFactProviderCancellationCompatibilityCurrent(rootDir, sourceHead);
   const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
@@ -8248,6 +8285,7 @@ function evaluatePublicProviderCancellationGate(rootDir) {
     || isSecurityUpstreamTransportCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || wikiCandidateCancellationCompatibility
+    || wikiSifCancellationCompatibility
     || eventFactCancellationCompatibility;
   const noMutation = mutation.dbMutationPerformed === false
     && mutation.providerDispatchCalled === false
@@ -8300,7 +8338,7 @@ function evaluatePublicProviderCancellationGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? `Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests${wikiCandidateCancellationCompatibility ? " plus a current 1 file / 18 tests Knowledge regeneration cancellation compatibility receipt" : " plus a current governed-path companion"}, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.`
+      ? `Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests${wikiCandidateCancellationCompatibility || wikiSifCancellationCompatibility ? " plus a current 1 file / 18 tests Knowledge regeneration cancellation compatibility receipt" : " plus a current governed-path companion"}, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.`
       : `Provider cancellation verdict=${readString(report.verdict) || "unknown"}, sourceCurrent=${sourceCurrent}, tests=${readNumber(tests.tests)}, liveProviderCall=${production.liveProviderCallExecuted === true}, followUp=${readString(remaining.followUpSecurityScan) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? ["Run a fresh full-repository security scan before reclassifying the immutable finding or making a security-complete claim."]

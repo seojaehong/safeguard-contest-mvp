@@ -2599,7 +2599,7 @@ function createFixtureRoot(): string {
   });
   writeJson(rootDir, path.join("evaluation", "llm-wiki-sif-evidence-matrix-2026-08-26", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_SIF_KOSHA_LAW_WIKI_CANDIDATE_EVIDENCE",
-    productCommit: "b".repeat(40), sourceHead: "a".repeat(40), productionCommit: "a".repeat(40),
+    productCommit: "fixture-sha", sourceHead: "fixture-sha", productionCommit: "fixture-sha",
     liveAfterDeploymentRequired: false,
     afterLocal: {
       verdict: "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
@@ -2608,7 +2608,7 @@ function createFixtureRoot(): string {
     },
     afterLive: {
       verdict: "PASS_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
-      sourceHead: "a".repeat(40), productionCommit: "a".repeat(40), passedCount: 5, failedCount: 0,
+      sourceHead: "fixture-sha", productionCommit: "fixture-sha", passedCount: 5, failedCount: 0,
       sifEvidenceBoundaryCount: 5, technicalGuidanceBoundaryCount: 5, lawCandidateBoundaryCount: 5,
       eventSemanticGroundingCount: 5, privateEventExposureCount: 0,
     },
@@ -2618,6 +2618,17 @@ function createFixtureRoot(): string {
       sifIncidentControlEvidenceIsNonStatutory: true, koshaTechnicalGuidanceIsNonStatutory: true,
       statutoryClaimsRequireLawProvenance: true, privateSifTitleExposureAllowed: false,
       humanReviewCompleted: false, publicationState: "unpublished", publishAllowed: false,
+    },
+    compatibilityContracts: {
+      providerCancellation: {
+        verdict: "PASS_CURRENT_SOURCE_WIKI_SIF_PROVIDER_CANCELLATION_COMPATIBILITY",
+        sourceHead: "fixture-sha",
+        changedGovernedPath: "lib/knowledge-candidate-route.ts",
+        focusedVitest: { file: "tests/knowledge-regenerate-route.test.ts", files: 1, tests: 18, failed: 0 },
+        requestSignalForwardedToGeneration: true,
+        abortSkipsProviderFallback: true,
+        originalSecurityBaselineRewritten: false,
+      },
     },
     mutationBoundary: {
       dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false,
@@ -6709,6 +6720,35 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("liveProviderCall=true");
     expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("followUp=NOT_REQUIRED");
     expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("exactShare=PASS");
+  });
+
+  it("keeps provider cancellation current through the Wiki SIF compatibility receipt and fails closed when it breaks", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    writeText(rootDir, path.join("lib", "knowledge-candidate-route.ts"), "export const sifEvidenceCompatibility = true;\n");
+    execFileSync("git", ["add", "lib/knowledge-candidate-route.ts"], { cwd: rootDir, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "change Wiki SIF renderer"], { cwd: rootDir, stdio: "ignore" });
+    const currentSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: rootDir, encoding: "utf8" }).trim();
+    const reportPath = path.join(rootDir, "evaluation", "llm-wiki-sif-evidence-matrix-2026-08-26", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      productCommit: string;
+      compatibilityContracts: {
+        providerCancellation: { sourceHead: string; abortSkipsProviderFallback: boolean };
+      };
+    };
+    report.productCommit = currentSha;
+    report.compatibilityContracts.providerCancellation.sourceHead = currentSha;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const compatibleAudit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(compatibleAudit.gates.find((gate) => gate.id === "public_provider_cancellation")?.state).toBe("notice");
+    expect(compatibleAudit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("current 1 file / 18 tests");
+
+    report.compatibilityContracts.providerCancellation.abortSkipsProviderFallback = false;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const contradictedAudit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradictedAudit.gates.find((gate) => gate.id === "public_provider_cancellation")?.state).toBe("contradicted");
+    expect(contradictedAudit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("sourceCurrent=false");
   });
 
   it("keeps distributed provider admission and exact Share boundaries fail-closed", async () => {
