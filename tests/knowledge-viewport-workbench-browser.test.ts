@@ -10,6 +10,12 @@ const artifactDirectory = path.resolve(
   "evaluation",
   "knowledge-viewport-workbench-2026-08-17"
 );
+const taskRailArtifactDirectory = path.resolve(
+  __dirname,
+  "..",
+  "evaluation",
+  "knowledge-mobile-task-rail-2026-08-27"
+);
 
 const sections = [
   { id: "today", label: "오늘" },
@@ -209,6 +215,83 @@ async function auditVariant(
 }
 
 describe.skipIf(!baseUrl)("knowledge viewport workbench production browser contract", () => {
+  it("keeps the 390px task selector on one horizontal rail and reveals hash-selected tabs", async () => {
+    fs.mkdirSync(taskRailArtifactDirectory, { recursive: true });
+    const browser = await chromium.launch({ headless: true });
+    try {
+      const results = [];
+      for (const theme of ["day", "night"] as const) {
+        for (const target of [
+          { id: "wiki", label: "위키", hash: "#wiki-index-heading" },
+          { id: "governance", label: "검토 흐름", hash: "#knowledge-review-inbox-heading" },
+        ] as const) {
+          const page = await browser.newPage({ viewport: { width: 390, height: 723 } });
+          try {
+            await page.goto(`${baseUrl}/knowledge?theme=${theme}${target.hash}`, { waitUntil: "networkidle" });
+            const root = page.locator('[data-knowledge-surface] [data-enhanced="true"]');
+            await root.waitFor();
+            const selectedTab = page.getByRole("tab", { name: target.label });
+            await expect.poll(() => selectedTab.getAttribute("aria-selected")).toBe("true");
+            const metrics = await page.evaluate(({ targetId, requestedTheme }) => {
+              const tabList = document.querySelector<HTMLElement>('[role="tablist"][aria-label="지식 DB 작업 보기"]');
+              const selected = document.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+              const panel = document.querySelector<HTMLElement>(`[data-knowledge-panel="${targetId}"]`);
+              if (!tabList || !selected || !panel) throw new Error("Missing Knowledge task rail geometry");
+              const railRect = tabList.getBoundingClientRect();
+              const selectedRect = selected.getBoundingClientRect();
+              const panelRect = panel.getBoundingClientRect();
+              const tabs = [...tabList.querySelectorAll<HTMLElement>('[role="tab"]')];
+              return {
+                theme: requestedTheme,
+                targetId,
+                viewport: { width: window.innerWidth, height: window.innerHeight },
+                documentHeight: document.documentElement.scrollHeight,
+                horizontalOverflow: Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, 0),
+                railHeight: railRect.height,
+                railClientWidth: tabList.clientWidth,
+                railScrollWidth: tabList.scrollWidth,
+                selectorCount: tabs.length,
+                selectorRows: new Set(tabs.map((tab) => Math.round(tab.getBoundingClientRect().top))).size,
+                selectorHeights: tabs.map((tab) => tab.getBoundingClientRect().height),
+                selectedFullyVisible: selectedRect.left >= railRect.left - 0.5 && selectedRect.right <= railRect.right + 0.5,
+                panelTop: panelRect.top,
+                panelBottom: panelRect.bottom,
+                panelClientHeight: panel.clientHeight,
+                panelScrollHeight: panel.scrollHeight,
+                panelOverflowY: window.getComputedStyle(panel).overflowY,
+              };
+            }, { targetId: target.id, requestedTheme: theme });
+            expect(metrics.documentHeight).toBeLessThanOrEqual(733);
+            expect(metrics.horizontalOverflow).toBe(0);
+            expect(metrics.railHeight).toBeLessThanOrEqual(48);
+            expect(metrics.railScrollWidth).toBeGreaterThan(metrics.railClientWidth);
+            expect(metrics.selectorCount).toBe(6);
+            expect(metrics.selectorRows).toBe(1);
+            expect(metrics.selectorHeights.every((height) => height >= 44)).toBe(true);
+            expect(metrics.selectedFullyVisible).toBe(true);
+            expect(metrics.panelTop).toBeLessThanOrEqual(400);
+            expect(metrics.panelBottom).toBeLessThanOrEqual(724);
+            expect(metrics.panelOverflowY).toBe("auto");
+            results.push(metrics);
+            await page.screenshot({
+              path: path.join(taskRailArtifactDirectory, `${theme}-${target.id}-390x723.png`),
+              fullPage: true,
+            });
+          } finally {
+            await page.close();
+          }
+        }
+      }
+      fs.writeFileSync(
+        path.join(taskRailArtifactDirectory, "browser-metrics.json"),
+        `${JSON.stringify({ source: baseUrl, generatedAt: new Date().toISOString(), results }, null, 2)}\n`,
+        "utf8"
+      );
+    } finally {
+      await browser.close();
+    }
+  }, 90_000);
+
   it("passes selected-only Day/Night desktop, tablet, and mobile geometry", async () => {
     fs.mkdirSync(artifactDirectory, { recursive: true });
     const browser = await chromium.launch({ headless: true });

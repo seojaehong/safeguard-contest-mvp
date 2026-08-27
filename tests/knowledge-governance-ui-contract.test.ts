@@ -15,6 +15,10 @@ describe("knowledge governance UI contract", () => {
     path.join(process.cwd(), "app/knowledge/KnowledgeReviewInbox.tsx"),
     "utf8"
   );
+  const navigatorSource = fs.readFileSync(
+    path.join(process.cwd(), "app/knowledge/KnowledgeSectionNavigator.tsx"),
+    "utf8"
+  );
   const browserRunnerSource = fs.readFileSync(
     path.join(process.cwd(), "scripts/knowledge_review_authority_ui_runner.mjs"),
     "utf8"
@@ -202,6 +206,12 @@ describe("knowledge governance UI contract", () => {
     expect(pageSource).toContain('name="knowledge-wiki-directory"');
     expect(cssSource).toContain("@media (max-width: 720px)");
     expect(cssSource).not.toMatch(/gradient\s*\(/i);
+  });
+
+  it("keeps the mobile task selector on one locally scrolling rail", () => {
+    expect(cssSource).toMatch(/@media \(max-width: 720px\)[\s\S]*?\.tabList\s*\{[\s\S]*?display:\s*flex;[\s\S]*?flex-wrap:\s*nowrap;[\s\S]*?overflow-x:\s*auto;[\s\S]*?overflow-y:\s*hidden;/u);
+    expect(cssSource).toMatch(/@media \(max-width: 720px\)[\s\S]*?\.sectionTab\s*\{[\s\S]*?flex:\s*0 0 104px;[\s\S]*?scroll-snap-align:\s*start;/u);
+    expect(navigatorSource).toContain('selectedTab.scrollIntoView({ block: "nearest", inline: "nearest" });');
   });
 
   it("gives repeated knowledge disclosures and links full touch targets", () => {

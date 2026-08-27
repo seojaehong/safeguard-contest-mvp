@@ -70,6 +70,17 @@ export function KnowledgeSectionNavigator({ children }: KnowledgeSectionNavigato
     };
   }, []);
 
+  useEffect(() => {
+    if (!enhanced) return;
+    const selectedIndex = SECTIONS.findIndex((section) => section.id === activeSection);
+    const selectedTab = tabRefs.current[selectedIndex];
+    if (!selectedTab) return;
+    const frame = window.requestAnimationFrame(() => {
+      selectedTab.scrollIntoView({ block: "nearest", inline: "nearest" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeSection, enhanced]);
+
   const selectTab = (index: number, moveFocus: boolean): void => {
     const section = SECTIONS[index];
     if (!section) return;
