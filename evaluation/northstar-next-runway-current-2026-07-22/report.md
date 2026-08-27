@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `899951952ee184d527742d541f976f7e72482f2e`
+Source HEAD: `4d3be96a30665862373620167148e3278547341c`
 
-Production `/api/build-info`: `899951952ee184d527742d541f976f7e72482f2e`
+Production `/api/build-info`: `4d3be96a30665862373620167148e3278547341c`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `899951952ee184d527742d541f976f7e72482f2e`
+Live rollup source head: `4d3be96a30665862373620167148e3278547341c`
 
 Live rollup matches production: `true`
 
@@ -72,6 +72,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Repository security scan reconciliation is `PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS`. The immutable same-target scans and `2` fail-open contradictions remain preserved; zero-finding accepted=`false`. Corrected scan completed=`true`, id=`c4e9e2f1-7ce4-4313-a651-32205fca401f`, reportable=`14`, deferred=`9`, coverage=`partial`, security-complete=`false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current security remediation ledger is `NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES`: deployed-source receipts `17/23`, unresolved `6`, approval-gated `3`, distributed-runtime open `3`, security-complete=`false`, exact saved Share `MISSING_EVIDENCE`.
 - Fresh current-source Standard security scan is `NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE`: scan `1411fb32-5c18-4d6a-b8ba-d52697757d8a`, findings `17` (medium/low `13/4`), coverage `partial` with `18` recorded surfaces and `21` deferred items. Bounded closures/residuals are `2/4`; database/atomicity and Share capability boundaries remain `12/1`. Scan completion is not security-complete `false`, and exact saved Share remains `MISSING_EVIDENCE`.
+- Share ACK pre-body admission is `PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED`: coarse IP rate/body concurrency ordering `true/true`, recipient-specific post-parse admission `true`, tests `66`, and live `503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE/distributed`. The sealed finding remains rescan-pending `true`; security-complete remains `false`, recipient ACK is `APPROVAL_GATED`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Atomic database race remediation is approval-gated: `APPROVAL_REQUIRED_TRANSACTIONAL_DB_RACE_REMEDIATION_NO_MUTATION`, sealed findings still open `2`, approval required/performed `true/false`, migration authored `false`, DB mutation performed `false`, fresh scan required `true`, security-complete `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Fresh live Documents/workspace Share route perception is `PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP`: measured rows Documents/Share `2/2`, desktop Share regions `3`, route split alone accepted `false`, DB mutation `false`, and exact saved user session reproduced/verdict `false/MISSING_EVIDENCE`.
 - Live deployment freshness is measured separately: `PASS_LIVE_PRODUCTION_DEPLOYMENT_FRESHNESS_GUARD`, current notice present `false`, simulated SHA-drift refresh visible `true`, frontend audit violations `0`, and live pending `false`. This closes only stale-tab visibility; DB mutation remains `false` and exact saved Share remains `MISSING_EVIDENCE`.

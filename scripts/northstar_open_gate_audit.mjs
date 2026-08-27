@@ -68,6 +68,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-28", "report.json"),
+  shareAckPreBodyAdmission: path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
   postRemediationRepositorySecurityScan: path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "report.json"),
   postRemediationSecuritySourceClosure: path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"),
   shareSessionRevocationRemediation: path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"),
@@ -8037,6 +8038,98 @@ function evaluateFreshCurrentSourceSecurityScanGate(rootDir) {
   });
 }
 
+const SHARE_ACK_PREBODY_ADMISSION_PATHS = [
+  "app/api/share-sessions/[sessionId]/route.ts",
+  "tests/workpack-share-authority-routes.test.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateShareAckPreBodyAdmissionGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.shareAckPreBodyAdmission;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "share_ack_prebody_admission_security",
+      label: "Share ACK pre-body admission security",
+      state: "missing",
+      evidencePath,
+      detail: "Share ACK pre-body admission evidence is missing or invalid.",
+      nextActions: ["Restore the no-mutation source/live receipt without creating a saved Share session."],
+    });
+  }
+
+  const finding = isRecord(report.finding) ? report.finding : {};
+  const contract = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacentTests) ? verification.focusedAndAdjacentTests : {};
+  const typecheck = isRecord(verification.typecheck) ? verification.typecheck : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const live = isRecord(report.liveProbe) ? report.liveProbe : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.shareSessionCreated === false
+    && mutation.readConfirmationInserted === false
+    && mutation.providerDispatchCalled === false
+    && mutation.vectorRuntimeCalled === false
+    && mutation.wikiPublished === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED"
+    && sourceHead === productionCommit
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, SHARE_ACK_PREBODY_ADMISSION_PATHS)
+    && readString(finding.scanId) === "1411fb32-5c18-4d6a-b8ba-d52697757d8a"
+    && readString(finding.slug) === "share-ack-prebody-admission"
+    && contract.coarseIpRateAdmissionBeforeBody === true
+    && contract.coarseBodyConcurrencyLeaseBeforeBody === true
+    && contract.bodyBudgetAfterCoarseAdmission === true
+    && contract.jsonParseAfterCoarseAdmission === true
+    && contract.recipientSpecificAdmissionRetainedAfterParse === true
+    && readNumber(contract.preBodyRateLimitPerMinute) === 60
+    && readNumber(contract.preBodyConcurrency) === 8
+    && readNumber(contract.preBodyLeaseMs) === 15000
+    && readNumber(contract.bodyBudgetBytes) === 16384
+    && readNumber(contract.bodyReadTimeoutMs) === 10000
+    && readNumber(focused.testFiles) === 3
+    && readNumber(focused.testsPassed) === 66
+    && readNumber(focused.testsFailed) === 0
+    && readString(typecheck.status) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPagesPassed) === 28
+    && readNumber(build.staticPagesFailed) === 0
+    && readNumber(live.requestBodyBytes) === 16385
+    && readNumber(live.status) === 503
+    && readString(live.code) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+    && readString(live.rateLimitHeader) === "distributed"
+    && live.applicationBodyBudgetReached === false
+    && live.sessionLookupReached === false
+    && noMutation
+    && remaining.findingSourceRemediated === true
+    && remaining.freshFullRepositoryRescanRequiredForScanClosure === true
+    && remaining.securityCompleteClaimAllowed === false
+    && readString(remaining.shareRecipientAckLiveDataApproval) === "APPROVAL_GATED"
+    && readString(remaining.providerDispatchPersistence) === "APPROVAL_GATED"
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+
+  return gateResult({
+    id: "share_ack_prebody_admission_security",
+    label: "Share ACK pre-body admission security",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live production now acquires coarse distributed IP admission and a bounded body-read concurrency lease before the public Share ACK body budget and JSON parser, while retaining recipient-specific admission after parsing. The no-mutation oversized probe failed closed at pre-body admission, but the sealed finding remains open pending a fresh full scan; live recipient ACK approval and exact saved Share MISSING_EVIDENCE remain unchanged."
+      : `Share ACK pre-body verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === productionCommit}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, SHARE_ACK_PREBODY_ADMISSION_PATHS)}, ordering=${contract.coarseIpRateAdmissionBeforeBody === true}/${contract.coarseBodyConcurrencyLeaseBeforeBody === true}/${contract.recipientSpecificAdmissionRetainedAfterParse === true}, live=${readNumber(live.status)}/${readString(live.code) || "missing"}, noMutation=${noMutation}, rescan=${remaining.freshFullRepositoryRescanRequiredForScanClosure === true}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Run a fresh Standard scan before reclassifying the sealed finding; keep exact saved Share and live recipient ACK approval-gated."]
+      : ["Restore source/live alignment, pre-body rate and concurrency ordering, recipient-specific post-parse admission, no-mutation live proof, fresh-rescan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
 const SECURITY_ACCIDENT_CASE_COMPATIBILITY_CHANGED_PATHS = [
   "lib/accident-cases.ts",
 ];
@@ -11432,6 +11525,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentSecurityRemediationLedgerGate(rootDir),
     evaluateCurrentRepositorySecurityRescanGate(rootDir),
     evaluateFreshCurrentSourceSecurityScanGate(rootDir),
+    evaluateShareAckPreBodyAdmissionGate(rootDir),
     evaluatePostRemediationRepositorySecurityScanGate(rootDir),
     evaluateShareSessionRevocationSecurityGate(rootDir),
     evaluateShareRecipientContactVerificationGate(rootDir),

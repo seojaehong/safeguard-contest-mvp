@@ -47,6 +47,7 @@ const ARTIFACTS = Object.freeze({
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-28", "report.json"),
+  shareAckPreBodyAdmission: path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
@@ -564,6 +565,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const currentSecurityRemediationLedger = tryReadJson(rootDir, ARTIFACTS.currentSecurityRemediationLedger);
   const currentRepositorySecurityRescan = tryReadJson(rootDir, ARTIFACTS.currentRepositorySecurityRescan);
   const freshCurrentSourceSecurityScan = tryReadJson(rootDir, ARTIFACTS.freshCurrentSourceSecurityScan);
+  const shareAckPreBodyAdmission = tryReadJson(rootDir, ARTIFACTS.shareAckPreBodyAdmission);
   const agentChatDurableAdmission = tryReadJson(rootDir, ARTIFACTS.agentChatDurableAdmission);
   const mcpProviderAdmission = tryReadJson(rootDir, ARTIFACTS.mcpProviderAdmission);
   const shareRecipientContactVerification = tryReadJson(rootDir, ARTIFACTS.shareRecipientContactVerification);
@@ -700,6 +702,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "current_security_remediation_ledger", ARTIFACTS.currentSecurityRemediationLedger, currentSecurityRemediationLedger),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_repository_security_rescan", ARTIFACTS.currentRepositorySecurityRescan, currentRepositorySecurityRescan),
     evidenceStatus(rootDir, currentHead, liveCommit, "fresh_current_source_security_scan", ARTIFACTS.freshCurrentSourceSecurityScan, freshCurrentSourceSecurityScan),
+    evidenceStatus(rootDir, currentHead, liveCommit, "share_ack_prebody_admission_security", ARTIFACTS.shareAckPreBodyAdmission, shareAckPreBodyAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "agent_chat_durable_admission_security", ARTIFACTS.agentChatDurableAdmission, agentChatDurableAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "mcp_provider_admission_security", ARTIFACTS.mcpProviderAdmission, mcpProviderAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "share_recipient_contact_verification_security", ARTIFACTS.shareRecipientContactVerification, shareRecipientContactVerification),
@@ -970,6 +973,25 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       freshFullRepositoryScanCompleted: recordAt(freshCurrentSourceSecurityScan, "remainingBoundaries")?.freshFullRepositoryScanCompleted === true,
       securityCompleteClaimAllowed: recordAt(freshCurrentSourceSecurityScan, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
       exactSavedShareVerdict: asString(recordAt(freshCurrentSourceSecurityScan, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    shareAckPreBodyAdmission: {
+      artifact: ARTIFACTS.shareAckPreBodyAdmission,
+      verdict: isRecord(shareAckPreBodyAdmission) ? asString(shareAckPreBodyAdmission.verdict) : "missing",
+      sourceHead: isRecord(shareAckPreBodyAdmission) ? asString(shareAckPreBodyAdmission.sourceHead) : "",
+      productionCommit: isRecord(shareAckPreBodyAdmission) ? asString(shareAckPreBodyAdmission.productionCommit) : "",
+      scanId: asString(recordAt(shareAckPreBodyAdmission, "finding")?.scanId),
+      findingSlug: asString(recordAt(shareAckPreBodyAdmission, "finding")?.slug),
+      coarseIpRateAdmissionBeforeBody: recordAt(shareAckPreBodyAdmission, "currentSourceContract")?.coarseIpRateAdmissionBeforeBody === true,
+      coarseBodyConcurrencyLeaseBeforeBody: recordAt(shareAckPreBodyAdmission, "currentSourceContract")?.coarseBodyConcurrencyLeaseBeforeBody === true,
+      recipientSpecificAdmissionRetainedAfterParse: recordAt(shareAckPreBodyAdmission, "currentSourceContract")?.recipientSpecificAdmissionRetainedAfterParse === true,
+      testsPassed: asNumber(recordAt(recordAt(shareAckPreBodyAdmission, "verification"), "focusedAndAdjacentTests")?.testsPassed),
+      liveStatus: asNumber(recordAt(shareAckPreBodyAdmission, "liveProbe")?.status),
+      liveCode: asString(recordAt(shareAckPreBodyAdmission, "liveProbe")?.code),
+      liveRateLimitHeader: asString(recordAt(shareAckPreBodyAdmission, "liveProbe")?.rateLimitHeader),
+      freshRescanRequired: recordAt(shareAckPreBodyAdmission, "remainingBoundaries")?.freshFullRepositoryRescanRequiredForScanClosure === true,
+      securityCompleteClaimAllowed: recordAt(shareAckPreBodyAdmission, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      recipientAckLiveDataApproval: asString(recordAt(shareAckPreBodyAdmission, "remainingBoundaries")?.shareRecipientAckLiveDataApproval),
+      exactSavedShareVerdict: asString(recordAt(shareAckPreBodyAdmission, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     publicSearchDistributedRateLimitReadiness: {
       artifact: ARTIFACTS.publicSearchDistributedRateLimitReadiness,

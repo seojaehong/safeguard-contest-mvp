@@ -504,6 +504,24 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  shareAckPreBodyAdmission: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    scanId: string;
+    findingSlug: string;
+    coarseIpRateAdmissionBeforeBody: boolean;
+    coarseBodyConcurrencyLeaseBeforeBody: boolean;
+    recipientSpecificAdmissionRetainedAfterParse: boolean;
+    testsPassed: number | null;
+    liveStatus: number | null;
+    liveCode: string;
+    liveRateLimitHeader: string;
+    freshRescanRequired: boolean;
+    securityCompleteClaimAllowed: boolean;
+    recipientAckLiveDataApproval: string;
+    exactSavedShareVerdict: string;
+  };
   publicSearchDistributedRateLimitReadiness: {
     verdict: string;
     sourceHead: string;
@@ -1413,6 +1431,28 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
       koshaExactRegistryPromotion: "APPROVAL_GATED",
       freshFullRepositoryScanCompleted: true,
       securityCompleteClaimAllowed: false,
+    },
+  };
+}
+
+function shareAckPreBodyAdmissionFixture(sourceHead: string): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED",
+    sourceHead,
+    productionCommit: sourceHead,
+    finding: { scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a", slug: "share-ack-prebody-admission" },
+    currentSourceContract: {
+      coarseIpRateAdmissionBeforeBody: true,
+      coarseBodyConcurrencyLeaseBeforeBody: true,
+      recipientSpecificAdmissionRetainedAfterParse: true,
+    },
+    verification: { focusedAndAdjacentTests: { testsPassed: 66 } },
+    liveProbe: { status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimitHeader: "distributed" },
+    remainingBoundaries: {
+      freshFullRepositoryRescanRequiredForScanClosure: true,
+      securityCompleteClaimAllowed: false,
+      shareRecipientAckLiveDataApproval: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   };
 }
@@ -3038,6 +3078,11 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
   });
 
   const firstHead = commitAll(root, "seed");
+  writeJson(
+    root,
+    "evaluation/share-ack-prebody-admission-2026-08-28/report.json",
+    shareAckPreBodyAdmissionFixture(firstHead),
+  );
   writeJson(root, "evaluation/final-99-12-document-no-mutation-2026-08-17/report.json", {
     schema: "safeclaw-final-99-12-document-no-mutation/v1",
     verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED",
@@ -4286,6 +4331,11 @@ describe("northstar next runway generator", () => {
       state: "notice",
       reason: expect.stringContaining("17 open findings"),
     }));
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "share_ack_prebody_admission_security",
+      state: "notice",
+      reason: expect.stringContaining("body-read concurrency admission"),
+    }));
     expect(report.freshCurrentSourceSecurityScan).toMatchObject({
       verdict: "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE",
       scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
@@ -4305,6 +4355,24 @@ describe("northstar next runway generator", () => {
       fullyClosedBoundedSourceCandidateCount: 2,
       freshFullRepositoryScanCompleted: true,
       securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.shareAckPreBodyAdmission).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+      findingSlug: "share-ack-prebody-admission",
+      coarseIpRateAdmissionBeforeBody: true,
+      coarseBodyConcurrencyLeaseBeforeBody: true,
+      recipientSpecificAdmissionRetainedAfterParse: true,
+      testsPassed: 66,
+      liveStatus: 503,
+      liveCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      liveRateLimitHeader: "distributed",
+      freshRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      recipientAckLiveDataApproval: "APPROVAL_GATED",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.provenCurrentState).toContain("public_json_request_body_budget");

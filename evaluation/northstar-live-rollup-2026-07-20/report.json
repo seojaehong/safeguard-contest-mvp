@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T18:57:17.600Z",
-  "head": "899951952ee184d527742d541f976f7e72482f2e",
+  "generatedAt": "2026-08-27T19:43:50.077Z",
+  "head": "4d3be96a30665862373620167148e3278547341c",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "899951952ee184d527742d541f976f7e72482f2e",
+    "commitSha": "4d3be96a30665862373620167148e3278547341c",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8fncz81z7-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-3ea06z54c-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_evidence_missing_or_unknown",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "contradicted",
-    "gateCount": 75
+    "gateCount": 76
   },
   "provenGates": [
     {
@@ -200,6 +200,12 @@
       "state": "notice",
       "artifact": "evaluation\\current-source-standard-security-scan-2026-08-28\\report.json",
       "detail": "Fresh Standard scan 1411fb32 is sealed at current source 89995195 with 17 open findings (13 medium, 4 low), partial coverage across 18 recorded surfaces, and 21 deferred coverage items. The immutable original 18-finding baseline is preserved. Two bounded public-error candidates are closed, while four narrower approval-free source residuals, one Share capability boundary, and twelve database/RLS/atomicity findings remain. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "share_ack_prebody_admission_security",
+      "state": "notice",
+      "artifact": "evaluation\\share-ack-prebody-admission-2026-08-28\\report.json",
+      "detail": "Live production now acquires coarse distributed IP admission and a bounded body-read concurrency lease before the public Share ACK body budget and JSON parser, while retaining recipient-specific admission after parsing. The no-mutation oversized probe failed closed at pre-body admission, but the sealed finding remains open pending a fresh full scan; live recipient ACK approval and exact saved Share MISSING_EVIDENCE remain unchanged."
     },
     {
       "id": "post_remediation_repository_security_scan",
@@ -695,6 +701,25 @@
     "fullyClosedBoundedSourceCandidateCount": 2,
     "freshFullRepositoryScanCompleted": true,
     "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "shareAckPreBodyAdmission": {
+    "artifact": "evaluation\\share-ack-prebody-admission-2026-08-28\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED",
+    "sourceHead": "4d3be96a30665862373620167148e3278547341c",
+    "productionCommit": "4d3be96a30665862373620167148e3278547341c",
+    "scanId": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    "findingSlug": "share-ack-prebody-admission",
+    "coarseIpRateAdmissionBeforeBody": true,
+    "coarseBodyConcurrencyLeaseBeforeBody": true,
+    "recipientSpecificAdmissionRetainedAfterParse": true,
+    "testsPassed": 66,
+    "liveStatus": 503,
+    "liveCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "liveRateLimitHeader": "distributed",
+    "freshRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "recipientAckLiveDataApproval": "APPROVAL_GATED",
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "publicSearchDistributedRateLimitReadiness": {
@@ -1731,9 +1756,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "899951952ee184d527742d541f976f7e72482f2e",
+      "sourceCommit": "4d3be96a30665862373620167148e3278547341c",
       "sourceStatus": "exact",
-      "productionCommit": "899951952ee184d527742d541f976f7e72482f2e",
+      "productionCommit": "4d3be96a30665862373620167148e3278547341c",
       "productionStatus": "matches_live"
     },
     {
@@ -1972,9 +1997,17 @@
       "id": "fresh_current_source_security_scan",
       "artifact": "evaluation\\current-source-standard-security-scan-2026-08-28\\report.json",
       "sourceCommit": "899951952ee184d527742d541f976f7e72482f2e",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
+    },
+    {
+      "id": "share_ack_prebody_admission_security",
+      "artifact": "evaluation\\share-ack-prebody-admission-2026-08-28\\report.json",
+      "sourceCommit": "4d3be96a30665862373620167148e3278547341c",
+      "sourceStatus": "exact",
+      "productionCommit": "4d3be96a30665862373620167148e3278547341c",
+      "productionStatus": "matches_live"
     },
     {
       "id": "agent_chat_durable_admission_security",

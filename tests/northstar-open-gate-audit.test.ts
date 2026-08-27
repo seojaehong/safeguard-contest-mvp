@@ -226,6 +226,61 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
   };
 }
 
+function shareAckPreBodyAdmissionFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    finding: {
+      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+      slug: "share-ack-prebody-admission",
+    },
+    currentSourceContract: {
+      coarseIpRateAdmissionBeforeBody: true,
+      coarseBodyConcurrencyLeaseBeforeBody: true,
+      bodyBudgetAfterCoarseAdmission: true,
+      jsonParseAfterCoarseAdmission: true,
+      recipientSpecificAdmissionRetainedAfterParse: true,
+      preBodyRateLimitPerMinute: 60,
+      preBodyConcurrency: 8,
+      preBodyLeaseMs: 15000,
+      bodyBudgetBytes: 16384,
+      bodyReadTimeoutMs: 10000,
+    },
+    verification: {
+      focusedAndAdjacentTests: { testFiles: 3, testsPassed: 66, testsFailed: 0 },
+      typecheck: { status: "PASS" },
+      build: { status: "PASS", staticPagesPassed: 28, staticPagesFailed: 0 },
+    },
+    liveProbe: {
+      requestBodyBytes: 16385,
+      status: 503,
+      code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      rateLimitHeader: "distributed",
+      applicationBodyBudgetReached: false,
+      sessionLookupReached: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      readConfirmationInserted: false,
+      providerDispatchCalled: false,
+      vectorRuntimeCalled: false,
+      wikiPublished: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      findingSourceRemediated: true,
+      freshFullRepositoryRescanRequiredForScanClosure: true,
+      securityCompleteClaimAllowed: false,
+      shareRecipientAckLiveDataApproval: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  };
+}
+
 function documentEditorialReviewReceiptFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
@@ -3835,6 +3890,13 @@ function createFixtureRoot(): string {
   writeJson(rootDir, path.join(freshScanRoot, "canonical", "findings.json"), { findings: [] });
   writeJson(rootDir, path.join(freshScanRoot, "canonical", "coverage.json"), { completeness: "partial" });
   fs.writeFileSync(path.join(rootDir, freshScanRoot, "scan-report.md"), "# sealed fixture\n", "utf8");
+  writeJson(
+    rootDir,
+    path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
+    shareAckPreBodyAdmissionFixture(),
+  );
+  writeText(rootDir, path.join("app", "api", "share-sessions", "[sessionId]", "route.ts"), "export const preBodyAdmission = true;\n");
+  writeText(rootDir, path.join("tests", "workpack-share-authority-routes.test.ts"), "export const preBodyAdmissionTest = true;\n");
   writeJson(rootDir, path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
     sourceHead: "fixture-sha",
@@ -7776,6 +7838,34 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "fresh_current_source_security_scan")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records Share ACK pre-body admission as notice and preserves approval boundaries", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "share-ack-prebody-admission-2026-08-28",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "share_ack_prebody_admission_security");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("pre-body admission");
+    expect(gate?.detail).toContain("fresh full scan");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "share_ack_prebody_admission_security")?.state)
       .toBe("contradicted");
   });
 

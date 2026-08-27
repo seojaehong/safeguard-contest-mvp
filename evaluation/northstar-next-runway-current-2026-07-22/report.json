@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-27T18:57:42.867Z",
+  "generatedAt": "2026-08-27T19:44:10.584Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "899951952ee184d527742d541f976f7e72482f2e",
-  "productionCommit": "899951952ee184d527742d541f976f7e72482f2e",
+  "sourceHead": "4d3be96a30665862373620167148e3278547341c",
+  "productionCommit": "4d3be96a30665862373620167148e3278547341c",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "899951952ee184d527742d541f976f7e72482f2e",
+    "commitSha": "4d3be96a30665862373620167148e3278547341c",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8fncz81z7-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-3ea06z54c-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "899951952ee184d527742d541f976f7e72482f2e",
-  "liveRollupLiveCommit": "899951952ee184d527742d541f976f7e72482f2e",
+  "liveExactEvidenceCommit": "4d3be96a30665862373620167148e3278547341c",
+  "liveRollupLiveCommit": "4d3be96a30665862373620167148e3278547341c",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -63,6 +63,7 @@
     "currentSecurityRemediationLedger": "evaluation\\security-current-remediation-ledger-2026-08-13\\report.json",
     "currentRepositorySecurityRescan": "evaluation\\current-full-repository-security-scan-2026-08-27\\report.json",
     "freshCurrentSourceSecurityScan": "evaluation\\current-source-standard-security-scan-2026-08-28\\report.json",
+    "shareAckPreBodyAdmission": "evaluation\\share-ack-prebody-admission-2026-08-28\\report.json",
     "agentChatDurableAdmission": "evaluation\\security-agent-chat-durable-admission-2026-08-14\\report.json",
     "mcpProviderAdmission": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
     "shareRecipientContactVerification": "evaluation\\share-recipient-contact-verification-2026-08-14\\report.json",
@@ -191,6 +192,11 @@
       "gate": "fresh_current_source_security_scan",
       "state": "notice",
       "reason": "fresh Standard scan 1411fb32-5c18-4d6a-b8ba-d52697757d8a records 17 open findings with partial coverage; 4 approval-free source residuals, 1 Share capability boundary, and 12 database/RLS/atomicity findings remain open; security-complete is false and exact saved Share remains MISSING_EVIDENCE"
+    },
+    {
+      "gate": "share_ack_prebody_admission_security",
+      "state": "notice",
+      "reason": "deployed Share ACK source now applies coarse rate and body-read concurrency admission before application body consumption, with 66 tests and live 503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; the sealed finding still requires a fresh scan, live recipient ACK remains APPROVAL_GATED, and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "mcp_generation_work_budget_security",
@@ -1060,6 +1066,24 @@
     "fullyClosedBoundedSourceCandidateCount": 2,
     "freshFullRepositoryScanCompleted": true,
     "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "shareAckPreBodyAdmission": {
+    "verdict": "PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED",
+    "sourceHead": "4d3be96a30665862373620167148e3278547341c",
+    "productionCommit": "4d3be96a30665862373620167148e3278547341c",
+    "scanId": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    "findingSlug": "share-ack-prebody-admission",
+    "coarseIpRateAdmissionBeforeBody": true,
+    "coarseBodyConcurrencyLeaseBeforeBody": true,
+    "recipientSpecificAdmissionRetainedAfterParse": true,
+    "testsPassed": 66,
+    "liveStatus": 503,
+    "liveCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "liveRateLimitHeader": "distributed",
+    "freshRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "recipientAckLiveDataApproval": "APPROVAL_GATED",
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "publicSearchDistributedRateLimitReadiness": {

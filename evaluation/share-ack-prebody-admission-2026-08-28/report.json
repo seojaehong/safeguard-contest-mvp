@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "safeclaw-share-ack-prebody-admission/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED",
+  "generatedAt": "2026-08-28T04:09:00+09:00",
+  "sourceHead": "4d3be96a30665862373620167148e3278547341c",
+  "productCommit": "4d3be96a30665862373620167148e3278547341c",
+  "productionCommit": "4d3be96a30665862373620167148e3278547341c",
+  "productionBuild": {
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-3ea06z54c-seojaehongs-projects.vercel.app"
+  },
+  "finding": {
+    "scanId": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    "slug": "share-ack-prebody-admission",
+    "title": "Share acknowledgement admission occurs after unauthenticated body consumption",
+    "beforeSource": "899951952ee184d527742d541f976f7e72482f2e",
+    "beforeEvidence": "evaluation/current-source-standard-security-scan-2026-08-28/findings/share-ack-prebody-admission/share-ack-prebody-admission.md"
+  },
+  "currentSourceContract": {
+    "coarseIpRateAdmissionBeforeBody": true,
+    "coarseBodyConcurrencyLeaseBeforeBody": true,
+    "bodyBudgetAfterCoarseAdmission": true,
+    "jsonParseAfterCoarseAdmission": true,
+    "recipientSpecificAdmissionRetainedAfterParse": true,
+    "preBodyRateNamespace": "share-session-ack-prebody",
+    "preBodyConcurrencyNamespace": "share-session-ack-prebody-body",
+    "preBodyRateLimitPerMinute": 60,
+    "preBodyConcurrency": 8,
+    "preBodyLeaseMs": 15000,
+    "bodyBudgetBytes": 16384,
+    "bodyReadTimeoutMs": 10000
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "command": "npm.cmd test -- tests/public-distributed-rate-limit.test.ts tests/share-recipient-ack-approval-preflight.test.ts tests/workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=30000",
+      "testFiles": 3,
+      "testsPassed": 66,
+      "testsFailed": 0
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPagesPassed": 28,
+      "staticPagesFailed": 0
+    }
+  },
+  "liveProbe": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "method": "POST",
+    "route": "/api/share-sessions/00000000-0000-4000-8000-000000000000?workerId=probe-worker",
+    "requestBodyBytes": 16385,
+    "status": 503,
+    "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "rateLimitHeader": "distributed",
+    "retryAfterSeconds": 5,
+    "applicationBodyBudgetReached": false,
+    "sessionLookupReached": false,
+    "interpretation": "The deployed route returned the coarse distributed-admission failure instead of the oversized-body 413, proving the application-level body budget and JSON parser were not reached."
+  },
+  "remainingBoundaries": {
+    "findingSourceRemediated": true,
+    "freshFullRepositoryRescanRequiredForScanClosure": true,
+    "securityCompleteClaimAllowed": false,
+    "shareRecipientAckLiveDataApproval": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "readConfirmationInserted": false,
+    "providerDispatchCalled": false,
+    "vectorRuntimeCalled": false,
+    "wikiPublished": false,
+    "koshaRegistryMutationPerformed": false
+  }
+}
