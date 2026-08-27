@@ -1,10 +1,10 @@
 {
   "schemaVersion": "safeclaw-document-export-capability-truth/v1",
-  "generatedAt": "2026-08-27T12:20:08.9275799Z",
+  "generatedAt": "2026-08-27T21:28:43.1567429Z",
   "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
-  "sourceHead": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
-  "productCommit": "f28ed068f76109453d9265314d406242badbe40c",
-  "productionCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+  "sourceHead": "b56800c428afc484e6f4d53616e592f69e1141bf",
+  "productCommit": "b56800c428afc484e6f4d53616e592f69e1141bf",
+  "productionCommit": "b56800c428afc484e6f4d53616e592f69e1141bf",
   "productCommitIncludedInProduction": true,
   "sourceHeadMatchesProduction": true,
   "geometryReceiptSourceHead": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
@@ -22,8 +22,16 @@
     },
     "credentialMaterialExposed": false,
     "localGuardedPostStatus": 503,
-    "localGuardedPostCode": "PUBLIC_EXPORT_CONCURRENCY_LIMIT",
+    "localGuardedPostCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "localGuardedPostRateLimit": "distributed",
     "localGuardedPostWorkUnit": "document-export",
+    "misleadingConcurrencyStatusObserved": false,
+    "liveGuardedExportRoutes": [
+      { "route": "/api/export/hwpx-template", "method": "GET", "status": 503, "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "rateLimit": "distributed", "workUnit": "document-export", "retryAfterSeconds": 5 },
+      { "route": "/api/export/pdf", "method": "POST", "status": 503, "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "rateLimit": "distributed", "workUnit": "document-export", "retryAfterSeconds": 5 },
+      { "route": "/api/export/hwp", "method": "POST", "status": 503, "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "rateLimit": "distributed", "workUnit": "document-export", "retryAfterSeconds": 5 },
+      { "route": "/api/export/xlsx", "method": "POST", "status": 503, "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "rateLimit": "distributed", "workUnit": "document-export", "retryAfterSeconds": 5 }
+    ],
     "serverExportWorkExecuted": false
   },
   "browser": {
@@ -84,15 +92,15 @@
   },
   "governedPathCompatibility": {
     "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_ADMISSION_COMPATIBILITY",
-    "sourceHead": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
-    "productionCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+    "sourceHead": "b56800c428afc484e6f4d53616e592f69e1141bf",
+    "productionCommit": "b56800c428afc484e6f4d53616e592f69e1141bf",
     "changedGovernedPaths": ["lib/public-distributed-rate-limit.ts"],
     "coveredGateIds": [
       "improvement_photo_analysis_budget",
       "public_provider_admission",
       "security_followup_remediation"
     ],
-    "focusedAndAdjacentTests": { "files": 10, "tests": 67, "failed": 0, "status": "PASS" },
+    "focusedAndAdjacentTests": { "files": 10, "tests": 73, "failed": 0, "status": "PASS" },
     "typecheck": "PASS",
     "build": "PASS",
     "originalSecurityBaselinesRewritten": false,

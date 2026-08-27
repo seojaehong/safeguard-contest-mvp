@@ -2064,6 +2064,9 @@ function evaluateDocumentExportCapabilityTruthGate(rootDir) {
 
   const capability = isRecord(report.capability) ? report.capability : {};
   const admission = isRecord(capability.admission) ? capability.admission : {};
+  const liveGuardedExportRoutes = Array.isArray(capability.liveGuardedExportRoutes)
+    ? capability.liveGuardedExportRoutes.filter(isRecord)
+    : [];
   const browser = isRecord(report.browser) ? report.browser : {};
   const desktop = isRecord(browser.desktop) ? browser.desktop : {};
   const mobile = isRecord(browser.mobile) ? browser.mobile : {};
@@ -2097,6 +2100,20 @@ function evaluateDocumentExportCapabilityTruthGate(rootDir) {
     && mutationBoundary.vectorMutationPerformed === false
     && mutationBoundary.wikiPublicationPerformed === false
     && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const guardedExportRoutePass = readNumber(capability.localGuardedPostStatus) === 503
+    && readString(capability.localGuardedPostCode) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+    && readString(capability.localGuardedPostRateLimit) === "distributed"
+    && readString(capability.localGuardedPostWorkUnit) === "document-export"
+    && capability.misleadingConcurrencyStatusObserved === false
+    && liveGuardedExportRoutes.length === 4
+    && new Set(liveGuardedExportRoutes.map((row) => readString(row.route))).size === 4
+    && liveGuardedExportRoutes.every((row) => (
+      readNumber(row.status) === 503
+      && readString(row.code) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+      && readString(row.rateLimit) === "distributed"
+      && readString(row.workUnit) === "document-export"
+      && readNumber(row.retryAfterSeconds) === 5
+    ));
   const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH"
     && sourceMatchesProduction
     && readNumber(capability.getStatus) === 200
@@ -2106,6 +2123,7 @@ function evaluateDocumentExportCapabilityTruthGate(rootDir) {
     && readString(admission.reason) === "distributed_limiter_unavailable"
     && capability.credentialMaterialExposed === false
     && capability.serverExportWorkExecuted === false
+    && guardedExportRoutePass
     && viewportPass
     && geometryPass
     && noMutation
@@ -2120,7 +2138,7 @@ function evaluateDocumentExportCapabilityTruthGate(rootDir) {
       label: "Live document export capability truth",
       state: "proven",
       evidencePath,
-      detail: `Production export admission is honestly locked (configuration=${readString(admission.configurationState)}, ${readString(admission.reason)}): server XLSX/HWP remain disabled while browser PDF, legacy XLS, and HWPX draft remain enabled. Desktop panel=${readNumber(desktop.panelWidth)}px with beta=${readNumber(desktop.legacyXlsButtonWidth)}px; mobile panel=${readNumber(mobile.panelWidth)}px with beta=${readNumber(mobile.legacyXlsButtonWidth)}px. Distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, fully automated launch remains forbidden, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`,
+      detail: `Production export admission is honestly locked (configuration=${readString(admission.configurationState)}, ${readString(admission.reason)}): four server export routes fail closed as DISTRIBUTED_RATE_LIMIT_UNAVAILABLE with distributed/document-export headers, and the misleading concurrency status is absent. Server XLSX/HWP remain disabled while browser PDF, legacy XLS, and HWPX draft remain enabled. Desktop panel=${readNumber(desktop.panelWidth)}px with beta=${readNumber(desktop.legacyXlsButtonWidth)}px; mobile panel=${readNumber(mobile.panelWidth)}px with beta=${readNumber(mobile.legacyXlsButtonWidth)}px. Distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, fully automated launch remains forbidden, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`,
       nextActions: ["Configure distributed admission separately before enabling server XLSX/HWP export."],
     });
   }
@@ -2130,7 +2148,7 @@ function evaluateDocumentExportCapabilityTruthGate(rootDir) {
     label: "Live document export capability truth",
     state: "contradicted",
     evidencePath,
-    detail: `Export verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, admission=${readString(admission.mode) || "unknown"}/${readString(admission.reason) || "unknown"}, ready=${admission.ready === true}, viewportPass=${viewportPass}, geometryPass=${geometryPass}, noMutation=${noMutation}, activation=${readString(remainingBoundaries.distributedAdmissionActivation) || "missing"}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    detail: `Export verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, admission=${readString(admission.mode) || "unknown"}/${readString(admission.reason) || "unknown"}, ready=${admission.ready === true}, guardedRoutesPass=${guardedExportRoutePass}, viewportPass=${viewportPass}, geometryPass=${geometryPass}, noMutation=${noMutation}, activation=${readString(remainingBoundaries.distributedAdmissionActivation) || "missing"}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: ["Restore the fail-closed export capability boundary and rerun current-production evidence without mutation."],
   });
 }

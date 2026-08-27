@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-27T21:17:25.658Z
-Source HEAD at generation: fd1122b482aec66570881ace74f90d8c10442d30
-Live commit at generation: fd1122b482aec66570881ace74f90d8c10442d30
+Generated at: 2026-08-27T21:31:23.655Z
+Source HEAD at generation: b56800c428afc484e6f4d53616e592f69e1141bf
+Live commit at generation: b56800c428afc484e6f4d53616e592f69e1141bf
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_evidence_missing_or_unknown`
@@ -431,8 +431,10 @@ Overall: `northstar_evidence_missing_or_unknown`
 | security_upstream_transport_remediation | proven | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |
 | security_safety_reference_surface_remediation | proven | evaluation\security-safety-reference-surface-remediation-2026-08-11\report.json |
 | improvement_photo_analysis_budget | notice | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
+| public_provider_admission | notice | evaluation\public-provider-admission-2026-08-11\report.json |
 | public_search_distributed_rate_limit_readiness | notice | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | notice | evaluation\security-public-generation-admission-2026-08-04\report.json |
+| security_followup_remediation | proven | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
 | mcp_generation_work_budget_security | notice | evaluation\security-mcp-generation-work-budget-2026-08-04\report.json |
 | learning_export_renderer_security | proven | evaluation\learning-export-renderer-security-2026-08-02\report.json |
 | hermes_remote_durable_ledger | proven | evaluation\hermes-openclaw-runtime-current-gate-2026-07-20\report.json |
@@ -482,7 +484,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
 | launch_operations_readiness_cockpit | ancestor | ancestor_of_head | evaluation\launch-operations-readiness-2026-08-26\report.json |
-| document_export_capability_truth | ancestor | ancestor_of_head | evaluation\document-export-capability-truth-2026-08-17\report.json |
+| document_export_capability_truth | exact | matches_live | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | ontology_viewport_workbench | ancestor | ancestor_of_head | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
 | knowledge_viewport_workbench | ancestor | ancestor_of_head | evaluation\knowledge-viewport-workbench-2026-08-17\report.json |
 | llm_wiki_candidate_content_readiness | ancestor | ancestor_of_head | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |
@@ -500,7 +502,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | share_ack_prebody_admission_security | ancestor | ancestor_of_head | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | ancestor | ancestor_of_head | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
 | weather_fallback_error_redaction_security | ancestor | ancestor_of_head | evaluation\weather-fallback-error-redaction-2026-08-28\report.json |
-| hwpx_archive_expansion_security | exact | matches_live | evaluation\hwpx-archive-expansion-security-2026-08-28\report.json |
+| hwpx_archive_expansion_security | ancestor | ancestor_of_head | evaluation\hwpx-archive-expansion-security-2026-08-28\report.json |
 | agent_chat_durable_admission_security | ancestor | ancestor_of_head | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
 | mcp_provider_admission_security | ancestor | ancestor_of_head | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
 | share_recipient_contact_verification_security | ancestor | ancestor_of_head | evaluation\share-recipient-contact-verification-2026-08-14\report.json |

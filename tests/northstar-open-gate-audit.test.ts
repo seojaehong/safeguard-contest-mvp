@@ -3040,6 +3040,17 @@ function createFixtureRoot(): string {
       getStatus: 200,
       admission: { configurationState: "absent", mode: "unavailable", ready: false, reason: "distributed_limiter_unavailable" },
       credentialMaterialExposed: false,
+      localGuardedPostStatus: 503,
+      localGuardedPostCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      localGuardedPostRateLimit: "distributed",
+      localGuardedPostWorkUnit: "document-export",
+      misleadingConcurrencyStatusObserved: false,
+      liveGuardedExportRoutes: [
+        { route: "/api/export/hwpx-template", status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimit: "distributed", workUnit: "document-export", retryAfterSeconds: 5 },
+        { route: "/api/export/pdf", status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimit: "distributed", workUnit: "document-export", retryAfterSeconds: 5 },
+        { route: "/api/export/hwp", status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimit: "distributed", workUnit: "document-export", retryAfterSeconds: 5 },
+        { route: "/api/export/xlsx", status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimit: "distributed", workUnit: "document-export", retryAfterSeconds: 5 },
+      ],
       serverExportWorkExecuted: false,
     },
     browser: {
@@ -9625,6 +9636,25 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")?.detail).toContain("exactShare=PASS");
+  });
+
+  it("fails document export capability truth closed on misleading instance concurrency evidence", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "document-export-capability-truth-2026-08-17", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      capability: { localGuardedPostCode: string; localGuardedPostRateLimit: string; misleadingConcurrencyStatusObserved: boolean };
+    };
+    report.capability.localGuardedPostCode = "PUBLIC_EXPORT_CONCURRENCY_LIMIT";
+    report.capability.localGuardedPostRateLimit = "instance";
+    report.capability.misleadingConcurrencyStatusObserved = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-17T00:00:00.000Z" });
+    expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")?.detail).toContain("guardedRoutesPass=false");
   });
 
   it("fails ontology viewport workbench closed when mobile task switching regresses", async () => {

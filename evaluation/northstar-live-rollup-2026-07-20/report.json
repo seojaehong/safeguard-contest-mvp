@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T21:17:25.658Z",
-  "head": "fd1122b482aec66570881ace74f90d8c10442d30",
+  "generatedAt": "2026-08-27T21:31:23.655Z",
+  "head": "b56800c428afc484e6f4d53616e592f69e1141bf",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "fd1122b482aec66570881ace74f90d8c10442d30",
+    "commitSha": "b56800c428afc484e6f4d53616e592f69e1141bf",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-gzs75cail-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-etf8mqcdb-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_evidence_missing_or_unknown",
@@ -109,7 +109,7 @@
       "id": "document_export_capability_truth",
       "state": "proven",
       "artifact": "evaluation\\document-export-capability-truth-2026-08-17\\report.json",
-      "detail": "Production export admission is honestly locked (configuration=absent, distributed_limiter_unavailable): server XLSX/HWP remain disabled while browser PDF, legacy XLS, and HWPX draft remain enabled. Desktop panel=843px with beta=191.25px; mobile panel=262px with beta=220px. Distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, fully automated launch remains forbidden, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Production export admission is honestly locked (configuration=absent, distributed_limiter_unavailable): four server export routes fail closed as DISTRIBUTED_RATE_LIMIT_UNAVAILABLE with distributed/document-export headers, and the misleading concurrency status is absent. Server XLSX/HWP remain disabled while browser PDF, legacy XLS, and HWPX draft remain enabled. Desktop panel=843px with beta=191.25px; mobile panel=262px with beta=220px. Distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, fully automated launch remains forbidden, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "ontology_viewport_workbench",
@@ -262,6 +262,12 @@
       "detail": "Improvement and dedicated photo analysis now share pre-provider byte, count, MIME/signature, rate, and concurrency controls with 76 tests plus a current 23 files / 215 tests governed-path companion. Production currently reports instance fallback rather than distributed admission, the immutable 14-finding scan remains unchanged, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
+      "id": "public_provider_admission",
+      "state": "notice",
+      "artifact": "evaluation\\public-provider-admission-2026-08-11\\report.json",
+      "detail": "Current production enforces mode-weighted provider work units (template 0, enhanced 2, full 12) with completion/cancellation release, 23 files / 215 tests governed-path compatibility, and live no-provider work-budget probes across ask, weather, and knowledge. Production still reports process-instance admission because Upstash is not configured; both canonical medium findings remain immutable, distributed activation and a fresh follow-up scan remain required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
       "id": "public_search_distributed_rate_limit_readiness",
       "state": "notice",
       "artifact": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
@@ -272,6 +278,12 @@
       "state": "notice",
       "artifact": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
       "detail": "Current production 99c7df72 requires distributed admission before body parsing on both public generation routes. The before-live 400/instance behavior is preserved, while local and live after-remediation probes return 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before reference search, AI/provider work, or DB mutation when configurationState=absent. Distributed activation and a fresh scan remain open; the immutable baseline is preserved, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "security_followup_remediation",
+      "state": "proven",
+      "artifact": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
+      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (covered by another current receipt). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "mcp_generation_work_budget_security",
@@ -1299,9 +1311,9 @@
   "documentExportCapabilityTruth": {
     "artifact": "evaluation\\document-export-capability-truth-2026-08-17\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
-    "sourceHead": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
-    "productCommit": "f28ed068f76109453d9265314d406242badbe40c",
-    "productionCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+    "sourceHead": "b56800c428afc484e6f4d53616e592f69e1141bf",
+    "productCommit": "b56800c428afc484e6f4d53616e592f69e1141bf",
+    "productionCommit": "b56800c428afc484e6f4d53616e592f69e1141bf",
     "admissionMode": "unavailable",
     "admissionReason": "distributed_limiter_unavailable",
     "admissionReady": false,
@@ -1835,9 +1847,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "fd1122b482aec66570881ace74f90d8c10442d30",
+      "sourceCommit": "b56800c428afc484e6f4d53616e592f69e1141bf",
       "sourceStatus": "exact",
-      "productionCommit": "fd1122b482aec66570881ace74f90d8c10442d30",
+      "productionCommit": "b56800c428afc484e6f4d53616e592f69e1141bf",
       "productionStatus": "matches_live"
     },
     {
@@ -1963,10 +1975,10 @@
     {
       "id": "document_export_capability_truth",
       "artifact": "evaluation\\document-export-capability-truth-2026-08-17\\report.json",
-      "sourceCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
-      "sourceStatus": "ancestor",
-      "productionCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "b56800c428afc484e6f4d53616e592f69e1141bf",
+      "sourceStatus": "exact",
+      "productionCommit": "b56800c428afc484e6f4d53616e592f69e1141bf",
+      "productionStatus": "matches_live"
     },
     {
       "id": "ontology_viewport_workbench",
@@ -2108,9 +2120,9 @@
       "id": "hwpx_archive_expansion_security",
       "artifact": "evaluation\\hwpx-archive-expansion-security-2026-08-28\\report.json",
       "sourceCommit": "fd1122b482aec66570881ace74f90d8c10442d30",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "fd1122b482aec66570881ace74f90d8c10442d30",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "agent_chat_durable_admission_security",

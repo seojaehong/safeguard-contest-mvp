@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-27T21:17:24.690Z",
-  "sourceSha": "fd1122b482aec66570881ace74f90d8c10442d30",
+  "generatedAt": "2026-08-27T21:30:31.705Z",
+  "sourceSha": "b56800c428afc484e6f4d53616e592f69e1141bf",
   "overall": "contradicted",
   "gates": [
     {
@@ -155,7 +155,7 @@
       "state": "proven",
       "label": "Live document export capability truth",
       "evidencePath": "evaluation\\document-export-capability-truth-2026-08-17\\report.json",
-      "detail": "Production export admission is honestly locked (configuration=absent, distributed_limiter_unavailable): server XLSX/HWP remain disabled while browser PDF, legacy XLS, and HWPX draft remain enabled. Desktop panel=843px with beta=191.25px; mobile panel=262px with beta=220px. Distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, fully automated launch remains forbidden, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Production export admission is honestly locked (configuration=absent, distributed_limiter_unavailable): four server export routes fail closed as DISTRIBUTED_RATE_LIMIT_UNAVAILABLE with distributed/document-export headers, and the misleading concurrency status is absent. Server XLSX/HWP remain disabled while browser PDF, legacy XLS, and HWPX draft remain enabled. Desktop panel=843px with beta=191.25px; mobile panel=262px with beta=220px. Distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, fully automated launch remains forbidden, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Configure distributed admission separately before enabling server XLSX/HWP export."
       ]
@@ -470,12 +470,13 @@
     },
     {
       "id": "public_provider_admission",
-      "state": "contradicted",
+      "state": "notice",
       "label": "Public provider admission",
       "evidencePath": "evaluation\\public-provider-admission-2026-08-11\\report.json",
-      "detail": "Public provider admission verdict=PARTIAL_LIVE_PRODUCTION_WEIGHTED_INSTANCE_ADMISSION_DISTRIBUTED_ACTIVATION_PENDING, sourceCurrent=false, findings=2, liveChecks=3, distributed=PENDING_CONFIGURATION, followUp=REQUIRED, noMutation=true, exactShare=MISSING_EVIDENCE.",
+      "detail": "Current production enforces mode-weighted provider work units (template 0, enhanced 2, full 12) with completion/cancellation release, 23 files / 215 tests governed-path compatibility, and live no-provider work-budget probes across ask, weather, and knowledge. Production still reports process-instance admission because Upstash is not configured; both canonical medium findings remain immutable, distributed activation and a fresh follow-up scan remain required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore source/live alignment, weighted contracts, all three no-provider live probes, verification totals, instance/distributed boundary, no-mutation boundary, follow-up scan requirement, and exact Share MISSING_EVIDENCE."
+        "Configure and verify an approved distributed admission backend before claiming horizontal durability.",
+        "Run a fresh full-repository security scan before reclassifying either immutable finding or making a security-complete claim."
       ]
     },
     {
@@ -522,12 +523,13 @@
     },
     {
       "id": "security_followup_remediation",
-      "state": "contradicted",
+      "state": "proven",
       "label": "Security follow-up remediation",
       "evidencePath": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
-      "detail": "Security follow-up verdict=PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP, sourceMatchesProduction=true, compatibilityPass=true, latestCompatibilityPass=true, latestCompatibilityCurrent=false, accidentCompatibilityCurrent=false, productPathsCurrent=false, exportAdmissionCompatibility=false, findings=3, baseline=18, deferred=2, remediations=3, tests=129, compatibilityTests=147, latestCompatibilityTests=245, liveProviderProbe=false, baselineRewritten=false, noMutation=true, exactShare=MISSING_EVIDENCE.",
+      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (covered by another current receipt). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore deployed SHA alignment, all three remediation contracts, verification totals, immutable-baseline preservation, no-mutation boundaries, and exact Share MISSING_EVIDENCE."
+        "Keep the immutable baseline and two deferred candidates visible in future security review; do not convert this scoped remediation into a security-complete claim.",
+        "Retain the separate public generation admission notice and exact saved Share boundary until their own evidence contracts close."
       ]
     },
     {
