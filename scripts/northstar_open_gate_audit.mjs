@@ -35,6 +35,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentFieldIsolation: path.join("evaluation", "live-document-field-isolation-2026-07-25", "report.json"),
   liveForeignWorkerScenarioGuidance: path.join("evaluation", "live-foreign-worker-scenario-guidance-2026-08-27", "report.json"),
   liveRoofRepairScenarioIsolation: path.join("evaluation", "live-roof-repair-scenario-isolation-2026-08-27", "report.json"),
+  liveAccidentCaseScenarioIsolation: path.join("evaluation", "live-accident-case-scenario-isolation-2026-08-27", "report.json"),
   liveKoshaExactMaterialization: path.join("evaluation", "live-kosha-exact-materialization-2026-07-25", "report.json"),
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
@@ -84,6 +85,7 @@ const EVIDENCE_PATHS = Object.freeze({
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
   securityResourceRemediation: path.join("evaluation", "security-resource-remediation-2026-08-11", "report.json"),
   securityUpstreamTransportRemediation: path.join("evaluation", "security-upstream-transport-remediation-2026-08-11", "report.json"),
+  securityAccidentCaseCompatibility: path.join("evaluation", "security-accident-case-compatibility-2026-08-27", "report.json"),
   securitySafetyReferenceSurfaceRemediation: path.join("evaluation", "security-safety-reference-surface-remediation-2026-08-11", "report.json"),
   mcpGenerationWorkBudgetSecurity: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
@@ -1033,6 +1035,53 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
     && roofRemaining.humanReviewCompleted === false
     && readString(roofRemaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && roofRemaining.fullyAutomatedLaunchClaimAllowed === false;
+  const accidentIsolation = readJsonFile(rootDir, EVIDENCE_PATHS.liveAccidentCaseScenarioIsolation);
+  const accidentAfterLive = isRecord(accidentIsolation) && isRecord(accidentIsolation.afterLive) ? accidentIsolation.afterLive : {};
+  const accidentCases = Array.isArray(accidentAfterLive.cases) ? accidentAfterLive.cases.filter(isRecord) : [];
+  const accidentMutation = isRecord(accidentIsolation) && isRecord(accidentIsolation.mutationBoundary) ? accidentIsolation.mutationBoundary : {};
+  const accidentRemaining = isRecord(accidentIsolation) && isRecord(accidentIsolation.remainingBoundaries) ? accidentIsolation.remainingBoundaries : {};
+  /**
+   * @param {string} id
+   * @param {number} expectedCount
+   * @param {string[]} requiredTerms
+   * @param {string[]} forbiddenTerms
+   */
+  const accidentCasePass = (id, expectedCount, requiredTerms, forbiddenTerms) => {
+    const item = accidentCases.find((candidate) => readString(candidate.id) === id);
+    if (!isRecord(item)) return false;
+    const titleSurface = readStringArray(item.titles).join(" ");
+    return readNumber(item.status) === 200
+      && readString(item.responseAiMode) === "template"
+      && readNumber(item.providerWorkUnit) === 0
+      && readString(item.accidentMode) === "fallback"
+      && readNumber(item.caseCount) === expectedCount
+      && requiredTerms.every((term) => titleSurface.includes(term))
+      && forbiddenTerms.every((term) => !titleSurface.includes(term))
+      && item.requiredTermsPresent === true
+      && item.forbiddenIndustryPresent === false
+      && item.pass === true;
+  };
+  const accidentIsolationReady = isRecord(accidentIsolation)
+    && readString(accidentIsolation.schema) === "safeclaw-live-accident-case-scenario-isolation/v1"
+    && readString(accidentIsolation.verdict) === "PASS_LIVE_PRODUCTION_ACCIDENT_CASE_SCENARIO_ISOLATION"
+    && readString(accidentIsolation.productCommit) === readString(accidentIsolation.productionCommit)
+    && readNumber(accidentAfterLive.total) === 5
+    && readNumber(accidentAfterLive.passed) === 5
+    && readNumber(accidentAfterLive.failed) === 0
+    && readNumber(accidentAfterLive.forbiddenIndustryCaseCount) === 0
+    && accidentAfterLive.providerGenerationRequested === false
+    && accidentCasePass("roof-heat", 2, ["추락", "온열질환"], ["지게차", "용접", "기계실", "세척"])
+    && accidentCasePass("warehouse-heat", 2, ["지게차", "온열질환"], ["추락", "용접", "기계실", "세척"])
+    && accidentCasePass("chemical-cleaning", 1, ["세척"], ["추락", "지게차", "용접", "기계실"])
+    && accidentCasePass("manufacturing-hotwork", 1, ["용접"], ["추락", "지게차", "기계실", "세척"])
+    && accidentCasePass("facility-electrical", 1, ["기계실"], ["추락", "지게차", "용접", "세척"])
+    && accidentMutation.dbMutationPerformed === false
+    && accidentMutation.providerGenerationPerformed === false
+    && accidentMutation.providerDispatchPerformed === false
+    && accidentMutation.shareSessionCreated === false
+    && accidentRemaining.humanReviewCompleted === false
+    && readString(accidentRemaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && accidentRemaining.fullyAutomatedLaunchClaimAllowed === false;
   const livePass = readNumber(normal.pass) + readNumber(stress.pass);
   const liveFail = readNumber(normal.fail) + readNumber(stress.fail);
   const noMutation = boundary.dbMutationPerformed === false
@@ -1045,7 +1094,8 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
     && report.liveAfterDeploymentPending === false
     && noMutation
     && guidanceReady
-    && roofIsolationReady;
+    && roofIsolationReady
+    && accidentIsolationReady;
 
   if (liveReady) {
     return gateResult({
@@ -1053,7 +1103,7 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
       label: "Live document scenario field isolation",
       state: "proven",
       evidencePath,
-      detail: `Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. The companion ${EVIDENCE_PATHS.liveForeignWorkerScenarioGuidance} additionally proves heat guidance absent for chemical cleaning and present for explicit heat work in template mode with work-unit 0. ${EVIDENCE_PATHS.liveRoofRepairScenarioIsolation} proves the roof-repair heat case keeps roof/fall identity with warehouse seed absent while the warehouse control retains its intended identity. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate.`,
+      detail: `Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. The companion ${EVIDENCE_PATHS.liveForeignWorkerScenarioGuidance} additionally proves heat guidance absent for chemical cleaning and present for explicit heat work in template mode with work-unit 0. ${EVIDENCE_PATHS.liveRoofRepairScenarioIsolation} proves the roof-repair heat case keeps roof/fall identity with warehouse seed absent while the warehouse control retains its intended identity. ${EVIDENCE_PATHS.liveAccidentCaseScenarioIsolation} separately proves 5/5 live fallback accident-case arrays retain only scenario-relevant fall, heat, forklift, chemical, hot-work, or facility evidence with 0 unrelated-industry cases. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate.`,
       nextActions: ["Keep the 10-scenario field-isolation gate in release evidence and preserve broad human wording review as a separate boundary."],
     });
   }
@@ -1063,7 +1113,7 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
     label: "Live document scenario field isolation",
     state: "contradicted",
     evidencePath,
-    detail: `Field-isolation verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/10, failed=${liveFail}, livePending=${report.liveAfterDeploymentPending === true}, noMutation=${noMutation}, foreignWorkerGuidance=${guidanceReady}, roofRepairIsolation=${roofIsolationReady}.`,
+    detail: `Field-isolation verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/10, failed=${liveFail}, livePending=${report.liveAfterDeploymentPending === true}, noMutation=${noMutation}, foreignWorkerGuidance=${guidanceReady}, roofRepairIsolation=${roofIsolationReady}, accidentCaseIsolation=${accidentIsolationReady}.`,
     nextActions: ["Fix process/task/equipment grounding or cross-scenario leakage and rerun the unchanged normal and stress matrices."],
   });
 }
@@ -7434,6 +7484,81 @@ function isDocumentExportAdmissionCompatibilityCurrent(rootDir, gateId, governed
     && readString(compatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE";
 }
 
+const SECURITY_ACCIDENT_CASE_COMPATIBILITY_CHANGED_PATHS = [
+  "lib/accident-cases.ts",
+];
+
+const SECURITY_ACCIDENT_CASE_COMPATIBILITY_GATE_IDS = [
+  "security_followup_remediation",
+];
+
+/**
+ * @param {string} rootDir
+ * @param {string} gateId
+ * @param {string[]} governedPaths
+ */
+function isSecurityAccidentCaseCompatibilityCurrent(rootDir, gateId, governedPaths) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.securityAccidentCaseCompatibility);
+  if (!isRecord(report) || !isRecord(report.governedPathCompatibility)) {
+    return false;
+  }
+  const compatibility = report.governedPathCompatibility;
+  const coveredGateIds = Array.isArray(compatibility.coveredGateIds)
+    ? compatibility.coveredGateIds.map(readString)
+    : [];
+  const changedGovernedPaths = Array.isArray(compatibility.changedGovernedPaths)
+    ? compatibility.changedGovernedPaths.map(readString)
+    : [];
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacentTests)
+    ? verification.focusedAndAdjacentTests
+    : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const contracts = isRecord(report.securityContracts) ? report.securityContracts : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  return readString(report.schema) === "safeclaw-security-accident-case-compatibility/v1"
+    && readString(report.verdict) === "PASS_LIVE_PRODUCTION_ACCIDENT_CASE_SECURITY_COMPATIBILITY"
+    && readString(compatibility.verdict) === "PASS_LIVE_PRODUCTION_ACCIDENT_CASE_GOVERNED_PATH_COMPATIBILITY"
+    && productCommit.length > 0
+    && productCommit === productionCommit
+    && productCommit === readString(compatibility.sourceHead)
+    && productionCommit === readString(compatibility.productionCommit)
+    && isGitAncestor(rootDir, productCommit)
+    && isEvidenceCurrentForPaths(rootDir, productCommit, governedPaths)
+    && coveredGateIds.length === SECURITY_ACCIDENT_CASE_COMPATIBILITY_GATE_IDS.length
+    && SECURITY_ACCIDENT_CASE_COMPATIBILITY_GATE_IDS.every((id) => coveredGateIds.includes(id))
+    && coveredGateIds.includes(gateId)
+    && changedGovernedPaths.length === SECURITY_ACCIDENT_CASE_COMPATIBILITY_CHANGED_PATHS.length
+    && SECURITY_ACCIDENT_CASE_COMPATIBILITY_CHANGED_PATHS.every((item) => changedGovernedPaths.includes(item))
+    && readNumber(focused.files) === 6
+    && readNumber(focused.tests) === 142
+    && readNumber(focused.failed) === 0
+    && readString(focused.status) === "PASS"
+    && verification.typecheck === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && contracts.callerAbortPropagated === true
+    && contracts.accidentBranchesReceiveCallerSignal === true
+    && contracts.oversizedKoshaResponseFallsBackWithinBudget === true
+    && contracts.privateProxyAndRelayTokenRejected === true
+    && contracts.redirectsRemainManual === true
+    && contracts.liveScenarioFallbackIsolationPassed === true
+    && readNumber(contracts.liveScenarioCount) === 5
+    && readNumber(contracts.unrelatedIndustryCaseCount) === 0
+    && mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchPerformed === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.vectorOrEmbeddingMutationPerformed === false
+    && mutationBoundary.wikiPublicationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false
+    && remainingBoundaries.originalBaselineRewritten === false
+    && remainingBoundaries.securityCompleteClaimed === false
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+}
+
 /**
  * @param {string} rootDir
  * @returns {GateResult}
@@ -8018,10 +8143,16 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
   const latestCompatibilityCurrent = latestPathCompatibility !== null
     && latestCompatibilityPass
     && isEvidenceCurrentForPaths(rootDir, latestCompatibilitySourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS);
+  const accidentCompatibilityCurrent = isSecurityAccidentCaseCompatibilityCurrent(
+    rootDir,
+    "security_followup_remediation",
+    SECURITY_FOLLOWUP_REMEDIATION_PATHS,
+  );
   const productPathsCurrent = latestCompatibilityCurrent
     || isEvidenceCurrentForPaths(rootDir, compatibilitySourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isSecurityUpstreamTransportCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
+    || accidentCompatibilityCurrent
     || isSecuritySafetyReferenceSurfaceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS);
@@ -8070,8 +8201,8 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     state: pass ? "proven" : "contradicted",
     evidencePath,
     detail: pass
-      ? `The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its ${readNumber(compatibilityFocused.files)}/${readNumber(compatibilityFocused.tests)} compatibility check, and the latest search/KOSHA compatibility receipt (${readNumber(latestCompatibilityFocused.files)} files / ${readNumber(latestCompatibilityFocused.tests)} tests; full CI ${readNumber(latestCompatibilityCi.filesPassed)} files / ${readNumber(latestCompatibilityCi.testsPassed)} tests). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.`
-      : `Security follow-up verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceHead.length > 0 && sourceHead === readString(deployment.productionCommit)}, compatibilityPass=${compatibilityPass}, latestCompatibilityPass=${latestCompatibilityPass}, latestCompatibilityCurrent=${latestCompatibilityCurrent}, productPathsCurrent=${currentProductPaths}, exportAdmissionCompatibility=${exportAdmissionCompatibilityCurrent}, findings=${readNumber(scan.sealedFindingCount)}, baseline=${readNumber(scan.immutableOriginalBaselineFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, remediations=${remediations.length}, tests=${readNumber(focused.tests)}, compatibilityTests=${readNumber(compatibilityFocused.tests)}, latestCompatibilityTests=${readNumber(latestCompatibilityFocused.tests)}, liveProviderProbe=${deployment.liveProviderCancellationProbeExecuted === true}, baselineRewritten=${boundaries.originalBaselineRewritten === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+      ? `The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its ${readNumber(compatibilityFocused.files)}/${readNumber(compatibilityFocused.tests)} compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (${accidentCompatibilityCurrent ? "6 files / 142 tests" : "covered by another current receipt"}). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.`
+      : `Security follow-up verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceHead.length > 0 && sourceHead === readString(deployment.productionCommit)}, compatibilityPass=${compatibilityPass}, latestCompatibilityPass=${latestCompatibilityPass}, latestCompatibilityCurrent=${latestCompatibilityCurrent}, accidentCompatibilityCurrent=${accidentCompatibilityCurrent}, productPathsCurrent=${currentProductPaths}, exportAdmissionCompatibility=${exportAdmissionCompatibilityCurrent}, findings=${readNumber(scan.sealedFindingCount)}, baseline=${readNumber(scan.immutableOriginalBaselineFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, remediations=${remediations.length}, tests=${readNumber(focused.tests)}, compatibilityTests=${readNumber(compatibilityFocused.tests)}, latestCompatibilityTests=${readNumber(latestCompatibilityFocused.tests)}, liveProviderProbe=${deployment.liveProviderCancellationProbeExecuted === true}, baselineRewritten=${boundaries.originalBaselineRewritten === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
           "Keep the immutable baseline and two deferred candidates visible in future security review; do not convert this scoped remediation into a security-complete claim.",

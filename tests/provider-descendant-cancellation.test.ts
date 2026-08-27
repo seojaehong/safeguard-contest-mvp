@@ -32,12 +32,13 @@ describe("Ask enrichment descendant cancellation", () => {
     const signals: AbortSignal[] = [];
     const fetchMock = stalledFetch(signals);
     vi.stubGlobal("fetch", fetchMock);
-    const [weather, work24, education, kosha, openApi] = await Promise.all([
+    const [weather, work24, education, kosha, openApi, accidentCases] = await Promise.all([
       import("@/lib/weather"),
       import("@/lib/work24"),
       import("@/lib/kosha-education"),
       import("@/lib/kosha"),
       import("@/lib/kosha-openapi"),
+      import("@/lib/accident-cases"),
     ]);
     const controller = new AbortController();
     const pending = Promise.all([
@@ -46,13 +47,18 @@ describe("Ask enrichment descendant cancellation", () => {
       education.fetchKoshaEducationRecommendations("외국인 근로자 안전교육", controller.signal),
       kosha.fetchKoshaReferences("외벽 고소작업", controller.signal),
       openApi.fetchKoshaOpenApiEvidence("건설업 추락 재해", controller.signal),
+      accidentCases.fetchAccidentCases("건설업 지붕 추락 작업", {
+        signal: controller.signal,
+        retryCount: 0,
+        requestTimeoutMs: 5_000,
+      }),
     ]);
-    await vi.waitFor(() => expect(fetchMock.mock.calls.length).toBeGreaterThanOrEqual(5));
+    await vi.waitFor(() => expect(fetchMock.mock.calls.length).toBeGreaterThanOrEqual(6));
     const reason = new Error("caller disconnected");
     controller.abort(reason);
 
     await expect(pending).rejects.toBe(reason);
-    expect(signals.length).toBeGreaterThanOrEqual(5);
+    expect(signals.length).toBeGreaterThanOrEqual(6);
     expect(signals.every((signal) => signal.aborted)).toBe(true);
   });
 });

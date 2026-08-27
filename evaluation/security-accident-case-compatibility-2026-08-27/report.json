@@ -1,0 +1,60 @@
+{
+  "schema": "safeclaw-security-accident-case-compatibility/v1",
+  "generatedAt": "2026-08-27T10:52:55.4073362+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_ACCIDENT_CASE_SECURITY_COMPATIBILITY",
+  "productCommit": "41872e1a5e321c2cf234bbd1c249e489b2960940",
+  "productionCommit": "41872e1a5e321c2cf234bbd1c249e489b2960940",
+  "productionDeployment": "safeguard-contest-6bmtjmzma-seojaehongs-projects.vercel.app",
+  "governedPathCompatibility": {
+    "verdict": "PASS_LIVE_PRODUCTION_ACCIDENT_CASE_GOVERNED_PATH_COMPATIBILITY",
+    "sourceHead": "41872e1a5e321c2cf234bbd1c249e489b2960940",
+    "productionCommit": "41872e1a5e321c2cf234bbd1c249e489b2960940",
+    "coveredGateIds": [
+      "security_followup_remediation"
+    ],
+    "changedGovernedPaths": [
+      "lib/accident-cases.ts"
+    ]
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "files": 6,
+      "tests": 142,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "staticPages": 28
+    },
+    "dependencyAuditVulnerabilities": 0
+  },
+  "securityContracts": {
+    "callerAbortPropagated": true,
+    "accidentBranchesReceiveCallerSignal": true,
+    "oversizedKoshaResponseFallsBackWithinBudget": true,
+    "privateProxyAndRelayTokenRejected": true,
+    "redirectsRemainManual": true,
+    "liveScenarioFallbackIsolationPassed": true,
+    "liveScenarioCount": 5,
+    "unrelatedIndustryCaseCount": 0
+  },
+  "immutableUserContext": "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchPerformed": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "originalBaselineFindingCount": 18,
+    "originalBaselineRewritten": false,
+    "securityCompleteClaimed": false,
+    "humanReviewCompleted": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesPreserved": true
+  }
+}

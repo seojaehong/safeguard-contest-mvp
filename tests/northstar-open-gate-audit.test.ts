@@ -2461,6 +2461,37 @@ function createFixtureRoot(): string {
       fullyAutomatedLaunchClaimAllowed: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "live-accident-case-scenario-isolation-2026-08-27", "report.json"), {
+    schema: "safeclaw-live-accident-case-scenario-isolation/v1",
+    verdict: "PASS_LIVE_PRODUCTION_ACCIDENT_CASE_SCENARIO_ISOLATION",
+    productCommit: "fixture-product",
+    productionCommit: "fixture-product",
+    afterLive: {
+      total: 5,
+      passed: 5,
+      failed: 0,
+      forbiddenIndustryCaseCount: 0,
+      providerGenerationRequested: false,
+      cases: [
+        { id: "roof-heat", status: 200, responseAiMode: "template", providerWorkUnit: 0, accidentMode: "fallback", caseCount: 2, titles: ["추락", "온열질환"], requiredTermsPresent: true, forbiddenIndustryPresent: false, pass: true },
+        { id: "warehouse-heat", status: 200, responseAiMode: "template", providerWorkUnit: 0, accidentMode: "fallback", caseCount: 2, titles: ["지게차", "온열질환"], requiredTermsPresent: true, forbiddenIndustryPresent: false, pass: true },
+        { id: "chemical-cleaning", status: 200, responseAiMode: "template", providerWorkUnit: 0, accidentMode: "fallback", caseCount: 1, titles: ["세척"], requiredTermsPresent: true, forbiddenIndustryPresent: false, pass: true },
+        { id: "manufacturing-hotwork", status: 200, responseAiMode: "template", providerWorkUnit: 0, accidentMode: "fallback", caseCount: 1, titles: ["용접"], requiredTermsPresent: true, forbiddenIndustryPresent: false, pass: true },
+        { id: "facility-electrical", status: 200, responseAiMode: "template", providerWorkUnit: 0, accidentMode: "fallback", caseCount: 1, titles: ["기계실"], requiredTermsPresent: true, forbiddenIndustryPresent: false, pass: true },
+      ],
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerGenerationPerformed: false,
+      providerDispatchPerformed: false,
+      shareSessionCreated: false,
+    },
+    remainingBoundaries: {
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "hermes-review-decision-first-viewport-2026-08-27", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_DECISION_FIRST_VIEWPORT",
     sourceHead: "fixture-sha",
@@ -3351,6 +3382,47 @@ function createFixtureRoot(): string {
       vectorUploadPerformed: false,
       wikiPublicationPerformed: false,
       koshaRegistryMutationPerformed: false,
+    },
+  });
+  writeJson(rootDir, path.join("evaluation", "security-accident-case-compatibility-2026-08-27", "report.json"), {
+    schema: "safeclaw-security-accident-case-compatibility/v1",
+    verdict: "PASS_LIVE_PRODUCTION_ACCIDENT_CASE_SECURITY_COMPATIBILITY",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    governedPathCompatibility: {
+      verdict: "PASS_LIVE_PRODUCTION_ACCIDENT_CASE_GOVERNED_PATH_COMPATIBILITY",
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      coveredGateIds: ["security_followup_remediation"],
+      changedGovernedPaths: ["lib/accident-cases.ts"],
+    },
+    verification: {
+      focusedAndAdjacentTests: { files: 6, tests: 142, failed: 0, status: "PASS" },
+      typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+    },
+    securityContracts: {
+      callerAbortPropagated: true,
+      accidentBranchesReceiveCallerSignal: true,
+      oversizedKoshaResponseFallsBackWithinBudget: true,
+      privateProxyAndRelayTokenRejected: true,
+      redirectsRemainManual: true,
+      liveScenarioFallbackIsolationPassed: true,
+      liveScenarioCount: 5,
+      unrelatedIndustryCaseCount: 0,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchPerformed: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      originalBaselineRewritten: false,
+      securityCompleteClaimed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
   writeJson(rootDir, path.join("evaluation", "security-safety-reference-surface-remediation-2026-08-11", "report.json"), {
@@ -5964,6 +6036,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("work-unit 0");
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("roof-repair heat case");
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("warehouse seed absent");
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("5/5 live fallback accident-case arrays");
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("0 unrelated-industry cases");
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("exact saved Share geometry remain separate");
     expect(audit.gates.find((gate) => gate.id === "live_kosha_exact_materialization")).toMatchObject({
       state: "proven",
@@ -7142,6 +7216,42 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const audit = buildNorthstarOpenGateAudit({ rootDir });
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.state).toBe("contradicted");
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("compatibilityPass=false");
+  });
+
+  it("keeps accident-case governed-path compatibility fail-closed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    writeText(rootDir, path.join("lib", "accident-cases.ts"), "export const scenarioIsolation = true;\n");
+    execFileSync("git", ["add", "lib/accident-cases.ts"], { cwd: rootDir, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "isolate accident evidence"], { cwd: rootDir, stdio: "ignore" });
+    const currentSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: rootDir, encoding: "utf8" }).trim();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "security-accident-case-compatibility-2026-08-27",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      productCommit: string;
+      productionCommit: string;
+      governedPathCompatibility: { sourceHead: string; productionCommit: string };
+      securityContracts: { callerAbortPropagated: boolean };
+    };
+    report.productCommit = currentSha;
+    report.productionCommit = currentSha;
+    report.governedPathCompatibility.sourceHead = currentSha;
+    report.governedPathCompatibility.productionCommit = currentSha;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const compatible = buildNorthstarOpenGateAudit({ rootDir });
+    expect(compatible.gates.find((gate) => gate.id === "security_followup_remediation")?.state).toBe("proven");
+    expect(compatible.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("6 files / 142 tests");
+
+    report.securityContracts.callerAbortPropagated = false;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((gate) => gate.id === "security_followup_remediation")?.state).toBe("contradicted");
+    expect(contradicted.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("accidentCompatibilityCurrent=false");
   });
 
   it("fails security follow-up closed when the latest search compatibility receipt overclaims boundaries", async () => {
@@ -9854,6 +9964,36 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("roofRepairIsolation=false");
+  });
+
+  it("fails document field isolation closed when an unrelated accident case is claimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const accidentPath = path.join(
+      rootDir,
+      "evaluation",
+      "live-accident-case-scenario-isolation-2026-08-27",
+      "report.json",
+    );
+    const accidentReport = JSON.parse(fs.readFileSync(accidentPath, "utf8")) as {
+      afterLive: { cases: Array<{ id: string; titles: string[]; forbiddenIndustryPresent: boolean }> };
+    };
+    const roofCase = accidentReport.afterLive.cases.find((item) => item.id === "roof-heat");
+    expect(roofCase).toBeDefined();
+    roofCase!.titles.push("지게차 후진 충돌");
+    roofCase!.forbiddenIndustryPresent = true;
+    writeJson(rootDir, path.relative(rootDir, accidentPath), accidentReport);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("accidentCaseIsolation=false");
   });
 
   it("renders the approval boundary and forbidden claims in the Markdown report", async () => {

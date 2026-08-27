@@ -1,0 +1,135 @@
+{
+  "schema": "safeclaw-live-accident-case-scenario-isolation/v1",
+  "generatedAt": "2026-08-27T10:22:09.7948955+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_ACCIDENT_CASE_SCENARIO_ISOLATION",
+  "productCommit": "41872e1a5e321c2cf234bbd1c249e489b2960940",
+  "productionCommit": "41872e1a5e321c2cf234bbd1c249e489b2960940",
+  "productionDeployment": "safeguard-contest-6bmtjmzma-seojaehongs-projects.vercel.app",
+  "beforeLiveDiagnostic": {
+    "sourceCommit": "3091cf2003caab42ae1e605a390cd756984b71a8",
+    "canonicalArtifactAvailable": false,
+    "caseId": "roof-heat",
+    "accidentMode": "fallback",
+    "caseCount": 3,
+    "titles": [
+      "이동식 비계 작업 중 추락 재해사례",
+      "지게차 후진 중 보행자 충돌 재해사례",
+      "용접 불티에 의한 화재 재해사례"
+    ],
+    "unrelatedIndustryCaseCount": 2,
+    "finding": "The roof-repair response exposed logistics and hot-work fallback cases beside the relevant fall case. This exact diagnostic observation is preserved as discovery context rather than relabeled as a canonical before matrix."
+  },
+  "afterLive": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "cases": [
+      {
+        "id": "roof-heat",
+        "status": 200,
+        "elapsedMs": 766,
+        "responseAiMode": "template",
+        "providerWorkUnit": 0,
+        "accidentMode": "fallback",
+        "caseCount": 2,
+        "titles": [
+          "이동식 비계 작업 중 추락 재해사례",
+          "옥외 고온 작업 중 온열질환 재해사례"
+        ],
+        "requiredTermsPresent": true,
+        "forbiddenIndustryPresent": false,
+        "pass": true
+      },
+      {
+        "id": "warehouse-heat",
+        "status": 200,
+        "elapsedMs": 305,
+        "responseAiMode": "template",
+        "providerWorkUnit": 0,
+        "accidentMode": "fallback",
+        "caseCount": 2,
+        "titles": [
+          "지게차 후진 중 보행자 충돌 재해사례",
+          "옥외 고온 작업 중 온열질환 재해사례"
+        ],
+        "requiredTermsPresent": true,
+        "forbiddenIndustryPresent": false,
+        "pass": true
+      },
+      {
+        "id": "chemical-cleaning",
+        "status": 200,
+        "elapsedMs": 76,
+        "responseAiMode": "template",
+        "providerWorkUnit": 0,
+        "accidentMode": "fallback",
+        "caseCount": 1,
+        "titles": [
+          "세척 작업 중 화학물질 노출 및 미끄럼 재해사례"
+        ],
+        "requiredTermsPresent": true,
+        "forbiddenIndustryPresent": false,
+        "pass": true
+      },
+      {
+        "id": "manufacturing-hotwork",
+        "status": 200,
+        "elapsedMs": 278,
+        "responseAiMode": "template",
+        "providerWorkUnit": 0,
+        "accidentMode": "fallback",
+        "caseCount": 1,
+        "titles": [
+          "용접 불티에 의한 화재 재해사례"
+        ],
+        "requiredTermsPresent": true,
+        "forbiddenIndustryPresent": false,
+        "pass": true
+      },
+      {
+        "id": "facility-electrical",
+        "status": 200,
+        "elapsedMs": 287,
+        "responseAiMode": "template",
+        "providerWorkUnit": 0,
+        "accidentMode": "fallback",
+        "caseCount": 1,
+        "titles": [
+          "지하 기계실 점검 중 감전·미끄럼 재해사례"
+        ],
+        "requiredTermsPresent": true,
+        "forbiddenIndustryPresent": false,
+        "pass": true
+      }
+    ],
+    "total": 5,
+    "passed": 5,
+    "failed": 0,
+    "forbiddenIndustryCaseCount": 0,
+    "providerGenerationRequested": false
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "files": 4,
+      "tests": 130,
+      "passed": true
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28,
+    "dependencyAuditVulnerabilities": 0
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerGenerationPerformed": false,
+    "providerDispatchPerformed": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "humanReviewCompleted": false,
+    "broadHumanWordingReviewRequired": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "fullyAutomatedLaunchClaimAllowed": false
+  }
+}
