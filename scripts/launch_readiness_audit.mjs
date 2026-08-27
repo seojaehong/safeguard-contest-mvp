@@ -188,6 +188,14 @@ try {
     elapsedMs: Date.now() - startedAt,
     apiAskStatus: ask.response.status,
     apiAskOk: ask.response.ok,
+    apiAskErrorCode: typeof ask.parsed?.code === "string" ? ask.parsed.code : null,
+    apiAskError: typeof ask.parsed?.error === "string" ? ask.parsed.error : null,
+    apiAskRetryAfterSeconds: typeof ask.parsed?.retryAfterSeconds === "number"
+      && Number.isFinite(ask.parsed.retryAfterSeconds)
+      ? ask.parsed.retryAfterSeconds
+      : null,
+    apiAskRateLimit: ask.response.headers.get("x-safeclaw-rate-limit"),
+    apiAskWorkUnit: ask.response.headers.get("x-safeclaw-work-unit"),
     dispatchStatus: dispatchResult?.response.status ?? null,
     dispatchOk: dispatchResult?.response.ok ?? null,
     scenario: ask.parsed?.scenario || null,
@@ -202,6 +210,7 @@ try {
     generatedAt: audit.generatedAt,
     baseUrl: audit.baseUrl,
     apiAskOk: audit.apiAskOk,
+    apiAskErrorCode: audit.apiAskErrorCode,
     dispatchOk: audit.dispatchOk,
     elapsedMs: audit.elapsedMs,
     connectionSummary: audit.connections.map((item) => `${item.name}: ${item.liveStatus}`)

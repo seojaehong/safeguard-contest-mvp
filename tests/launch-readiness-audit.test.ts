@@ -21,7 +21,7 @@ const delayedStdoutPreload = `data:text/javascript,${encodeURIComponent(`
   };
 `)}`;
 
-type FixtureMode = "success" | "http-failure" | "timeout" | "malformed-json";
+type FixtureMode = "success" | "http-failure" | "distributed-unavailable" | "timeout" | "malformed-json";
 
 type FixtureRequest = {
   body: string;
@@ -86,6 +86,19 @@ async function startFixtureServer(mode: FixtureMode): Promise<FixtureServer> {
       if (mode === "http-failure") {
         response.writeHead(503, { "content-type": "application/json" });
         response.end(JSON.stringify({ error: "fixture unavailable" }));
+        return;
+      }
+      if (mode === "distributed-unavailable") {
+        response.writeHead(503, {
+          "content-type": "application/json",
+          "x-safeclaw-rate-limit": "distributed",
+          "x-safeclaw-work-unit": "generation",
+        });
+        response.end(JSON.stringify({
+          code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+          error: "request protection unavailable",
+          retryAfterSeconds: 5,
+        }));
         return;
       }
       if (mode === "malformed-json") {
@@ -277,6 +290,29 @@ describe("launch readiness audit process lifecycle", () => {
     expect(parseJsonObject(result.outputText ?? "")).toMatchObject({
       apiAskOk: false,
       apiAskStatus: 503,
+    });
+    expectOnlyAskRequest(result);
+  });
+
+  it("preserves distributed admission failure details without dispatch", async () => {
+    const result = await runAudit("distributed-unavailable");
+
+    expect(result.code).toBe(1);
+    expect(result.signal).toBeNull();
+    expect(result.stderr).toBe("");
+    expect(parseJsonObject(result.stdout.trim())).toMatchObject({
+      apiAskErrorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      apiAskOk: false,
+      dispatchOk: null,
+    });
+    expect(parseJsonObject(result.outputText ?? "")).toMatchObject({
+      apiAskError: "request protection unavailable",
+      apiAskErrorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      apiAskRateLimit: "distributed",
+      apiAskRetryAfterSeconds: 5,
+      apiAskStatus: 503,
+      apiAskWorkUnit: "generation",
+      dispatchStatus: null,
     });
     expectOnlyAskRequest(result);
   });

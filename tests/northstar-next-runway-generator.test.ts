@@ -35,6 +35,16 @@ type NextRunwayReport = {
   boundedWorkbenchSourceIncludedInLive: boolean;
   boundedWorkbenchCurrentLivePending: boolean;
   launchReadiness: {
+    verdict: string;
+    safeLaunchDemoClaimAllowed: boolean;
+    apiAskStatus: number | null;
+    apiAskErrorCode: string;
+    apiAskRateLimit: string;
+    apiAskWorkUnit: string;
+    dispatchCalled: boolean;
+    distributedAdmissionBlocked: boolean;
+    distributedAdmissionActivation: string;
+    exactSavedShareVerdict: string;
     documentCoverage: {
       expectedCount: number;
       presentCount: number;
@@ -5181,6 +5191,63 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
     expect(report.latestEvidenceCommitLive).toBe(false);
     expect(report.currentHeadIsEvidenceOnlyPending).toBe(true);
     expect(report.liveRollupMatchesProduction).toBe(true);
+  });
+
+  it("carries the current distributed admission blocker into the runway without weakening saved Share boundaries", async () => {
+    const { buildNorthstarNextRunway, renderNorthstarNextRunwayMarkdown } = await loadNextRunwayModule();
+    const { root, secondHead } = createFixtureRoot();
+    pointLiveRollupAt(root, secondHead);
+    writeJson(root, "evaluation/launch-readiness-current-2026-07-22/report.json", {
+      verdict: "BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH",
+      safeLaunchDemoClaimAllowed: false,
+      guidedPilotClaimAllowed: false,
+      fullyAutomatedLaunchClaimAllowed: false,
+      selfServeSaasLaunchClaimAllowed: false,
+      providerDispatchLiveClaimed: false,
+      dispatchCalled: false,
+      apiAsk: {
+        status: 503,
+        ok: false,
+        errorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        rateLimit: "distributed",
+        workUnit: "generation",
+      },
+      runtimeBoundary: {
+        distributedAdmissionBlocked: true,
+        distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+        exactSavedShareVerdict: "MISSING_EVIDENCE",
+      },
+      documentCoverage: {
+        expectedCount: 12,
+        presentCount: 0,
+        missing: [],
+        present: [],
+      },
+    });
+
+    const report = buildNorthstarNextRunway({
+      rootDir: root,
+      buildInfo: { commitSha: secondHead },
+      generatedAt: "2026-08-28T00:00:00.000Z",
+    });
+    const markdown = renderNorthstarNextRunwayMarkdown(report);
+
+    expect(report.launchReadiness).toMatchObject({
+      verdict: "BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH",
+      safeLaunchDemoClaimAllowed: false,
+      apiAskStatus: 503,
+      apiAskErrorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      apiAskRateLimit: "distributed",
+      apiAskWorkUnit: "generation",
+      dispatchCalled: false,
+      distributedAdmissionBlocked: true,
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(markdown).toContain("BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH");
+    expect(markdown).toContain("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+    expect(markdown).toContain("demo allowed=`false`");
+    expect(markdown).toContain("exact saved Share remains `MISSING_EVIDENCE`");
   });
 
   it("keeps an evidence-only source head pending after refreshing the rollup from that source head", async () => {

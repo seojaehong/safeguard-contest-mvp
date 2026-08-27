@@ -6,6 +6,13 @@ import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 
 type LaunchReadinessReport = {
+  apiAsk: {
+    errorCode: string;
+    rateLimit: string;
+    retryAfterSeconds: number | null;
+    status: number | null;
+    workUnit: string;
+  };
   connectionVerdict: string;
   currentHeadIsEvidenceOnlyPending: boolean;
   dispatchCalled: boolean;
@@ -17,6 +24,7 @@ type LaunchReadinessReport = {
   };
   final99Boundary: {
     fullyAutomatedLaunchClaimAllowed: boolean;
+    historicalGateSafeLaunchDemoClaimAllowed: boolean;
     noticeCount: number;
     overall: string;
     safeLaunchDemoClaimAllowed: boolean;
@@ -25,6 +33,14 @@ type LaunchReadinessReport = {
   fullyAutomatedLaunchClaimAllowed: boolean;
   productionCommit: string;
   providerDispatchLiveClaimed: boolean;
+  runtimeBoundary: {
+    databaseMutationPerformed: boolean;
+    distributedAdmissionActivation: string;
+    distributedAdmissionBlocked: boolean;
+    exactSavedShareVerdict: string;
+    providerDispatchExecuted: boolean;
+    providerWorkExecuted: boolean | null;
+  };
   safeLaunchDemoClaimAllowed: boolean;
   sourceHeadAtGeneration: string;
   uiArchitectureBoundary: {
@@ -212,5 +228,67 @@ describe("launch readiness current report", () => {
     expect(report.productionCommit).toBe("previous-live-commit");
     expect(report.verdict).toBe("PASS_LIVE_PRODUCTION_WITH_BOUNDARIES");
     expect(report.dispatchCalled).toBe(false);
+    expect(report.final99Boundary).toMatchObject({
+      historicalGateSafeLaunchDemoClaimAllowed: true,
+      safeLaunchDemoClaimAllowed: true,
+    });
+  });
+
+  it("classifies distributed admission unavailability as a live launch blocker without overclaiming document failure", async () => {
+    const module = await loadReportModule();
+    const { head, rootDir } = createFixtureRoot();
+    writeJson(rootDir, "evaluation/launch-readiness-current-2026-07-22/api-connection-audit.json", {
+      apiAskError: "request protection unavailable",
+      apiAskErrorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      apiAskOk: false,
+      apiAskRateLimit: "distributed",
+      apiAskRetryAfterSeconds: 5,
+      apiAskStatus: 503,
+      apiAskWorkUnit: "generation",
+      baseUrl: "https://www.safeclaw.kr",
+      connections: [],
+      dispatchOk: null,
+      dispatchStatus: null,
+      documents: {},
+      elapsedMs: 696,
+      scenario: null,
+    });
+
+    const report = module.buildLaunchReadinessCurrentReport({
+      generatedAt: "2026-08-28T00:00:00.000Z",
+      productionCommit: head,
+      rootDir,
+    });
+    const markdown = module.renderLaunchReadinessCurrentMarkdown(report);
+
+    expect(report).toMatchObject({
+      connectionVerdict: "BLOCKED_BEFORE_CONNECTION_CHECK_NO_DISPATCH",
+      dispatchCalled: false,
+      providerDispatchLiveClaimed: false,
+      safeLaunchDemoClaimAllowed: false,
+      verdict: "BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH",
+    });
+    expect(report.apiAsk).toMatchObject({
+      errorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      rateLimit: "distributed",
+      retryAfterSeconds: 5,
+      status: 503,
+      workUnit: "generation",
+    });
+    expect(report.runtimeBoundary).toEqual({
+      databaseMutationPerformed: false,
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      distributedAdmissionBlocked: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      providerDispatchExecuted: false,
+      providerWorkExecuted: false,
+    });
+    expect(report.final99Boundary).toMatchObject({
+      historicalGateSafeLaunchDemoClaimAllowed: true,
+      safeLaunchDemoClaimAllowed: false,
+    });
+    expect(report.forbiddenClaims).toContain("Current live /api/ask generation is available for a launch demo.");
+    expect(markdown).toContain("Current live launch demo generation is not allowed");
+    expect(markdown).toContain("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
   });
 });

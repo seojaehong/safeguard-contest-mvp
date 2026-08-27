@@ -318,6 +318,8 @@ function approvalGates(approvalRunway, shareRecipientAckApproval) {
  */
 function launchReadinessSummary(launch) {
   if (!isRecord(launch)) return {};
+  const apiAsk = isRecord(launch.apiAsk) ? launch.apiAsk : {};
+  const runtimeBoundary = isRecord(launch.runtimeBoundary) ? launch.runtimeBoundary : {};
   return {
     verdict: asString(launch.verdict),
     safeLaunchDemoClaimAllowed: asBoolean(launch.safeLaunchDemoClaimAllowed),
@@ -325,8 +327,17 @@ function launchReadinessSummary(launch) {
     fullyAutomatedLaunchClaimAllowed: asBoolean(launch.fullyAutomatedLaunchClaimAllowed),
     selfServeSaasLaunchClaimAllowed: asBoolean(launch.selfServeSaasLaunchClaimAllowed),
     providerDispatchLiveClaimed: asBoolean(launch.providerDispatchLiveClaimed),
-    apiAskOk: isRecord(launch.apiAsk) && asBoolean(launch.apiAsk.ok),
+    apiAskOk: asBoolean(apiAsk.ok),
+    apiAskStatus: typeof apiAsk.status === "number" && Number.isFinite(apiAsk.status)
+      ? apiAsk.status
+      : null,
+    apiAskErrorCode: asString(apiAsk.errorCode),
+    apiAskRateLimit: asString(apiAsk.rateLimit),
+    apiAskWorkUnit: asString(apiAsk.workUnit),
     dispatchCalled: asBoolean(launch.dispatchCalled),
+    distributedAdmissionBlocked: asBoolean(runtimeBoundary.distributedAdmissionBlocked),
+    distributedAdmissionActivation: asString(runtimeBoundary.distributedAdmissionActivation),
+    exactSavedShareVerdict: asString(runtimeBoundary.exactSavedShareVerdict),
     documentCoverage: isRecord(launch.documentCoverage) ? launch.documentCoverage : {},
   };
 }
@@ -3927,6 +3938,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 
 ## Proven Current State
 
+- Current launch smoke is \`${report.launchReadiness.verdict || "missing"}\`: \`/api/ask\` status \`${report.launchReadiness.apiAskStatus ?? "unknown"}\`, error \`${report.launchReadiness.apiAskErrorCode || "none"}\`, admission \`${report.launchReadiness.apiAskRateLimit || "unknown"}/${report.launchReadiness.apiAskWorkUnit || "unknown"}\`, demo allowed=\`${report.launchReadiness.safeLaunchDemoClaimAllowed === true}\`, dispatch called=\`${report.launchReadiness.dispatchCalled === true}\`. Distributed admission activation is \`${report.launchReadiness.distributedAdmissionActivation || "unknown"}\`; exact saved Share remains \`${report.launchReadiness.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live harness quality is proven.
 - KOSHA exact trust registry is proven for the accepted exact-trust slice.
 - KOSHA next exact candidate audit identifies the 234-item current native technical-support subset and 231 metadata-verified non-exact candidates without mutation.
