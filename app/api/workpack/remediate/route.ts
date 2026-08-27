@@ -214,7 +214,8 @@ export async function POST(request: NextRequest) {
     namespace: "workpack-remediation",
     limit: REMEDIATION_RATE_LIMIT,
     windowMs: REMEDIATION_RATE_WINDOW_MS,
-    instanceLimiter: limiter
+    instanceLimiter: limiter,
+    requireDistributedInProduction: true
   });
   const limited = publicRateLimitResponse(rateLimit);
   if (limited) return limited;

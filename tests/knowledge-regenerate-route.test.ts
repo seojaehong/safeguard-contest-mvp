@@ -55,6 +55,31 @@ describe("knowledge candidate API", () => {
     error.mockRestore();
   });
 
+  it("fails closed before body parsing or AI generation when production distributed admission is absent", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { POST } = await import("@/app/api/knowledge/regenerate/route");
+
+    const response = await POST(new NextRequest("http://localhost/api/knowledge/regenerate", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-forwarded-for": "198.51.100.42"
+      },
+      body: "not-json"
+    }));
+    const payload = await response.json() as { code: string };
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
+    expect(payload.code).toBe("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+    expect(generateKnowledgeText).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledTimes(1);
+    error.mockRestore();
+  });
+
   it.each([
     ["missing", undefined],
     ["non-array", { source: "lawgo" }],

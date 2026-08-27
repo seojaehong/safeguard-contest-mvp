@@ -106,6 +106,36 @@ describe("workpack remediation route", () => {
     });
   });
 
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("fails closed before body parsing, reference search, or AI work when production distributed admission is absent", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const response = await POST(new NextRequest("http://localhost/api/workpack/remediate", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-forwarded-for": "198.51.100.43"
+      },
+      body: "not-json"
+    }));
+    const body = await response.json() as { code: string };
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
+    expect(body.code).toBe("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+    expect(generateKnowledgeText).not.toHaveBeenCalled();
+    expect(searchSafetyReferences).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledTimes(1);
+    error.mockRestore();
+  });
+
   it("uses readable SIF labels in remediation evidence without overwriting source title", async () => {
     const rawTitle = "1919 / 기타의사업 / 시설관리및사업지원서비스업";
     const readableTitle = "지하 기계실 배수펌프 점검 중 산소결핍으로 쓰러지고, 구조 과정에서 불시기동된 펌프에 끼임 사례";
@@ -127,11 +157,6 @@ describe("workpack remediation route", () => {
     expect(generatedPrompt).toContain(readableTitle);
     expect(generatedPrompt).not.toContain(rawTitle);
     expect(archiveSifReference().title).toBe(rawTitle);
-  });
-
-  afterEach(() => {
-    vi.unstubAllEnvs();
-    vi.unstubAllGlobals();
   });
 
   it("fails closed before reference search or AI generation when distributed admission is misconfigured", async () => {

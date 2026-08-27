@@ -37,7 +37,8 @@ export async function POST(request: NextRequest) {
     namespace: "knowledge-regeneration",
     limit: KNOWLEDGE_REGENERATION_RATE_LIMIT,
     windowMs: KNOWLEDGE_REGENERATION_RATE_WINDOW_MS,
-    instanceLimiter: limiter
+    instanceLimiter: limiter,
+    requireDistributedInProduction: true
   });
   const limited = publicRateLimitResponse(rateLimit);
   if (limited) return limited;
