@@ -491,6 +491,36 @@ describe("share session route authority", () => {
     expect(mocks.loadActivePublicShareSession).not.toHaveBeenCalled();
   });
 
+  it("fails production acknowledgement admission before consuming the request body", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    let bodyAccessed = false;
+    const request = {
+      headers: new Headers({ "content-type": "application/json", "x-forwarded-for": "198.51.100.91" }),
+      nextUrl: new URL(`http://localhost/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`),
+      get body() {
+        bodyAccessed = true;
+        throw new Error("request body must not be accessed before coarse admission");
+      }
+    } as unknown as NextRequest;
+
+    try {
+      const { POST } = await import("@/app/api/share-sessions/[sessionId]/route");
+      const response = await POST(request, { params: Promise.resolve({ sessionId: SESSION_ID }) });
+
+      expect(response.status).toBe(503);
+      await expect(response.json()).resolves.toMatchObject({ code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE" });
+      expect(bodyAccessed).toBe(false);
+      expect(mocks.createSupabaseAdminClient).not.toHaveBeenCalled();
+      expect(mocks.loadActivePublicShareSession).not.toHaveBeenCalled();
+    } finally {
+      error.mockRestore();
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("rate limits repeated public share reads before session lookup", async () => {
     const rateLimitedSessionId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
     mocks.createSupabaseAdminClient.mockReturnValue({});
@@ -557,10 +587,10 @@ describe("share session route authority", () => {
     const fetchMock = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
       const command = JSON.parse(String(init?.body)) as unknown[];
       const key = String(command[3]);
-      expect(key).toMatch(new RegExp(`^safeclaw:public-rate:share-session-(?:read|ack):[a-f0-9]{32}$`, "u"));
+      expect(key).toMatch(/^safeclaw:public-(?:rate:share-session-(?:read|ack|ack-prebody):[a-f0-9]{32}|concurrency:share-session-ack-prebody-body)$/u);
       expect(key).not.toContain(SESSION_ID);
       expect(key).not.toContain(WORKER_ID);
-      return Response.json({ result: [1, 59_500] });
+      return Response.json({ result: command[0] === "EVAL" ? [1, 1] : [1, 59_500] });
     });
     vi.stubGlobal("fetch", fetchMock);
     const confirmation = makeConfirmationClient(null);
@@ -579,7 +609,7 @@ describe("share session route authority", () => {
           });
 
       expect(response.status).toBe(200);
-      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(fetchMock).toHaveBeenCalledTimes(method === "GET" ? 1 : 4);
     } finally {
       vi.unstubAllGlobals();
       vi.unstubAllEnvs();

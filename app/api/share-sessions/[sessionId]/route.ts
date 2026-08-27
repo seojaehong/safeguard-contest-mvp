@@ -17,10 +17,13 @@ import {
   type WorkspaceDatabase
 } from "@/lib/supabase-admin";
 import { loadActivePublicShareSession } from "@/lib/workpack-commercial-store";
-import { createRateLimiter } from "@/lib/rate-limit";
+import { createConcurrencyGuard, createRateLimiter } from "@/lib/rate-limit";
 import {
+  acquirePublicConcurrencyLease,
+  applyPublicRateLimitHeader,
   checkPublicRateLimit,
-  publicRateLimitResponse
+  publicRateLimitResponse,
+  type PublicRateLimitDecision
 } from "@/lib/public-distributed-rate-limit";
 import {
   enforcePublicJsonRequestBodyBudget,
@@ -31,6 +34,9 @@ export const dynamic = "force-dynamic";
 
 const SHARE_READ_LIMIT = 60;
 const SHARE_ACK_LIMIT = 20;
+const SHARE_ACK_PREBODY_LIMIT = 60;
+const SHARE_ACK_PREBODY_CONCURRENCY = 8;
+const SHARE_ACK_PREBODY_LEASE_MS = 15_000;
 const SHARE_RATE_WINDOW_MS = 60_000;
 const shareReadLimiter = createRateLimiter({
   limit: SHARE_READ_LIMIT,
@@ -40,6 +46,11 @@ const shareAckLimiter = createRateLimiter({
   limit: SHARE_ACK_LIMIT,
   windowMs: SHARE_RATE_WINDOW_MS
 });
+const shareAckPreBodyLimiter = createRateLimiter({
+  limit: SHARE_ACK_PREBODY_LIMIT,
+  windowMs: SHARE_RATE_WINDOW_MS
+});
+const shareAckPreBodyConcurrency = createConcurrencyGuard(SHARE_ACK_PREBODY_CONCURRENCY);
 
 type RouteContext = {
   params: Promise<{
@@ -58,6 +69,22 @@ function buildPublicRecipientHint(recipients: ShareRecipientInput[]) {
     displayName: recipient.displayName,
     languageCode: recipient.languageCode || "ko"
   }));
+}
+
+function shareAckPreBodyConcurrencyResponse(decision: PublicRateLimitDecision): Response {
+  const response = NextResponse.json({
+    ok: false,
+    code: "SHARE_ACK_PREBODY_CONCURRENCY_LIMIT",
+    confirmationId: null,
+    message: "열람 확인 요청이 많습니다. 잠시 후 다시 시도해 주세요.",
+    retryAfterSeconds: 1
+  }, {
+    status: 503,
+    headers: { "Retry-After": "1" }
+  });
+  applyPublicRateLimitHeader(response, decision);
+  response.headers.set("X-SafeClaw-Work-Unit", "share-ack-body");
+  return response;
 }
 
 export async function GET(request: NextRequest, context: RouteContext) {
@@ -135,17 +162,51 @@ export async function GET(request: NextRequest, context: RouteContext) {
 }
 
 export async function POST(request: NextRequest, context: RouteContext) {
-  const bodyBudget = await enforcePublicJsonRequestBodyBudget(
+  const preBodyAdmission = await checkPublicRateLimit({
     request,
-    PUBLIC_SHARE_ACK_REQUEST_MAX_BYTES,
-    "request body exceeds the public Share acknowledgement byte budget",
-  );
-  if (!bodyBudget.ok) return bodyBudget.response;
+    namespace: "share-session-ack-prebody",
+    limit: SHARE_ACK_PREBODY_LIMIT,
+    windowMs: SHARE_RATE_WINDOW_MS,
+    instanceLimiter: shareAckPreBodyLimiter,
+    requireDistributedInProduction: true
+  });
+  const preBodyLimited = publicRateLimitResponse(preBodyAdmission);
+  if (preBodyLimited) return preBodyLimited;
+
+  let releasePreBody: (() => void | Promise<void>) | null;
+  try {
+    const distributedRelease = await acquirePublicConcurrencyLease({
+      concurrency: SHARE_ACK_PREBODY_CONCURRENCY,
+      leaseMs: SHARE_ACK_PREBODY_LEASE_MS,
+      namespace: "share-session-ack-prebody-body",
+      requireDistributedInProduction: true
+    });
+    releasePreBody = distributedRelease === undefined
+      ? shareAckPreBodyConcurrency.tryAcquire()
+      : distributedRelease;
+  } catch (error) {
+    console.error("public Share acknowledgement pre-body admission unavailable", error);
+    return shareAckPreBodyConcurrencyResponse(preBodyAdmission);
+  }
+  if (!releasePreBody) return shareAckPreBodyConcurrencyResponse(preBodyAdmission);
+
+  let bodyBudget: Awaited<ReturnType<typeof enforcePublicJsonRequestBodyBudget>>;
+  let parsed: unknown;
+  try {
+    bodyBudget = await enforcePublicJsonRequestBodyBudget(
+      request,
+      PUBLIC_SHARE_ACK_REQUEST_MAX_BYTES,
+      "request body exceeds the public Share acknowledgement byte budget",
+    );
+    if (!bodyBudget.ok) return applyPublicRateLimitHeader(bodyBudget.response, preBodyAdmission);
+    parsed = await bodyBudget.request.json().catch((): unknown => ({}));
+  } finally {
+    await releasePreBody();
+  }
 
   const { sessionId } = await context.params;
   const searchParams = request.nextUrl.searchParams;
   const queryWorkerId = searchParams.get("workerId") || undefined;
-  const parsed = await bodyBudget.request.json().catch((): unknown => ({}));
   const body = isRecord(parsed) ? parsed : {};
   const bodyWorkerId = readString(body.workerId);
   const workerId = queryWorkerId || bodyWorkerId || undefined;
