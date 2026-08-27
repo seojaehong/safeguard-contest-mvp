@@ -11,14 +11,29 @@ import { withPublicSafetyReferenceStatusAdmission } from "@/lib/public-distribut
 export const dynamic = "force-dynamic";
 const STATUS_CACHE_CONTROL = "public, max-age=5, s-maxage=30, stale-while-revalidate=60";
 
+function waitForStatusWork<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  signal.throwIfAborted();
+  return new Promise<T>((resolve, reject) => {
+    const abort = () => reject(signal.reason);
+    signal.addEventListener("abort", abort, { once: true });
+    promise.then(resolve, reject).finally(() => {
+      signal.removeEventListener("abort", abort);
+    });
+  });
+}
+
 export async function GET(request: NextRequest) {
   return withPublicSafetyReferenceStatusAdmission(request, async () => {
     const exactTrustPins = getProductionExactKoshaTrustPins();
-    const [catalog, localCorpus, exactTrustRegistryLoad] = await Promise.all([
-      getSafetyReferenceStats(),
-      loadKoshaGuideCorpus(),
-      loadBundledExactKoshaReferences()
-    ]);
+    const [catalog, localCorpus, exactTrustRegistryLoad] = await waitForStatusWork(
+      Promise.all([
+        getSafetyReferenceStats(),
+        loadKoshaGuideCorpus(),
+        loadBundledExactKoshaReferences()
+      ]),
+      request.signal
+    );
+    request.signal.throwIfAborted();
     const exactTrustReady = exactTrustRegistryLoad.status === "ready";
     const searchReady = catalog.ok && localCorpus.status === "ready" && exactTrustReady;
     const status = searchReady ? "ready" : "degraded";

@@ -7,6 +7,17 @@
 import fs from "node:fs";
 import path from "node:path";
 import AdmZip from "adm-zip";
+import {
+  assertDocumentExportInputBudget,
+  DocumentExportLimitError,
+  DOCUMENT_EXPORT_BUDGETS
+} from "@/lib/document-export-budget";
+
+export const HWPX_TEMPLATE_BUDGETS = {
+  companyNameCharacters: DOCUMENT_EXPORT_BUDGETS.fieldCharacters,
+  templateBytes: 8 * 1024 * 1024,
+  outputBytes: 8 * 1024 * 1024
+} as const;
 
 export type HwpxTemplateKind =
   | "risk-assessment"
@@ -150,10 +161,20 @@ export function localizeHwpxPlainText(text: string, companyName: string): string
     .replace(/<(?:NO|No\.)></gu, "<연번><");
 }
 
+export function assertHwpxTemplateOutputBudget(buffer: Buffer): void {
+  if (buffer.length > HWPX_TEMPLATE_BUDGETS.outputBytes) {
+    throw new DocumentExportLimitError("hwpx_output_bytes");
+  }
+}
+
 export function buildHwpxFromTemplate(kind: HwpxTemplateKind, companyName: string): Buffer {
+  assertDocumentExportInputBudget({ companyName });
   const srcPath = path.join(templatesDir(), TEMPLATE_FILES[kind]);
   if (!fs.existsSync(srcPath)) {
     throw new Error(`HWPX template not found: ${kind}`);
+  }
+  if (fs.statSync(srcPath).size > HWPX_TEMPLATE_BUDGETS.templateBytes) {
+    throw new DocumentExportLimitError("hwpx_template_bytes");
   }
 
   const replaceCompany = String(companyName ?? "").trim();
@@ -176,5 +197,7 @@ export function buildHwpxFromTemplate(kind: HwpxTemplateKind, companyName: strin
     }
   }
 
-  return inputZip.toBuffer();
+  const output = inputZip.toBuffer();
+  assertHwpxTemplateOutputBudget(output);
+  return output;
 }

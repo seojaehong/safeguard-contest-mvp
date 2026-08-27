@@ -6,10 +6,13 @@ import { describe, expect, it } from "vitest";
 import { POST as exportHwp } from "@/app/api/export/hwp/route";
 import { POST as exportPdf } from "@/app/api/export/pdf/route";
 import {
+  assertHwpxTemplateOutputBudget,
   buildHwpxFromTemplate,
+  HWPX_TEMPLATE_BUDGETS,
   localizeHwpxPlainText,
   localizeHwpxXmlText
 } from "@/lib/hwpx-template";
+import { DocumentExportLimitError } from "@/lib/document-export-budget";
 
 const root = process.cwd();
 
@@ -58,6 +61,20 @@ function listHwpTables(document: HwpDocument) {
 }
 
 describe("localized editable document exports", () => {
+  it("bounds HWPX company-name expansion before archive allocation", () => {
+    const companyName = "가".repeat(HWPX_TEMPLATE_BUDGETS.companyNameCharacters + 1);
+
+    expect(() => buildHwpxFromTemplate("risk-assessment", companyName))
+      .toThrow(DocumentExportLimitError);
+  });
+
+  it("rejects HWPX output buffers above the template memory budget", () => {
+    const oversized = Buffer.alloc(HWPX_TEMPLATE_BUDGETS.outputBytes + 1);
+
+    expect(() => assertHwpxTemplateOutputBudget(oversized))
+      .toThrow(DocumentExportLimitError);
+  });
+
   it("keeps HWPX mimetype first and stored while localizing only intended XML text", () => {
     const sourcePath = path.join(root, "templates", "hwpx", "tbm-log.hwpx");
     const sourceZip = new AdmZip(sourcePath);

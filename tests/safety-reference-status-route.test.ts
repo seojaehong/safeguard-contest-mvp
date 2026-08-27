@@ -43,8 +43,8 @@ const readyCatalogStats = {
   message: "Supabase catalog ready"
 };
 
-function statusRequest() {
-  return new NextRequest("http://localhost/api/safety-reference/status");
+function statusRequest(signal?: AbortSignal) {
+  return new NextRequest("http://localhost/api/safety-reference/status", { signal });
 }
 
 describe("safety-reference status route", () => {
@@ -270,5 +270,21 @@ describe("safety-reference status route", () => {
       }
     });
     expect(JSON.stringify(payload)).not.toContain("C:/private/kosha-corpus");
+  });
+
+  it("releases status admission when the client disconnects", async () => {
+    const controller = new AbortController();
+    mocks.getSafetyReferenceStats.mockImplementationOnce(() => new Promise(() => undefined));
+    mocks.loadKoshaGuideCorpus.mockResolvedValue({
+      status: "unconfigured",
+      rootDir: null,
+      failures: []
+    });
+
+    const pending = GET(statusRequest(controller.signal));
+    await vi.waitFor(() => expect(mocks.getSafetyReferenceStats).toHaveBeenCalledOnce());
+    controller.abort(new DOMException("client disconnected", "AbortError"));
+
+    await expect(pending).rejects.toMatchObject({ name: "AbortError" });
   });
 });

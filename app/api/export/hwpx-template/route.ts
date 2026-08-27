@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
+  DocumentExportLimitError,
+} from "@/lib/document-export-budget";
+import {
   buildHwpxFromTemplate,
   isValidTemplateKind,
   listAvailableTemplates,
@@ -57,9 +60,20 @@ async function exportHwpxTemplate(request: NextRequest) {
       }
     });
   } catch (error) {
+    if (error instanceof DocumentExportLimitError) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: "DOCUMENT_EXPORT_LIMIT_EXCEEDED",
+          message: "문서 내보내기 요청이 허용된 크기 한도를 초과했습니다."
+        },
+        { status: 413, headers: { "cache-control": "no-store" } }
+      );
+    }
+    console.error("HWPX template export failed", error);
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "HWPX 양식을 만들지 못했습니다." },
-      { status: 500 }
+      { ok: false, error: "HWPX 양식을 만들지 못했습니다." },
+      { status: 500, headers: { "cache-control": "no-store" } }
     );
   }
 }
