@@ -1579,6 +1579,8 @@ function currentRepositorySecurityRescanSummary(report) {
       ? report.currentSourceRemediation.approvalSensitiveShareCapabilityCount
       : null,
     freshFullRepositoryRescanRequired: report.currentSourceRemediation?.freshFullRepositoryRescanRequired === true,
+    currentSourceLiveProductionCommit: asString(report.currentSourceRemediation?.liveAfterDeployment?.productionCommit),
+    currentSourceLiveIncluded: report.currentSourceRemediation?.liveAfterDeployment?.sourceRemediationIncluded === true,
     databaseApprovalGatedRemainingCount: typeof disposition.approvalGatedDatabaseOrAtomicityCount === "number"
       ? disposition.approvalGatedDatabaseOrAtomicityCount
       : null,

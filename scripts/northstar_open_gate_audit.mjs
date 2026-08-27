@@ -6607,6 +6607,9 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
   const currentSourceRemediation = isRecord(report.currentSourceRemediation)
     ? report.currentSourceRemediation
     : {};
+  const liveAfterDeployment = isRecord(currentSourceRemediation.liveAfterDeployment)
+    ? currentSourceRemediation.liveAfterDeployment
+    : {};
   const approvalFreeCandidatesReport = isRecord(report.approvalFreeProductSourceCandidates)
     ? report.approvalFreeProductSourceCandidates
     : {};
@@ -6657,10 +6660,16 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
     && readNumber(currentSourceRemediation.approvalSensitiveShareCapabilityCount) === 1
     && readString(currentSourceRemediation.approvalSensitiveFinding) === "public-share-object-id-credential"
     && currentSourceRemediation.freshFullRepositoryRescanRequired === true
+    && readString(liveAfterDeployment.status) === "PASS_SOURCE_INCLUDED"
+    && readString(liveAfterDeployment.productionCommit) === "607c39b3204fd4e1732890bcc6dbad30e4815ea2"
+    && liveAfterDeployment.sourceRemediationIncluded === true
+    && liveAfterDeployment.providerDispatchCalled === false
+    && liveAfterDeployment.dbMutationPerformed === false
+    && liveAfterDeployment.shareSessionCreated === false
     && noMutation
     && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && readString(remainingBoundaries.databaseSecurityRemediation) === "APPROVAL_GATED"
-    && readString(remainingBoundaries.approvalFreeProductSourceRemediation) === "SOURCE_REMEDIATED_FRESH_RESCAN_REQUIRED"
+    && readString(remainingBoundaries.approvalFreeProductSourceRemediation) === "LIVE_SOURCE_INCLUDED_FRESH_RESCAN_REQUIRED"
     && readString(remainingBoundaries.shareCapabilityCredentialRemediation) === "APPROVAL_GATED"
     && readString(remainingBoundaries.coverageCompleteness) === "partial"
     && readNumber(remainingBoundaries.deferredCoverageItemCount) === 26
@@ -6672,7 +6681,7 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Standard scan da97e400 is sealed at 4e3e7e5d with 19 findings (14 medium, 5 low) while preserving the immutable original baseline of 18. Coverage remains partial across 9 reviewed surfaces with 26 deferred items. Current source f95773c2 has focused remediation for six approval-free candidates, but a fresh full-repository rescan is required; the Share object-ID credential finding and twelve database/RLS/atomicity findings remain approval-gated. No mutation occurred and exact saved Share remains MISSING_EVIDENCE. This gate remains notice and is not a proven or security-complete claim."
+      ? "Standard scan da97e400 is sealed at 4e3e7e5d with 19 findings (14 medium, 5 low) while preserving the immutable original baseline of 18. Coverage remains partial across 9 reviewed surfaces with 26 deferred items. Production 607c39b3 includes focused remediation for six approval-free candidates, but a fresh full-repository rescan is required; the Share object-ID credential finding and twelve database/RLS/atomicity findings remain approval-gated. No mutation occurred and exact saved Share remains MISSING_EVIDENCE. This gate remains notice and is not a proven or security-complete claim."
       : `Current scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(report.scanId) || "missing"}, revision=${readString(report.scanRevision) || "missing"}, baseline=${readNumber(report.immutableOriginalBaselineFindingCount)}, findings=${readNumber(scan.reportableFindingCount)}, severity=${readNumber(severityCounts.medium)}/${readNumber(severityCounts.low)}, coverage=${readString(scan.coverage) || "missing"}/${readNumber(scan.reviewedSurfaceCount)}/${readNumber(scan.deferredCoverageItemCount)}, approvalFreeOpen=${readNumber(disposition.approvalFreeProductSourceCandidateCount)}/${approvalFreeCandidates.length}, dbApprovalGated=${readNumber(disposition.approvalGatedDatabaseOrAtomicityCount)}/${approvalGatedFindings.length}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, securityComplete=${remainingBoundaries.securityCompleteClaimAllowed}.`,
     nextActions: pass
       ? ["Run a fresh full-repository scan over the six current-source remediations; separately obtain explicit approval before the Share capability credential and twelve database/RLS/atomicity remediations, and close the 26 deferred coverage items before any security-complete claim."]

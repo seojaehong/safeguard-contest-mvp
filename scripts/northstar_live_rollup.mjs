@@ -940,6 +940,8 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       currentSourceRemediationHead: asString(recordAt(currentRepositorySecurityRescan, "currentSourceRemediation")?.sourceHead),
       approvalSensitiveShareCapabilityCount: asNumber(recordAt(currentRepositorySecurityRescan, "currentSourceRemediation")?.approvalSensitiveShareCapabilityCount),
       freshFullRepositoryRescanRequired: recordAt(currentRepositorySecurityRescan, "currentSourceRemediation")?.freshFullRepositoryRescanRequired === true,
+      currentSourceLiveProductionCommit: asString(recordAt(recordAt(currentRepositorySecurityRescan, "currentSourceRemediation"), "liveAfterDeployment")?.productionCommit),
+      currentSourceLiveIncluded: recordAt(recordAt(currentRepositorySecurityRescan, "currentSourceRemediation"), "liveAfterDeployment")?.sourceRemediationIncluded === true,
       databaseApprovalGatedRemainingCount: asNumber(recordAt(currentRepositorySecurityRescan, "findingDisposition")?.approvalGatedDatabaseOrAtomicityCount),
       securityCompleteClaimAllowed: recordAt(currentRepositorySecurityRescan, "findingDisposition")?.securityCompleteClaimAllowed === true,
       exactSavedShareVerdict: asString(recordAt(currentRepositorySecurityRescan, "remainingBoundaries")?.exactSavedShareVerdict),

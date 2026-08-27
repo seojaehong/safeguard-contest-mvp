@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T17:47:05.680Z",
-  "head": "f95773c2f4b55fe0ba8b199b5218800067e09bdf",
+  "generatedAt": "2026-08-27T17:56:13.708Z",
+  "head": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "4e3e7e5d9ebad7e91f428a856019122431410be4",
+    "commitSha": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8mse0waxa-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-kdbkqwrce-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_evidence_missing_or_unknown",
@@ -193,7 +193,7 @@
       "id": "current_repository_security_rescan",
       "state": "notice",
       "artifact": "evaluation\\current-full-repository-security-scan-2026-08-27\\report.json",
-      "detail": "Standard scan da97e400 is sealed at 4e3e7e5d with 19 findings (14 medium, 5 low) while preserving the immutable original baseline of 18. Coverage remains partial across 9 reviewed surfaces with 26 deferred items. Current source f95773c2 has focused remediation for six approval-free candidates, but a fresh full-repository rescan is required; the Share object-ID credential finding and twelve database/RLS/atomicity findings remain approval-gated. No mutation occurred and exact saved Share remains MISSING_EVIDENCE. This gate remains notice and is not a proven or security-complete claim."
+      "detail": "Standard scan da97e400 is sealed at 4e3e7e5d with 19 findings (14 medium, 5 low) while preserving the immutable original baseline of 18. Coverage remains partial across 9 reviewed surfaces with 26 deferred items. Production 607c39b3 includes focused remediation for six approval-free candidates, but a fresh full-repository rescan is required; the Share object-ID credential finding and twelve database/RLS/atomicity findings remain approval-gated. No mutation occurred and exact saved Share remains MISSING_EVIDENCE. This gate remains notice and is not a proven or security-complete claim."
     },
     {
       "id": "post_remediation_repository_security_scan",
@@ -663,11 +663,13 @@
     "currentSourceRemediationHead": "f95773c2f4b55fe0ba8b199b5218800067e09bdf",
     "approvalSensitiveShareCapabilityCount": 1,
     "freshFullRepositoryRescanRequired": true,
+    "currentSourceLiveProductionCommit": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+    "currentSourceLiveIncluded": true,
     "databaseApprovalGatedRemainingCount": 12,
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "databaseSecurityRemediation": "APPROVAL_GATED",
-    "approvalFreeProductSourceRemediation": "SOURCE_REMEDIATED_FRESH_RESCAN_REQUIRED"
+    "approvalFreeProductSourceRemediation": "LIVE_SOURCE_INCLUDED_FRESH_RESCAN_REQUIRED"
   },
   "publicSearchDistributedRateLimitReadiness": {
     "artifact": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
@@ -1703,10 +1705,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "f95773c2f4b55fe0ba8b199b5218800067e09bdf",
+      "sourceCommit": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
       "sourceStatus": "exact",
-      "productionCommit": "f95773c2f4b55fe0ba8b199b5218800067e09bdf",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -1938,7 +1940,7 @@
       "sourceCommit": "4e3e7e5d9ebad7e91f428a856019122431410be4",
       "sourceStatus": "ancestor",
       "productionCommit": "4e3e7e5d9ebad7e91f428a856019122431410be4",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "agent_chat_durable_admission_security",

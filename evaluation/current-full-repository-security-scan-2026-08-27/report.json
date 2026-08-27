@@ -1,6 +1,6 @@
 {
   "schemaVersion": "safeclaw-current-full-repository-security-scan/v1",
-  "generatedAt": "2026-08-28T02:47:00+09:00",
+  "generatedAt": "2026-08-28T02:52:00+09:00",
   "verdict": "NOTICE_CURRENT_HEAD_STANDARD_SCAN_19_FINDINGS_PARTIAL_COVERAGE_REMEDIATION_REQUIRED",
   "sourceHead": "4e3e7e5d9ebad7e91f428a856019122431410be4",
   "scanId": "da97e400-1f4d-40b9-a434-ab5ab013fdb3",
@@ -74,6 +74,17 @@
     "approvalSensitiveShareCapabilityCount": 1,
     "approvalSensitiveFinding": "public-share-object-id-credential",
     "freshFullRepositoryRescanRequired": true,
+    "liveAfterDeployment": {
+      "status": "PASS_SOURCE_INCLUDED",
+      "productionCommit": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-kdbkqwrce-seojaehongs-projects.vercel.app",
+      "sourceRemediationIncluded": true,
+      "providerDispatchCalled": false,
+      "dbMutationPerformed": false,
+      "shareSessionCreated": false
+    },
     "remediatedFindings": [
       "share-ack-instance-local-admission",
       "safety-reference-status-disconnect-cancellation",
@@ -133,7 +144,7 @@
   "remainingBoundaries": {
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "databaseSecurityRemediation": "APPROVAL_GATED",
-    "approvalFreeProductSourceRemediation": "SOURCE_REMEDIATED_FRESH_RESCAN_REQUIRED",
+    "approvalFreeProductSourceRemediation": "LIVE_SOURCE_INCLUDED_FRESH_RESCAN_REQUIRED",
     "shareCapabilityCredentialRemediation": "APPROVAL_GATED",
     "coverageCompleteness": "partial",
     "deferredCoverageItemCount": 26,

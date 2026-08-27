@@ -14,6 +14,7 @@ This is not a security-complete result. Canonical coverage is `partial`, with ni
 - The sealed scan classified seven source-side candidates at `4e3e7e5d`. Current source at `f95773c2` has bounded fixes and focused regression coverage for six of them: Share ACK admission, safety-reference status cancellation, HWPX input/output budgets, and stable public weather/XLSX/HWPX errors.
 - The remaining `public-share-object-id-credential` finding needs an unforgeable recipient capability and storage/session design, so it is retained as an approval-sensitive Share boundary rather than claimed fixed.
 - A fresh full-repository scan is still required before any of the six source fixes are promoted from tested remediation to security closure.
+- Production marker `607c39b3204fd4e1732890bcc6dbad30e4815ea2` includes all six source remediations. This proves deployed source inclusion, not finding closure; no provider dispatch, DB write, or Share-session creation was executed.
 - Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
 
 ## Evidence

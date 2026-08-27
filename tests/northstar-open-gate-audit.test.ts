@@ -3743,6 +3743,14 @@ function createFixtureRoot(): string {
       approvalSensitiveShareCapabilityCount: 1,
       approvalSensitiveFinding: "public-share-object-id-credential",
       freshFullRepositoryRescanRequired: true,
+      liveAfterDeployment: {
+        status: "PASS_SOURCE_INCLUDED",
+        productionCommit: "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+        sourceRemediationIncluded: true,
+        providerDispatchCalled: false,
+        dbMutationPerformed: false,
+        shareSessionCreated: false,
+      },
     },
     approvalGatedDatabaseOrAtomicity: {
       count: 12,
@@ -3760,7 +3768,7 @@ function createFixtureRoot(): string {
     remainingBoundaries: {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       databaseSecurityRemediation: "APPROVAL_GATED",
-      approvalFreeProductSourceRemediation: "SOURCE_REMEDIATED_FRESH_RESCAN_REQUIRED",
+      approvalFreeProductSourceRemediation: "LIVE_SOURCE_INCLUDED_FRESH_RESCAN_REQUIRED",
       shareCapabilityCredentialRemediation: "APPROVAL_GATED",
       coverageCompleteness: "partial",
       deferredCoverageItemCount: 26,
@@ -7278,7 +7286,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(gate?.state).toBe("notice");
     expect(gate?.detail).toContain("19 findings (14 medium, 5 low)");
     expect(gate?.detail).toContain("partial across 9 reviewed surfaces with 26 deferred items");
-    expect(gate?.detail).toContain("Current source f95773c2 has focused remediation for six approval-free candidates");
+    expect(gate?.detail).toContain("Production 607c39b3 includes focused remediation for six approval-free candidates");
     expect(gate?.detail).toContain("Share object-ID credential finding and twelve database/RLS/atomicity findings remain approval-gated");
     expect(gate?.detail).toContain("remains notice");
     expect(gate?.detail).toContain("not a proven or security-complete claim");
@@ -7292,6 +7300,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       currentSourceRemediation: {
         approvalFreeRemediatedCount: number;
         approvalSensitiveShareCapabilityCount: number;
+        liveAfterDeployment: { sourceRemediationIncluded: boolean };
       };
       scan: { deferredCoverageItemCount: number };
       remainingBoundaries: {
@@ -7307,6 +7316,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       (candidate) => { candidate.findingDisposition.approvalGatedDatabaseOrAtomicityCount = 11; },
       (candidate) => { candidate.currentSourceRemediation.approvalFreeRemediatedCount = 5; },
       (candidate) => { candidate.currentSourceRemediation.approvalSensitiveShareCapabilityCount = 0; },
+      (candidate) => { candidate.currentSourceRemediation.liveAfterDeployment.sourceRemediationIncluded = false; },
       (candidate) => { candidate.scan.deferredCoverageItemCount = 25; },
     ];
     for (const contradict of contradictions) {

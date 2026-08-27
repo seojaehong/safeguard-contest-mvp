@@ -475,6 +475,8 @@ type NextRunwayReport = {
     currentSourceRemediationHead: string;
     approvalSensitiveShareCapabilityCount: number | null;
     freshFullRepositoryRescanRequired: boolean;
+    currentSourceLiveProductionCommit: string;
+    currentSourceLiveIncluded: boolean;
     databaseApprovalGatedRemainingCount: number | null;
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
@@ -2667,11 +2669,15 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       approvalFreeRemediatedCount: 6,
       approvalSensitiveShareCapabilityCount: 1,
       freshFullRepositoryRescanRequired: true,
+      liveAfterDeployment: {
+        productionCommit: "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+        sourceRemediationIncluded: true,
+      },
     },
     remainingBoundaries: {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       databaseSecurityRemediation: "APPROVAL_GATED",
-      approvalFreeProductSourceRemediation: "SOURCE_REMEDIATED_FRESH_RESCAN_REQUIRED",
+      approvalFreeProductSourceRemediation: "LIVE_SOURCE_INCLUDED_FRESH_RESCAN_REQUIRED",
       coverageCompleteness: "partial",
       deferredCoverageItemCount: 26,
       securityCompleteClaimAllowed: false,
@@ -4198,11 +4204,13 @@ describe("northstar next runway generator", () => {
       currentSourceRemediationHead: "f95773c2f4b55fe0ba8b199b5218800067e09bdf",
       approvalSensitiveShareCapabilityCount: 1,
       freshFullRepositoryRescanRequired: true,
+      currentSourceLiveProductionCommit: "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+      currentSourceLiveIncluded: true,
       databaseApprovalGatedRemainingCount: 12,
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       databaseSecurityRemediation: "APPROVAL_GATED",
-      approvalFreeProductSourceRemediation: "SOURCE_REMEDIATED_FRESH_RESCAN_REQUIRED",
+      approvalFreeProductSourceRemediation: "LIVE_SOURCE_INCLUDED_FRESH_RESCAN_REQUIRED",
     });
     expect(report.provenCurrentState).toContain("public_json_request_body_budget");
     expect(report.publicJsonRequestBodyBudget).toMatchObject({

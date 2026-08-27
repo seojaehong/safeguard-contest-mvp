@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `f95773c2f4b55fe0ba8b199b5218800067e09bdf`
+Source HEAD: `607c39b3204fd4e1732890bcc6dbad30e4815ea2`
 
-Production `/api/build-info`: `4e3e7e5d9ebad7e91f428a856019122431410be4`
+Production `/api/build-info`: `607c39b3204fd4e1732890bcc6dbad30e4815ea2`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
-Source head has product changes: `true`
+Source head has product changes: `false`
 
-Source pending changed paths: `app/api/export/hwpx-template/route.ts`, `app/api/export/xlsx/route.ts`, `app/api/safety-reference/status/route.ts`, `app/api/share-sessions/[sessionId]/route.ts`, `app/api/weather/route.ts`, `lib/hwpx-template.ts`, `tests/document-export-localization.test.ts`, `tests/hwpx-template-route.test.ts`, `tests/safety-reference-status-route.test.ts`, `tests/weather-route-budget.test.ts`, `tests/workpack-share-authority-routes.test.ts`, `tests/xlsx-export-route.test.ts`
+Source pending changed paths: `none`
 
 Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `f95773c2f4b55fe0ba8b199b5218800067e09bdf`
+Live rollup source head: `607c39b3204fd4e1732890bcc6dbad30e4815ea2`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `f95773c2f4b55fe0ba8b199b5218800067e09bdf` includes product/runtime file changes that are not live yet. Production is still `4e3e7e5d9ebad7e91f428a856019122431410be4`, and the live rollup remains exact for that deployed marker.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
