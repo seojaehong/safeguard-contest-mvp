@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-reviewer-support/v1",
-  "generatedAt": "2026-08-16T16:29:20.743962+00:00",
-  "sourceHead": "ed40eac88c0d12eb45a9da2687f4991cd4a505e7",
+  "generatedAt": "2026-08-27T23:36:02.922659+00:00",
+  "sourceHead": "89bdd9cc73bc68e5dcb8e2d0aca20086ec4aab9a",
   "verdict": "PASS_MACHINE_REVIEWER_SUPPORT_HUMAN_CONFIRMATION_REQUIRED",
   "scope": "read-only semantic support for the bounded KOSHA exact-promotion human review",
   "candidateCount": 8,

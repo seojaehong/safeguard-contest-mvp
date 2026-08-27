@@ -1,7 +1,7 @@
 # KOSHA Exact Official Lifecycle Audit
 
 - Verdict: `PASS_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_HUMAN_REVIEW_REQUIRED`
-- Source HEAD: `47aa94a969beebbf71d938e82133165b1f13682b`
+- Source HEAD: `89bdd9cc73bc68e5dcb8e2d0aca20086ec4aab9a`
 - Candidates: `8`
 - Machine lifecycle supported: `8`
 - Exact official title identity matches: `8`

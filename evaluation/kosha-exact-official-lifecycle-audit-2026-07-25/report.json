@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-official-lifecycle-audit/v1",
-  "generatedAt": "2026-07-25T00:33:06.716024+00:00",
-  "sourceHead": "47aa94a969beebbf71d938e82133165b1f13682b",
+  "generatedAt": "2026-08-27T23:36:02.495817+00:00",
+  "sourceHead": "89bdd9cc73bc68e5dcb8e2d0aca20086ec4aab9a",
   "verdict": "PASS_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_HUMAN_REVIEW_REQUIRED",
   "scope": "read-only current and retired KOSHA official-list reconciliation for the bounded promotion packet",
   "officialApiUrl": "https://portal.kosha.or.kr/api/portal24/bizV/p/VCPDG08009/selectList",
@@ -11,7 +11,7 @@
   "exactTitleIdentityMatchCount": 8,
   "failedCount": 0,
   "titleVariantFindingCount": 0,
-  "elapsedMs": 8686,
+  "elapsedMs": 6000,
   "officialInventory": {
     "current": {
       "state": "current",

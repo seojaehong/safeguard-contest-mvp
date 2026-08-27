@@ -1,7 +1,7 @@
 # KOSHA Exact Promotion Reviewer Support
 
 - Verdict: `PASS_MACHINE_REVIEWER_SUPPORT_HUMAN_CONFIRMATION_REQUIRED`
-- Source HEAD: `ed40eac88c0d12eb45a9da2687f4991cd4a505e7`
+- Source HEAD: `89bdd9cc73bc68e5dcb8e2d0aca20086ec4aab9a`
 - Candidates: `8`
 - Machine-supported candidates: `8`
 - Semantic groups: `24`

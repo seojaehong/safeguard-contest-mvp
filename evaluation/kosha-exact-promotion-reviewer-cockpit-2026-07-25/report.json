@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-reviewer-cockpit/v1",
   "verdict": "PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY",
-  "checkedAt": "2026-08-26T19:07:54.130Z",
-  "sourceHead": "d3ed175cc683a7a2734fd1b3d54f3b951025b4dd",
+  "checkedAt": "2026-08-27T23:36:03.647Z",
+  "sourceHead": "89bdd9cc73bc68e5dcb8e2d0aca20086ec4aab9a",
   "candidateCount": 8,
   "semanticGroupCount": 24,
   "pageReceiptCount": 24,
