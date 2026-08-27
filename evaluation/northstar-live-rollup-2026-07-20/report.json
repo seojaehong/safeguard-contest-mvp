@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T12:44:13.538Z",
-  "head": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
+  "generatedAt": "2026-08-27T13:14:10.293Z",
+  "head": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
+    "commitSha": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-fyerav16s-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-nrqhzrr6q-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -1184,9 +1184,9 @@
   "launchOperationsReadiness": {
     "artifact": "evaluation\\launch-operations-readiness-2026-08-26\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
-    "sourceHead": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
-    "productCommit": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
-    "productionCommit": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
+    "sourceHead": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
+    "productCommit": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
+    "productionCommit": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
     "rowCount": 4,
     "firstViewportCount": 4,
     "desktopFourColumnCount": 2,
@@ -1739,9 +1739,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
+      "sourceCommit": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
       "sourceStatus": "exact",
-      "productionCommit": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
+      "productionCommit": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
       "productionStatus": "matches_live"
     },
     {
@@ -1859,9 +1859,9 @@
     {
       "id": "launch_operations_readiness_cockpit",
       "artifact": "evaluation\\launch-operations-readiness-2026-08-26\\report.json",
-      "sourceCommit": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
+      "sourceCommit": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
       "sourceStatus": "exact",
-      "productionCommit": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
+      "productionCommit": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
       "productionStatus": "matches_live"
     },
     {
