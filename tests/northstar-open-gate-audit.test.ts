@@ -386,6 +386,68 @@ function weatherFallbackErrorRedactionFixture(): Record<string, unknown> {
   };
 }
 
+function hwpxArchiveExpansionSecurityFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_HWPX_ARCHIVE_EXPANSION_SOURCE_REMEDIATED",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    finding: {
+      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+      findingId: "csf_f8f783170119f2531bcc3163",
+      slug: "hwpx-archive-expansion",
+      ruleId: "resource-exhaustion.hwpx-archive-expansion",
+    },
+    currentSourceContract: {
+      centralDirectoryCheckedBeforeEntryData: true,
+      entryDataReadBeforeBudgetPass: false,
+      outputBufferBuiltBeforeBudgetPass: false,
+      entryCountBudget: 64,
+      totalUncompressedBytesBudget: 20 * 1024 * 1024,
+      largestEntryUncompressedBytesBudget: 10 * 1024 * 1024,
+      estimatedPeakWorkingBytesBudget: 40 * 1024 * 1024,
+      invalidOrUnsafeIntegerMetadataRejected: true,
+      archiveBudgetFailureUsesBoundedPublic413: true,
+    },
+    committedTemplateManifest: {
+      templateCount: 25,
+      availableTemplateCount: 25,
+      allTemplatesPassPreDecompressionBudget: true,
+      maximumEntryCount: 32,
+      maximumTotalUncompressedBytes: 15184195,
+      maximumLargestEntryUncompressedBytes: 8532294,
+    },
+    verification: {
+      focusedAndAdjacentTests: { testFiles: 4, testsPassed: 37, testsFailed: 0 },
+      typecheck: { status: "PASS" },
+      build: { status: "PASS", staticPagesPassed: 28, staticPagesFailed: 0 },
+    },
+    liveProbe: {
+      status: 503,
+      code: "PUBLIC_EXPORT_CONCURRENCY_LIMIT",
+      rateLimitHeader: "instance",
+      archiveProcessingReached: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      readConfirmationInserted: false,
+      providerDispatchCalled: false,
+      vectorRuntimeCalled: false,
+      wikiPublished: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      findingSourceRemediated: true,
+      freshFullRepositoryRescanRequiredForScanClosure: true,
+      securityCompleteClaimAllowed: false,
+      publicExportDistributedAdmission: "OPEN_OPERATOR_CONFIGURATION",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  };
+}
+
 function documentEditorialReviewReceiptFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
@@ -4016,6 +4078,13 @@ function createFixtureRoot(): string {
   );
   writeText(rootDir, path.join("lib", "weather.ts"), "export const publicFallbackDetail = true;\n");
   writeText(rootDir, path.join("tests", "upstream-integration-security.test.ts"), "export const weatherRedactionTest = true;\n");
+  writeJson(
+    rootDir,
+    path.join("evaluation", "hwpx-archive-expansion-security-2026-08-28", "report.json"),
+    hwpxArchiveExpansionSecurityFixture(),
+  );
+  writeText(rootDir, path.join("lib", "hwpx-template.ts"), "export const archiveBudget = true;\n");
+  writeText(rootDir, path.join("tests", "document-export-localization.test.ts"), "export const archiveBudgetTest = true;\n");
   writeJson(rootDir, path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
     sourceHead: "fixture-sha",
@@ -8041,6 +8110,34 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
 
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "weather_fallback_error_redaction_security")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records HWPX archive expansion as notice and fails closed on preflight drift", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "hwpx-archive-expansion-security-2026-08-28",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "hwpx_archive_expansion_security");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("before getData or toBuffer");
+    expect(gate?.detail).toContain("25 committed templates");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      currentSourceContract: { centralDirectoryCheckedBeforeEntryData: boolean };
+    };
+    report.currentSourceContract.centralDirectoryCheckedBeforeEntryData = false;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "hwpx_archive_expansion_security")?.state)
       .toBe("contradicted");
   });
 

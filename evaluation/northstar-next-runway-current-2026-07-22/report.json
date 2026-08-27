@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-27T20:32:49.956Z",
+  "generatedAt": "2026-08-27T21:17:47.098Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "48cdb1ebdf066adf04d11dc452909241157a93a5",
-  "productionCommit": "48cdb1ebdf066adf04d11dc452909241157a93a5",
+  "sourceHead": "fd1122b482aec66570881ace74f90d8c10442d30",
+  "productionCommit": "fd1122b482aec66570881ace74f90d8c10442d30",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "48cdb1ebdf066adf04d11dc452909241157a93a5",
+    "commitSha": "fd1122b482aec66570881ace74f90d8c10442d30",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-kb74y73xa-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-gzs75cail-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "48cdb1ebdf066adf04d11dc452909241157a93a5",
-  "liveRollupLiveCommit": "48cdb1ebdf066adf04d11dc452909241157a93a5",
+  "liveExactEvidenceCommit": "fd1122b482aec66570881ace74f90d8c10442d30",
+  "liveRollupLiveCommit": "fd1122b482aec66570881ace74f90d8c10442d30",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -66,6 +66,7 @@
     "shareAckPreBodyAdmission": "evaluation\\share-ack-prebody-admission-2026-08-28\\report.json",
     "safetyStatusDisconnectLease": "evaluation\\safety-status-disconnect-lease-2026-08-28\\report.json",
     "weatherFallbackErrorRedaction": "evaluation\\weather-fallback-error-redaction-2026-08-28\\report.json",
+    "hwpxArchiveExpansionSecurity": "evaluation\\hwpx-archive-expansion-security-2026-08-28\\report.json",
     "agentChatDurableAdmission": "evaluation\\security-agent-chat-durable-admission-2026-08-14\\report.json",
     "mcpProviderAdmission": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
     "shareRecipientContactVerification": "evaluation\\share-recipient-contact-verification-2026-08-14\\report.json",
@@ -209,6 +210,11 @@
       "gate": "weather_fallback_error_redaction_security",
       "state": "notice",
       "reason": "deployed weather source now keeps all 8 provider fallback diagnostics server-side, with 16 tests and live 503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; the sealed finding still requires a fresh scan, distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, and exact saved Share remains MISSING_EVIDENCE"
+    },
+    {
+      "gate": "hwpx_archive_expansion_security",
+      "state": "notice",
+      "reason": "deployed HWPX source validates 25/25 committed templates against entry, total-uncompressed, largest-entry, and peak-working-set budgets before archive expansion, with 37 tests and live 503/PUBLIC_EXPORT_CONCURRENCY_LIMIT; the sealed finding still requires a fresh scan, distributed export activation remains OPEN_OPERATOR_CONFIGURATION, and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "mcp_generation_work_budget_security",
@@ -1135,6 +1141,31 @@
     "freshRescanRequired": true,
     "securityCompleteClaimAllowed": false,
     "distributedAdmissionActivation": "OPERATOR_CONFIGURATION_REQUIRED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "hwpxArchiveExpansionSecurity": {
+    "verdict": "PASS_LIVE_PRODUCTION_HWPX_ARCHIVE_EXPANSION_SOURCE_REMEDIATED",
+    "sourceHead": "fd1122b482aec66570881ace74f90d8c10442d30",
+    "productionCommit": "fd1122b482aec66570881ace74f90d8c10442d30",
+    "scanId": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    "findingId": "csf_f8f783170119f2531bcc3163",
+    "findingSlug": "hwpx-archive-expansion",
+    "centralDirectoryCheckedBeforeEntryData": true,
+    "entryCountBudget": 64,
+    "totalUncompressedBytesBudget": 20971520,
+    "largestEntryUncompressedBytesBudget": 10485760,
+    "estimatedPeakWorkingBytesBudget": 41943040,
+    "templateCount": 25,
+    "availableTemplateCount": 25,
+    "allTemplatesPassPreDecompressionBudget": true,
+    "testsPassed": 37,
+    "liveStatus": 503,
+    "liveCode": "PUBLIC_EXPORT_CONCURRENCY_LIMIT",
+    "liveRateLimitHeader": "instance",
+    "archiveProcessingReached": false,
+    "freshRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "publicExportDistributedAdmission": "OPEN_OPERATOR_CONFIGURATION",
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "publicSearchDistributedRateLimitReadiness": {

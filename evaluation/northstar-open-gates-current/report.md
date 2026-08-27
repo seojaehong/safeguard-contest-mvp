@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-08-27T20:32:28.686Z
-Source SHA: `48cdb1ebdf066adf04d11dc452909241157a93a5`
+Generated at: 2026-08-27T21:17:24.690Z
+Source SHA: `fd1122b482aec66570881ace74f90d8c10442d30`
 Overall: `contradicted`
 
 ## Gate Matrix
@@ -41,6 +41,7 @@ Overall: `contradicted`
 | share_ack_prebody_admission_security | notice | evaluation\share-ack-prebody-admission-2026-08-28\report.json | Live production now acquires coarse distributed IP admission and a bounded body-read concurrency lease before the public Share ACK body budget and JSON parser, while retaining recipient-specific admission after parsing. The no-mutation oversized probe failed closed at pre-body admission, but the sealed finding remains open pending a fresh full scan; live recipient ACK approval and exact saved Share MISSING_EVIDENCE remain unchanged. |
 | safety_status_disconnect_lease_security | notice | evaluation\safety-status-disconnect-lease-2026-08-28\report.json | Live production source now keeps safety-reference status admission occupied until the real catalog, corpus, and exact-registry aggregate settles after disconnect. Two disconnected tasks continue to consume the two-slot concurrency budget and a third request is rejected. The sealed finding remains open pending a fresh full scan; distributed activation and exact saved Share MISSING_EVIDENCE remain unchanged. |
 | weather_fallback_error_redaction_security | notice | evaluation\weather-fallback-error-redaction-2026-08-28\report.json | Live production source now keeps raw failures from all eight weather provider fallbacks in server logs and exposes only fixed public details. Production remains fail-closed before provider work while durable admission is absent. The sealed finding still needs a fresh full scan; distributed activation and exact saved Share MISSING_EVIDENCE remain open. |
+| hwpx_archive_expansion_security | notice | evaluation\hwpx-archive-expansion-security-2026-08-28\report.json | Live production source now validates HWPX entry count, total uncompressed bytes, largest entry, and estimated peak working bytes before getData or toBuffer. All 25 committed templates pass the manifest. The sealed finding still needs a fresh full scan; public export distributed activation and exact saved Share MISSING_EVIDENCE remain open. |
 | post_remediation_repository_security_scan | notice | evaluation\post-remediation-full-repository-security-scan-2026-08-14\report.json | Fresh Standard scan bd135da7 is sealed at 20 findings (12 medium, 8 low) across five reviewed surfaces. Live source closes two findings and mitigates one public-status fanout finding while retaining its distributed-admission residual; 18 findings remain open or only partially mitigated before a fresh rescan. The immutable 18-finding baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE. |
 | share_session_revocation_security | contradicted | evaluation\share-session-revocation-remediation-2026-08-14\report.json | Share revocation verdict=PASS_LIVE_PRODUCTION_OWNER_SHARE_SESSION_REVOCATION_RESCAN_PENDING, sourceLive=true, sourceCurrent=false, auth=401, destructiveProbe=false, noMutation=true, exactShare=MISSING_EVIDENCE. |
 | share_recipient_contact_verification_security | contradicted | evaluation\share-recipient-contact-verification-2026-08-14\report.json | Share recipient verification verdict=PASS_LIVE_DEPLOYED_SOURCE_SHARE_RECIPIENT_CONTACT_VERIFICATION_RESCAN_PENDING, sourceLive=true, sourceCurrent=false, workerIdOnly=false, persisted=false, liveStatus=404, noMutation=true, exactShare=MISSING_EVIDENCE, ack=APPROVAL_GATED. |
@@ -147,6 +148,7 @@ Overall: `contradicted`
 - share_ack_prebody_admission_security: Run a fresh Standard scan before reclassifying the sealed finding; keep exact saved Share and live recipient ACK approval-gated.
 - safety_status_disconnect_lease_security: Run a fresh Standard scan before reclassifying the sealed finding; keep durable activation and exact saved Share boundaries open.
 - weather_fallback_error_redaction_security: Run a fresh Standard scan before reclassifying the sealed finding; keep distributed activation and exact saved Share boundaries open.
+- hwpx_archive_expansion_security: Run a fresh Standard scan before reclassifying the sealed finding; keep distributed export activation and exact saved Share boundaries open.
 - post_remediation_repository_security_scan: Remediate or explicitly defer the remaining 18 findings, activate approved distributed admission where required, then run a fresh scan before any security-complete claim.
 - share_session_revocation_security: Restore live source alignment, owner/tuple scoping, focused and browser verification, 401 fail-closed proof, no-mutation boundaries, and exact Share MISSING_EVIDENCE.
 - share_recipient_contact_verification_security: Restore source/live alignment, full contact verification before insert, non-persistence, browser containment, no-mutation evidence, fresh-rescan requirement, exact Share MISSING_EVIDENCE, and ACK approval gating.

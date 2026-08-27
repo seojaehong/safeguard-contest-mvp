@@ -71,6 +71,7 @@ const EVIDENCE_PATHS = Object.freeze({
   shareAckPreBodyAdmission: path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
   safetyStatusDisconnectLease: path.join("evaluation", "safety-status-disconnect-lease-2026-08-28", "report.json"),
   weatherFallbackErrorRedaction: path.join("evaluation", "weather-fallback-error-redaction-2026-08-28", "report.json"),
+  hwpxArchiveExpansionSecurity: path.join("evaluation", "hwpx-archive-expansion-security-2026-08-28", "report.json"),
   postRemediationRepositorySecurityScan: path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "report.json"),
   postRemediationSecuritySourceClosure: path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"),
   shareSessionRevocationRemediation: path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"),
@@ -8311,6 +8312,104 @@ function evaluateWeatherFallbackErrorRedactionGate(rootDir) {
   });
 }
 
+const HWPX_ARCHIVE_EXPANSION_SECURITY_PATHS = [
+  "lib/hwpx-template.ts",
+  "tests/document-export-localization.test.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateHwpxArchiveExpansionSecurityGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.hwpxArchiveExpansionSecurity;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "hwpx_archive_expansion_security",
+      label: "HWPX archive expansion security",
+      state: "missing",
+      evidencePath,
+      detail: "HWPX archive expansion evidence is missing or invalid.",
+      nextActions: ["Restore the no-mutation source/live archive-budget receipt."],
+    });
+  }
+
+  const finding = isRecord(report.finding) ? report.finding : {};
+  const contract = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
+  const manifest = isRecord(report.committedTemplateManifest) ? report.committedTemplateManifest : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacentTests) ? verification.focusedAndAdjacentTests : {};
+  const typecheck = isRecord(verification.typecheck) ? verification.typecheck : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const live = isRecord(report.liveProbe) ? report.liveProbe : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.shareSessionCreated === false
+    && mutation.readConfirmationInserted === false
+    && mutation.providerDispatchCalled === false
+    && mutation.vectorRuntimeCalled === false
+    && mutation.wikiPublished === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_HWPX_ARCHIVE_EXPANSION_SOURCE_REMEDIATED"
+    && sourceHead === productionCommit
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, HWPX_ARCHIVE_EXPANSION_SECURITY_PATHS)
+    && readString(finding.scanId) === "1411fb32-5c18-4d6a-b8ba-d52697757d8a"
+    && readString(finding.findingId) === "csf_f8f783170119f2531bcc3163"
+    && readString(finding.slug) === "hwpx-archive-expansion"
+    && readString(finding.ruleId) === "resource-exhaustion.hwpx-archive-expansion"
+    && contract.centralDirectoryCheckedBeforeEntryData === true
+    && contract.entryDataReadBeforeBudgetPass === false
+    && contract.outputBufferBuiltBeforeBudgetPass === false
+    && readNumber(contract.entryCountBudget) === 64
+    && readNumber(contract.totalUncompressedBytesBudget) === 20 * 1024 * 1024
+    && readNumber(contract.largestEntryUncompressedBytesBudget) === 10 * 1024 * 1024
+    && readNumber(contract.estimatedPeakWorkingBytesBudget) === 40 * 1024 * 1024
+    && contract.invalidOrUnsafeIntegerMetadataRejected === true
+    && contract.archiveBudgetFailureUsesBoundedPublic413 === true
+    && readNumber(manifest.templateCount) === 25
+    && readNumber(manifest.availableTemplateCount) === 25
+    && manifest.allTemplatesPassPreDecompressionBudget === true
+    && readNumber(manifest.maximumEntryCount) === 32
+    && readNumber(manifest.maximumTotalUncompressedBytes) === 15184195
+    && readNumber(manifest.maximumLargestEntryUncompressedBytes) === 8532294
+    && readNumber(focused.testFiles) === 4
+    && readNumber(focused.testsPassed) === 37
+    && readNumber(focused.testsFailed) === 0
+    && readString(typecheck.status) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPagesPassed) === 28
+    && readNumber(build.staticPagesFailed) === 0
+    && readNumber(live.status) === 503
+    && readString(live.code) === "PUBLIC_EXPORT_CONCURRENCY_LIMIT"
+    && readString(live.rateLimitHeader) === "instance"
+    && live.archiveProcessingReached === false
+    && noMutation
+    && remaining.findingSourceRemediated === true
+    && remaining.freshFullRepositoryRescanRequiredForScanClosure === true
+    && remaining.securityCompleteClaimAllowed === false
+    && readString(remaining.publicExportDistributedAdmission) === "OPEN_OPERATOR_CONFIGURATION"
+    && readString(remaining.providerDispatchPersistence) === "APPROVAL_GATED"
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+
+  return gateResult({
+    id: "hwpx_archive_expansion_security",
+    label: "HWPX archive expansion security",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live production source now validates HWPX entry count, total uncompressed bytes, largest entry, and estimated peak working bytes before getData or toBuffer. All 25 committed templates pass the manifest. The sealed finding still needs a fresh full scan; public export distributed activation and exact saved Share MISSING_EVIDENCE remain open."
+      : `HWPX archive verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === productionCommit}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, HWPX_ARCHIVE_EXPANSION_SECURITY_PATHS)}, preflight=${contract.centralDirectoryCheckedBeforeEntryData === true}/${contract.entryDataReadBeforeBudgetPass === false}/${contract.outputBufferBuiltBeforeBudgetPass === false}, manifest=${readNumber(manifest.availableTemplateCount)}/${readNumber(manifest.templateCount)}, live=${readNumber(live.status)}/${readString(live.code) || "missing"}, noMutation=${noMutation}, rescan=${remaining.freshFullRepositoryRescanRequiredForScanClosure === true}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Run a fresh Standard scan before reclassifying the sealed finding; keep distributed export activation and exact saved Share boundaries open."]
+      : ["Restore source/live alignment, pre-decompression archive budgets, 25-template manifest proof, no-mutation live proof, fresh-rescan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
 const SECURITY_ACCIDENT_CASE_COMPATIBILITY_CHANGED_PATHS = [
   "lib/accident-cases.ts",
 ];
@@ -11709,6 +11808,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateShareAckPreBodyAdmissionGate(rootDir),
     evaluateSafetyStatusDisconnectLeaseGate(rootDir),
     evaluateWeatherFallbackErrorRedactionGate(rootDir),
+    evaluateHwpxArchiveExpansionSecurityGate(rootDir),
     evaluatePostRemediationRepositorySecurityScanGate(rootDir),
     evaluateShareSessionRevocationSecurityGate(rootDir),
     evaluateShareRecipientContactVerificationGate(rootDir),

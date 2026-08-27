@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "safeclaw-hwpx-archive-expansion-security/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_HWPX_ARCHIVE_EXPANSION_SOURCE_REMEDIATED",
+  "generatedAt": "2026-08-28T05:51:03+09:00",
+  "sourceHead": "fd1122b482aec66570881ace74f90d8c10442d30",
+  "productCommit": "fd1122b482aec66570881ace74f90d8c10442d30",
+  "productionCommit": "fd1122b482aec66570881ace74f90d8c10442d30",
+  "productionBuild": {
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-gzs75cail-seojaehongs-projects.vercel.app"
+  },
+  "finding": {
+    "scanId": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    "findingId": "csf_f8f783170119f2531bcc3163",
+    "occurrenceId": "occ_017f2ee99d5eac6cf9561f13",
+    "slug": "hwpx-archive-expansion",
+    "ruleId": "resource-exhaustion.hwpx-archive-expansion",
+    "title": "HWPX limits bound compressed artifacts but not peak archive-expansion memory",
+    "beforeSource": "899951952ee184d527742d541f976f7e72482f2e",
+    "beforeEvidence": "evaluation/current-source-standard-security-scan-2026-08-28/findings/hwpx-archive-expansion/hwpx-archive-expansion.md"
+  },
+  "currentSourceContract": {
+    "centralDirectoryCheckedBeforeEntryData": true,
+    "entryDataReadBeforeBudgetPass": false,
+    "outputBufferBuiltBeforeBudgetPass": false,
+    "entryCountBudget": 64,
+    "totalUncompressedBytesBudget": 20971520,
+    "largestEntryUncompressedBytesBudget": 10485760,
+    "estimatedPeakWorkingBytesBudget": 41943040,
+    "compressedTemplateBytesBudget": 8388608,
+    "outputBytesBudget": 8388608,
+    "invalidOrUnsafeIntegerMetadataRejected": true,
+    "archiveBudgetFailureUsesBoundedPublic413": true
+  },
+  "committedTemplateManifest": {
+    "templateCount": 25,
+    "availableTemplateCount": 25,
+    "allTemplatesPassPreDecompressionBudget": true,
+    "maximumEntryCount": 32,
+    "maximumTotalUncompressedBytes": 15184195,
+    "maximumLargestEntryUncompressedBytes": 8532294,
+    "maximumObservedExpansionRatio": 15.99,
+    "largestTemplate": "moel-workplan-truck.hwpx",
+    "largestTemplateCompressedBytes": 3724587
+  },
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd test -- tests/document-export-localization.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFiles": 1,
+      "testsPassed": 13,
+      "testsFailed": 0
+    },
+    "focusedAndAdjacentTests": {
+      "command": "npm.cmd test -- tests/document-export-budget.test.ts tests/document-export-localization.test.ts tests/hwpx-template-route.test.ts tests/public-export-admission.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFiles": 4,
+      "testsPassed": 37,
+      "testsFailed": 0
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPagesPassed": 28,
+      "staticPagesFailed": 0
+    }
+  },
+  "liveProbe": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "method": "GET",
+    "route": "/api/export/hwpx-template?kind=moel-workplan-truck&companyName=SafeClaw",
+    "attempts": 3,
+    "status": 503,
+    "code": "PUBLIC_EXPORT_CONCURRENCY_LIMIT",
+    "rateLimitHeader": "instance",
+    "retryAfterSeconds": 1,
+    "archiveProcessingReached": false,
+    "dbMutationPerformed": false,
+    "interpretation": "The deployed route remained fail-closed at public export admission, so the live probe did not force archive allocation. The deployed source and bounded 25-template regression prove the pre-decompression contract without bypassing admission."
+  },
+  "remainingBoundaries": {
+    "findingSourceRemediated": true,
+    "freshFullRepositoryRescanRequiredForScanClosure": true,
+    "securityCompleteClaimAllowed": false,
+    "publicExportDistributedAdmission": "OPEN_OPERATOR_CONFIGURATION",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "readConfirmationInserted": false,
+    "providerDispatchCalled": false,
+    "vectorRuntimeCalled": false,
+    "wikiPublished": false,
+    "koshaRegistryMutationPerformed": false
+  }
+}

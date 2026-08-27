@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-27T20:32:29.542Z
-Source HEAD at generation: 48cdb1ebdf066adf04d11dc452909241157a93a5
-Live commit at generation: 48cdb1ebdf066adf04d11dc452909241157a93a5
+Generated at: 2026-08-27T21:17:25.658Z
+Source HEAD at generation: fd1122b482aec66570881ace74f90d8c10442d30
+Live commit at generation: fd1122b482aec66570881ace74f90d8c10442d30
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_evidence_missing_or_unknown`
@@ -424,6 +424,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | share_ack_prebody_admission_security | notice | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | notice | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
 | weather_fallback_error_redaction_security | notice | evaluation\weather-fallback-error-redaction-2026-08-28\report.json |
+| hwpx_archive_expansion_security | notice | evaluation\hwpx-archive-expansion-security-2026-08-28\report.json |
 | post_remediation_repository_security_scan | notice | evaluation\post-remediation-full-repository-security-scan-2026-08-14\report.json |
 | agent_chat_durable_admission_security | notice | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
 | security_resource_remediation | proven | evaluation\security-resource-remediation-2026-08-11\report.json |
@@ -498,7 +499,8 @@ Overall: `northstar_evidence_missing_or_unknown`
 | fresh_current_source_security_scan | ancestor | missing | evaluation\current-source-standard-security-scan-2026-08-28\report.json |
 | share_ack_prebody_admission_security | ancestor | ancestor_of_head | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | ancestor | ancestor_of_head | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
-| weather_fallback_error_redaction_security | exact | matches_live | evaluation\weather-fallback-error-redaction-2026-08-28\report.json |
+| weather_fallback_error_redaction_security | ancestor | ancestor_of_head | evaluation\weather-fallback-error-redaction-2026-08-28\report.json |
+| hwpx_archive_expansion_security | exact | matches_live | evaluation\hwpx-archive-expansion-security-2026-08-28\report.json |
 | agent_chat_durable_admission_security | ancestor | ancestor_of_head | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
 | mcp_provider_admission_security | ancestor | ancestor_of_head | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
 | share_recipient_contact_verification_security | ancestor | ancestor_of_head | evaluation\share-recipient-contact-verification-2026-08-14\report.json |

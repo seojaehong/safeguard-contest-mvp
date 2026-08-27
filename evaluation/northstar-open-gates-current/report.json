@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-27T20:32:28.686Z",
-  "sourceSha": "48cdb1ebdf066adf04d11dc452909241157a93a5",
+  "generatedAt": "2026-08-27T21:17:24.690Z",
+  "sourceSha": "fd1122b482aec66570881ace74f90d8c10442d30",
   "overall": "contradicted",
   "gates": [
     {
@@ -334,6 +334,16 @@
       "detail": "Live production source now keeps raw failures from all eight weather provider fallbacks in server logs and exposes only fixed public details. Production remains fail-closed before provider work while durable admission is absent. The sealed finding still needs a fresh full scan; distributed activation and exact saved Share MISSING_EVIDENCE remain open.",
       "nextActions": [
         "Run a fresh Standard scan before reclassifying the sealed finding; keep distributed activation and exact saved Share boundaries open."
+      ]
+    },
+    {
+      "id": "hwpx_archive_expansion_security",
+      "state": "notice",
+      "label": "HWPX archive expansion security",
+      "evidencePath": "evaluation\\hwpx-archive-expansion-security-2026-08-28\\report.json",
+      "detail": "Live production source now validates HWPX entry count, total uncompressed bytes, largest entry, and estimated peak working bytes before getData or toBuffer. All 25 committed templates pass the manifest. The sealed finding still needs a fresh full scan; public export distributed activation and exact saved Share MISSING_EVIDENCE remain open.",
+      "nextActions": [
+        "Run a fresh Standard scan before reclassifying the sealed finding; keep distributed export activation and exact saved Share boundaries open."
       ]
     },
     {

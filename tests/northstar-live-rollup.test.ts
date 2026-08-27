@@ -506,6 +506,31 @@ type RollupReport = {
     distributedAdmissionActivation: string;
     exactSavedShareVerdict: string;
   };
+  hwpxArchiveExpansionSecurity: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    scanId: string;
+    findingId: string;
+    findingSlug: string;
+    centralDirectoryCheckedBeforeEntryData: boolean;
+    entryCountBudget: number | null;
+    totalUncompressedBytesBudget: number | null;
+    largestEntryUncompressedBytesBudget: number | null;
+    estimatedPeakWorkingBytesBudget: number | null;
+    templateCount: number | null;
+    availableTemplateCount: number | null;
+    allTemplatesPassPreDecompressionBudget: boolean;
+    testsPassed: number | null;
+    liveStatus: number | null;
+    liveCode: string;
+    liveRateLimitHeader: string;
+    archiveProcessingReached: boolean;
+    freshRescanRequired: boolean;
+    securityCompleteClaimAllowed: boolean;
+    publicExportDistributedAdmission: string;
+    exactSavedShareVerdict: string;
+  };
   publicSearchDistributedRateLimitReadiness: {
     verdict: string;
     sourceHead: string;
@@ -1103,6 +1128,44 @@ function weatherFallbackErrorRedactionFixture(): Record<string, unknown> {
       freshFullRepositoryRescanRequiredForScanClosure: true,
       securityCompleteClaimAllowed: false,
       distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  };
+}
+
+function hwpxArchiveExpansionSecurityFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_HWPX_ARCHIVE_EXPANSION_SOURCE_REMEDIATED",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    finding: {
+      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+      findingId: "csf_f8f783170119f2531bcc3163",
+      slug: "hwpx-archive-expansion",
+    },
+    currentSourceContract: {
+      centralDirectoryCheckedBeforeEntryData: true,
+      entryCountBudget: 64,
+      totalUncompressedBytesBudget: 20 * 1024 * 1024,
+      largestEntryUncompressedBytesBudget: 10 * 1024 * 1024,
+      estimatedPeakWorkingBytesBudget: 40 * 1024 * 1024,
+    },
+    committedTemplateManifest: {
+      templateCount: 25,
+      availableTemplateCount: 25,
+      allTemplatesPassPreDecompressionBudget: true,
+    },
+    verification: { focusedAndAdjacentTests: { testsPassed: 37 } },
+    liveProbe: {
+      status: 503,
+      code: "PUBLIC_EXPORT_CONCURRENCY_LIMIT",
+      rateLimitHeader: "instance",
+      archiveProcessingReached: false,
+    },
+    remainingBoundaries: {
+      freshFullRepositoryRescanRequiredForScanClosure: true,
+      securityCompleteClaimAllowed: false,
+      publicExportDistributedAdmission: "OPEN_OPERATOR_CONFIGURATION",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   };
@@ -2172,6 +2235,7 @@ function createFixtureRoot(): { root: string; head: string } {
   writeJson(root, "evaluation/share-ack-prebody-admission-2026-08-28/report.json", shareAckPreBodyAdmissionFixture());
   writeJson(root, "evaluation/safety-status-disconnect-lease-2026-08-28/report.json", safetyStatusDisconnectLeaseFixture());
   writeJson(root, "evaluation/weather-fallback-error-redaction-2026-08-28/report.json", weatherFallbackErrorRedactionFixture());
+  writeJson(root, "evaluation/hwpx-archive-expansion-security-2026-08-28/report.json", hwpxArchiveExpansionSecurityFixture());
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "TO_FILL",
@@ -2565,6 +2629,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/share-ack-prebody-admission-2026-08-28/report.json",
     "evaluation/safety-status-disconnect-lease-2026-08-28/report.json",
     "evaluation/weather-fallback-error-redaction-2026-08-28/report.json",
+    "evaluation/hwpx-archive-expansion-security-2026-08-28/report.json",
     "evaluation/public-json-request-body-budget-2026-08-11/report.json",
     "evaluation/improvement-photo-analysis-budget-2026-08-11/report.json",
     "evaluation/public-provider-cancellation-2026-08-11/report.json",
@@ -3184,6 +3249,34 @@ describe("northstar live rollup", () => {
       freshRescanRequired: true,
       securityCompleteClaimAllowed: false,
       distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "hwpx_archive_expansion_security")).toMatchObject({
+      artifact: path.join("evaluation", "hwpx-archive-expansion-security-2026-08-28", "report.json"),
+    });
+    expect(report.hwpxArchiveExpansionSecurity).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_HWPX_ARCHIVE_EXPANSION_SOURCE_REMEDIATED",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+      findingId: "csf_f8f783170119f2531bcc3163",
+      findingSlug: "hwpx-archive-expansion",
+      centralDirectoryCheckedBeforeEntryData: true,
+      entryCountBudget: 64,
+      totalUncompressedBytesBudget: 20 * 1024 * 1024,
+      largestEntryUncompressedBytesBudget: 10 * 1024 * 1024,
+      estimatedPeakWorkingBytesBudget: 40 * 1024 * 1024,
+      templateCount: 25,
+      availableTemplateCount: 25,
+      allTemplatesPassPreDecompressionBudget: true,
+      testsPassed: 37,
+      liveStatus: 503,
+      liveCode: "PUBLIC_EXPORT_CONCURRENCY_LIMIT",
+      liveRateLimitHeader: "instance",
+      archiveProcessingReached: false,
+      freshRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      publicExportDistributedAdmission: "OPEN_OPERATOR_CONFIGURATION",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.publicJsonRequestBodyBudget).toMatchObject({

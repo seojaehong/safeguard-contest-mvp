@@ -561,6 +561,31 @@ type NextRunwayReport = {
     distributedAdmissionActivation: string;
     exactSavedShareVerdict: string;
   };
+  hwpxArchiveExpansionSecurity: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    scanId: string;
+    findingId: string;
+    findingSlug: string;
+    centralDirectoryCheckedBeforeEntryData: boolean;
+    entryCountBudget: number | null;
+    totalUncompressedBytesBudget: number | null;
+    largestEntryUncompressedBytesBudget: number | null;
+    estimatedPeakWorkingBytesBudget: number | null;
+    templateCount: number | null;
+    availableTemplateCount: number | null;
+    allTemplatesPassPreDecompressionBudget: boolean;
+    testsPassed: number | null;
+    liveStatus: number | null;
+    liveCode: string;
+    liveRateLimitHeader: string;
+    archiveProcessingReached: boolean;
+    freshRescanRequired: boolean;
+    securityCompleteClaimAllowed: boolean;
+    publicExportDistributedAdmission: string;
+    exactSavedShareVerdict: string;
+  };
   publicSearchDistributedRateLimitReadiness: {
     verdict: string;
     sourceHead: string;
@@ -1540,6 +1565,44 @@ function weatherFallbackErrorRedactionFixture(sourceHead: string): Record<string
       freshFullRepositoryRescanRequiredForScanClosure: true,
       securityCompleteClaimAllowed: false,
       distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  };
+}
+
+function hwpxArchiveExpansionSecurityFixture(sourceHead: string): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_HWPX_ARCHIVE_EXPANSION_SOURCE_REMEDIATED",
+    sourceHead,
+    productionCommit: sourceHead,
+    finding: {
+      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+      findingId: "csf_f8f783170119f2531bcc3163",
+      slug: "hwpx-archive-expansion",
+    },
+    currentSourceContract: {
+      centralDirectoryCheckedBeforeEntryData: true,
+      entryCountBudget: 64,
+      totalUncompressedBytesBudget: 20 * 1024 * 1024,
+      largestEntryUncompressedBytesBudget: 10 * 1024 * 1024,
+      estimatedPeakWorkingBytesBudget: 40 * 1024 * 1024,
+    },
+    committedTemplateManifest: {
+      templateCount: 25,
+      availableTemplateCount: 25,
+      allTemplatesPassPreDecompressionBudget: true,
+    },
+    verification: { focusedAndAdjacentTests: { testsPassed: 37 } },
+    liveProbe: {
+      status: 503,
+      code: "PUBLIC_EXPORT_CONCURRENCY_LIMIT",
+      rateLimitHeader: "instance",
+      archiveProcessingReached: false,
+    },
+    remainingBoundaries: {
+      freshFullRepositoryRescanRequiredForScanClosure: true,
+      securityCompleteClaimAllowed: false,
+      publicExportDistributedAdmission: "OPEN_OPERATOR_CONFIGURATION",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   };
@@ -3181,6 +3244,11 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     "evaluation/weather-fallback-error-redaction-2026-08-28/report.json",
     weatherFallbackErrorRedactionFixture(firstHead),
   );
+  writeJson(
+    root,
+    "evaluation/hwpx-archive-expansion-security-2026-08-28/report.json",
+    hwpxArchiveExpansionSecurityFixture(firstHead),
+  );
   writeJson(root, "evaluation/final-99-12-document-no-mutation-2026-08-17/report.json", {
     schema: "safeclaw-final-99-12-document-no-mutation/v1",
     verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED",
@@ -4444,6 +4512,11 @@ describe("northstar next runway generator", () => {
       state: "notice",
       reason: expect.stringContaining("provider fallback diagnostics server-side"),
     }));
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "hwpx_archive_expansion_security",
+      state: "notice",
+      reason: expect.stringContaining("before archive expansion"),
+    }));
     expect(report.freshCurrentSourceSecurityScan).toMatchObject({
       verdict: "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE",
       scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
@@ -4520,6 +4593,31 @@ describe("northstar next runway generator", () => {
       freshRescanRequired: true,
       securityCompleteClaimAllowed: false,
       distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.hwpxArchiveExpansionSecurity).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_HWPX_ARCHIVE_EXPANSION_SOURCE_REMEDIATED",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+      findingId: "csf_f8f783170119f2531bcc3163",
+      findingSlug: "hwpx-archive-expansion",
+      centralDirectoryCheckedBeforeEntryData: true,
+      entryCountBudget: 64,
+      totalUncompressedBytesBudget: 20 * 1024 * 1024,
+      largestEntryUncompressedBytesBudget: 10 * 1024 * 1024,
+      estimatedPeakWorkingBytesBudget: 40 * 1024 * 1024,
+      templateCount: 25,
+      availableTemplateCount: 25,
+      allTemplatesPassPreDecompressionBudget: true,
+      testsPassed: 37,
+      liveStatus: 503,
+      liveCode: "PUBLIC_EXPORT_CONCURRENCY_LIMIT",
+      liveRateLimitHeader: "instance",
+      archiveProcessingReached: false,
+      freshRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      publicExportDistributedAdmission: "OPEN_OPERATOR_CONFIGURATION",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.provenCurrentState).toContain("public_json_request_body_budget");

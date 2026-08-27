@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `48cdb1ebdf066adf04d11dc452909241157a93a5`
+Source HEAD: `fd1122b482aec66570881ace74f90d8c10442d30`
 
-Production `/api/build-info`: `48cdb1ebdf066adf04d11dc452909241157a93a5`
+Production `/api/build-info`: `fd1122b482aec66570881ace74f90d8c10442d30`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `48cdb1ebdf066adf04d11dc452909241157a93a5`
+Live rollup source head: `fd1122b482aec66570881ace74f90d8c10442d30`
 
 Live rollup matches production: `true`
 
@@ -75,6 +75,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Share ACK pre-body admission is `PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED`: coarse IP rate/body concurrency ordering `true/true`, recipient-specific post-parse admission `true`, tests `66`, and live `503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE/distributed`. The sealed finding remains rescan-pending `true`; security-complete remains `false`, recipient ACK is `APPROVAL_GATED`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Safety status disconnect lease is `PASS_LIVE_PRODUCTION_SAFETY_STATUS_DISCONNECT_LEASE_SOURCE_REMEDIATED`: work settlement before abort rejection/lease release `true/true`, two-disconnect concurrency proof `true`, tests `16`, and live `503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE/safety-reference-status`. The sealed finding remains rescan-pending `true`; security-complete remains `false`, distributed activation is `OPERATOR_CONFIGURATION_REQUIRED`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Weather fallback error redaction is `PASS_LIVE_PRODUCTION_WEATHER_FALLBACK_ERROR_REDACTION_SOURCE_REMEDIATED`: fixed public detail/server-only raw diagnostics/aggregate redaction `true/true/true`, provider branches `8`, tests `16`, and live `503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE/distributed`. The sealed finding remains rescan-pending `true`; security-complete remains `false`, distributed activation is `OPERATOR_CONFIGURATION_REQUIRED`, and exact saved Share remains `MISSING_EVIDENCE`.
+- HWPX archive expansion security is `PASS_LIVE_PRODUCTION_HWPX_ARCHIVE_EXPANSION_SOURCE_REMEDIATED`: central-directory preflight `true`, template manifest `25/25`, entry/total/largest/peak budgets `64/20971520/10485760/41943040`, tests `37`, and live `503/PUBLIC_EXPORT_CONCURRENCY_LIMIT/instance`. The sealed finding remains rescan-pending `true`; security-complete remains `false`, distributed export activation is `OPEN_OPERATOR_CONFIGURATION`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Atomic database race remediation is approval-gated: `APPROVAL_REQUIRED_TRANSACTIONAL_DB_RACE_REMEDIATION_NO_MUTATION`, sealed findings still open `2`, approval required/performed `true/false`, migration authored `false`, DB mutation performed `false`, fresh scan required `true`, security-complete `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Fresh live Documents/workspace Share route perception is `PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP`: measured rows Documents/Share `2/2`, desktop Share regions `3`, route split alone accepted `false`, DB mutation `false`, and exact saved user session reproduced/verdict `false/MISSING_EVIDENCE`.
 - Live deployment freshness is measured separately: `PASS_LIVE_PRODUCTION_DEPLOYMENT_FRESHNESS_GUARD`, current notice present `false`, simulated SHA-drift refresh visible `true`, frontend audit violations `0`, and live pending `false`. This closes only stale-tab visibility; DB mutation remains `false` and exact saved Share remains `MISSING_EVIDENCE`.
