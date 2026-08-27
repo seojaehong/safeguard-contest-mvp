@@ -287,4 +287,15 @@ describe("safety-reference status route", () => {
 
     await expect(pending).rejects.toMatchObject({ name: "AbortError" });
   });
+
+  it("does not start status work for an already disconnected request", async () => {
+    const controller = new AbortController();
+    controller.abort(new DOMException("client disconnected", "AbortError"));
+
+    await expect(GET(statusRequest(controller.signal))).rejects.toMatchObject({ name: "AbortError" });
+
+    expect(mocks.getSafetyReferenceStats).not.toHaveBeenCalled();
+    expect(mocks.loadKoshaGuideCorpus).not.toHaveBeenCalled();
+    expect(mocks.loadBundledExactKoshaReferences).not.toHaveBeenCalled();
+  });
 });

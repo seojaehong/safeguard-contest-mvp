@@ -24,6 +24,7 @@ function waitForStatusWork<T>(promise: Promise<T>, signal: AbortSignal): Promise
 
 export async function GET(request: NextRequest) {
   return withPublicSafetyReferenceStatusAdmission(request, async () => {
+    request.signal.throwIfAborted();
     const exactTrustPins = getProductionExactKoshaTrustPins();
     const [catalog, localCorpus, exactTrustRegistryLoad] = await waitForStatusWork(
       Promise.all([
