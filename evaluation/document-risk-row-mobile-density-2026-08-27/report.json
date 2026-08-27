@@ -1,0 +1,166 @@
+{
+  "schema": "safeclaw-document-risk-row-mobile-density/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_MOBILE_DENSITY",
+  "checkedAt": "2026-08-27T03:55:48.7677405Z",
+  "productCommit": "bc127f89661460a47cc1b7438c8d3d04ed1c05c5",
+  "productionBuild": {
+    "commitSha": "bc127f89661460a47cc1b7438c8d3d04ed1c05c5",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-qew45pcm5-seojaehongs-projects.vercel.app"
+  },
+  "crossSessionUiReview": {
+    "reviewedBranches": [
+      {
+        "branch": "feat/safeclaw-document-rail",
+        "head": "a497c5419fd28f1466725d7cdcea04bf03b2ed5a",
+        "base": "c4781ee71a86a231b76949b73df0716eb5d78a52",
+        "clean": true,
+        "integratedIntoCurrent": false,
+        "disposition": "superseded_by_current_selected_only_workbench"
+      },
+      {
+        "branch": "feat/safeclaw-linear-shell",
+        "head": "1cd42e3aef6376a124d5bf8c99a93e471f7ec56f",
+        "base": "c4781ee71a86a231b76949b73df0716eb5d78a52",
+        "clean": true,
+        "integratedIntoCurrent": false,
+        "disposition": "not_cherry_picked_wholesale_globals_rewrite"
+      },
+      {
+        "branch": "feat/safeclaw-share-workflow",
+        "head": "93fad09338662fb9a65bb3e74e6f14eaea14f44a",
+        "base": "c4781ee71a86a231b76949b73df0716eb5d78a52",
+        "clean": true,
+        "integratedIntoCurrent": false,
+        "disposition": "share_intent_superseded_by_current_live_three_zone_workflow"
+      },
+      {
+        "branch": "fix/docs-share-viewport-ia",
+        "head": "3fc8ff1276575482caa1fecf99262bbd427597e2",
+        "clean": true,
+        "integratedIntoCurrent": true,
+        "disposition": "preserved_in_product_history"
+      }
+    ],
+    "existingDirectionPreserved": true,
+    "wholesaleUiBranchMergePerformed": false
+  },
+  "beforeLive": {
+    "commitSha": "9dbe230cbb2973eb2313036b3b87094b1d0194f7",
+    "deploymentUrl": "safeguard-contest-f2lp8xwz2-seojaehongs-projects.vercel.app",
+    "viewport": {
+      "width": 390,
+      "height": 723
+    },
+    "riskRowSelectorCount": 5,
+    "riskRowSelectorRows": 2,
+    "riskRowRailTop": 619,
+    "riskRowRailBottom": 713,
+    "riskRowRailHeight": 94,
+    "firstActiveEditorGroupTop": 716,
+    "finding": "Five risk selectors wrapped into a two-row mobile grid, consuming 94px and pushing the first active editor group to the viewport edge."
+  },
+  "afterLive": {
+    "mobileDay390x723": {
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "documentHeight": 723,
+      "horizontalOverflow": 0,
+      "riskRowSelectorCount": 5,
+      "riskRowSelectorRows": 1,
+      "riskRowRailTop": 498,
+      "riskRowRailBottom": 544,
+      "riskRowRailHeight": 46,
+      "riskRowRailClientWidth": 265,
+      "riskRowRailScrollWidth": 446,
+      "selectorHeights": [44, 44, 44, 44, 44],
+      "activeHazardTop": 617,
+      "activeHazardBottom": 667,
+      "shellClientHeight": 352,
+      "shellScrollHeight": 930,
+      "screenshot": "evaluation/document-risk-row-mobile-density-2026-08-27/after-live-390x723.png"
+    },
+    "mobileNight390x723": {
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "documentHeight": 723,
+      "horizontalOverflow": 0,
+      "riskRowSelectorCount": 5,
+      "riskRowSelectorRows": 1,
+      "riskRowRailTop": 498,
+      "riskRowRailBottom": 544,
+      "riskRowRailHeight": 46,
+      "riskRowRailClientWidth": 265,
+      "riskRowRailScrollWidth": 446,
+      "selectorHeights": [44, 44, 44, 44, 44],
+      "activeHazardTop": 617,
+      "activeHazardBottom": 667,
+      "shellClientHeight": 352,
+      "shellScrollHeight": 930,
+      "screenshot": "evaluation/document-risk-row-mobile-density-2026-08-27/after-live-mobile-night-390x723.png"
+    },
+    "desktopDay1440x723": {
+      "viewport": {
+        "width": 1440,
+        "height": 723
+      },
+      "documentHeight": 723,
+      "horizontalOverflow": 0,
+      "riskRowSelectorCount": 5,
+      "riskRowSelectorRows": 1,
+      "riskRowRailHeight": 56,
+      "riskRowRailClientWidth": 831,
+      "riskRowRailScrollWidth": 831,
+      "selectorHeights": [54, 54, 54, 54, 54],
+      "activeHazardTop": 582,
+      "activeHazardBottom": 642,
+      "shellClientHeight": 448,
+      "shellScrollHeight": 869,
+      "screenshot": "evaluation/document-risk-row-mobile-density-2026-08-27/after-live-desktop-day-1440x723.png"
+    }
+  },
+  "verification": {
+    "focusedFiveRowBrowser": {
+      "files": 1,
+      "tests": 1,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "documentsEditorLayout": {
+      "files": 1,
+      "tests": 44,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "staticPages": 28,
+      "nextVersion": "15.5.22"
+    },
+    "dependencyAudit": {
+      "packages": 362,
+      "vulnerabilities": 0
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerLiveDispatchProven": false,
+    "routeSplitAloneAcceptedAsFix": false,
+    "wholeDocumentsPageClaimedShort": false,
+    "rawSourceDrilldownRemainsBoundedSecondary": true
+  }
+}
