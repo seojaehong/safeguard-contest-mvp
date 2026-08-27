@@ -135,6 +135,7 @@ const EVIDENCE_PATHS = Object.freeze({
   shareDesktopComposition: path.join("evaluation", "share-desktop-composition-2026-07-21", "report.json"),
   shareDesktopShortCockpit: path.join("evaluation", "share-desktop-short-cockpit-2026-07-21", "report.json"),
   shareDesktopPerception: path.join("evaluation", "share-desktop-perception-2026-07-22", "report.json"),
+  shareChannelLabelPolish: path.join("evaluation", "share-channel-label-polish-2026-08-27", "report.json"),
   shareMobileFullFlow: path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"),
   shareStagedFlowRail: path.join("evaluation", "share-staged-flow-rail-2026-07-21", "report.json"),
   shareMobileStageRailCollapse: path.join("evaluation", "share-mobile-stage-rail-collapse-2026-07-21", "report.json"),
@@ -3103,6 +3104,7 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const shareDesktopPath = EVIDENCE_PATHS.shareDesktopComposition;
   const shareDesktopShortPath = EVIDENCE_PATHS.shareDesktopShortCockpit;
   const shareDesktopPerceptionPath = EVIDENCE_PATHS.shareDesktopPerception;
+  const shareChannelLabelPolishPath = EVIDENCE_PATHS.shareChannelLabelPolish;
   const sharePath = EVIDENCE_PATHS.shareMobileFullFlow;
   const shareStageRailPath = EVIDENCE_PATHS.shareStagedFlowRail;
   const shareMobileStageRailCollapsePath = EVIDENCE_PATHS.shareMobileStageRailCollapse;
@@ -3139,6 +3141,7 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const shareDesktop = readJsonFile(rootDir, shareDesktopPath);
   const shareDesktopShort = readJsonFile(rootDir, shareDesktopShortPath);
   const shareDesktopPerception = readJsonFile(rootDir, shareDesktopPerceptionPath);
+  const shareChannelLabelPolish = readJsonFile(rootDir, shareChannelLabelPolishPath);
   const share = readJsonFile(rootDir, sharePath);
   const shareStageRail = readJsonFile(rootDir, shareStageRailPath);
   const shareMobileStageRailCollapse = readJsonFile(rootDir, shareMobileStageRailCollapsePath);
@@ -3156,6 +3159,17 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
       evidencePath: documentAuthoringPaneMarginPath,
       detail: "The live document authoring pane-margin companion evidence is missing or invalid.",
       nextActions: ["Regenerate the 12-document Day/Night desktop-short/mobile-short pane-margin evidence before promoting the cockpit gate."],
+    });
+  }
+
+  if (!isRecord(shareChannelLabelPolish)) {
+    return gateResult({
+      id: "ui_documents_share_cockpit",
+      label: "Documents and Share cockpit UI",
+      state: "missing",
+      evidencePath: shareChannelLabelPolishPath,
+      detail: "The live Workspace Share channel-label companion evidence is missing or invalid.",
+      nextActions: ["Regenerate the live 1440x723 and 390x723 Workspace Share channel-label evidence without claiming exact saved Share."],
     });
   }
 
@@ -3841,6 +3855,70 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
       && readBoolean(row.metrics?.horizontalOverflow) === false
       && readNumber(row.metrics?.outsideElements) === 0
     ));
+  const shareChannelLabelBuild = isRecord(shareChannelLabelPolish.productionBuild)
+    ? shareChannelLabelPolish.productionBuild
+    : {};
+  const shareChannelLabelIntegration = isRecord(shareChannelLabelPolish.crossSessionUiIntegration)
+    ? shareChannelLabelPolish.crossSessionUiIntegration
+    : {};
+  const shareChannelLabelDesktop = isRecord(shareChannelLabelPolish.afterLive?.desktop)
+    ? shareChannelLabelPolish.afterLive.desktop
+    : {};
+  const shareChannelLabelMobile = isRecord(shareChannelLabelPolish.afterLive?.mobile)
+    ? shareChannelLabelPolish.afterLive.mobile
+    : {};
+  const shareChannelCards = Array.isArray(shareChannelLabelDesktop.channelCards)
+    ? shareChannelLabelDesktop.channelCards.filter(isRecord)
+    : [];
+  const shareChannelLabels = shareChannelCards.map((card) => readString(card.label)).sort();
+  const shareChannelLabelPolishPass = readString(shareChannelLabelPolish.schema) === "safeclaw-share-channel-label-polish/v1"
+    && readString(shareChannelLabelPolish.verdict) === "PASS_LIVE_PRODUCTION_SHARE_CHANNEL_LABEL_POLISH"
+    && readString(shareChannelLabelPolish.productCommit) === readString(shareChannelLabelBuild.commitSha)
+    && readString(shareChannelLabelBuild.branch) === "master"
+    && readString(shareChannelLabelBuild.environment) === "production"
+    && readBoolean(shareChannelLabelIntegration.integratedIntoProductHistory) === true
+    && readBoolean(shareChannelLabelIntegration.desktopThreeZoneContractPreserved) === true
+    && readBoolean(shareChannelLabelIntegration.mobileStackContractPreserved) === true
+    && readNumber(shareChannelLabelDesktop.viewport?.width) === 1440
+    && readNumber(shareChannelLabelDesktop.viewport?.height) === 723
+    && readNumber(shareChannelLabelDesktop.documentHeight) === 723
+    && readNumber(shareChannelLabelDesktop.bodyHeight) === 723
+    && readNumber(shareChannelLabelDesktop.horizontalOverflow) === 0
+    && readNumber(shareChannelLabelDesktop.root?.width) >= 1180
+    && readNumber(shareChannelLabelDesktop.root?.bottom) <= 723
+    && readNumber(shareChannelLabelDesktop.preview?.bottom) <= 723
+    && readString(shareChannelLabelDesktop.statusRail?.display) === "grid"
+    && readNumber(shareChannelLabelDesktop.statusRail?.bottom) <= 723
+    && readNumber(shareChannelLabelDesktop.primary?.bottom) <= 723
+    && readNumber(shareChannelLabelDesktop.distinctRegions) >= 3
+    && shareChannelCards.length === 3
+    && JSON.stringify(shareChannelLabels) === JSON.stringify(["메일", "문자", "카카오"].sort())
+    && shareChannelCards.every((card) => (
+      readNumber(card.width) >= 150
+      && readNumber(card.labelLineCount) === 1
+      && readString(card.whiteSpace) === "nowrap"
+    ))
+    && readNumber(shareChannelLabelMobile.viewport?.width) === 390
+    && readNumber(shareChannelLabelMobile.viewport?.height) === 723
+    && readNumber(shareChannelLabelMobile.documentHeight) === 723
+    && readNumber(shareChannelLabelMobile.bodyHeight) === 723
+    && readNumber(shareChannelLabelMobile.horizontalOverflow) === 0
+    && readNumber(shareChannelLabelMobile.root?.bottom) <= 723
+    && readNumber(shareChannelLabelMobile.preview?.bottom) <= 723
+    && readNumber(shareChannelLabelMobile.primary?.bottom) <= 723
+    && readString(shareChannelLabelMobile.statusRailDisplay) === "none"
+    && readBoolean(shareChannelLabelMobile.configurationCollapsed) === true
+    && readBoolean(shareChannelLabelPolish.mutationBoundary?.dbMutationPerformed) === false
+    && readBoolean(shareChannelLabelPolish.mutationBoundary?.providerDispatchCalled) === false
+    && readBoolean(shareChannelLabelPolish.mutationBoundary?.shareSessionCreated) === false
+    && readBoolean(shareChannelLabelPolish.mutationBoundary?.vectorOrEmbeddingMutationPerformed) === false
+    && readBoolean(shareChannelLabelPolish.mutationBoundary?.wikiPublicationPerformed) === false
+    && readBoolean(shareChannelLabelPolish.mutationBoundary?.koshaRegistryMutationPerformed) === false
+    && readString(shareChannelLabelPolish.remainingBoundaries?.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readBoolean(shareChannelLabelPolish.remainingBoundaries?.embeddedWorkspaceShareOnly) === true
+    && readBoolean(shareChannelLabelPolish.remainingBoundaries?.exactSavedSessionReproduced) === false
+    && readBoolean(shareChannelLabelPolish.remainingBoundaries?.providerLiveDispatchProven) === false
+    && readBoolean(shareChannelLabelPolish.remainingBoundaries?.routeSplitAloneAcceptedAsFix) === false;
   const shareStageScope = isRecord(shareStageRail.scope) ? shareStageRail.scope : {};
   const shareStageContracts = isRecord(shareStageRail.contracts) ? shareStageRail.contracts : {};
   const shareStageGeometry = isRecord(shareStageRail.freshGeometry) ? shareStageRail.freshGeometry : {};
@@ -4551,13 +4629,13 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && readString(workspaceIaCurrentRawTextareaDepth.status) === "open_secondary_drilldown"
     && readString(workspaceIaCurrentShareNarrowWorkbench.status) === "optional_follow_up_if_reproduced";
 
-  if (documentsPass && sharePass && workspaceIaRefinementPass && workspaceEditorDetailLandingPass && selectedEditorCockpitPass && workspaceIaCurrentPass && documentsCockpitWorkbenchGeometryPass && liveCurrentDocumentsShareGeometryPass && documentsMobileReviewLaunchPass && documentsTouchTargetsPass && documentSectionNavigationPass && documentAllAuthoringGeometryPass && documentAuthoringPaneMarginPass && documentRawDrilldownGeometryPass && documentRiskRowNavigationPass && documentRiskRowMobileOrderPass && documentRiskRowMobileLabelPass) {
+  if (documentsPass && sharePass && shareChannelLabelPolishPass && workspaceIaRefinementPass && workspaceEditorDetailLandingPass && selectedEditorCockpitPass && workspaceIaCurrentPass && documentsCockpitWorkbenchGeometryPass && liveCurrentDocumentsShareGeometryPass && documentsMobileReviewLaunchPass && documentsTouchTargetsPass && documentSectionNavigationPass && documentAllAuthoringGeometryPass && documentAuthoringPaneMarginPass && documentRawDrilldownGeometryPass && documentRiskRowNavigationPass && documentRiskRowMobileOrderPass && documentRiskRowMobileLabelPass) {
     return gateResult({
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "proven",
       evidencePath: documentRiskRowMobileLabelPath,
-      detail: "Scoped first-task cockpit proof only, not full Documents/Share IA completion: live /documents?theme=day geometry now directly proves the selected-document cockpit/workbench is not the stale stacked layout at 1440x723 and 390x723, with 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers kept inside the closed disclosure, 0 visible supporting launchers by default, and the legacy document index hidden. The current-production companion additionally records the mobile risk-row shell containment remediation from 327/360px to 327/327px, with the active risk row at 264/264px and no visual horizontal scrollbar at exactly 390x723; its same live snapshot retains a three-column 1440x723 Workspace Share workbench, a separate one-column mobile cockpit, and exact saved Share as MISSING_EVIDENCE. A live companion also proves the mobile document-review launcher overlap moved from 1 to 0, the three core launchers remain unobstructed, the review control remains 44px tall inside the 390x723 viewport, desktop/mobile body ratio remains 1.00, and exact saved Share remains MISSING_EVIDENCE. A separate live Day/Night desktop/mobile touch contract proves 4/4 viewport-contained cases with 44px section actions, 44px risk-row selectors, and a 44x44 human-review close control while supporting documents remain collapsed and exact saved Share remains MISSING_EVIDENCE. Live Day/Night section-navigation evidence additionally proves the selected Work Plan exposes 6 readable section tabs with exactly 1 selected tab, 6 filled states, 44px minimum controls, two-line labels, shell ratio <= 3, and first action containment across 1440x723 and 390x723. Live all-document selected-authoring geometry further covers all 12 canonical documents in 48/48 rows across Day/Night desktop-short/mobile-short, with at most one role-specific cockpit, internal cockpit scrolling, first action inside the viewport, and raw/source editors hidden by default; the foreign-worker briefing no longer stacks education and transmission cockpits. The earlier pane-margin companion reduced rows below its historical 16px contract from 44/48 to 0/48; the current all-document contract now requires and proves a 32px minimum inner-pane margin in all 48/48 rows while keeping the maximum shell ratio at 2.36 in aligned live production. A separate live 48/48 raw-source drilldown contract now proves every canonical document opens exactly one source editor inside the viewport with a bounded 258px editor, local source scrolling, shell ratio <= 2.25, and no horizontal overflow across the same Day/Night desktop-short/mobile-short matrix. Live risk-row navigation adds 4/4 Day/Night desktop-short/mobile-short cases with 3/3 hazard-first visible labels, task context preserved in accessible names and tooltips, shell ratio <= 2.23, and no horizontal overflow. A companion live mobile-order contract proves the selector rail precedes the active editor in all 4/4 cases; a second live mobile-label contract keeps all three 390px selectors visually distinct with an unclipped accident type plus hazard cue while preserving each full hazard in its accessible name and title, body height 728px, first hazard bottom 703px, and shell ratio 2.11. Default /workspace Documents and Share cockpits, /documents mobile first-action containment, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, selected-editor field summary plus evidence/recheck CTA before raw textarea, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors remain scoped. Live Workspace Share now separately proves a 1440px three-zone cockpit, including desktop-short 1440x723, with an 1180px workspace step rail, zero overflowing step-status labels, the status/provenance rail inside the first viewport, and a 390x723 mobile stack with that rail hidden; the invited recipient fixture retains a separate desktop two-zone contract. It also keeps desktop-short Share containment, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, mobile Share exact 844px viewport containment, and /share/[sessionId] desktop recipient confirmation cockpit with mobile confirmation CTA before document details. This is not a claim that the whole Documents page is short; raw/source editing remains an explicit secondary drilldown and is now live-bounded, while deeper row/detail editing and broad human wording review remain separate. It also does not prove exact saved/generated Share, provider live dispatch, or route/page split alone as the UX fix.",
+      detail: "Scoped first-task cockpit proof only, not full Documents/Share IA completion: live /documents?theme=day geometry now directly proves the selected-document cockpit/workbench is not the stale stacked layout at 1440x723 and 390x723, with 12 unique document keys, exactly 3 visible core launchers, 9 supporting launchers kept inside the closed disclosure, 0 visible supporting launchers by default, and the legacy document index hidden. The current-production companion additionally records the mobile risk-row shell containment remediation from 327/360px to 327/327px, with the active risk row at 264/264px and no visual horizontal scrollbar at exactly 390x723; its same live snapshot retains a three-column 1440x723 Workspace Share workbench, a separate one-column mobile cockpit, and exact saved Share as MISSING_EVIDENCE. A live companion also proves the mobile document-review launcher overlap moved from 1 to 0, the three core launchers remain unobstructed, the review control remains 44px tall inside the 390x723 viewport, desktop/mobile body ratio remains 1.00, and exact saved Share remains MISSING_EVIDENCE. A separate live Day/Night desktop/mobile touch contract proves 4/4 viewport-contained cases with 44px section actions, 44px risk-row selectors, and a 44x44 human-review close control while supporting documents remain collapsed and exact saved Share remains MISSING_EVIDENCE. Live Day/Night section-navigation evidence additionally proves the selected Work Plan exposes 6 readable section tabs with exactly 1 selected tab, 6 filled states, 44px minimum controls, two-line labels, shell ratio <= 3, and first action containment across 1440x723 and 390x723. Live all-document selected-authoring geometry further covers all 12 canonical documents in 48/48 rows across Day/Night desktop-short/mobile-short, with at most one role-specific cockpit, internal cockpit scrolling, first action inside the viewport, and raw/source editors hidden by default; the foreign-worker briefing no longer stacks education and transmission cockpits. The earlier pane-margin companion reduced rows below its historical 16px contract from 44/48 to 0/48; the current all-document contract now requires and proves a 32px minimum inner-pane margin in all 48/48 rows while keeping the maximum shell ratio at 2.36 in aligned live production. A separate live 48/48 raw-source drilldown contract now proves every canonical document opens exactly one source editor inside the viewport with a bounded 258px editor, local source scrolling, shell ratio <= 2.25, and no horizontal overflow across the same Day/Night desktop-short/mobile-short matrix. Live risk-row navigation adds 4/4 Day/Night desktop-short/mobile-short cases with 3/3 hazard-first visible labels, task context preserved in accessible names and tooltips, shell ratio <= 2.23, and no horizontal overflow. A companion live mobile-order contract proves the selector rail precedes the active editor in all 4/4 cases; a second live mobile-label contract keeps all three 390px selectors visually distinct with an unclipped accident type plus hazard cue while preserving each full hazard in its accessible name and title, body height 728px, first hazard bottom 703px, and shell ratio 2.11. Default /workspace Documents and Share cockpits, /documents mobile first-action containment, exact one-viewport Documents review cockpit, selected-document context/summary layers, selected editor/detail field-summary risk-row landing, selected-editor field summary plus evidence/recheck CTA before raw textarea, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, and live 12 document first-task cockpits before long raw editors remain scoped. Live Workspace Share now separately proves a 1440px three-zone cockpit, including desktop-short 1440x723, with an 1180px workspace step rail, zero overflowing step-status labels, the status/provenance rail inside the first viewport, and a 390x723 mobile stack with that rail hidden; the cross-session UI integration is present in product history and the desktop 메일, 문자, and 카카오 channel labels each remain on one nowrap line in 159px cards. The invited recipient fixture retains a separate desktop two-zone contract. It also keeps desktop-short Share containment, staged Share rail, live mobile selected-summary/preview/primary CTA/config toggle, collapsed mobile configuration stack, provider-result summary inside the first viewport, mobile Share exact 844px viewport containment, and /share/[sessionId] desktop recipient confirmation cockpit with mobile confirmation CTA before document details. This is not a claim that the whole Documents page is short; raw/source editing remains an explicit secondary drilldown and is now live-bounded, while deeper row/detail editing and broad human wording review remain separate. It also does not prove exact saved/generated Share, provider live dispatch, or route/page split alone as the UX fix.",
       nextActions: [
         "Keep the live selected-authoring and raw-source matrices as scoped containment claims; do not phrase them as the whole Documents page being short or completed human wording review.",
         "Keep raw/source editing as an explicit live-bounded secondary drilldown and deeper row/detail editing as separate scope; selected-editor evidence/recheck CTA remains live-proven before raw editing.",
@@ -4576,8 +4654,8 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     id: "ui_documents_share_cockpit",
     label: "Documents and Share cockpit UI",
     state: "contradicted",
-    evidencePath: !workspaceIaRefinementPass ? workspaceIaLiveRefinementPath : !workspaceEditorDetailLandingPass ? workspaceEditorDetailLandingPath : !selectedEditorCockpitPass ? documentsSelectedEditorCockpitPath : !workspaceIaCurrentPass ? workspaceIaLiveCurrentPath : !documentsCockpitWorkbenchGeometryPass ? documentsCockpitWorkbenchGeometryPath : !liveCurrentDocumentsShareGeometryPass ? liveCurrentDocumentsShareGeometryPath : !documentsMobileReviewLaunchPass ? documentsMobileReviewLaunchPath : !documentsTouchTargetsPass ? documentsTouchTargetsPath : !documentSectionNavigationPass ? documentSectionNavigationPath : !documentAllAuthoringGeometryPass ? documentAllAuthoringGeometryPath : !documentAuthoringPaneMarginPass ? documentAuthoringPaneMarginPath : !documentRawDrilldownGeometryPass ? documentRawDrilldownGeometryPath : !documentRiskRowNavigationPass ? documentRiskRowNavigationPath : !documentRiskRowMobileOrderPass ? documentRiskRowMobileOrderPath : !documentRiskRowMobileLabelPass ? documentRiskRowMobileLabelPath : !shareDesktopPerceptionPass ? shareDesktopPerceptionPath : documentsPass ? shareDesktopShortPath : documentsMobileExactCockpitPath,
-    detail: "Documents/share cockpit evidence no longer proves bounded page height, the 12/3/9/0 default document exposure budget, selected Work Plan section navigation, 48/48 all-document selected-authoring and raw-source containment, distinct hazard-first risk-row navigation, selector-before-editor mobile risk-row order, distinct unclipped mobile risk-row labels, exact mobile Documents cockpit, first-viewport share action, share recipient cockpit geometry, and the latest IA refinement together.",
+    evidencePath: !workspaceIaRefinementPass ? workspaceIaLiveRefinementPath : !workspaceEditorDetailLandingPass ? workspaceEditorDetailLandingPath : !selectedEditorCockpitPass ? documentsSelectedEditorCockpitPath : !workspaceIaCurrentPass ? workspaceIaLiveCurrentPath : !documentsCockpitWorkbenchGeometryPass ? documentsCockpitWorkbenchGeometryPath : !liveCurrentDocumentsShareGeometryPass ? liveCurrentDocumentsShareGeometryPath : !documentsMobileReviewLaunchPass ? documentsMobileReviewLaunchPath : !documentsTouchTargetsPass ? documentsTouchTargetsPath : !documentSectionNavigationPass ? documentSectionNavigationPath : !documentAllAuthoringGeometryPass ? documentAllAuthoringGeometryPath : !documentAuthoringPaneMarginPass ? documentAuthoringPaneMarginPath : !documentRawDrilldownGeometryPass ? documentRawDrilldownGeometryPath : !documentRiskRowNavigationPass ? documentRiskRowNavigationPath : !documentRiskRowMobileOrderPass ? documentRiskRowMobileOrderPath : !documentRiskRowMobileLabelPass ? documentRiskRowMobileLabelPath : !shareDesktopPerceptionPass ? shareDesktopPerceptionPath : !shareChannelLabelPolishPass ? shareChannelLabelPolishPath : documentsPass ? shareDesktopShortPath : documentsMobileExactCockpitPath,
+    detail: `Documents/share cockpit evidence no longer proves bounded page height, the 12/3/9/0 default document exposure budget, selected Work Plan section navigation, 48/48 all-document selected-authoring and raw-source containment, distinct hazard-first risk-row navigation, selector-before-editor mobile risk-row order, distinct unclipped mobile risk-row labels, exact mobile Documents cockpit, first-viewport share action, share recipient cockpit geometry, live single-line desktop channel labels, and the latest IA refinement together. shareChannelLabelPolish=${shareChannelLabelPolishPass}.`,
     nextActions: ["Re-run documents/share browser geometry gates, promote exact Documents cockpit only after live production verification, refresh the workspace IA refinement, editor detail landing, and share recipient cockpit evidence, and fix any UI cockpit regression."],
   });
 }

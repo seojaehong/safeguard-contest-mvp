@@ -1980,6 +1980,63 @@ function createFixtureRoot(): string {
       })),
     ],
   });
+  writeJson(rootDir, path.join("evaluation", "share-channel-label-polish-2026-08-27", "report.json"), {
+    schema: "safeclaw-share-channel-label-polish/v1",
+    verdict: "PASS_LIVE_PRODUCTION_SHARE_CHANNEL_LABEL_POLISH",
+    productCommit: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    crossSessionUiIntegration: {
+      integratedIntoProductHistory: true,
+      desktopThreeZoneContractPreserved: true,
+      mobileStackContractPreserved: true,
+    },
+    afterLive: {
+      desktop: {
+        viewport: { width: 1440, height: 723 },
+        documentHeight: 723,
+        bodyHeight: 723,
+        horizontalOverflow: 0,
+        root: { width: 1180, bottom: 716 },
+        preview: { bottom: 571 },
+        statusRail: { display: "grid", bottom: 678 },
+        primary: { bottom: 389 },
+        distinctRegions: 3,
+        channelCards: ["메일", "문자", "카카오"].map((label) => ({
+          label,
+          width: 159,
+          height: 56,
+          labelLineCount: 1,
+          whiteSpace: "nowrap",
+        })),
+      },
+      mobile: {
+        viewport: { width: 390, height: 723 },
+        documentHeight: 723,
+        bodyHeight: 723,
+        horizontalOverflow: 0,
+        root: { bottom: 704 },
+        preview: { bottom: 637 },
+        primary: { bottom: 696 },
+        statusRailDisplay: "none",
+        configurationCollapsed: true,
+      },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      embeddedWorkspaceShareOnly: true,
+      exactSavedSessionReproduced: false,
+      providerLiveDispatchProven: false,
+      routeSplitAloneAcceptedAsFix: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "share-staged-flow-rail-2026-07-21", "report.json"), {
     verdict: "PASS_CURRENT_SOURCE",
     source: {
@@ -6439,6 +6496,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("zero overflowing step-status labels");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("390x723 mobile stack");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("invited recipient fixture retains a separate desktop two-zone contract");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("메일, 문자, and 카카오 channel labels each remain on one nowrap line");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("live mobile selected-summary");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact 844px viewport");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact one-viewport Documents");
@@ -8467,6 +8525,29 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const gate = audit.gates.find((item) => item.id === "ui_documents_share_cockpit");
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "share-desktop-perception-2026-07-22", "report.json"));
+  });
+
+  it("contradicts the UI gate when a desktop share channel label wraps", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "share-channel-label-polish-2026-08-27", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLive: { desktop: { channelCards: Array<{ label: string; labelLineCount: number }> } };
+    };
+    const kakao = report.afterLive.desktop.channelCards.find((card) => card.label === "카카오");
+    if (!kakao) throw new Error("Missing Kakao channel fixture");
+    kakao.labelLineCount = 2;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-08-12T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+    const gate = audit.gates.find((item) => item.id === "ui_documents_share_cockpit");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.evidencePath).toBe(path.join("evaluation", "share-channel-label-polish-2026-08-27", "report.json"));
+    expect(gate?.detail).toContain("shareChannelLabelPolish=false");
   });
 
   it("contradicts the UI gate when a document action loses the 32px pane margin", async () => {

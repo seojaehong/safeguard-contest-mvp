@@ -1,0 +1,175 @@
+{
+  "schema": "safeclaw-share-channel-label-polish/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_SHARE_CHANNEL_LABEL_POLISH",
+  "checkedAt": "2026-08-27T03:06:05.5765868Z",
+  "productCommit": "ef7c1260e9b0ff2ccfb09ea75ad45c2947de44bb",
+  "productionBuild": {
+    "commitSha": "ef7c1260e9b0ff2ccfb09ea75ad45c2947de44bb",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-ot8gl4qts-seojaehongs-projects.vercel.app"
+  },
+  "crossSessionUiIntegration": {
+    "sourceBranch": "fix/docs-share-viewport-ia",
+    "sourceHead": "3fc8ff1276575482caa1fecf99262bbd427597e2",
+    "integratedIntoProductHistory": true,
+    "desktopThreeZoneContractPreserved": true,
+    "mobileStackContractPreserved": true
+  },
+  "beforeLive": {
+    "commitSha": "1110ba5d6e54d25f21c695aca8a5dd5cd5f35eea",
+    "viewport": {
+      "width": 1440,
+      "height": 723
+    },
+    "kakaoLabelVisualLineCount": 2,
+    "kakaoLabelWrapped": true,
+    "finding": "The desktop Workspace Share channel card wrapped 카카오 across two visual lines inside the three-zone cockpit."
+  },
+  "afterLive": {
+    "desktop": {
+      "viewport": {
+        "width": 1440,
+        "height": 723
+      },
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "horizontalOverflow": 0,
+      "root": {
+        "left": 130,
+        "right": 1310,
+        "top": 195,
+        "bottom": 716,
+        "width": 1180,
+        "height": 521
+      },
+      "preview": {
+        "left": 653,
+        "right": 1053,
+        "top": 345,
+        "bottom": 571,
+        "width": 400,
+        "height": 226
+      },
+      "statusRail": {
+        "left": 1059,
+        "right": 1286,
+        "top": 345,
+        "bottom": 678,
+        "width": 227,
+        "height": 333,
+        "display": "grid"
+      },
+      "primary": {
+        "left": 139,
+        "right": 647,
+        "top": 345,
+        "bottom": 389,
+        "width": 508,
+        "height": 44
+      },
+      "distinctRegions": 3,
+      "channelCards": [
+        {
+          "label": "메일",
+          "width": 159,
+          "height": 56,
+          "labelLineCount": 1,
+          "whiteSpace": "nowrap"
+        },
+        {
+          "label": "문자",
+          "width": 159,
+          "height": 56,
+          "labelLineCount": 1,
+          "whiteSpace": "nowrap"
+        },
+        {
+          "label": "카카오",
+          "width": 159,
+          "height": 56,
+          "labelLineCount": 1,
+          "whiteSpace": "nowrap"
+        }
+      ],
+      "screenshot": "evaluation/share-channel-label-polish-2026-08-27/workspace-share-desktop-1440x723.png"
+    },
+    "mobile": {
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "horizontalOverflow": 0,
+      "root": {
+        "left": 27,
+        "right": 363,
+        "top": 273,
+        "bottom": 704,
+        "width": 336,
+        "height": 431,
+        "clientHeight": 429,
+        "scrollHeight": 489
+      },
+      "preview": {
+        "left": 36,
+        "right": 339,
+        "top": 445,
+        "bottom": 637,
+        "width": 303,
+        "height": 192
+      },
+      "primary": {
+        "left": 45,
+        "right": 330,
+        "top": 652,
+        "bottom": 696,
+        "width": 285,
+        "height": 44
+      },
+      "statusRailDisplay": "none",
+      "configurationCollapsed": true,
+      "screenshot": "evaluation/share-channel-label-polish-2026-08-27/workspace-share-mobile-390x723.png"
+    }
+  },
+  "verification": {
+    "workspaceShareSimplification": {
+      "files": 1,
+      "tests": 12,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "workspaceShareBrowser": {
+      "files": 1,
+      "tests": 4,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "staticPages": 28,
+      "nextVersion": "15.5.22"
+    },
+    "dependencyAudit": {
+      "packages": 362,
+      "vulnerabilities": 0
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "embeddedWorkspaceShareOnly": true,
+    "exactSavedSessionReproduced": false,
+    "providerLiveDispatchProven": false,
+    "routeSplitAloneAcceptedAsFix": false
+  }
+}
