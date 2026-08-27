@@ -1,0 +1,86 @@
+{
+  "schema": "safeclaw-knowledge-mobile-task-rail/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_KNOWLEDGE_MOBILE_TASK_RAIL",
+  "checkedAt": "2026-08-27T04:39:27.121Z",
+  "productCommit": "8702123190125273018840379e24d6a2463a6890",
+  "productionBuild": {
+    "commitSha": "8702123190125273018840379e24d6a2463a6890",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-qlf0bpq0x-seojaehongs-projects.vercel.app"
+  },
+  "scope": {
+    "route": "/knowledge",
+    "viewport": { "width": 390, "height": 723 },
+    "themes": ["day", "night"],
+    "hashTargets": ["wiki", "governance"],
+    "existingSelectedOnlyWorkbenchPreserved": true,
+    "routeSplitAloneAcceptedAsFix": false
+  },
+  "beforeLive": {
+    "commitSha": "9796fa159bc7948ca7146c20e4e21fed036d88bb",
+    "viewport": { "width": 390, "height": 723 },
+    "documentHeight": 733,
+    "horizontalOverflow": 0,
+    "selectorCount": 6,
+    "selectorRows": 2,
+    "selectorHeight": 44,
+    "taskIndexHeight": 129,
+    "tabListGridColumns": 3,
+    "panelTop": 437.9921875,
+    "panelClientHeight": 183,
+    "finding": "Six task tabs wrapped into a 3x2 grid, consuming 129px and delaying the selected Wiki or governance panel."
+  },
+  "afterLive": {
+    "source": "https://www.safeclaw.kr",
+    "resultCount": 4,
+    "passCount": 4,
+    "failCount": 0,
+    "resultsPath": "evaluation/knowledge-mobile-task-rail-2026-08-27/browser-metrics.json",
+    "commonContract": {
+      "documentHeight": 733,
+      "horizontalOverflow": 0,
+      "railHeight": 46,
+      "railClientWidth": 366,
+      "railScrollWidth": 644,
+      "selectorCount": 6,
+      "selectorRows": 1,
+      "minimumSelectorHeight": 44,
+      "selectedFullyVisible": true,
+      "panelTop": 381.96875,
+      "panelBottom": 610.96875,
+      "panelClientHeight": 229,
+      "panelOverflowY": "auto"
+    },
+    "screenshots": [
+      "evaluation/knowledge-mobile-task-rail-2026-08-27/day-wiki-390x723.png",
+      "evaluation/knowledge-mobile-task-rail-2026-08-27/day-governance-390x723.png",
+      "evaluation/knowledge-mobile-task-rail-2026-08-27/night-wiki-390x723.png",
+      "evaluation/knowledge-mobile-task-rail-2026-08-27/night-governance-390x723.png"
+    ]
+  },
+  "verification": {
+    "knowledgeGovernanceUiContract": { "files": 1, "tests": 18, "failed": 0, "status": "PASS" },
+    "focusedBrowser": { "files": 1, "tests": 1, "failed": 0, "status": "PASS" },
+    "typecheck": "PASS",
+    "build": { "status": "PASS", "nextVersion": "15.5.22", "staticPages": 28 },
+    "dependencyAudit": { "packages": 362, "vulnerabilities": 0 }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "sifEmbeddingRuntime": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "koshaExactPromotionReview": "APPROVAL_GATED",
+    "humanReviewCompleted": false
+  }
+}

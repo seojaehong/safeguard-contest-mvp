@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-27T04:18:32.269Z",
-  "sourceSha": "bc127f89661460a47cc1b7438c8d3d04ed1c05c5",
+  "generatedAt": "2026-08-27T04:58:52.831Z",
+  "sourceSha": "8702123190125273018840379e24d6a2463a6890",
   "overall": "open",
   "gates": [
     {
@@ -172,8 +172,8 @@
       "id": "knowledge_viewport_workbench",
       "state": "proven",
       "label": "Live Knowledge viewport workbench",
-      "evidencePath": "evaluation\\knowledge-viewport-workbench-2026-08-17\\report.json",
-      "detail": "Production /knowledge passes 10/10 Day/Night browser rows with maximum body ratio 1.02, one visible panel, six reachable tasks, zero horizontal overflow, and 44px minimum controls. KOSHA disclosures are 6/7 technical/reference rows; Wiki/governance disclosures are 2/2. All groups are exclusive with defaultOpen=0, mobile scroll ratios 4.47/3.68/2.03/2.2, and first review state panel-contained=true. Long content remains inside local-scroll panels; route split alone is not accepted. No mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus SIF embedding remain APPROVAL_GATED.",
+      "evidencePath": "evaluation\\knowledge-mobile-task-rail-2026-08-27\\report.json",
+      "detail": "Production /knowledge passes 10/10 Day/Night browser rows with maximum body ratio 1.02, one visible panel, six reachable tasks, zero horizontal overflow, and 44px minimum controls. KOSHA disclosures are 6/7 technical/reference rows; Wiki/governance disclosures are 2/2. All groups are exclusive with defaultOpen=0, mobile scroll ratios 4.47/3.68/2.03/2.2, and first review state panel-contained=true. A current live companion reduces the 390x723 six-task navigator from a 3x2, 129px block to one 46px horizontal rail across Day/Night Wiki and governance hash entry, keeps all controls 44px, reveals the selected tab, and moves the panel top from 437.99px to 381.97px. Long content remains inside local-scroll panels; route split alone is not accepted. No mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus SIF embedding remain APPROVAL_GATED.",
       "nextActions": []
     },
     {

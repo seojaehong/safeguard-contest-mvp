@@ -52,6 +52,7 @@ const EVIDENCE_PATHS = Object.freeze({
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
   knowledgeViewportWorkbench: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
+  knowledgeMobileTaskRail: path.join("evaluation", "knowledge-mobile-task-rail-2026-08-27", "report.json"),
   llmWikiCandidateContentReadiness: path.join("evaluation", "llm-wiki-candidate-readiness-2026-08-25", "report.json"),
   llmWikiCandidateContentMatrix: path.join("evaluation", "llm-wiki-candidate-content-matrix-2026-08-25", "report.json"),
   llmWikiSifEvidenceMatrix: path.join("evaluation", "llm-wiki-sif-evidence-matrix-2026-08-26", "report.json"),
@@ -2211,6 +2212,7 @@ function evaluateOntologyViewportWorkbenchGate(rootDir) {
  */
 function evaluateKnowledgeViewportWorkbenchGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.knowledgeViewportWorkbench;
+  const taskRailEvidencePath = EVIDENCE_PATHS.knowledgeMobileTaskRail;
   const report = readJsonFile(rootDir, evidencePath);
   if (!isRecord(report)) {
     return gateResult({
@@ -2220,6 +2222,18 @@ function evaluateKnowledgeViewportWorkbenchGate(rootDir) {
       evidencePath,
       detail: "Live Knowledge viewport workbench evidence is missing or invalid.",
       nextActions: ["Rerun the selected-only Day/Night desktop, tablet, and mobile Knowledge browser contract against current production."],
+    });
+  }
+
+  const taskRailReport = readJsonFile(rootDir, taskRailEvidencePath);
+  if (!isRecord(taskRailReport)) {
+    return gateResult({
+      id: "knowledge_viewport_workbench",
+      label: "Live Knowledge viewport workbench",
+      state: "missing",
+      evidencePath: taskRailEvidencePath,
+      detail: "Live Knowledge mobile task-rail companion evidence is missing or invalid.",
+      nextActions: ["Rerun the 390x723 Day/Night Wiki and governance hash-entry task-rail contract against current production."],
     });
   }
 
@@ -2252,6 +2266,72 @@ function evaluateKnowledgeViewportWorkbenchGate(rootDir) {
   const progressiveReferenceRatio = readNumber(progressiveDisclosure.maxMobileReferenceScrollRatio);
   const progressiveWikiRatio = readNumber(progressiveDisclosure.maxMobileWikiScrollRatio);
   const progressiveGovernanceRatio = readNumber(progressiveDisclosure.maxMobileGovernanceScrollRatio);
+  const taskRailBuild = isRecord(taskRailReport.productionBuild) ? taskRailReport.productionBuild : {};
+  const taskRailScope = isRecord(taskRailReport.scope) ? taskRailReport.scope : {};
+  const taskRailBefore = isRecord(taskRailReport.beforeLive) ? taskRailReport.beforeLive : {};
+  const taskRailAfter = isRecord(taskRailReport.afterLive) ? taskRailReport.afterLive : {};
+  const taskRailCommon = isRecord(taskRailAfter.commonContract) ? taskRailAfter.commonContract : {};
+  const taskRailVerification = isRecord(taskRailReport.verification) ? taskRailReport.verification : {};
+  const taskRailMutation = isRecord(taskRailReport.mutationBoundary) ? taskRailReport.mutationBoundary : {};
+  const taskRailBoundaries = isRecord(taskRailReport.remainingBoundaries) ? taskRailReport.remainingBoundaries : {};
+  const taskRailThemes = Array.isArray(taskRailScope.themes) ? taskRailScope.themes.map(readString) : [];
+  const taskRailTargets = Array.isArray(taskRailScope.hashTargets) ? taskRailScope.hashTargets.map(readString) : [];
+  const knowledgeMobileTaskRailPass = readString(taskRailReport.schema) === "safeclaw-knowledge-mobile-task-rail/v1"
+    && readString(taskRailReport.verdict) === "PASS_LIVE_PRODUCTION_KNOWLEDGE_MOBILE_TASK_RAIL"
+    && readString(taskRailReport.productCommit) === readString(taskRailBuild.commitSha)
+    && readString(taskRailBuild.branch) === "master"
+    && readString(taskRailBuild.environment) === "production"
+    && readString(taskRailScope.route) === "/knowledge"
+    && readNumber(taskRailScope.viewport?.width) === 390
+    && readNumber(taskRailScope.viewport?.height) === 723
+    && taskRailThemes.length === 2
+    && taskRailThemes.includes("day")
+    && taskRailThemes.includes("night")
+    && taskRailTargets.length === 2
+    && taskRailTargets.includes("wiki")
+    && taskRailTargets.includes("governance")
+    && taskRailScope.existingSelectedOnlyWorkbenchPreserved === true
+    && taskRailScope.routeSplitAloneAcceptedAsFix === false
+    && readNumber(taskRailBefore.selectorCount) === 6
+    && readNumber(taskRailBefore.selectorRows) === 2
+    && readNumber(taskRailBefore.selectorHeight) >= 44
+    && readNumber(taskRailBefore.taskIndexHeight) === 129
+    && readNumber(taskRailBefore.panelTop) >= 437
+    && readNumber(taskRailAfter.resultCount) === 4
+    && readNumber(taskRailAfter.passCount) === 4
+    && readNumber(taskRailAfter.failCount) === 0
+    && readNumber(taskRailCommon.documentHeight) <= 733
+    && readNumber(taskRailCommon.horizontalOverflow) === 0
+    && readNumber(taskRailCommon.railHeight) <= 48
+    && readNumber(taskRailCommon.railScrollWidth) > readNumber(taskRailCommon.railClientWidth)
+    && readNumber(taskRailCommon.selectorCount) === 6
+    && readNumber(taskRailCommon.selectorRows) === 1
+    && readNumber(taskRailCommon.minimumSelectorHeight) >= 44
+    && taskRailCommon.selectedFullyVisible === true
+    && readNumber(taskRailCommon.panelTop) <= 400
+    && readNumber(taskRailCommon.panelBottom) <= 724
+    && readNumber(taskRailCommon.panelClientHeight) >= 220
+    && readString(taskRailCommon.panelOverflowY) === "auto"
+    && readString(taskRailVerification.knowledgeGovernanceUiContract?.status) === "PASS"
+    && readNumber(taskRailVerification.knowledgeGovernanceUiContract?.tests) === 18
+    && readString(taskRailVerification.focusedBrowser?.status) === "PASS"
+    && readNumber(taskRailVerification.focusedBrowser?.tests) === 1
+    && readString(taskRailVerification.typecheck) === "PASS"
+    && readString(taskRailVerification.build?.status) === "PASS"
+    && readNumber(taskRailVerification.build?.staticPages) === 28
+    && taskRailMutation.dbMutationPerformed === false
+    && taskRailMutation.providerDispatchCalled === false
+    && taskRailMutation.shareSessionCreated === false
+    && taskRailMutation.embeddingOrVectorMutationPerformed === false
+    && taskRailMutation.wikiPublicationPerformed === false
+    && taskRailMutation.koshaRegistryMutationPerformed === false
+    && readString(taskRailBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(taskRailBoundaries.llmWikiPublication) === "APPROVAL_GATED"
+    && readString(taskRailBoundaries.sifEmbeddingRuntime) === "APPROVAL_GATED"
+    && readString(taskRailBoundaries.providerDispatchPersistence) === "APPROVAL_GATED"
+    && readString(taskRailBoundaries.supabaseRlsLaunchIsolation) === "APPROVAL_GATED"
+    && readString(taskRailBoundaries.koshaExactPromotionReview) === "APPROVAL_GATED"
+    && taskRailBoundaries.humanReviewCompleted === false;
   const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH"
     && sourceMatchesProduction
     && readNumber(browser.rowCount) === 10
@@ -2310,15 +2390,16 @@ function evaluateKnowledgeViewportWorkbenchGate(rootDir) {
     && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && readString(remainingBoundaries.llmWikiPublicationVerdict) === "APPROVAL_GATED"
     && readString(remainingBoundaries.sifEmbeddingRuntimeVerdict) === "APPROVAL_GATED"
-    && remainingBoundaries.fullyAutomatedLaunchClaimAllowed === false;
+    && remainingBoundaries.fullyAutomatedLaunchClaimAllowed === false
+    && knowledgeMobileTaskRailPass;
 
   if (liveReady) {
     return gateResult({
       id: "knowledge_viewport_workbench",
       label: "Live Knowledge viewport workbench",
       state: "proven",
-      evidencePath,
-      detail: `Production /knowledge passes ${readNumber(browser.passCount)}/${readNumber(browser.rowCount)} Day/Night browser rows with maximum body ratio ${readNumber(browser.maxBodyRatio)}, one visible panel, six reachable tasks, zero horizontal overflow, and ${readNumber(browser.minimumControlHeight)}px minimum controls. KOSHA disclosures are ${readNumber(progressiveDisclosure.technicalDisclosureCount)}/${readNumber(progressiveDisclosure.referenceDisclosureCount)} technical/reference rows; Wiki/governance disclosures are ${readNumber(progressiveDisclosure.wikiDisclosureCount)}/${readNumber(progressiveDisclosure.governanceDisclosureCount)}. All groups are exclusive with defaultOpen=${readNumber(progressiveDisclosure.defaultOpenDisclosureCount)}, mobile scroll ratios ${readNumber(progressiveDisclosure.maxMobileTechnicalScrollRatio)}/${readNumber(progressiveDisclosure.maxMobileReferenceScrollRatio)}/${readNumber(progressiveDisclosure.maxMobileWikiScrollRatio)}/${readNumber(progressiveDisclosure.maxMobileGovernanceScrollRatio)}, and first review state panel-contained=${progressiveDisclosure.firstReviewStateInsidePanel === true}. Long content remains inside local-scroll panels; route split alone is not accepted. No mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus SIF embedding remain APPROVAL_GATED.`,
+      evidencePath: taskRailEvidencePath,
+      detail: `Production /knowledge passes ${readNumber(browser.passCount)}/${readNumber(browser.rowCount)} Day/Night browser rows with maximum body ratio ${readNumber(browser.maxBodyRatio)}, one visible panel, six reachable tasks, zero horizontal overflow, and ${readNumber(browser.minimumControlHeight)}px minimum controls. KOSHA disclosures are ${readNumber(progressiveDisclosure.technicalDisclosureCount)}/${readNumber(progressiveDisclosure.referenceDisclosureCount)} technical/reference rows; Wiki/governance disclosures are ${readNumber(progressiveDisclosure.wikiDisclosureCount)}/${readNumber(progressiveDisclosure.governanceDisclosureCount)}. All groups are exclusive with defaultOpen=${readNumber(progressiveDisclosure.defaultOpenDisclosureCount)}, mobile scroll ratios ${readNumber(progressiveDisclosure.maxMobileTechnicalScrollRatio)}/${readNumber(progressiveDisclosure.maxMobileReferenceScrollRatio)}/${readNumber(progressiveDisclosure.maxMobileWikiScrollRatio)}/${readNumber(progressiveDisclosure.maxMobileGovernanceScrollRatio)}, and first review state panel-contained=${progressiveDisclosure.firstReviewStateInsidePanel === true}. A current live companion reduces the 390x723 six-task navigator from a 3x2, 129px block to one 46px horizontal rail across Day/Night Wiki and governance hash entry, keeps all controls 44px, reveals the selected tab, and moves the panel top from 437.99px to 381.97px. Long content remains inside local-scroll panels; route split alone is not accepted. No mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus SIF embedding remain APPROVAL_GATED.`,
       nextActions: [],
     });
   }
@@ -2327,8 +2408,8 @@ function evaluateKnowledgeViewportWorkbenchGate(rootDir) {
     id: "knowledge_viewport_workbench",
     label: "Live Knowledge viewport workbench",
     state: "contradicted",
-    evidencePath,
-    detail: `Knowledge verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, rows=${readNumber(browser.passCount)}/${readNumber(browser.rowCount)}, maxBodyRatio=${readNumber(browser.maxBodyRatio)}, visiblePanels=${readNumber(browser.visiblePanelCountPerRow)}, reachableTasks=${readNumber(browser.reachableSectionCountPerRow)}, disclosures=${readNumber(progressiveDisclosure.technicalDisclosureCount)}/${readNumber(progressiveDisclosure.referenceDisclosureCount)}/${readNumber(progressiveDisclosure.wikiDisclosureCount)}/${readNumber(progressiveDisclosure.governanceDisclosureCount)}, defaultOpen=${readNumber(progressiveDisclosure.defaultOpenDisclosureCount)}, mobileRatios=${readNumber(progressiveDisclosure.maxMobileTechnicalScrollRatio)}/${readNumber(progressiveDisclosure.maxMobileReferenceScrollRatio)}/${readNumber(progressiveDisclosure.maxMobileWikiScrollRatio)}/${readNumber(progressiveDisclosure.maxMobileGovernanceScrollRatio)}, firstDisclosureInsidePanel=${progressiveDisclosure.firstDisclosureInsidePanel === true}, firstReviewStateInsidePanel=${progressiveDisclosure.firstReviewStateInsidePanel === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, wiki=${readString(remainingBoundaries.llmWikiPublicationVerdict) || "missing"}, embedding=${readString(remainingBoundaries.sifEmbeddingRuntimeVerdict) || "missing"}.`,
+    evidencePath: knowledgeMobileTaskRailPass ? evidencePath : taskRailEvidencePath,
+    detail: `Knowledge verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, rows=${readNumber(browser.passCount)}/${readNumber(browser.rowCount)}, maxBodyRatio=${readNumber(browser.maxBodyRatio)}, visiblePanels=${readNumber(browser.visiblePanelCountPerRow)}, reachableTasks=${readNumber(browser.reachableSectionCountPerRow)}, disclosures=${readNumber(progressiveDisclosure.technicalDisclosureCount)}/${readNumber(progressiveDisclosure.referenceDisclosureCount)}/${readNumber(progressiveDisclosure.wikiDisclosureCount)}/${readNumber(progressiveDisclosure.governanceDisclosureCount)}, defaultOpen=${readNumber(progressiveDisclosure.defaultOpenDisclosureCount)}, mobileRatios=${readNumber(progressiveDisclosure.maxMobileTechnicalScrollRatio)}/${readNumber(progressiveDisclosure.maxMobileReferenceScrollRatio)}/${readNumber(progressiveDisclosure.maxMobileWikiScrollRatio)}/${readNumber(progressiveDisclosure.maxMobileGovernanceScrollRatio)}, firstDisclosureInsidePanel=${progressiveDisclosure.firstDisclosureInsidePanel === true}, firstReviewStateInsidePanel=${progressiveDisclosure.firstReviewStateInsidePanel === true}, mobileTaskRail=${knowledgeMobileTaskRailPass}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, wiki=${readString(remainingBoundaries.llmWikiPublicationVerdict) || "missing"}, embedding=${readString(remainingBoundaries.sifEmbeddingRuntimeVerdict) || "missing"}.`,
     nextActions: ["Restore selected-only viewport containment and approval boundaries, then rerun the current-production Knowledge browser contract."],
   });
 }

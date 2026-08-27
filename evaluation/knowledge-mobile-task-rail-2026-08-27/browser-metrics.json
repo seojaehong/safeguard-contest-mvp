@@ -1,0 +1,122 @@
+{
+  "source": "https://www.safeclaw.kr",
+  "generatedAt": "2026-08-27T04:39:27.121Z",
+  "results": [
+    {
+      "theme": "day",
+      "targetId": "wiki",
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "documentHeight": 733,
+      "horizontalOverflow": 0,
+      "railHeight": 46,
+      "railClientWidth": 366,
+      "railScrollWidth": 644,
+      "selectorCount": 6,
+      "selectorRows": 1,
+      "selectorHeights": [
+        44,
+        44,
+        44,
+        44,
+        44,
+        44
+      ],
+      "selectedFullyVisible": true,
+      "panelTop": 381.96875,
+      "panelBottom": 610.96875,
+      "panelClientHeight": 229,
+      "panelScrollHeight": 372,
+      "panelOverflowY": "auto"
+    },
+    {
+      "theme": "day",
+      "targetId": "governance",
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "documentHeight": 733,
+      "horizontalOverflow": 0,
+      "railHeight": 46,
+      "railClientWidth": 366,
+      "railScrollWidth": 644,
+      "selectorCount": 6,
+      "selectorRows": 1,
+      "selectorHeights": [
+        44,
+        44,
+        44,
+        44,
+        44,
+        44
+      ],
+      "selectedFullyVisible": true,
+      "panelTop": 381.96875,
+      "panelBottom": 610.96875,
+      "panelClientHeight": 229,
+      "panelScrollHeight": 352,
+      "panelOverflowY": "auto"
+    },
+    {
+      "theme": "night",
+      "targetId": "wiki",
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "documentHeight": 733,
+      "horizontalOverflow": 0,
+      "railHeight": 46,
+      "railClientWidth": 366,
+      "railScrollWidth": 644,
+      "selectorCount": 6,
+      "selectorRows": 1,
+      "selectorHeights": [
+        44,
+        44,
+        44,
+        44,
+        44,
+        44
+      ],
+      "selectedFullyVisible": true,
+      "panelTop": 381.96875,
+      "panelBottom": 610.96875,
+      "panelClientHeight": 229,
+      "panelScrollHeight": 372,
+      "panelOverflowY": "auto"
+    },
+    {
+      "theme": "night",
+      "targetId": "governance",
+      "viewport": {
+        "width": 390,
+        "height": 723
+      },
+      "documentHeight": 733,
+      "horizontalOverflow": 0,
+      "railHeight": 46,
+      "railClientWidth": 366,
+      "railScrollWidth": 644,
+      "selectorCount": 6,
+      "selectorRows": 1,
+      "selectorHeights": [
+        44,
+        44,
+        44,
+        44,
+        44,
+        44
+      ],
+      "selectedFullyVisible": true,
+      "panelTop": 381.96875,
+      "panelBottom": 610.96875,
+      "panelClientHeight": 229,
+      "panelScrollHeight": 352,
+      "panelOverflowY": "auto"
+    }
+  ]
+}

@@ -2843,6 +2843,45 @@ function createFixtureRoot(): string {
       fullyAutomatedLaunchClaimAllowed: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "knowledge-mobile-task-rail-2026-08-27", "report.json"), {
+    schema: "safeclaw-knowledge-mobile-task-rail/v1",
+    verdict: "PASS_LIVE_PRODUCTION_KNOWLEDGE_MOBILE_TASK_RAIL",
+    productCommit: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    scope: {
+      route: "/knowledge", viewport: { width: 390, height: 723 }, themes: ["day", "night"],
+      hashTargets: ["wiki", "governance"], existingSelectedOnlyWorkbenchPreserved: true,
+      routeSplitAloneAcceptedAsFix: false,
+    },
+    beforeLive: {
+      selectorCount: 6, selectorRows: 2, selectorHeight: 44, taskIndexHeight: 129, panelTop: 437.99,
+    },
+    afterLive: {
+      resultCount: 4, passCount: 4, failCount: 0,
+      commonContract: {
+        documentHeight: 733, horizontalOverflow: 0, railHeight: 46, railClientWidth: 366,
+        railScrollWidth: 644, selectorCount: 6, selectorRows: 1, minimumSelectorHeight: 44,
+        selectedFullyVisible: true, panelTop: 381.97, panelBottom: 610.97,
+        panelClientHeight: 229, panelOverflowY: "auto",
+      },
+    },
+    verification: {
+      knowledgeGovernanceUiContract: { status: "PASS", tests: 18 },
+      focusedBrowser: { status: "PASS", tests: 1 }, typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false,
+      embeddingOrVectorMutationPerformed: false, wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublication: "APPROVAL_GATED",
+      sifEmbeddingRuntime: "APPROVAL_GATED", providerDispatchPersistence: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED", koshaExactPromotionReview: "APPROVAL_GATED",
+      humanReviewCompleted: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "llm-wiki-candidate-readiness-2026-08-25", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS",
     sourceHead: "a".repeat(40),
@@ -6295,11 +6334,13 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "ontology_viewport_workbench")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")).toMatchObject({
       state: "proven",
-      evidencePath: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
+      evidencePath: path.join("evaluation", "knowledge-mobile-task-rail-2026-08-27", "report.json"),
     });
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("six reachable tasks");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("KOSHA disclosures are 6/7");
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("Wiki/governance disclosures are 2/2");
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("3x2, 129px block to one 46px horizontal rail");
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("panel top from 437.99px to 381.97px");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_readiness")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "llm-wiki-candidate-readiness-2026-08-25", "report.json"),
@@ -8859,6 +8900,24 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-17T00:00:00.000Z" });
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")).toMatchObject({ state: "contradicted" });
     expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("wiki=PASS");
+  });
+
+  it("fails Knowledge viewport workbench closed when the mobile task rail wraps again", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "knowledge-mobile-task-rail-2026-08-27", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLive: { commonContract: { selectorRows: number } };
+    };
+    report.afterLive.commonContract.selectorRows = 2;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-17T00:00:00.000Z" });
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")).toMatchObject({
+      state: "contradicted",
+      evidencePath: path.join("evaluation", "knowledge-mobile-task-rail-2026-08-27", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "knowledge_viewport_workbench")?.detail).toContain("mobileTaskRail=false");
   });
 
   it.each([

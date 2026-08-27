@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T04:18:38.996Z",
-  "head": "bc127f89661460a47cc1b7438c8d3d04ed1c05c5",
+  "generatedAt": "2026-08-27T04:58:58.346Z",
+  "head": "8702123190125273018840379e24d6a2463a6890",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "bc127f89661460a47cc1b7438c8d3d04ed1c05c5",
+    "commitSha": "8702123190125273018840379e24d6a2463a6890",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-qew45pcm5-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-qlf0bpq0x-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -120,8 +120,8 @@
     {
       "id": "knowledge_viewport_workbench",
       "state": "proven",
-      "artifact": "evaluation\\knowledge-viewport-workbench-2026-08-17\\report.json",
-      "detail": "Production /knowledge passes 10/10 Day/Night browser rows with maximum body ratio 1.02, one visible panel, six reachable tasks, zero horizontal overflow, and 44px minimum controls. KOSHA disclosures are 6/7 technical/reference rows; Wiki/governance disclosures are 2/2. All groups are exclusive with defaultOpen=0, mobile scroll ratios 4.47/3.68/2.03/2.2, and first review state panel-contained=true. Long content remains inside local-scroll panels; route split alone is not accepted. No mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus SIF embedding remain APPROVAL_GATED."
+      "artifact": "evaluation\\knowledge-mobile-task-rail-2026-08-27\\report.json",
+      "detail": "Production /knowledge passes 10/10 Day/Night browser rows with maximum body ratio 1.02, one visible panel, six reachable tasks, zero horizontal overflow, and 44px minimum controls. KOSHA disclosures are 6/7 technical/reference rows; Wiki/governance disclosures are 2/2. All groups are exclusive with defaultOpen=0, mobile scroll ratios 4.47/3.68/2.03/2.2, and first review state panel-contained=true. A current live companion reduces the 390x723 six-task navigator from a 3x2, 129px block to one 46px horizontal rail across Day/Night Wiki and governance hash entry, keeps all controls 44px, reveals the selected tab, and moves the panel top from 437.99px to 381.97px. Long content remains inside local-scroll panels; route split alone is not accepted. No mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus SIF embedding remain APPROVAL_GATED."
     },
     {
       "id": "llm_wiki_candidate_content_readiness",
@@ -1733,9 +1733,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "bc127f89661460a47cc1b7438c8d3d04ed1c05c5",
+      "sourceCommit": "8702123190125273018840379e24d6a2463a6890",
       "sourceStatus": "exact",
-      "productionCommit": "bc127f89661460a47cc1b7438c8d3d04ed1c05c5",
+      "productionCommit": "8702123190125273018840379e24d6a2463a6890",
       "productionStatus": "matches_live"
     },
     {

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-27T04:18:38.996Z
-Source HEAD at generation: bc127f89661460a47cc1b7438c8d3d04ed1c05c5
-Live commit at generation: bc127f89661460a47cc1b7438c8d3d04ed1c05c5
+Generated at: 2026-08-27T04:58:58.346Z
+Source HEAD at generation: 8702123190125273018840379e24d6a2463a6890
+Live commit at generation: 8702123190125273018840379e24d6a2463a6890
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -407,7 +407,7 @@ Overall: `northstar_open_approval_gated`
 | launch_operations_readiness_cockpit | proven | evaluation\launch-operations-readiness-2026-08-26\report.json |
 | document_export_capability_truth | proven | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | ontology_viewport_workbench | proven | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
-| knowledge_viewport_workbench | proven | evaluation\knowledge-viewport-workbench-2026-08-17\report.json |
+| knowledge_viewport_workbench | proven | evaluation\knowledge-mobile-task-rail-2026-08-27\report.json |
 | llm_wiki_candidate_content_readiness | proven | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |
 | llm_wiki_candidate_content_matrix | proven | evaluation\llm-wiki-candidate-content-matrix-2026-08-25\report.json |
 | llm_wiki_sif_evidence_matrix | proven | evaluation\llm-wiki-sif-evidence-matrix-2026-08-26\report.json |
