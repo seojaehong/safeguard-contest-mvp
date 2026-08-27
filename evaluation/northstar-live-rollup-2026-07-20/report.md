@@ -1,11 +1,11 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-27T14:35:02.301Z
-Source HEAD at generation: 99c7df721af566510a96793c75701bd78392a034
-Live commit at generation: 99c7df721af566510a96793c75701bd78392a034
+Generated at: 2026-08-27T17:47:05.680Z
+Source HEAD at generation: f95773c2f4b55fe0ba8b199b5218800067e09bdf
+Live commit at generation: 4e3e7e5d9ebad7e91f428a856019122431410be4
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
-Overall: `northstar_open_approval_gated`
+Overall: `northstar_evidence_missing_or_unknown`
 
 ## Current Workspace Mobile Geometry
 
@@ -419,21 +419,13 @@ Overall: `northstar_open_approval_gated`
 | full_repository_security_scan | proven | evaluation\follow-up-full-repository-security-scan-2026-08-02\report.json |
 | repository_security_scan_reconciliation | proven | evaluation\repository-security-scan-reconciliation-2026-08-11\report.json |
 | current_security_remediation_ledger | notice | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
-| current_repository_security_rescan | notice | evaluation\final-approval-free-security-rescan-2026-08-16\report.json |
+| current_repository_security_rescan | notice | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | post_remediation_repository_security_scan | notice | evaluation\post-remediation-full-repository-security-scan-2026-08-14\report.json |
-| share_session_revocation_security | notice | evaluation\share-session-revocation-remediation-2026-08-14\report.json |
-| share_recipient_contact_verification_security | notice | evaluation\share-recipient-contact-verification-2026-08-14\report.json |
 | agent_chat_durable_admission_security | notice | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
-| mcp_provider_admission_security | notice | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
-| public_json_request_body_budget | proven | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | security_resource_remediation | proven | evaluation\security-resource-remediation-2026-08-11\report.json |
 | security_upstream_transport_remediation | proven | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |
 | security_safety_reference_surface_remediation | proven | evaluation\security-safety-reference-surface-remediation-2026-08-11\report.json |
 | improvement_photo_analysis_budget | notice | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
-| public_provider_cancellation | notice | evaluation\public-provider-cancellation-2026-08-11\report.json |
-| public_provider_admission | notice | evaluation\public-provider-admission-2026-08-11\report.json |
-| public_ask_distributed_admission | proven | evaluation\public-ask-distributed-admission-2026-08-14\report.json |
-| public_search_distributed_admission | proven | evaluation\public-search-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_rate_limit_readiness | notice | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | notice | evaluation\security-public-generation-admission-2026-08-04\report.json |
 | security_followup_remediation | proven | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
@@ -470,7 +462,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -499,7 +491,7 @@ Overall: `northstar_open_approval_gated`
 | full_repository_security_scan | ancestor | ancestor_of_head | evaluation\follow-up-full-repository-security-scan-2026-08-02\report.json |
 | repository_security_scan_reconciliation | missing | missing | evaluation\repository-security-scan-reconciliation-2026-08-11\report.json |
 | current_security_remediation_ledger | ancestor | ancestor_of_head | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
-| current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\final-approval-free-security-rescan-2026-08-16\report.json |
+| current_repository_security_rescan | ancestor | matches_live | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | agent_chat_durable_admission_security | ancestor | ancestor_of_head | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
 | mcp_provider_admission_security | ancestor | ancestor_of_head | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
 | share_recipient_contact_verification_security | ancestor | ancestor_of_head | evaluation\share-recipient-contact-verification-2026-08-14\report.json |
@@ -513,7 +505,7 @@ Overall: `northstar_open_approval_gated`
 | public_ask_distributed_admission | ancestor | ancestor_of_head | evaluation\public-ask-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_admission | ancestor | ancestor_of_head | evaluation\public-search-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_rate_limit_readiness | ancestor | ancestor_of_head | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
-| public_generation_admission_security | missing | matches_live | evaluation\security-public-generation-admission-2026-08-04\report.json |
+| public_generation_admission_security | missing | ancestor_of_head | evaluation\security-public-generation-admission-2026-08-04\report.json |
 | security_followup_remediation | ancestor | missing | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
 | security_resource_remediation | ancestor | ancestor_of_head | evaluation\security-resource-remediation-2026-08-11\report.json |
 | security_upstream_transport_remediation | ancestor | ancestor_of_head | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |

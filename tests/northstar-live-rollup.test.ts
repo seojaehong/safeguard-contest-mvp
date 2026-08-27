@@ -410,16 +410,23 @@ type RollupReport = {
     productCommit: string;
     productionCommit: string;
     originalBaselineFindingCount: number | null;
-    freshReportableFindingCount: number | null;
-    liveRemediatedCount: number | null;
+    reportableFindingCount: number | null;
+    mediumFindingCount: number | null;
+    lowFindingCount: number | null;
+    coverageCompleteness: string;
+    reviewedSurfaceCount: number | null;
+    deferredCoverageItemCount: number | null;
+    approvalFreeProductSourceCandidateCount: number | null;
+    approvalFreeRemediatedCount: number | null;
+    currentSourceRemediatedCount: number | null;
+    currentSourceRemediationHead: string;
+    approvalSensitiveShareCapabilityCount: number | null;
+    freshFullRepositoryRescanRequired: boolean;
     databaseApprovalGatedRemainingCount: number | null;
-    focusedTestFiles: number | null;
-    focusedTestCount: number | null;
-    focusedTestStatus: string;
-    typecheck: string;
-    build: string;
+    securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
     databaseSecurityRemediation: string;
+    approvalFreeProductSourceRemediation: string;
   };
   publicSearchDistributedRateLimitReadiness: {
     verdict: string;
@@ -992,7 +999,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "full_repository_security_scan", state: "proven", evidencePath: "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", detail: "sealed follow-up scan with 17 reportable findings and one deferred candidate" },
       { id: "repository_security_scan_reconciliation", state: "notice", evidencePath: "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json", detail: "same-target scan conflict with fail-open receipts" },
       { id: "current_security_remediation_ledger", state: "notice", evidencePath: "evaluation/security-current-remediation-ledger-2026-08-13/report.json", detail: "17/23 deployed-source remediated; six approval or distributed-runtime boundaries remain open" },
-      { id: "current_repository_security_rescan", state: "notice", evidencePath: "evaluation/final-approval-free-security-rescan-2026-08-16/report.json", detail: "9 approval-gated findings remain after 5 approval-free closures; notice, not security-complete" },
+      { id: "current_repository_security_rescan", state: "notice", evidencePath: "evaluation/current-full-repository-security-scan-2026-08-27/report.json", detail: "19 findings with partial coverage; 12 approval-gated and 7 approval-free source candidates remain open" },
       { id: "public_search_distributed_rate_limit_readiness", state: "notice", evidencePath: "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", detail: "current-source capability with production configuration pending" },
       { id: "public_generation_admission_security", state: "notice", evidencePath: "evaluation/security-public-generation-admission-2026-08-04/report.json", detail: "live generation routes fail closed when distributed configuration is unavailable; activation and fresh rescan pending" },
       { id: "security_followup_remediation", state: "proven", evidencePath: "evaluation/codex-security-followup-remediation-2026-08-11/report.json", detail: "deployed three-finding remediation with immutable baseline preserved" },
@@ -1954,25 +1961,41 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/document-editorial-review-receipt-2026-08-17/report.json",
     documentEditorialReviewReceiptFixture(),
   );
-  writeJson(root, "evaluation/final-approval-free-security-rescan-2026-08-16/report.json", {
-    verdict: "NOTICE_FRESH_STANDARD_SCAN_APPROVAL_FREE_FINDINGS_CLOSED_NINE_APPROVAL_GATED_REMAIN",
-    scanId: "38b87f68-ea7c-4843-a89c-5f97ba99e319",
-    scanRevision: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
-    productCommit: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+  writeJson(root, "evaluation/current-full-repository-security-scan-2026-08-27/report.json", {
+    verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_19_FINDINGS_PARTIAL_COVERAGE_REMEDIATION_REQUIRED",
+    scanId: "da97e400-1f4d-40b9-a434-ab5ab013fdb3",
+    scanRevision: "4e3e7e5d9ebad7e91f428a856019122431410be4",
+    productCommit: "4e3e7e5d9ebad7e91f428a856019122431410be4",
     productionCommit: "TO_FILL",
     immutableOriginalBaselineFindingCount: 18,
-    freshReportableFindingCount: 9,
-    approvalFreeRemediatedCount: 5,
-    approvalGatedRemainingCount: 9,
-    verification: {
-      focusedTests: { files: 8, tests: 88, status: "PASS" },
-      typecheck: "PASS",
-      build: { status: "PASS" },
+    scan: {
+      status: "complete",
+      coverage: "partial",
+      reviewedSurfaceCount: 9,
+      deferredCoverageItemCount: 26,
+      reportableFindingCount: 19,
+      severityCounts: { medium: 14, low: 5 },
+    },
+    findingDisposition: {
+      total: 19,
+      approvalGatedDatabaseOrAtomicityCount: 12,
+      approvalFreeProductSourceCandidateCount: 7,
+      approvalFreeRemediatedCount: 0,
+      securityCompleteClaimAllowed: false,
+    },
+    currentSourceRemediation: {
+      sourceHead: "f95773c2f4b55fe0ba8b199b5218800067e09bdf",
+      approvalFreeRemediatedCount: 6,
+      approvalSensitiveShareCapabilityCount: 1,
+      freshFullRepositoryRescanRequired: true,
     },
     remainingBoundaries: {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       databaseSecurityRemediation: "APPROVAL_GATED",
-      liveAfterDeploymentRequired: false,
+      approvalFreeProductSourceRemediation: "SOURCE_REMEDIATED_FRESH_RESCAN_REQUIRED",
+      coverageCompleteness: "partial",
+      deferredCoverageItemCount: 26,
+      securityCompleteClaimAllowed: false,
     },
   });
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
@@ -2363,7 +2386,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/security-upstream-transport-remediation-2026-08-11/report.json",
     "evaluation/security-safety-reference-surface-remediation-2026-08-11/report.json",
     "evaluation/security-current-remediation-ledger-2026-08-13/report.json",
-    "evaluation/final-approval-free-security-rescan-2026-08-16/report.json",
+    "evaluation/current-full-repository-security-scan-2026-08-27/report.json",
     "evaluation/public-json-request-body-budget-2026-08-11/report.json",
     "evaluation/improvement-photo-analysis-budget-2026-08-11/report.json",
     "evaluation/public-provider-cancellation-2026-08-11/report.json",
@@ -2867,27 +2890,33 @@ describe("northstar live rollup", () => {
     });
     expect(report.evidence.find((item) => item.id === "current_security_remediation_ledger")).toBeDefined();
     expect(report.evidence.find((item) => item.id === "current_repository_security_rescan")).toMatchObject({
-      artifact: path.join("evaluation", "final-approval-free-security-rescan-2026-08-16", "report.json"),
+      artifact: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
       productionStatus: "ancestor_of_head",
     });
     expect(report.currentRepositorySecurityRescan).toMatchObject({
-      verdict: "NOTICE_FRESH_STANDARD_SCAN_APPROVAL_FREE_FINDINGS_CLOSED_NINE_APPROVAL_GATED_REMAIN",
-      scanId: "38b87f68-ea7c-4843-a89c-5f97ba99e319",
-      scanRevision: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
-      productCommit: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+      verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_19_FINDINGS_PARTIAL_COVERAGE_REMEDIATION_REQUIRED",
+      scanId: "da97e400-1f4d-40b9-a434-ab5ab013fdb3",
+      scanRevision: "4e3e7e5d9ebad7e91f428a856019122431410be4",
+      productCommit: "4e3e7e5d9ebad7e91f428a856019122431410be4",
       productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
       originalBaselineFindingCount: 18,
-      freshReportableFindingCount: 9,
-      liveRemediatedCount: 5,
-      databaseApprovalGatedRemainingCount: 9,
-      focusedTestFiles: 8,
-      focusedTestCount: 88,
-      focusedTestStatus: "PASS",
-      typecheck: "PASS",
-      build: "PASS",
+      reportableFindingCount: 19,
+      mediumFindingCount: 14,
+      lowFindingCount: 5,
+      coverageCompleteness: "partial",
+      reviewedSurfaceCount: 9,
+      deferredCoverageItemCount: 26,
+      approvalFreeProductSourceCandidateCount: 7,
+      approvalFreeRemediatedCount: 0,
+      currentSourceRemediatedCount: 6,
+      currentSourceRemediationHead: "f95773c2f4b55fe0ba8b199b5218800067e09bdf",
+      approvalSensitiveShareCapabilityCount: 1,
+      freshFullRepositoryRescanRequired: true,
+      databaseApprovalGatedRemainingCount: 12,
+      securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       databaseSecurityRemediation: "APPROVAL_GATED",
-      liveAfterDeploymentRequired: false,
+      approvalFreeProductSourceRemediation: "SOURCE_REMEDIATED_FRESH_RESCAN_REQUIRED",
     });
     expect(report.publicJsonRequestBodyBudget).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",

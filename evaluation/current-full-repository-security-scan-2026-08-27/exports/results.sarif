@@ -1,0 +1,1608 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "automationDetails": {
+        "id": "da97e400-1f4d-40b9-a434-ab5ab013fdb3"
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "toolExecutionNotifications": [
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Awaiting parent validation against current 4e3e7e5d source; no live mutation performed."
+              }
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "codexSecurityCoverageCompleteness": "partial",
+        "codexSecuritySchemaVersion": "1.0",
+        "codexSecurityTargetKind": "git_revision"
+      },
+      "results": [
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/export/hwpx-template/route.ts"
+                },
+                "region": {
+                  "endLine": 63,
+                  "startLine": 48
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/hwpx-template.ts"
+                },
+                "region": {
+                  "endLine": 179,
+                  "startLine": 153
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "HWPX template export reflects archive and filesystem errors\n\nThe public HWPX route returns raw archive or filesystem Error.message.\n\nSeverity: low\n\nCategory: Information exposure error handling\n\nWeaknesses: CWE-209\n\nRemediation:\nReturn a fixed public error and log details server-side.\n\nRemediation tests:\n- Reject the negative path for hwpx-error-detail.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:9beafc6160f550a05584b2f7bec25218e81976f6ab6549be4651236d05e3f3c1"
+          },
+          "properties": {
+            "category": "Information exposure / error handling",
+            "confidence": "high",
+            "findingId": "csf_8b1692fc4a214f4d8c00583c",
+            "occurrenceId": "occ_0e512b8f957093538fc7dd19",
+            "severity": "low"
+          },
+          "ruleId": "information-exposure.internal-errors",
+          "ruleIndex": 6
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/010_commercial_operations.sql"
+                },
+                "region": {
+                  "endLine": 68,
+                  "startLine": 51
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/010_commercial_operations.sql"
+                },
+                "region": {
+                  "endLine": 210,
+                  "startLine": 195
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/tenant-harness-memory.ts"
+                },
+                "region": {
+                  "endLine": 175,
+                  "startLine": 151
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/tenant-harness-memory.ts"
+                },
+                "region": {
+                  "endLine": 316,
+                  "startLine": 243
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Direct improvement approval forgery can poison tenant harness memory\n\nOwners can set improvement approval metadata while harness memory trusts approved or reflected rows.\n\nSeverity: medium\n\nCategory: Authorization bypass generation integrity\n\nWeaknesses: CWE-862\n\nRemediation:\nMake approval fields server-only and require an immutable review receipt.\n\nRemediation tests:\n- Reject the negative path for improvement-review-forgery.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:9f11e26fccc0d4c14afdf9f224f454dd6176c3fca620c9499f765161cab9a970"
+          },
+          "properties": {
+            "category": "Authorization bypass / generation integrity",
+            "confidence": "high",
+            "findingId": "csf_ea82f29c8e9761af55fc15f1",
+            "occurrenceId": "occ_24867d7a5e7034c223d55a1e",
+            "severity": "medium"
+          },
+          "ruleId": "authorization-bypass.review-state-forgery",
+          "ruleIndex": 3
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/supabase-admin.ts"
+                },
+                "region": {
+                  "endLine": 715,
+                  "startLine": 645
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 19,
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Workspace provisioning can create duplicate organizations and sites\n\nConcurrent first-use calls can duplicate organizations and same-name sites through select-then-insert.\n\nSeverity: low\n\nCategory: Race condition tenant provisioning\n\nWeaknesses: CWE-362\n\nRemediation:\nAdd idempotency keys, uniqueness, and transactional provisioning.\n\nRemediation tests:\n- Reject the negative path for workspace-provisioning-race.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:644d0bbee0a8366456cc7b5e86eeaebb3d3011350539a82de81d0090c2ae4e2b"
+          },
+          "properties": {
+            "category": "Race condition / tenant provisioning",
+            "confidence": "high",
+            "findingId": "csf_f75d6f1cd78d8c433440f49c",
+            "occurrenceId": "occ_39c3459f354d826160a1f820",
+            "severity": "low"
+          },
+          "ruleId": "race-condition.workspace-provisioning",
+          "ruleIndex": 12
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/001_init.sql"
+                },
+                "region": {
+                  "endLine": 6,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Query logs table is exposed without row-level security\n\nMigration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed.\n\nSeverity: low\n\nCategory: Missing authorization RLS\n\nWeaknesses: CWE-862\n\nRemediation:\nEnable RLS and make writes service-role-only.\n\nRemediation tests:\n- Reject the negative path for query-logs-no-rls.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:c8fd851e904e4c62c12a70cc6fcbb8f210d2055567f110537f74197c43e5a3f7"
+          },
+          "properties": {
+            "category": "Missing authorization / RLS",
+            "confidence": "high",
+            "findingId": "csf_ff01d65d4d13040b3b940324",
+            "occurrenceId": "occ_4ff7214f556bff88394f0bb3",
+            "severity": "low"
+          },
+          "ruleId": "authorization-bypass.missing-row-level-security",
+          "ruleIndex": 1
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/knowledge-review.ts"
+                },
+                "region": {
+                  "endLine": 1343,
+                  "startLine": 1285
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/knowledge-review.ts"
+                },
+                "region": {
+                  "endLine": 1422,
+                  "startLine": 1392
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Knowledge review transitions are not atomic\n\nKnowledge review updates events sequentially and the run separately, leaving partial states on failure.\n\nSeverity: medium\n\nCategory: Race condition governance integrity\n\nWeaknesses: CWE-362\n\nRemediation:\nMove the entire transition into one locked database transaction.\n\nRemediation tests:\n- Reject the negative path for knowledge-review-atomicity.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:26f2b568b226e9c260744f1aa12909bbd1b7ecfc3ac466da5f89aa21fe1b42ff"
+          },
+          "properties": {
+            "category": "Race condition / governance integrity",
+            "confidence": "high",
+            "findingId": "csf_e1a64eafc25218ab1a4d8909",
+            "occurrenceId": "occ_51e4112ad0d696253bfcb42b",
+            "severity": "medium"
+          },
+          "ruleId": "race-condition.review-transition",
+          "ruleIndex": 9
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/mcp-tokens/route.ts"
+                },
+                "region": {
+                  "endLine": 278,
+                  "startLine": 247
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/mcp-token-service.ts"
+                },
+                "region": {
+                  "endLine": 82,
+                  "startLine": 80
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/007_mcp_tokens.sql"
+                },
+                "region": {
+                  "endLine": 30,
+                  "startLine": 14
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "MCP token quota check and issuance are non-atomic\n\nConcurrent issuance calls can all pass a separate count check and insert past the cap.\n\nSeverity: medium\n\nCategory: Race condition credential issuance\n\nWeaknesses: CWE-362\n\nRemediation:\nUse a locked transactional recount-and-insert RPC.\n\nRemediation tests:\n- Reject the negative path for mcp-token-quota-race.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:579d68e1ee0f95866c53ce326974ddcebe60cd38c9a63be959429008c8760a04"
+          },
+          "properties": {
+            "category": "Race condition / credential issuance",
+            "confidence": "high",
+            "findingId": "csf_490f3ec0bc5623527698a2a5",
+            "occurrenceId": "occ_547aded5dbe8044619fa97b4",
+            "severity": "medium"
+          },
+          "ruleId": "race-condition.token-quota",
+          "ruleIndex": 10
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/001_init.sql"
+                },
+                "region": {
+                  "endLine": 16,
+                  "startLine": 8
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Documents table is exposed without row-level security\n\nMigration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed.\n\nSeverity: medium\n\nCategory: Missing authorization RLS\n\nWeaknesses: CWE-862\n\nRemediation:\nEnable RLS, revoke broad grants, and add least-privilege tenant policies.\n\nRemediation tests:\n- Reject the negative path for documents-no-rls.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:c16f1ff3bdfd4ee4bb0312f6833e3c79028ffe10fd2ab0c3edae0a1c156aa420"
+          },
+          "properties": {
+            "category": "Missing authorization / RLS",
+            "confidence": "high",
+            "findingId": "csf_21ef431767305615cd2342d9",
+            "occurrenceId": "occ_6c070474708de7d597c1bffd",
+            "severity": "medium"
+          },
+          "ruleId": "authorization-bypass.missing-row-level-security",
+          "ruleIndex": 1
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/safety-reference/status/route.ts"
+                },
+                "region": {
+                  "endLine": 82,
+                  "startLine": 14
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/public-distributed-rate-limit.ts"
+                },
+                "region": {
+                  "endLine": 648,
+                  "startLine": 609
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Safety-reference status work survives client disconnect\n\nStatus work holds scarce concurrency while catalog, corpus, and registry work continues without request cancellation.\n\nSeverity: medium\n\nCategory: Resource exhaustion cancellation\n\nWeaknesses: CWE-400\n\nRemediation:\nPropagate request.signal and release the lease on disconnect.\n\nRemediation tests:\n- Reject the negative path for status-disconnect.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:0c784234cadca20405e2658184c07b6eeaec6af3e5cf5c59a2c3e4f5ce78a1e5"
+          },
+          "properties": {
+            "category": "Resource exhaustion / cancellation",
+            "confidence": "high",
+            "findingId": "csf_b08a96f6b1ba27a33af52a6a",
+            "occurrenceId": "occ_711bec8b505df7474157ad9e",
+            "severity": "medium"
+          },
+          "ruleId": "resource-exhaustion.disconnect-cancellation",
+          "ruleIndex": 13
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/weather/route.ts"
+                },
+                "region": {
+                  "endLine": 122,
+                  "startLine": 107
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/weather.ts"
+                },
+                "region": {
+                  "endLine": 6,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Weather API reflects upstream failure details\n\nThe public weather route returns raw upstream Error.message.\n\nSeverity: low\n\nCategory: Information exposure error handling\n\nWeaknesses: CWE-209\n\nRemediation:\nReturn a fixed public error and log details server-side.\n\nRemediation tests:\n- Reject the negative path for weather-error-detail.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:94a1d90014911b0de78b0cb9acfe2e4bec01cbd03ce8f92ecc2a1f18ba3d6712"
+          },
+          "properties": {
+            "category": "Information exposure / error handling",
+            "confidence": "high",
+            "findingId": "csf_fdda99ed09c6fb65bc74caff",
+            "occurrenceId": "occ_754802a7d5bb6b9ae37da31d",
+            "severity": "low"
+          },
+          "ruleId": "information-exposure.upstream-errors",
+          "ruleIndex": 8
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 90,
+                  "startLine": 76
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 200,
+                  "startLine": 183
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "NULL dispatch-log tenants bypass row-level authorization\n\ndispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts.\n\nSeverity: medium\n\nCategory: Authorization bypass audit integrity\n\nWeaknesses: CWE-862\n\nRemediation:\nMake organization_id non-null and remove NULL wildcard policies.\n\nRemediation tests:\n- Reject the negative path for null-dispatch-tenant.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:f009021f878c7e27193c278f8d1f519576683411c692bd6bd1da87ea5be24dd7"
+          },
+          "properties": {
+            "category": "Authorization bypass / audit integrity",
+            "confidence": "high",
+            "findingId": "csf_46f8a918c02d6ab6c6754b34",
+            "occurrenceId": "occ_791b78c2279c2d8dc18cadd9",
+            "severity": "medium"
+          },
+          "ruleId": "authorization-bypass.null-tenant-rls",
+          "ruleIndex": 2
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/workers/route.ts"
+                },
+                "region": {
+                  "endLine": 120,
+                  "startLine": 84
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 42,
+                  "startLine": 21
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Concurrent worker upserts bypass the site-transfer check\n\nConcurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id.\n\nSeverity: medium\n\nCategory: Race condition tenant integrity\n\nWeaknesses: CWE-362\n\nRemediation:\nLock the natural key and reject site changes transactionally.\n\nRemediation tests:\n- Reject the negative path for worker-site-race.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:7c8ed0068c7a1d828022d375f17dd462936fa1406add940191e86e6281831fd1"
+          },
+          "properties": {
+            "category": "Race condition / tenant integrity",
+            "confidence": "high",
+            "findingId": "csf_13399cd391234fe2a86afb48",
+            "occurrenceId": "occ_805756d69f1d501a8eec2c78",
+            "severity": "medium"
+          },
+          "ruleId": "race-condition.worker-site-binding",
+          "ruleIndex": 11
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 90,
+                  "startLine": 21
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 181,
+                  "startLine": 132
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/003_knowledge_runtime.sql"
+                },
+                "region": {
+                  "endLine": 64,
+                  "startLine": 1
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/003_knowledge_runtime.sql"
+                },
+                "region": {
+                  "endLine": 126,
+                  "startLine": 77
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/010_commercial_operations.sql"
+                },
+                "region": {
+                  "endLine": 95,
+                  "startLine": 21
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/010_commercial_operations.sql"
+                },
+                "region": {
+                  "endLine": 227,
+                  "startLine": 161
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Organization-only RLS permits inconsistent cross-tenant relationship tuples\n\nChild tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples.\n\nSeverity: medium\n\nCategory: Authorization bypass tenant integrity\n\nWeaknesses: CWE-639\n\nRemediation:\nAdd composite tenant foreign keys and RLS checks for every related object.\n\nRemediation tests:\n- Reject the negative path for composite-tenant-binding.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:8e294d4fffffc22acf684619caf1f6fa037f88f95e46c28b69a6030a765f4f51"
+          },
+          "properties": {
+            "category": "Authorization bypass / tenant integrity",
+            "confidence": "high",
+            "findingId": "csf_44d1529d7c4559355db37fe1",
+            "occurrenceId": "occ_848a455c0d0ac59fadb4d058",
+            "severity": "medium"
+          },
+          "ruleId": "tenant-integrity.related-object-binding",
+          "ruleIndex": 15
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/004_safety_reference_catalog.sql"
+                },
+                "region": {
+                  "endLine": 31,
+                  "startLine": 16
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/004_safety_reference_catalog.sql"
+                },
+                "region": {
+                  "endLine": 72,
+                  "startLine": 58
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/safety-reference-catalog.ts"
+                },
+                "region": {
+                  "endLine": 335,
+                  "startLine": 250
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Public RLS exposes complete safety-reference bodies and payloads\n\nRaw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection.\n\nSeverity: medium\n\nCategory: Information exposure corpus boundary\n\nWeaknesses: CWE-200\n\nRemediation:\nRemove anon SELECT and expose an approved bounded view.\n\nRemediation tests:\n- Reject the negative path for raw-safety-corpus.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:1b23a75b436fe88c8cf66ebded212af21a54502d4d254943b1de44f2c132c95b"
+          },
+          "properties": {
+            "category": "Information exposure / corpus boundary",
+            "confidence": "high",
+            "findingId": "csf_5f6a26717450806f76b32ef0",
+            "occurrenceId": "occ_9257030447af537e61a4f786",
+            "severity": "medium"
+          },
+          "ruleId": "information-exposure.raw-corpus",
+          "ruleIndex": 7
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/export/hwpx-template/route.ts"
+                },
+                "region": {
+                  "endLine": 58,
+                  "startLine": 22
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/hwpx-template.ts"
+                },
+                "region": {
+                  "endLine": 179,
+                  "startLine": 153
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/document-export-budget.ts"
+                },
+                "region": {
+                  "endLine": 14,
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "HWPX template export lacks input and output memory budgets\n\nHWPX template export expands companyName in archive entries and buffers the ZIP without shared input/output budgets.\n\nSeverity: medium\n\nCategory: Resource exhaustion document export\n\nWeaknesses: CWE-400\n\nRemediation:\nApply a character budget and final-buffer budget.\n\nRemediation tests:\n- Reject the negative path for hwpx-budget.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:c7dd3f382df51fed892a097da8984f4a2861dd73000fab8984d426a65d6e9b4f"
+          },
+          "properties": {
+            "category": "Resource exhaustion / document export",
+            "confidence": "high",
+            "findingId": "csf_31eacaa13d8eb56e50b81531",
+            "occurrenceId": "occ_9dcf9de91be9268f6938769b",
+            "severity": "medium"
+          },
+          "ruleId": "resource-exhaustion.hwpx-template",
+          "ruleIndex": 14
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/share-sessions/%5BsessionId%5D/route.ts"
+                },
+                "region": {
+                  "endLine": 168,
+                  "startLine": 136
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/public-distributed-rate-limit.ts"
+                },
+                "region": {
+                  "endLine": 273,
+                  "startLine": 227
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/share-sessions/%5BsessionId%5D/route.ts"
+                },
+                "region": {
+                  "endLine": 315,
+                  "startLine": 208
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Share acknowledgement verification falls back to instance-local admission in production\n\nShare ACK omits requireDistributedInProduction, permitting process-local fallback before contact verification and insertion.\n\nSeverity: medium\n\nCategory: Authentication attempts distributed admission\n\nWeaknesses: CWE-307\n\nRemediation:\nRequire distributed admission and short-lived invitation proof.\n\nRemediation tests:\n- Reject the negative path for share-ack-admission.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:dfd4a46555c23659012c1ae0d7e8eab379b78a93314113a1092a1509eef5272e"
+          },
+          "properties": {
+            "category": "Authentication attempts / distributed admission",
+            "confidence": "high",
+            "findingId": "csf_9dac782bd36595036219dbbc",
+            "occurrenceId": "occ_a428bbc462c7cb5dea420e9d",
+            "severity": "medium"
+          },
+          "ruleId": "authentication.share-verification-rate-limit",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/003_knowledge_runtime.sql"
+                },
+                "region": {
+                  "endLine": 64,
+                  "startLine": 21
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/003_knowledge_runtime.sql"
+                },
+                "region": {
+                  "endLine": 126,
+                  "startLine": 94
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/knowledge-review.ts"
+                },
+                "region": {
+                  "endLine": 1208,
+                  "startLine": 1029
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Tenant owners can forge knowledge approval and review-receipt state\n\nOwner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts.\n\nSeverity: medium\n\nCategory: Authorization bypass governance integrity\n\nWeaknesses: CWE-862\n\nRemediation:\nRevoke direct approval-field writes and use a transactional SECURITY DEFINER review RPC.\n\nRemediation tests:\n- Reject the negative path for knowledge-review-forgery.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:31e2340a451194a69eced34fb222f61afccbc8816049231a0c9e87593bd547d0"
+          },
+          "properties": {
+            "category": "Authorization bypass / governance integrity",
+            "confidence": "high",
+            "findingId": "csf_393e16d588fcc75c427ba241",
+            "occurrenceId": "occ_af7a02a5dffd1994a3f5dedb",
+            "severity": "medium"
+          },
+          "ruleId": "authorization-bypass.review-state-forgery",
+          "ruleIndex": 3
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/share-sessions/%5BsessionId%5D/route.ts"
+                },
+                "region": {
+                  "endLine": 130,
+                  "startLine": 79
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/workpack-commercial-store.ts"
+                },
+                "region": {
+                  "endLine": 449,
+                  "startLine": 320
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Public Share documents treat tenant object identifiers as recipient credentials\n\nUnauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents.\n\nSeverity: medium\n\nCategory: Authorization bypass public Share\n\nWeaknesses: CWE-639\n\nRemediation:\nRequire recipient-specific random or signed short-lived invitation proof.\n\nRemediation tests:\n- Reject the negative path for share-id-credential.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:aa430029cb82f2dd75f1a3907ab5efa26773e6409fecdca80bf8b0df93643c03"
+          },
+          "properties": {
+            "category": "Authorization bypass / public Share",
+            "confidence": "high",
+            "findingId": "csf_898fe45c59bcb15db8827642",
+            "occurrenceId": "occ_b5d1cbbcd41b5ebee23a2588",
+            "severity": "medium"
+          },
+          "ruleId": "authorization-bypass.share-object-id",
+          "ruleIndex": 4
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 90,
+                  "startLine": 76
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 200,
+                  "startLine": 183
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/dispatch-logs/route.ts"
+                },
+                "region": {
+                  "endLine": 77,
+                  "startLine": 72
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/dispatch-logs/route.ts"
+                },
+                "region": {
+                  "endLine": 157,
+                  "startLine": 105
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Owners can forge provider dispatch receipts through direct PostgREST\n\nThe owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes.\n\nSeverity: medium\n\nCategory: Data authenticity audit integrity\n\nWeaknesses: CWE-345\n\nRemediation:\nRevoke tenant mutation rights and write receipts only through a server path.\n\nRemediation tests:\n- Reject the negative path for provider-receipt-forgery.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:b19c7c81b143e74c06ada65ce2586482ce5610b8f5c07328501dc7ba60f5dfab"
+          },
+          "properties": {
+            "category": "Data authenticity / audit integrity",
+            "confidence": "high",
+            "findingId": "csf_3a7389105c348505c09d1b6b",
+            "occurrenceId": "occ_f07a715f677d6322ec312f1b",
+            "severity": "medium"
+          },
+          "ruleId": "data-authenticity.provider-receipt-forgery",
+          "ruleIndex": 5
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/export/xlsx/route.ts"
+                },
+                "region": {
+                  "endLine": 260,
+                  "startLine": 245
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/document-export-budget.ts"
+                },
+                "region": {
+                  "endLine": 37,
+                  "startLine": 31
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "XLSX export reflects internal builder errors\n\nUnexpected XLSX builder errors are returned verbatim despite a sanitized helper.\n\nSeverity: low\n\nCategory: Information exposure error handling\n\nWeaknesses: CWE-209\n\nRemediation:\nUse the shared sanitized export-error helper.\n\nRemediation tests:\n- Reject the negative path for xlsx-error-detail.\n- Preserve the intended bounded path.\n\nPreventive controls:\n- Enforce the invariant in a shared database or admission control.\n- Add a negative regression test for the direct path."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:4445dab4f61a623a7e80c0fbfccd5d5d947a8ea553c588afed4831664d85ad05"
+          },
+          "properties": {
+            "category": "Information exposure / error handling",
+            "confidence": "high",
+            "findingId": "csf_3561ce0132096dad1aeb7f5a",
+            "occurrenceId": "occ_ff4eae154d594a00092db904",
+            "severity": "low"
+          },
+          "ruleId": "information-exposure.internal-errors",
+          "ruleIndex": 6
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "Codex Security",
+          "rules": [
+            {
+              "fullDescription": {
+                "text": "Authentication: Share verification rate limit. Categories: Authentication attempts distributed admission. Weaknesses: CWE-307."
+              },
+              "help": {
+                "markdown": "Authentication: Share verification rate limit. Categories: Authentication attempts distributed admission. Weaknesses: CWE-307.\n\n## Remediation\n\nRequire distributed admission and short-lived invitation proof.",
+                "text": "Authentication: Share verification rate limit. Categories: Authentication attempts distributed admission. Weaknesses: CWE-307.\n\nRemediation:\n\nRequire distributed admission and short-lived invitation proof."
+              },
+              "id": "authentication.share-verification-rate-limit",
+              "name": "Authentication: Share verification rate limit",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "Authentication attempts / distributed admission",
+                  "external/cwe/cwe-307",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Authentication: Share verification rate limit"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Authorization bypass: Missing row level security. Categories: Missing authorization RLS. Weaknesses: CWE-862."
+              },
+              "help": {
+                "markdown": "Authorization bypass: Missing row level security. Categories: Missing authorization RLS. Weaknesses: CWE-862.\n\n## Remediation\n\nEnable RLS and make writes service-role-only.\n\nEnable RLS, revoke broad grants, and add least-privilege tenant policies.",
+                "text": "Authorization bypass: Missing row level security. Categories: Missing authorization RLS. Weaknesses: CWE-862.\n\nRemediation:\n\nEnable RLS and make writes service-role-only.\n\nEnable RLS, revoke broad grants, and add least-privilege tenant policies."
+              },
+              "id": "authorization-bypass.missing-row-level-security",
+              "name": "Authorization bypass: Missing row level security",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "Missing authorization / RLS",
+                  "external/cwe/cwe-862",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Authorization bypass: Missing row level security"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Authorization bypass: Null tenant rls. Categories: Authorization bypass audit integrity. Weaknesses: CWE-862."
+              },
+              "help": {
+                "markdown": "Authorization bypass: Null tenant rls. Categories: Authorization bypass audit integrity. Weaknesses: CWE-862.\n\n## Remediation\n\nMake organization_id non-null and remove NULL wildcard policies.",
+                "text": "Authorization bypass: Null tenant rls. Categories: Authorization bypass audit integrity. Weaknesses: CWE-862.\n\nRemediation:\n\nMake organization_id non-null and remove NULL wildcard policies."
+              },
+              "id": "authorization-bypass.null-tenant-rls",
+              "name": "Authorization bypass: Null tenant rls",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "Authorization bypass / audit integrity",
+                  "external/cwe/cwe-862",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Authorization bypass: Null tenant rls"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Authorization bypass: Review state forgery. Categories: Authorization bypass generation integrity, Authorization bypass governance integrity. Weaknesses: CWE-862."
+              },
+              "help": {
+                "markdown": "Authorization bypass: Review state forgery. Categories: Authorization bypass generation integrity, Authorization bypass governance integrity. Weaknesses: CWE-862.\n\n## Remediation\n\nMake approval fields server-only and require an immutable review receipt.\n\nRevoke direct approval-field writes and use a transactional SECURITY DEFINER review RPC.",
+                "text": "Authorization bypass: Review state forgery. Categories: Authorization bypass generation integrity, Authorization bypass governance integrity. Weaknesses: CWE-862.\n\nRemediation:\n\nMake approval fields server-only and require an immutable review receipt.\n\nRevoke direct approval-field writes and use a transactional SECURITY DEFINER review RPC."
+              },
+              "id": "authorization-bypass.review-state-forgery",
+              "name": "Authorization bypass: Review state forgery",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "Authorization bypass / generation integrity",
+                  "Authorization bypass / governance integrity",
+                  "external/cwe/cwe-862",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Authorization bypass: Review state forgery"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Authorization bypass: Share object ID. Categories: Authorization bypass public Share. Weaknesses: CWE-639."
+              },
+              "help": {
+                "markdown": "Authorization bypass: Share object ID. Categories: Authorization bypass public Share. Weaknesses: CWE-639.\n\n## Remediation\n\nRequire recipient-specific random or signed short-lived invitation proof.",
+                "text": "Authorization bypass: Share object ID. Categories: Authorization bypass public Share. Weaknesses: CWE-639.\n\nRemediation:\n\nRequire recipient-specific random or signed short-lived invitation proof."
+              },
+              "id": "authorization-bypass.share-object-id",
+              "name": "Authorization bypass: Share object ID",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "Authorization bypass / public Share",
+                  "external/cwe/cwe-639",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Authorization bypass: Share object ID"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Data authenticity: Provider receipt forgery. Categories: Data authenticity audit integrity. Weaknesses: CWE-345."
+              },
+              "help": {
+                "markdown": "Data authenticity: Provider receipt forgery. Categories: Data authenticity audit integrity. Weaknesses: CWE-345.\n\n## Remediation\n\nRevoke tenant mutation rights and write receipts only through a server path.",
+                "text": "Data authenticity: Provider receipt forgery. Categories: Data authenticity audit integrity. Weaknesses: CWE-345.\n\nRemediation:\n\nRevoke tenant mutation rights and write receipts only through a server path."
+              },
+              "id": "data-authenticity.provider-receipt-forgery",
+              "name": "Data authenticity: Provider receipt forgery",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "Data authenticity / audit integrity",
+                  "external/cwe/cwe-345",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Data authenticity: Provider receipt forgery"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Information exposure: Internal errors. Categories: Information exposure error handling. Weaknesses: CWE-209."
+              },
+              "help": {
+                "markdown": "Information exposure: Internal errors. Categories: Information exposure error handling. Weaknesses: CWE-209.\n\n## Remediation\n\nReturn a fixed public error and log details server-side.\n\nUse the shared sanitized export-error helper.",
+                "text": "Information exposure: Internal errors. Categories: Information exposure error handling. Weaknesses: CWE-209.\n\nRemediation:\n\nReturn a fixed public error and log details server-side.\n\nUse the shared sanitized export-error helper."
+              },
+              "id": "information-exposure.internal-errors",
+              "name": "Information exposure: Internal errors",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "Information exposure / error handling",
+                  "external/cwe/cwe-209",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Information exposure: Internal errors"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Information exposure: Raw corpus. Categories: Information exposure corpus boundary. Weaknesses: CWE-200."
+              },
+              "help": {
+                "markdown": "Information exposure: Raw corpus. Categories: Information exposure corpus boundary. Weaknesses: CWE-200.\n\n## Remediation\n\nRemove anon SELECT and expose an approved bounded view.",
+                "text": "Information exposure: Raw corpus. Categories: Information exposure corpus boundary. Weaknesses: CWE-200.\n\nRemediation:\n\nRemove anon SELECT and expose an approved bounded view."
+              },
+              "id": "information-exposure.raw-corpus",
+              "name": "Information exposure: Raw corpus",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "Information exposure / corpus boundary",
+                  "external/cwe/cwe-200",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Information exposure: Raw corpus"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Information exposure: Upstream errors. Categories: Information exposure error handling. Weaknesses: CWE-209."
+              },
+              "help": {
+                "markdown": "Information exposure: Upstream errors. Categories: Information exposure error handling. Weaknesses: CWE-209.\n\n## Remediation\n\nReturn a fixed public error and log details server-side.",
+                "text": "Information exposure: Upstream errors. Categories: Information exposure error handling. Weaknesses: CWE-209.\n\nRemediation:\n\nReturn a fixed public error and log details server-side."
+              },
+              "id": "information-exposure.upstream-errors",
+              "name": "Information exposure: Upstream errors",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "Information exposure / error handling",
+                  "external/cwe/cwe-209",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Information exposure: Upstream errors"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Race condition: Review transition. Categories: Race condition governance integrity. Weaknesses: CWE-362."
+              },
+              "help": {
+                "markdown": "Race condition: Review transition. Categories: Race condition governance integrity. Weaknesses: CWE-362.\n\n## Remediation\n\nMove the entire transition into one locked database transaction.",
+                "text": "Race condition: Review transition. Categories: Race condition governance integrity. Weaknesses: CWE-362.\n\nRemediation:\n\nMove the entire transition into one locked database transaction."
+              },
+              "id": "race-condition.review-transition",
+              "name": "Race condition: Review transition",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "Race condition / governance integrity",
+                  "external/cwe/cwe-362",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Race condition: Review transition"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Race condition: Token quota. Categories: Race condition credential issuance. Weaknesses: CWE-362."
+              },
+              "help": {
+                "markdown": "Race condition: Token quota. Categories: Race condition credential issuance. Weaknesses: CWE-362.\n\n## Remediation\n\nUse a locked transactional recount-and-insert RPC.",
+                "text": "Race condition: Token quota. Categories: Race condition credential issuance. Weaknesses: CWE-362.\n\nRemediation:\n\nUse a locked transactional recount-and-insert RPC."
+              },
+              "id": "race-condition.token-quota",
+              "name": "Race condition: Token quota",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "Race condition / credential issuance",
+                  "external/cwe/cwe-362",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Race condition: Token quota"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Race condition: Worker site binding. Categories: Race condition tenant integrity. Weaknesses: CWE-362."
+              },
+              "help": {
+                "markdown": "Race condition: Worker site binding. Categories: Race condition tenant integrity. Weaknesses: CWE-362.\n\n## Remediation\n\nLock the natural key and reject site changes transactionally.",
+                "text": "Race condition: Worker site binding. Categories: Race condition tenant integrity. Weaknesses: CWE-362.\n\nRemediation:\n\nLock the natural key and reject site changes transactionally."
+              },
+              "id": "race-condition.worker-site-binding",
+              "name": "Race condition: Worker site binding",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "Race condition / tenant integrity",
+                  "external/cwe/cwe-362",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Race condition: Worker site binding"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Race condition: Workspace provisioning. Categories: Race condition tenant provisioning. Weaknesses: CWE-362."
+              },
+              "help": {
+                "markdown": "Race condition: Workspace provisioning. Categories: Race condition tenant provisioning. Weaknesses: CWE-362.\n\n## Remediation\n\nAdd idempotency keys, uniqueness, and transactional provisioning.",
+                "text": "Race condition: Workspace provisioning. Categories: Race condition tenant provisioning. Weaknesses: CWE-362.\n\nRemediation:\n\nAdd idempotency keys, uniqueness, and transactional provisioning."
+              },
+              "id": "race-condition.workspace-provisioning",
+              "name": "Race condition: Workspace provisioning",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "Race condition / tenant provisioning",
+                  "external/cwe/cwe-362",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Race condition: Workspace provisioning"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Resource exhaustion: Disconnect cancellation. Categories: Resource exhaustion cancellation. Weaknesses: CWE-400."
+              },
+              "help": {
+                "markdown": "Resource exhaustion: Disconnect cancellation. Categories: Resource exhaustion cancellation. Weaknesses: CWE-400.\n\n## Remediation\n\nPropagate request.signal and release the lease on disconnect.",
+                "text": "Resource exhaustion: Disconnect cancellation. Categories: Resource exhaustion cancellation. Weaknesses: CWE-400.\n\nRemediation:\n\nPropagate request.signal and release the lease on disconnect."
+              },
+              "id": "resource-exhaustion.disconnect-cancellation",
+              "name": "Resource exhaustion: Disconnect cancellation",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "Resource exhaustion / cancellation",
+                  "external/cwe/cwe-400",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Resource exhaustion: Disconnect cancellation"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Resource exhaustion: Hwpx template. Categories: Resource exhaustion document export. Weaknesses: CWE-400."
+              },
+              "help": {
+                "markdown": "Resource exhaustion: Hwpx template. Categories: Resource exhaustion document export. Weaknesses: CWE-400.\n\n## Remediation\n\nApply a character budget and final-buffer budget.",
+                "text": "Resource exhaustion: Hwpx template. Categories: Resource exhaustion document export. Weaknesses: CWE-400.\n\nRemediation:\n\nApply a character budget and final-buffer budget."
+              },
+              "id": "resource-exhaustion.hwpx-template",
+              "name": "Resource exhaustion: Hwpx template",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "Resource exhaustion / document export",
+                  "external/cwe/cwe-400",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Resource exhaustion: Hwpx template"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Tenant integrity: Related object binding. Categories: Authorization bypass tenant integrity. Weaknesses: CWE-639."
+              },
+              "help": {
+                "markdown": "Tenant integrity: Related object binding. Categories: Authorization bypass tenant integrity. Weaknesses: CWE-639.\n\n## Remediation\n\nAdd composite tenant foreign keys and RLS checks for every related object.",
+                "text": "Tenant integrity: Related object binding. Categories: Authorization bypass tenant integrity. Weaknesses: CWE-639.\n\nRemediation:\n\nAdd composite tenant foreign keys and RLS checks for every related object."
+              },
+              "id": "tenant-integrity.related-object-binding",
+              "name": "Tenant integrity: Related object binding",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "Authorization bypass / tenant integrity",
+                  "external/cwe/cwe-639",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Tenant integrity: Related object binding"
+              }
+            }
+          ],
+          "version": "0.1.22"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

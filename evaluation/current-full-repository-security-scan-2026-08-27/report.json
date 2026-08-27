@@ -1,0 +1,143 @@
+{
+  "schemaVersion": "safeclaw-current-full-repository-security-scan/v1",
+  "generatedAt": "2026-08-28T02:47:00+09:00",
+  "verdict": "NOTICE_CURRENT_HEAD_STANDARD_SCAN_19_FINDINGS_PARTIAL_COVERAGE_REMEDIATION_REQUIRED",
+  "sourceHead": "4e3e7e5d9ebad7e91f428a856019122431410be4",
+  "scanId": "da97e400-1f4d-40b9-a434-ab5ab013fdb3",
+  "scanRevision": "4e3e7e5d9ebad7e91f428a856019122431410be4",
+  "productCommit": "4e3e7e5d9ebad7e91f428a856019122431410be4",
+  "productionCommit": "4e3e7e5d9ebad7e91f428a856019122431410be4",
+  "sourceHeadMatchesProduction": true,
+  "immutableOriginalBaselineFindingCount": 18,
+  "immutableOriginalBaseline": {
+    "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+    "findingCount": 18,
+    "preserved": true
+  },
+  "scan": {
+    "status": "complete",
+    "sealedAt": "2026-08-27T16:44:19.760101Z",
+    "mode": "standard",
+    "coverage": "partial",
+    "reviewedSurfaceCount": 9,
+    "deferredCoverageItemCount": 26,
+    "reportableFindingCount": 19,
+    "severityCounts": {
+      "medium": 14,
+      "low": 5
+    }
+  },
+  "findingDisposition": {
+    "total": 19,
+    "approvalGatedDatabaseOrAtomicityCount": 12,
+    "approvalFreeProductSourceCandidateCount": 7,
+    "approvalFreeRemediatedCount": 0,
+    "securityCompleteClaimAllowed": false
+  },
+  "approvalGatedDatabaseOrAtomicity": {
+    "count": 12,
+    "findings": [
+      "documents-table-missing-rls",
+      "query-logs-table-missing-rls",
+      "dispatch-null-tenant-rls",
+      "cross-tenant-relationship-tuples",
+      "knowledge-review-state-forgery",
+      "improvement-approval-state-forgery",
+      "provider-receipt-forgery",
+      "raw-safety-corpus-public-rls",
+      "knowledge-review-transition-race",
+      "mcp-token-quota-race",
+      "worker-site-binding-race",
+      "workspace-provisioning-race"
+    ],
+    "databaseOrAtomicityApprovalRequired": true
+  },
+  "approvalFreeProductSourceCandidates": {
+    "count": 7,
+    "findings": [
+      "public-share-object-id-credential",
+      "share-ack-instance-local-admission",
+      "safety-reference-status-disconnect-cancellation",
+      "hwpx-template-memory-budget",
+      "weather-upstream-error-exposure",
+      "xlsx-builder-error-exposure",
+      "hwpx-archive-error-exposure"
+    ],
+    "remediationPending": true
+  },
+  "currentSourceRemediation": {
+    "sourceHead": "f95773c2f4b55fe0ba8b199b5218800067e09bdf",
+    "scanTimeCandidateCount": 7,
+    "approvalFreeCandidateCount": 6,
+    "approvalFreeRemediatedCount": 6,
+    "approvalFreeOpenCount": 0,
+    "approvalSensitiveShareCapabilityCount": 1,
+    "approvalSensitiveFinding": "public-share-object-id-credential",
+    "freshFullRepositoryRescanRequired": true,
+    "remediatedFindings": [
+      "share-ack-instance-local-admission",
+      "safety-reference-status-disconnect-cancellation",
+      "hwpx-template-memory-budget",
+      "weather-upstream-error-exposure",
+      "xlsx-builder-error-exposure",
+      "hwpx-archive-error-exposure"
+    ],
+    "commits": [
+      "ca9bea4876c534fe7a4183c98f7477ad6468974d",
+      "c8223a0e1aa547b1d5c0188cbef9cced7f987159",
+      "c2839719dd68ccf32b5634efffbb1680ea1bf272",
+      "f95773c2f4b55fe0ba8b199b5218800067e09bdf"
+    ]
+  },
+  "canonicalArtifacts": {
+    "manifest": "evaluation/current-full-repository-security-scan-2026-08-27/canonical/scan-manifest.json",
+    "findings": "evaluation/current-full-repository-security-scan-2026-08-27/canonical/findings.json",
+    "coverage": "evaluation/current-full-repository-security-scan-2026-08-27/canonical/coverage.json",
+    "markdownProjection": "evaluation/current-full-repository-security-scan-2026-08-27/scan-report.md",
+    "sarif": "evaluation/current-full-repository-security-scan-2026-08-27/exports/results.sarif"
+  },
+  "verification": {
+    "sealedCanonicalArtifactsPresent": true,
+    "liveBuildInfo": {
+      "status": "PASS",
+      "commitSha": "4e3e7e5d9ebad7e91f428a856019122431410be4",
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-8mse0waxa-seojaehongs-projects.vercel.app"
+    },
+    "focusedTests": {
+      "files": 9,
+      "tests": 268,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "northstarIntegration": {
+      "openGateOverall": "contradicted",
+      "provenCount": 49,
+      "noticeCount": 10,
+      "contradictedCount": 8,
+      "approvalGatedCount": 7,
+      "liveRollupOverall": "northstar_evidence_missing_or_unknown",
+      "nextRunwayVerdict": "OPEN_APPROVAL_GATED"
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorMutationPerformed": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseSecurityRemediation": "APPROVAL_GATED",
+    "approvalFreeProductSourceRemediation": "SOURCE_REMEDIATED_FRESH_RESCAN_REQUIRED",
+    "shareCapabilityCredentialRemediation": "APPROVAL_GATED",
+    "coverageCompleteness": "partial",
+    "deferredCoverageItemCount": 26,
+    "approvalGatedBoundariesPreserved": true,
+    "securityCompleteClaimAllowed": false
+  }
+}

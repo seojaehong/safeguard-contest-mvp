@@ -1,23 +1,23 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T14:35:02.301Z",
-  "head": "99c7df721af566510a96793c75701bd78392a034",
+  "generatedAt": "2026-08-27T17:47:05.680Z",
+  "head": "f95773c2f4b55fe0ba8b199b5218800067e09bdf",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "99c7df721af566510a96793c75701bd78392a034",
+    "commitSha": "4e3e7e5d9ebad7e91f428a856019122431410be4",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ikhpmfwgp-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-8mse0waxa-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "overall": "northstar_open_approval_gated",
+  "overall": "northstar_evidence_missing_or_unknown",
   "dbMutationPerformed": false,
   "launchReadiness": false,
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-    "overall": "open",
+    "overall": "contradicted",
     "gateCount": 74
   },
   "provenGates": [
@@ -192,8 +192,8 @@
     {
       "id": "current_repository_security_rescan",
       "state": "notice",
-      "artifact": "evaluation\\final-approval-free-security-rescan-2026-08-16\\report.json",
-      "detail": "Fresh Standard repository scan 38b87f68 records 9 findings against the preserved original baseline of 18: all 5 approval-free candidates are absent and 9 database/RLS/atomicity findings remain approval-gated. Focused tests 8 files / 88 tests, typecheck, and build pass; no mutation occurred, live-after-deployment is not pending, and exact saved Share remains MISSING_EVIDENCE. This gate remains notice and is not a proven or security-complete claim while databaseSecurityRemediation is APPROVAL_GATED."
+      "artifact": "evaluation\\current-full-repository-security-scan-2026-08-27\\report.json",
+      "detail": "Standard scan da97e400 is sealed at 4e3e7e5d with 19 findings (14 medium, 5 low) while preserving the immutable original baseline of 18. Coverage remains partial across 9 reviewed surfaces with 26 deferred items. Current source f95773c2 has focused remediation for six approval-free candidates, but a fresh full-repository rescan is required; the Share object-ID credential finding and twelve database/RLS/atomicity findings remain approval-gated. No mutation occurred and exact saved Share remains MISSING_EVIDENCE. This gate remains notice and is not a proven or security-complete claim."
     },
     {
       "id": "post_remediation_repository_security_scan",
@@ -202,34 +202,10 @@
       "detail": "Fresh Standard scan bd135da7 is sealed at 20 findings (12 medium, 8 low) across five reviewed surfaces. Live source closes two findings and mitigates one public-status fanout finding while retaining its distributed-admission residual; 18 findings remain open or only partially mitigated before a fresh rescan. The immutable 18-finding baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
-      "id": "share_session_revocation_security",
-      "state": "notice",
-      "artifact": "evaluation\\share-session-revocation-remediation-2026-08-14\\report.json",
-      "detail": "Live production exposes an authenticated owner-only Share session revoke action scoped by session, workpack, organization, and site with durable status/timestamp evidence. The unauthenticated DELETE probe fails closed at 401, no production session was created or revoked, the canonical low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE."
-    },
-    {
-      "id": "share_recipient_contact_verification_security",
-      "state": "notice",
-      "artifact": "evaluation\\share-recipient-contact-verification-2026-08-14\\report.json",
-      "detail": "Live source requires full snapshotted phone or email verification before an invited worker-attributed Share confirmation insert. The value is not stored or returned, mobile/desktop recipient geometry remains bounded, the safe live missing-session probe created no confirmation, the sealed low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE."
-    },
-    {
       "id": "agent_chat_durable_admission_security",
       "state": "notice",
       "artifact": "evaluation\\security-agent-chat-durable-admission-2026-08-14\\report.json",
       "detail": "Live source requires a distributed authenticated-user quota and engine-work lease before Agent Chat model or tool execution, with busy, failure, completion, and cancellation release covered by 24 focused and 55 adjacent tests. Production still reports pre-auth instance mode, so authenticated Agent Chat is fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE."
-    },
-    {
-      "id": "mcp_provider_admission_security",
-      "state": "notice",
-      "artifact": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
-      "detail": "Live source requires token-and-tenant-bound distributed rate admission plus a weighted durable lease before either provider-generating MCP tool runs, while read-only tools and deterministic template mode remain available. Production still reports pre-auth instance mode, so authenticated provider generation is fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE."
-    },
-    {
-      "id": "public_json_request_body_budget",
-      "state": "proven",
-      "artifact": "evaluation\\public-json-request-body-budget-2026-08-11\\report.json",
-      "detail": "The corrected current-source scan's medium public JSON body-budget finding is source-remediated and live-proven across /api/ask, /api/ask/stream, and /api/knowledge/match with pre-parse byte limits, 48 focused/adjacent tests, and a current 23 files / 215 tests governed-path companion. The immutable 14-finding scan and nine deferred candidates remain visible, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "security_resource_remediation",
@@ -254,30 +230,6 @@
       "state": "notice",
       "artifact": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
       "detail": "Improvement and dedicated photo analysis now share pre-provider byte, count, MIME/signature, rate, and concurrency controls with 76 tests plus a current 23 files / 215 tests governed-path companion. Production currently reports instance fallback rather than distributed admission, the immutable 14-finding scan remains unchanged, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
-    },
-    {
-      "id": "public_provider_cancellation",
-      "state": "notice",
-      "artifact": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
-      "detail": "Weather coalescing cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The original deployed receipt remains 9 files / 104 tests, and current source 99c7df72 adds a 6 files / 49 tests cancellation refresh; no live provider cancellation call was executed. The canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
-    },
-    {
-      "id": "public_provider_admission",
-      "state": "notice",
-      "artifact": "evaluation\\public-provider-admission-2026-08-11\\report.json",
-      "detail": "Current production enforces mode-weighted provider work units (template 0, enhanced 2, full 12) with completion/cancellation release, 23 files / 215 tests governed-path compatibility, and live no-provider work-budget probes across ask, weather, and knowledge. Production still reports process-instance admission because Upstash is not configured; both canonical medium findings remain immutable, distributed activation and a fresh follow-up scan remain required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
-    },
-    {
-      "id": "public_ask_distributed_admission",
-      "state": "proven",
-      "artifact": "evaluation\\public-ask-distributed-admission-2026-08-14\\report.json",
-      "detail": "Current production keeps template work at zero and fails JSON/SSE enhanced/full closed with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before provider work when distributed admission is unavailable. The immutable csf_9b3cc6648586dabf4bfa61e9 finding still requires a fresh scan; backend activation is OPERATOR_CONFIGURATION_REQUIRED, no provider or mutation was used, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
-    },
-    {
-      "id": "public_search_distributed_admission",
-      "state": "proven",
-      "artifact": "evaluation\\public-search-distributed-admission-2026-08-14\\report.json",
-      "detail": "Live legal, safety-reference, and weather provider work fails closed before upstream calls without distributed admission. Shared capacity is 12 with weights 6/3/1 per coalesced job. Immutable finding csf_bb897a39277591f4fbab0ca7 still requires a fresh scan; activation is OPERATOR_CONFIGURATION_REQUIRED, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "public_search_distributed_rate_limit_readiness",
@@ -692,24 +644,30 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "currentRepositorySecurityRescan": {
-    "artifact": "evaluation\\final-approval-free-security-rescan-2026-08-16\\report.json",
-    "verdict": "NOTICE_FRESH_STANDARD_SCAN_APPROVAL_FREE_FINDINGS_CLOSED_NINE_APPROVAL_GATED_REMAIN",
-    "scanId": "38b87f68-ea7c-4843-a89c-5f97ba99e319",
-    "scanRevision": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
-    "productCommit": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
-    "productionCommit": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+    "artifact": "evaluation\\current-full-repository-security-scan-2026-08-27\\report.json",
+    "verdict": "NOTICE_CURRENT_HEAD_STANDARD_SCAN_19_FINDINGS_PARTIAL_COVERAGE_REMEDIATION_REQUIRED",
+    "scanId": "da97e400-1f4d-40b9-a434-ab5ab013fdb3",
+    "scanRevision": "4e3e7e5d9ebad7e91f428a856019122431410be4",
+    "productCommit": "4e3e7e5d9ebad7e91f428a856019122431410be4",
+    "productionCommit": "4e3e7e5d9ebad7e91f428a856019122431410be4",
     "originalBaselineFindingCount": 18,
-    "freshReportableFindingCount": 9,
-    "liveRemediatedCount": 5,
-    "databaseApprovalGatedRemainingCount": 9,
-    "focusedTestFiles": 8,
-    "focusedTestCount": 88,
-    "focusedTestStatus": "PASS",
-    "typecheck": "PASS",
-    "build": "PASS",
+    "reportableFindingCount": 19,
+    "mediumFindingCount": 14,
+    "lowFindingCount": 5,
+    "coverageCompleteness": "partial",
+    "reviewedSurfaceCount": 9,
+    "deferredCoverageItemCount": 26,
+    "approvalFreeProductSourceCandidateCount": 7,
+    "approvalFreeRemediatedCount": 0,
+    "currentSourceRemediatedCount": 6,
+    "currentSourceRemediationHead": "f95773c2f4b55fe0ba8b199b5218800067e09bdf",
+    "approvalSensitiveShareCapabilityCount": 1,
+    "freshFullRepositoryRescanRequired": true,
+    "databaseApprovalGatedRemainingCount": 12,
+    "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "databaseSecurityRemediation": "APPROVAL_GATED",
-    "liveAfterDeploymentRequired": false
+    "approvalFreeProductSourceRemediation": "SOURCE_REMEDIATED_FRESH_RESCAN_REQUIRED"
   },
   "publicSearchDistributedRateLimitReadiness": {
     "artifact": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
@@ -1745,10 +1703,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "99c7df721af566510a96793c75701bd78392a034",
+      "sourceCommit": "f95773c2f4b55fe0ba8b199b5218800067e09bdf",
       "sourceStatus": "exact",
-      "productionCommit": "99c7df721af566510a96793c75701bd78392a034",
-      "productionStatus": "matches_live"
+      "productionCommit": "f95773c2f4b55fe0ba8b199b5218800067e09bdf",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -1976,11 +1934,11 @@
     },
     {
       "id": "current_repository_security_rescan",
-      "artifact": "evaluation\\final-approval-free-security-rescan-2026-08-16\\report.json",
-      "sourceCommit": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+      "artifact": "evaluation\\current-full-repository-security-scan-2026-08-27\\report.json",
+      "sourceCommit": "4e3e7e5d9ebad7e91f428a856019122431410be4",
       "sourceStatus": "ancestor",
-      "productionCommit": "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "4e3e7e5d9ebad7e91f428a856019122431410be4",
+      "productionStatus": "matches_live"
     },
     {
       "id": "agent_chat_durable_admission_security",
@@ -2092,7 +2050,7 @@
       "sourceCommit": null,
       "sourceStatus": "missing",
       "productionCommit": "99c7df721af566510a96793c75701bd78392a034",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "security_followup_remediation",

@@ -66,7 +66,7 @@ const EVIDENCE_PATHS = Object.freeze({
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
-  currentRepositorySecurityRescan: path.join("evaluation", "final-approval-free-security-rescan-2026-08-16", "report.json"),
+  currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   postRemediationRepositorySecurityScan: path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "report.json"),
   postRemediationSecuritySourceClosure: path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"),
   shareSessionRevocationRemediation: path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"),
@@ -6599,19 +6599,25 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
     });
   }
 
-  const verification = isRecord(report.verification) ? report.verification : {};
-  const focusedTests = isRecord(verification.focusedTests) ? verification.focusedTests : {};
-  const build = isRecord(verification.build) ? verification.build : {};
+  const scan = isRecord(report.scan) ? report.scan : {};
+  const severityCounts = isRecord(scan.severityCounts) ? scan.severityCounts : {};
+  const disposition = isRecord(report.findingDisposition) ? report.findingDisposition : {};
   const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
   const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
-  const approvalFreeRemediations = Array.isArray(report.approvalFreeRemediations)
-    ? report.approvalFreeRemediations.filter((item) => readString(item) !== "")
-    : [];
-  const approvalGatedRemainingReport = isRecord(report.approvalGatedRemaining)
-    ? report.approvalGatedRemaining
+  const currentSourceRemediation = isRecord(report.currentSourceRemediation)
+    ? report.currentSourceRemediation
     : {};
-  const approvalGatedRemaining = Array.isArray(approvalGatedRemainingReport.findings)
-    ? approvalGatedRemainingReport.findings.filter((item) => readString(item) !== "")
+  const approvalFreeCandidatesReport = isRecord(report.approvalFreeProductSourceCandidates)
+    ? report.approvalFreeProductSourceCandidates
+    : {};
+  const approvalFreeCandidates = Array.isArray(approvalFreeCandidatesReport.findings)
+    ? approvalFreeCandidatesReport.findings.filter((item) => readString(item) !== "")
+    : [];
+  const approvalGatedReport = isRecord(report.approvalGatedDatabaseOrAtomicity)
+    ? report.approvalGatedDatabaseOrAtomicity
+    : {};
+  const approvalGatedFindings = Array.isArray(approvalGatedReport.findings)
+    ? approvalGatedReport.findings.filter((item) => readString(item) !== "")
     : [];
   const noMutation = mutationBoundary.dbMutationPerformed === false
     && mutationBoundary.providerDispatchCalled === false
@@ -6619,26 +6625,46 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
     && mutationBoundary.vectorMutationPerformed === false
     && mutationBoundary.wikiPublicationPerformed === false
     && mutationBoundary.koshaRegistryMutationPerformed === false;
-  const pass = readString(report.verdict) === "NOTICE_FRESH_STANDARD_SCAN_APPROVAL_FREE_FINDINGS_CLOSED_NINE_APPROVAL_GATED_REMAIN"
-    && readString(report.scanId) === "38b87f68-ea7c-4843-a89c-5f97ba99e319"
-    && readString(report.scanRevision) === "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f"
-    && readString(report.productCommit) === "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f"
-    && readString(report.productionCommit) === "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f"
+  const pass = readString(report.verdict) === "NOTICE_CURRENT_HEAD_STANDARD_SCAN_19_FINDINGS_PARTIAL_COVERAGE_REMEDIATION_REQUIRED"
+    && readString(report.scanId) === "da97e400-1f4d-40b9-a434-ab5ab013fdb3"
+    && readString(report.scanRevision) === "4e3e7e5d9ebad7e91f428a856019122431410be4"
+    && readString(report.productCommit) === "4e3e7e5d9ebad7e91f428a856019122431410be4"
+    && readString(report.productionCommit) === "4e3e7e5d9ebad7e91f428a856019122431410be4"
     && readNumber(report.immutableOriginalBaselineFindingCount) === 18
-    && readNumber(report.freshReportableFindingCount) === 9
-    && readNumber(report.approvalFreeRemediatedCount) === 5
-    && approvalFreeRemediations.length === 5
-    && readNumber(report.approvalGatedRemainingCount) === 9
-    && approvalGatedRemaining.length === 9
-    && readNumber(focusedTests.files) === 8
-    && readNumber(focusedTests.tests) === 88
-    && readString(focusedTests.status) === "PASS"
-    && readString(verification.typecheck) === "PASS"
-    && readString(build.status) === "PASS"
+    && readString(scan.status) === "complete"
+    && readString(scan.coverage) === "partial"
+    && readNumber(scan.reviewedSurfaceCount) === 9
+    && readNumber(scan.deferredCoverageItemCount) === 26
+    && readNumber(scan.reportableFindingCount) === 19
+    && readNumber(severityCounts.medium) === 14
+    && readNumber(severityCounts.low) === 5
+    && readNumber(disposition.total) === 19
+    && readNumber(disposition.approvalGatedDatabaseOrAtomicityCount) === 12
+    && readNumber(disposition.approvalFreeProductSourceCandidateCount) === 7
+    && readNumber(disposition.approvalFreeRemediatedCount) === 0
+    && disposition.securityCompleteClaimAllowed === false
+    && readNumber(approvalFreeCandidatesReport.count) === 7
+    && approvalFreeCandidates.length === 7
+    && approvalFreeCandidatesReport.remediationPending === true
+    && readNumber(approvalGatedReport.count) === 12
+    && approvalGatedFindings.length === 12
+    && approvalGatedReport.databaseOrAtomicityApprovalRequired === true
+    && readString(currentSourceRemediation.sourceHead) === "f95773c2f4b55fe0ba8b199b5218800067e09bdf"
+    && readNumber(currentSourceRemediation.scanTimeCandidateCount) === 7
+    && readNumber(currentSourceRemediation.approvalFreeCandidateCount) === 6
+    && readNumber(currentSourceRemediation.approvalFreeRemediatedCount) === 6
+    && readNumber(currentSourceRemediation.approvalFreeOpenCount) === 0
+    && readNumber(currentSourceRemediation.approvalSensitiveShareCapabilityCount) === 1
+    && readString(currentSourceRemediation.approvalSensitiveFinding) === "public-share-object-id-credential"
+    && currentSourceRemediation.freshFullRepositoryRescanRequired === true
     && noMutation
     && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && readString(remainingBoundaries.databaseSecurityRemediation) === "APPROVAL_GATED"
-    && remainingBoundaries.liveAfterDeploymentRequired === false;
+    && readString(remainingBoundaries.approvalFreeProductSourceRemediation) === "SOURCE_REMEDIATED_FRESH_RESCAN_REQUIRED"
+    && readString(remainingBoundaries.shareCapabilityCredentialRemediation) === "APPROVAL_GATED"
+    && readString(remainingBoundaries.coverageCompleteness) === "partial"
+    && readNumber(remainingBoundaries.deferredCoverageItemCount) === 26
+    && remainingBoundaries.securityCompleteClaimAllowed === false;
 
   return gateResult({
     id: "current_repository_security_rescan",
@@ -6646,11 +6672,11 @@ function evaluateCurrentRepositorySecurityRescanGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Fresh Standard repository scan 38b87f68 records 9 findings against the preserved original baseline of 18: all 5 approval-free candidates are absent and 9 database/RLS/atomicity findings remain approval-gated. Focused tests 8 files / 88 tests, typecheck, and build pass; no mutation occurred, live-after-deployment is not pending, and exact saved Share remains MISSING_EVIDENCE. This gate remains notice and is not a proven or security-complete claim while databaseSecurityRemediation is APPROVAL_GATED."
-      : `Current scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(report.scanId) || "missing"}, revision=${readString(report.scanRevision) || "missing"}, baseline=${readNumber(report.immutableOriginalBaselineFindingCount)}, fresh=${readNumber(report.freshReportableFindingCount)}, liveRemediated=${readNumber(report.approvalFreeRemediatedCount)}/${approvalFreeRemediations.length}, dbApprovalGated=${readNumber(report.approvalGatedRemainingCount)}/${approvalGatedRemaining.length}, tests=${readNumber(focusedTests.files)}/${readNumber(focusedTests.tests)}/${readString(focusedTests.status) || "missing"}, typecheck=${readString(verification.typecheck) || "missing"}, build=${readString(build.status) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, databaseSecurityRemediation=${readString(remainingBoundaries.databaseSecurityRemediation) || "missing"}, livePending=${remainingBoundaries.liveAfterDeploymentRequired}.`,
+      ? "Standard scan da97e400 is sealed at 4e3e7e5d with 19 findings (14 medium, 5 low) while preserving the immutable original baseline of 18. Coverage remains partial across 9 reviewed surfaces with 26 deferred items. Current source f95773c2 has focused remediation for six approval-free candidates, but a fresh full-repository rescan is required; the Share object-ID credential finding and twelve database/RLS/atomicity findings remain approval-gated. No mutation occurred and exact saved Share remains MISSING_EVIDENCE. This gate remains notice and is not a proven or security-complete claim."
+      : `Current scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(report.scanId) || "missing"}, revision=${readString(report.scanRevision) || "missing"}, baseline=${readNumber(report.immutableOriginalBaselineFindingCount)}, findings=${readNumber(scan.reportableFindingCount)}, severity=${readNumber(severityCounts.medium)}/${readNumber(severityCounts.low)}, coverage=${readString(scan.coverage) || "missing"}/${readNumber(scan.reviewedSurfaceCount)}/${readNumber(scan.deferredCoverageItemCount)}, approvalFreeOpen=${readNumber(disposition.approvalFreeProductSourceCandidateCount)}/${approvalFreeCandidates.length}, dbApprovalGated=${readNumber(disposition.approvalGatedDatabaseOrAtomicityCount)}/${approvalGatedFindings.length}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, securityComplete=${remainingBoundaries.securityCompleteClaimAllowed}.`,
     nextActions: pass
-      ? ["Obtain explicit approval before remediating the nine database/RLS/atomicity findings; keep the gate at notice until those approval-gated boundaries are closed and rescanned."]
-      : ["Restore the exact current rescan identity, preserved 18-finding baseline, 5 closed approval-free candidates, 9 approval-gated findings, verification passes, and no-mutation boundaries."],
+      ? ["Run a fresh full-repository scan over the six current-source remediations; separately obtain explicit approval before the Share capability credential and twelve database/RLS/atomicity remediations, and close the 26 deferred coverage items before any security-complete claim."]
+      : ["Restore the sealed current scan identity, preserved 18-finding baseline, 19-finding disposition, partial coverage/deferred counts, no-mutation boundary, and exact saved Share MISSING_EVIDENCE."],
   });
 }
 
@@ -7522,12 +7548,12 @@ function isEvidenceCurrentForPaths(rootDir, sourceSha, governedPaths) {
  */
 function currentSecurityScanClearsGovernedPaths(rootDir, governedPaths) {
   const report = readJsonFile(rootDir, EVIDENCE_PATHS.currentRepositorySecurityRescan);
+  const scan = isRecord(report) && isRecord(report.scan) ? report.scan : {};
   if (!isRecord(report)
-    || readString(report.verdict) !== "NOTICE_FRESH_STANDARD_SCAN_APPROVAL_FREE_FINDINGS_CLOSED_NINE_APPROVAL_GATED_REMAIN"
-    || readString(report.scanId) !== "38b87f68-ea7c-4843-a89c-5f97ba99e319"
-    || readNumber(report.freshReportableFindingCount) !== 9
-    || readNumber(report.approvalFreeRemediatedCount) !== 5
-    || readNumber(report.approvalGatedRemainingCount) !== 9) {
+    || readString(report.verdict) !== "NOTICE_CURRENT_HEAD_STANDARD_SCAN_19_FINDINGS_PARTIAL_COVERAGE_REMEDIATION_REQUIRED"
+    || readString(report.scanId) !== "da97e400-1f4d-40b9-a434-ab5ab013fdb3"
+    || readNumber(scan.reportableFindingCount) !== 19
+    || readString(scan.coverage) !== "complete") {
     return false;
   }
   const scanRevision = readString(report.scanRevision);
@@ -7548,7 +7574,7 @@ function currentSecurityScanClearsGovernedPaths(rootDir, governedPaths) {
   const findings = isRecord(canonicalFindings) && Array.isArray(canonicalFindings.findings)
     ? canonicalFindings.findings.filter(isRecord)
     : [];
-  if (findings.length !== 9) {
+  if (findings.length !== 19) {
     return false;
   }
   const normalizedGovernedPaths = governedPaths.map((value) => value.replaceAll("\\", "/"));

@@ -49,7 +49,7 @@ const ARTIFACTS = Object.freeze({
   fullRepositorySecurityScan: path.join("evaluation", "follow-up-full-repository-security-scan-2026-08-02", "report.json"),
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
-  currentRepositorySecurityRescan: path.join("evaluation", "final-approval-free-security-rescan-2026-08-16", "report.json"),
+  currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
@@ -1542,9 +1542,9 @@ function currentSecurityRemediationLedgerSummary(report) {
 /** @param {unknown} report */
 function currentRepositorySecurityRescanSummary(report) {
   if (!isRecord(report)) return {};
-  const verification = isRecord(report.verification) ? report.verification : {};
-  const focusedTests = isRecord(verification.focusedTests) ? verification.focusedTests : {};
-  const build = isRecord(verification.build) ? verification.build : {};
+  const scan = isRecord(report.scan) ? report.scan : {};
+  const severityCounts = isRecord(scan.severityCounts) ? scan.severityCounts : {};
+  const disposition = isRecord(report.findingDisposition) ? report.findingDisposition : {};
   const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
   return {
     verdict: asString(report.verdict),
@@ -1555,23 +1555,37 @@ function currentRepositorySecurityRescanSummary(report) {
     originalBaselineFindingCount: typeof report.immutableOriginalBaselineFindingCount === "number"
       ? report.immutableOriginalBaselineFindingCount
       : null,
-    freshReportableFindingCount: typeof report.freshReportableFindingCount === "number"
-      ? report.freshReportableFindingCount
+    reportableFindingCount: typeof scan.reportableFindingCount === "number"
+      ? scan.reportableFindingCount
       : null,
-    liveRemediatedCount: typeof report.approvalFreeRemediatedCount === "number"
-      ? report.approvalFreeRemediatedCount
+    mediumFindingCount: typeof severityCounts.medium === "number" ? severityCounts.medium : null,
+    lowFindingCount: typeof severityCounts.low === "number" ? severityCounts.low : null,
+    coverageCompleteness: asString(scan.coverage),
+    reviewedSurfaceCount: typeof scan.reviewedSurfaceCount === "number" ? scan.reviewedSurfaceCount : null,
+    deferredCoverageItemCount: typeof scan.deferredCoverageItemCount === "number"
+      ? scan.deferredCoverageItemCount
       : null,
-    databaseApprovalGatedRemainingCount: typeof report.approvalGatedRemainingCount === "number"
-      ? report.approvalGatedRemainingCount
+    approvalFreeProductSourceCandidateCount: typeof disposition.approvalFreeProductSourceCandidateCount === "number"
+      ? disposition.approvalFreeProductSourceCandidateCount
       : null,
-    focusedTestFiles: typeof focusedTests.files === "number" ? focusedTests.files : null,
-    focusedTestCount: typeof focusedTests.tests === "number" ? focusedTests.tests : null,
-    focusedTestStatus: asString(focusedTests.status),
-    typecheck: asString(verification.typecheck),
-    build: asString(build.status),
+    approvalFreeRemediatedCount: typeof disposition.approvalFreeRemediatedCount === "number"
+      ? disposition.approvalFreeRemediatedCount
+      : null,
+    currentSourceRemediatedCount: typeof report.currentSourceRemediation?.approvalFreeRemediatedCount === "number"
+      ? report.currentSourceRemediation.approvalFreeRemediatedCount
+      : null,
+    currentSourceRemediationHead: asString(report.currentSourceRemediation?.sourceHead),
+    approvalSensitiveShareCapabilityCount: typeof report.currentSourceRemediation?.approvalSensitiveShareCapabilityCount === "number"
+      ? report.currentSourceRemediation.approvalSensitiveShareCapabilityCount
+      : null,
+    freshFullRepositoryRescanRequired: report.currentSourceRemediation?.freshFullRepositoryRescanRequired === true,
+    databaseApprovalGatedRemainingCount: typeof disposition.approvalGatedDatabaseOrAtomicityCount === "number"
+      ? disposition.approvalGatedDatabaseOrAtomicityCount
+      : null,
+    securityCompleteClaimAllowed: asBoolean(disposition.securityCompleteClaimAllowed),
     exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
     databaseSecurityRemediation: asString(remaining.databaseSecurityRemediation),
-    liveAfterDeploymentRequired: asBoolean(remaining.liveAfterDeploymentRequired),
+    approvalFreeProductSourceRemediation: asString(remaining.approvalFreeProductSourceRemediation),
   };
 }
 
@@ -3385,7 +3399,7 @@ export function buildNorthstarNextRunway(options) {
       {
         gate: "current_repository_security_rescan",
         state: "notice",
-        reason: "fresh Standard rescan records 9 approval-gated findings after all 5 approval-free candidates disappear; the gate remains notice, not proven or security-complete",
+        reason: "sealed Standard scan records 19 findings with partial coverage; current source remediates six bounded source candidates, while one Share capability credential and 12 database/RLS/atomicity findings remain approval-gated and a fresh full scan is required",
       },
       {
         gate: "mcp_generation_work_budget_security",

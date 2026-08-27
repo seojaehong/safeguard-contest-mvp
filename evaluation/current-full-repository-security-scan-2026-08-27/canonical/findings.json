@@ -1,0 +1,3628 @@
+{
+  "documentType": "codex-security.findings",
+  "findings": [
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Migration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed.",
+          "sink": "supabase/migrations/001_init.sql",
+          "source": "supabase/migrations/001_init.sql",
+          "summary": "No later canonical migration protects documents."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Migration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "No later canonical migration protects documents."
+        },
+        "limitations": [
+          "Live grants were not probed."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/001_init.sql",
+          "outcome": "Migration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed.",
+          "summary": "No later canonical migration protects documents."
+        },
+        "summary": "No later canonical migration protects documents."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "No later canonical migration protects documents."
+      },
+      "findingId": "csf_21ef431767305615cd2342d9",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c16f1ff3bdfd4ee4bb0312f6833e3c79028ffe10fd2ab0c3edae0a1c156aa420"
+      },
+      "identity": {
+        "anchor": "authorization-bypass.missing-row-level-security",
+        "instance": "documents-no-rls"
+      },
+      "locations": [
+        {
+          "endLine": 16,
+          "path": "supabase/migrations/001_init.sql",
+          "role": "source",
+          "startLine": 8
+        }
+      ],
+      "occurrenceId": "occ_6c070474708de7d597c1bffd",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "Migration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed.",
+                "sink": "supabase/migrations/001_init.sql",
+                "source": "supabase/migrations/001_init.sql",
+                "summary": "No later canonical migration protects documents."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Migration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "No later canonical migration protects documents."
+              },
+              "limitations": [
+                "Live grants were not probed."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "supabase/migrations/001_init.sql",
+                "outcome": "Migration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed.",
+                "summary": "No later canonical migration protects documents."
+              },
+              "summary": "No later canonical migration protects documents."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "No later canonical migration protects documents."
+            },
+            "identity": {
+              "anchor": "authorization-bypass.missing-row-level-security",
+              "instance": "documents-no-rls"
+            },
+            "locations": [
+              {
+                "endLine": 16,
+                "path": "supabase/migrations/001_init.sql",
+                "role": "source",
+                "startLine": 8
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Enable RLS, revoke broad grants, and add least-privilege tenant policies.",
+            "remediationTests": [
+              "Reject the negative path for documents-no-rls.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "authorization-bypass.missing-row-level-security",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "medium",
+              "rationale": "Migration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed."
+            },
+            "summary": "Migration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed.",
+            "taxonomy": {
+              "category": "Missing authorization / RLS",
+              "cwe": [
+                "CWE-862"
+              ]
+            },
+            "title": "Documents table is exposed without row-level security",
+            "validation": {
+              "assertions": [
+                "No later canonical migration protects documents."
+              ],
+              "limitations": [
+                "Live grants were not probed."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "No later canonical migration protects documents."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Enable RLS, revoke broad grants, and add least-privilege tenant policies.",
+      "remediationTests": [
+        "Reject the negative path for documents-no-rls.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "authorization-bypass.missing-row-level-security",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Migration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed."
+      },
+      "summary": "Migration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed.",
+      "taxonomy": {
+        "category": "Missing authorization / RLS",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Documents table is exposed without row-level security",
+      "validation": {
+        "assertions": [
+          "No later canonical migration protects documents."
+        ],
+        "limitations": [
+          "Live grants were not probed."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "No later canonical migration protects documents."
+      },
+      "writeup": {
+        "reportPath": "findings/documents-no-rls/documents-no-rls.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Migration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed.",
+          "sink": "supabase/migrations/001_init.sql",
+          "source": "supabase/migrations/001_init.sql",
+          "summary": "No later canonical migration protects query_logs."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Migration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "No later canonical migration protects query_logs."
+        },
+        "limitations": [
+          "Live grants were not probed."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/001_init.sql",
+          "outcome": "Migration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed.",
+          "summary": "No later canonical migration protects query_logs."
+        },
+        "summary": "No later canonical migration protects query_logs."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "No later canonical migration protects query_logs."
+      },
+      "findingId": "csf_ff01d65d4d13040b3b940324",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c8fd851e904e4c62c12a70cc6fcbb8f210d2055567f110537f74197c43e5a3f7"
+      },
+      "identity": {
+        "anchor": "authorization-bypass.missing-row-level-security",
+        "instance": "query-logs-no-rls"
+      },
+      "locations": [
+        {
+          "endLine": 6,
+          "path": "supabase/migrations/001_init.sql",
+          "role": "source",
+          "startLine": 1
+        }
+      ],
+      "occurrenceId": "occ_4ff7214f556bff88394f0bb3",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "Migration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed.",
+                "sink": "supabase/migrations/001_init.sql",
+                "source": "supabase/migrations/001_init.sql",
+                "summary": "No later canonical migration protects query_logs."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Migration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "No later canonical migration protects query_logs."
+              },
+              "limitations": [
+                "Live grants were not probed."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "supabase/migrations/001_init.sql",
+                "outcome": "Migration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed.",
+                "summary": "No later canonical migration protects query_logs."
+              },
+              "summary": "No later canonical migration protects query_logs."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "No later canonical migration protects query_logs."
+            },
+            "identity": {
+              "anchor": "authorization-bypass.missing-row-level-security",
+              "instance": "query-logs-no-rls"
+            },
+            "locations": [
+              {
+                "endLine": 6,
+                "path": "supabase/migrations/001_init.sql",
+                "role": "source",
+                "startLine": 1
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Enable RLS and make writes service-role-only.",
+            "remediationTests": [
+              "Reject the negative path for query-logs-no-rls.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "authorization-bypass.missing-row-level-security",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "low",
+              "rationale": "Migration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed."
+            },
+            "summary": "Migration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed.",
+            "taxonomy": {
+              "category": "Missing authorization / RLS",
+              "cwe": [
+                "CWE-862"
+              ]
+            },
+            "title": "Query logs table is exposed without row-level security",
+            "validation": {
+              "assertions": [
+                "No later canonical migration protects query_logs."
+              ],
+              "limitations": [
+                "Live grants were not probed."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "No later canonical migration protects query_logs."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Enable RLS and make writes service-role-only.",
+      "remediationTests": [
+        "Reject the negative path for query-logs-no-rls.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "authorization-bypass.missing-row-level-security",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "low",
+        "rationale": "Migration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed."
+      },
+      "summary": "Migration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed.",
+      "taxonomy": {
+        "category": "Missing authorization / RLS",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Query logs table is exposed without row-level security",
+      "validation": {
+        "assertions": [
+          "No later canonical migration protects query_logs."
+        ],
+        "limitations": [
+          "Live grants were not probed."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "No later canonical migration protects query_logs."
+      },
+      "writeup": {
+        "reportPath": "findings/query-logs-no-rls/query-logs-no-rls.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "dispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts.",
+          "sink": "supabase/migrations/002_workspace_productization.sql",
+          "source": "supabase/migrations/002_workspace_productization.sql",
+          "summary": "The policy explicitly accepts NULL for reads and writes."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "dispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "The policy explicitly accepts NULL for reads and writes."
+        },
+        "limitations": [
+          "Direct PostgREST bypasses application filters.",
+          "Live grants were not probed."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/002_workspace_productization.sql",
+          "outcome": "dispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts.",
+          "summary": "The policy explicitly accepts NULL for reads and writes."
+        },
+        "summary": "The policy explicitly accepts NULL for reads and writes."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "The policy explicitly accepts NULL for reads and writes."
+      },
+      "findingId": "csf_46f8a918c02d6ab6c6754b34",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:f009021f878c7e27193c278f8d1f519576683411c692bd6bd1da87ea5be24dd7"
+      },
+      "identity": {
+        "anchor": "authorization-bypass.null-tenant-rls",
+        "instance": "null-dispatch-tenant"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 76
+        },
+        {
+          "endLine": 200,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "sink",
+          "startLine": 183
+        }
+      ],
+      "occurrenceId": "occ_791b78c2279c2d8dc18cadd9",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "dispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts.",
+                "sink": "supabase/migrations/002_workspace_productization.sql",
+                "source": "supabase/migrations/002_workspace_productization.sql",
+                "summary": "The policy explicitly accepts NULL for reads and writes."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "dispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "The policy explicitly accepts NULL for reads and writes."
+              },
+              "limitations": [
+                "Direct PostgREST bypasses application filters.",
+                "Live grants were not probed."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "supabase/migrations/002_workspace_productization.sql",
+                "outcome": "dispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts.",
+                "summary": "The policy explicitly accepts NULL for reads and writes."
+              },
+              "summary": "The policy explicitly accepts NULL for reads and writes."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "The policy explicitly accepts NULL for reads and writes."
+            },
+            "identity": {
+              "anchor": "authorization-bypass.null-tenant-rls",
+              "instance": "null-dispatch-tenant"
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "source",
+                "startLine": 76
+              },
+              {
+                "endLine": 200,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "sink",
+                "startLine": 183
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Make organization_id non-null and remove NULL wildcard policies.",
+            "remediationTests": [
+              "Reject the negative path for null-dispatch-tenant.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "authorization-bypass.null-tenant-rls",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "medium",
+              "rationale": "dispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts."
+            },
+            "summary": "dispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts.",
+            "taxonomy": {
+              "category": "Authorization bypass / audit integrity",
+              "cwe": [
+                "CWE-862"
+              ]
+            },
+            "title": "NULL dispatch-log tenants bypass row-level authorization",
+            "validation": {
+              "assertions": [
+                "The policy explicitly accepts NULL for reads and writes."
+              ],
+              "limitations": [
+                "Direct PostgREST bypasses application filters.",
+                "Live grants were not probed."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "The policy explicitly accepts NULL for reads and writes."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Make organization_id non-null and remove NULL wildcard policies.",
+      "remediationTests": [
+        "Reject the negative path for null-dispatch-tenant.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "authorization-bypass.null-tenant-rls",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "dispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts."
+      },
+      "summary": "dispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts.",
+      "taxonomy": {
+        "category": "Authorization bypass / audit integrity",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "NULL dispatch-log tenants bypass row-level authorization",
+      "validation": {
+        "assertions": [
+          "The policy explicitly accepts NULL for reads and writes."
+        ],
+        "limitations": [
+          "Direct PostgREST bypasses application filters.",
+          "Live grants were not probed."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "The policy explicitly accepts NULL for reads and writes."
+      },
+      "writeup": {
+        "reportPath": "findings/null-dispatch-tenant/null-dispatch-tenant.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Child tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples.",
+          "sink": "supabase/migrations/010_commercial_operations.sql",
+          "source": "supabase/migrations/002_workspace_productization.sql",
+          "summary": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Child tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+        },
+        "limitations": [
+          "Routes often add checks.",
+          "Migration 010 deployment was not probed."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/002_workspace_productization.sql",
+          "outcome": "Child tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples.",
+          "summary": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+        },
+        "summary": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+      },
+      "findingId": "csf_44d1529d7c4559355db37fe1",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:8e294d4fffffc22acf684619caf1f6fa037f88f95e46c28b69a6030a765f4f51"
+      },
+      "identity": {
+        "anchor": "tenant-integrity.related-object-binding",
+        "instance": "composite-tenant-binding"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "endLine": 181,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "sink",
+          "startLine": 132
+        },
+        {
+          "endLine": 64,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "sink",
+          "startLine": 1
+        },
+        {
+          "endLine": 126,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "sink",
+          "startLine": 77
+        },
+        {
+          "endLine": 95,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "sink",
+          "startLine": 21
+        },
+        {
+          "endLine": 227,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "sink",
+          "startLine": 161
+        }
+      ],
+      "occurrenceId": "occ_848a455c0d0ac59fadb4d058",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "Child tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples.",
+                "sink": "supabase/migrations/010_commercial_operations.sql",
+                "source": "supabase/migrations/002_workspace_productization.sql",
+                "summary": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Child tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+              },
+              "limitations": [
+                "Routes often add checks.",
+                "Migration 010 deployment was not probed."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "supabase/migrations/002_workspace_productization.sql",
+                "outcome": "Child tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples.",
+                "summary": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+              },
+              "summary": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+            },
+            "identity": {
+              "anchor": "tenant-integrity.related-object-binding",
+              "instance": "composite-tenant-binding"
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "source",
+                "startLine": 21
+              },
+              {
+                "endLine": 181,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "sink",
+                "startLine": 132
+              },
+              {
+                "endLine": 64,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "sink",
+                "startLine": 1
+              },
+              {
+                "endLine": 126,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "sink",
+                "startLine": 77
+              },
+              {
+                "endLine": 95,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "sink",
+                "startLine": 21
+              },
+              {
+                "endLine": 227,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "sink",
+                "startLine": 161
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Add composite tenant foreign keys and RLS checks for every related object.",
+            "remediationTests": [
+              "Reject the negative path for composite-tenant-binding.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "tenant-integrity.related-object-binding",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "medium",
+              "rationale": "Child tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples."
+            },
+            "summary": "Child tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples.",
+            "taxonomy": {
+              "category": "Authorization bypass / tenant integrity",
+              "cwe": [
+                "CWE-639"
+              ]
+            },
+            "title": "Organization-only RLS permits inconsistent cross-tenant relationship tuples",
+            "validation": {
+              "assertions": [
+                "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+              ],
+              "limitations": [
+                "Routes often add checks.",
+                "Migration 010 deployment was not probed."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Add composite tenant foreign keys and RLS checks for every related object.",
+      "remediationTests": [
+        "Reject the negative path for composite-tenant-binding.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Child tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples."
+      },
+      "summary": "Child tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples.",
+      "taxonomy": {
+        "category": "Authorization bypass / tenant integrity",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Organization-only RLS permits inconsistent cross-tenant relationship tuples",
+      "validation": {
+        "assertions": [
+          "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+        ],
+        "limitations": [
+          "Routes often add checks.",
+          "Migration 010 deployment was not probed."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+      },
+      "writeup": {
+        "reportPath": "findings/composite-tenant-binding/composite-tenant-binding.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Owner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts.",
+          "sink": "lib/knowledge-review.ts",
+          "source": "supabase/migrations/003_knowledge_runtime.sql",
+          "summary": "Direct PostgREST can write state guarded review code later trusts."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Owner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Direct PostgREST can write state guarded review code later trusts."
+        },
+        "limitations": [
+          "Publication remains approval-gated."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/003_knowledge_runtime.sql",
+          "outcome": "Owner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts.",
+          "summary": "Direct PostgREST can write state guarded review code later trusts."
+        },
+        "summary": "Direct PostgREST can write state guarded review code later trusts."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Direct PostgREST can write state guarded review code later trusts."
+      },
+      "findingId": "csf_393e16d588fcc75c427ba241",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:31e2340a451194a69eced34fb222f61afccbc8816049231a0c9e87593bd547d0"
+      },
+      "identity": {
+        "anchor": "authorization-bypass.review-state-forgery",
+        "instance": "knowledge-review-forgery"
+      },
+      "locations": [
+        {
+          "endLine": 64,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "endLine": 126,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "sink",
+          "startLine": 94
+        },
+        {
+          "endLine": 1208,
+          "path": "lib/knowledge-review.ts",
+          "role": "sink",
+          "startLine": 1029
+        }
+      ],
+      "occurrenceId": "occ_af7a02a5dffd1994a3f5dedb",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "Owner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts.",
+                "sink": "lib/knowledge-review.ts",
+                "source": "supabase/migrations/003_knowledge_runtime.sql",
+                "summary": "Direct PostgREST can write state guarded review code later trusts."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Owner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Direct PostgREST can write state guarded review code later trusts."
+              },
+              "limitations": [
+                "Publication remains approval-gated."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "supabase/migrations/003_knowledge_runtime.sql",
+                "outcome": "Owner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts.",
+                "summary": "Direct PostgREST can write state guarded review code later trusts."
+              },
+              "summary": "Direct PostgREST can write state guarded review code later trusts."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Direct PostgREST can write state guarded review code later trusts."
+            },
+            "identity": {
+              "anchor": "authorization-bypass.review-state-forgery",
+              "instance": "knowledge-review-forgery"
+            },
+            "locations": [
+              {
+                "endLine": 64,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "source",
+                "startLine": 21
+              },
+              {
+                "endLine": 126,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "sink",
+                "startLine": 94
+              },
+              {
+                "endLine": 1208,
+                "path": "lib/knowledge-review.ts",
+                "role": "sink",
+                "startLine": 1029
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Revoke direct approval-field writes and use a transactional SECURITY DEFINER review RPC.",
+            "remediationTests": [
+              "Reject the negative path for knowledge-review-forgery.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "authorization-bypass.review-state-forgery",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "medium",
+              "rationale": "Owner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts."
+            },
+            "summary": "Owner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts.",
+            "taxonomy": {
+              "category": "Authorization bypass / governance integrity",
+              "cwe": [
+                "CWE-862"
+              ]
+            },
+            "title": "Tenant owners can forge knowledge approval and review-receipt state",
+            "validation": {
+              "assertions": [
+                "Direct PostgREST can write state guarded review code later trusts."
+              ],
+              "limitations": [
+                "Publication remains approval-gated."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "Direct PostgREST can write state guarded review code later trusts."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Revoke direct approval-field writes and use a transactional SECURITY DEFINER review RPC.",
+      "remediationTests": [
+        "Reject the negative path for knowledge-review-forgery.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "authorization-bypass.review-state-forgery",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Owner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts."
+      },
+      "summary": "Owner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts.",
+      "taxonomy": {
+        "category": "Authorization bypass / governance integrity",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Tenant owners can forge knowledge approval and review-receipt state",
+      "validation": {
+        "assertions": [
+          "Direct PostgREST can write state guarded review code later trusts."
+        ],
+        "limitations": [
+          "Publication remains approval-gated."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "Direct PostgREST can write state guarded review code later trusts."
+      },
+      "writeup": {
+        "reportPath": "findings/knowledge-review-forgery/knowledge-review-forgery.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Owners can set improvement approval metadata while harness memory trusts approved or reflected rows.",
+          "sink": "lib/tenant-harness-memory.ts",
+          "source": "supabase/migrations/010_commercial_operations.sql",
+          "summary": "The owner policy can fabricate the status consumed as approval evidence."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Owners can set improvement approval metadata while harness memory trusts approved or reflected rows."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "The owner policy can fabricate the status consumed as approval evidence."
+        },
+        "limitations": [
+          "Migration 010 is approval-gated."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/010_commercial_operations.sql",
+          "outcome": "Owners can set improvement approval metadata while harness memory trusts approved or reflected rows.",
+          "summary": "The owner policy can fabricate the status consumed as approval evidence."
+        },
+        "summary": "The owner policy can fabricate the status consumed as approval evidence."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "The owner policy can fabricate the status consumed as approval evidence."
+      },
+      "findingId": "csf_ea82f29c8e9761af55fc15f1",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:9f11e26fccc0d4c14afdf9f224f454dd6176c3fca620c9499f765161cab9a970"
+      },
+      "identity": {
+        "anchor": "authorization-bypass.review-state-forgery",
+        "instance": "improvement-review-forgery"
+      },
+      "locations": [
+        {
+          "endLine": 68,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "source",
+          "startLine": 51
+        },
+        {
+          "endLine": 210,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "sink",
+          "startLine": 195
+        },
+        {
+          "endLine": 175,
+          "path": "lib/tenant-harness-memory.ts",
+          "role": "sink",
+          "startLine": 151
+        },
+        {
+          "endLine": 316,
+          "path": "lib/tenant-harness-memory.ts",
+          "role": "sink",
+          "startLine": 243
+        }
+      ],
+      "occurrenceId": "occ_24867d7a5e7034c223d55a1e",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "Owners can set improvement approval metadata while harness memory trusts approved or reflected rows.",
+                "sink": "lib/tenant-harness-memory.ts",
+                "source": "supabase/migrations/010_commercial_operations.sql",
+                "summary": "The owner policy can fabricate the status consumed as approval evidence."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Owners can set improvement approval metadata while harness memory trusts approved or reflected rows."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "The owner policy can fabricate the status consumed as approval evidence."
+              },
+              "limitations": [
+                "Migration 010 is approval-gated."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "supabase/migrations/010_commercial_operations.sql",
+                "outcome": "Owners can set improvement approval metadata while harness memory trusts approved or reflected rows.",
+                "summary": "The owner policy can fabricate the status consumed as approval evidence."
+              },
+              "summary": "The owner policy can fabricate the status consumed as approval evidence."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "The owner policy can fabricate the status consumed as approval evidence."
+            },
+            "identity": {
+              "anchor": "authorization-bypass.review-state-forgery",
+              "instance": "improvement-review-forgery"
+            },
+            "locations": [
+              {
+                "endLine": 68,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "source",
+                "startLine": 51
+              },
+              {
+                "endLine": 210,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "sink",
+                "startLine": 195
+              },
+              {
+                "endLine": 175,
+                "path": "lib/tenant-harness-memory.ts",
+                "role": "sink",
+                "startLine": 151
+              },
+              {
+                "endLine": 316,
+                "path": "lib/tenant-harness-memory.ts",
+                "role": "sink",
+                "startLine": 243
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Make approval fields server-only and require an immutable review receipt.",
+            "remediationTests": [
+              "Reject the negative path for improvement-review-forgery.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "authorization-bypass.review-state-forgery",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "medium",
+              "rationale": "Owners can set improvement approval metadata while harness memory trusts approved or reflected rows."
+            },
+            "summary": "Owners can set improvement approval metadata while harness memory trusts approved or reflected rows.",
+            "taxonomy": {
+              "category": "Authorization bypass / generation integrity",
+              "cwe": [
+                "CWE-862"
+              ]
+            },
+            "title": "Direct improvement approval forgery can poison tenant harness memory",
+            "validation": {
+              "assertions": [
+                "The owner policy can fabricate the status consumed as approval evidence."
+              ],
+              "limitations": [
+                "Migration 010 is approval-gated."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "The owner policy can fabricate the status consumed as approval evidence."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Make approval fields server-only and require an immutable review receipt.",
+      "remediationTests": [
+        "Reject the negative path for improvement-review-forgery.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "authorization-bypass.review-state-forgery",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Owners can set improvement approval metadata while harness memory trusts approved or reflected rows."
+      },
+      "summary": "Owners can set improvement approval metadata while harness memory trusts approved or reflected rows.",
+      "taxonomy": {
+        "category": "Authorization bypass / generation integrity",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Direct improvement approval forgery can poison tenant harness memory",
+      "validation": {
+        "assertions": [
+          "The owner policy can fabricate the status consumed as approval evidence."
+        ],
+        "limitations": [
+          "Migration 010 is approval-gated."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "The owner policy can fabricate the status consumed as approval evidence."
+      },
+      "writeup": {
+        "reportPath": "findings/improvement-review-forgery/improvement-review-forgery.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "The owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes.",
+          "sink": "app/api/dispatch-logs/route.ts",
+          "source": "supabase/migrations/002_workspace_productization.sql",
+          "summary": "Direct table access bypasses the API server-receipt gate."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "The owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Direct table access bypasses the API server-receipt gate."
+        },
+        "limitations": [
+          "Provider dispatch is preview-only."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/002_workspace_productization.sql",
+          "outcome": "The owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes.",
+          "summary": "Direct table access bypasses the API server-receipt gate."
+        },
+        "summary": "Direct table access bypasses the API server-receipt gate."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Direct table access bypasses the API server-receipt gate."
+      },
+      "findingId": "csf_3a7389105c348505c09d1b6b",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:b19c7c81b143e74c06ada65ce2586482ce5610b8f5c07328501dc7ba60f5dfab"
+      },
+      "identity": {
+        "anchor": "data-authenticity.provider-receipt-forgery",
+        "instance": "provider-receipt-forgery"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 76
+        },
+        {
+          "endLine": 200,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "sink",
+          "startLine": 183
+        },
+        {
+          "endLine": 77,
+          "path": "app/api/dispatch-logs/route.ts",
+          "role": "sink",
+          "startLine": 72
+        },
+        {
+          "endLine": 157,
+          "path": "app/api/dispatch-logs/route.ts",
+          "role": "sink",
+          "startLine": 105
+        }
+      ],
+      "occurrenceId": "occ_f07a715f677d6322ec312f1b",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "The owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes.",
+                "sink": "app/api/dispatch-logs/route.ts",
+                "source": "supabase/migrations/002_workspace_productization.sql",
+                "summary": "Direct table access bypasses the API server-receipt gate."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "The owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Direct table access bypasses the API server-receipt gate."
+              },
+              "limitations": [
+                "Provider dispatch is preview-only."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "supabase/migrations/002_workspace_productization.sql",
+                "outcome": "The owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes.",
+                "summary": "Direct table access bypasses the API server-receipt gate."
+              },
+              "summary": "Direct table access bypasses the API server-receipt gate."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Direct table access bypasses the API server-receipt gate."
+            },
+            "identity": {
+              "anchor": "data-authenticity.provider-receipt-forgery",
+              "instance": "provider-receipt-forgery"
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "source",
+                "startLine": 76
+              },
+              {
+                "endLine": 200,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "sink",
+                "startLine": 183
+              },
+              {
+                "endLine": 77,
+                "path": "app/api/dispatch-logs/route.ts",
+                "role": "sink",
+                "startLine": 72
+              },
+              {
+                "endLine": 157,
+                "path": "app/api/dispatch-logs/route.ts",
+                "role": "sink",
+                "startLine": 105
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Revoke tenant mutation rights and write receipts only through a server path.",
+            "remediationTests": [
+              "Reject the negative path for provider-receipt-forgery.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "data-authenticity.provider-receipt-forgery",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "medium",
+              "rationale": "The owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes."
+            },
+            "summary": "The owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes.",
+            "taxonomy": {
+              "category": "Data authenticity / audit integrity",
+              "cwe": [
+                "CWE-345"
+              ]
+            },
+            "title": "Owners can forge provider dispatch receipts through direct PostgREST",
+            "validation": {
+              "assertions": [
+                "Direct table access bypasses the API server-receipt gate."
+              ],
+              "limitations": [
+                "Provider dispatch is preview-only."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "Direct table access bypasses the API server-receipt gate."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Revoke tenant mutation rights and write receipts only through a server path.",
+      "remediationTests": [
+        "Reject the negative path for provider-receipt-forgery.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "data-authenticity.provider-receipt-forgery",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "The owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes."
+      },
+      "summary": "The owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes.",
+      "taxonomy": {
+        "category": "Data authenticity / audit integrity",
+        "cwe": [
+          "CWE-345"
+        ]
+      },
+      "title": "Owners can forge provider dispatch receipts through direct PostgREST",
+      "validation": {
+        "assertions": [
+          "Direct table access bypasses the API server-receipt gate."
+        ],
+        "limitations": [
+          "Provider dispatch is preview-only."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "Direct table access bypasses the API server-receipt gate."
+      },
+      "writeup": {
+        "reportPath": "findings/provider-receipt-forgery/provider-receipt-forgery.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Raw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection.",
+          "sink": "lib/safety-reference-catalog.ts",
+          "source": "supabase/migrations/004_safety_reference_catalog.sql",
+          "summary": "The HTTP API redacts body and payload but direct PostgREST does not."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Raw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "The HTTP API redacts body and payload but direct PostgREST does not."
+        },
+        "limitations": [
+          "Source PDFs may be public; normalized payload is outside the public contract."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/004_safety_reference_catalog.sql",
+          "outcome": "Raw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection.",
+          "summary": "The HTTP API redacts body and payload but direct PostgREST does not."
+        },
+        "summary": "The HTTP API redacts body and payload but direct PostgREST does not."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "The HTTP API redacts body and payload but direct PostgREST does not."
+      },
+      "findingId": "csf_5f6a26717450806f76b32ef0",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:1b23a75b436fe88c8cf66ebded212af21a54502d4d254943b1de44f2c132c95b"
+      },
+      "identity": {
+        "anchor": "information-exposure.raw-corpus",
+        "instance": "raw-safety-corpus"
+      },
+      "locations": [
+        {
+          "endLine": 31,
+          "path": "supabase/migrations/004_safety_reference_catalog.sql",
+          "role": "source",
+          "startLine": 16
+        },
+        {
+          "endLine": 72,
+          "path": "supabase/migrations/004_safety_reference_catalog.sql",
+          "role": "sink",
+          "startLine": 58
+        },
+        {
+          "endLine": 335,
+          "path": "lib/safety-reference-catalog.ts",
+          "role": "sink",
+          "startLine": 250
+        }
+      ],
+      "occurrenceId": "occ_9257030447af537e61a4f786",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "Raw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection.",
+                "sink": "lib/safety-reference-catalog.ts",
+                "source": "supabase/migrations/004_safety_reference_catalog.sql",
+                "summary": "The HTTP API redacts body and payload but direct PostgREST does not."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Raw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "The HTTP API redacts body and payload but direct PostgREST does not."
+              },
+              "limitations": [
+                "Source PDFs may be public; normalized payload is outside the public contract."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "supabase/migrations/004_safety_reference_catalog.sql",
+                "outcome": "Raw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection.",
+                "summary": "The HTTP API redacts body and payload but direct PostgREST does not."
+              },
+              "summary": "The HTTP API redacts body and payload but direct PostgREST does not."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "The HTTP API redacts body and payload but direct PostgREST does not."
+            },
+            "identity": {
+              "anchor": "information-exposure.raw-corpus",
+              "instance": "raw-safety-corpus"
+            },
+            "locations": [
+              {
+                "endLine": 31,
+                "path": "supabase/migrations/004_safety_reference_catalog.sql",
+                "role": "source",
+                "startLine": 16
+              },
+              {
+                "endLine": 72,
+                "path": "supabase/migrations/004_safety_reference_catalog.sql",
+                "role": "sink",
+                "startLine": 58
+              },
+              {
+                "endLine": 335,
+                "path": "lib/safety-reference-catalog.ts",
+                "role": "sink",
+                "startLine": 250
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Remove anon SELECT and expose an approved bounded view.",
+            "remediationTests": [
+              "Reject the negative path for raw-safety-corpus.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "information-exposure.raw-corpus",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "medium",
+              "rationale": "Raw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection."
+            },
+            "summary": "Raw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection.",
+            "taxonomy": {
+              "category": "Information exposure / corpus boundary",
+              "cwe": [
+                "CWE-200"
+              ]
+            },
+            "title": "Public RLS exposes complete safety-reference bodies and payloads",
+            "validation": {
+              "assertions": [
+                "The HTTP API redacts body and payload but direct PostgREST does not."
+              ],
+              "limitations": [
+                "Source PDFs may be public; normalized payload is outside the public contract."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "The HTTP API redacts body and payload but direct PostgREST does not."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Remove anon SELECT and expose an approved bounded view.",
+      "remediationTests": [
+        "Reject the negative path for raw-safety-corpus.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "information-exposure.raw-corpus",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Raw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection."
+      },
+      "summary": "Raw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection.",
+      "taxonomy": {
+        "category": "Information exposure / corpus boundary",
+        "cwe": [
+          "CWE-200"
+        ]
+      },
+      "title": "Public RLS exposes complete safety-reference bodies and payloads",
+      "validation": {
+        "assertions": [
+          "The HTTP API redacts body and payload but direct PostgREST does not."
+        ],
+        "limitations": [
+          "Source PDFs may be public; normalized payload is outside the public contract."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "The HTTP API redacts body and payload but direct PostgREST does not."
+      },
+      "writeup": {
+        "reportPath": "findings/raw-safety-corpus/raw-safety-corpus.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Knowledge review updates events sequentially and the run separately, leaving partial states on failure.",
+          "sink": "lib/knowledge-review.ts",
+          "source": "lib/knowledge-review.ts",
+          "summary": "Error paths explicitly acknowledge partial event commits."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Knowledge review updates events sequentially and the run separately, leaving partial states on failure."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Error paths explicitly acknowledge partial event commits."
+        },
+        "limitations": [
+          "Compare-and-set aids recovery but not atomicity."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "lib/knowledge-review.ts",
+          "outcome": "Knowledge review updates events sequentially and the run separately, leaving partial states on failure.",
+          "summary": "Error paths explicitly acknowledge partial event commits."
+        },
+        "summary": "Error paths explicitly acknowledge partial event commits."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Error paths explicitly acknowledge partial event commits."
+      },
+      "findingId": "csf_e1a64eafc25218ab1a4d8909",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:26f2b568b226e9c260744f1aa12909bbd1b7ecfc3ac466da5f89aa21fe1b42ff"
+      },
+      "identity": {
+        "anchor": "race-condition.review-transition",
+        "instance": "knowledge-review-atomicity"
+      },
+      "locations": [
+        {
+          "endLine": 1343,
+          "path": "lib/knowledge-review.ts",
+          "role": "source",
+          "startLine": 1285
+        },
+        {
+          "endLine": 1422,
+          "path": "lib/knowledge-review.ts",
+          "role": "sink",
+          "startLine": 1392
+        }
+      ],
+      "occurrenceId": "occ_51e4112ad0d696253bfcb42b",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "Knowledge review updates events sequentially and the run separately, leaving partial states on failure.",
+                "sink": "lib/knowledge-review.ts",
+                "source": "lib/knowledge-review.ts",
+                "summary": "Error paths explicitly acknowledge partial event commits."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Knowledge review updates events sequentially and the run separately, leaving partial states on failure."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Error paths explicitly acknowledge partial event commits."
+              },
+              "limitations": [
+                "Compare-and-set aids recovery but not atomicity."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "lib/knowledge-review.ts",
+                "outcome": "Knowledge review updates events sequentially and the run separately, leaving partial states on failure.",
+                "summary": "Error paths explicitly acknowledge partial event commits."
+              },
+              "summary": "Error paths explicitly acknowledge partial event commits."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Error paths explicitly acknowledge partial event commits."
+            },
+            "identity": {
+              "anchor": "race-condition.review-transition",
+              "instance": "knowledge-review-atomicity"
+            },
+            "locations": [
+              {
+                "endLine": 1343,
+                "path": "lib/knowledge-review.ts",
+                "role": "source",
+                "startLine": 1285
+              },
+              {
+                "endLine": 1422,
+                "path": "lib/knowledge-review.ts",
+                "role": "sink",
+                "startLine": 1392
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Move the entire transition into one locked database transaction.",
+            "remediationTests": [
+              "Reject the negative path for knowledge-review-atomicity.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "race-condition.review-transition",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "medium",
+              "rationale": "Knowledge review updates events sequentially and the run separately, leaving partial states on failure."
+            },
+            "summary": "Knowledge review updates events sequentially and the run separately, leaving partial states on failure.",
+            "taxonomy": {
+              "category": "Race condition / governance integrity",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "Knowledge review transitions are not atomic",
+            "validation": {
+              "assertions": [
+                "Error paths explicitly acknowledge partial event commits."
+              ],
+              "limitations": [
+                "Compare-and-set aids recovery but not atomicity."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "Error paths explicitly acknowledge partial event commits."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Move the entire transition into one locked database transaction.",
+      "remediationTests": [
+        "Reject the negative path for knowledge-review-atomicity.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "race-condition.review-transition",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Knowledge review updates events sequentially and the run separately, leaving partial states on failure."
+      },
+      "summary": "Knowledge review updates events sequentially and the run separately, leaving partial states on failure.",
+      "taxonomy": {
+        "category": "Race condition / governance integrity",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Knowledge review transitions are not atomic",
+      "validation": {
+        "assertions": [
+          "Error paths explicitly acknowledge partial event commits."
+        ],
+        "limitations": [
+          "Compare-and-set aids recovery but not atomicity."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "Error paths explicitly acknowledge partial event commits."
+      },
+      "writeup": {
+        "reportPath": "findings/knowledge-review-atomicity/knowledge-review-atomicity.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Concurrent issuance calls can all pass a separate count check and insert past the cap.",
+          "sink": "supabase/migrations/007_mcp_tokens.sql",
+          "source": "app/api/mcp-tokens/route.ts",
+          "summary": "No serialized database operation enforces the cap."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Concurrent issuance calls can all pass a separate count check and insert past the cap."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "No serialized database operation enforces the cap."
+        },
+        "limitations": [
+          "Tokens remain site-bound and expiring."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "app/api/mcp-tokens/route.ts",
+          "outcome": "Concurrent issuance calls can all pass a separate count check and insert past the cap.",
+          "summary": "No serialized database operation enforces the cap."
+        },
+        "summary": "No serialized database operation enforces the cap."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "No serialized database operation enforces the cap."
+      },
+      "findingId": "csf_490f3ec0bc5623527698a2a5",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:579d68e1ee0f95866c53ce326974ddcebe60cd38c9a63be959429008c8760a04"
+      },
+      "identity": {
+        "anchor": "race-condition.token-quota",
+        "instance": "mcp-token-quota-race"
+      },
+      "locations": [
+        {
+          "endLine": 278,
+          "path": "app/api/mcp-tokens/route.ts",
+          "role": "source",
+          "startLine": 247
+        },
+        {
+          "endLine": 82,
+          "path": "lib/mcp-token-service.ts",
+          "role": "sink",
+          "startLine": 80
+        },
+        {
+          "endLine": 30,
+          "path": "supabase/migrations/007_mcp_tokens.sql",
+          "role": "sink",
+          "startLine": 14
+        }
+      ],
+      "occurrenceId": "occ_547aded5dbe8044619fa97b4",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "Concurrent issuance calls can all pass a separate count check and insert past the cap.",
+                "sink": "supabase/migrations/007_mcp_tokens.sql",
+                "source": "app/api/mcp-tokens/route.ts",
+                "summary": "No serialized database operation enforces the cap."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Concurrent issuance calls can all pass a separate count check and insert past the cap."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "No serialized database operation enforces the cap."
+              },
+              "limitations": [
+                "Tokens remain site-bound and expiring."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "app/api/mcp-tokens/route.ts",
+                "outcome": "Concurrent issuance calls can all pass a separate count check and insert past the cap.",
+                "summary": "No serialized database operation enforces the cap."
+              },
+              "summary": "No serialized database operation enforces the cap."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "No serialized database operation enforces the cap."
+            },
+            "identity": {
+              "anchor": "race-condition.token-quota",
+              "instance": "mcp-token-quota-race"
+            },
+            "locations": [
+              {
+                "endLine": 278,
+                "path": "app/api/mcp-tokens/route.ts",
+                "role": "source",
+                "startLine": 247
+              },
+              {
+                "endLine": 82,
+                "path": "lib/mcp-token-service.ts",
+                "role": "sink",
+                "startLine": 80
+              },
+              {
+                "endLine": 30,
+                "path": "supabase/migrations/007_mcp_tokens.sql",
+                "role": "sink",
+                "startLine": 14
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Use a locked transactional recount-and-insert RPC.",
+            "remediationTests": [
+              "Reject the negative path for mcp-token-quota-race.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "race-condition.token-quota",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "medium",
+              "rationale": "Concurrent issuance calls can all pass a separate count check and insert past the cap."
+            },
+            "summary": "Concurrent issuance calls can all pass a separate count check and insert past the cap.",
+            "taxonomy": {
+              "category": "Race condition / credential issuance",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "MCP token quota check and issuance are non-atomic",
+            "validation": {
+              "assertions": [
+                "No serialized database operation enforces the cap."
+              ],
+              "limitations": [
+                "Tokens remain site-bound and expiring."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "No serialized database operation enforces the cap."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use a locked transactional recount-and-insert RPC.",
+      "remediationTests": [
+        "Reject the negative path for mcp-token-quota-race.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "race-condition.token-quota",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Concurrent issuance calls can all pass a separate count check and insert past the cap."
+      },
+      "summary": "Concurrent issuance calls can all pass a separate count check and insert past the cap.",
+      "taxonomy": {
+        "category": "Race condition / credential issuance",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "MCP token quota check and issuance are non-atomic",
+      "validation": {
+        "assertions": [
+          "No serialized database operation enforces the cap."
+        ],
+        "limitations": [
+          "Tokens remain site-bound and expiring."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "No serialized database operation enforces the cap."
+      },
+      "writeup": {
+        "reportPath": "findings/mcp-token-quota-race/mcp-token-quota-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Concurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id.",
+          "sink": "supabase/migrations/002_workspace_productization.sql",
+          "source": "app/api/workers/route.ts",
+          "summary": "Lookup and upsert are separate and the payload contains site_id."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Concurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Lookup and upsert are separate and the payload contains site_id."
+        },
+        "limitations": [
+          "Sequential transfers are rejected."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "app/api/workers/route.ts",
+          "outcome": "Concurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id.",
+          "summary": "Lookup and upsert are separate and the payload contains site_id."
+        },
+        "summary": "Lookup and upsert are separate and the payload contains site_id."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Lookup and upsert are separate and the payload contains site_id."
+      },
+      "findingId": "csf_13399cd391234fe2a86afb48",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:7c8ed0068c7a1d828022d375f17dd462936fa1406add940191e86e6281831fd1"
+      },
+      "identity": {
+        "anchor": "race-condition.worker-site-binding",
+        "instance": "worker-site-race"
+      },
+      "locations": [
+        {
+          "endLine": 120,
+          "path": "app/api/workers/route.ts",
+          "role": "source",
+          "startLine": 84
+        },
+        {
+          "endLine": 42,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "sink",
+          "startLine": 21
+        }
+      ],
+      "occurrenceId": "occ_805756d69f1d501a8eec2c78",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "Concurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id.",
+                "sink": "supabase/migrations/002_workspace_productization.sql",
+                "source": "app/api/workers/route.ts",
+                "summary": "Lookup and upsert are separate and the payload contains site_id."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Concurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Lookup and upsert are separate and the payload contains site_id."
+              },
+              "limitations": [
+                "Sequential transfers are rejected."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "app/api/workers/route.ts",
+                "outcome": "Concurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id.",
+                "summary": "Lookup and upsert are separate and the payload contains site_id."
+              },
+              "summary": "Lookup and upsert are separate and the payload contains site_id."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Lookup and upsert are separate and the payload contains site_id."
+            },
+            "identity": {
+              "anchor": "race-condition.worker-site-binding",
+              "instance": "worker-site-race"
+            },
+            "locations": [
+              {
+                "endLine": 120,
+                "path": "app/api/workers/route.ts",
+                "role": "source",
+                "startLine": 84
+              },
+              {
+                "endLine": 42,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "sink",
+                "startLine": 21
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Lock the natural key and reject site changes transactionally.",
+            "remediationTests": [
+              "Reject the negative path for worker-site-race.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "race-condition.worker-site-binding",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "medium",
+              "rationale": "Concurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id."
+            },
+            "summary": "Concurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id.",
+            "taxonomy": {
+              "category": "Race condition / tenant integrity",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "Concurrent worker upserts bypass the site-transfer check",
+            "validation": {
+              "assertions": [
+                "Lookup and upsert are separate and the payload contains site_id."
+              ],
+              "limitations": [
+                "Sequential transfers are rejected."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "Lookup and upsert are separate and the payload contains site_id."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Lock the natural key and reject site changes transactionally.",
+      "remediationTests": [
+        "Reject the negative path for worker-site-race.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "race-condition.worker-site-binding",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Concurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id."
+      },
+      "summary": "Concurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id.",
+      "taxonomy": {
+        "category": "Race condition / tenant integrity",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Concurrent worker upserts bypass the site-transfer check",
+      "validation": {
+        "assertions": [
+          "Lookup and upsert are separate and the payload contains site_id."
+        ],
+        "limitations": [
+          "Sequential transfers are rejected."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "Lookup and upsert are separate and the payload contains site_id."
+      },
+      "writeup": {
+        "reportPath": "findings/worker-site-race/worker-site-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Concurrent first-use calls can duplicate organizations and same-name sites through select-then-insert.",
+          "sink": "supabase/migrations/002_workspace_productization.sql",
+          "source": "lib/supabase-admin.ts",
+          "summary": "Provisioning is non-atomic and lacks natural-key uniqueness."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Concurrent first-use calls can duplicate organizations and same-name sites through select-then-insert."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Provisioning is non-atomic and lacks natural-key uniqueness."
+        },
+        "limitations": [
+          "Duplicates remain same-user owned."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "lib/supabase-admin.ts",
+          "outcome": "Concurrent first-use calls can duplicate organizations and same-name sites through select-then-insert.",
+          "summary": "Provisioning is non-atomic and lacks natural-key uniqueness."
+        },
+        "summary": "Provisioning is non-atomic and lacks natural-key uniqueness."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Provisioning is non-atomic and lacks natural-key uniqueness."
+      },
+      "findingId": "csf_f75d6f1cd78d8c433440f49c",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:644d0bbee0a8366456cc7b5e86eeaebb3d3011350539a82de81d0090c2ae4e2b"
+      },
+      "identity": {
+        "anchor": "race-condition.workspace-provisioning",
+        "instance": "workspace-provisioning-race"
+      },
+      "locations": [
+        {
+          "endLine": 715,
+          "path": "lib/supabase-admin.ts",
+          "role": "source",
+          "startLine": 645
+        },
+        {
+          "endLine": 19,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "sink",
+          "startLine": 3
+        }
+      ],
+      "occurrenceId": "occ_39c3459f354d826160a1f820",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "Concurrent first-use calls can duplicate organizations and same-name sites through select-then-insert.",
+                "sink": "supabase/migrations/002_workspace_productization.sql",
+                "source": "lib/supabase-admin.ts",
+                "summary": "Provisioning is non-atomic and lacks natural-key uniqueness."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Concurrent first-use calls can duplicate organizations and same-name sites through select-then-insert."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Provisioning is non-atomic and lacks natural-key uniqueness."
+              },
+              "limitations": [
+                "Duplicates remain same-user owned."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "lib/supabase-admin.ts",
+                "outcome": "Concurrent first-use calls can duplicate organizations and same-name sites through select-then-insert.",
+                "summary": "Provisioning is non-atomic and lacks natural-key uniqueness."
+              },
+              "summary": "Provisioning is non-atomic and lacks natural-key uniqueness."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Provisioning is non-atomic and lacks natural-key uniqueness."
+            },
+            "identity": {
+              "anchor": "race-condition.workspace-provisioning",
+              "instance": "workspace-provisioning-race"
+            },
+            "locations": [
+              {
+                "endLine": 715,
+                "path": "lib/supabase-admin.ts",
+                "role": "source",
+                "startLine": 645
+              },
+              {
+                "endLine": 19,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "sink",
+                "startLine": 3
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Add stable idempotency keys, uniqueness, and transactional provisioning.",
+            "remediationTests": [
+              "Reject the negative path for workspace-provisioning-race.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "race-condition.workspace-provisioning",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "low",
+              "rationale": "Concurrent first-use calls can duplicate organizations and same-name sites through select-then-insert."
+            },
+            "summary": "Concurrent first-use calls can duplicate organizations and same-name sites through select-then-insert.",
+            "taxonomy": {
+              "category": "Race condition / tenant provisioning",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "Workspace provisioning can create duplicate organizations and sites",
+            "validation": {
+              "assertions": [
+                "Provisioning is non-atomic and lacks natural-key uniqueness."
+              ],
+              "limitations": [
+                "Duplicates remain same-user owned."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "Provisioning is non-atomic and lacks natural-key uniqueness."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Add idempotency keys, uniqueness, and transactional provisioning.",
+      "remediationTests": [
+        "Reject the negative path for workspace-provisioning-race.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "race-condition.workspace-provisioning",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "low",
+        "rationale": "Concurrent first-use calls can duplicate organizations and same-name sites through select-then-insert."
+      },
+      "summary": "Concurrent first-use calls can duplicate organizations and same-name sites through select-then-insert.",
+      "taxonomy": {
+        "category": "Race condition / tenant provisioning",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Workspace provisioning can create duplicate organizations and sites",
+      "validation": {
+        "assertions": [
+          "Provisioning is non-atomic and lacks natural-key uniqueness."
+        ],
+        "limitations": [
+          "Duplicates remain same-user owned."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "Provisioning is non-atomic and lacks natural-key uniqueness."
+      },
+      "writeup": {
+        "reportPath": "findings/workspace-provisioning-race/workspace-provisioning-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Unauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents.",
+          "sink": "lib/workpack-commercial-store.ts",
+          "source": "app/api/share-sessions/[sessionId]/route.ts",
+          "summary": "Possession of two UUIDs is the complete document-read credential."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Unauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Possession of two UUIDs is the complete document-read credential."
+        },
+        "limitations": [
+          "Sessions expire.",
+          "Production storage is missing and exact Share is MISSING_EVIDENCE."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "app/api/share-sessions/[sessionId]/route.ts",
+          "outcome": "Unauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents.",
+          "summary": "Possession of two UUIDs is the complete document-read credential."
+        },
+        "summary": "Possession of two UUIDs is the complete document-read credential."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Possession of two UUIDs is the complete document-read credential."
+      },
+      "findingId": "csf_898fe45c59bcb15db8827642",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:aa430029cb82f2dd75f1a3907ab5efa26773e6409fecdca80bf8b0df93643c03"
+      },
+      "identity": {
+        "anchor": "authorization-bypass.share-object-id",
+        "instance": "share-id-credential"
+      },
+      "locations": [
+        {
+          "endLine": 130,
+          "path": "app/api/share-sessions/[sessionId]/route.ts",
+          "role": "source",
+          "startLine": 79
+        },
+        {
+          "endLine": 449,
+          "path": "lib/workpack-commercial-store.ts",
+          "role": "sink",
+          "startLine": 320
+        }
+      ],
+      "occurrenceId": "occ_b5d1cbbcd41b5ebee23a2588",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "Unauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents.",
+                "sink": "lib/workpack-commercial-store.ts",
+                "source": "app/api/share-sessions/[sessionId]/route.ts",
+                "summary": "Possession of two UUIDs is the complete document-read credential."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Unauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Possession of two UUIDs is the complete document-read credential."
+              },
+              "limitations": [
+                "Sessions expire.",
+                "Production storage is missing and exact Share is MISSING_EVIDENCE."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "app/api/share-sessions/[sessionId]/route.ts",
+                "outcome": "Unauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents.",
+                "summary": "Possession of two UUIDs is the complete document-read credential."
+              },
+              "summary": "Possession of two UUIDs is the complete document-read credential."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Possession of two UUIDs is the complete document-read credential."
+            },
+            "identity": {
+              "anchor": "authorization-bypass.share-object-id",
+              "instance": "share-id-credential"
+            },
+            "locations": [
+              {
+                "endLine": 130,
+                "path": "app/api/share-sessions/[sessionId]/route.ts",
+                "role": "source",
+                "startLine": 79
+              },
+              {
+                "endLine": 449,
+                "path": "lib/workpack-commercial-store.ts",
+                "role": "sink",
+                "startLine": 320
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Require recipient-specific random or signed short-lived invitation proof.",
+            "remediationTests": [
+              "Reject the negative path for share-id-credential.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "authorization-bypass.share-object-id",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "medium",
+              "rationale": "Unauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents."
+            },
+            "summary": "Unauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents.",
+            "taxonomy": {
+              "category": "Authorization bypass / public Share",
+              "cwe": [
+                "CWE-639"
+              ]
+            },
+            "title": "Public Share documents treat tenant object identifiers as recipient credentials",
+            "validation": {
+              "assertions": [
+                "Possession of two UUIDs is the complete document-read credential."
+              ],
+              "limitations": [
+                "Sessions expire.",
+                "Production storage is missing and exact Share is MISSING_EVIDENCE."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "Possession of two UUIDs is the complete document-read credential."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Require recipient-specific random or signed short-lived invitation proof.",
+      "remediationTests": [
+        "Reject the negative path for share-id-credential.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "authorization-bypass.share-object-id",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Unauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents."
+      },
+      "summary": "Unauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents.",
+      "taxonomy": {
+        "category": "Authorization bypass / public Share",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Public Share documents treat tenant object identifiers as recipient credentials",
+      "validation": {
+        "assertions": [
+          "Possession of two UUIDs is the complete document-read credential."
+        ],
+        "limitations": [
+          "Sessions expire.",
+          "Production storage is missing and exact Share is MISSING_EVIDENCE."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "Possession of two UUIDs is the complete document-read credential."
+      },
+      "writeup": {
+        "reportPath": "findings/share-id-credential/share-id-credential.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Share ACK omits requireDistributedInProduction, permitting process-local fallback before contact verification and insertion.",
+          "sink": "app/api/share-sessions/[sessionId]/route.ts",
+          "source": "app/api/share-sessions/[sessionId]/route.ts",
+          "summary": "The route permits instance_fallback in production."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Share ACK omits requireDistributedInProduction, permitting process-local fallback before contact verification and insertion."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "The route permits instance_fallback in production."
+        },
+        "limitations": [
+          "Production storage is missing and no mutation was attempted."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "app/api/share-sessions/[sessionId]/route.ts",
+          "outcome": "Share ACK omits requireDistributedInProduction, permitting process-local fallback before contact verification and insertion.",
+          "summary": "The route permits instance_fallback in production."
+        },
+        "summary": "The route permits instance_fallback in production."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "The route permits instance_fallback in production."
+      },
+      "findingId": "csf_9dac782bd36595036219dbbc",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:dfd4a46555c23659012c1ae0d7e8eab379b78a93314113a1092a1509eef5272e"
+      },
+      "identity": {
+        "anchor": "authentication.share-verification-rate-limit",
+        "instance": "share-ack-admission"
+      },
+      "locations": [
+        {
+          "endLine": 168,
+          "path": "app/api/share-sessions/[sessionId]/route.ts",
+          "role": "source",
+          "startLine": 136
+        },
+        {
+          "endLine": 273,
+          "path": "lib/public-distributed-rate-limit.ts",
+          "role": "sink",
+          "startLine": 227
+        },
+        {
+          "endLine": 315,
+          "path": "app/api/share-sessions/[sessionId]/route.ts",
+          "role": "sink",
+          "startLine": 208
+        }
+      ],
+      "occurrenceId": "occ_a428bbc462c7cb5dea420e9d",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "Share ACK omits requireDistributedInProduction, permitting process-local fallback before contact verification and insertion.",
+                "sink": "app/api/share-sessions/[sessionId]/route.ts",
+                "source": "app/api/share-sessions/[sessionId]/route.ts",
+                "summary": "The route permits instance_fallback in production."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Share ACK omits requireDistributedInProduction, permitting process-local fallback before contact verification and insertion."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "The route permits instance_fallback in production."
+              },
+              "limitations": [
+                "Production storage is missing and no mutation was attempted."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "app/api/share-sessions/[sessionId]/route.ts",
+                "outcome": "Share ACK omits requireDistributedInProduction, permitting process-local fallback before contact verification and insertion.",
+                "summary": "The route permits instance_fallback in production."
+              },
+              "summary": "The route permits instance_fallback in production."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "The route permits instance_fallback in production."
+            },
+            "identity": {
+              "anchor": "authentication.share-verification-rate-limit",
+              "instance": "share-ack-admission"
+            },
+            "locations": [
+              {
+                "endLine": 168,
+                "path": "app/api/share-sessions/[sessionId]/route.ts",
+                "role": "source",
+                "startLine": 136
+              },
+              {
+                "endLine": 273,
+                "path": "lib/public-distributed-rate-limit.ts",
+                "role": "sink",
+                "startLine": 227
+              },
+              {
+                "endLine": 315,
+                "path": "app/api/share-sessions/[sessionId]/route.ts",
+                "role": "sink",
+                "startLine": 208
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Require distributed admission and short-lived invitation proof.",
+            "remediationTests": [
+              "Reject the negative path for share-ack-admission.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "authentication.share-verification-rate-limit",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "medium",
+              "rationale": "Share ACK omits requireDistributedInProduction, permitting process-local fallback before contact verification and insertion."
+            },
+            "summary": "Share ACK omits requireDistributedInProduction, permitting process-local fallback before contact verification and insertion.",
+            "taxonomy": {
+              "category": "Authentication attempts / distributed admission",
+              "cwe": [
+                "CWE-307"
+              ]
+            },
+            "title": "Share acknowledgement verification falls back to instance-local admission in production",
+            "validation": {
+              "assertions": [
+                "The route permits instance_fallback in production."
+              ],
+              "limitations": [
+                "Production storage is missing and no mutation was attempted."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "The route permits instance_fallback in production."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Require distributed admission and short-lived invitation proof.",
+      "remediationTests": [
+        "Reject the negative path for share-ack-admission.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "authentication.share-verification-rate-limit",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Share ACK omits requireDistributedInProduction, permitting process-local fallback before contact verification and insertion."
+      },
+      "summary": "Share ACK omits requireDistributedInProduction, permitting process-local fallback before contact verification and insertion.",
+      "taxonomy": {
+        "category": "Authentication attempts / distributed admission",
+        "cwe": [
+          "CWE-307"
+        ]
+      },
+      "title": "Share acknowledgement verification falls back to instance-local admission in production",
+      "validation": {
+        "assertions": [
+          "The route permits instance_fallback in production."
+        ],
+        "limitations": [
+          "Production storage is missing and no mutation was attempted."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "The route permits instance_fallback in production."
+      },
+      "writeup": {
+        "reportPath": "findings/share-ack-admission/share-ack-admission.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Status work holds scarce concurrency while catalog, corpus, and registry work continues without request cancellation.",
+          "sink": "lib/public-distributed-rate-limit.ts",
+          "source": "app/api/safety-reference/status/route.ts",
+          "summary": "Admission bounds concurrency but does not cancel the callback."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Status work holds scarce concurrency while catalog, corpus, and registry work continues without request cancellation."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Admission bounds concurrency but does not cancel the callback."
+        },
+        "limitations": [
+          "Distributed controls bound parallelism."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "app/api/safety-reference/status/route.ts",
+          "outcome": "Status work holds scarce concurrency while catalog, corpus, and registry work continues without request cancellation.",
+          "summary": "Admission bounds concurrency but does not cancel the callback."
+        },
+        "summary": "Admission bounds concurrency but does not cancel the callback."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Admission bounds concurrency but does not cancel the callback."
+      },
+      "findingId": "csf_b08a96f6b1ba27a33af52a6a",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:0c784234cadca20405e2658184c07b6eeaec6af3e5cf5c59a2c3e4f5ce78a1e5"
+      },
+      "identity": {
+        "anchor": "resource-exhaustion.disconnect-cancellation",
+        "instance": "status-disconnect"
+      },
+      "locations": [
+        {
+          "endLine": 82,
+          "path": "app/api/safety-reference/status/route.ts",
+          "role": "source",
+          "startLine": 14
+        },
+        {
+          "endLine": 648,
+          "path": "lib/public-distributed-rate-limit.ts",
+          "role": "sink",
+          "startLine": 609
+        }
+      ],
+      "occurrenceId": "occ_711bec8b505df7474157ad9e",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "Status work holds scarce concurrency while catalog, corpus, and registry work continues without request cancellation.",
+                "sink": "lib/public-distributed-rate-limit.ts",
+                "source": "app/api/safety-reference/status/route.ts",
+                "summary": "Admission bounds concurrency but does not cancel the callback."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Status work holds scarce concurrency while catalog, corpus, and registry work continues without request cancellation."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Admission bounds concurrency but does not cancel the callback."
+              },
+              "limitations": [
+                "Distributed controls bound parallelism."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "app/api/safety-reference/status/route.ts",
+                "outcome": "Status work holds scarce concurrency while catalog, corpus, and registry work continues without request cancellation.",
+                "summary": "Admission bounds concurrency but does not cancel the callback."
+              },
+              "summary": "Admission bounds concurrency but does not cancel the callback."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Admission bounds concurrency but does not cancel the callback."
+            },
+            "identity": {
+              "anchor": "resource-exhaustion.disconnect-cancellation",
+              "instance": "status-disconnect"
+            },
+            "locations": [
+              {
+                "endLine": 82,
+                "path": "app/api/safety-reference/status/route.ts",
+                "role": "source",
+                "startLine": 14
+              },
+              {
+                "endLine": 648,
+                "path": "lib/public-distributed-rate-limit.ts",
+                "role": "sink",
+                "startLine": 609
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Propagate request.signal and release the lease on disconnect.",
+            "remediationTests": [
+              "Reject the negative path for status-disconnect.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "resource-exhaustion.disconnect-cancellation",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "medium",
+              "rationale": "Status work holds scarce concurrency while catalog, corpus, and registry work continues without request cancellation."
+            },
+            "summary": "Status work holds scarce concurrency while catalog, corpus, and registry work continues without request cancellation.",
+            "taxonomy": {
+              "category": "Resource exhaustion / cancellation",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "Safety-reference status work survives client disconnect",
+            "validation": {
+              "assertions": [
+                "Admission bounds concurrency but does not cancel the callback."
+              ],
+              "limitations": [
+                "Distributed controls bound parallelism."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "Admission bounds concurrency but does not cancel the callback."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Propagate request.signal and release the lease on disconnect.",
+      "remediationTests": [
+        "Reject the negative path for status-disconnect.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "resource-exhaustion.disconnect-cancellation",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Status work holds scarce concurrency while catalog, corpus, and registry work continues without request cancellation."
+      },
+      "summary": "Status work holds scarce concurrency while catalog, corpus, and registry work continues without request cancellation.",
+      "taxonomy": {
+        "category": "Resource exhaustion / cancellation",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Safety-reference status work survives client disconnect",
+      "validation": {
+        "assertions": [
+          "Admission bounds concurrency but does not cancel the callback."
+        ],
+        "limitations": [
+          "Distributed controls bound parallelism."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "Admission bounds concurrency but does not cancel the callback."
+      },
+      "writeup": {
+        "reportPath": "findings/status-disconnect/status-disconnect.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "HWPX template export expands companyName in archive entries and buffers the ZIP without shared input/output budgets.",
+          "sink": "lib/document-export-budget.ts",
+          "source": "app/api/export/hwpx-template/route.ts",
+          "summary": "This route bypasses shared export budgets."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "HWPX template export expands companyName in archive entries and buffers the ZIP without shared input/output budgets."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "This route bypasses shared export budgets."
+        },
+        "limitations": [
+          "URL limits and concurrency provide partial bounds."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "app/api/export/hwpx-template/route.ts",
+          "outcome": "HWPX template export expands companyName in archive entries and buffers the ZIP without shared input/output budgets.",
+          "summary": "This route bypasses shared export budgets."
+        },
+        "summary": "This route bypasses shared export budgets."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "This route bypasses shared export budgets."
+      },
+      "findingId": "csf_31eacaa13d8eb56e50b81531",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c7dd3f382df51fed892a097da8984f4a2861dd73000fab8984d426a65d6e9b4f"
+      },
+      "identity": {
+        "anchor": "resource-exhaustion.hwpx-template",
+        "instance": "hwpx-budget"
+      },
+      "locations": [
+        {
+          "endLine": 58,
+          "path": "app/api/export/hwpx-template/route.ts",
+          "role": "source",
+          "startLine": 22
+        },
+        {
+          "endLine": 179,
+          "path": "lib/hwpx-template.ts",
+          "role": "sink",
+          "startLine": 153
+        },
+        {
+          "endLine": 14,
+          "path": "lib/document-export-budget.ts",
+          "role": "sink",
+          "startLine": 4
+        }
+      ],
+      "occurrenceId": "occ_9dcf9de91be9268f6938769b",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "HWPX template export expands companyName in archive entries and buffers the ZIP without shared input/output budgets.",
+                "sink": "lib/document-export-budget.ts",
+                "source": "app/api/export/hwpx-template/route.ts",
+                "summary": "This route bypasses shared export budgets."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "HWPX template export expands companyName in archive entries and buffers the ZIP without shared input/output budgets."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "This route bypasses shared export budgets."
+              },
+              "limitations": [
+                "URL limits and concurrency provide partial bounds."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "app/api/export/hwpx-template/route.ts",
+                "outcome": "HWPX template export expands companyName in archive entries and buffers the ZIP without shared input/output budgets.",
+                "summary": "This route bypasses shared export budgets."
+              },
+              "summary": "This route bypasses shared export budgets."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "This route bypasses shared export budgets."
+            },
+            "identity": {
+              "anchor": "resource-exhaustion.hwpx-template",
+              "instance": "hwpx-budget"
+            },
+            "locations": [
+              {
+                "endLine": 58,
+                "path": "app/api/export/hwpx-template/route.ts",
+                "role": "source",
+                "startLine": 22
+              },
+              {
+                "endLine": 179,
+                "path": "lib/hwpx-template.ts",
+                "role": "sink",
+                "startLine": 153
+              },
+              {
+                "endLine": 14,
+                "path": "lib/document-export-budget.ts",
+                "role": "sink",
+                "startLine": 4
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Apply a character budget and final-buffer budget.",
+            "remediationTests": [
+              "Reject the negative path for hwpx-budget.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "resource-exhaustion.hwpx-template",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "medium",
+              "rationale": "HWPX template export expands companyName in archive entries and buffers the ZIP without shared input/output budgets."
+            },
+            "summary": "HWPX template export expands companyName in archive entries and buffers the ZIP without shared input/output budgets.",
+            "taxonomy": {
+              "category": "Resource exhaustion / document export",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "HWPX template export lacks input and output memory budgets",
+            "validation": {
+              "assertions": [
+                "This route bypasses shared export budgets."
+              ],
+              "limitations": [
+                "URL limits and concurrency provide partial bounds."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "This route bypasses shared export budgets."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Apply a character budget and final-buffer budget.",
+      "remediationTests": [
+        "Reject the negative path for hwpx-budget.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "resource-exhaustion.hwpx-template",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "HWPX template export expands companyName in archive entries and buffers the ZIP without shared input/output budgets."
+      },
+      "summary": "HWPX template export expands companyName in archive entries and buffers the ZIP without shared input/output budgets.",
+      "taxonomy": {
+        "category": "Resource exhaustion / document export",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "HWPX template export lacks input and output memory budgets",
+      "validation": {
+        "assertions": [
+          "This route bypasses shared export budgets."
+        ],
+        "limitations": [
+          "URL limits and concurrency provide partial bounds."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "This route bypasses shared export budgets."
+      },
+      "writeup": {
+        "reportPath": "findings/hwpx-budget/hwpx-budget.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "The public weather route returns raw upstream Error.message.",
+          "sink": "lib/weather.ts",
+          "source": "app/api/weather/route.ts",
+          "summary": "The catch serializes raw Error.message."
+        },
+        "impact": {
+          "level": "low",
+          "why": "The public weather route returns raw upstream Error.message."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "The catch serializes raw Error.message."
+        },
+        "limitations": [
+          "No secret was proven in a current error."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "app/api/weather/route.ts",
+          "outcome": "The public weather route returns raw upstream Error.message.",
+          "summary": "The catch serializes raw Error.message."
+        },
+        "summary": "The catch serializes raw Error.message."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "The catch serializes raw Error.message."
+      },
+      "findingId": "csf_fdda99ed09c6fb65bc74caff",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:94a1d90014911b0de78b0cb9acfe2e4bec01cbd03ce8f92ecc2a1f18ba3d6712"
+      },
+      "identity": {
+        "anchor": "information-exposure.upstream-errors",
+        "instance": "weather-error-detail"
+      },
+      "locations": [
+        {
+          "endLine": 122,
+          "path": "app/api/weather/route.ts",
+          "role": "source",
+          "startLine": 107
+        },
+        {
+          "endLine": 6,
+          "path": "lib/weather.ts",
+          "role": "sink",
+          "startLine": 1
+        }
+      ],
+      "occurrenceId": "occ_754802a7d5bb6b9ae37da31d",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "The public weather route returns raw upstream Error.message.",
+                "sink": "lib/weather.ts",
+                "source": "app/api/weather/route.ts",
+                "summary": "The catch serializes raw Error.message."
+              },
+              "impact": {
+                "level": "low",
+                "why": "The public weather route returns raw upstream Error.message."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "The catch serializes raw Error.message."
+              },
+              "limitations": [
+                "No secret was proven in a current error."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "app/api/weather/route.ts",
+                "outcome": "The public weather route returns raw upstream Error.message.",
+                "summary": "The catch serializes raw Error.message."
+              },
+              "summary": "The catch serializes raw Error.message."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "The catch serializes raw Error.message."
+            },
+            "identity": {
+              "anchor": "information-exposure.upstream-errors",
+              "instance": "weather-error-detail"
+            },
+            "locations": [
+              {
+                "endLine": 122,
+                "path": "app/api/weather/route.ts",
+                "role": "source",
+                "startLine": 107
+              },
+              {
+                "endLine": 6,
+                "path": "lib/weather.ts",
+                "role": "sink",
+                "startLine": 1
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Return a fixed public error and log details server-side.",
+            "remediationTests": [
+              "Reject the negative path for weather-error-detail.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "information-exposure.upstream-errors",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "low",
+              "rationale": "The public weather route returns raw upstream Error.message."
+            },
+            "summary": "The public weather route returns raw upstream Error.message.",
+            "taxonomy": {
+              "category": "Information exposure / error handling",
+              "cwe": [
+                "CWE-209"
+              ]
+            },
+            "title": "Weather API reflects upstream failure details",
+            "validation": {
+              "assertions": [
+                "The catch serializes raw Error.message."
+              ],
+              "limitations": [
+                "No secret was proven in a current error."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "The catch serializes raw Error.message."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Return a fixed public error and log details server-side.",
+      "remediationTests": [
+        "Reject the negative path for weather-error-detail.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "information-exposure.upstream-errors",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "low",
+        "rationale": "The public weather route returns raw upstream Error.message."
+      },
+      "summary": "The public weather route returns raw upstream Error.message.",
+      "taxonomy": {
+        "category": "Information exposure / error handling",
+        "cwe": [
+          "CWE-209"
+        ]
+      },
+      "title": "Weather API reflects upstream failure details",
+      "validation": {
+        "assertions": [
+          "The catch serializes raw Error.message."
+        ],
+        "limitations": [
+          "No secret was proven in a current error."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "The catch serializes raw Error.message."
+      },
+      "writeup": {
+        "reportPath": "findings/weather-error-detail/weather-error-detail.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Unexpected XLSX builder errors are returned verbatim despite a sanitized helper.",
+          "sink": "lib/document-export-budget.ts",
+          "source": "app/api/export/xlsx/route.ts",
+          "summary": "The unexpected branch returns Error.message."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Unexpected XLSX builder errors are returned verbatim despite a sanitized helper."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "The unexpected branch returns Error.message."
+        },
+        "limitations": [
+          "Budget errors are sanitized."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "app/api/export/xlsx/route.ts",
+          "outcome": "Unexpected XLSX builder errors are returned verbatim despite a sanitized helper.",
+          "summary": "The unexpected branch returns Error.message."
+        },
+        "summary": "The unexpected branch returns Error.message."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "The unexpected branch returns Error.message."
+      },
+      "findingId": "csf_3561ce0132096dad1aeb7f5a",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:4445dab4f61a623a7e80c0fbfccd5d5d947a8ea553c588afed4831664d85ad05"
+      },
+      "identity": {
+        "anchor": "information-exposure.internal-errors",
+        "instance": "xlsx-error-detail"
+      },
+      "locations": [
+        {
+          "endLine": 260,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "source",
+          "startLine": 245
+        },
+        {
+          "endLine": 37,
+          "path": "lib/document-export-budget.ts",
+          "role": "sink",
+          "startLine": 31
+        }
+      ],
+      "occurrenceId": "occ_ff4eae154d594a00092db904",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "Unexpected XLSX builder errors are returned verbatim despite a sanitized helper.",
+                "sink": "lib/document-export-budget.ts",
+                "source": "app/api/export/xlsx/route.ts",
+                "summary": "The unexpected branch returns Error.message."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Unexpected XLSX builder errors are returned verbatim despite a sanitized helper."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "The unexpected branch returns Error.message."
+              },
+              "limitations": [
+                "Budget errors are sanitized."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "app/api/export/xlsx/route.ts",
+                "outcome": "Unexpected XLSX builder errors are returned verbatim despite a sanitized helper.",
+                "summary": "The unexpected branch returns Error.message."
+              },
+              "summary": "The unexpected branch returns Error.message."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "The unexpected branch returns Error.message."
+            },
+            "identity": {
+              "anchor": "information-exposure.internal-errors",
+              "instance": "xlsx-error-detail"
+            },
+            "locations": [
+              {
+                "endLine": 260,
+                "path": "app/api/export/xlsx/route.ts",
+                "role": "source",
+                "startLine": 245
+              },
+              {
+                "endLine": 37,
+                "path": "lib/document-export-budget.ts",
+                "role": "sink",
+                "startLine": 31
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Use the shared sanitized export-error helper.",
+            "remediationTests": [
+              "Reject the negative path for xlsx-error-detail.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "information-exposure.internal-errors",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "low",
+              "rationale": "Unexpected XLSX builder errors are returned verbatim despite a sanitized helper."
+            },
+            "summary": "Unexpected XLSX builder errors are returned verbatim despite a sanitized helper.",
+            "taxonomy": {
+              "category": "Information exposure / error handling",
+              "cwe": [
+                "CWE-209"
+              ]
+            },
+            "title": "XLSX export reflects internal builder errors",
+            "validation": {
+              "assertions": [
+                "The unexpected branch returns Error.message."
+              ],
+              "limitations": [
+                "Budget errors are sanitized."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "The unexpected branch returns Error.message."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use the shared sanitized export-error helper.",
+      "remediationTests": [
+        "Reject the negative path for xlsx-error-detail.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "information-exposure.internal-errors",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "low",
+        "rationale": "Unexpected XLSX builder errors are returned verbatim despite a sanitized helper."
+      },
+      "summary": "Unexpected XLSX builder errors are returned verbatim despite a sanitized helper.",
+      "taxonomy": {
+        "category": "Information exposure / error handling",
+        "cwe": [
+          "CWE-209"
+        ]
+      },
+      "title": "XLSX export reflects internal builder errors",
+      "validation": {
+        "assertions": [
+          "The unexpected branch returns Error.message."
+        ],
+        "limitations": [
+          "Budget errors are sanitized."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "The unexpected branch returns Error.message."
+      },
+      "writeup": {
+        "reportPath": "findings/xlsx-error-detail/xlsx-error-detail.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "The public HWPX route returns raw archive or filesystem Error.message.",
+          "sink": "lib/hwpx-template.ts",
+          "source": "app/api/export/hwpx-template/route.ts",
+          "summary": "The catch serializes internal Error.message."
+        },
+        "impact": {
+          "level": "low",
+          "why": "The public HWPX route returns raw archive or filesystem Error.message."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "The catch serializes internal Error.message."
+        },
+        "limitations": [
+          "Template kind is allowlisted."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "app/api/export/hwpx-template/route.ts",
+          "outcome": "The public HWPX route returns raw archive or filesystem Error.message.",
+          "summary": "The catch serializes internal Error.message."
+        },
+        "summary": "The catch serializes internal Error.message."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "The catch serializes internal Error.message."
+      },
+      "findingId": "csf_8b1692fc4a214f4d8c00583c",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:9beafc6160f550a05584b2f7bec25218e81976f6ab6549be4651236d05e3f3c1"
+      },
+      "identity": {
+        "anchor": "information-exposure.internal-errors",
+        "instance": "hwpx-error-detail"
+      },
+      "locations": [
+        {
+          "endLine": 63,
+          "path": "app/api/export/hwpx-template/route.ts",
+          "role": "source",
+          "startLine": 48
+        },
+        {
+          "endLine": 179,
+          "path": "lib/hwpx-template.ts",
+          "role": "sink",
+          "startLine": 153
+        }
+      ],
+      "occurrenceId": "occ_0e512b8f957093538fc7dd19",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "dataflow": {
+                "outcome": "The public HWPX route returns raw archive or filesystem Error.message.",
+                "sink": "lib/hwpx-template.ts",
+                "source": "app/api/export/hwpx-template/route.ts",
+                "summary": "The catch serializes internal Error.message."
+              },
+              "impact": {
+                "level": "low",
+                "why": "The public HWPX route returns raw archive or filesystem Error.message."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "The catch serializes internal Error.message."
+              },
+              "limitations": [
+                "Template kind is allowlisted."
+              ],
+              "reachability": {
+                "attacker": "Remote public caller or authenticated tenant as described",
+                "entrypoint": "app/api/export/hwpx-template/route.ts",
+                "outcome": "The public HWPX route returns raw archive or filesystem Error.message.",
+                "summary": "The catch serializes internal Error.message."
+              },
+              "summary": "The catch serializes internal Error.message."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "The catch serializes internal Error.message."
+            },
+            "identity": {
+              "anchor": "information-exposure.internal-errors",
+              "instance": "hwpx-error-detail"
+            },
+            "locations": [
+              {
+                "endLine": 63,
+                "path": "app/api/export/hwpx-template/route.ts",
+                "role": "source",
+                "startLine": 48
+              },
+              {
+                "endLine": 179,
+                "path": "lib/hwpx-template.ts",
+                "role": "sink",
+                "startLine": 153
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant in a shared database or admission control.",
+              "Add a negative regression test for the independent direct path."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Return a fixed public error and log details server-side.",
+            "remediationTests": [
+              "Reject the negative path for hwpx-error-detail.",
+              "Preserve the intended bounded path."
+            ],
+            "ruleId": "information-exposure.internal-errors",
+            "severity": {
+              "changeConditions": "Reassess if verified deployed controls close the path or runtime evidence changes impact.",
+              "level": "low",
+              "rationale": "The public HWPX route returns raw archive or filesystem Error.message."
+            },
+            "summary": "The public HWPX route returns raw archive or filesystem Error.message.",
+            "taxonomy": {
+              "category": "Information exposure / error handling",
+              "cwe": [
+                "CWE-209"
+              ]
+            },
+            "title": "HWPX template export reflects archive and filesystem errors",
+            "validation": {
+              "assertions": [
+                "The catch serializes internal Error.message."
+              ],
+              "limitations": [
+                "Template kind is allowlisted."
+              ],
+              "method": "Static current-source trace at 4e3e7e5d",
+              "summary": "The catch serializes internal Error.message."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Return a fixed public error and log details server-side.",
+      "remediationTests": [
+        "Reject the negative path for hwpx-error-detail.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "information-exposure.internal-errors",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "low",
+        "rationale": "The public HWPX route returns raw archive or filesystem Error.message."
+      },
+      "summary": "The public HWPX route returns raw archive or filesystem Error.message.",
+      "taxonomy": {
+        "category": "Information exposure / error handling",
+        "cwe": [
+          "CWE-209"
+        ]
+      },
+      "title": "HWPX template export reflects archive and filesystem errors",
+      "validation": {
+        "assertions": [
+          "The catch serializes internal Error.message."
+        ],
+        "limitations": [
+          "Template kind is allowlisted."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "The catch serializes internal Error.message."
+      },
+      "writeup": {
+        "reportPath": "findings/hwpx-error-detail/hwpx-error-detail.md"
+      }
+    }
+  ],
+  "scanId": "da97e400-1f4d-40b9-a434-ab5ab013fdb3",
+  "schemaVersion": "1.0"
+}

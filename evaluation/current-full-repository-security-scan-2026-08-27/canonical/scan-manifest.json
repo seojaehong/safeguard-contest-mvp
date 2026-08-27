@@ -1,0 +1,88 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "03291c068354b3c31d94a2653e6a9884c5c0fcda69df2944841900f45b18ca8e"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "0f166648896b6efae5294b91357db4c393f719b9198b6016f5fa8d5afb70a0b0"
+      }
+    ],
+    "completedAt": "2026-08-27T16:44:19.760101Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "da97e400-1f4d-40b9-a434-ab5ab013fdb3",
+    "preservedSources": {
+      "checkpoints/0136cf4d9988068c1fd029c4aedb529fa45928821cd74eaf2acaf2285c874b16.json": "3a045fc1716f13bf8d5a04028326334b54555a08679806b42ee04b7f616a3cb4",
+      "checkpoints/08912ce3b92d0fba3381c7045d3815eaf6470a98bb299ae2c5a1cae134dc84ea.json": "b10269745bc395b0cf919f21970e4ac9e5321e0eac58447e2e9580a96041726c",
+      "checkpoints/2916b0dbf0d6ae8c8abf1958ff0e6750364a826563e8602664b04aa24e87e012.json": "2916b0dbf0d6ae8c8abf1958ff0e6750364a826563e8602664b04aa24e87e012",
+      "checkpoints/36a8384b677bfddbcddbba70b83d3e91e1f9d0f86cc2e81407cc4ab8bdbf3b5a.json": "42c66f5c5ed45c59d6dffc61d8a4c106e7260398eed8e2c6d2bab3cee436a97c",
+      "checkpoints/db49bb8818574cf5d254161c86615b340eb8c255286b05f1cf05e9f8a8b29f60.json": "b5f8b780f0c1f143a22dc0fdb714e36055fa9fb8563def2be1b5b90002012ba0"
+    },
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.22"
+    },
+    "scope": {
+      "context": "Immutable original 18-finding baseline preserved.",
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "No live DB catalog or tenant A/B mutation",
+        "Exact saved Share MISSING_EVIDENCE",
+        "Provider/vector/wiki/KOSHA registry mutations prohibited"
+      ],
+      "runtimeStatus": "Live marker 4e3e7e5d verified without mutation.",
+      "summary": "Standard full-repository current-source scan at 4e3e7e5d"
+    },
+    "sealedAt": "2026-08-27T16:44:19.760101Z",
+    "startedAt": "2026-08-27T16:11:37.295964Z",
+    "status": "completed",
+    "target": {
+      "displayName": "safeclaw-northstar-current",
+      "kind": "git_revision",
+      "revision": "4e3e7e5d9ebad7e91f428a856019122431410be4",
+      "targetId": "target_sha256_59a91dd8129f171a6e0ff82b60460781f1067b1940d76c7a524e5f0e2b7ec5de"
+    },
+    "threatModel": {
+      "assets": [
+        "tenant workpacks and worker identities",
+        "provider receipts and review approvals",
+        "MCP/Hermes credentials and ledgers",
+        "KOSHA/SIF provenance"
+      ],
+      "assumptions": [
+        "No approval-sensitive mutation",
+        "Exact saved Share remains MISSING_EVIDENCE"
+      ],
+      "attackerCapabilities": [
+        "unauthenticated public API calls",
+        "authenticated tenant direct PostgREST calls",
+        "possession of leaked object identifiers"
+      ],
+      "securityObjectives": [
+        "tenant isolation",
+        "fail-closed production admission",
+        "server-authenticated state",
+        "bounded public work",
+        "no identifier-as-credential"
+      ],
+      "summary": "SafeClaw multi-tenant safety-document platform with public APIs, service-role workspace APIs, public Share, MCP/Hermes engines, provider dispatch, and KOSHA/SIF knowledge.",
+      "trustBoundaries": [
+        "browser to API",
+        "tenant to service-role layer",
+        "public Share to workpack",
+        "runtime to providers",
+        "review UI to publication gates"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

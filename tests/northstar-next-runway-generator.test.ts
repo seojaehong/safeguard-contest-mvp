@@ -463,16 +463,23 @@ type NextRunwayReport = {
     productCommit: string;
     productionCommit: string;
     originalBaselineFindingCount: number | null;
-    freshReportableFindingCount: number | null;
-    liveRemediatedCount: number | null;
+    reportableFindingCount: number | null;
+    mediumFindingCount: number | null;
+    lowFindingCount: number | null;
+    coverageCompleteness: string;
+    reviewedSurfaceCount: number | null;
+    deferredCoverageItemCount: number | null;
+    approvalFreeProductSourceCandidateCount: number | null;
+    approvalFreeRemediatedCount: number | null;
+    currentSourceRemediatedCount: number | null;
+    currentSourceRemediationHead: string;
+    approvalSensitiveShareCapabilityCount: number | null;
+    freshFullRepositoryRescanRequired: boolean;
     databaseApprovalGatedRemainingCount: number | null;
-    focusedTestFiles: number | null;
-    focusedTestCount: number | null;
-    focusedTestStatus: string;
-    typecheck: string;
-    build: string;
+    securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
     databaseSecurityRemediation: string;
+    approvalFreeProductSourceRemediation: string;
   };
   publicSearchDistributedRateLimitReadiness: {
     verdict: string;
@@ -2633,25 +2640,41 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
     remainingBoundaries: { securityCompleteClaimAllowed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   });
-  writeJson(root, "evaluation/final-approval-free-security-rescan-2026-08-16/report.json", {
-    verdict: "NOTICE_FRESH_STANDARD_SCAN_APPROVAL_FREE_FINDINGS_CLOSED_NINE_APPROVAL_GATED_REMAIN",
-    scanId: "38b87f68-ea7c-4843-a89c-5f97ba99e319",
-    scanRevision: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
-    productCommit: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
-    productionCommit: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+  writeJson(root, "evaluation/current-full-repository-security-scan-2026-08-27/report.json", {
+    verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_19_FINDINGS_PARTIAL_COVERAGE_REMEDIATION_REQUIRED",
+    scanId: "da97e400-1f4d-40b9-a434-ab5ab013fdb3",
+    scanRevision: "4e3e7e5d9ebad7e91f428a856019122431410be4",
+    productCommit: "4e3e7e5d9ebad7e91f428a856019122431410be4",
+    productionCommit: "4e3e7e5d9ebad7e91f428a856019122431410be4",
     immutableOriginalBaselineFindingCount: 18,
-    freshReportableFindingCount: 9,
-    approvalFreeRemediatedCount: 5,
-    approvalGatedRemainingCount: 9,
-    verification: {
-      focusedTests: { files: 8, tests: 88, status: "PASS" },
-      typecheck: "PASS",
-      build: { status: "PASS" },
+    scan: {
+      status: "complete",
+      coverage: "partial",
+      reviewedSurfaceCount: 9,
+      deferredCoverageItemCount: 26,
+      reportableFindingCount: 19,
+      severityCounts: { medium: 14, low: 5 },
+    },
+    findingDisposition: {
+      total: 19,
+      approvalGatedDatabaseOrAtomicityCount: 12,
+      approvalFreeProductSourceCandidateCount: 7,
+      approvalFreeRemediatedCount: 0,
+      securityCompleteClaimAllowed: false,
+    },
+    currentSourceRemediation: {
+      sourceHead: "f95773c2f4b55fe0ba8b199b5218800067e09bdf",
+      approvalFreeRemediatedCount: 6,
+      approvalSensitiveShareCapabilityCount: 1,
+      freshFullRepositoryRescanRequired: true,
     },
     remainingBoundaries: {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       databaseSecurityRemediation: "APPROVAL_GATED",
-      liveAfterDeploymentRequired: false,
+      approvalFreeProductSourceRemediation: "SOURCE_REMEDIATED_FRESH_RESCAN_REQUIRED",
+      coverageCompleteness: "partial",
+      deferredCoverageItemCount: 26,
+      securityCompleteClaimAllowed: false,
     },
   });
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
@@ -4154,26 +4177,32 @@ describe("northstar next runway generator", () => {
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "current_repository_security_rescan",
       state: "notice",
-      reason: expect.stringContaining("all 5 approval-free candidates disappear"),
+      reason: expect.stringContaining("current source remediates six bounded source candidates"),
     }));
     expect(report.currentRepositorySecurityRescan).toMatchObject({
-      verdict: "NOTICE_FRESH_STANDARD_SCAN_APPROVAL_FREE_FINDINGS_CLOSED_NINE_APPROVAL_GATED_REMAIN",
-      scanId: "38b87f68-ea7c-4843-a89c-5f97ba99e319",
-      scanRevision: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
-      productCommit: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
-      productionCommit: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+      verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_19_FINDINGS_PARTIAL_COVERAGE_REMEDIATION_REQUIRED",
+      scanId: "da97e400-1f4d-40b9-a434-ab5ab013fdb3",
+      scanRevision: "4e3e7e5d9ebad7e91f428a856019122431410be4",
+      productCommit: "4e3e7e5d9ebad7e91f428a856019122431410be4",
+      productionCommit: "4e3e7e5d9ebad7e91f428a856019122431410be4",
       originalBaselineFindingCount: 18,
-      freshReportableFindingCount: 9,
-      liveRemediatedCount: 5,
-      databaseApprovalGatedRemainingCount: 9,
-      focusedTestFiles: 8,
-      focusedTestCount: 88,
-      focusedTestStatus: "PASS",
-      typecheck: "PASS",
-      build: "PASS",
+      reportableFindingCount: 19,
+      mediumFindingCount: 14,
+      lowFindingCount: 5,
+      coverageCompleteness: "partial",
+      reviewedSurfaceCount: 9,
+      deferredCoverageItemCount: 26,
+      approvalFreeProductSourceCandidateCount: 7,
+      approvalFreeRemediatedCount: 0,
+      currentSourceRemediatedCount: 6,
+      currentSourceRemediationHead: "f95773c2f4b55fe0ba8b199b5218800067e09bdf",
+      approvalSensitiveShareCapabilityCount: 1,
+      freshFullRepositoryRescanRequired: true,
+      databaseApprovalGatedRemainingCount: 12,
+      securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       databaseSecurityRemediation: "APPROVAL_GATED",
-      liveAfterDeploymentRequired: false,
+      approvalFreeProductSourceRemediation: "SOURCE_REMEDIATED_FRESH_RESCAN_REQUIRED",
     });
     expect(report.provenCurrentState).toContain("public_json_request_body_budget");
     expect(report.publicJsonRequestBodyBudget).toMatchObject({

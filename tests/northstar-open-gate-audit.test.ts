@@ -3707,24 +3707,47 @@ function createFixtureRoot(): string {
     path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
     currentSecurityRemediationLedgerFixture(),
   );
-  writeJson(rootDir, path.join("evaluation", "final-approval-free-security-rescan-2026-08-16", "report.json"), {
-    verdict: "NOTICE_FRESH_STANDARD_SCAN_APPROVAL_FREE_FINDINGS_CLOSED_NINE_APPROVAL_GATED_REMAIN",
-    scanId: "38b87f68-ea7c-4843-a89c-5f97ba99e319",
-    scanRevision: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
-    productCommit: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
-    productionCommit: "52fc4e1896c0dda73b9d3181d5239cdf14c3f00f",
+  writeJson(rootDir, path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"), {
+    verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_19_FINDINGS_PARTIAL_COVERAGE_REMEDIATION_REQUIRED",
+    scanId: "da97e400-1f4d-40b9-a434-ab5ab013fdb3",
+    scanRevision: "4e3e7e5d9ebad7e91f428a856019122431410be4",
+    productCommit: "4e3e7e5d9ebad7e91f428a856019122431410be4",
+    productionCommit: "4e3e7e5d9ebad7e91f428a856019122431410be4",
     immutableOriginalBaselineFindingCount: 18,
-    freshReportableFindingCount: 9,
-    approvalFreeRemediatedCount: 5,
-    approvalGatedRemainingCount: 9,
-    approvalFreeRemediations: Array.from({ length: 5 }, (_, index) => `live-remediation-${index + 1}`),
-    approvalGatedRemaining: {
-      findings: Array.from({ length: 9 }, (_, index) => `db-approval-gated-${index + 1}`),
+    scan: {
+      status: "complete",
+      coverage: "partial",
+      reviewedSurfaceCount: 9,
+      deferredCoverageItemCount: 26,
+      reportableFindingCount: 19,
+      severityCounts: { medium: 14, low: 5 },
     },
-    verification: {
-      focusedTests: { files: 8, tests: 88, status: "PASS" },
-      typecheck: "PASS",
-      build: { status: "PASS" },
+    findingDisposition: {
+      total: 19,
+      approvalGatedDatabaseOrAtomicityCount: 12,
+      approvalFreeProductSourceCandidateCount: 7,
+      approvalFreeRemediatedCount: 0,
+      securityCompleteClaimAllowed: false,
+    },
+    approvalFreeProductSourceCandidates: {
+      count: 7,
+      findings: Array.from({ length: 7 }, (_, index) => `source-candidate-${index + 1}`),
+      remediationPending: true,
+    },
+    currentSourceRemediation: {
+      sourceHead: "f95773c2f4b55fe0ba8b199b5218800067e09bdf",
+      scanTimeCandidateCount: 7,
+      approvalFreeCandidateCount: 6,
+      approvalFreeRemediatedCount: 6,
+      approvalFreeOpenCount: 0,
+      approvalSensitiveShareCapabilityCount: 1,
+      approvalSensitiveFinding: "public-share-object-id-credential",
+      freshFullRepositoryRescanRequired: true,
+    },
+    approvalGatedDatabaseOrAtomicity: {
+      count: 12,
+      findings: Array.from({ length: 12 }, (_, index) => `db-approval-gated-${index + 1}`),
+      databaseOrAtomicityApprovalRequired: true,
     },
     mutationBoundary: {
       dbMutationPerformed: false,
@@ -3737,7 +3760,11 @@ function createFixtureRoot(): string {
     remainingBoundaries: {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       databaseSecurityRemediation: "APPROVAL_GATED",
-      liveAfterDeploymentRequired: false,
+      approvalFreeProductSourceRemediation: "SOURCE_REMEDIATED_FRESH_RESCAN_REQUIRED",
+      shareCapabilityCredentialRemediation: "APPROVAL_GATED",
+      coverageCompleteness: "partial",
+      deferredCoverageItemCount: 26,
+      securityCompleteClaimAllowed: false,
     },
   });
   writeJson(rootDir, path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"), {
@@ -7242,22 +7269,31 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const reportPath = path.join(
       rootDir,
       "evaluation",
-      "final-approval-free-security-rescan-2026-08-16",
+      "current-full-repository-security-scan-2026-08-27",
       "report.json",
     );
 
     const audit = buildNorthstarOpenGateAudit({ rootDir });
     const gate = audit.gates.find((item) => item.id === "current_repository_security_rescan");
     expect(gate?.state).toBe("notice");
-    expect(gate?.detail).toContain("all 5 approval-free candidates are absent");
-    expect(gate?.detail).toContain("9 database/RLS/atomicity findings remain approval-gated");
+    expect(gate?.detail).toContain("19 findings (14 medium, 5 low)");
+    expect(gate?.detail).toContain("partial across 9 reviewed surfaces with 26 deferred items");
+    expect(gate?.detail).toContain("Current source f95773c2 has focused remediation for six approval-free candidates");
+    expect(gate?.detail).toContain("Share object-ID credential finding and twelve database/RLS/atomicity findings remain approval-gated");
     expect(gate?.detail).toContain("remains notice");
     expect(gate?.detail).toContain("not a proven or security-complete claim");
     expect(gate?.detail).toContain("MISSING_EVIDENCE");
 
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
-      approvalFreeRemediatedCount: number;
-      approvalGatedRemainingCount: number;
+      findingDisposition: {
+        approvalFreeProductSourceCandidateCount: number;
+        approvalGatedDatabaseOrAtomicityCount: number;
+      };
+      currentSourceRemediation: {
+        approvalFreeRemediatedCount: number;
+        approvalSensitiveShareCapabilityCount: number;
+      };
+      scan: { deferredCoverageItemCount: number };
       remainingBoundaries: {
         exactSavedShareVerdict: string;
         databaseSecurityRemediation: string;
@@ -7267,8 +7303,11 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const contradictions: Array<(candidate: typeof report) => void> = [
       (candidate) => { candidate.remainingBoundaries.exactSavedShareVerdict = "PASS"; },
       (candidate) => { candidate.remainingBoundaries.databaseSecurityRemediation = "COMPLETED"; },
-      (candidate) => { candidate.approvalFreeRemediatedCount = 4; },
-      (candidate) => { candidate.approvalGatedRemainingCount = 8; },
+      (candidate) => { candidate.findingDisposition.approvalFreeProductSourceCandidateCount = 6; },
+      (candidate) => { candidate.findingDisposition.approvalGatedDatabaseOrAtomicityCount = 11; },
+      (candidate) => { candidate.currentSourceRemediation.approvalFreeRemediatedCount = 5; },
+      (candidate) => { candidate.currentSourceRemediation.approvalSensitiveShareCapabilityCount = 0; },
+      (candidate) => { candidate.scan.deferredCoverageItemCount = 25; },
     ];
     for (const contradict of contradictions) {
       const candidate = JSON.parse(original) as typeof report;
