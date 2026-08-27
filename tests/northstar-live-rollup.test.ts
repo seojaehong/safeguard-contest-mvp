@@ -1327,7 +1327,7 @@ function createFixtureRoot(): { root: string; head: string } {
     },
   });
   writeJson(root, "evaluation/launch-operations-readiness-2026-08-26/report.json", {
-    verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
+    verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
     sourceHead: "TO_FILL",
     productCommit: "TO_FILL",
     productionBuild: { commitSha: "TO_FILL", environment: "production" },
@@ -2570,7 +2570,7 @@ describe("northstar live rollup", () => {
     });
     expect(report.evidence.find((item) => item.id === "product_capability_truth")?.productionStatus).toBe("ancestor_of_head");
     expect(report.launchOperationsReadiness).toMatchObject({
-      verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
+      verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
       rowCount: 4,
       firstViewportCount: 4,
       desktopFourColumnCount: 2,

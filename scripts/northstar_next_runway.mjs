@@ -723,7 +723,7 @@ function launchOperationsReadinessSummary(report) {
  * @param {Record<string, unknown>} summary
  */
 function launchOperationsReadinessProven(summary) {
-  return summary.verdict === "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS"
+  return summary.verdict === "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH"
     && summary.sourceHead === summary.productionCommit
     && summary.rowCount === 4
     && summary.firstViewportCount === 4

@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T12:28:00.140Z",
-  "head": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+  "generatedAt": "2026-08-27T12:44:13.538Z",
+  "head": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+    "commitSha": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-rlut51oac-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-fyerav16s-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -103,7 +103,7 @@
       "id": "launch_operations_readiness_cockpit",
       "state": "proven",
       "artifact": "evaluation\\launch-operations-readiness-2026-08-26\\report.json",
-      "detail": "Live /ops/api passes 4/4 Day/Night desktop-short and mobile-short cases with four capability states inside the first viewport, desktop four-column presentation, mobile local-scroll containment, zero page overflow, and zero browser console errors. Production truth remains distributed admission unavailable, provider dispatch preview-only, and Vision ready. This is operator readiness, not automatic launch approval; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Live /ops/api passes 4/4 Day/Night desktop-short and mobile-short cases with four capability states inside the first viewport, desktop four-column presentation, mobile local-scroll containment, zero horizontal page overflow, and zero browser console errors. Production truth explicitly reports distributed configuration absent, provider dispatch preview-only, and Vision ready. This is operator readiness, not automatic launch approval or an unrelated whole-page height claim; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "document_export_capability_truth",
@@ -1183,10 +1183,10 @@
   },
   "launchOperationsReadiness": {
     "artifact": "evaluation\\launch-operations-readiness-2026-08-26\\report.json",
-    "verdict": "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
-    "sourceHead": "5cedcd1efb467bc2ad6de56c68c2448aaf1ec364",
-    "productCommit": "654188d102bed618a5df14933e6c815a65f1b2e3",
-    "productionCommit": "5cedcd1efb467bc2ad6de56c68c2448aaf1ec364",
+    "verdict": "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
+    "sourceHead": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
+    "productCommit": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
+    "productionCommit": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
     "rowCount": 4,
     "firstViewportCount": 4,
     "desktopFourColumnCount": 2,
@@ -1739,9 +1739,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+      "sourceCommit": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
       "sourceStatus": "exact",
-      "productionCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+      "productionCommit": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
       "productionStatus": "matches_live"
     },
     {
@@ -1859,18 +1859,18 @@
     {
       "id": "launch_operations_readiness_cockpit",
       "artifact": "evaluation\\launch-operations-readiness-2026-08-26\\report.json",
-      "sourceCommit": "5cedcd1efb467bc2ad6de56c68c2448aaf1ec364",
-      "sourceStatus": "ancestor",
-      "productionCommit": "5cedcd1efb467bc2ad6de56c68c2448aaf1ec364",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
+      "sourceStatus": "exact",
+      "productionCommit": "5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a",
+      "productionStatus": "matches_live"
     },
     {
       "id": "document_export_capability_truth",
       "artifact": "evaluation\\document-export-capability-truth-2026-08-17\\report.json",
       "sourceCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "ontology_viewport_workbench",

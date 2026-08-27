@@ -2000,6 +2000,8 @@ function evaluateLaunchOperationsReadinessGate(rootDir) {
         && row.horizontalOverflow === false
         && browserErrors.length === 0
         && readString(row.publicAdmission) === "unavailable"
+        && readString(row.publicAdmissionConfiguration) === "absent"
+        && row.configurationLabelPresent === true
         && readString(row.providerDispatch) === "preview_only"
         && readString(row.photoVision) === "ready"
         && readNumber(root.bottom) <= 723
@@ -2013,7 +2015,7 @@ function evaluateLaunchOperationsReadinessGate(rootDir) {
     && boundaries.wikiPublished === false
     && boundaries.embeddingOrVectorMutationPerformed === false
     && boundaries.koshaRegistryMutated === false;
-  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS"
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH"
     && sourceMatchesProduction
     && readString(report.productCommit).length > 0
     && geometryPass
@@ -2029,8 +2031,8 @@ function evaluateLaunchOperationsReadinessGate(rootDir) {
     state: pass ? "proven" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Live /ops/api passes 4/4 Day/Night desktop-short and mobile-short cases with four capability states inside the first viewport, desktop four-column presentation, mobile local-scroll containment, zero page overflow, and zero browser console errors. Production truth remains distributed admission unavailable, provider dispatch preview-only, and Vision ready. This is operator readiness, not automatic launch approval; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
-      : `Launch readiness verdict=${readString(report.verdict) || "missing"}, sourceMatchesProduction=${sourceMatchesProduction}, geometryPass=${geometryPass}, noMutation=${noMutation}, distributedConfigured=${boundaries.distributedAdmissionConfigured}, providerReady=${boundaries.providerDispatchReady}, fullyAutomated=${boundaries.fullyAutomatedLaunchClaimAllowed}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+      ? "Live /ops/api passes 4/4 Day/Night desktop-short and mobile-short cases with four capability states inside the first viewport, desktop four-column presentation, mobile local-scroll containment, zero horizontal page overflow, and zero browser console errors. Production truth explicitly reports distributed configuration absent, provider dispatch preview-only, and Vision ready. This is operator readiness, not automatic launch approval or an unrelated whole-page height claim; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      : `Launch readiness verdict=${readString(report.verdict) || "missing"}, sourceMatchesProduction=${sourceMatchesProduction}, geometryPass=${geometryPass}, configurationStates=${rows.map((row) => readString(row.publicAdmissionConfiguration) || "missing").join(",")}, noMutation=${noMutation}, distributedConfigured=${boundaries.distributedAdmissionConfigured}, providerReady=${boundaries.providerDispatchReady}, fullyAutomated=${boundaries.fullyAutomatedLaunchClaimAllowed}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? ["Configure distributed admission and obtain provider persistence approval separately; do not infer automatic launch approval from this cockpit."]
       : ["Restore the four-case viewport contract and preserved approval boundaries, then rerun live evidence without mutation."],

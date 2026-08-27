@@ -1774,7 +1774,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
   });
   writeJson(root, "evaluation/launch-operations-readiness-2026-08-26/report.json", {
-    verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
+    verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
     sourceHead: "fixture-sha",
     productCommit: "fixture-product",
     productionBuild: { commitSha: "fixture-sha", environment: "production" },
@@ -3456,7 +3456,7 @@ describe("northstar next runway generator", () => {
     });
     expect(report.provenCurrentState).toContain("product_capability_truth");
     expect(report.launchOperationsReadiness).toMatchObject({
-      verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
+      verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
       rowCount: 4,
       firstViewportCount: 4,
       desktopFourColumnCount: 2,

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-27T12:28:00.140Z
-Source HEAD at generation: 9a4a703b6b1ff370a362bfafee42dfff9141be31
-Live commit at generation: 9a4a703b6b1ff370a362bfafee42dfff9141be31
+Generated at: 2026-08-27T12:44:13.538Z
+Source HEAD at generation: 5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a
+Live commit at generation: 5d3c1530d0eb1157f57e35c9e31e91b5e23bea7a
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -248,7 +248,7 @@ Overall: `northstar_open_approval_gated`
 
 ## Live Launch Operations Readiness
 
-- Verdict: `PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS`
+- Verdict: `PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH`
 - Viewport receipts: 4/4; desktop four-column=2/2; mobile local-scroll=2/2; console errors=0
 - Runtime truth: admission=unavailable; provider dispatch=preview_only; photo Vision=ready
 - Activation boundaries: distributed configured=false; provider ready=false; fully automated launch=false
@@ -485,8 +485,8 @@ Overall: `northstar_open_approval_gated`
 | live_document_editorial_duplicate_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
-| launch_operations_readiness_cockpit | ancestor | ancestor_of_head | evaluation\launch-operations-readiness-2026-08-26\report.json |
-| document_export_capability_truth | exact | matches_live | evaluation\document-export-capability-truth-2026-08-17\report.json |
+| launch_operations_readiness_cockpit | exact | matches_live | evaluation\launch-operations-readiness-2026-08-26\report.json |
+| document_export_capability_truth | ancestor | ancestor_of_head | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | ontology_viewport_workbench | ancestor | ancestor_of_head | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
 | knowledge_viewport_workbench | ancestor | ancestor_of_head | evaluation\knowledge-viewport-workbench-2026-08-17\report.json |
 | llm_wiki_candidate_content_readiness | ancestor | ancestor_of_head | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |

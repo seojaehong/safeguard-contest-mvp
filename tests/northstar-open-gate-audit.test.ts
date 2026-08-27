@@ -2687,15 +2687,15 @@ function createFixtureRoot(): string {
     },
   });
   writeJson(rootDir, path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"), {
-    verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_READINESS",
+    verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
     sourceHead: "fixture-sha",
     productCommit: "fixture-product-sha",
     productionBuild: { commitSha: "fixture-sha", environment: "production" },
     rows: [
-      { name: "desktop-day", cardCount: 4, firstViewport: true, horizontalOverflow: false, browserConsoleErrors: [], publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", localHorizontalScroll: false, root: { bottom: 503 } },
-      { name: "desktop-night", cardCount: 4, firstViewport: true, horizontalOverflow: false, browserConsoleErrors: [], publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", localHorizontalScroll: false, root: { bottom: 503 } },
-      { name: "mobile-day", cardCount: 4, firstViewport: true, horizontalOverflow: false, browserConsoleErrors: [], publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", localHorizontalScroll: true, root: { bottom: 492 } },
-      { name: "mobile-night", cardCount: 4, firstViewport: true, horizontalOverflow: false, browserConsoleErrors: [], publicAdmission: "unavailable", providerDispatch: "preview_only", photoVision: "ready", localHorizontalScroll: true, root: { bottom: 492 } },
+      { name: "desktop-day", cardCount: 4, firstViewport: true, horizontalOverflow: false, browserConsoleErrors: [], publicAdmission: "unavailable", publicAdmissionConfiguration: "absent", configurationLabelPresent: true, providerDispatch: "preview_only", photoVision: "ready", localHorizontalScroll: false, root: { bottom: 503 } },
+      { name: "desktop-night", cardCount: 4, firstViewport: true, horizontalOverflow: false, browserConsoleErrors: [], publicAdmission: "unavailable", publicAdmissionConfiguration: "absent", configurationLabelPresent: true, providerDispatch: "preview_only", photoVision: "ready", localHorizontalScroll: false, root: { bottom: 503 } },
+      { name: "mobile-day", cardCount: 4, firstViewport: true, horizontalOverflow: false, browserConsoleErrors: [], publicAdmission: "unavailable", publicAdmissionConfiguration: "absent", configurationLabelPresent: true, providerDispatch: "preview_only", photoVision: "ready", localHorizontalScroll: true, root: { bottom: 492 } },
+      { name: "mobile-night", cardCount: 4, firstViewport: true, horizontalOverflow: false, browserConsoleErrors: [], publicAdmission: "unavailable", publicAdmissionConfiguration: "absent", configurationLabelPresent: true, providerDispatch: "preview_only", photoVision: "ready", localHorizontalScroll: true, root: { bottom: 492 } },
     ],
     boundaries: {
       distributedAdmissionConfigured: false,
@@ -7414,7 +7414,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((item) => item.id === "mcp_generation_work_budget_security")?.state)
       .toBe("notice");
     expect(audit.gates.find((item) => item.id === "mcp_generation_work_budget_security")?.detail)
-      .toContain("94 adjacent MCP tests");
+      .toContain("126 adjacent MCP tests");
 
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
       contracts: { preservedBehavior: { existingTransportBodyAndAuthenticationBudgetsRetained: boolean } };
@@ -8386,6 +8386,21 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     });
     expect(audit.gates.find((gate) => gate.id === "launch_operations_readiness_cockpit")?.detail).toContain("fullyAutomated=true");
     expect(audit.gates.find((gate) => gate.id === "launch_operations_readiness_cockpit")?.detail).toContain("exactShare=PASS");
+  });
+
+  it("fails launch operations readiness closed when absent distributed configuration is overclaimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "launch-operations-readiness-2026-08-26", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      rows: Array<{ publicAdmissionConfiguration: string }>;
+    };
+    report.rows[0].publicAdmissionConfiguration = "ready";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "launch_operations_readiness_cockpit")?.state).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "launch_operations_readiness_cockpit")?.detail).toContain("configurationStates=ready");
   });
 
   it("fails Hermes event fact traceability closed on orphan facts, private text, or saved Share overclaim", async () => {
