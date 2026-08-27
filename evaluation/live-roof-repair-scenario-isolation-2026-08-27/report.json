@@ -1,0 +1,82 @@
+{
+  "schema": "safeclaw-live-roof-repair-scenario-isolation/v1",
+  "generatedAt": "2026-08-27T09:50:03.3039120+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_ROOF_REPAIR_SCENARIO_ISOLATION",
+  "productCommit": "f5032dc80fb013c6545e3b914cc0186a9deb614e",
+  "productionCommit": "f5032dc80fb013c6545e3b914cc0186a9deb614e",
+  "productionDeployment": "safeguard-contest-cfzfgc83s-seojaehongs-projects.vercel.app",
+  "beforeLiveDiagnostic": {
+    "sourceCommit": "b196234a6d092ff96f2a2d40e77d3851a632c896",
+    "canonicalArtifactAvailable": false,
+    "question": "대구 옥외 지붕 보수 작업. 폭염과 자외선 노출이 예상되어 온열질환 예방을 위해 물, 그늘, 휴식 시간을 확인해야 한다.",
+    "observedWorkSummary": "대구 옥외 지붕 보수 작업",
+    "observedSiteName": "대구 고중량 박스 적재 및 수작업 운반 현장",
+    "observedTopRisk": "폭염 환경에서 고중량 박스 운반이 반복되어 온열질환과 근골격계 부담이 커질 수 있음",
+    "finding": "The explicit roof-repair task was paired with the warehouse high-load seed profile. This diagnostic observation is preserved as the bounded discovery input, not relabeled as a canonical before artifact."
+  },
+  "afterLive": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "cases": [
+      {
+        "id": "roof-repair-heat",
+        "status": 200,
+        "elapsedMs": 1195,
+        "requestedAiMode": "template",
+        "responseAiMode": "template",
+        "providerWorkUnit": 0,
+        "returnedDeliverableSurfaceCount": 15,
+        "roofIdentityPresent": true,
+        "fallContextPresent": true,
+        "heatContextPresent": true,
+        "heatGuidancePresent": true,
+        "warehouseSeedPresent": false,
+        "pass": true
+      },
+      {
+        "id": "warehouse-heat-control",
+        "status": 200,
+        "elapsedMs": 431,
+        "requestedAiMode": "template",
+        "responseAiMode": "template",
+        "providerWorkUnit": 0,
+        "returnedDeliverableSurfaceCount": 15,
+        "roofIdentityPresent": false,
+        "fallContextPresent": false,
+        "heatContextPresent": true,
+        "heatGuidancePresent": true,
+        "warehouseSeedPresent": true,
+        "warehouseIdentityPresent": true,
+        "pass": true
+      }
+    ],
+    "passed": 2,
+    "failed": 0,
+    "providerGenerationRequested": false
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "files": 4,
+      "tests": 78,
+      "passed": true
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28,
+    "dependencyAuditVulnerabilities": 0
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerGenerationPerformed": false,
+    "providerDispatchPerformed": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "humanReviewCompleted": false,
+    "broadHumanWordingReviewRequired": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "fullyAutomatedLaunchClaimAllowed": false
+  }
+}

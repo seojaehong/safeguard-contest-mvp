@@ -34,6 +34,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentQualityStressMatrix: path.join("evaluation", "live-document-quality-stress-matrix-2026-07-24", "report.json"),
   liveDocumentFieldIsolation: path.join("evaluation", "live-document-field-isolation-2026-07-25", "report.json"),
   liveForeignWorkerScenarioGuidance: path.join("evaluation", "live-foreign-worker-scenario-guidance-2026-08-27", "report.json"),
+  liveRoofRepairScenarioIsolation: path.join("evaluation", "live-roof-repair-scenario-isolation-2026-08-27", "report.json"),
   liveKoshaExactMaterialization: path.join("evaluation", "live-kosha-exact-materialization-2026-07-25", "report.json"),
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
@@ -991,6 +992,47 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
     && guidanceRemaining.humanReviewCompleted === false
     && readString(guidanceRemaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && guidanceRemaining.fullyAutomatedLaunchClaimAllowed === false;
+  const roofIsolation = readJsonFile(rootDir, EVIDENCE_PATHS.liveRoofRepairScenarioIsolation);
+  const roofAfterLive = isRecord(roofIsolation) && isRecord(roofIsolation.afterLive) ? roofIsolation.afterLive : {};
+  const roofCases = Array.isArray(roofAfterLive.cases) ? roofAfterLive.cases.filter(isRecord) : [];
+  const roofCase = roofCases.find((item) => readString(item.id) === "roof-repair-heat");
+  const warehouseControlCase = roofCases.find((item) => readString(item.id) === "warehouse-heat-control");
+  const roofMutation = isRecord(roofIsolation) && isRecord(roofIsolation.mutationBoundary) ? roofIsolation.mutationBoundary : {};
+  const roofRemaining = isRecord(roofIsolation) && isRecord(roofIsolation.remainingBoundaries) ? roofIsolation.remainingBoundaries : {};
+  const roofIsolationReady = isRecord(roofIsolation)
+    && readString(roofIsolation.schema) === "safeclaw-live-roof-repair-scenario-isolation/v1"
+    && readString(roofIsolation.verdict) === "PASS_LIVE_PRODUCTION_ROOF_REPAIR_SCENARIO_ISOLATION"
+    && readString(roofIsolation.productCommit) === readString(roofIsolation.productionCommit)
+    && readNumber(roofAfterLive.passed) === 2
+    && readNumber(roofAfterLive.failed) === 0
+    && roofAfterLive.providerGenerationRequested === false
+    && isRecord(roofCase)
+    && readNumber(roofCase.status) === 200
+    && readString(roofCase.responseAiMode) === "template"
+    && readNumber(roofCase.providerWorkUnit) === 0
+    && roofCase.roofIdentityPresent === true
+    && roofCase.fallContextPresent === true
+    && roofCase.heatContextPresent === true
+    && roofCase.heatGuidancePresent === true
+    && roofCase.warehouseSeedPresent === false
+    && roofCase.pass === true
+    && isRecord(warehouseControlCase)
+    && readNumber(warehouseControlCase.status) === 200
+    && readString(warehouseControlCase.responseAiMode) === "template"
+    && readNumber(warehouseControlCase.providerWorkUnit) === 0
+    && warehouseControlCase.roofIdentityPresent === false
+    && warehouseControlCase.heatContextPresent === true
+    && warehouseControlCase.heatGuidancePresent === true
+    && warehouseControlCase.warehouseSeedPresent === true
+    && warehouseControlCase.warehouseIdentityPresent === true
+    && warehouseControlCase.pass === true
+    && roofMutation.dbMutationPerformed === false
+    && roofMutation.providerGenerationPerformed === false
+    && roofMutation.providerDispatchPerformed === false
+    && roofMutation.shareSessionCreated === false
+    && roofRemaining.humanReviewCompleted === false
+    && readString(roofRemaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && roofRemaining.fullyAutomatedLaunchClaimAllowed === false;
   const livePass = readNumber(normal.pass) + readNumber(stress.pass);
   const liveFail = readNumber(normal.fail) + readNumber(stress.fail);
   const noMutation = boundary.dbMutationPerformed === false
@@ -1002,7 +1044,8 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
     && liveFail === 0
     && report.liveAfterDeploymentPending === false
     && noMutation
-    && guidanceReady;
+    && guidanceReady
+    && roofIsolationReady;
 
   if (liveReady) {
     return gateResult({
@@ -1010,7 +1053,7 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
       label: "Live document scenario field isolation",
       state: "proven",
       evidencePath,
-      detail: `Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. The companion ${EVIDENCE_PATHS.liveForeignWorkerScenarioGuidance} additionally proves heat guidance absent for chemical cleaning and present for explicit heat work in template mode with work-unit 0. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate.`,
+      detail: `Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. The companion ${EVIDENCE_PATHS.liveForeignWorkerScenarioGuidance} additionally proves heat guidance absent for chemical cleaning and present for explicit heat work in template mode with work-unit 0. ${EVIDENCE_PATHS.liveRoofRepairScenarioIsolation} proves the roof-repair heat case keeps roof/fall identity with warehouse seed absent while the warehouse control retains its intended identity. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate.`,
       nextActions: ["Keep the 10-scenario field-isolation gate in release evidence and preserve broad human wording review as a separate boundary."],
     });
   }
@@ -1020,7 +1063,7 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
     label: "Live document scenario field isolation",
     state: "contradicted",
     evidencePath,
-    detail: `Field-isolation verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/10, failed=${liveFail}, livePending=${report.liveAfterDeploymentPending === true}, noMutation=${noMutation}, foreignWorkerGuidance=${guidanceReady}.`,
+    detail: `Field-isolation verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/10, failed=${liveFail}, livePending=${report.liveAfterDeploymentPending === true}, noMutation=${noMutation}, foreignWorkerGuidance=${guidanceReady}, roofRepairIsolation=${roofIsolationReady}.`,
     nextActions: ["Fix process/task/equipment grounding or cross-scenario leakage and rerun the unchanged normal and stress matrices."],
   });
 }

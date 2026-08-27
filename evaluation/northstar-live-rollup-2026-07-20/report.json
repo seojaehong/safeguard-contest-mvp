@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T00:34:56.003Z",
-  "head": "9e49be8454fdf594834e6947b07bca411b2a57ad",
+  "generatedAt": "2026-08-27T00:52:59.709Z",
+  "head": "f5032dc80fb013c6545e3b914cc0186a9deb614e",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "9e49be8454fdf594834e6947b07bca411b2a57ad",
+    "commitSha": "f5032dc80fb013c6545e3b914cc0186a9deb614e",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-qz2xdnkub-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-cfzfgc83s-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -55,7 +55,7 @@
       "id": "live_document_field_isolation",
       "state": "proven",
       "artifact": "evaluation\\live-document-field-isolation-2026-07-25\\report.json",
-      "detail": "Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. The companion evaluation\\live-foreign-worker-scenario-guidance-2026-08-27\\report.json additionally proves heat guidance absent for chemical cleaning and present for explicit heat work in template mode with work-unit 0. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate."
+      "detail": "Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. The companion evaluation\\live-foreign-worker-scenario-guidance-2026-08-27\\report.json additionally proves heat guidance absent for chemical cleaning and present for explicit heat work in template mode with work-unit 0. evaluation\\live-roof-repair-scenario-isolation-2026-08-27\\report.json proves the roof-repair heat case keeps roof/fall identity with warehouse seed absent while the warehouse control retains its intended identity. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate."
     },
     {
       "id": "live_kosha_exact_materialization",
@@ -1733,9 +1733,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "9e49be8454fdf594834e6947b07bca411b2a57ad",
+      "sourceCommit": "f5032dc80fb013c6545e3b914cc0186a9deb614e",
       "sourceStatus": "exact",
-      "productionCommit": "9e49be8454fdf594834e6947b07bca411b2a57ad",
+      "productionCommit": "f5032dc80fb013c6545e3b914cc0186a9deb614e",
       "productionStatus": "matches_live"
     },
     {

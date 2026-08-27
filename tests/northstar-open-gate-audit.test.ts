@@ -2413,6 +2413,54 @@ function createFixtureRoot(): string {
       fullyAutomatedLaunchClaimAllowed: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "live-roof-repair-scenario-isolation-2026-08-27", "report.json"), {
+    schema: "safeclaw-live-roof-repair-scenario-isolation/v1",
+    verdict: "PASS_LIVE_PRODUCTION_ROOF_REPAIR_SCENARIO_ISOLATION",
+    productCommit: "fixture-product",
+    productionCommit: "fixture-product",
+    afterLive: {
+      passed: 2,
+      failed: 0,
+      providerGenerationRequested: false,
+      cases: [
+        {
+          id: "roof-repair-heat",
+          status: 200,
+          responseAiMode: "template",
+          providerWorkUnit: 0,
+          roofIdentityPresent: true,
+          fallContextPresent: true,
+          heatContextPresent: true,
+          heatGuidancePresent: true,
+          warehouseSeedPresent: false,
+          pass: true,
+        },
+        {
+          id: "warehouse-heat-control",
+          status: 200,
+          responseAiMode: "template",
+          providerWorkUnit: 0,
+          roofIdentityPresent: false,
+          heatContextPresent: true,
+          heatGuidancePresent: true,
+          warehouseSeedPresent: true,
+          warehouseIdentityPresent: true,
+          pass: true,
+        },
+      ],
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerGenerationPerformed: false,
+      providerDispatchPerformed: false,
+      shareSessionCreated: false,
+    },
+    remainingBoundaries: {
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "hermes-review-decision-first-viewport-2026-08-27", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_DECISION_FIRST_VIEWPORT",
     sourceHead: "fixture-sha",
@@ -5914,6 +5962,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("process/task/equipment");
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("heat guidance absent for chemical cleaning");
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("work-unit 0");
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("roof-repair heat case");
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("warehouse seed absent");
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("exact saved Share geometry remain separate");
     expect(audit.gates.find((gate) => gate.id === "live_kosha_exact_materialization")).toMatchObject({
       state: "proven",
@@ -8945,6 +8995,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(finalGate?.detail).toContain(path.join("evaluation", "final-99-no-approval-boundary-2026-07-23", "report.json"));
     expect(finalGate?.nextActions).toEqual([
       "Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.",
+      "Configure approved distributed admission before claiming live export and weather-dependent orchestration readiness.",
       "Do not rerun full final-99 as a no-approval cleanup when SAFEGUARD_AUTH_TOKEN is configured.",
     ]);
     expect(markdown).toContain("notice-carry.json");
@@ -9774,6 +9825,35 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("foreignWorkerGuidance=false");
+  });
+
+  it("fails document field isolation closed when the warehouse seed leaks into roof repair", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const roofPath = path.join(
+      rootDir,
+      "evaluation",
+      "live-roof-repair-scenario-isolation-2026-08-27",
+      "report.json",
+    );
+    const roofReport = JSON.parse(fs.readFileSync(roofPath, "utf8")) as {
+      afterLive: { cases: Array<{ id: string; warehouseSeedPresent: boolean }> };
+    };
+    const roofCase = roofReport.afterLive.cases.find((item) => item.id === "roof-repair-heat");
+    expect(roofCase).toBeDefined();
+    roofCase!.warehouseSeedPresent = true;
+    writeJson(rootDir, path.relative(rootDir, roofPath), roofReport);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("roofRepairIsolation=false");
   });
 
   it("renders the approval boundary and forbidden claims in the Markdown report", async () => {
