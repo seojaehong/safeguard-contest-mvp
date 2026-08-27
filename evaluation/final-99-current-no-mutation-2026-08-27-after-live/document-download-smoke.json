@@ -1,0 +1,163 @@
+{
+  "verdict": "blocked",
+  "policyNotice": "HWPX는 원본 셀 단위 완전 복제가 아니라 제출형 초안입니다. 현장 검토 후 사용 고지를 유지합니다.",
+  "routeNotice": "",
+  "corePdf": {
+    "verdict": "blocked",
+    "generatedCount": 4,
+    "checks": [
+      {
+        "id": "risk-assessment",
+        "title": "위험성평가표",
+        "sourceKey": "riskAssessmentDraft",
+        "htmlStatus": 503,
+        "pdfStatus": 503,
+        "htmlPath": "evaluation\\final-99-current-no-mutation-2026-08-27-after-live\\core-pdf\\risk-assessment.error.html",
+        "pdfPath": "",
+        "pdfBytes": 0,
+        "requiredTerms": [
+          {
+            "term": "사전준비",
+            "present": false
+          },
+          {
+            "term": "유해",
+            "present": false
+          },
+          {
+            "term": "위험성",
+            "present": false
+          },
+          {
+            "term": "감소대책",
+            "present": false
+          },
+          {
+            "term": "확인",
+            "present": false
+          }
+        ],
+        "hasUniqueStructure": false,
+        "hasSignatureOrCheck": false,
+        "hasKoreanEncoding": true,
+        "verdict": "blocked"
+      },
+      {
+        "id": "work-plan",
+        "title": "작업계획서",
+        "sourceKey": "workPlanDraft",
+        "htmlStatus": 503,
+        "pdfStatus": 503,
+        "htmlPath": "evaluation\\final-99-current-no-mutation-2026-08-27-after-live\\core-pdf\\work-plan.error.html",
+        "pdfPath": "",
+        "pdfBytes": 0,
+        "requiredTerms": [
+          {
+            "term": "작업개요",
+            "present": false
+          },
+          {
+            "term": "작업순서",
+            "present": false
+          },
+          {
+            "term": "장비",
+            "present": false
+          },
+          {
+            "term": "작업중지",
+            "present": false
+          },
+          {
+            "term": "확인",
+            "present": false
+          }
+        ],
+        "hasUniqueStructure": false,
+        "hasSignatureOrCheck": false,
+        "hasKoreanEncoding": true,
+        "verdict": "blocked"
+      },
+      {
+        "id": "permit-inspection",
+        "title": "허가/점검표",
+        "sourceKey": "workPermitDraft",
+        "htmlStatus": 503,
+        "pdfStatus": 503,
+        "htmlPath": "evaluation\\final-99-current-no-mutation-2026-08-27-after-live\\core-pdf\\permit-inspection.error.html",
+        "pdfPath": "",
+        "pdfBytes": 0,
+        "requiredTerms": [
+          {
+            "term": "허가",
+            "present": false
+          },
+          {
+            "term": "격리",
+            "present": false
+          },
+          {
+            "term": "차단",
+            "present": false
+          },
+          {
+            "term": "종료",
+            "present": false
+          },
+          {
+            "term": "보호구",
+            "present": false
+          }
+        ],
+        "hasUniqueStructure": false,
+        "hasSignatureOrCheck": false,
+        "hasKoreanEncoding": true,
+        "verdict": "blocked"
+      },
+      {
+        "id": "tbm-log",
+        "title": "TBM일지",
+        "sourceKey": "tbmLogDraft",
+        "htmlStatus": 503,
+        "pdfStatus": 503,
+        "htmlPath": "evaluation\\final-99-current-no-mutation-2026-08-27-after-live\\core-pdf\\tbm-log.error.html",
+        "pdfPath": "",
+        "pdfBytes": 0,
+        "requiredTerms": [
+          {
+            "term": "TBM",
+            "present": false
+          },
+          {
+            "term": "위험성평가",
+            "present": false
+          },
+          {
+            "term": "기상",
+            "present": false
+          },
+          {
+            "term": "참석",
+            "present": false
+          },
+          {
+            "term": "확인",
+            "present": false
+          }
+        ],
+        "hasUniqueStructure": false,
+        "hasSignatureOrCheck": false,
+        "hasKoreanEncoding": true,
+        "verdict": "blocked"
+      }
+    ]
+  },
+  "orchestration": {
+    "verdict": "blocked",
+    "status": 1,
+    "stdout": "",
+    "stderr": "file:///C:/Users/iceam/OneDrive/.codex-worktrees/safeclaw-northstar-current/scripts/prod_orchestration_download_smoke.mjs:632 throw new Error(`Weather preflight failed: ${weatherResult.status} ${weatherResult.rawPreview}`); ^ Error: Weather preflight failed: 503 {\"error\":\"요청 보호 서비스를 확인하는 동안 요청을 잠시 처리할 수 없습니다.\",\"code\":\"DISTRIBUTED_RATE_LIMIT_UNAVAILABLE\",\"retryAfterSeconds\":5} at file:///C:/Users/iceam/OneDrive/.codex-worktrees/safeclaw-northstar-current/scripts/prod_orchestration_download_smoke.mjs:632:9 at process.processTicksAndRejections (node:internal/process/task_queues:103:5) Node.js v24.12.0 ",
+    "outDir": "evaluation\\final-99-current-no-mutation-2026-08-27-after-live\\orchestration-download",
+    "parsedStdout": null
+  }
+}

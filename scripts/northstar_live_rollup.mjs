@@ -1915,6 +1915,19 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
           && isRecord(final99TwelveDocumentNoMutation.liveAfterDeployment)
           ? asString(final99TwelveDocumentNoMutation.liveAfterDeployment.blockerCode)
           : "",
+        liveAskVerdict: isRecord(final99TwelveDocumentNoMutation)
+          && isRecord(final99TwelveDocumentNoMutation.liveAfterDeployment)
+          ? asString(final99TwelveDocumentNoMutation.liveAfterDeployment.askVerdict)
+          : "",
+        liveRequestedAiMode: isRecord(final99TwelveDocumentNoMutation)
+          && isRecord(final99TwelveDocumentNoMutation.liveAfterDeployment)
+          ? asString(final99TwelveDocumentNoMutation.liveAfterDeployment.requestedAiMode)
+          : "",
+        liveBlockerSurfaces: isRecord(final99TwelveDocumentNoMutation)
+          && isRecord(final99TwelveDocumentNoMutation.liveAfterDeployment)
+          && Array.isArray(final99TwelveDocumentNoMutation.liveAfterDeployment.blockerSurfaces)
+          ? final99TwelveDocumentNoMutation.liveAfterDeployment.blockerSurfaces.map(asString)
+          : [],
         exactSavedShareVerdict: isRecord(final99TwelveDocumentNoMutation)
           && isRecord(final99TwelveDocumentNoMutation.remainingBoundaries)
           ? asString(final99TwelveDocumentNoMutation.remainingBoundaries.exactSavedShareVerdict)
@@ -2427,7 +2440,7 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     }
   }
   lines.push(
-    `- Final99 12-document no-mutation companion: ${rollup.final99.twelveDocumentNoMutation.verdict}; local documents/core PDFs/downloads ${rollup.final99.twelveDocumentNoMutation.localCanonicalPassed ?? "unknown"}/12, ${rollup.final99.twelveDocumentNoMutation.localCorePdfsPassed ?? "unknown"}/4, ${rollup.final99.twelveDocumentNoMutation.localOrchestrationDownloads ?? "unknown"}/14; live ${rollup.final99.twelveDocumentNoMutation.liveOverall} (${rollup.final99.twelveDocumentNoMutation.liveBlockerCode || "no blocker"}); exact saved Share ${rollup.final99.twelveDocumentNoMutation.exactSavedShareVerdict}; fully automated launch allowed ${rollup.final99.twelveDocumentNoMutation.fullyAutomatedLaunchClaimAllowed}.`,
+    `- Final99 12-document no-mutation companion: ${rollup.final99.twelveDocumentNoMutation.verdict}; local documents/core PDFs/downloads ${rollup.final99.twelveDocumentNoMutation.localCanonicalPassed ?? "unknown"}/12, ${rollup.final99.twelveDocumentNoMutation.localCorePdfsPassed ?? "unknown"}/4, ${rollup.final99.twelveDocumentNoMutation.localOrchestrationDownloads ?? "unknown"}/14; live generation ${rollup.final99.twelveDocumentNoMutation.liveAskVerdict || "unknown"}/${rollup.final99.twelveDocumentNoMutation.liveRequestedAiMode || "unknown"}, blocked surfaces ${rollup.final99.twelveDocumentNoMutation.liveBlockerSurfaces.join(", ") || "none"}, overall ${rollup.final99.twelveDocumentNoMutation.liveOverall} (${rollup.final99.twelveDocumentNoMutation.liveBlockerCode || "no blocker"}); exact saved Share ${rollup.final99.twelveDocumentNoMutation.exactSavedShareVerdict}; fully automated launch allowed ${rollup.final99.twelveDocumentNoMutation.fullyAutomatedLaunchClaimAllowed}.`,
   );
   lines.push("", "## Approval-Gated Work", "");
   for (const gate of rollup.approvalGated) {

@@ -3344,7 +3344,7 @@ export function buildNorthstarNextRunway(options) {
         state: "notice",
         reason: isRecord(final99TwelveDocumentNoMutation)
           && isRecord(final99TwelveDocumentNoMutation.liveAfterDeployment)
-          ? `pass_with_notice with carried auth-history and dispatch-policy notices; no-mutation 12-document local coverage passes while source-aligned live downloads remain ${asString(final99TwelveDocumentNoMutation.liveAfterDeployment.overall)} (${asString(final99TwelveDocumentNoMutation.liveAfterDeployment.blockerCode) || "no blocker"})`
+          ? `pass_with_notice with carried auth-history and dispatch-policy notices; no-mutation live template generation passes 12/12 while core PDF export and weather preflight remain ${asString(final99TwelveDocumentNoMutation.liveAfterDeployment.overall)} (${asString(final99TwelveDocumentNoMutation.liveAfterDeployment.blockerCode) || "no blocker"})`
           : "pass_with_notice with carried auth-history and dispatch-policy notices",
       },
       {
@@ -3450,6 +3450,19 @@ export function buildNorthstarNextRunway(options) {
         && isRecord(final99TwelveDocumentNoMutation.liveAfterDeployment)
         ? asString(final99TwelveDocumentNoMutation.liveAfterDeployment.blockerCode)
         : "",
+      liveAskVerdict: isRecord(final99TwelveDocumentNoMutation)
+        && isRecord(final99TwelveDocumentNoMutation.liveAfterDeployment)
+        ? asString(final99TwelveDocumentNoMutation.liveAfterDeployment.askVerdict)
+        : "",
+      liveRequestedAiMode: isRecord(final99TwelveDocumentNoMutation)
+        && isRecord(final99TwelveDocumentNoMutation.liveAfterDeployment)
+        ? asString(final99TwelveDocumentNoMutation.liveAfterDeployment.requestedAiMode)
+        : "",
+      liveBlockerSurfaces: isRecord(final99TwelveDocumentNoMutation)
+        && isRecord(final99TwelveDocumentNoMutation.liveAfterDeployment)
+        && Array.isArray(final99TwelveDocumentNoMutation.liveAfterDeployment.blockerSurfaces)
+        ? final99TwelveDocumentNoMutation.liveAfterDeployment.blockerSurfaces.map(asString)
+        : [],
       exactSavedShareVerdict: isRecord(final99TwelveDocumentNoMutation)
         && isRecord(final99TwelveDocumentNoMutation.remainingBoundaries)
         ? asString(final99TwelveDocumentNoMutation.remainingBoundaries.exactSavedShareVerdict)
@@ -3702,7 +3715,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and separates runtime/provider/database/vector gates from ordinary UI/evidence iteration.
 - RLS / LLM Wiki approval preflight remains operator-review ready, with no DB mutation or launch-readiness claim.
-- Final-99 is \`pass_with_notice\`, not clean launch-complete. Its 12-document no-mutation companion is \`${report.final99TwelveDocumentNoMutation.verdict}\`: local documents/core PDFs/downloads \`${report.final99TwelveDocumentNoMutation.localCanonicalPassed ?? "unknown"}/12\`, \`${report.final99TwelveDocumentNoMutation.localCorePdfsPassed ?? "unknown"}/4\`, and \`${report.final99TwelveDocumentNoMutation.localOrchestrationDownloads ?? "unknown"}/14\`; the source-aligned live rerun is \`${report.final99TwelveDocumentNoMutation.liveOverall}\` with \`${report.final99TwelveDocumentNoMutation.liveBlockerCode || "no blocker"}\`. Exact saved Share remains \`${report.final99TwelveDocumentNoMutation.exactSavedShareVerdict}\`, and fully automated launch allowed remains \`${report.final99TwelveDocumentNoMutation.fullyAutomatedLaunchClaimAllowed}\`.
+- Final-99 is \`pass_with_notice\`, not clean launch-complete. Its 12-document no-mutation companion is \`${report.final99TwelveDocumentNoMutation.verdict}\`: local documents/core PDFs/downloads \`${report.final99TwelveDocumentNoMutation.localCanonicalPassed ?? "unknown"}/12\`, \`${report.final99TwelveDocumentNoMutation.localCorePdfsPassed ?? "unknown"}/4\`, and \`${report.final99TwelveDocumentNoMutation.localOrchestrationDownloads ?? "unknown"}/14\`; the source-aligned live template generation is \`${report.final99TwelveDocumentNoMutation.liveAskVerdict}\` in \`${report.final99TwelveDocumentNoMutation.liveRequestedAiMode}\` mode while \`${report.final99TwelveDocumentNoMutation.liveBlockerSurfaces?.join(", ") || "no blocked surfaces"}\` remain \`${report.final99TwelveDocumentNoMutation.liveOverall}\` with \`${report.final99TwelveDocumentNoMutation.liveBlockerCode || "no blocker"}\`. Exact saved Share remains \`${report.final99TwelveDocumentNoMutation.exactSavedShareVerdict}\`, and fully automated launch allowed remains \`${report.final99TwelveDocumentNoMutation.fullyAutomatedLaunchClaimAllowed}\`.
 
 ## Approval-Gated Boundaries
 

@@ -1,0 +1,185 @@
+{
+  "generatedAt": "2026-08-27T00:03:47.715Z",
+  "baseUrl": "http://127.0.0.1:3084",
+  "commit": "dc978772",
+  "sourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+  "productionBuild": {
+    "ok": true,
+    "status": 200,
+    "commitSha": null,
+    "branch": null,
+    "environment": null,
+    "deploymentUrl": null
+  },
+  "executionMode": "no-mutation",
+  "overall": "pass_with_notice",
+  "elapsedMs": 8716,
+  "gates": [
+    {
+      "name": "ask-orchestration",
+      "verdict": "pass",
+      "evidence": "12/12 documents"
+    },
+    {
+      "name": "auth-history-reuse",
+      "verdict": "pass_with_notice",
+      "evidence": "no-mutation 모드가 관리자 저장/재열기 쓰기를 강제로 건너뛰었습니다. 인증 토큰이 있어도 사용하지 않았습니다."
+    },
+    {
+      "name": "document-downloads",
+      "verdict": "pass",
+      "evidence": "core PDF + orchestration XLS/HWPX/PDF smoke"
+    },
+    {
+      "name": "public-data-ai-map",
+      "verdict": "pass",
+      "evidence": "docs/submission-evidence-map.md"
+    },
+    {
+      "name": "ai-remediation-flow",
+      "verdict": "pass_with_notice",
+      "evidence": "not-called:no-mutation"
+    },
+    {
+      "name": "dispatch-policy",
+      "verdict": "pass_with_notice",
+      "evidence": "raw payload rejected, band locked, auth gate enforced"
+    },
+    {
+      "name": "screenshots",
+      "verdict": "pass",
+      "evidence": "5 screenshots"
+    }
+  ],
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "noMutationMode": true
+  },
+  "outputs": {
+    "authHistory": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\auth-history-smoke.json",
+    "documentDownloads": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\document-download-smoke.json",
+    "publicDataAiMap": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\public-data-ai-map.json",
+    "prodGoldenPath": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\prod-golden-path.json",
+    "decision": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\decision.md",
+    "evidenceMapDoc": "docs\\submission-evidence-map.md",
+    "securityPrivacyDoc": "docs\\security_privacy_readiness.md",
+    "commercializationDoc": "docs\\commercialization-onepager.md"
+  },
+  "notes": [
+    "provider 전파는 관리자 인증과 서버 소유 workpack/share session이 필요하며, 카카오/밴드는 승인 전이라 제외했습니다.",
+    "HWPX는 제출형 초안으로 고지합니다.",
+    "no-mutation 모드는 인증 토큰 존재 여부와 무관하게 관리자 이력 쓰기를 건너뛰고 pass_with_notice를 유지합니다."
+  ],
+  "ask": {
+    "status": 200,
+    "mode": "mock",
+    "documentCount": 12,
+    "externalSignals": {
+      "lawgo": true,
+      "weather": true,
+      "work24": true,
+      "kosha": true,
+      "accidentCases": true
+    }
+  },
+  "remediation": {
+    "verdict": "pass_with_notice",
+    "status": null,
+    "configured": false,
+    "providerLabel": "not-called:no-mutation",
+    "catalogStatus": null,
+    "textPreview": "",
+    "sourceCount": 0,
+    "mutationBoundary": {
+      "providerGenerationCalled": false,
+      "dbMutationPerformed": false
+    },
+    "policy": "no-mutation 모드는 외부 AI 보완 생성을 호출하지 않습니다. 제안·편집·삽입 계약은 별도 live evidence를 유지합니다."
+  },
+  "dispatch": {
+    "verdict": "pass_with_notice",
+    "officialChannels": [
+      "email",
+      "sms"
+    ],
+    "excludedChannels": [
+      "kakao",
+      "band"
+    ],
+    "policyNotice": "메일·문자는 관리자 인증과 서버 소유 workpack/share session이 있을 때만 provider 전송합니다. 이 게이트는 raw workpack 전송 차단, 밴드 잠금, 무인 provider 호출 차단을 확인합니다.",
+    "capability": {
+      "status": 200,
+      "providerDispatch": {
+        "capability": false,
+        "mode": "preview_only",
+        "reason": "persistent_idempotency_unavailable",
+        "channels": {
+          "email": {
+            "capability": false,
+            "reason": "persistent_idempotency_unavailable"
+          },
+          "sms": {
+            "capability": false,
+            "reason": "persistent_idempotency_unavailable"
+          },
+          "kakao": {
+            "capability": false,
+            "reason": "persistent_idempotency_unavailable"
+          }
+        }
+      }
+    },
+    "legacyRejected": {
+      "status": 400,
+      "rejectedFields": [
+        "recipients",
+        "workpack"
+      ],
+      "message": "전파 요청에는 서버 권한 식별자, 채널, 대상 언어, 검증된 메시지만 사용할 수 있습니다."
+    },
+    "locked": {
+      "status": 400,
+      "lockedChannels": [
+        "band"
+      ],
+      "message": "밴드 전파는 승인 대기 상태입니다. 현재 서버 전파는 메일·문자와 설정된 카카오 알림톡만 허용합니다."
+    },
+    "authGate": {
+      "status": 401,
+      "message": "관리자 로그인이 필요합니다.",
+      "providerCalled": null
+    },
+    "mutationBoundary": {
+      "dbMutationPerformed": false,
+      "providerDispatchCalled": false,
+      "shareSessionCreated": false
+    }
+  },
+  "screenshots": {
+    "verdict": "pass",
+    "screenshots": [
+      {
+        "route": "/",
+        "path": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\screenshots\\01-home.png"
+      },
+      {
+        "route": "/workspace",
+        "path": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\screenshots\\02-workspace.png"
+      },
+      {
+        "route": "/documents",
+        "path": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\screenshots\\03-documents.png"
+      },
+      {
+        "route": "/evidence",
+        "path": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\screenshots\\04-evidence.png"
+      },
+      {
+        "route": "/dispatch",
+        "path": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\screenshots\\05-dispatch.png"
+      }
+    ]
+  }
+}

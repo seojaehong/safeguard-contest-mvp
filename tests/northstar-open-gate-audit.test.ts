@@ -8953,6 +8953,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const rootDir = createFixtureRoot();
     writeJson(rootDir, path.join("evaluation", "final-99-12-document-no-mutation-2026-08-17", "report.json"), {
       schema: "safeclaw-final-99-12-document-no-mutation/v1",
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED",
       currentSourceCommit: "fixture-sha",
       currentSourceLocal: {
         overall: "pass_with_notice",
@@ -8963,6 +8964,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
         orchestrationDocumentCount: 12,
         orchestrationDownloadCount: 14,
         orchestrationFailureCount: 0,
+        askVerdict: "pass",
+        requestedAiMode: "template",
       },
       liveAfterDeployment: {
         sourceCommit: "fixture-sha",
@@ -8972,6 +8975,9 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
         canonicalDocumentsPassed: 12,
         documentDownloadVerdict: "blocked",
         blockerCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        askVerdict: "pass",
+        requestedAiMode: "template",
+        blockerSurfaces: ["core_pdf_exports", "weather_preflight"],
         freshLiveRerunCompleted: true,
         liveRemediationRequired: true,
       },
@@ -9012,6 +9018,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const reportPath = path.join("evaluation", "final-99-12-document-no-mutation-2026-08-17", "report.json");
     writeJson(rootDir, reportPath, {
       schema: "safeclaw-final-99-12-document-no-mutation/v1",
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED",
       currentSourceCommit: "fixture-sha",
       currentSourceLocal: {
         overall: "pass_with_notice",
@@ -9022,6 +9029,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
         orchestrationDocumentCount: 12,
         orchestrationDownloadCount: 14,
         orchestrationFailureCount: 0,
+        askVerdict: "pass",
+        requestedAiMode: "template",
       },
       liveAfterDeployment: {
         sourceCommit: "fixture-sha",
@@ -9031,6 +9040,9 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
         canonicalDocumentsPassed: 12,
         documentDownloadVerdict: "blocked",
         blockerCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        askVerdict: "pass",
+        requestedAiMode: "template",
+        blockerSurfaces: ["core_pdf_exports", "weather_preflight"],
         freshLiveRerunCompleted: true,
         liveRemediationRequired: true,
       },

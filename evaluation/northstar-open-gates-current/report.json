@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-26T23:53:28.012Z",
-  "sourceSha": "e740b92ef3192caeefa06634dca0e70ad9791db6",
+  "generatedAt": "2026-08-27T00:14:13.535Z",
+  "sourceSha": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
   "overall": "open",
   "gates": [
     {
@@ -9,9 +9,10 @@
       "state": "notice",
       "label": "Final 99 evidence gate",
       "evidencePath": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
-      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven. Full final-99 rerun is not treated as no-approval cleanup; evaluation\\final-99-no-approval-boundary-2026-07-23\\report.json records the mutation boundary. The no-mutation companion evaluation\\final-99-12-document-no-mutation-2026-08-17\\report.json proves local canonical/core/orchestration coverage 12/12, 4/4, and 12 documents with 14 downloads and 0 failures. Its fresh source-aligned live rerun remains blocked with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; exact saved Share is MISSING_EVIDENCE and fully automated launch remains forbidden.",
+      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven. Full final-99 rerun is not treated as no-approval cleanup; evaluation\\final-99-no-approval-boundary-2026-07-23\\report.json records the mutation boundary. The no-mutation companion evaluation\\final-99-12-document-no-mutation-2026-08-17\\report.json proves local canonical/core/orchestration coverage 12/12, 4/4, and 12 documents with 14 downloads and 0 failures. Its fresh source-aligned live template generation passes 12/12, while core PDF exports and weather preflight remain blocked with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; exact saved Share is MISSING_EVIDENCE and fully automated launch remains forbidden.",
       "nextActions": [
         "Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.",
+        "Configure approved distributed admission before claiming live export and weather-dependent orchestration readiness.",
         "Do not rerun full final-99 as a no-approval cleanup when SAFEGUARD_AUTH_TOKEN is configured."
       ]
     },

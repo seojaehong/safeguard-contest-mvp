@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-26T23:53:29.990Z
-Source HEAD at generation: e740b92ef3192caeefa06634dca0e70ad9791db6
-Live commit at generation: e740b92ef3192caeefa06634dca0e70ad9791db6
+Generated at: 2026-08-27T00:14:16.326Z
+Source HEAD at generation: dc97877267a48525b9c30b80f9bdd2b2e5d82e18
+Live commit at generation: dc97877267a48525b9c30b80f9bdd2b2e5d82e18
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -472,7 +472,7 @@ Overall: `northstar_open_approval_gated`
 | --- | --- | --- | --- |
 | open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
-| final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
+| final_99_12_document_no_mutation | exact | matches_live | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | live_document_quality_matrix | ancestor | ancestor_of_head | evaluation\live-document-quality-matrix-2026-07-24\report.json |
 | live_document_quality_stress_matrix | ancestor | ancestor_of_head | evaluation\live-document-quality-stress-matrix-2026-07-24\report.json |
@@ -547,7 +547,7 @@ Overall: `northstar_open_approval_gated`
 
 - auth-history-reuse: operator-auth-gated — forbidden: 관리자 서버 저장과 이력 재열기를 live에서 실행 완료했다.
 - dispatch-policy: provider-approval-gated — forbidden: 카카오·밴드 또는 모든 provider 전파가 실제 승인 채널로 live 완료됐다.
-- Final99 12-document no-mutation companion: PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_DISTRIBUTED_ADMISSION_BLOCKED; local documents/core PDFs/downloads 12/12, 4/4, 14/14; live blocked (DISTRIBUTED_RATE_LIMIT_UNAVAILABLE); exact saved Share MISSING_EVIDENCE; fully automated launch allowed false.
+- Final99 12-document no-mutation companion: PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED; local documents/core PDFs/downloads 12/12, 4/4, 14/14; live generation pass/template, blocked surfaces core_pdf_exports, weather_preflight, overall blocked (DISTRIBUTED_RATE_LIMIT_UNAVAILABLE); exact saved Share MISSING_EVIDENCE; fully automated launch allowed false.
 
 ## Approval-Gated Work
 

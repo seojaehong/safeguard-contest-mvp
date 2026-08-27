@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-26T23:53:29.990Z",
-  "head": "e740b92ef3192caeefa06634dca0e70ad9791db6",
+  "generatedAt": "2026-08-27T00:14:16.326Z",
+  "head": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e740b92ef3192caeefa06634dca0e70ad9791db6",
+    "commitSha": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2l0se8gza-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-91hmpdcir-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -25,7 +25,7 @@
       "id": "final_99_gate",
       "state": "notice",
       "artifact": "evaluation\\final-99-gate-current-2026-07-22\\report.json",
-      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven. Full final-99 rerun is not treated as no-approval cleanup; evaluation\\final-99-no-approval-boundary-2026-07-23\\report.json records the mutation boundary. The no-mutation companion evaluation\\final-99-12-document-no-mutation-2026-08-17\\report.json proves local canonical/core/orchestration coverage 12/12, 4/4, and 12 documents with 14 downloads and 0 failures. Its fresh source-aligned live rerun remains blocked with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; exact saved Share is MISSING_EVIDENCE and fully automated launch remains forbidden."
+      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-22\\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven. Full final-99 rerun is not treated as no-approval cleanup; evaluation\\final-99-no-approval-boundary-2026-07-23\\report.json records the mutation boundary. The no-mutation companion evaluation\\final-99-12-document-no-mutation-2026-08-17\\report.json proves local canonical/core/orchestration coverage 12/12, 4/4, and 12 documents with 14 downloads and 0 failures. Its fresh source-aligned live template generation passes 12/12, while core PDF exports and weather preflight remain blocked with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; exact saved Share is MISSING_EVIDENCE and fully automated launch remains forbidden."
     },
     {
       "id": "live_harness_quality",
@@ -1632,13 +1632,19 @@
     ],
     "twelveDocumentNoMutation": {
       "artifact": "evaluation\\final-99-12-document-no-mutation-2026-08-17\\report.json",
-      "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_DISTRIBUTED_ADMISSION_BLOCKED",
-      "currentSourceCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
+      "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED",
+      "currentSourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
       "localCanonicalPassed": 12,
       "localCorePdfsPassed": 4,
       "localOrchestrationDownloads": 14,
       "liveOverall": "blocked",
       "liveBlockerCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      "liveAskVerdict": "pass",
+      "liveRequestedAiMode": "template",
+      "liveBlockerSurfaces": [
+        "core_pdf_exports",
+        "weather_preflight"
+      ],
       "exactSavedShareVerdict": "MISSING_EVIDENCE",
       "fullyAutomatedLaunchClaimAllowed": false
     }
@@ -1727,9 +1733,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "e740b92ef3192caeefa06634dca0e70ad9791db6",
+      "sourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
       "sourceStatus": "exact",
-      "productionCommit": "e740b92ef3192caeefa06634dca0e70ad9791db6",
+      "productionCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
       "productionStatus": "matches_live"
     },
     {
@@ -1743,10 +1749,10 @@
     {
       "id": "final_99_12_document_no_mutation",
       "artifact": "evaluation\\final-99-12-document-no-mutation-2026-08-17\\report.json",
-      "sourceCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
-      "sourceStatus": "ancestor",
-      "productionCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+      "sourceStatus": "exact",
+      "productionCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+      "productionStatus": "matches_live"
     },
     {
       "id": "live_harness_quality",

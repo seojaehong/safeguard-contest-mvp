@@ -1,13 +1,13 @@
 {
   "schema": "safeclaw-final-99-12-document-no-mutation/v1",
-  "generatedAt": "2026-08-17T00:15:17.351Z",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_DISTRIBUTED_ADMISSION_BLOCKED",
-  "productCommit": "0c5f9ce26e96ed14cd31cac3c57ea51cfaaa03d8",
-  "currentSourceCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
-  "productionCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
+  "generatedAt": "2026-08-27T00:00:32.654Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED",
+  "productCommit": "e740b92ef3192caeefa06634dca0e70ad9791db6",
+  "currentSourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+  "productionCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
   "currentSourceLocal": {
-    "baseUrl": "http://127.0.0.1:3083",
-    "reportPath": "evaluation/final-99-current-no-mutation-2026-08-17-after-product-commit/report.json",
+    "baseUrl": "http://127.0.0.1:3084",
+    "reportPath": "evaluation/final-99-current-no-mutation-2026-08-27-after-local/report.json",
     "overall": "pass_with_notice",
     "elapsedMs": 10121,
     "canonicalDocumentCount": 12,
@@ -17,7 +17,9 @@
     "orchestrationDocumentCount": 12,
     "orchestrationDownloadCount": 14,
     "orchestrationFailureCount": 0,
-    "screenshotCount": 5
+    "screenshotCount": 5,
+    "askVerdict": "pass",
+    "requestedAiMode": "template"
   },
   "liveBeforeProductCommit": {
     "baseUrl": "https://www.safeclaw.kr",
@@ -33,11 +35,13 @@
   },
   "liveAfterDeployment": {
     "baseUrl": "https://www.safeclaw.kr",
-    "reportPath": "evaluation/final-99-current-no-mutation-2026-08-17-after-live/report.json",
-    "sourceCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
-    "productionCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
+    "reportPath": "evaluation/final-99-current-no-mutation-2026-08-27-after-live/report.json",
+    "sourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+    "productionCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
     "productionEnvironment": "production",
     "overall": "blocked",
+    "askVerdict": "pass",
+    "requestedAiMode": "template",
     "canonicalDocumentCount": 12,
     "canonicalDocumentsPassed": 12,
     "documentDownloadVerdict": "blocked",
@@ -45,6 +49,10 @@
     "corePdfsPassed": 0,
     "orchestrationVerdict": "blocked",
     "blockerCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "blockerSurfaces": [
+      "core_pdf_exports",
+      "weather_preflight"
+    ],
     "freshLiveRerunCompleted": true,
     "liveRemediationRequired": true
   },
@@ -54,6 +62,10 @@
     "evaluation/final-99-current-no-mutation-2026-08-17-after-local-pdf-fix"
   ],
   "verification": {
+    "currentNoMutationContractTests": {
+      "filesPassed": 1,
+      "testsPassed": 4
+    },
     "focusedGateAndPdfTests": {
       "filesPassed": 3,
       "testsPassed": 14
@@ -81,6 +93,8 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "providerDispatchPersistence": "APPROVAL_GATED",
     "liveDistributedRateLimitReadiness": "RED_DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "templateDocumentGenerationLive": "PASS_12_OF_12",
+    "liveExportAndWeatherAdmission": "OPERATOR_CONFIGURATION_REQUIRED",
     "fullyAutomatedLaunchClaimAllowed": false
   }
 }

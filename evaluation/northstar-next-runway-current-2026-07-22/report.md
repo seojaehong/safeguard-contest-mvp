@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `e740b92ef3192caeefa06634dca0e70ad9791db6`
+Source HEAD: `dc97877267a48525b9c30b80f9bdd2b2e5d82e18`
 
-Production `/api/build-info`: `e740b92ef3192caeefa06634dca0e70ad9791db6`
+Production `/api/build-info`: `dc97877267a48525b9c30b80f9bdd2b2e5d82e18`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `e740b92ef3192caeefa06634dca0e70ad9791db6`
+Live rollup source head: `dc97877267a48525b9c30b80f9bdd2b2e5d82e18`
 
 Live rollup matches production: `true`
 
@@ -88,7 +88,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - SIF embedding approval preflight is approval-held: no embedding generation, no upload, and vector runtime disabled until approval.
 - North Star approval runway is current and separates runtime/provider/database/vector gates from ordinary UI/evidence iteration.
 - RLS / LLM Wiki approval preflight remains operator-review ready, with no DB mutation or launch-readiness claim.
-- Final-99 is `pass_with_notice`, not clean launch-complete. Its 12-document no-mutation companion is `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_DISTRIBUTED_ADMISSION_BLOCKED`: local documents/core PDFs/downloads `12/12`, `4/4`, and `14/14`; the source-aligned live rerun is `blocked` with `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`. Exact saved Share remains `MISSING_EVIDENCE`, and fully automated launch allowed remains `false`.
+- Final-99 is `pass_with_notice`, not clean launch-complete. Its 12-document no-mutation companion is `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED`: local documents/core PDFs/downloads `12/12`, `4/4`, and `14/14`; the source-aligned live template generation is `pass` in `template` mode while `core_pdf_exports, weather_preflight` remain `blocked` with `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`. Exact saved Share remains `MISSING_EVIDENCE`, and fully automated launch allowed remains `false`.
 
 ## Approval-Gated Boundaries
 

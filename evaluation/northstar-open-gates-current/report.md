@@ -1,14 +1,14 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-08-26T23:53:28.012Z
-Source SHA: `e740b92ef3192caeefa06634dca0e70ad9791db6`
+Generated at: 2026-08-27T00:14:13.535Z
+Source SHA: `dc97877267a48525b9c30b80f9bdd2b2e5d82e18`
 Overall: `open`
 
 ## Gate Matrix
 
 | Gate | State | Evidence | Detail |
 | --- | --- | --- | --- |
-| final_99_gate | notice | evaluation\final-99-gate-current-2026-07-22\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-22\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven. Full final-99 rerun is not treated as no-approval cleanup; evaluation\final-99-no-approval-boundary-2026-07-23\report.json records the mutation boundary. The no-mutation companion evaluation\final-99-12-document-no-mutation-2026-08-17\report.json proves local canonical/core/orchestration coverage 12/12, 4/4, and 12 documents with 14 downloads and 0 failures. Its fresh source-aligned live rerun remains blocked with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; exact saved Share is MISSING_EVIDENCE and fully automated launch remains forbidden. |
+| final_99_gate | notice | evaluation\final-99-gate-current-2026-07-22\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-22\notice-carry.json: auth-history-reuse=operator-auth-gated, dispatch-policy=provider-approval-gated. Fully automated launch remains forbidden until those approval/auth gates are proven. Full final-99 rerun is not treated as no-approval cleanup; evaluation\final-99-no-approval-boundary-2026-07-23\report.json records the mutation boundary. The no-mutation companion evaluation\final-99-12-document-no-mutation-2026-08-17\report.json proves local canonical/core/orchestration coverage 12/12, 4/4, and 12 documents with 14 downloads and 0 failures. Its fresh source-aligned live template generation passes 12/12, while core PDF exports and weather preflight remain blocked with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; exact saved Share is MISSING_EVIDENCE and fully automated launch remains forbidden. |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
 | document_quality_grounding | proven | evaluation\document-quality-grounding-current-gate-2026-07-19\report.json | Current source proves the document-quality grounding contract with 135 focused tests: SIF/KOSHA/law evidence stays before LLM prose, LLM role remains naturalize_only, unsupported provider hazards are rejected, qualityContract blocks incomplete outputs, and KOSHA support is not promoted to statutory mandate. This is not a claim that every live model sample is excellent. |
 | live_document_quality_matrix | proven | evaluation\live-document-quality-matrix-2026-07-24\report.json | Five live production scenarios pass the measured document-quality matrix: structured risk rows are present, current/additional controls remain distinct, foreign-worker briefing stays scenario-relevant, and no DB/share-session/provider mutation occurred. This scoped matrix does not replace broad human wording review. |
@@ -105,6 +105,7 @@ Overall: `open`
 ## Next Actions
 
 - final_99_gate: Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.
+- final_99_gate: Configure approved distributed admission before claiming live export and weather-dependent orchestration readiness.
 - final_99_gate: Do not rerun full final-99 as a no-approval cleanup when SAFEGUARD_AUTH_TOKEN is configured.
 - document_quality_grounding: Keep live model sample excellence separate from the deterministic document-quality grounding contract.
 - document_quality_grounding: Continue requiring human review for wording quality, concision, and field usability before broad launch claims.

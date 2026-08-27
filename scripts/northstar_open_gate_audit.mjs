@@ -326,10 +326,17 @@ function evaluateFinal99Gate(rootDir) {
   const remainingBoundaries = isRecord(twelveDocumentCompanion?.remainingBoundaries)
     ? twelveDocumentCompanion.remainingBoundaries
     : {};
+  const blockerSurfaces = Array.isArray(liveResult.blockerSurfaces)
+    ? liveResult.blockerSurfaces.map(readString)
+    : [];
   const liveResultIsHonest = (
     (readString(liveResult.overall) === "blocked"
+      && readString(liveResult.askVerdict) === "pass"
+      && readString(liveResult.requestedAiMode) === "template"
       && readString(liveResult.documentDownloadVerdict) === "blocked"
       && readString(liveResult.blockerCode) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+      && blockerSurfaces.includes("core_pdf_exports")
+      && blockerSurfaces.includes("weather_preflight")
       && liveResult.liveRemediationRequired === true)
     || ((readString(liveResult.overall) === "pass" || readString(liveResult.overall) === "pass_with_notice")
       && readString(liveResult.documentDownloadVerdict) === "pass")
@@ -337,6 +344,8 @@ function evaluateFinal99Gate(rootDir) {
   const twelveDocumentCompanionPresent = isRecord(twelveDocumentCompanion);
   const twelveDocumentCompanionReady = twelveDocumentCompanionPresent
     && readString(twelveDocumentCompanion.schema) === "safeclaw-final-99-12-document-no-mutation/v1"
+    && readString(twelveDocumentCompanion.verdict)
+      === "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED"
     && readString(twelveDocumentCompanion.currentSourceCommit) !== ""
     && readString(liveResult.sourceCommit) === readString(liveResult.productionCommit)
     && readString(liveResult.sourceCommit) === readString(twelveDocumentCompanion.currentSourceCommit)
@@ -348,6 +357,8 @@ function evaluateFinal99Gate(rootDir) {
     && localResult.orchestrationDocumentCount === 12
     && localResult.orchestrationDownloadCount === 14
     && localResult.orchestrationFailureCount === 0
+    && readString(localResult.askVerdict) === "pass"
+    && readString(localResult.requestedAiMode) === "template"
     && liveResult.canonicalDocumentCount === 12
     && liveResult.canonicalDocumentsPassed === 12
     && liveResult.freshLiveRerunCompleted === true
@@ -376,7 +387,7 @@ function evaluateFinal99Gate(rootDir) {
   }
 
   const twelveDocumentDetail = twelveDocumentCompanionReady
-    ? ` The no-mutation companion ${EVIDENCE_PATHS.final99TwelveDocumentNoMutation} proves local canonical/core/orchestration coverage 12/12, 4/4, and 12 documents with 14 downloads and 0 failures. Its fresh source-aligned live rerun remains ${readString(liveResult.overall)} with ${readString(liveResult.blockerCode) || "no blocker"}; exact saved Share is MISSING_EVIDENCE and fully automated launch remains forbidden.`
+    ? ` The no-mutation companion ${EVIDENCE_PATHS.final99TwelveDocumentNoMutation} proves local canonical/core/orchestration coverage 12/12, 4/4, and 12 documents with 14 downloads and 0 failures. Its fresh source-aligned live template generation passes 12/12, while core PDF exports and weather preflight remain ${readString(liveResult.overall)} with ${readString(liveResult.blockerCode) || "no blocker"}; exact saved Share is MISSING_EVIDENCE and fully automated launch remains forbidden.`
     : "";
 
   const overall = readString(report.overall);
@@ -416,6 +427,7 @@ function evaluateFinal99Gate(rootDir) {
         ? noticeCarryReady
           ? [
             "Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.",
+            "Configure approved distributed admission before claiming live export and weather-dependent orchestration readiness.",
             ...(noApprovalBoundaryReady ? ["Do not rerun full final-99 as a no-approval cleanup when SAFEGUARD_AUTH_TOKEN is configured."] : []),
           ]
           : ["Resolve or explicitly carry each notice before claiming fully automated launch readiness."]

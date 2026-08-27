@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-26T23:53:55.921Z",
+  "generatedAt": "2026-08-27T00:14:41.856Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "e740b92ef3192caeefa06634dca0e70ad9791db6",
-  "productionCommit": "e740b92ef3192caeefa06634dca0e70ad9791db6",
+  "sourceHead": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+  "productionCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e740b92ef3192caeefa06634dca0e70ad9791db6",
+    "commitSha": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2l0se8gza-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-91hmpdcir-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "e740b92ef3192caeefa06634dca0e70ad9791db6",
-  "liveRollupLiveCommit": "e740b92ef3192caeefa06634dca0e70ad9791db6",
+  "liveExactEvidenceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+  "liveRollupLiveCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -164,7 +164,7 @@
     {
       "gate": "final_99_gate",
       "state": "notice",
-      "reason": "pass_with_notice with carried auth-history and dispatch-policy notices; no-mutation 12-document local coverage passes while source-aligned live downloads remain blocked (DISTRIBUTED_RATE_LIMIT_UNAVAILABLE)"
+      "reason": "pass_with_notice with carried auth-history and dispatch-policy notices; no-mutation live template generation passes 12/12 while core PDF export and weather preflight remain blocked (DISTRIBUTED_RATE_LIMIT_UNAVAILABLE)"
     },
     {
       "gate": "public_search_distributed_rate_limit_readiness",
@@ -375,13 +375,19 @@
     }
   },
   "final99TwelveDocumentNoMutation": {
-    "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_DISTRIBUTED_ADMISSION_BLOCKED",
-    "currentSourceCommit": "e8f721aa2bf2cfb06efe0a806302c9497a43f68b",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED",
+    "currentSourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
     "localCanonicalPassed": 12,
     "localCorePdfsPassed": 4,
     "localOrchestrationDownloads": 14,
     "liveOverall": "blocked",
     "liveBlockerCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "liveAskVerdict": "pass",
+    "liveRequestedAiMode": "template",
+    "liveBlockerSurfaces": [
+      "core_pdf_exports",
+      "weather_preflight"
+    ],
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "fullyAutomatedLaunchClaimAllowed": false
   },

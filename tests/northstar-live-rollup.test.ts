@@ -1021,19 +1021,24 @@ function createFixtureRoot(): { root: string; head: string } {
   });
   writeJson(root, "evaluation/final-99-12-document-no-mutation-2026-08-17/report.json", {
     schema: "safeclaw-final-99-12-document-no-mutation/v1",
-    verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_DISTRIBUTED_ADMISSION_BLOCKED",
+    verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED",
     currentSourceCommit: "TO_FILL",
     productionCommit: "TO_FILL",
     currentSourceLocal: {
       canonicalDocumentsPassed: 12,
       corePdfsPassed: 4,
       orchestrationDownloadCount: 14,
+      askVerdict: "pass",
+      requestedAiMode: "template",
     },
     liveAfterDeployment: {
       sourceCommit: "TO_FILL",
       productionCommit: "TO_FILL",
       overall: "blocked",
       blockerCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      askVerdict: "pass",
+      requestedAiMode: "template",
+      blockerSurfaces: ["core_pdf_exports", "weather_preflight"],
     },
     remainingBoundaries: {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
@@ -3273,12 +3278,15 @@ describe("northstar live rollup", () => {
     const report = runRollup(root, head);
 
     expect(report.final99.twelveDocumentNoMutation).toMatchObject({
-      verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_DISTRIBUTED_ADMISSION_BLOCKED",
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED",
       localCanonicalPassed: 12,
       localCorePdfsPassed: 4,
       localOrchestrationDownloads: 14,
       liveOverall: "blocked",
       liveBlockerCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      liveAskVerdict: "pass",
+      liveRequestedAiMode: "template",
+      liveBlockerSurfaces: ["core_pdf_exports", "weather_preflight"],
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       fullyAutomatedLaunchClaimAllowed: false,
     });
