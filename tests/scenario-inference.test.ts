@@ -35,6 +35,33 @@ describe("inferScenario", () => {
     expect(scenario.companyType).toBe("물류업");
   });
 
+  it("keeps an outdoor roof repair heat scenario out of the warehouse seed", () => {
+    const question = "대구 옥외 지붕 보수 작업. 폭염과 자외선 노출이 예상되어 온열질환 예방을 위해 물, 그늘, 휴식 시간을 확인해야 한다.";
+    const scenario = inferScenario(question);
+    const response = buildMockAskResponse(question, [], "mock", "test");
+    const surface = Object.values(response.deliverables).join("\n");
+
+    expect(scenario.profile.id).toBe("construction-painting");
+    expect(scenario.profile.workName).toBe("옥외 지붕 보수 작업");
+    expect(scenario.siteName).toContain("대구");
+    expect(scenario.profile.topRisk).toMatch(/지붕.*추락/);
+    expect(scenario.profile.topRisk).toContain("온열질환");
+    expect(scenario.profile.actions.join(" ")).toMatch(/안전대.*물·그늘·휴식/);
+    expect(surface).toContain("옥외 지붕 보수 작업");
+    expect(surface).toContain("더위·자외선 작업에서는");
+    expect(surface).not.toMatch(/고중량 박스|지게차|피킹|상하차/);
+  });
+
+  it("retains the warehouse heat profile for an explicit logistics loading scenario", () => {
+    const question = "대구 물류창고 폭염 속 고중량 박스 상하차 작업. 물, 그늘, 휴식 시간을 확인해야 한다.";
+    const scenario = inferScenario(question);
+
+    expect(scenario.profile.id).toBe("warehouse-heat");
+    expect(scenario.profile.workName).toBe("고중량 박스 적재 및 수작업 운반");
+    expect(scenario.profile.topRisk).toMatch(/고중량 박스.*온열질환/);
+    expect(scenario.weatherNote).toContain("온열질환");
+  });
+
   it("classifies an apartment exterior painting job as 건설업", () => {
     const scenario = inferScenario("아파트 외벽 도장 공사");
     expect(scenario.companyType).toBe("건설업");

@@ -521,6 +521,10 @@ function hasHighRiskChemicalCleaningIdentity(question: string) {
   return /(?:SDS|MSDS|물질안전보건자료|GHS|경고표지|라벨).*(?:화학|세척|용기)|(?:화학|세척|용기).*(?:SDS|MSDS|물질안전보건자료|GHS|경고표지|라벨)|화학\s*세척|화학세척|탱크.{0,20}세척|도금.{0,40}세척|비산.{0,20}피부접촉|국소배기.{0,30}세척/i.test(question);
 }
 
+function hasRoofRepairWorkIdentity(question: string) {
+  return /지붕.{0,20}(?:보수|수리|점검|작업|공사)|(?:보수|수리|점검|작업|공사).{0,20}지붕/.test(question);
+}
+
 function inferSpecialContext(question: string): string[] {
   const notes: string[] = [];
   const foreignWorkerCount = question.match(/외국인\s*(?:근로자|작업자)?\s*(\d+)\s*명/)?.[1];
@@ -764,6 +768,10 @@ function pickExplicitIndustryProfile(question: string) {
 function pickScenarioProfile(question: string) {
   const normalized = question.trim().toLowerCase();
 
+  if (hasRoofRepairWorkIdentity(question)) {
+    return fieldScenarioProfiles.find((profile) => profile.id === "construction-painting") || buildCustomScenarioProfile(question);
+  }
+
   if (/누수|비가\s*새|천장|비정형|유지보수|정비|점검/.test(question) || hasExcavationWorkIdentity(question) || hasElectricalWorkIdentity(question)) {
     return buildCustomScenarioProfile(question);
   }
@@ -809,7 +817,32 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
   let educationTargets = source.educationTargets;
   let replaceBaseRisk = false;
 
-  if (/비계.{0,20}(?:조립|해체)|(?:조립|해체).{0,20}비계/.test(question)) {
+  if (hasRoofRepairWorkIdentity(question)) {
+    const hasHeatCondition = /폭염|고온|온열|자외선/.test(question);
+    workName = "옥외 지붕 보수 작업";
+    processName = "지붕 작업구역 확인, 안전대 부착설비·작업발판 점검, 개구부·단부 통제, 자재·공구 낙하 방지";
+    weatherNote = hasHeatCondition
+      ? "옥외 지붕 고온·자외선 조건, 추락방지와 물·그늘·휴식 기준 확인 필요"
+      : "옥외 지붕 작업조건, 추락방지·강풍·자재 낙하 통제 상태 확인 필요";
+    companyType = "건설업";
+    educationName = "옥외 지붕 보수 추락·기상 위험 예방 교육";
+    educationTargets = "지붕 보수 작업자, 감시자, 관리감독자";
+    replaceBaseRisk = true;
+    hazards.push(
+      "지붕 단부·개구부 또는 불안정한 작업발판에서 작업자가 추락하는 위험",
+      hasHeatCondition
+        ? "옥외 고온·자외선 노출과 휴식 부족으로 인한 온열질환 위험"
+        : "강풍 또는 미끄러운 지붕면에서 균형을 잃고 추락하는 위험",
+      "지붕 위 자재·공구가 낙하해 하부 작업자와 통행자가 맞는 위험"
+    );
+    actions.push(
+      "지붕 단부·개구부를 통제하고 안전대 부착설비·작업발판 상태를 관리감독자가 확인한 뒤 작업 시작",
+      hasHeatCondition
+        ? "물·그늘·휴식 기준과 온열질환 증상 보고 절차를 공유하고 어지러움 발생 시 즉시 작업중지"
+        : "강풍·우천 등 기상 악화 시 작업중지 기준과 안전한 지상 대피 위치를 전원에게 공유",
+      "자재·공구를 고정하고 하부 낙하위험 구역을 출입 통제하며 감시자를 배치"
+    );
+  } else if (/비계.{0,20}(?:조립|해체)|(?:조립|해체).{0,20}비계/.test(question)) {
     workName = "이동식 비계 조립·해체 작업";
     processName = "이동식 비계 조립·해체, 작업발판·안전난간 설치, 바퀴 잠금·전도 방지, 하부 출입통제";
     hazards.push(
