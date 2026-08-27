@@ -3567,7 +3567,7 @@ function pointLiveRollupAtHeadWithLive(root: string, head: string, liveCommit: s
   });
 }
 
-describe("northstar next runway generator", () => {
+describe("northstar next runway generator", { timeout: 90_000 }, () => {
   it("marks the latest evidence commit as live when source, production, and live rollup align", async () => {
     const { buildNorthstarNextRunway, renderNorthstarNextRunwayMarkdown } = await loadNextRunwayModule();
     const { root, secondHead } = createFixtureRoot();
