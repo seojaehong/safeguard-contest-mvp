@@ -19,6 +19,19 @@ function effectiveDeclarations(source: string, selector: string): Declarations {
 
 describe("document typography token contract", () => {
   const css = fs.readFileSync(path.join(process.cwd(), "app", "globals.css"), "utf8");
+  const workpackEditorCss = fs.readFileSync(
+    path.join(process.cwd(), "components", "WorkpackEditor.module.css"),
+    "utf8",
+  );
+
+  it("keeps the mobile risk-row add action at the 44px touch target", () => {
+    const mobileStart = workpackEditorCss.indexOf("@media (max-width: 600px)");
+
+    expect(mobileStart).toBeGreaterThanOrEqual(0);
+    expect(workpackEditorCss.slice(mobileStart)).toMatch(
+      /\.addRiskRowButton\s*\{[^}]*min-height:\s*44px;/u,
+    );
+  });
 
   it.each([
     [
