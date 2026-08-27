@@ -492,28 +492,98 @@ describe("share session route authority", () => {
   });
 
   it("rate limits repeated public share reads before session lookup", async () => {
+    const rateLimitedSessionId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
     mocks.createSupabaseAdminClient.mockReturnValue({});
     const { GET } = await import("@/app/api/share-sessions/[sessionId]/route");
     const requestForAttempt = () => new NextRequest(
-      `http://localhost/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`,
+      `http://localhost/api/share-sessions/${rateLimitedSessionId}?workerId=${WORKER_ID}`,
       { method: "GET", headers: { "x-forwarded-for": "198.51.100.89" } }
     );
 
     for (let attempt = 0; attempt < 60; attempt += 1) {
       const response = await GET(requestForAttempt(), {
-        params: Promise.resolve({ sessionId: SESSION_ID })
+        params: Promise.resolve({ sessionId: rateLimitedSessionId })
       });
       expect(response.status).toBe(200);
     }
 
     mocks.loadActivePublicShareSession.mockClear();
     const limited = await GET(requestForAttempt(), {
-      params: Promise.resolve({ sessionId: SESSION_ID })
+      params: Promise.resolve({ sessionId: rateLimitedSessionId })
     });
 
     expect(limited.status).toBe(429);
     expect(limited.headers.get("X-SafeClaw-Rate-Limit")).toBe("instance");
     expect(mocks.loadActivePublicShareSession).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["read", "GET"],
+    ["acknowledgement", "POST"]
+  ] as const)("fails public Share %s closed in production without distributed admission", async (_label, method) => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      const route = await import("@/app/api/share-sessions/[sessionId]/route");
+      const response = method === "GET"
+        ? await route.GET(getRequest(`/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`), {
+            params: Promise.resolve({ sessionId: SESSION_ID })
+          })
+        : await route.POST(jsonRequest(`/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`, {
+            recipientVerification: RECIPIENT_VERIFICATION
+          }), { params: Promise.resolve({ sessionId: SESSION_ID }) });
+      const payload = await response.json() as { code: string };
+
+      expect(response.status).toBe(503);
+      expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
+      expect(payload.code).toBe("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+      expect(mocks.createSupabaseAdminClient).not.toHaveBeenCalled();
+      expect(mocks.loadActivePublicShareSession).not.toHaveBeenCalled();
+    } finally {
+      error.mockRestore();
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it.each([
+    ["read", "GET", {}],
+    ["acknowledgement", "POST", { workerId: WORKER_ID, recipientVerification: RECIPIENT_VERIFICATION }]
+  ] as const)("uses a non-plaintext session and worker digest for public Share %s admission", async (_label, method, body) => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "test-token");
+    const fetchMock = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      const command = JSON.parse(String(init?.body)) as unknown[];
+      const key = String(command[3]);
+      expect(key).toMatch(new RegExp(`^safeclaw:public-rate:share-session-(?:read|ack):[a-f0-9]{32}$`, "u"));
+      expect(key).not.toContain(SESSION_ID);
+      expect(key).not.toContain(WORKER_ID);
+      return Response.json({ result: [1, 59_500] });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const confirmation = makeConfirmationClient(null);
+    mocks.createSupabaseAdminClient.mockReturnValue(
+      method === "GET" ? {} : confirmation.client
+    );
+
+    try {
+      const route = await import("@/app/api/share-sessions/[sessionId]/route");
+      const response = method === "GET"
+        ? await route.GET(getRequest(`/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`), {
+            params: Promise.resolve({ sessionId: SESSION_ID })
+          })
+        : await route.POST(jsonRequest(`/api/share-sessions/${SESSION_ID}`, body), {
+            params: Promise.resolve({ sessionId: SESSION_ID })
+          });
+
+      expect(response.status).toBe(200);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.unstubAllGlobals();
+      vi.unstubAllEnvs();
+    }
   });
 
   it("returns only the invited worker hint for a public recipient share link", async () => {

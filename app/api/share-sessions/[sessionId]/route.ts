@@ -61,12 +61,17 @@ function buildPublicRecipientHint(recipients: ShareRecipientInput[]) {
 }
 
 export async function GET(request: NextRequest, context: RouteContext) {
+  const { sessionId } = await context.params;
+  const searchParams = request.nextUrl.searchParams;
+  const workerId = searchParams.get("workerId") || undefined;
   const admission = await checkPublicRateLimit({
     request,
+    identifier: `${sessionId}:${workerId || "anonymous"}`,
     namespace: "share-session-read",
     limit: SHARE_READ_LIMIT,
     windowMs: SHARE_RATE_WINDOW_MS,
-    instanceLimiter: shareReadLimiter
+    instanceLimiter: shareReadLimiter,
+    requireDistributedInProduction: true
   });
   const limited = publicRateLimitResponse(admission);
   if (limited) return limited;
@@ -75,10 +80,6 @@ export async function GET(request: NextRequest, context: RouteContext) {
   if (!client) {
     return NextResponse.json({ ok: false, configured: false, session: null, message: "Supabase 저장소가 아직 설정되지 않았습니다." });
   }
-
-  const { sessionId } = await context.params;
-  const searchParams = request.nextUrl.searchParams;
-  const workerId = searchParams.get("workerId") || undefined;
 
   const activeSession = await loadActivePublicShareSession(client, {
     shareSessionId: sessionId,
@@ -134,16 +135,6 @@ export async function GET(request: NextRequest, context: RouteContext) {
 }
 
 export async function POST(request: NextRequest, context: RouteContext) {
-  const admission = await checkPublicRateLimit({
-    request,
-    namespace: "share-session-ack",
-    limit: SHARE_ACK_LIMIT,
-    windowMs: SHARE_RATE_WINDOW_MS,
-    instanceLimiter: shareAckLimiter
-  });
-  const limited = publicRateLimitResponse(admission);
-  if (limited) return limited;
-
   const bodyBudget = await enforcePublicJsonRequestBodyBudget(
     request,
     PUBLIC_SHARE_ACK_REQUEST_MAX_BYTES,
@@ -151,19 +142,30 @@ export async function POST(request: NextRequest, context: RouteContext) {
   );
   if (!bodyBudget.ok) return bodyBudget.response;
 
+  const { sessionId } = await context.params;
+  const searchParams = request.nextUrl.searchParams;
+  const queryWorkerId = searchParams.get("workerId") || undefined;
+  const parsed = await bodyBudget.request.json().catch((): unknown => ({}));
+  const body = isRecord(parsed) ? parsed : {};
+  const bodyWorkerId = readString(body.workerId);
+  const workerId = queryWorkerId || bodyWorkerId || undefined;
+  const admission = await checkPublicRateLimit({
+    request,
+    identifier: `${sessionId}:${workerId || "anonymous"}`,
+    namespace: "share-session-ack",
+    limit: SHARE_ACK_LIMIT,
+    windowMs: SHARE_RATE_WINDOW_MS,
+    instanceLimiter: shareAckLimiter,
+    requireDistributedInProduction: true
+  });
+  const limited = publicRateLimitResponse(admission);
+  if (limited) return limited;
+
   const client = createSupabaseAdminClient();
   if (!client) {
     return NextResponse.json({ ok: false, configured: false, confirmationId: null, message: "Supabase 저장소가 아직 설정되지 않았습니다." });
   }
 
-  const { sessionId } = await context.params;
-  const searchParams = request.nextUrl.searchParams;
-  const queryWorkerId = searchParams.get("workerId") || undefined;
-
-  const parsed = await bodyBudget.request.json().catch((): unknown => ({}));
-  const body = isRecord(parsed) ? parsed : {};
-  const bodyWorkerId = readString(body.workerId);
-  const workerId = queryWorkerId || bodyWorkerId || undefined;
   const displayName = readString(body.displayName);
   const recipientVerification = readString(body.recipientVerification);
   const languageCode = sanitizeLanguageCode(body.languageCode);
