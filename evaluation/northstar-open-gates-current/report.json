@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-27T08:45:51.412Z",
-  "sourceSha": "fbe35641a7f870570d242e1bdf3b5bf30d512f83",
+  "generatedAt": "2026-08-27T11:26:15.762Z",
+  "sourceSha": "65f7d839d64a1aefc9e275764497bcd5eab0174b",
   "overall": "open",
   "gates": [
     {
@@ -490,10 +490,10 @@
       "state": "notice",
       "label": "MCP generation work-budget security",
       "evidencePath": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
-      "detail": "Current production 87025eb8 re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The provider-admission companion preserves the 96 KiB measured body and authentication contracts through 122 adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Current production 65f7d839 proves distributed MCP admission is configured but unhealthy: the pre-auth guard returned 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE and failed closed before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification preserves the 96 KiB body contract with 3 files / 65 focused tests and 8 files / 126 adjacent MCP tests. Distributed activation is observed, while backend health, a valid authenticated runtime probe, and a fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Run a valid credential-safe production MCP boundary probe without exposing the token.",
-        "Activate the approved distributed limiter configuration and complete a fresh security rescan before reclassifying the sealed finding."
+        "Restore distributed limiter backend health before claiming authenticated MCP availability, then complete a fresh security rescan."
       ]
     },
     {

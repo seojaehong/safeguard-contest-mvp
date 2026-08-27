@@ -37,12 +37,12 @@ The sealed finding remains unchanged. This report records a remediation candidat
 
 ## Current live refresh
 
-Production commit `87025eb89280d75c7232ec2812a9ddb19a961ef3` was re-probed with an intentionally invalid, non-secret bearer and a two-byte JSON body. `/api/mcp/mcp` returned `401` with `X-SafeClaw-Rate-Limit: instance`; no MCP tool dispatch, provider call, or mutation was performed. This is current invalid-token admission evidence only. It does not substitute for a valid authenticated 96 KiB boundary probe, distributed activation, or a fresh security scan.
+Production commit `65f7d839d64a1aefc9e275764497bcd5eab0174b` was re-probed with an intentionally invalid, non-secret bearer and a two-byte JSON body. `/api/mcp/mcp` returned `503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE` with `X-SafeClaw-Rate-Limit: distributed` and `Retry-After: 5`. This proves distributed admission is configured but currently unhealthy, and that the request fails closed before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification passes 3 files / 65 focused tests and 8 files / 126 adjacent MCP tests with zero dependency vulnerabilities. This does not substitute for restored distributed backend health, a valid authenticated 96 KiB boundary probe, or a fresh security scan.
 
 ## Boundaries
 
 - The product source is deployed, but a valid authenticated runtime body/rate-limit probe is pending.
 - A fresh security rescan is still required before the canonical finding can be reclassified.
-- Production distributed limiter activation remains open.
+- Production distributed limiter activation is observed; distributed backend health remains open.
 - No DB, provider, Share-session, embedding/vector, wiki, or KOSHA exact-registry mutation occurred.
 - Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.

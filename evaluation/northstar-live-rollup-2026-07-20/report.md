@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-27T08:46:03.562Z
-Source HEAD at generation: fbe35641a7f870570d242e1bdf3b5bf30d512f83
-Live commit at generation: fbe35641a7f870570d242e1bdf3b5bf30d512f83
+Generated at: 2026-08-27T11:26:22.022Z
+Source HEAD at generation: 65f7d839d64a1aefc9e275764497bcd5eab0174b
+Live commit at generation: 65f7d839d64a1aefc9e275764497bcd5eab0174b
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -231,7 +231,7 @@ Overall: `northstar_open_approval_gated`
 - Verdict: `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING`
 - POST body budget: 98304 bytes; adjacent tests=77
 - Valid authenticated runtime probe pending: true
-- Distributed activation pending: true; fresh rescan required: true
+- Distributed activation pending: false; fresh rescan required: true
 - Exact saved Share: MISSING_EVIDENCE
 - Boundary: live instance admission is not a distributed multi-instance or canonical rescan closure claim.
 

@@ -961,6 +961,10 @@ type NextRunwayReport = {
     adjacentTests: number | null;
     validAuthenticatedRuntimeProbeRequired: boolean;
     distributedActivationRequired: boolean;
+    distributedHealthRequired: boolean;
+    currentRefreshStatus: number | null;
+    currentRefreshRateLimitMode: string;
+    currentRefreshErrorCode: string;
     freshRescanRequired: boolean;
     exactSavedShareVerdict: string;
   };
@@ -2643,9 +2647,17 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     sourceHeadMatchesProduction: true,
     currentSourceContract: { postBodyMaxBytes: 98304 },
     verification: { adjacentMcp: { tests: 77 } },
+    currentLiveRefresh: {
+      probe: {
+        status: 503,
+        rateLimitHeader: "distributed",
+        errorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      },
+    },
     remainingBoundaries: {
       validAuthenticatedRuntimeProbeRequired: true,
-      distributedProductionActivationRequired: true,
+      distributedProductionActivationRequired: false,
+      distributedProductionHealthRequired: true,
       freshSecurityRescanRequired: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
@@ -4222,7 +4234,11 @@ describe("northstar next runway generator", () => {
       postBodyMaxBytes: 98304,
       adjacentTests: 77,
       validAuthenticatedRuntimeProbeRequired: true,
-      distributedActivationRequired: true,
+      distributedActivationRequired: false,
+      distributedHealthRequired: true,
+      currentRefreshStatus: 503,
+      currentRefreshRateLimitMode: "distributed",
+      currentRefreshErrorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
       freshRescanRequired: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });

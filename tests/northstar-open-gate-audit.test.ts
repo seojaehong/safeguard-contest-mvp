@@ -4847,7 +4847,7 @@ function createFixtureRoot(): string {
       liveReadOnlyProbe: { status: 401, authenticationFailedClosed: true, validAuthenticatedBudgetProbeExecuted: false },
     },
     currentLiveRefresh: {
-      verdict: "PASS_LIVE_PRODUCTION_MCP_INVALID_TOKEN_ADMISSION_REFRESH",
+      verdict: "PASS_LIVE_PRODUCTION_MCP_PREAUTH_ADMISSION_FAIL_CLOSED_REFRESH",
       sourceHead: "fixture-sha",
       productionCommit: "fixture-sha",
       productionBranch: "master",
@@ -4858,12 +4858,24 @@ function createFixtureRoot(): string {
         method: "POST",
         credential: "intentionally_invalid_non_secret",
         requestBodyBytes: 2,
-        status: 401,
-        authenticationFailedClosed: true,
-        rateLimitHeader: "instance",
+        status: 503,
+        rateLimitHeader: "distributed",
+        errorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        retryAfterSeconds: 5,
+        distributedAdmissionConfigured: true,
+        distributedAdmissionHealthy: false,
+        distributedAdmissionFailedClosed: true,
+        authenticationNotReachedBecauseAdmissionFailedClosed: true,
         mcpToolDispatchPerformed: false,
         providerCallPerformed: false,
         validAuthenticatedBudgetProbeExecuted: false,
+      },
+      verification: {
+        focused: { files: 3, tests: 65, failed: 0, status: "PASS" },
+        adjacentMcp: { files: 8, tests: 126, failed: 0, status: "PASS" },
+        typecheck: "PASS",
+        build: { status: "PASS", staticPages: 28 },
+        dependencyAuditVulnerabilities: 0,
       },
       mutationBoundary: {
         dbMutationPerformed: false,
@@ -4878,7 +4890,8 @@ function createFixtureRoot(): string {
       liveAfterDeploymentRequired: false,
       validAuthenticatedRuntimeProbeRequired: true,
       freshSecurityRescanRequired: true,
-      distributedProductionActivationRequired: true,
+      distributedProductionActivationRequired: false,
+      distributedProductionHealthRequired: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       approvalGatedBoundariesUnchanged: true,
     },
@@ -6586,7 +6599,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       evidencePath: path.join("evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json"),
     });
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("96 KiB");
-    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("before any MCP tool dispatch");
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("8 files / 126 adjacent MCP tests");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("valid authenticated runtime probe");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "tenant_authorization_remediation")).toMatchObject({ state: "proven" });
@@ -8846,6 +8860,21 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")).toMatchObject({
       state: "contradicted",
     });
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("currentRefresh=false");
+  });
+
+  it("fails MCP generation security closed when distributed admission does not fail closed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      currentLiveRefresh: { probe: { distributedAdmissionFailedClosed: boolean } };
+    };
+    report.currentLiveRefresh.probe.distributedAdmissionFailedClosed = false;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.state).toBe("contradicted");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("currentRefresh=false");
   });
 

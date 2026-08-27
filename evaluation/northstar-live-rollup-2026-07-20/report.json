@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T08:46:03.562Z",
-  "head": "fbe35641a7f870570d242e1bdf3b5bf30d512f83",
+  "generatedAt": "2026-08-27T11:26:22.022Z",
+  "head": "65f7d839d64a1aefc9e275764497bcd5eab0174b",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "fbe35641a7f870570d242e1bdf3b5bf30d512f83",
+    "commitSha": "65f7d839d64a1aefc9e275764497bcd5eab0174b",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-k5k2srsiw-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-63jmmkl8j-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -301,7 +301,7 @@
       "id": "mcp_generation_work_budget_security",
       "state": "notice",
       "artifact": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
-      "detail": "Current production 87025eb8 re-proves MCP invalid-token 401 fail-closed with instance admission before any MCP tool dispatch, provider call, or mutation. The provider-admission companion preserves the 96 KiB measured body and authentication contracts through 122 adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Current production 65f7d839 proves distributed MCP admission is configured but unhealthy: the pre-auth guard returned 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE and failed closed before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification preserves the 96 KiB body contract with 3 files / 65 focused tests and 8 files / 126 adjacent MCP tests. Distributed activation is observed, while backend health, a valid authenticated runtime probe, and a fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "learning_export_renderer_security",
@@ -967,7 +967,11 @@
     "postBodyMaxBytes": 98304,
     "adjacentTests": 77,
     "validAuthenticatedRuntimeProbeRequired": true,
-    "distributedActivationRequired": true,
+    "distributedActivationRequired": false,
+    "distributedHealthRequired": true,
+    "currentRefreshStatus": 503,
+    "currentRefreshRateLimitMode": "distributed",
+    "currentRefreshErrorCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
     "freshRescanRequired": true,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
@@ -1733,9 +1737,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "fbe35641a7f870570d242e1bdf3b5bf30d512f83",
+      "sourceCommit": "65f7d839d64a1aefc9e275764497bcd5eab0174b",
       "sourceStatus": "exact",
-      "productionCommit": "fbe35641a7f870570d242e1bdf3b5bf30d512f83",
+      "productionCommit": "65f7d839d64a1aefc9e275764497bcd5eab0174b",
       "productionStatus": "matches_live"
     },
     {

@@ -2684,6 +2684,8 @@ function mcpGenerationWorkBudgetSecuritySummary(report) {
   const verification = isRecord(report.verification) ? report.verification : {};
   const adjacent = isRecord(verification.adjacentMcp) ? verification.adjacentMcp : {};
   const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const currentRefresh = isRecord(report.currentLiveRefresh) ? report.currentLiveRefresh : {};
+  const currentProbe = isRecord(currentRefresh.probe) ? currentRefresh.probe : {};
   return {
     verdict: asString(report.verdict),
     sourceHead: asString(report.sourceHead),
@@ -2693,6 +2695,10 @@ function mcpGenerationWorkBudgetSecuritySummary(report) {
     adjacentTests: typeof adjacent.tests === "number" ? adjacent.tests : null,
     validAuthenticatedRuntimeProbeRequired: asBoolean(remaining.validAuthenticatedRuntimeProbeRequired),
     distributedActivationRequired: asBoolean(remaining.distributedProductionActivationRequired),
+    distributedHealthRequired: asBoolean(remaining.distributedProductionHealthRequired),
+    currentRefreshStatus: typeof currentProbe.status === "number" ? currentProbe.status : null,
+    currentRefreshRateLimitMode: asString(currentProbe.rateLimitHeader),
+    currentRefreshErrorCode: asString(currentProbe.errorCode),
     freshRescanRequired: asBoolean(remaining.freshSecurityRescanRequired),
     exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
   };
