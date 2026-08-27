@@ -400,7 +400,19 @@ describe("workspace mobile share presentation", () => {
               primaryCount: primaryActions.length,
               channelCards: channelCards.map((card) => {
                 const rect = card.getBoundingClientRect();
-                return { width: Math.round(rect.width), height: Math.round(rect.height) };
+                const label = card.querySelector<HTMLElement>("strong");
+                const labelRect = label?.getBoundingClientRect();
+                const labelStyle = label ? getComputedStyle(label) : null;
+                const labelLineHeight = labelStyle ? Number.parseFloat(labelStyle.lineHeight) : 0;
+                return {
+                  width: Math.round(rect.width),
+                  height: Math.round(rect.height),
+                  label: label?.innerText ?? "",
+                  labelLineCount: labelRect && labelLineHeight > 0
+                    ? Math.round(labelRect.height / labelLineHeight)
+                    : 0,
+                  labelWhiteSpace: labelStyle?.whiteSpace ?? "missing"
+                };
               }),
               configCards: configCards.map((card) => {
                 const rect = card.getBoundingClientRect();
@@ -504,6 +516,8 @@ describe("workspace mobile share presentation", () => {
             for (const card of metrics.channelCards) {
               expect.soft(card.width, `${scenario.label} ${theme} channel card readable width`).toBeGreaterThanOrEqual(150);
               expect.soft(card.height, `${scenario.label} ${theme} channel card compact height`).toBeLessThanOrEqual(80);
+              expect.soft(card.labelLineCount, `${scenario.label} ${theme} ${card.label} channel label line count`).toBe(1);
+              expect.soft(card.labelWhiteSpace, `${scenario.label} ${theme} ${card.label} channel label wrapping`).toBe("nowrap");
             }
             writeFileSync(
               join(evidenceDirectory, `${scenario.label}-${theme}-share-config-collapse-metrics.json`),

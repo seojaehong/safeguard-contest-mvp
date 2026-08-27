@@ -137,6 +137,7 @@ describe("workspace share simplification", () => {
     expect(desktopShareBlock).toContain(".share-form-card {\n    grid-row: 2;\n    align-content: start;\n    min-height: 150px;");
     expect(desktopShareBlock).toContain("grid-row: 2;");
     expect(desktopShareBlock).toContain(".channel-grid {\n    grid-template-columns: repeat(3, minmax(0, 1fr));");
+    expect(desktopShareBlock).toContain(".channel-card strong {\n    flex: 0 0 auto;\n    white-space: nowrap;");
     expect(desktopShareBlock).toContain("position: sticky;");
     expect(desktopShareBlock).toContain("top: 88px;");
     expect(desktopShareBlock).toContain("min-height: min(400px, calc(100vh - 210px));");

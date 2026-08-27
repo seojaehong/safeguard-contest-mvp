@@ -15139,6 +15139,11 @@ body:has(.safeclaw-landing) :is(
     padding: 7px 6px;
   }
 
+  .command-center-shell.workspace-page-share .share-panel.workflow-panel .channel-card strong {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
   .command-center-shell.workspace-page-share .share-primary-action-row {
     grid-column: 1 / -1;
     grid-row: 1;
