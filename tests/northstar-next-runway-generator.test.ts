@@ -4245,6 +4245,7 @@ describe("northstar next runway generator", () => {
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "mcp_generation_work_budget_security",
       state: "notice",
+      reason: expect.stringContaining("activated but currently unhealthy"),
     }));
     expect(report.mcpProviderAdmission).toMatchObject({
       verdict: "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING",

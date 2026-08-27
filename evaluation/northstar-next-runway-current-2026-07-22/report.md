@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `b4c3e50db49468a6bfdaaed15451fd63a8d23b6f`
+Source HEAD: `c970664479f94a75aa14556b3c5ecf4be4846df2`
 
-Production `/api/build-info`: `b4c3e50db49468a6bfdaaed15451fd63a8d23b6f`
+Production `/api/build-info`: `c970664479f94a75aa14556b3c5ecf4be4846df2`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `b4c3e50db49468a6bfdaaed15451fd63a8d23b6f`
+Live rollup source head: `c970664479f94a75aa14556b3c5ecf4be4846df2`
 
 Live rollup matches production: `true`
 
@@ -74,7 +74,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Atomic database race remediation is approval-gated: `APPROVAL_REQUIRED_TRANSACTIONAL_DB_RACE_REMEDIATION_NO_MUTATION`, sealed findings still open `2`, approval required/performed `true/false`, migration authored `false`, DB mutation performed `false`, fresh scan required `true`, security-complete `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Fresh live Documents/workspace Share route perception is `PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP`: measured rows Documents/Share `2/2`, desktop Share regions `3`, route split alone accepted `false`, DB mutation `false`, and exact saved user session reproduced/verdict `false/MISSING_EVIDENCE`.
 - Live deployment freshness is measured separately: `PASS_LIVE_PRODUCTION_DEPLOYMENT_FRESHNESS_GUARD`, current notice present `false`, simulated SHA-drift refresh visible `true`, frontend audit violations `0`, and live pending `false`. This closes only stale-tab visibility; DB mutation remains `false` and exact saved Share remains `MISSING_EVIDENCE`.
-- MCP generation work-budget security is separately measured: `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING`, POST body budget `98304` bytes, adjacent tests `77`, valid authenticated runtime probe pending=`true`, distributed activation pending=`false`, and fresh rescan required=`true`. This notice preserves the sealed finding and exact saved Share `MISSING_EVIDENCE`.
+- MCP generation work-budget security is separately measured: `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING`, POST body budget `98304` bytes, adjacent tests `77`, valid authenticated runtime probe pending=`true`, distributed activation pending=`false`, distributed backend health pending=`true`, current refresh status/mode/error=`503/distributed/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`, and fresh rescan required=`true`. This notice preserves the sealed finding and exact saved Share `MISSING_EVIDENCE`.
 - Live Hermes reviewer authority UI is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`, local/live viewport contracts `8/8` and `8/8`, selected-only candidates/selected/body `3/1/1`, desktop/mobile columns `2/1`, and authority order `SIF -> KOSHA -> law -> organization_history -> site_history -> external_context`. Candidate tabs require linked tabpanel semantics, one roving tab stop, breakpoint-aware orientation, and Arrow/Home/End keyboard navigation; compact review panes require linked keyboard-operable tabs. Delayed decisions require live pending/settled status, busy semantics, and disabled competing actions `true/true/true/true`. Human review remains required and machine evidence does not replace it; no DB/provider/share/publication mutation is claimed. Exact saved Share remains `MISSING_EVIDENCE`, while LLM Wiki publication and Supabase RLS remain approval-gated.
 - Live Hermes decision visibility is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_DECISION_FIRST_VIEWPORT`, before/local/live passes `0/8`, `8/8`, and `8/8`. Desktop-short/mobile-short first-action bottoms are `532.44/622.75` inside 723px with `0` hit-test occlusions; every action remains locked until explicit candidate-and-evidence confirmation `true/true`. This does not complete human review `false`; exact saved Share remains `MISSING_EVIDENCE`, and Wiki/RLS/provider persistence remain `APPROVAL_GATED/APPROVAL_GATED/APPROVAL_GATED`.
 - Live Hermes candidate position is measured separately: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_CANDIDATE_POSITION`, local/live passes `8/8` and `8/8`, with candidate positions `1/3, 2/3, 3/3`. The prior visual/source baseline is not a retroactive RED runner claim `visual and source snapshot; no retroactive RED runner claim`. Human review remains incomplete, exact saved Share remains `MISSING_EVIDENCE`, and Wiki/RLS/provider persistence remain approval-gated.
