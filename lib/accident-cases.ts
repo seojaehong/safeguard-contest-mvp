@@ -316,14 +316,14 @@ function buildFatalAccidentUrlCandidates(question: string) {
 }
 
 function pickKeyword(question: string) {
-  const candidates = ["지붕", "비계", "추락", "고소", "개구부", "지게차", "충돌", "용접", "화재", "절단", "감전", "밀폐", "화학", "세척", "폭염", "온열"];
+  const candidates = ["지붕", "비계", "추락", "고소", "개구부", "동시작업", "양중", "크레인", "낙하물", "지게차", "충돌", "방호장치", "자동화설비", "끼임", "기동", "정비", "보전", "용접", "화재", "절단", "감전", "밀폐", "화학", "세척", "폭염", "온열"];
   return candidates.find((keyword) => question.includes(keyword)) || "산업재해";
 }
 
 function pickBusiness(question: string) {
-  if (["건설", "비계", "추락", "외벽", "지붕", "고소", "개구부"].some((keyword) => question.includes(keyword))) return "건설업";
+  if (["건설", "증축", "비계", "추락", "외벽", "지붕", "고소", "개구부"].some((keyword) => question.includes(keyword))) return "건설업";
   if (["조선", "선박", "조선소"].some((keyword) => question.includes(keyword))) return "조선업";
-  if (["제조", "용접", "절단", "금속"].some((keyword) => question.includes(keyword))) return "제조업";
+  if (["제조", "용접", "절단", "금속", "방호장치", "자동화설비", "컨베이어", "프레스", "정비", "보전"].some((keyword) => question.includes(keyword))) return "제조업";
   if (["물류", "지게차", "상하차", "창고", "청소", "세척", "서비스", "시설"].some((keyword) => question.includes(keyword))) return "서비스업";
   return "";
 }
@@ -353,6 +353,16 @@ function rankAccidentCase(question: string, item: AccidentCaseWithMeta): RankedA
     "떨어",
     "지게차",
     "충돌",
+    "동시작업",
+    "양중",
+    "크레인",
+    "낙하물",
+    "방호장치",
+    "자동화설비",
+    "끼임",
+    "기동",
+    "정비",
+    "보전",
     "끼임",
     "용접",
     "절단",
@@ -496,6 +506,24 @@ export function selectFallbackAccidentCases(question: string): AccidentCase[] {
       preventionPoint: "물·그늘·휴식 기준을 작업 전에 정하고 어지러움·두통·구토감이 있으면 즉시 작업을 중지해 시원한 장소로 이동합니다.",
       sourceUrl: FALLBACK_SOURCE_URL,
       matchedReason: "폭염·고온·온열질환 작업조건과 직접 연결되는 예방 사례입니다."
+    },
+    {
+      title: "자동화설비 정비 중 끼임·예기치 않은 기동 재해사례",
+      industry: "제조업",
+      accidentType: "끼임",
+      summary: "방호장치를 해제한 자동화설비를 정비할 때 에너지원이 차단되지 않거나 잔류에너지가 남으면 예기치 않은 기동과 끼임으로 이어질 수 있습니다.",
+      preventionPoint: "정비 전 전원·공압·유압을 차단하고 잠금표지(LOTO), 잔류에너지 해소, 무전압·무구동 확인 후 방호장치를 복구합니다.",
+      sourceUrl: FALLBACK_SOURCE_URL,
+      matchedReason: "자동화설비·방호장치·끼임·예기치 않은 기동·LOTO 조건과 직접 연결되는 예방 사례입니다."
+    },
+    {
+      title: "상하부 양중·화기 동시작업 중 낙하물·화재 재해사례",
+      industry: "건설업",
+      accidentType: "낙하물·화재",
+      summary: "상부 크레인 양중과 하부 화기작업을 동시에 수행하면 낙하물이 하부 작업자를 가격하거나 불티가 양중물·가연물에 옮겨붙을 수 있습니다.",
+      preventionPoint: "상하부 작업구역과 시간을 분리하고 양중구역 출입통제, 신호수, 화재감시자, 가연물 제거와 공정 간 작업순서를 함께 확인합니다.",
+      sourceUrl: FALLBACK_SOURCE_URL,
+      matchedReason: "상하부 동시작업·크레인 양중·화기작업의 교차위험과 직접 연결되는 예방 사례입니다."
     }
   ];
 
@@ -504,9 +532,17 @@ export function selectFallbackAccidentCases(question: string): AccidentCase[] {
       ? [...cases, fallback[5]]
       : cases;
 
+  const simultaneousLiftingHotwork = ["동시작업", "동시 작업"].some((keyword) => lower.includes(keyword))
+    || (/상부.*하부|하부.*상부/u.test(lower));
+  if (simultaneousLiftingHotwork
+    && ["양중", "크레인"].some((keyword) => lower.includes(keyword))
+    && ["화기", "용접", "절단", "불티"].some((keyword) => lower.includes(keyword))) {
+    return appendHeatCase([fallback[7]]);
+  }
   if (["세척", "화학", "청소"].some((keyword) => lower.includes(keyword))) return appendHeatCase([fallback[3]]);
   if (["지게차", "물류", "상하차", "창고", "피킹"].some((keyword) => lower.includes(keyword))) return appendHeatCase([fallback[1]]);
-  if (["용접", "절단", "화기", "제조"].some((keyword) => lower.includes(keyword))) return appendHeatCase([fallback[2]]);
+  if (["방호장치", "자동화설비", "예기치 않은 기동", "loto", "끼임", "컨베이어", "프레스", "설비 정비", "설비 보전"].some((keyword) => lower.includes(keyword))) return appendHeatCase([fallback[6]]);
+  if (["용접", "절단", "화기"].some((keyword) => lower.includes(keyword))) return appendHeatCase([fallback[2]]);
   if (["기계실", "감전", "지하", "시설"].some((keyword) => lower.includes(keyword))) return appendHeatCase([fallback[4]]);
   if (["지붕", "고소", "개구부", "비계", "추락", "외벽"].some((keyword) => lower.includes(keyword))) return appendHeatCase([fallback[0]]);
   if (["폭염", "고온", "온열", "자외선"].some((keyword) => lower.includes(keyword))) return [fallback[5]];

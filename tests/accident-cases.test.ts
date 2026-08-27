@@ -45,10 +45,45 @@ describe("selectFallbackAccidentCases", () => {
     expect(surface).not.toMatch(/지게차|상하차|용접|화재|기계실/);
   });
 
+  it("keeps automation-equipment maintenance evidence limited to guarding and unexpected startup", () => {
+    const cases = selectFallbackAccidentCases(
+      "구미 전자부품 공장 자동화설비 방호장치 개선과 정비 작업. 끼임과 예기치 않은 기동을 다루되 KOSHA Guide는 기술지침으로 참고한다."
+    );
+    const surface = JSON.stringify(cases);
+
+    expect(cases).toHaveLength(1);
+    expect(cases[0]?.title).toContain("자동화설비 정비");
+    expect(surface).toMatch(/방호장치|LOTO|잔류에너지/);
+    expect(surface).not.toMatch(/지게차|상하차|용접|화재|비계|추락|기계실|세척 작업/);
+  });
+
+  it("retains the representative fallback only for an unspecified general question", () => {
+    const cases = selectFallbackAccidentCases("산업안전 실무 질문");
+
+    expect(cases.map((item) => item.title)).toEqual([
+      "이동식 비계 작업 중 추락 재해사례",
+      "지게차 후진 중 보행자 충돌 재해사례",
+      "용접 불티에 의한 화재 재해사례"
+    ]);
+  });
+
+  it("prioritizes simultaneous lifting and hot-work cross-risk over a logistics site label", () => {
+    const cases = selectFallbackAccidentCases(
+      "평택 물류창고 증축 현장. 상부에서는 크레인 양중, 하부에서는 배관 화기작업을 동시에 계획하고 있어 낙하물과 불티 교차위험이 있다."
+    );
+    const surface = JSON.stringify(cases);
+
+    expect(cases).toHaveLength(1);
+    expect(cases[0]?.title).toContain("양중·화기 동시작업");
+    expect(surface).toMatch(/작업구역과 시간을 분리|출입통제|작업순서/);
+    expect(surface).not.toMatch(/지게차 후진|화학물질 노출|기계실 점검|비계 작업/);
+  });
+
   it.each([
     ["물류센터 지게차 상하차 작업", /추락|용접|기계실/],
     ["제조공장 용접 화기작업", /지게차|기계실|세척 작업/],
     ["지하 기계실 감전 점검 작업", /지게차|용접|세척 작업/],
+    ["자동화설비 방호장치 정비 작업", /지게차|용접|추락|기계실|세척 작업/],
     ["공장 화학세척 작업", /지게차|용접|기계실/]
   ])("does not mix unrelated fallback industries into explicit work: %s", (question, forbidden) => {
     expect(serializeCases(question)).not.toMatch(forbidden);
