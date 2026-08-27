@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T20:00:00.318Z",
-  "head": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+  "generatedAt": "2026-08-27T20:32:29.542Z",
+  "head": "48cdb1ebdf066adf04d11dc452909241157a93a5",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+    "commitSha": "48cdb1ebdf066adf04d11dc452909241157a93a5",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-3lyf2lnkk-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-kb74y73xa-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_evidence_missing_or_unknown",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "contradicted",
-    "gateCount": 77
+    "gateCount": 78
   },
   "provenGates": [
     {
@@ -214,6 +214,12 @@
       "detail": "Live production source now keeps safety-reference status admission occupied until the real catalog, corpus, and exact-registry aggregate settles after disconnect. Two disconnected tasks continue to consume the two-slot concurrency budget and a third request is rejected. The sealed finding remains open pending a fresh full scan; distributed activation and exact saved Share MISSING_EVIDENCE remain unchanged."
     },
     {
+      "id": "weather_fallback_error_redaction_security",
+      "state": "notice",
+      "artifact": "evaluation\\weather-fallback-error-redaction-2026-08-28\\report.json",
+      "detail": "Live production source now keeps raw failures from all eight weather provider fallbacks in server logs and exposes only fixed public details. Production remains fail-closed before provider work while durable admission is absent. The sealed finding still needs a fresh full scan; distributed activation and exact saved Share MISSING_EVIDENCE remain open."
+    },
+    {
       "id": "post_remediation_repository_security_scan",
       "state": "notice",
       "artifact": "evaluation\\post-remediation-full-repository-security-scan-2026-08-14\\report.json",
@@ -260,12 +266,6 @@
       "state": "notice",
       "artifact": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
       "detail": "Current production 99c7df72 requires distributed admission before body parsing on both public generation routes. The before-live 400/instance behavior is preserved, while local and live after-remediation probes return 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before reference search, AI/provider work, or DB mutation when configurationState=absent. Distributed activation and a fresh scan remain open; the immutable baseline is preserved, and exact saved Share remains MISSING_EVIDENCE."
-    },
-    {
-      "id": "security_followup_remediation",
-      "state": "proven",
-      "artifact": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
-      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (covered by another current receipt). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "mcp_generation_work_budget_security",
@@ -743,6 +743,27 @@
     "liveStatus": 503,
     "liveCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
     "liveWorkUnit": "safety-reference-status",
+    "freshRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "distributedAdmissionActivation": "OPERATOR_CONFIGURATION_REQUIRED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "weatherFallbackErrorRedaction": {
+    "artifact": "evaluation\\weather-fallback-error-redaction-2026-08-28\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_WEATHER_FALLBACK_ERROR_REDACTION_SOURCE_REMEDIATED",
+    "sourceHead": "48cdb1ebdf066adf04d11dc452909241157a93a5",
+    "productionCommit": "48cdb1ebdf066adf04d11dc452909241157a93a5",
+    "scanId": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    "findingId": "csf_fdda99ed09c6fb65bc74caff",
+    "findingSlug": "weather-fallback-error-exposure",
+    "providerFallbackBranchCount": 8,
+    "allProviderFallbackBranchesUseFixedPublicDetail": true,
+    "rawProviderErrorsLoggedServerSide": true,
+    "aggregateWeatherDetailOmitsRawProviderErrors": true,
+    "testsPassed": 16,
+    "liveStatus": 503,
+    "liveCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "liveRateLimitHeader": "distributed",
     "freshRescanRequired": true,
     "securityCompleteClaimAllowed": false,
     "distributedAdmissionActivation": "OPERATOR_CONFIGURATION_REQUIRED",
@@ -1782,9 +1803,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+      "sourceCommit": "48cdb1ebdf066adf04d11dc452909241157a93a5",
       "sourceStatus": "exact",
-      "productionCommit": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+      "productionCommit": "48cdb1ebdf066adf04d11dc452909241157a93a5",
       "productionStatus": "matches_live"
     },
     {
@@ -2039,8 +2060,16 @@
       "id": "safety_status_disconnect_lease_security",
       "artifact": "evaluation\\safety-status-disconnect-lease-2026-08-28\\report.json",
       "sourceCommit": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "weather_fallback_error_redaction_security",
+      "artifact": "evaluation\\weather-fallback-error-redaction-2026-08-28\\report.json",
+      "sourceCommit": "48cdb1ebdf066adf04d11dc452909241157a93a5",
+      "sourceStatus": "exact",
+      "productionCommit": "48cdb1ebdf066adf04d11dc452909241157a93a5",
       "productionStatus": "matches_live"
     },
     {

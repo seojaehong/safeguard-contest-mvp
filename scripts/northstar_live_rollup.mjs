@@ -49,6 +49,7 @@ const ARTIFACTS = Object.freeze({
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-28", "report.json"),
   shareAckPreBodyAdmission: path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
   safetyStatusDisconnectLease: path.join("evaluation", "safety-status-disconnect-lease-2026-08-28", "report.json"),
+  weatherFallbackErrorRedaction: path.join("evaluation", "weather-fallback-error-redaction-2026-08-28", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
@@ -568,6 +569,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const freshCurrentSourceSecurityScan = tryReadJson(rootDir, ARTIFACTS.freshCurrentSourceSecurityScan);
   const shareAckPreBodyAdmission = tryReadJson(rootDir, ARTIFACTS.shareAckPreBodyAdmission);
   const safetyStatusDisconnectLease = tryReadJson(rootDir, ARTIFACTS.safetyStatusDisconnectLease);
+  const weatherFallbackErrorRedaction = tryReadJson(rootDir, ARTIFACTS.weatherFallbackErrorRedaction);
   const agentChatDurableAdmission = tryReadJson(rootDir, ARTIFACTS.agentChatDurableAdmission);
   const mcpProviderAdmission = tryReadJson(rootDir, ARTIFACTS.mcpProviderAdmission);
   const shareRecipientContactVerification = tryReadJson(rootDir, ARTIFACTS.shareRecipientContactVerification);
@@ -706,6 +708,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "fresh_current_source_security_scan", ARTIFACTS.freshCurrentSourceSecurityScan, freshCurrentSourceSecurityScan),
     evidenceStatus(rootDir, currentHead, liveCommit, "share_ack_prebody_admission_security", ARTIFACTS.shareAckPreBodyAdmission, shareAckPreBodyAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "safety_status_disconnect_lease_security", ARTIFACTS.safetyStatusDisconnectLease, safetyStatusDisconnectLease),
+    evidenceStatus(rootDir, currentHead, liveCommit, "weather_fallback_error_redaction_security", ARTIFACTS.weatherFallbackErrorRedaction, weatherFallbackErrorRedaction),
     evidenceStatus(rootDir, currentHead, liveCommit, "agent_chat_durable_admission_security", ARTIFACTS.agentChatDurableAdmission, agentChatDurableAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "mcp_provider_admission_security", ARTIFACTS.mcpProviderAdmission, mcpProviderAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "share_recipient_contact_verification_security", ARTIFACTS.shareRecipientContactVerification, shareRecipientContactVerification),
@@ -1015,6 +1018,27 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       securityCompleteClaimAllowed: recordAt(safetyStatusDisconnectLease, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
       distributedAdmissionActivation: asString(recordAt(safetyStatusDisconnectLease, "remainingBoundaries")?.distributedAdmissionActivation),
       exactSavedShareVerdict: asString(recordAt(safetyStatusDisconnectLease, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    weatherFallbackErrorRedaction: {
+      artifact: ARTIFACTS.weatherFallbackErrorRedaction,
+      verdict: isRecord(weatherFallbackErrorRedaction) ? asString(weatherFallbackErrorRedaction.verdict) : "missing",
+      sourceHead: isRecord(weatherFallbackErrorRedaction) ? asString(weatherFallbackErrorRedaction.sourceHead) : "",
+      productionCommit: isRecord(weatherFallbackErrorRedaction) ? asString(weatherFallbackErrorRedaction.productionCommit) : "",
+      scanId: asString(recordAt(weatherFallbackErrorRedaction, "finding")?.scanId),
+      findingId: asString(recordAt(weatherFallbackErrorRedaction, "finding")?.findingId),
+      findingSlug: asString(recordAt(weatherFallbackErrorRedaction, "finding")?.slug),
+      providerFallbackBranchCount: asNumber(recordAt(weatherFallbackErrorRedaction, "currentSourceContract")?.providerFallbackBranchCount),
+      allProviderFallbackBranchesUseFixedPublicDetail: recordAt(weatherFallbackErrorRedaction, "currentSourceContract")?.allProviderFallbackBranchesUseFixedPublicDetail === true,
+      rawProviderErrorsLoggedServerSide: recordAt(weatherFallbackErrorRedaction, "currentSourceContract")?.rawProviderErrorsLoggedServerSide === true,
+      aggregateWeatherDetailOmitsRawProviderErrors: recordAt(weatherFallbackErrorRedaction, "currentSourceContract")?.aggregateWeatherDetailOmitsRawProviderErrors === true,
+      testsPassed: asNumber(recordAt(recordAt(weatherFallbackErrorRedaction, "verification"), "focusedAndAdjacentTests")?.testsPassed),
+      liveStatus: asNumber(recordAt(weatherFallbackErrorRedaction, "liveProbe")?.status),
+      liveCode: asString(recordAt(weatherFallbackErrorRedaction, "liveProbe")?.code),
+      liveRateLimitHeader: asString(recordAt(weatherFallbackErrorRedaction, "liveProbe")?.rateLimitHeader),
+      freshRescanRequired: recordAt(weatherFallbackErrorRedaction, "remainingBoundaries")?.freshFullRepositoryRescanRequiredForScanClosure === true,
+      securityCompleteClaimAllowed: recordAt(weatherFallbackErrorRedaction, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      distributedAdmissionActivation: asString(recordAt(weatherFallbackErrorRedaction, "remainingBoundaries")?.distributedAdmissionActivation),
+      exactSavedShareVerdict: asString(recordAt(weatherFallbackErrorRedaction, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     publicSearchDistributedRateLimitReadiness: {
       artifact: ARTIFACTS.publicSearchDistributedRateLimitReadiness,

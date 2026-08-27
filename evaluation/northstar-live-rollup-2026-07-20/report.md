@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-27T20:00:00.318Z
-Source HEAD at generation: 6c57425a1fbccc61c265c84f18bc24e902ade37f
-Live commit at generation: 6c57425a1fbccc61c265c84f18bc24e902ade37f
+Generated at: 2026-08-27T20:32:29.542Z
+Source HEAD at generation: 48cdb1ebdf066adf04d11dc452909241157a93a5
+Live commit at generation: 48cdb1ebdf066adf04d11dc452909241157a93a5
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_evidence_missing_or_unknown`
@@ -423,6 +423,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | fresh_current_source_security_scan | notice | evaluation\current-source-standard-security-scan-2026-08-28\report.json |
 | share_ack_prebody_admission_security | notice | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | notice | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
+| weather_fallback_error_redaction_security | notice | evaluation\weather-fallback-error-redaction-2026-08-28\report.json |
 | post_remediation_repository_security_scan | notice | evaluation\post-remediation-full-repository-security-scan-2026-08-14\report.json |
 | agent_chat_durable_admission_security | notice | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
 | security_resource_remediation | proven | evaluation\security-resource-remediation-2026-08-11\report.json |
@@ -431,7 +432,6 @@ Overall: `northstar_evidence_missing_or_unknown`
 | improvement_photo_analysis_budget | notice | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_search_distributed_rate_limit_readiness | notice | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | notice | evaluation\security-public-generation-admission-2026-08-04\report.json |
-| security_followup_remediation | proven | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
 | mcp_generation_work_budget_security | notice | evaluation\security-mcp-generation-work-budget-2026-08-04\report.json |
 | learning_export_renderer_security | proven | evaluation\learning-export-renderer-security-2026-08-02\report.json |
 | hermes_remote_durable_ledger | proven | evaluation\hermes-openclaw-runtime-current-gate-2026-07-20\report.json |
@@ -497,7 +497,8 @@ Overall: `northstar_evidence_missing_or_unknown`
 | current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | fresh_current_source_security_scan | ancestor | missing | evaluation\current-source-standard-security-scan-2026-08-28\report.json |
 | share_ack_prebody_admission_security | ancestor | ancestor_of_head | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
-| safety_status_disconnect_lease_security | exact | matches_live | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
+| safety_status_disconnect_lease_security | ancestor | ancestor_of_head | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
+| weather_fallback_error_redaction_security | exact | matches_live | evaluation\weather-fallback-error-redaction-2026-08-28\report.json |
 | agent_chat_durable_admission_security | ancestor | ancestor_of_head | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
 | mcp_provider_admission_security | ancestor | ancestor_of_head | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
 | share_recipient_contact_verification_security | ancestor | ancestor_of_head | evaluation\share-recipient-contact-verification-2026-08-14\report.json |

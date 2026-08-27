@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "safeclaw-weather-fallback-error-redaction/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_WEATHER_FALLBACK_ERROR_REDACTION_SOURCE_REMEDIATED",
+  "generatedAt": "2026-08-28T05:12:00+09:00",
+  "sourceHead": "48cdb1ebdf066adf04d11dc452909241157a93a5",
+  "productCommit": "48cdb1ebdf066adf04d11dc452909241157a93a5",
+  "productionCommit": "48cdb1ebdf066adf04d11dc452909241157a93a5",
+  "productionBuild": {
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-kb74y73xa-seojaehongs-projects.vercel.app"
+  },
+  "finding": {
+    "scanId": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    "findingId": "csf_fdda99ed09c6fb65bc74caff",
+    "occurrenceId": "occ_e54c99614cfa49feb5b55ffc",
+    "slug": "weather-fallback-error-exposure",
+    "ruleId": "information-exposure.upstream-errors",
+    "title": "Weather fallback responses still expose raw upstream error text",
+    "beforeSource": "899951952ee184d527742d541f976f7e72482f2e",
+    "beforeEvidence": "evaluation/current-source-standard-security-scan-2026-08-28/findings/weather-fallback-error-exposure/weather-fallback-error-exposure.md"
+  },
+  "currentSourceContract": {
+    "providerFallbackBranchCount": 8,
+    "allProviderFallbackBranchesUseFixedPublicDetail": true,
+    "rawProviderErrorsLoggedServerSide": true,
+    "aggregateWeatherDetailOmitsRawProviderErrors": true,
+    "signalDetailsOmitRawProviderErrors": true,
+    "callerAbortStillPropagatesBeforeFallbackProjection": true,
+    "privateUpstreamDiagnosticsRemainServerOnly": true
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "command": "npm.cmd test -- tests/upstream-integration-security.test.ts tests/weather-route-budget.test.ts tests/provider-descendant-cancellation.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFiles": 3,
+      "testsPassed": 16,
+      "testsFailed": 0
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPagesPassed": 28,
+      "staticPagesFailed": 0
+    }
+  },
+  "liveProbe": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "method": "GET",
+    "route": "/api/weather?question=서울%20옥외%20폭염%20작업&codexCacheBust=48cdb1eb-live2",
+    "status": 503,
+    "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "rateLimitHeader": "distributed",
+    "retryAfterSeconds": 5,
+    "providerWorkReached": false,
+    "rawProviderErrorObserved": false,
+    "interpretation": "The deployed route fails closed at durable distributed admission before provider work. Every provider fallback branch is covered by the bounded source regression, which proves raw diagnostics remain server-side without inducing live provider failures."
+  },
+  "remainingBoundaries": {
+    "findingSourceRemediated": true,
+    "freshFullRepositoryRescanRequiredForScanClosure": true,
+    "securityCompleteClaimAllowed": false,
+    "distributedAdmissionActivation": "OPERATOR_CONFIGURATION_REQUIRED",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "readConfirmationInserted": false,
+    "providerDispatchCalled": false,
+    "vectorRuntimeCalled": false,
+    "wikiPublished": false,
+    "koshaRegistryMutationPerformed": false
+  }
+}

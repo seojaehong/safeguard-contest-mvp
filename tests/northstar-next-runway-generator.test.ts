@@ -541,6 +541,26 @@ type NextRunwayReport = {
     distributedAdmissionActivation: string;
     exactSavedShareVerdict: string;
   };
+  weatherFallbackErrorRedaction: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    scanId: string;
+    findingId: string;
+    findingSlug: string;
+    providerFallbackBranchCount: number | null;
+    allProviderFallbackBranchesUseFixedPublicDetail: boolean;
+    rawProviderErrorsLoggedServerSide: boolean;
+    aggregateWeatherDetailOmitsRawProviderErrors: boolean;
+    testsPassed: number | null;
+    liveStatus: number | null;
+    liveCode: string;
+    liveRateLimitHeader: string;
+    freshRescanRequired: boolean;
+    securityCompleteClaimAllowed: boolean;
+    distributedAdmissionActivation: string;
+    exactSavedShareVerdict: string;
+  };
   publicSearchDistributedRateLimitReadiness: {
     verdict: string;
     sourceHead: string;
@@ -1489,6 +1509,33 @@ function safetyStatusDisconnectLeaseFixture(sourceHead: string): Record<string, 
     },
     verification: { focusedAndAdjacentTests: { testsPassed: 16 } },
     liveProbe: { status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", workUnitHeader: "safety-reference-status" },
+    remainingBoundaries: {
+      freshFullRepositoryRescanRequiredForScanClosure: true,
+      securityCompleteClaimAllowed: false,
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  };
+}
+
+function weatherFallbackErrorRedactionFixture(sourceHead: string): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_WEATHER_FALLBACK_ERROR_REDACTION_SOURCE_REMEDIATED",
+    sourceHead,
+    productionCommit: sourceHead,
+    finding: {
+      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+      findingId: "csf_fdda99ed09c6fb65bc74caff",
+      slug: "weather-fallback-error-exposure",
+    },
+    currentSourceContract: {
+      providerFallbackBranchCount: 8,
+      allProviderFallbackBranchesUseFixedPublicDetail: true,
+      rawProviderErrorsLoggedServerSide: true,
+      aggregateWeatherDetailOmitsRawProviderErrors: true,
+    },
+    verification: { focusedAndAdjacentTests: { testsPassed: 16 } },
+    liveProbe: { status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimitHeader: "distributed" },
     remainingBoundaries: {
       freshFullRepositoryRescanRequiredForScanClosure: true,
       securityCompleteClaimAllowed: false,
@@ -3129,6 +3176,11 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     "evaluation/safety-status-disconnect-lease-2026-08-28/report.json",
     safetyStatusDisconnectLeaseFixture(firstHead),
   );
+  writeJson(
+    root,
+    "evaluation/weather-fallback-error-redaction-2026-08-28/report.json",
+    weatherFallbackErrorRedactionFixture(firstHead),
+  );
   writeJson(root, "evaluation/final-99-12-document-no-mutation-2026-08-17/report.json", {
     schema: "safeclaw-final-99-12-document-no-mutation/v1",
     verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED",
@@ -4387,6 +4439,11 @@ describe("northstar next runway generator", () => {
       state: "notice",
       reason: expect.stringContaining("underlying work settles"),
     }));
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "weather_fallback_error_redaction_security",
+      state: "notice",
+      reason: expect.stringContaining("provider fallback diagnostics server-side"),
+    }));
     expect(report.freshCurrentSourceSecurityScan).toMatchObject({
       verdict: "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE",
       scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
@@ -4440,6 +4497,26 @@ describe("northstar next runway generator", () => {
       liveStatus: 503,
       liveCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
       liveWorkUnit: "safety-reference-status",
+      freshRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.weatherFallbackErrorRedaction).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_WEATHER_FALLBACK_ERROR_REDACTION_SOURCE_REMEDIATED",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+      findingId: "csf_fdda99ed09c6fb65bc74caff",
+      findingSlug: "weather-fallback-error-exposure",
+      providerFallbackBranchCount: 8,
+      allProviderFallbackBranchesUseFixedPublicDetail: true,
+      rawProviderErrorsLoggedServerSide: true,
+      aggregateWeatherDetailOmitsRawProviderErrors: true,
+      testsPassed: 16,
+      liveStatus: 503,
+      liveCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      liveRateLimitHeader: "distributed",
       freshRescanRequired: true,
       securityCompleteClaimAllowed: false,
       distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",

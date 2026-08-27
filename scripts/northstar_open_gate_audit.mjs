@@ -70,6 +70,7 @@ const EVIDENCE_PATHS = Object.freeze({
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-28", "report.json"),
   shareAckPreBodyAdmission: path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
   safetyStatusDisconnectLease: path.join("evaluation", "safety-status-disconnect-lease-2026-08-28", "report.json"),
+  weatherFallbackErrorRedaction: path.join("evaluation", "weather-fallback-error-redaction-2026-08-28", "report.json"),
   postRemediationRepositorySecurityScan: path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "report.json"),
   postRemediationSecuritySourceClosure: path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"),
   shareSessionRevocationRemediation: path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"),
@@ -8220,6 +8221,96 @@ function evaluateSafetyStatusDisconnectLeaseGate(rootDir) {
   });
 }
 
+const WEATHER_FALLBACK_ERROR_REDACTION_PATHS = [
+  "lib/weather.ts",
+  "tests/upstream-integration-security.test.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateWeatherFallbackErrorRedactionGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.weatherFallbackErrorRedaction;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "weather_fallback_error_redaction_security",
+      label: "Weather fallback error redaction security",
+      state: "missing",
+      evidencePath,
+      detail: "Weather fallback error redaction evidence is missing or invalid.",
+      nextActions: ["Restore the no-mutation source/live receipt without inducing provider failure."],
+    });
+  }
+
+  const finding = isRecord(report.finding) ? report.finding : {};
+  const contract = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacentTests) ? verification.focusedAndAdjacentTests : {};
+  const typecheck = isRecord(verification.typecheck) ? verification.typecheck : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const live = isRecord(report.liveProbe) ? report.liveProbe : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.shareSessionCreated === false
+    && mutation.readConfirmationInserted === false
+    && mutation.providerDispatchCalled === false
+    && mutation.vectorRuntimeCalled === false
+    && mutation.wikiPublished === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_WEATHER_FALLBACK_ERROR_REDACTION_SOURCE_REMEDIATED"
+    && sourceHead === productionCommit
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, WEATHER_FALLBACK_ERROR_REDACTION_PATHS)
+    && readString(finding.scanId) === "1411fb32-5c18-4d6a-b8ba-d52697757d8a"
+    && readString(finding.findingId) === "csf_fdda99ed09c6fb65bc74caff"
+    && readString(finding.slug) === "weather-fallback-error-exposure"
+    && readString(finding.ruleId) === "information-exposure.upstream-errors"
+    && readNumber(contract.providerFallbackBranchCount) === 8
+    && contract.allProviderFallbackBranchesUseFixedPublicDetail === true
+    && contract.rawProviderErrorsLoggedServerSide === true
+    && contract.aggregateWeatherDetailOmitsRawProviderErrors === true
+    && contract.signalDetailsOmitRawProviderErrors === true
+    && contract.callerAbortStillPropagatesBeforeFallbackProjection === true
+    && contract.privateUpstreamDiagnosticsRemainServerOnly === true
+    && readNumber(focused.testFiles) === 3
+    && readNumber(focused.testsPassed) === 16
+    && readNumber(focused.testsFailed) === 0
+    && readString(typecheck.status) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPagesPassed) === 28
+    && readNumber(build.staticPagesFailed) === 0
+    && readNumber(live.status) === 503
+    && readString(live.code) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+    && readString(live.rateLimitHeader) === "distributed"
+    && live.providerWorkReached === false
+    && live.rawProviderErrorObserved === false
+    && noMutation
+    && remaining.findingSourceRemediated === true
+    && remaining.freshFullRepositoryRescanRequiredForScanClosure === true
+    && remaining.securityCompleteClaimAllowed === false
+    && readString(remaining.distributedAdmissionActivation) === "OPERATOR_CONFIGURATION_REQUIRED"
+    && readString(remaining.providerDispatchPersistence) === "APPROVAL_GATED"
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+
+  return gateResult({
+    id: "weather_fallback_error_redaction_security",
+    label: "Weather fallback error redaction security",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live production source now keeps raw failures from all eight weather provider fallbacks in server logs and exposes only fixed public details. Production remains fail-closed before provider work while durable admission is absent. The sealed finding still needs a fresh full scan; distributed activation and exact saved Share MISSING_EVIDENCE remain open."
+      : `Weather redaction verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === productionCommit}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, WEATHER_FALLBACK_ERROR_REDACTION_PATHS)}, redaction=${contract.allProviderFallbackBranchesUseFixedPublicDetail === true}/${contract.rawProviderErrorsLoggedServerSide === true}/${contract.aggregateWeatherDetailOmitsRawProviderErrors === true}, live=${readNumber(live.status)}/${readString(live.code) || "missing"}, noMutation=${noMutation}, rescan=${remaining.freshFullRepositoryRescanRequiredForScanClosure === true}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Run a fresh Standard scan before reclassifying the sealed finding; keep distributed activation and exact saved Share boundaries open."]
+      : ["Restore source/live alignment, all-branch public redaction, server-only diagnostics, no-mutation live proof, fresh-rescan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
 const SECURITY_ACCIDENT_CASE_COMPATIBILITY_CHANGED_PATHS = [
   "lib/accident-cases.ts",
 ];
@@ -11617,6 +11708,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateFreshCurrentSourceSecurityScanGate(rootDir),
     evaluateShareAckPreBodyAdmissionGate(rootDir),
     evaluateSafetyStatusDisconnectLeaseGate(rootDir),
+    evaluateWeatherFallbackErrorRedactionGate(rootDir),
     evaluatePostRemediationRepositorySecurityScanGate(rootDir),
     evaluateShareSessionRevocationSecurityGate(rootDir),
     evaluateShareRecipientContactVerificationGate(rootDir),

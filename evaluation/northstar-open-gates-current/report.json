@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-27T19:59:59.208Z",
-  "sourceSha": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+  "generatedAt": "2026-08-27T20:32:28.686Z",
+  "sourceSha": "48cdb1ebdf066adf04d11dc452909241157a93a5",
   "overall": "contradicted",
   "gates": [
     {
@@ -327,6 +327,16 @@
       ]
     },
     {
+      "id": "weather_fallback_error_redaction_security",
+      "state": "notice",
+      "label": "Weather fallback error redaction security",
+      "evidencePath": "evaluation\\weather-fallback-error-redaction-2026-08-28\\report.json",
+      "detail": "Live production source now keeps raw failures from all eight weather provider fallbacks in server logs and exposes only fixed public details. Production remains fail-closed before provider work while durable admission is absent. The sealed finding still needs a fresh full scan; distributed activation and exact saved Share MISSING_EVIDENCE remain open.",
+      "nextActions": [
+        "Run a fresh Standard scan before reclassifying the sealed finding; keep distributed activation and exact saved Share boundaries open."
+      ]
+    },
+    {
       "id": "post_remediation_repository_security_scan",
       "state": "notice",
       "label": "Post-remediation repository security scan",
@@ -502,13 +512,12 @@
     },
     {
       "id": "security_followup_remediation",
-      "state": "proven",
+      "state": "contradicted",
       "label": "Security follow-up remediation",
       "evidencePath": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
-      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (covered by another current receipt). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Security follow-up verdict=PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP, sourceMatchesProduction=true, compatibilityPass=true, latestCompatibilityPass=true, latestCompatibilityCurrent=false, accidentCompatibilityCurrent=false, productPathsCurrent=false, exportAdmissionCompatibility=false, findings=3, baseline=18, deferred=2, remediations=3, tests=129, compatibilityTests=147, latestCompatibilityTests=245, liveProviderProbe=false, baselineRewritten=false, noMutation=true, exactShare=MISSING_EVIDENCE.",
       "nextActions": [
-        "Keep the immutable baseline and two deferred candidates visible in future security review; do not convert this scoped remediation into a security-complete claim.",
-        "Retain the separate public generation admission notice and exact saved Share boundary until their own evidence contracts close."
+        "Restore deployed SHA alignment, all three remediation contracts, verification totals, immutable-baseline preservation, no-mutation boundaries, and exact Share MISSING_EVIDENCE."
       ]
     },
     {

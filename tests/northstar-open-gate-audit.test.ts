@@ -333,6 +333,59 @@ function safetyStatusDisconnectLeaseFixture(): Record<string, unknown> {
   };
 }
 
+function weatherFallbackErrorRedactionFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_WEATHER_FALLBACK_ERROR_REDACTION_SOURCE_REMEDIATED",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    finding: {
+      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+      findingId: "csf_fdda99ed09c6fb65bc74caff",
+      slug: "weather-fallback-error-exposure",
+      ruleId: "information-exposure.upstream-errors",
+    },
+    currentSourceContract: {
+      providerFallbackBranchCount: 8,
+      allProviderFallbackBranchesUseFixedPublicDetail: true,
+      rawProviderErrorsLoggedServerSide: true,
+      aggregateWeatherDetailOmitsRawProviderErrors: true,
+      signalDetailsOmitRawProviderErrors: true,
+      callerAbortStillPropagatesBeforeFallbackProjection: true,
+      privateUpstreamDiagnosticsRemainServerOnly: true,
+    },
+    verification: {
+      focusedAndAdjacentTests: { testFiles: 3, testsPassed: 16, testsFailed: 0 },
+      typecheck: { status: "PASS" },
+      build: { status: "PASS", staticPagesPassed: 28, staticPagesFailed: 0 },
+    },
+    liveProbe: {
+      status: 503,
+      code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      rateLimitHeader: "distributed",
+      providerWorkReached: false,
+      rawProviderErrorObserved: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      readConfirmationInserted: false,
+      providerDispatchCalled: false,
+      vectorRuntimeCalled: false,
+      wikiPublished: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      findingSourceRemediated: true,
+      freshFullRepositoryRescanRequiredForScanClosure: true,
+      securityCompleteClaimAllowed: false,
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  };
+}
+
 function documentEditorialReviewReceiptFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
@@ -3956,6 +4009,13 @@ function createFixtureRoot(): string {
   );
   writeText(rootDir, path.join("app", "api", "safety-reference", "status", "route.ts"), "export const settleBeforeRelease = true;\n");
   writeText(rootDir, path.join("tests", "safety-reference-status-route.test.ts"), "export const settleBeforeReleaseTest = true;\n");
+  writeJson(
+    rootDir,
+    path.join("evaluation", "weather-fallback-error-redaction-2026-08-28", "report.json"),
+    weatherFallbackErrorRedactionFixture(),
+  );
+  writeText(rootDir, path.join("lib", "weather.ts"), "export const publicFallbackDetail = true;\n");
+  writeText(rootDir, path.join("tests", "upstream-integration-security.test.ts"), "export const weatherRedactionTest = true;\n");
   writeJson(rootDir, path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
     sourceHead: "fixture-sha",
@@ -7953,6 +8013,34 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
 
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "safety_status_disconnect_lease_security")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records weather fallback error redaction as notice and fails closed on public-detail drift", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "weather-fallback-error-redaction-2026-08-28",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "weather_fallback_error_redaction_security");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("all eight weather provider fallbacks");
+    expect(gate?.detail).toContain("fresh full scan");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      currentSourceContract: { aggregateWeatherDetailOmitsRawProviderErrors: boolean };
+    };
+    report.currentSourceContract.aggregateWeatherDetailOmitsRawProviderErrors = false;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "weather_fallback_error_redaction_security")?.state)
       .toBe("contradicted");
   });
 
