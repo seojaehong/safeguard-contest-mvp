@@ -502,6 +502,7 @@ export async function withPublicDocumentExportAdmission(
     limit: PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.limit,
     windowMs: PUBLIC_DOCUMENT_EXPORT_ADMISSION_POLICY.windowMs,
     instanceLimiter: documentExportLimiter,
+    requireDistributedInProduction: true,
   });
   const limited = publicRateLimitResponse(decision);
   if (limited) {

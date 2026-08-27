@@ -238,7 +238,7 @@ describe("public export aggregate admission", () => {
     error.mockRestore();
   });
 
-  it("does not fall back to process-local concurrency in production", async () => {
+  it("reports missing production export admission as distributed unavailable", async () => {
     vi.stubEnv("VERCEL_ENV", "production");
     const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const work = vi.fn(async () => new Response("should not run"));
@@ -252,7 +252,11 @@ describe("public export aggregate admission", () => {
     );
 
     expect(response.status).toBe(503);
-    await expect(response.json()).resolves.toMatchObject({ code: "PUBLIC_EXPORT_CONCURRENCY_LIMIT" });
+    expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("distributed");
+    expect(response.headers.get("X-SafeClaw-Work-Unit")).toBe("document-export");
+    await expect(response.json()).resolves.toMatchObject({
+      code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    });
     expect(work).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledOnce();
   });
