@@ -99,6 +99,22 @@ describe("weather route public work budget", () => {
     error.mockRestore();
   });
 
+  it("keeps upstream weather errors out of the public response while logging them", async () => {
+    const upstreamError = new Error("KMA token rejected by internal-weather.example");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    mocks.fetchWeatherSignal.mockRejectedValueOnce(upstreamError);
+    const { GET } = await import("@/app/api/weather/route");
+
+    const response = await GET(weatherRequest("서울 옥외 폭염 작업", 21));
+    const body = await response.json() as { ok: boolean; message: string };
+
+    expect(response.status).toBe(502);
+    expect(body).toEqual({ ok: false, message: "기상 정보를 불러오지 못했습니다." });
+    expect(JSON.stringify(body)).not.toContain(upstreamError.message);
+    expect(error).toHaveBeenCalledWith("weather route failed", upstreamError);
+    error.mockRestore();
+  });
+
   it("coalesces equivalent in-flight weather lookups", async () => {
     const { GET } = await import("@/app/api/weather/route");
     let resolveWeather: (value: WeatherRouteSignal) => void = () => undefined;

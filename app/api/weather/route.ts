@@ -114,10 +114,9 @@ export async function GET(request: NextRequest) {
     request.signal.throwIfAborted();
     const admissionResponse = publicSearchAdmissionErrorResponse(error);
     if (admissionResponse) return applyPublicRateLimitHeader(admissionResponse, providerRateLimit);
-    const message = error instanceof Error ? error.message : String(error);
     console.error("weather route failed", error);
     return NextResponse.json(
-      { ok: false, message },
+      { ok: false, message: "기상 정보를 불러오지 못했습니다." },
       { status: 502 }
     );
   }

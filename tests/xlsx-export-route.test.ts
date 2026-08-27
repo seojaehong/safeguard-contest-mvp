@@ -1,6 +1,21 @@
 import ExcelJS from "exceljs";
 import { NextRequest } from "next/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+const mocks = vi.hoisted(() => ({
+  buildXlsxError: null as Error | null
+}));
+
+vi.mock("@/lib/xlsx-builder", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/xlsx-builder")>();
+  return {
+    ...actual,
+    buildXlsxForDocument: (...args: Parameters<typeof actual.buildXlsxForDocument>) => {
+      if (mocks.buildXlsxError) throw mocks.buildXlsxError;
+      return actual.buildXlsxForDocument(...args);
+    }
+  };
+});
 
 import { POST } from "@/app/api/export/xlsx/route";
 import { ACCIDENT_TYPE_VALUES } from "@/lib/risk-assessment-schema";
@@ -467,5 +482,30 @@ describe("/api/export/xlsx structured contract", () => {
       expect(cell.font.name).toBe("Malgun Gothic");
       expect(cell.border).toBeDefined();
     });
+  });
+
+  it("keeps builder errors out of the public response while logging them", async () => {
+    const builderError = new Error("ExcelJS failed at C:\\srv\\private\\template.xlsx");
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    mocks.buildXlsxError = builderError;
+
+    try {
+      const response = await POST(xlsxRequest({
+        mode: "single",
+        title: "위험성평가표",
+        scenario,
+        rows: []
+      }));
+      const body = await response.json() as { ok: boolean; error: string };
+
+      expect(response.status).toBe(500);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+      expect(body).toEqual({ ok: false, error: "XLSX 문서를 만들지 못했습니다." });
+      expect(JSON.stringify(body)).not.toContain(builderError.message);
+      expect(consoleError).toHaveBeenCalledWith("XLSX export failed", builderError);
+    } finally {
+      mocks.buildXlsxError = null;
+      consoleError.mockRestore();
+    }
   });
 });

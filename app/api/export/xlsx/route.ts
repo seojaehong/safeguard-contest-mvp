@@ -11,6 +11,7 @@ import {
 import {
   assertDocumentExportInputBudget,
   assertDocumentExportOutputBudget,
+  createDocumentExportInternalErrorPayload,
   DocumentExportLimitError,
   DocumentExportRequestError,
   readDocumentExportRequestJson
@@ -255,7 +256,7 @@ async function exportXlsx(request: NextRequest) {
       );
     }
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "xlsx build failed" },
+      createDocumentExportInternalErrorPayload("XLSX", error),
       { status: 500, headers: { "cache-control": "no-store" } }
     );
   }
