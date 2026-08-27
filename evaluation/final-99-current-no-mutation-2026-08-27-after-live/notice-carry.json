@@ -1,6 +1,6 @@
 {
   "verdict": "carried",
-  "generatedAt": "2026-08-27T00:00:32.654Z",
+  "generatedAt": "2026-08-27T13:18:41.113Z",
   "sourceReport": "evaluation\\final-99-current-no-mutation-2026-08-27-after-live\\report.json",
   "fullyAutomatedLaunchClaimAllowed": false,
   "safeLaunchDemoClaimAllowed": true,

@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-08-27T00:00:32.654Z",
+  "generatedAt": "2026-08-27T13:18:41.113Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "commit": "dc978772",
-  "sourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+  "commit": "cc7fdcc4",
+  "sourceCommit": "cc7fdcc48245e064f6ee93f9cc2afe8d7d890219",
   "productionBuild": {
     "ok": true,
     "status": 200,
-    "commitSha": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+    "commitSha": "cc7fdcc48245e064f6ee93f9cc2afe8d7d890219",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-91hmpdcir-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-1wgdc1peb-seojaehongs-projects.vercel.app"
   },
   "executionMode": "no-mutation",
   "overall": "blocked",
-  "elapsedMs": 10781,
+  "elapsedMs": 8319,
   "gates": [
     {
       "name": "ask-orchestration",

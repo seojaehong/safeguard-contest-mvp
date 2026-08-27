@@ -14,7 +14,7 @@
         "pdfStatus": 200,
         "htmlPath": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\core-pdf\\risk-assessment.html",
         "pdfPath": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\core-pdf\\risk-assessment.pdf",
-        "pdfBytes": 29609,
+        "pdfBytes": 29585,
         "requiredTerms": [
           {
             "term": "사전준비",
@@ -50,7 +50,7 @@
         "pdfStatus": 200,
         "htmlPath": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\core-pdf\\work-plan.html",
         "pdfPath": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\core-pdf\\work-plan.pdf",
-        "pdfBytes": 28064,
+        "pdfBytes": 27962,
         "requiredTerms": [
           {
             "term": "작업개요",
@@ -86,7 +86,7 @@
         "pdfStatus": 200,
         "htmlPath": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\core-pdf\\permit-inspection.html",
         "pdfPath": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\core-pdf\\permit-inspection.pdf",
-        "pdfBytes": 30762,
+        "pdfBytes": 30668,
         "requiredTerms": [
           {
             "term": "허가",
@@ -122,7 +122,7 @@
         "pdfStatus": 200,
         "htmlPath": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\core-pdf\\tbm-log.html",
         "pdfPath": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\core-pdf\\tbm-log.pdf",
-        "pdfBytes": 30816,
+        "pdfBytes": 30820,
         "requiredTerms": [
           {
             "term": "TBM",

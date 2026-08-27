@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-08-27T00:03:47.715Z",
-  "baseUrl": "http://127.0.0.1:3084",
-  "commit": "dc978772",
-  "sourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+  "generatedAt": "2026-08-27T13:22:06.782Z",
+  "baseUrl": "http://127.0.0.1:3085",
+  "commit": "cc7fdcc4",
+  "sourceCommit": "cc7fdcc48245e064f6ee93f9cc2afe8d7d890219",
   "productionBuild": {
     "ok": true,
     "status": 200,
@@ -13,7 +13,7 @@
   },
   "executionMode": "no-mutation",
   "overall": "pass_with_notice",
-  "elapsedMs": 8716,
+  "elapsedMs": 11178,
   "gates": [
     {
       "name": "ask-orchestration",
@@ -63,9 +63,9 @@
     "publicDataAiMap": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\public-data-ai-map.json",
     "prodGoldenPath": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\prod-golden-path.json",
     "decision": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\decision.md",
-    "evidenceMapDoc": "docs\\submission-evidence-map.md",
-    "securityPrivacyDoc": "docs\\security_privacy_readiness.md",
-    "commercializationDoc": "docs\\commercialization-onepager.md"
+    "evidenceMapDoc": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\docs-sandbox\\submission-evidence-map.md",
+    "securityPrivacyDoc": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\docs-sandbox\\security_privacy_readiness.md",
+    "commercializationDoc": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\docs-sandbox\\commercialization-onepager.md"
   },
   "notes": [
     "provider 전파는 관리자 인증과 서버 소유 workpack/share session이 필요하며, 카카오/밴드는 승인 전이라 제외했습니다.",

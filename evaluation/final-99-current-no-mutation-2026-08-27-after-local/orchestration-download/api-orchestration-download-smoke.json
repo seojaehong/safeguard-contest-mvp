@@ -1,18 +1,18 @@
 {
-  "baseUrl": "http://127.0.0.1:3084",
-  "generatedAt": "2026-08-27T00:03:45.128Z",
-  "elapsedMs": 3244,
+  "baseUrl": "http://127.0.0.1:3085",
+  "generatedAt": "2026-08-27T13:22:03.497Z",
+  "elapsedMs": 4484,
   "question": "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
   "weather": {
     "status": 200,
-    "elapsedMs": 35,
+    "elapsedMs": 49,
     "mode": "fallback",
     "summary": "기상청 서비스 키가 없어 현장 기상 주의 문구를 보수적으로 적용합니다.",
     "signalCount": 6
   },
   "ask": {
     "status": 200,
-    "elapsedMs": 18,
+    "elapsedMs": 22,
     "mode": "mock",
     "statusSummary": "연결 점검 필요",
     "documentCount": 12
@@ -134,7 +134,7 @@
         "교육 사례"
       ],
       "evidence": "대표 시나리오 기반 유사 재해사례 보강 문구",
-      "count": 3
+      "count": 1
     }
   ],
   "downloads": [
@@ -213,7 +213,7 @@
     {
       "format": "PDF",
       "file": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\orchestration-download\\files\\세이프건설-risk-assessment.pdf",
-      "bytes": 210671,
+      "bytes": 210303,
       "ok": true
     },
     {
@@ -225,19 +225,19 @@
     {
       "format": "ALL_TXT",
       "file": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\orchestration-download\\files\\세이프건설-safeguard-workpack.txt",
-      "bytes": 52176,
+      "bytes": 52083,
       "ok": true
     },
     {
       "format": "ALL_CSV",
       "file": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\orchestration-download\\files\\세이프건설-safeguard-workpack.csv",
-      "bytes": 79907,
+      "bytes": 79761,
       "ok": true
     },
     {
       "format": "ALL_XLS",
       "file": "evaluation\\final-99-current-no-mutation-2026-08-27-after-local\\orchestration-download\\files\\세이프건설-safeguard-workpack.xls",
-      "bytes": 128030,
+      "bytes": 127812,
       "ok": true
     }
   ],

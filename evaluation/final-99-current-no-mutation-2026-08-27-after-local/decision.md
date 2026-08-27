@@ -1,10 +1,10 @@
 # SafeClaw final-99-gate decision
 
-- Generated at: 2026-08-27T00:03:47.715Z
-- Base URL: http://127.0.0.1:3084
-- Commit: dc978772
+- Generated at: 2026-08-27T13:22:06.782Z
+- Base URL: http://127.0.0.1:3085
+- Commit: cc7fdcc4
 - Overall: pass_with_notice
-- Elapsed: 8716ms
+- Elapsed: 11178ms
 
 ## Gate Results
 

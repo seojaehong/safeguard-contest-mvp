@@ -1,15 +1,15 @@
 {
   "schema": "safeclaw-final-99-12-document-no-mutation/v1",
-  "generatedAt": "2026-08-27T00:00:32.654Z",
+  "generatedAt": "2026-08-27T13:22:06.782Z",
   "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED",
   "productCommit": "e740b92ef3192caeefa06634dca0e70ad9791db6",
-  "currentSourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
-  "productionCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+  "currentSourceCommit": "cc7fdcc48245e064f6ee93f9cc2afe8d7d890219",
+  "productionCommit": "cc7fdcc48245e064f6ee93f9cc2afe8d7d890219",
   "currentSourceLocal": {
-    "baseUrl": "http://127.0.0.1:3084",
+    "baseUrl": "http://127.0.0.1:3085",
     "reportPath": "evaluation/final-99-current-no-mutation-2026-08-27-after-local/report.json",
     "overall": "pass_with_notice",
-    "elapsedMs": 10121,
+    "elapsedMs": 11178,
     "canonicalDocumentCount": 12,
     "canonicalDocumentsPassed": 12,
     "corePdfCount": 4,
@@ -36,8 +36,8 @@
   "liveAfterDeployment": {
     "baseUrl": "https://www.safeclaw.kr",
     "reportPath": "evaluation/final-99-current-no-mutation-2026-08-27-after-live/report.json",
-    "sourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
-    "productionCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+    "sourceCommit": "cc7fdcc48245e064f6ee93f9cc2afe8d7d890219",
+    "productionCommit": "cc7fdcc48245e064f6ee93f9cc2afe8d7d890219",
     "productionEnvironment": "production",
     "overall": "blocked",
     "askVerdict": "pass",
@@ -63,8 +63,12 @@
   ],
   "verification": {
     "currentNoMutationContractTests": {
+      "filesPassed": 2,
+      "testsPassed": 5
+    },
+    "northstarFinal99ContractTests": {
       "filesPassed": 1,
-      "testsPassed": 4
+      "testsPassed": 2
     },
     "focusedGateAndPdfTests": {
       "filesPassed": 3,

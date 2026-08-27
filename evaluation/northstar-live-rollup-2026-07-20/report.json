@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T13:14:10.293Z",
-  "head": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
+  "generatedAt": "2026-08-27T13:24:23.866Z",
+  "head": "cc7fdcc48245e064f6ee93f9cc2afe8d7d890219",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
+    "commitSha": "cc7fdcc48245e064f6ee93f9cc2afe8d7d890219",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-nrqhzrr6q-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-1wgdc1peb-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -1639,7 +1639,7 @@
     "twelveDocumentNoMutation": {
       "artifact": "evaluation\\final-99-12-document-no-mutation-2026-08-17\\report.json",
       "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED",
-      "currentSourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+      "currentSourceCommit": "cc7fdcc48245e064f6ee93f9cc2afe8d7d890219",
       "localCanonicalPassed": 12,
       "localCorePdfsPassed": 4,
       "localOrchestrationDownloads": 14,
@@ -1739,9 +1739,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
+      "sourceCommit": "cc7fdcc48245e064f6ee93f9cc2afe8d7d890219",
       "sourceStatus": "exact",
-      "productionCommit": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
+      "productionCommit": "cc7fdcc48245e064f6ee93f9cc2afe8d7d890219",
       "productionStatus": "matches_live"
     },
     {
@@ -1755,10 +1755,10 @@
     {
       "id": "final_99_12_document_no_mutation",
       "artifact": "evaluation\\final-99-12-document-no-mutation-2026-08-17\\report.json",
-      "sourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
-      "sourceStatus": "ancestor",
-      "productionCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "cc7fdcc48245e064f6ee93f9cc2afe8d7d890219",
+      "sourceStatus": "exact",
+      "productionCommit": "cc7fdcc48245e064f6ee93f9cc2afe8d7d890219",
+      "productionStatus": "matches_live"
     },
     {
       "id": "live_harness_quality",
@@ -1860,9 +1860,9 @@
       "id": "launch_operations_readiness_cockpit",
       "artifact": "evaluation\\launch-operations-readiness-2026-08-26\\report.json",
       "sourceCommit": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "document_export_capability_truth",
