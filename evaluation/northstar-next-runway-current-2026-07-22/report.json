@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-27T22:31:26.556Z",
+  "generatedAt": "2026-08-27T22:45:46.940Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "e20605523592fee0df26a95d5108a167141a1ac0",
-  "productionCommit": "e20605523592fee0df26a95d5108a167141a1ac0",
+  "sourceHead": "5f280fafeb1c378eedff35e1dc1c011eda802716",
+  "productionCommit": "5f280fafeb1c378eedff35e1dc1c011eda802716",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e20605523592fee0df26a95d5108a167141a1ac0",
+    "commitSha": "5f280fafeb1c378eedff35e1dc1c011eda802716",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-f3vyvwmuy-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-8sd7kd840-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "e20605523592fee0df26a95d5108a167141a1ac0",
-  "liveRollupLiveCommit": "e20605523592fee0df26a95d5108a167141a1ac0",
+  "liveExactEvidenceCommit": "5f280fafeb1c378eedff35e1dc1c011eda802716",
+  "liveRollupLiveCommit": "5f280fafeb1c378eedff35e1dc1c011eda802716",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -2207,8 +2207,8 @@
   },
   "boundedWorkbenchCurrent": {
     "verdict": "PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP",
-    "sourceHead": "be494e764282cc4961b1259975324ef0d38669bc",
-    "productionCommit": "be494e764282cc4961b1259975324ef0d38669bc",
+    "sourceHead": "5f280fafeb1c378eedff35e1dc1c011eda802716",
+    "productionCommit": "5f280fafeb1c378eedff35e1dc1c011eda802716",
     "routeSplitAloneAcceptedAsFix": false,
     "providerDispatchLiveClaimed": false,
     "externalProviderCalled": false,
@@ -2233,9 +2233,9 @@
         "viewport": "390x723",
         "overallVerdict": "PASS",
         "bodyHeightRatio": 1,
-        "workpackShellScrollRatio": 2.03,
-        "firstActionBottom": 480,
-        "firstHazardBottom": 647,
+        "workpackShellScrollRatio": 2.1,
+        "firstActionBottom": 488,
+        "firstHazardBottom": 663,
         "stickyOverlapCount": 0,
         "supportingDocsOpenDefault": false
       },
@@ -2257,9 +2257,9 @@
         "viewport": "390x723",
         "overallVerdict": "PASS",
         "bodyHeightRatio": 1,
-        "workpackShellScrollRatio": 2.03,
-        "firstActionBottom": 480,
-        "firstHazardBottom": 647,
+        "workpackShellScrollRatio": 2.1,
+        "firstActionBottom": 488,
+        "firstHazardBottom": 663,
         "stickyOverlapCount": 0,
         "supportingDocsOpenDefault": false
       }
@@ -2283,7 +2283,7 @@
         "theme": "day",
         "viewport": "390x723",
         "overallVerdict": "PASS",
-        "workpackShellScrollRatio": 2.3,
+        "workpackShellScrollRatio": 2.32,
         "sectionTabCount": 6,
         "selectedSectionTabCount": 1,
         "mountedSectionDetailCount": 1,
@@ -2309,7 +2309,7 @@
         "theme": "night",
         "viewport": "390x723",
         "overallVerdict": "PASS",
-        "workpackShellScrollRatio": 2.3,
+        "workpackShellScrollRatio": 2.32,
         "sectionTabCount": 6,
         "selectedSectionTabCount": 1,
         "mountedSectionDetailCount": 1,
@@ -2362,7 +2362,7 @@
         "exactSavedSessionVerdict": "MISSING_EVIDENCE",
         "rootWidthRatio": 1,
         "desktopXRegionCount": 1,
-        "primaryBottom": 707
+        "primaryBottom": 685
       },
       {
         "route": "/workspace?share&theme=night",
@@ -2406,7 +2406,7 @@
         "exactSavedSessionVerdict": "MISSING_EVIDENCE",
         "rootWidthRatio": 1,
         "desktopXRegionCount": 1,
-        "primaryBottom": 707
+        "primaryBottom": 685
       }
     ],
     "detailDepthDebt": false,
