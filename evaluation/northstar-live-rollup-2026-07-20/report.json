@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T19:43:50.077Z",
-  "head": "4d3be96a30665862373620167148e3278547341c",
+  "generatedAt": "2026-08-27T20:00:00.318Z",
+  "head": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "4d3be96a30665862373620167148e3278547341c",
+    "commitSha": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-3ea06z54c-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-3lyf2lnkk-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_evidence_missing_or_unknown",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "contradicted",
-    "gateCount": 76
+    "gateCount": 77
   },
   "provenGates": [
     {
@@ -206,6 +206,12 @@
       "state": "notice",
       "artifact": "evaluation\\share-ack-prebody-admission-2026-08-28\\report.json",
       "detail": "Live production now acquires coarse distributed IP admission and a bounded body-read concurrency lease before the public Share ACK body budget and JSON parser, while retaining recipient-specific admission after parsing. The no-mutation oversized probe failed closed at pre-body admission, but the sealed finding remains open pending a fresh full scan; live recipient ACK approval and exact saved Share MISSING_EVIDENCE remain unchanged."
+    },
+    {
+      "id": "safety_status_disconnect_lease_security",
+      "state": "notice",
+      "artifact": "evaluation\\safety-status-disconnect-lease-2026-08-28\\report.json",
+      "detail": "Live production source now keeps safety-reference status admission occupied until the real catalog, corpus, and exact-registry aggregate settles after disconnect. Two disconnected tasks continue to consume the two-slot concurrency budget and a third request is rejected. The sealed finding remains open pending a fresh full scan; distributed activation and exact saved Share MISSING_EVIDENCE remain unchanged."
     },
     {
       "id": "post_remediation_repository_security_scan",
@@ -720,6 +726,26 @@
     "freshRescanRequired": true,
     "securityCompleteClaimAllowed": false,
     "recipientAckLiveDataApproval": "APPROVAL_GATED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "safetyStatusDisconnectLease": {
+    "artifact": "evaluation\\safety-status-disconnect-lease-2026-08-28\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_SAFETY_STATUS_DISCONNECT_LEASE_SOURCE_REMEDIATED",
+    "sourceHead": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+    "productionCommit": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+    "scanId": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    "findingId": "csf_b08a96f6b1ba27a33af52a6a",
+    "findingSlug": "status-disconnect-residual",
+    "underlyingWorkSettlementPrecedesAbortRejection": true,
+    "admissionLeaseHeldUntilUnderlyingSettlement": true,
+    "thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle": true,
+    "testsPassed": 16,
+    "liveStatus": 503,
+    "liveCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "liveWorkUnit": "safety-reference-status",
+    "freshRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "distributedAdmissionActivation": "OPERATOR_CONFIGURATION_REQUIRED",
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "publicSearchDistributedRateLimitReadiness": {
@@ -1756,9 +1782,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "4d3be96a30665862373620167148e3278547341c",
+      "sourceCommit": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
       "sourceStatus": "exact",
-      "productionCommit": "4d3be96a30665862373620167148e3278547341c",
+      "productionCommit": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
       "productionStatus": "matches_live"
     },
     {
@@ -2005,8 +2031,16 @@
       "id": "share_ack_prebody_admission_security",
       "artifact": "evaluation\\share-ack-prebody-admission-2026-08-28\\report.json",
       "sourceCommit": "4d3be96a30665862373620167148e3278547341c",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "4d3be96a30665862373620167148e3278547341c",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "safety_status_disconnect_lease_security",
+      "artifact": "evaluation\\safety-status-disconnect-lease-2026-08-28\\report.json",
+      "sourceCommit": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+      "sourceStatus": "exact",
+      "productionCommit": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
       "productionStatus": "matches_live"
     },
     {

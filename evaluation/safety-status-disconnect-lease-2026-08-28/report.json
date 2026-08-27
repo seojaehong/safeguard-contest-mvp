@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "safeclaw-safety-status-disconnect-lease/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_SAFETY_STATUS_DISCONNECT_LEASE_SOURCE_REMEDIATED",
+  "generatedAt": "2026-08-28T04:53:00+09:00",
+  "sourceHead": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+  "productCommit": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+  "productionCommit": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+  "productionBuild": {
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-3lyf2lnkk-seojaehongs-projects.vercel.app"
+  },
+  "finding": {
+    "scanId": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    "findingId": "csf_b08a96f6b1ba27a33af52a6a",
+    "slug": "status-disconnect-residual",
+    "title": "Disconnected safety-status requests release admission while underlying work continues",
+    "beforeSource": "899951952ee184d527742d541f976f7e72482f2e",
+    "beforeEvidence": "evaluation/current-source-standard-security-scan-2026-08-28/findings/status-disconnect-residual/status-disconnect-residual.md"
+  },
+  "currentSourceContract": {
+    "preAbortedRequestsRejectedBeforeWork": true,
+    "disconnectRecordedWithoutEarlySettlement": true,
+    "underlyingWorkSettlementPrecedesAbortRejection": true,
+    "admissionLeaseHeldUntilUnderlyingSettlement": true,
+    "disconnectedWorkStillConsumesConcurrency": true,
+    "thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle": true,
+    "concurrencyLimit": 2
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "command": "npm.cmd exec -- vitest run tests\\safety-reference-status-route.test.ts tests\\safety-reference-status-admission.test.ts tests\\safety-reference-status-bundled-corpus.test.ts tests\\public-distributed-rate-limit.test.ts --maxWorkers=1 --fileParallelism=false --testTimeout=30000",
+      "testFiles": 4,
+      "testsPassed": 16,
+      "testsFailed": 0
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPagesPassed": 28,
+      "staticPagesFailed": 0
+    }
+  },
+  "liveProbe": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "method": "GET",
+    "route": "/api/safety-reference/status?codexCacheBust=6c57425a",
+    "status": 503,
+    "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "rateLimitHeader": "distributed",
+    "workUnitHeader": "safety-reference-status",
+    "retryAfterSeconds": 5,
+    "statusWorkReached": false,
+    "interpretation": "The deployed route remains fail-closed before catalog, corpus, or registry work when durable distributed admission is unavailable. Disconnect lifetime behavior is verified by the bounded source regression without inducing live provider or database work."
+  },
+  "remainingBoundaries": {
+    "findingSourceRemediated": true,
+    "freshFullRepositoryRescanRequiredForScanClosure": true,
+    "securityCompleteClaimAllowed": false,
+    "distributedAdmissionActivation": "OPERATOR_CONFIGURATION_REQUIRED",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "readConfirmationInserted": false,
+    "providerDispatchCalled": false,
+    "vectorRuntimeCalled": false,
+    "wikiPublished": false,
+    "koshaRegistryMutationPerformed": false
+  }
+}

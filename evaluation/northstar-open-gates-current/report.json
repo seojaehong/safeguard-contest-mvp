@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-27T19:43:49.092Z",
-  "sourceSha": "4d3be96a30665862373620167148e3278547341c",
+  "generatedAt": "2026-08-27T19:59:59.208Z",
+  "sourceSha": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
   "overall": "contradicted",
   "gates": [
     {
@@ -314,6 +314,16 @@
       "detail": "Live production now acquires coarse distributed IP admission and a bounded body-read concurrency lease before the public Share ACK body budget and JSON parser, while retaining recipient-specific admission after parsing. The no-mutation oversized probe failed closed at pre-body admission, but the sealed finding remains open pending a fresh full scan; live recipient ACK approval and exact saved Share MISSING_EVIDENCE remain unchanged.",
       "nextActions": [
         "Run a fresh Standard scan before reclassifying the sealed finding; keep exact saved Share and live recipient ACK approval-gated."
+      ]
+    },
+    {
+      "id": "safety_status_disconnect_lease_security",
+      "state": "notice",
+      "label": "Safety status disconnect lease security",
+      "evidencePath": "evaluation\\safety-status-disconnect-lease-2026-08-28\\report.json",
+      "detail": "Live production source now keeps safety-reference status admission occupied until the real catalog, corpus, and exact-registry aggregate settles after disconnect. Two disconnected tasks continue to consume the two-slot concurrency budget and a third request is rejected. The sealed finding remains open pending a fresh full scan; distributed activation and exact saved Share MISSING_EVIDENCE remain unchanged.",
+      "nextActions": [
+        "Run a fresh Standard scan before reclassifying the sealed finding; keep durable activation and exact saved Share boundaries open."
       ]
     },
     {

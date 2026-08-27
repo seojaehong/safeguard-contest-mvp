@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-27T19:44:10.584Z",
+  "generatedAt": "2026-08-27T20:00:21.958Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "4d3be96a30665862373620167148e3278547341c",
-  "productionCommit": "4d3be96a30665862373620167148e3278547341c",
+  "sourceHead": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+  "productionCommit": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "4d3be96a30665862373620167148e3278547341c",
+    "commitSha": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-3ea06z54c-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-3lyf2lnkk-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "4d3be96a30665862373620167148e3278547341c",
-  "liveRollupLiveCommit": "4d3be96a30665862373620167148e3278547341c",
+  "liveExactEvidenceCommit": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+  "liveRollupLiveCommit": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -64,6 +64,7 @@
     "currentRepositorySecurityRescan": "evaluation\\current-full-repository-security-scan-2026-08-27\\report.json",
     "freshCurrentSourceSecurityScan": "evaluation\\current-source-standard-security-scan-2026-08-28\\report.json",
     "shareAckPreBodyAdmission": "evaluation\\share-ack-prebody-admission-2026-08-28\\report.json",
+    "safetyStatusDisconnectLease": "evaluation\\safety-status-disconnect-lease-2026-08-28\\report.json",
     "agentChatDurableAdmission": "evaluation\\security-agent-chat-durable-admission-2026-08-14\\report.json",
     "mcpProviderAdmission": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
     "shareRecipientContactVerification": "evaluation\\share-recipient-contact-verification-2026-08-14\\report.json",
@@ -197,6 +198,11 @@
       "gate": "share_ack_prebody_admission_security",
       "state": "notice",
       "reason": "deployed Share ACK source now applies coarse rate and body-read concurrency admission before application body consumption, with 66 tests and live 503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; the sealed finding still requires a fresh scan, live recipient ACK remains APPROVAL_GATED, and exact saved Share remains MISSING_EVIDENCE"
+    },
+    {
+      "gate": "safety_status_disconnect_lease_security",
+      "state": "notice",
+      "reason": "deployed safety-reference status source now retains admission until underlying work settles after disconnect, with 16 tests and live 503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; the sealed finding still requires a fresh scan, distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "mcp_generation_work_budget_security",
@@ -1084,6 +1090,25 @@
     "freshRescanRequired": true,
     "securityCompleteClaimAllowed": false,
     "recipientAckLiveDataApproval": "APPROVAL_GATED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "safetyStatusDisconnectLease": {
+    "verdict": "PASS_LIVE_PRODUCTION_SAFETY_STATUS_DISCONNECT_LEASE_SOURCE_REMEDIATED",
+    "sourceHead": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+    "productionCommit": "6c57425a1fbccc61c265c84f18bc24e902ade37f",
+    "scanId": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    "findingId": "csf_b08a96f6b1ba27a33af52a6a",
+    "findingSlug": "status-disconnect-residual",
+    "underlyingWorkSettlementPrecedesAbortRejection": true,
+    "admissionLeaseHeldUntilUnderlyingSettlement": true,
+    "thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle": true,
+    "testsPassed": 16,
+    "liveStatus": 503,
+    "liveCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "liveWorkUnit": "safety-reference-status",
+    "freshRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "distributedAdmissionActivation": "OPERATOR_CONFIGURATION_REQUIRED",
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "publicSearchDistributedRateLimitReadiness": {

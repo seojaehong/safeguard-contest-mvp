@@ -52,6 +52,7 @@ const ARTIFACTS = Object.freeze({
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-28", "report.json"),
   shareAckPreBodyAdmission: path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
+  safetyStatusDisconnectLease: path.join("evaluation", "safety-status-disconnect-lease-2026-08-28", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
@@ -2262,6 +2263,36 @@ function shareAckPreBodyAdmissionSummary(report) {
   };
 }
 
+/** @param {unknown} report */
+function safetyStatusDisconnectLeaseSummary(report) {
+  if (!isRecord(report)) return {};
+  const finding = isRecord(report.finding) ? report.finding : {};
+  const contract = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacentTests) ? verification.focusedAndAdjacentTests : {};
+  const live = isRecord(report.liveProbe) ? report.liveProbe : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(report.productionCommit),
+    scanId: asString(finding.scanId),
+    findingId: asString(finding.findingId),
+    findingSlug: asString(finding.slug),
+    underlyingWorkSettlementPrecedesAbortRejection: asBoolean(contract.underlyingWorkSettlementPrecedesAbortRejection),
+    admissionLeaseHeldUntilUnderlyingSettlement: asBoolean(contract.admissionLeaseHeldUntilUnderlyingSettlement),
+    thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle: asBoolean(contract.thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle),
+    testsPassed: typeof focused.testsPassed === "number" ? focused.testsPassed : null,
+    liveStatus: typeof live.status === "number" ? live.status : null,
+    liveCode: asString(live.code),
+    liveWorkUnit: asString(live.workUnitHeader),
+    freshRescanRequired: asBoolean(remaining.freshFullRepositoryRescanRequiredForScanClosure),
+    securityCompleteClaimAllowed: asBoolean(remaining.securityCompleteClaimAllowed),
+    distributedAdmissionActivation: asString(remaining.distributedAdmissionActivation),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+  };
+}
+
 /**
  * @param {unknown} report
  */
@@ -3201,6 +3232,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.shareAckPreBodyAdmission,
   );
+  const safetyStatusDisconnectLease = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.safetyStatusDisconnectLease,
+  );
   const publicSearchDistributedRateLimitReadiness = readOptionalJson(
     options.rootDir,
     ARTIFACTS.publicSearchDistributedRateLimitReadiness,
@@ -3334,6 +3369,7 @@ export function buildNorthstarNextRunway(options) {
     freshCurrentSourceSecurityScan,
   );
   const shareAckPreBodyAdmissionResult = shareAckPreBodyAdmissionSummary(shareAckPreBodyAdmission);
+  const safetyStatusDisconnectLeaseResult = safetyStatusDisconnectLeaseSummary(safetyStatusDisconnectLease);
   const publicSearchDistributedRateLimitReadinessResult = publicSearchDistributedRateLimitReadinessSummary(
     publicSearchDistributedRateLimitReadiness,
   );
@@ -3496,6 +3532,11 @@ export function buildNorthstarNextRunway(options) {
         gate: "share_ack_prebody_admission_security",
         state: "notice",
         reason: `deployed Share ACK source now applies coarse rate and body-read concurrency admission before application body consumption, with ${shareAckPreBodyAdmissionResult.testsPassed ?? "unknown"} tests and live ${shareAckPreBodyAdmissionResult.liveStatus ?? "unknown"}/${shareAckPreBodyAdmissionResult.liveCode || "missing"}; the sealed finding still requires a fresh scan, live recipient ACK remains ${shareAckPreBodyAdmissionResult.recipientAckLiveDataApproval || "APPROVAL_GATED"}, and exact saved Share remains ${shareAckPreBodyAdmissionResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+      },
+      {
+        gate: "safety_status_disconnect_lease_security",
+        state: "notice",
+        reason: `deployed safety-reference status source now retains admission until underlying work settles after disconnect, with ${safetyStatusDisconnectLeaseResult.testsPassed ?? "unknown"} tests and live ${safetyStatusDisconnectLeaseResult.liveStatus ?? "unknown"}/${safetyStatusDisconnectLeaseResult.liveCode || "missing"}; the sealed finding still requires a fresh scan, distributed activation remains ${safetyStatusDisconnectLeaseResult.distributedAdmissionActivation || "OPERATOR_CONFIGURATION_REQUIRED"}, and exact saved Share remains ${safetyStatusDisconnectLeaseResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
       },
       {
         gate: "mcp_generation_work_budget_security",
@@ -3661,6 +3702,7 @@ export function buildNorthstarNextRunway(options) {
     currentRepositorySecurityRescan: currentRepositorySecurityRescanResult,
     freshCurrentSourceSecurityScan: freshCurrentSourceSecurityScanResult,
     shareAckPreBodyAdmission: shareAckPreBodyAdmissionResult,
+    safetyStatusDisconnectLease: safetyStatusDisconnectLeaseResult,
     publicSearchDistributedRateLimitReadiness: publicSearchDistributedRateLimitReadinessResult,
     publicGenerationAdmissionSecurity: publicGenerationAdmissionSecurityResult,
     securityFollowupRemediation: securityFollowupRemediationResult,
@@ -3834,6 +3876,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Current security remediation ledger is \`${report.currentSecurityRemediationLedger.verdict || "missing"}\`: deployed-source receipts \`${report.currentSecurityRemediationLedger.deployedSourceRemediationCount ?? "unknown"}/${report.currentSecurityRemediationLedger.totalFindings ?? "unknown"}\`, unresolved \`${report.currentSecurityRemediationLedger.unresolvedCount ?? "unknown"}\`, approval-gated \`${report.currentSecurityRemediationLedger.approvalGatedCount ?? "unknown"}\`, distributed-runtime open \`${report.currentSecurityRemediationLedger.distributedRuntimeOpenCount ?? "unknown"}\`, security-complete=\`${report.currentSecurityRemediationLedger.securityCompleteClaimAllowed === true}\`, exact saved Share \`${report.currentSecurityRemediationLedger.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Fresh current-source Standard security scan is \`${report.freshCurrentSourceSecurityScan.verdict || "missing"}\`: scan \`${report.freshCurrentSourceSecurityScan.scanId || "missing"}\`, findings \`${report.freshCurrentSourceSecurityScan.reportableFindingCount ?? "unknown"}\` (medium/low \`${report.freshCurrentSourceSecurityScan.mediumFindingCount ?? "unknown"}/${report.freshCurrentSourceSecurityScan.lowFindingCount ?? "unknown"}\`), coverage \`${report.freshCurrentSourceSecurityScan.coverageCompleteness || "unknown"}\` with \`${report.freshCurrentSourceSecurityScan.reviewedSurfaceCount ?? "unknown"}\` recorded surfaces and \`${report.freshCurrentSourceSecurityScan.deferredCoverageItemCount ?? "unknown"}\` deferred items. Bounded closures/residuals are \`${report.freshCurrentSourceSecurityScan.fullyClosedBoundedSourceCandidateCount ?? "unknown"}/${report.freshCurrentSourceSecurityScan.approvalFreeProductSourceResidualCount ?? "unknown"}\`; database/atomicity and Share capability boundaries remain \`${report.freshCurrentSourceSecurityScan.approvalGatedDatabaseOrAtomicityCount ?? "unknown"}/${report.freshCurrentSourceSecurityScan.approvalSensitiveShareCapabilityCount ?? "unknown"}\`. Scan completion is not security-complete \`${report.freshCurrentSourceSecurityScan.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.freshCurrentSourceSecurityScan.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Share ACK pre-body admission is \`${report.shareAckPreBodyAdmission.verdict || "missing"}\`: coarse IP rate/body concurrency ordering \`${report.shareAckPreBodyAdmission.coarseIpRateAdmissionBeforeBody === true}/${report.shareAckPreBodyAdmission.coarseBodyConcurrencyLeaseBeforeBody === true}\`, recipient-specific post-parse admission \`${report.shareAckPreBodyAdmission.recipientSpecificAdmissionRetainedAfterParse === true}\`, tests \`${report.shareAckPreBodyAdmission.testsPassed ?? "unknown"}\`, and live \`${report.shareAckPreBodyAdmission.liveStatus ?? "unknown"}/${report.shareAckPreBodyAdmission.liveCode || "missing"}/${report.shareAckPreBodyAdmission.liveRateLimitHeader || "missing"}\`. The sealed finding remains rescan-pending \`${report.shareAckPreBodyAdmission.freshRescanRequired === true}\`; security-complete remains \`${report.shareAckPreBodyAdmission.securityCompleteClaimAllowed === true}\`, recipient ACK is \`${report.shareAckPreBodyAdmission.recipientAckLiveDataApproval || "APPROVAL_GATED"}\`, and exact saved Share remains \`${report.shareAckPreBodyAdmission.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Safety status disconnect lease is \`${report.safetyStatusDisconnectLease.verdict || "missing"}\`: work settlement before abort rejection/lease release \`${report.safetyStatusDisconnectLease.underlyingWorkSettlementPrecedesAbortRejection === true}/${report.safetyStatusDisconnectLease.admissionLeaseHeldUntilUnderlyingSettlement === true}\`, two-disconnect concurrency proof \`${report.safetyStatusDisconnectLease.thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle === true}\`, tests \`${report.safetyStatusDisconnectLease.testsPassed ?? "unknown"}\`, and live \`${report.safetyStatusDisconnectLease.liveStatus ?? "unknown"}/${report.safetyStatusDisconnectLease.liveCode || "missing"}/${report.safetyStatusDisconnectLease.liveWorkUnit || "missing"}\`. The sealed finding remains rescan-pending \`${report.safetyStatusDisconnectLease.freshRescanRequired === true}\`; security-complete remains \`${report.safetyStatusDisconnectLease.securityCompleteClaimAllowed === true}\`, distributed activation is \`${report.safetyStatusDisconnectLease.distributedAdmissionActivation || "OPERATOR_CONFIGURATION_REQUIRED"}\`, and exact saved Share remains \`${report.safetyStatusDisconnectLease.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Atomic database race remediation is approval-gated: \`${report.securityAtomicDbRaceRemediation.verdict || "missing"}\`, sealed findings still open \`${report.securityAtomicDbRaceRemediation.openFindingCount ?? "unknown"}\`, approval required/performed \`${report.securityAtomicDbRaceRemediation.approvalRequired === true}/${report.securityAtomicDbRaceRemediation.approvalPerformed === true}\`, migration authored \`${report.securityAtomicDbRaceRemediation.migrationAuthored === true}\`, DB mutation performed \`${report.securityAtomicDbRaceRemediation.dbMutationPerformed === true}\`, fresh scan required \`${report.securityAtomicDbRaceRemediation.freshRescanRequired === true}\`, security-complete \`${report.securityAtomicDbRaceRemediation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.securityAtomicDbRaceRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Fresh live Documents/workspace Share route perception is \`${report.liveDocumentsShareRoutePerception.verdict || "missing"}\`: measured rows Documents/Share \`${report.liveDocumentsShareRoutePerception.documentsRows ?? 0}/${report.liveDocumentsShareRoutePerception.workspaceShareRows ?? 0}\`, desktop Share regions \`${report.liveDocumentsShareRoutePerception.desktopShareRegions ?? "unknown"}\`, route split alone accepted \`${report.liveDocumentsShareRoutePerception.routeSplitAloneAcceptedAsFix === true}\`, DB mutation \`${report.liveDocumentsShareRoutePerception.dbMutationPerformed === true}\`, and exact saved user session reproduced/verdict \`${report.liveDocumentsShareRoutePerception.exactSavedUserSessionReproduced === true}/${report.liveDocumentsShareRoutePerception.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live deployment freshness is measured separately: \`${report.deploymentFreshnessGuard.verdict || "missing"}\`, current notice present \`${report.deploymentFreshnessGuard.currentNoticePresent === true}\`, simulated SHA-drift refresh visible \`${report.deploymentFreshnessGuard.driftRefreshVisible === true}\`, frontend audit violations \`${report.deploymentFreshnessGuard.frontendAuditViolations ?? "unknown"}\`, and live pending \`${report.deploymentFreshnessGuard.liveAfterDeploymentPending === true}\`. This closes only stale-tab visibility; DB mutation remains \`${report.deploymentFreshnessGuard.dbMutationPerformed === true}\` and exact saved Share remains \`${report.deploymentFreshnessGuard.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.

@@ -281,6 +281,58 @@ function shareAckPreBodyAdmissionFixture(): Record<string, unknown> {
   };
 }
 
+function safetyStatusDisconnectLeaseFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_SAFETY_STATUS_DISCONNECT_LEASE_SOURCE_REMEDIATED",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    finding: {
+      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+      findingId: "csf_b08a96f6b1ba27a33af52a6a",
+      slug: "status-disconnect-residual",
+    },
+    currentSourceContract: {
+      preAbortedRequestsRejectedBeforeWork: true,
+      disconnectRecordedWithoutEarlySettlement: true,
+      underlyingWorkSettlementPrecedesAbortRejection: true,
+      admissionLeaseHeldUntilUnderlyingSettlement: true,
+      disconnectedWorkStillConsumesConcurrency: true,
+      thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle: true,
+      concurrencyLimit: 2,
+    },
+    verification: {
+      focusedAndAdjacentTests: { testFiles: 4, testsPassed: 16, testsFailed: 0 },
+      typecheck: { status: "PASS" },
+      build: { status: "PASS", staticPagesPassed: 28, staticPagesFailed: 0 },
+    },
+    liveProbe: {
+      status: 503,
+      code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      rateLimitHeader: "distributed",
+      workUnitHeader: "safety-reference-status",
+      statusWorkReached: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      shareSessionCreated: false,
+      readConfirmationInserted: false,
+      providerDispatchCalled: false,
+      vectorRuntimeCalled: false,
+      wikiPublished: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      findingSourceRemediated: true,
+      freshFullRepositoryRescanRequiredForScanClosure: true,
+      securityCompleteClaimAllowed: false,
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  };
+}
+
 function documentEditorialReviewReceiptFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
@@ -3897,6 +3949,13 @@ function createFixtureRoot(): string {
   );
   writeText(rootDir, path.join("app", "api", "share-sessions", "[sessionId]", "route.ts"), "export const preBodyAdmission = true;\n");
   writeText(rootDir, path.join("tests", "workpack-share-authority-routes.test.ts"), "export const preBodyAdmissionTest = true;\n");
+  writeJson(
+    rootDir,
+    path.join("evaluation", "safety-status-disconnect-lease-2026-08-28", "report.json"),
+    safetyStatusDisconnectLeaseFixture(),
+  );
+  writeText(rootDir, path.join("app", "api", "safety-reference", "status", "route.ts"), "export const settleBeforeRelease = true;\n");
+  writeText(rootDir, path.join("tests", "safety-reference-status-route.test.ts"), "export const settleBeforeReleaseTest = true;\n");
   writeJson(rootDir, path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
     sourceHead: "fixture-sha",
@@ -7866,6 +7925,34 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
 
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "share_ack_prebody_admission_security")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records safety status disconnect lease retention as notice and preserves rescan boundaries", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "safety-status-disconnect-lease-2026-08-28",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "safety_status_disconnect_lease_security");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("until the real catalog");
+    expect(gate?.detail).toContain("fresh full scan");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      currentSourceContract: { admissionLeaseHeldUntilUnderlyingSettlement: boolean };
+    };
+    report.currentSourceContract.admissionLeaseHeldUntilUnderlyingSettlement = false;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "safety_status_disconnect_lease_security")?.state)
       .toBe("contradicted");
   });
 

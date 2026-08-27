@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-27T19:43:50.077Z
-Source HEAD at generation: 4d3be96a30665862373620167148e3278547341c
-Live commit at generation: 4d3be96a30665862373620167148e3278547341c
+Generated at: 2026-08-27T20:00:00.318Z
+Source HEAD at generation: 6c57425a1fbccc61c265c84f18bc24e902ade37f
+Live commit at generation: 6c57425a1fbccc61c265c84f18bc24e902ade37f
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_evidence_missing_or_unknown`
@@ -422,6 +422,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | current_repository_security_rescan | notice | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | fresh_current_source_security_scan | notice | evaluation\current-source-standard-security-scan-2026-08-28\report.json |
 | share_ack_prebody_admission_security | notice | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
+| safety_status_disconnect_lease_security | notice | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
 | post_remediation_repository_security_scan | notice | evaluation\post-remediation-full-repository-security-scan-2026-08-14\report.json |
 | agent_chat_durable_admission_security | notice | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
 | security_resource_remediation | proven | evaluation\security-resource-remediation-2026-08-11\report.json |
@@ -495,7 +496,8 @@ Overall: `northstar_evidence_missing_or_unknown`
 | current_security_remediation_ledger | ancestor | ancestor_of_head | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | fresh_current_source_security_scan | ancestor | missing | evaluation\current-source-standard-security-scan-2026-08-28\report.json |
-| share_ack_prebody_admission_security | exact | matches_live | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
+| share_ack_prebody_admission_security | ancestor | ancestor_of_head | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
+| safety_status_disconnect_lease_security | exact | matches_live | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
 | agent_chat_durable_admission_security | ancestor | ancestor_of_head | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
 | mcp_provider_admission_security | ancestor | ancestor_of_head | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
 | share_recipient_contact_verification_security | ancestor | ancestor_of_head | evaluation\share-recipient-contact-verification-2026-08-14\report.json |

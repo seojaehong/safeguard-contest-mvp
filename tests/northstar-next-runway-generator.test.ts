@@ -522,6 +522,25 @@ type NextRunwayReport = {
     recipientAckLiveDataApproval: string;
     exactSavedShareVerdict: string;
   };
+  safetyStatusDisconnectLease: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    scanId: string;
+    findingId: string;
+    findingSlug: string;
+    underlyingWorkSettlementPrecedesAbortRejection: boolean;
+    admissionLeaseHeldUntilUnderlyingSettlement: boolean;
+    thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle: boolean;
+    testsPassed: number | null;
+    liveStatus: number | null;
+    liveCode: string;
+    liveWorkUnit: string;
+    freshRescanRequired: boolean;
+    securityCompleteClaimAllowed: boolean;
+    distributedAdmissionActivation: string;
+    exactSavedShareVerdict: string;
+  };
   publicSearchDistributedRateLimitReadiness: {
     verdict: string;
     sourceHead: string;
@@ -1452,6 +1471,28 @@ function shareAckPreBodyAdmissionFixture(sourceHead: string): Record<string, unk
       freshFullRepositoryRescanRequiredForScanClosure: true,
       securityCompleteClaimAllowed: false,
       shareRecipientAckLiveDataApproval: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  };
+}
+
+function safetyStatusDisconnectLeaseFixture(sourceHead: string): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_SAFETY_STATUS_DISCONNECT_LEASE_SOURCE_REMEDIATED",
+    sourceHead,
+    productionCommit: sourceHead,
+    finding: { scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a", findingId: "csf_b08a96f6b1ba27a33af52a6a", slug: "status-disconnect-residual" },
+    currentSourceContract: {
+      underlyingWorkSettlementPrecedesAbortRejection: true,
+      admissionLeaseHeldUntilUnderlyingSettlement: true,
+      thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle: true,
+    },
+    verification: { focusedAndAdjacentTests: { testsPassed: 16 } },
+    liveProbe: { status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", workUnitHeader: "safety-reference-status" },
+    remainingBoundaries: {
+      freshFullRepositoryRescanRequiredForScanClosure: true,
+      securityCompleteClaimAllowed: false,
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   };
@@ -3083,6 +3124,11 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     "evaluation/share-ack-prebody-admission-2026-08-28/report.json",
     shareAckPreBodyAdmissionFixture(firstHead),
   );
+  writeJson(
+    root,
+    "evaluation/safety-status-disconnect-lease-2026-08-28/report.json",
+    safetyStatusDisconnectLeaseFixture(firstHead),
+  );
   writeJson(root, "evaluation/final-99-12-document-no-mutation-2026-08-17/report.json", {
     schema: "safeclaw-final-99-12-document-no-mutation/v1",
     verdict: "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_12_DOCUMENT_NO_MUTATION_LIVE_HORIZONTAL_ADMISSION_BLOCKED",
@@ -4336,6 +4382,11 @@ describe("northstar next runway generator", () => {
       state: "notice",
       reason: expect.stringContaining("body-read concurrency admission"),
     }));
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "safety_status_disconnect_lease_security",
+      state: "notice",
+      reason: expect.stringContaining("underlying work settles"),
+    }));
     expect(report.freshCurrentSourceSecurityScan).toMatchObject({
       verdict: "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE",
       scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
@@ -4373,6 +4424,25 @@ describe("northstar next runway generator", () => {
       freshRescanRequired: true,
       securityCompleteClaimAllowed: false,
       recipientAckLiveDataApproval: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.safetyStatusDisconnectLease).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SAFETY_STATUS_DISCONNECT_LEASE_SOURCE_REMEDIATED",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+      findingId: "csf_b08a96f6b1ba27a33af52a6a",
+      findingSlug: "status-disconnect-residual",
+      underlyingWorkSettlementPrecedesAbortRejection: true,
+      admissionLeaseHeldUntilUnderlyingSettlement: true,
+      thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle: true,
+      testsPassed: 16,
+      liveStatus: 503,
+      liveCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      liveWorkUnit: "safety-reference-status",
+      freshRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.provenCurrentState).toContain("public_json_request_body_budget");

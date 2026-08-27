@@ -69,6 +69,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-28", "report.json"),
   shareAckPreBodyAdmission: path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
+  safetyStatusDisconnectLease: path.join("evaluation", "safety-status-disconnect-lease-2026-08-28", "report.json"),
   postRemediationRepositorySecurityScan: path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "report.json"),
   postRemediationSecuritySourceClosure: path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"),
   shareSessionRevocationRemediation: path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"),
@@ -8130,6 +8131,95 @@ function evaluateShareAckPreBodyAdmissionGate(rootDir) {
   });
 }
 
+const SAFETY_STATUS_DISCONNECT_LEASE_PATHS = [
+  "app/api/safety-reference/status/route.ts",
+  "tests/safety-reference-status-route.test.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateSafetyStatusDisconnectLeaseGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.safetyStatusDisconnectLease;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "safety_status_disconnect_lease_security",
+      label: "Safety status disconnect lease security",
+      state: "missing",
+      evidencePath,
+      detail: "Safety status disconnect lease evidence is missing or invalid.",
+      nextActions: ["Restore the no-mutation source/live receipt without bypassing durable admission."],
+    });
+  }
+
+  const finding = isRecord(report.finding) ? report.finding : {};
+  const contract = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacentTests) ? verification.focusedAndAdjacentTests : {};
+  const typecheck = isRecord(verification.typecheck) ? verification.typecheck : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const live = isRecord(report.liveProbe) ? report.liveProbe : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.shareSessionCreated === false
+    && mutation.readConfirmationInserted === false
+    && mutation.providerDispatchCalled === false
+    && mutation.vectorRuntimeCalled === false
+    && mutation.wikiPublished === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SAFETY_STATUS_DISCONNECT_LEASE_SOURCE_REMEDIATED"
+    && sourceHead === productionCommit
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, SAFETY_STATUS_DISCONNECT_LEASE_PATHS)
+    && readString(finding.scanId) === "1411fb32-5c18-4d6a-b8ba-d52697757d8a"
+    && readString(finding.findingId) === "csf_b08a96f6b1ba27a33af52a6a"
+    && readString(finding.slug) === "status-disconnect-residual"
+    && contract.preAbortedRequestsRejectedBeforeWork === true
+    && contract.disconnectRecordedWithoutEarlySettlement === true
+    && contract.underlyingWorkSettlementPrecedesAbortRejection === true
+    && contract.admissionLeaseHeldUntilUnderlyingSettlement === true
+    && contract.disconnectedWorkStillConsumesConcurrency === true
+    && contract.thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle === true
+    && readNumber(contract.concurrencyLimit) === 2
+    && readNumber(focused.testFiles) === 4
+    && readNumber(focused.testsPassed) === 16
+    && readNumber(focused.testsFailed) === 0
+    && readString(typecheck.status) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPagesPassed) === 28
+    && readNumber(build.staticPagesFailed) === 0
+    && readNumber(live.status) === 503
+    && readString(live.code) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+    && readString(live.rateLimitHeader) === "distributed"
+    && readString(live.workUnitHeader) === "safety-reference-status"
+    && live.statusWorkReached === false
+    && noMutation
+    && remaining.findingSourceRemediated === true
+    && remaining.freshFullRepositoryRescanRequiredForScanClosure === true
+    && remaining.securityCompleteClaimAllowed === false
+    && readString(remaining.distributedAdmissionActivation) === "OPERATOR_CONFIGURATION_REQUIRED"
+    && readString(remaining.providerDispatchPersistence) === "APPROVAL_GATED"
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+
+  return gateResult({
+    id: "safety_status_disconnect_lease_security",
+    label: "Safety status disconnect lease security",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Live production source now keeps safety-reference status admission occupied until the real catalog, corpus, and exact-registry aggregate settles after disconnect. Two disconnected tasks continue to consume the two-slot concurrency budget and a third request is rejected. The sealed finding remains open pending a fresh full scan; distributed activation and exact saved Share MISSING_EVIDENCE remain unchanged."
+      : `Safety status disconnect verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === productionCommit}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, SAFETY_STATUS_DISCONNECT_LEASE_PATHS)}, settlement=${contract.underlyingWorkSettlementPrecedesAbortRejection === true}/${contract.admissionLeaseHeldUntilUnderlyingSettlement === true}/${contract.thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle === true}, live=${readNumber(live.status)}/${readString(live.code) || "missing"}, noMutation=${noMutation}, rescan=${remaining.freshFullRepositoryRescanRequiredForScanClosure === true}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Run a fresh Standard scan before reclassifying the sealed finding; keep durable activation and exact saved Share boundaries open."]
+      : ["Restore source/live alignment, underlying-settlement lease retention, concurrency proof, no-mutation live proof, fresh-rescan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
 const SECURITY_ACCIDENT_CASE_COMPATIBILITY_CHANGED_PATHS = [
   "lib/accident-cases.ts",
 ];
@@ -11526,6 +11616,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentRepositorySecurityRescanGate(rootDir),
     evaluateFreshCurrentSourceSecurityScanGate(rootDir),
     evaluateShareAckPreBodyAdmissionGate(rootDir),
+    evaluateSafetyStatusDisconnectLeaseGate(rootDir),
     evaluatePostRemediationRepositorySecurityScanGate(rootDir),
     evaluateShareSessionRevocationSecurityGate(rootDir),
     evaluateShareRecipientContactVerificationGate(rootDir),

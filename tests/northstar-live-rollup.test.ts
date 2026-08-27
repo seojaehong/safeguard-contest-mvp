@@ -467,6 +467,25 @@ type RollupReport = {
     recipientAckLiveDataApproval: string;
     exactSavedShareVerdict: string;
   };
+  safetyStatusDisconnectLease: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    scanId: string;
+    findingId: string;
+    findingSlug: string;
+    underlyingWorkSettlementPrecedesAbortRejection: boolean;
+    admissionLeaseHeldUntilUnderlyingSettlement: boolean;
+    thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle: boolean;
+    testsPassed: number | null;
+    liveStatus: number | null;
+    liveCode: string;
+    liveWorkUnit: string;
+    freshRescanRequired: boolean;
+    securityCompleteClaimAllowed: boolean;
+    distributedAdmissionActivation: string;
+    exactSavedShareVerdict: string;
+  };
   publicSearchDistributedRateLimitReadiness: {
     verdict: string;
     sourceHead: string;
@@ -1020,6 +1039,28 @@ function shareAckPreBodyAdmissionFixture(): Record<string, unknown> {
   };
 }
 
+function safetyStatusDisconnectLeaseFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_SAFETY_STATUS_DISCONNECT_LEASE_SOURCE_REMEDIATED",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    finding: { scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a", findingId: "csf_b08a96f6b1ba27a33af52a6a", slug: "status-disconnect-residual" },
+    currentSourceContract: {
+      underlyingWorkSettlementPrecedesAbortRejection: true,
+      admissionLeaseHeldUntilUnderlyingSettlement: true,
+      thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle: true,
+    },
+    verification: { focusedAndAdjacentTests: { testsPassed: 16 } },
+    liveProbe: { status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", workUnitHeader: "safety-reference-status" },
+    remainingBoundaries: {
+      freshFullRepositoryRescanRequiredForScanClosure: true,
+      securityCompleteClaimAllowed: false,
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  };
+}
+
 function documentEditorialReviewReceiptFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
@@ -1076,6 +1117,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "current_repository_security_rescan", state: "notice", evidencePath: "evaluation/current-full-repository-security-scan-2026-08-27/report.json", detail: "19 findings with partial coverage; 12 approval-gated and 7 approval-free source candidates remain open" },
       { id: "fresh_current_source_security_scan", state: "notice", evidencePath: "evaluation/current-source-standard-security-scan-2026-08-28/report.json", detail: "17 findings with partial coverage; four approval-free source residuals and approval-gated boundaries remain open" },
       { id: "share_ack_prebody_admission_security", state: "notice", evidencePath: "evaluation/share-ack-prebody-admission-2026-08-28/report.json", detail: "Share ACK pre-body admission is live; fresh rescan and exact saved Share remain open" },
+      { id: "safety_status_disconnect_lease_security", state: "notice", evidencePath: "evaluation/safety-status-disconnect-lease-2026-08-28/report.json", detail: "Safety status disconnect lease retention is live; fresh rescan and durable activation remain open" },
       { id: "public_search_distributed_rate_limit_readiness", state: "notice", evidencePath: "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", detail: "current-source capability with production configuration pending" },
       { id: "public_generation_admission_security", state: "notice", evidencePath: "evaluation/security-public-generation-admission-2026-08-04/report.json", detail: "live generation routes fail closed when distributed configuration is unavailable; activation and fresh rescan pending" },
       { id: "security_followup_remediation", state: "proven", evidencePath: "evaluation/codex-security-followup-remediation-2026-08-11/report.json", detail: "deployed three-finding remediation with immutable baseline preserved" },
@@ -2080,6 +2122,7 @@ function createFixtureRoot(): { root: string; head: string } {
   });
   writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-28/report.json", freshCurrentSourceSecurityScanFixture());
   writeJson(root, "evaluation/share-ack-prebody-admission-2026-08-28/report.json", shareAckPreBodyAdmissionFixture());
+  writeJson(root, "evaluation/safety-status-disconnect-lease-2026-08-28/report.json", safetyStatusDisconnectLeaseFixture());
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "TO_FILL",
@@ -2471,6 +2514,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/current-full-repository-security-scan-2026-08-27/report.json",
     "evaluation/current-source-standard-security-scan-2026-08-28/report.json",
     "evaluation/share-ack-prebody-admission-2026-08-28/report.json",
+    "evaluation/safety-status-disconnect-lease-2026-08-28/report.json",
     "evaluation/public-json-request-body-budget-2026-08-11/report.json",
     "evaluation/improvement-photo-analysis-budget-2026-08-11/report.json",
     "evaluation/public-provider-cancellation-2026-08-11/report.json",
@@ -3045,6 +3089,28 @@ describe("northstar live rollup", () => {
       freshRescanRequired: true,
       securityCompleteClaimAllowed: false,
       recipientAckLiveDataApproval: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "safety_status_disconnect_lease_security")).toMatchObject({
+      artifact: path.join("evaluation", "safety-status-disconnect-lease-2026-08-28", "report.json"),
+    });
+    expect(report.safetyStatusDisconnectLease).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SAFETY_STATUS_DISCONNECT_LEASE_SOURCE_REMEDIATED",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+      findingId: "csf_b08a96f6b1ba27a33af52a6a",
+      findingSlug: "status-disconnect-residual",
+      underlyingWorkSettlementPrecedesAbortRejection: true,
+      admissionLeaseHeldUntilUnderlyingSettlement: true,
+      thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle: true,
+      testsPassed: 16,
+      liveStatus: 503,
+      liveCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      liveWorkUnit: "safety-reference-status",
+      freshRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.publicJsonRequestBodyBudget).toMatchObject({
