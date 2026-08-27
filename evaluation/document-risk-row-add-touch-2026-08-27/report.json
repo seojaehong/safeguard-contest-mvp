@@ -1,0 +1,85 @@
+{
+  "schema": "safeclaw-document-risk-row-add-touch/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_ADD_TOUCH_TARGET",
+  "checkedAt": "2026-08-27T07:44:04.437Z",
+  "productCommit": "fbe35641a7f870570d242e1bdf3b5bf30d512f83",
+  "productionBuild": {
+    "commitSha": "fbe35641a7f870570d242e1bdf3b5bf30d512f83",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-k5k2srsiw-seojaehongs-projects.vercel.app"
+  },
+  "scope": {
+    "route": "/documents",
+    "selectedDocument": "riskAssessmentDraft",
+    "action": "addRiskRow",
+    "viewport": { "width": 390, "height": 723 },
+    "themes": ["day", "night"],
+    "existingSelectedOnlyWorkbenchPreserved": true,
+    "routeSplitAloneAcceptedAsFix": false
+  },
+  "beforeLive": {
+    "commitSha": "eb0000396fde7ab41e37f2853318d8bacadd91b1",
+    "buttonHeight": 32,
+    "requiredHeight": 44,
+    "verdict": "RED_MOBILE_ADD_RISK_ROW_TOUCH_TARGET_BELOW_44PX",
+    "screenshot": "evaluation/document-risk-row-add-touch-2026-08-27/before-live-day-390x723.png"
+  },
+  "afterLocal": {
+    "passCount": 2,
+    "rowCount": 2,
+    "buttonHeight": 44,
+    "documentHeight": 723,
+    "horizontalOverflow": 0,
+    "shellOverflowY": "auto",
+    "screenshots": [
+      "evaluation/document-risk-row-add-touch-2026-08-27/after-local-day-390x723.png",
+      "evaluation/document-risk-row-add-touch-2026-08-27/after-local-night-390x723.png"
+    ]
+  },
+  "afterLive": {
+    "passCount": 2,
+    "rowCount": 2,
+    "buttonHeight": 44,
+    "documentHeight": 723,
+    "horizontalOverflow": 0,
+    "shellOverflowY": "auto",
+    "metricsPath": "evaluation/document-risk-row-add-touch-2026-08-27/browser-metrics.json",
+    "screenshots": [
+      "evaluation/document-risk-row-add-touch-2026-08-27/after-live-day-390x723.png",
+      "evaluation/document-risk-row-add-touch-2026-08-27/after-live-night-390x723.png"
+    ]
+  },
+  "verification": {
+    "cssTokenContract": { "files": 1, "tests": 3, "failed": 0, "status": "PASS" },
+    "typecheck": "PASS",
+    "build": { "status": "PASS", "nextVersion": "15.5.22", "staticPages": 28 },
+    "localBrowser": { "rows": 2, "passed": 2, "status": "PASS" },
+    "liveBrowser": { "rows": 2, "passed": 2, "status": "PASS" },
+    "visualInspection": { "screenshots": 5, "status": "PASS" },
+    "isolatedBrowserHarness": {
+      "status": "ENVIRONMENT_TIMEOUT_BEFORE_ASSERTION",
+      "attempts": 4,
+      "hookTimeoutMs": 90000,
+      "productAssertionExecuted": false,
+      "treatedAsProductFailure": false
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "sifEmbeddingRuntime": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "koshaExactPromotionReview": "APPROVAL_GATED",
+    "humanReviewCompleted": false
+  }
+}

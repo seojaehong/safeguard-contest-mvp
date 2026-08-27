@@ -5157,6 +5157,98 @@ function createFixtureRoot(): string {
       rawSourceDrilldownRemainsBoundedSecondary: true,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "document-risk-row-add-touch-2026-08-27", "browser-metrics.json"), {
+    schema: "safeclaw-document-risk-row-add-touch-browser/v1",
+    beforeLive: {
+      source: "https://www.safeclaw.kr",
+      commitSha: "eb0000396fde7ab41e37f2853318d8bacadd91b1",
+      theme: "day",
+      viewport: { width: 390, height: 723 },
+      documentHeight: 723,
+      horizontalOverflow: 0,
+      addRiskRowButton: { height: 32, minHeight: "32px", width: 90.5 },
+      shell: { clientHeight: 352, scrollHeight: 860, overflowY: "auto" },
+      verdict: "RED_MOBILE_ADD_RISK_ROW_TOUCH_TARGET_BELOW_44PX",
+    },
+    afterLocal: ["day", "night"].map((theme) => ({
+      source: "http://127.0.0.1:3084",
+      theme,
+      viewport: { width: 390, height: 723 },
+      documentHeight: 723,
+      horizontalOverflow: 0,
+      addRiskRowButton: { height: 44, minHeight: "44px", width: 90.34 },
+      shell: { clientHeight: 352, scrollHeight: 732, overflowY: "auto" },
+      verdict: "PASS",
+    })),
+    afterLive: ["day", "night"].map((theme) => ({
+      source: "https://www.safeclaw.kr",
+      theme,
+      viewport: { width: 390, height: 723 },
+      documentHeight: 723,
+      horizontalOverflow: 0,
+      addRiskRowButton: { height: 44, minHeight: "44px", width: 90.5 },
+      shell: { clientHeight: 352, scrollHeight: 868, overflowY: "auto" },
+      verdict: "PASS",
+    })),
+  });
+  writeJson(rootDir, path.join("evaluation", "document-risk-row-add-touch-2026-08-27", "report.json"), {
+    schema: "safeclaw-document-risk-row-add-touch/v1",
+    verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_ADD_TOUCH_TARGET",
+    productCommit: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    scope: {
+      route: "/documents",
+      selectedDocument: "riskAssessmentDraft",
+      action: "addRiskRow",
+      viewport: { width: 390, height: 723 },
+      themes: ["day", "night"],
+      existingSelectedOnlyWorkbenchPreserved: true,
+      routeSplitAloneAcceptedAsFix: false,
+    },
+    beforeLive: {
+      commitSha: "eb0000396fde7ab41e37f2853318d8bacadd91b1",
+      buttonHeight: 32,
+      requiredHeight: 44,
+      verdict: "RED_MOBILE_ADD_RISK_ROW_TOUCH_TARGET_BELOW_44PX",
+    },
+    afterLocal: { passCount: 2, rowCount: 2, buttonHeight: 44 },
+    afterLive: {
+      passCount: 2,
+      rowCount: 2,
+      buttonHeight: 44,
+      metricsPath: "evaluation/document-risk-row-add-touch-2026-08-27/browser-metrics.json",
+    },
+    verification: {
+      cssTokenContract: { files: 1, tests: 3, failed: 0, status: "PASS" },
+      typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+      localBrowser: { rows: 2, passed: 2, status: "PASS" },
+      liveBrowser: { rows: 2, passed: 2, status: "PASS" },
+      visualInspection: { screenshots: 5, status: "PASS" },
+      isolatedBrowserHarness: {
+        status: "ENVIRONMENT_TIMEOUT_BEFORE_ASSERTION",
+        productAssertionExecuted: false,
+        treatedAsProductFailure: false,
+      },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingOrVectorMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      sifEmbeddingRuntime: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      koshaExactPromotionReview: "APPROVAL_GATED",
+      humanReviewCompleted: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "workspace-ia-live-7b36-2026-07-22", "report.json"), {
     verdict: "IA_BLOCKER_REFINED_CURRENT_LIVE",
     liveCommitChecked: "fixture-sha",
@@ -6609,6 +6701,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("five-row density companion");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("two rows/94px to one horizontal row/46px");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("active hazard field bottom to 667px");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("restores the mobile + 위험 항목 action from 32px to 44px");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("12 document first-task cockpits");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("staged Share rail");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("desktop-short 1440x723");
@@ -6628,7 +6721,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("/share/[sessionId] desktop recipient confirmation");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("mobile confirmation CTA before document details");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.evidencePath).toBe(
-      path.join("evaluation", "document-risk-row-mobile-density-2026-08-27", "report.json"),
+      path.join("evaluation", "document-risk-row-add-touch-2026-08-27", "report.json"),
     );
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("raw/source editing as an explicit live-bounded secondary drilldown");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("selected-editor evidence/recheck CTA remains live-proven before raw editing");
@@ -9285,6 +9378,30 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "document-risk-row-mobile-density-2026-08-27", "report.json"));
     expect(gate?.detail).toContain("documentRiskRowMobileDensity=false");
+  });
+
+  it("contradicts the UI gate when the mobile add-risk-row action drops below 44px", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const geometryPath = path.join(rootDir, "evaluation", "document-risk-row-add-touch-2026-08-27", "browser-metrics.json");
+    const geometry = JSON.parse(fs.readFileSync(geometryPath, "utf8")) as {
+      afterLive: Array<{ theme: string; addRiskRowButton: { height: number; minHeight: string } }>;
+    };
+    const day = geometry.afterLive.find((row) => row.theme === "day");
+    if (!day) throw new Error("Missing live Day add-risk-row fixture");
+    day.addRiskRowButton.height = 32;
+    day.addRiskRowButton.minHeight = "32px";
+    fs.writeFileSync(geometryPath, `${JSON.stringify(geometry, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+    const gate = audit.gates.find((item) => item.id === "ui_documents_share_cockpit");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.evidencePath).toBe(path.join("evaluation", "document-risk-row-add-touch-2026-08-27", "report.json"));
+    expect(gate?.detail).toContain("documentRiskRowAddTouch=false");
   });
 
   it("fails seed-profile isolation closed when one forbidden fragment remains live", async () => {

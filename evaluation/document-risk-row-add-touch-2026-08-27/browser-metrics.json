@@ -1,0 +1,64 @@
+{
+  "schema": "safeclaw-document-risk-row-add-touch-browser/v1",
+  "generatedAt": "2026-08-27T07:44:04.437Z",
+  "beforeLive": {
+    "source": "https://www.safeclaw.kr",
+    "commitSha": "eb0000396fde7ab41e37f2853318d8bacadd91b1",
+    "theme": "day",
+    "viewport": { "width": 390, "height": 723 },
+    "documentHeight": 723,
+    "horizontalOverflow": 0,
+    "addRiskRowButton": { "height": 32, "minHeight": "32px", "width": 90.5 },
+    "shell": { "clientHeight": 352, "scrollHeight": 860, "overflowY": "auto" },
+    "verdict": "RED_MOBILE_ADD_RISK_ROW_TOUCH_TARGET_BELOW_44PX"
+  },
+  "afterLocal": [
+    {
+      "source": "http://127.0.0.1:3084",
+      "theme": "day",
+      "viewport": { "width": 390, "height": 723 },
+      "documentHeight": 723,
+      "horizontalOverflow": 0,
+      "addRiskRowButton": { "height": 44, "minHeight": "44px", "width": 90.34 },
+      "shell": { "clientHeight": 352, "scrollHeight": 732, "overflowY": "auto" },
+      "selectorRailHeight": 46,
+      "stickyOverlap": false,
+      "verdict": "PASS"
+    },
+    {
+      "source": "http://127.0.0.1:3084",
+      "theme": "night",
+      "viewport": { "width": 390, "height": 723 },
+      "documentHeight": 723,
+      "horizontalOverflow": 0,
+      "addRiskRowButton": { "height": 44, "minHeight": "44px", "width": 90.34 },
+      "shell": { "clientHeight": 352, "scrollHeight": 732, "overflowY": "auto" },
+      "selectorRailHeight": 46,
+      "stickyOverlap": false,
+      "verdict": "PASS"
+    }
+  ],
+  "afterLive": [
+    {
+      "source": "https://www.safeclaw.kr",
+      "theme": "day",
+      "viewport": { "width": 390, "height": 723 },
+      "documentHeight": 723,
+      "horizontalOverflow": 0,
+      "addRiskRowButton": { "height": 44, "minHeight": "44px", "width": 90.5 },
+      "shell": { "clientHeight": 352, "scrollHeight": 868, "overflowY": "auto" },
+      "stickyOverlapAtInitialScroll": false,
+      "verdict": "PASS"
+    },
+    {
+      "source": "https://www.safeclaw.kr",
+      "theme": "night",
+      "viewport": { "width": 390, "height": 723 },
+      "documentHeight": 723,
+      "horizontalOverflow": 0,
+      "addRiskRowButton": { "height": 44, "minHeight": "44px", "width": 90.5 },
+      "shell": { "clientHeight": 352, "scrollHeight": 868, "overflowY": "auto" },
+      "verdict": "PASS"
+    }
+  ]
+}
