@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-27T11:44:44.350Z
-Source HEAD at generation: 3d726b5cdb7d7cc6e05b2135d6ac9f0336ea70a8
-Live commit at generation: 3d726b5cdb7d7cc6e05b2135d6ac9f0336ea70a8
+Generated at: 2026-08-27T12:28:00.140Z
+Source HEAD at generation: 9a4a703b6b1ff370a362bfafee42dfff9141be31
+Live commit at generation: 9a4a703b6b1ff370a362bfafee42dfff9141be31
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -231,9 +231,9 @@ Overall: `northstar_open_approval_gated`
 - Verdict: `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING`
 - POST body budget: 98304 bytes; adjacent tests=77
 - Valid authenticated runtime probe pending: true
-- Distributed activation pending: false; fresh rescan required: true
+- Distributed activation pending: true; backend health pending: false; configuration=absent; readiness=distributed_limiter_unavailable; fresh rescan required: true
 - Exact saved Share: MISSING_EVIDENCE
-- Boundary: live instance admission is not a distributed multi-instance or canonical rescan closure claim.
+- Boundary: the distributed header on a fail-closed MCP response does not prove that the distributed backend is configured; activation and a canonical rescan remain separate requirements.
 
 ## Live Product Capability Truth
 
@@ -486,7 +486,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
 | launch_operations_readiness_cockpit | ancestor | ancestor_of_head | evaluation\launch-operations-readiness-2026-08-26\report.json |
-| document_export_capability_truth | ancestor | ancestor_of_head | evaluation\document-export-capability-truth-2026-08-17\report.json |
+| document_export_capability_truth | exact | matches_live | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | ontology_viewport_workbench | ancestor | ancestor_of_head | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
 | knowledge_viewport_workbench | ancestor | ancestor_of_head | evaluation\knowledge-viewport-workbench-2026-08-17\report.json |
 | llm_wiki_candidate_content_readiness | ancestor | ancestor_of_head | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |

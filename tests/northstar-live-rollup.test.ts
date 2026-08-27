@@ -1355,7 +1355,7 @@ function createFixtureRoot(): { root: string; head: string } {
     sourceHead: "TO_FILL",
     productCommit: "TO_FILL",
     productionCommit: "TO_FILL",
-    capability: { admission: { mode: "unavailable", ready: false, reason: "distributed_limiter_unavailable" } },
+    capability: { admission: { configurationState: "absent", mode: "unavailable", ready: false, reason: "distributed_limiter_unavailable" } },
     browser: {
       desktop: { panelWidth: 843, legacyXlsButtonWidth: 191.25 },
       mobile: { panelWidth: 262, legacyXlsButtonWidth: 220 },

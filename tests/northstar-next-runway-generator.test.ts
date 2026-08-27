@@ -3074,7 +3074,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     sourceHead: "fixture-sha",
     productCommit: "fixture-product-sha",
     productionCommit: "fixture-sha",
-    capability: { admission: { mode: "unavailable", ready: false, reason: "distributed_limiter_unavailable" } },
+    capability: { admission: { configurationState: "absent", mode: "unavailable", ready: false, reason: "distributed_limiter_unavailable" } },
     browser: {
       desktop: { panelWidth: 843, legacyXlsButtonWidth: 191.25 },
       mobile: { panelWidth: 262, legacyXlsButtonWidth: 220 },

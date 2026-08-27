@@ -77,12 +77,12 @@
   },
   "currentLiveRefresh": {
     "verdict": "PASS_LIVE_PRODUCTION_MCP_PREAUTH_ADMISSION_FAIL_CLOSED_REFRESH",
-    "checkedAt": "2026-08-27T11:12:07Z",
-    "sourceHead": "65f7d839d64a1aefc9e275764497bcd5eab0174b",
-    "productionCommit": "65f7d839d64a1aefc9e275764497bcd5eab0174b",
+    "checkedAt": "2026-08-27T12:20:08.9275799Z",
+    "sourceHead": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+    "productionCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
     "productionBranch": "master",
     "productionEnvironment": "production",
-    "deploymentUrl": "safeguard-contest-63jmmkl8j-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-rlut51oac-seojaehongs-projects.vercel.app",
     "probe": {
       "path": "/api/mcp/mcp",
       "method": "POST",
@@ -92,13 +92,22 @@
       "rateLimitHeader": "distributed",
       "errorCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
       "retryAfterSeconds": 5,
-      "distributedAdmissionConfigured": true,
-      "distributedAdmissionHealthy": false,
+      "distributedAdmissionRequired": true,
+      "distributedAdmissionAvailable": false,
       "distributedAdmissionFailedClosed": true,
       "authenticationNotReachedBecauseAdmissionFailedClosed": true,
       "mcpToolDispatchPerformed": false,
       "providerCallPerformed": false,
       "validAuthenticatedBudgetProbeExecuted": false
+    },
+    "configurationReadiness": {
+      "path": "/api/export/pdf",
+      "method": "GET",
+      "status": 200,
+      "configurationState": "absent",
+      "mode": "unavailable",
+      "ready": false,
+      "reason": "distributed_limiter_unavailable"
     },
     "verification": {
       "focused": { "files": 3, "tests": 65, "failed": 0, "status": "PASS" },
@@ -120,8 +129,8 @@
     "liveAfterDeploymentRequired": false,
     "validAuthenticatedRuntimeProbeRequired": true,
     "freshSecurityRescanRequired": true,
-    "distributedProductionActivationRequired": false,
-    "distributedProductionHealthRequired": true,
+    "distributedProductionActivationRequired": true,
+    "distributedProductionHealthRequired": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedBoundariesUnchanged": true
   },

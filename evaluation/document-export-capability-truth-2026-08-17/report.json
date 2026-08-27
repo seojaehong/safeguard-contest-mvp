@@ -1,18 +1,21 @@
 {
   "schemaVersion": "safeclaw-document-export-capability-truth/v1",
-  "generatedAt": "2026-08-17T11:58:51+09:00",
+  "generatedAt": "2026-08-27T12:20:08.9275799Z",
   "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
-  "sourceHead": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
+  "sourceHead": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
   "productCommit": "f28ed068f76109453d9265314d406242badbe40c",
-  "productionCommit": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
+  "productionCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
   "productCommitIncludedInProduction": true,
   "sourceHeadMatchesProduction": true,
+  "geometryReceiptSourceHead": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
+  "geometryGovernedPathsChangedSinceReceipt": false,
   "mode": "live-production",
   "baseUrl": "https://www.safeclaw.kr",
   "capability": {
     "endpoint": "/api/export/pdf",
     "getStatus": 200,
     "admission": {
+      "configurationState": "absent",
       "mode": "unavailable",
       "ready": false,
       "reason": "distributed_limiter_unavailable"
@@ -81,15 +84,15 @@
   },
   "governedPathCompatibility": {
     "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_ADMISSION_COMPATIBILITY",
-    "sourceHead": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
-    "productionCommit": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
+    "sourceHead": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+    "productionCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
     "changedGovernedPaths": ["lib/public-distributed-rate-limit.ts"],
     "coveredGateIds": [
       "improvement_photo_analysis_budget",
       "public_provider_admission",
       "security_followup_remediation"
     ],
-    "focusedAndAdjacentTests": { "files": 10, "tests": 47, "failed": 0, "status": "PASS" },
+    "focusedAndAdjacentTests": { "files": 10, "tests": 67, "failed": 0, "status": "PASS" },
     "typecheck": "PASS",
     "build": "PASS",
     "originalSecurityBaselinesRewritten": false,

@@ -2093,6 +2093,7 @@ function evaluateDocumentExportCapabilityTruthGate(rootDir) {
   const liveReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH"
     && sourceMatchesProduction
     && readNumber(capability.getStatus) === 200
+    && readString(admission.configurationState) === "absent"
     && readString(admission.mode) === "unavailable"
     && admission.ready === false
     && readString(admission.reason) === "distributed_limiter_unavailable"
@@ -2112,7 +2113,7 @@ function evaluateDocumentExportCapabilityTruthGate(rootDir) {
       label: "Live document export capability truth",
       state: "proven",
       evidencePath,
-      detail: `Production export admission is honestly locked (${readString(admission.reason)}): server XLSX/HWP remain disabled while browser PDF, legacy XLS, and HWPX draft remain enabled. Desktop panel=${readNumber(desktop.panelWidth)}px with beta=${readNumber(desktop.legacyXlsButtonWidth)}px; mobile panel=${readNumber(mobile.panelWidth)}px with beta=${readNumber(mobile.legacyXlsButtonWidth)}px. Distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, fully automated launch remains forbidden, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`,
+      detail: `Production export admission is honestly locked (configuration=${readString(admission.configurationState)}, ${readString(admission.reason)}): server XLSX/HWP remain disabled while browser PDF, legacy XLS, and HWPX draft remain enabled. Desktop panel=${readNumber(desktop.panelWidth)}px with beta=${readNumber(desktop.legacyXlsButtonWidth)}px; mobile panel=${readNumber(mobile.panelWidth)}px with beta=${readNumber(mobile.legacyXlsButtonWidth)}px. Distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, fully automated launch remains forbidden, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`,
       nextActions: ["Configure distributed admission separately before enabling server XLSX/HWP export."],
     });
   }
@@ -7882,7 +7883,7 @@ function isDocumentExportAdmissionCompatibilityCurrent(rootDir, gateId, governed
     && changedGovernedPaths.length === 1
     && changedGovernedPaths[0] === "lib/public-distributed-rate-limit.ts"
     && readNumber(tests.files) === 10
-    && readNumber(tests.tests) === 47
+    && readNumber(tests.tests) >= 47
     && readNumber(tests.failed) === 0
     && readString(tests.status) === "PASS"
     && compatibility.typecheck === "PASS"

@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T11:44:44.350Z",
-  "head": "3d726b5cdb7d7cc6e05b2135d6ac9f0336ea70a8",
+  "generatedAt": "2026-08-27T12:28:00.140Z",
+  "head": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "3d726b5cdb7d7cc6e05b2135d6ac9f0336ea70a8",
+    "commitSha": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-1gf9xq3p7-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-rlut51oac-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -109,7 +109,7 @@
       "id": "document_export_capability_truth",
       "state": "proven",
       "artifact": "evaluation\\document-export-capability-truth-2026-08-17\\report.json",
-      "detail": "Production export admission is honestly locked (distributed_limiter_unavailable): server XLSX/HWP remain disabled while browser PDF, legacy XLS, and HWPX draft remain enabled. Desktop panel=843px with beta=191.25px; mobile panel=262px with beta=220px. Distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, fully automated launch remains forbidden, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Production export admission is honestly locked (configuration=absent, distributed_limiter_unavailable): server XLSX/HWP remain disabled while browser PDF, legacy XLS, and HWPX draft remain enabled. Desktop panel=843px with beta=191.25px; mobile panel=262px with beta=220px. Distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, fully automated launch remains forbidden, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "ontology_viewport_workbench",
@@ -295,13 +295,13 @@
       "id": "security_followup_remediation",
       "state": "proven",
       "artifact": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
-      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (6 files / 146 tests). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (covered by another current receipt). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "mcp_generation_work_budget_security",
       "state": "notice",
       "artifact": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
-      "detail": "Current production 65f7d839 proves distributed MCP admission is configured but unhealthy: the pre-auth guard returned 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE and failed closed before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification preserves the 96 KiB body contract with 3 files / 65 focused tests and 8 files / 126 adjacent MCP tests. Distributed activation is observed, while backend health, a valid authenticated runtime probe, and a fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Current production 9a4a703b proves distributed MCP admission is required but not configured: the readiness endpoint reports configurationState=absent and the pre-auth guard returns 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification preserves the 96 KiB body contract with 3 files / 65 focused tests and 8 files / 126 adjacent MCP tests. Distributed activation, a valid authenticated runtime probe, and a fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "learning_export_renderer_security",
@@ -967,11 +967,13 @@
     "postBodyMaxBytes": 98304,
     "adjacentTests": 77,
     "validAuthenticatedRuntimeProbeRequired": true,
-    "distributedActivationRequired": false,
-    "distributedHealthRequired": true,
+    "distributedActivationRequired": true,
+    "distributedHealthRequired": false,
     "currentRefreshStatus": 503,
     "currentRefreshRateLimitMode": "distributed",
     "currentRefreshErrorCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "currentRefreshConfigurationState": "absent",
+    "currentRefreshReadinessReason": "distributed_limiter_unavailable",
     "freshRescanRequired": true,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
@@ -1201,9 +1203,9 @@
   "documentExportCapabilityTruth": {
     "artifact": "evaluation\\document-export-capability-truth-2026-08-17\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
-    "sourceHead": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
+    "sourceHead": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
     "productCommit": "f28ed068f76109453d9265314d406242badbe40c",
-    "productionCommit": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
+    "productionCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
     "admissionMode": "unavailable",
     "admissionReason": "distributed_limiter_unavailable",
     "admissionReady": false,
@@ -1737,9 +1739,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "3d726b5cdb7d7cc6e05b2135d6ac9f0336ea70a8",
+      "sourceCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
       "sourceStatus": "exact",
-      "productionCommit": "3d726b5cdb7d7cc6e05b2135d6ac9f0336ea70a8",
+      "productionCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
       "productionStatus": "matches_live"
     },
     {
@@ -1865,10 +1867,10 @@
     {
       "id": "document_export_capability_truth",
       "artifact": "evaluation\\document-export-capability-truth-2026-08-17\\report.json",
-      "sourceCommit": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
-      "sourceStatus": "ancestor",
-      "productionCommit": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+      "sourceStatus": "exact",
+      "productionCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+      "productionStatus": "matches_live"
     },
     {
       "id": "ontology_viewport_workbench",

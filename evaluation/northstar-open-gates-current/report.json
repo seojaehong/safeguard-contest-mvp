@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-27T11:44:36.522Z",
-  "sourceSha": "3d726b5cdb7d7cc6e05b2135d6ac9f0336ea70a8",
+  "generatedAt": "2026-08-27T12:27:53.509Z",
+  "sourceSha": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
   "overall": "open",
   "gates": [
     {
@@ -155,7 +155,7 @@
       "state": "proven",
       "label": "Live document export capability truth",
       "evidencePath": "evaluation\\document-export-capability-truth-2026-08-17\\report.json",
-      "detail": "Production export admission is honestly locked (distributed_limiter_unavailable): server XLSX/HWP remain disabled while browser PDF, legacy XLS, and HWPX draft remain enabled. Desktop panel=843px with beta=191.25px; mobile panel=262px with beta=220px. Distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, fully automated launch remains forbidden, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Production export admission is honestly locked (configuration=absent, distributed_limiter_unavailable): server XLSX/HWP remain disabled while browser PDF, legacy XLS, and HWPX draft remain enabled. Desktop panel=843px with beta=191.25px; mobile panel=262px with beta=220px. Distributed activation remains OPERATOR_CONFIGURATION_REQUIRED, fully automated launch remains forbidden, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Configure distributed admission separately before enabling server XLSX/HWP export."
       ]
@@ -479,7 +479,7 @@
       "state": "proven",
       "label": "Security follow-up remediation",
       "evidencePath": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
-      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (6 files / 146 tests). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (covered by another current receipt). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Keep the immutable baseline and two deferred candidates visible in future security review; do not convert this scoped remediation into a security-complete claim.",
         "Retain the separate public generation admission notice and exact saved Share boundary until their own evidence contracts close."
@@ -490,10 +490,10 @@
       "state": "notice",
       "label": "MCP generation work-budget security",
       "evidencePath": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
-      "detail": "Current production 65f7d839 proves distributed MCP admission is configured but unhealthy: the pre-auth guard returned 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE and failed closed before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification preserves the 96 KiB body contract with 3 files / 65 focused tests and 8 files / 126 adjacent MCP tests. Distributed activation is observed, while backend health, a valid authenticated runtime probe, and a fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Current production 9a4a703b proves distributed MCP admission is required but not configured: the readiness endpoint reports configurationState=absent and the pre-auth guard returns 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification preserves the 96 KiB body contract with 3 files / 65 focused tests and 8 files / 126 adjacent MCP tests. Distributed activation, a valid authenticated runtime probe, and a fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Run a valid credential-safe production MCP boundary probe without exposing the token.",
-        "Restore distributed limiter backend health before claiming authenticated MCP availability, then complete a fresh security rescan."
+        "Activate the approved distributed limiter configuration before claiming authenticated MCP availability, then complete a fresh security rescan."
       ]
     },
     {

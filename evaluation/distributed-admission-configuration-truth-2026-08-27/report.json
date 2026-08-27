@@ -1,0 +1,151 @@
+{
+  "schemaVersion": "safeclaw-distributed-admission-configuration-truth/v1",
+  "generatedAt": "2026-08-27T12:20:08.9275799Z",
+  "verdict": "PASS_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_CONFIGURATION_TRUTH",
+  "sourceHead": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+  "productCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+  "productionCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+  "sourceHeadMatchesProduction": true,
+  "interpretation": {
+    "distributedResponseHeaderProvesConfiguration": false,
+    "distributedResponseHeaderMeaning": "The MCP guard requires distributed admission in production and labels the fail-closed response mode as distributed even when server configuration is absent.",
+    "configurationTruthSource": "getPublicDistributedAdmissionReadiness plus the read-only /api/export/pdf readiness response",
+    "currentConclusion": "Distributed admission is required, configuration is absent, and public provider work fails closed before authentication or tool dispatch."
+  },
+  "beforeLive": {
+    "checkedAt": "2026-08-27T12:17:00Z",
+    "productionBuild": {
+      "commitSha": "8068d623d22fe28d814aaf62a18a04deb3a55627",
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-lglvd3y4n-seojaehongs-projects.vercel.app"
+    },
+    "configurationReadiness": {
+      "path": "/api/export/pdf",
+      "method": "GET",
+      "status": 200,
+      "configurationStateFieldPresent": false,
+      "inferredConfigurationState": "absent",
+      "mode": "unavailable",
+      "ready": false,
+      "reason": "distributed_limiter_unavailable"
+    },
+    "mcpPreAuthProbe": {
+      "path": "/api/mcp/mcp",
+      "method": "POST",
+      "credential": "intentionally_invalid_non_secret",
+      "requestBodyBytes": 2,
+      "status": 503,
+      "rateLimitHeader": "distributed",
+      "retryAfterSeconds": 5,
+      "errorCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      "authenticationReached": false,
+      "mcpToolDispatchPerformed": false,
+      "providerCallPerformed": false
+    }
+  },
+  "afterLocal": {
+    "baseUrl": "http://127.0.0.1:3207",
+    "mode": "current-source-local-production",
+    "environment": "VERCEL_ENV=production with no Upstash variables",
+    "configurationReadiness": {
+      "path": "/api/export/pdf",
+      "method": "GET",
+      "status": 200,
+      "configurationState": "absent",
+      "mode": "unavailable",
+      "ready": false,
+      "reason": "distributed_limiter_unavailable"
+    },
+    "mcpPreAuthProbe": {
+      "path": "/api/mcp/mcp",
+      "method": "POST",
+      "credential": "intentionally_invalid_non_secret",
+      "requestBodyBytes": 2,
+      "status": 503,
+      "rateLimitHeader": "distributed",
+      "retryAfterSeconds": 5,
+      "errorCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      "authenticationReached": false,
+      "mcpToolDispatchPerformed": false,
+      "providerCallPerformed": false
+    }
+  },
+  "afterLive": {
+    "checkedAt": "2026-08-27T12:20:08.9275799Z",
+    "productionBuild": {
+      "commitSha": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-rlut51oac-seojaehongs-projects.vercel.app"
+    },
+    "configurationReadiness": {
+      "path": "/api/export/pdf",
+      "method": "GET",
+      "status": 200,
+      "configurationState": "absent",
+      "mode": "unavailable",
+      "ready": false,
+      "reason": "distributed_limiter_unavailable"
+    },
+    "mcpPreAuthProbe": {
+      "path": "/api/mcp/mcp",
+      "method": "POST",
+      "credential": "intentionally_invalid_non_secret",
+      "requestBodyBytes": 2,
+      "status": 503,
+      "rateLimitHeader": "distributed",
+      "retryAfterSeconds": 5,
+      "errorCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      "authenticationReached": false,
+      "mcpToolDispatchPerformed": false,
+      "providerCallPerformed": false
+    }
+  },
+  "verification": {
+    "focused": {
+      "command": "npm.cmd exec -- vitest run tests/public-export-admission.test.ts tests/engine-runtime-readiness-policy.test.ts tests/public-distributed-rate-limit.test.ts --maxWorkers=1 --fileParallelism=false",
+      "files": 3,
+      "tests": 23,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "northstarMcpBoundary": {
+      "command": "npm.cmd exec -- vitest run tests/northstar-open-gate-audit.test.ts -t MCP generation security --maxWorkers=1 --fileParallelism=false",
+      "tests": 3,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "northstarRollupAndRunway": {
+      "filesPassed": 1,
+      "testsPassed": 13,
+      "unrelatedTimeouts": 1,
+      "timeoutRerun": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "dependencyAuditVulnerabilities": 0
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentRequired": false,
+    "distributedProductionActivationRequired": true,
+    "distributedProductionHealthRequired": false,
+    "validAuthenticatedRuntimeProbeRequired": true,
+    "freshSecurityRescanRequired": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesUnchanged": true
+  },
+  "mutationBoundary": {
+    "environmentConfigurationChanged": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublished": false,
+    "koshaExactRegistryMutationPerformed": false
+  }
+}

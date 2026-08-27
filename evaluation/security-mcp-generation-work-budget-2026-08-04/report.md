@@ -37,12 +37,12 @@ The sealed finding remains unchanged. This report records a remediation candidat
 
 ## Current live refresh
 
-Production commit `65f7d839d64a1aefc9e275764497bcd5eab0174b` was re-probed with an intentionally invalid, non-secret bearer and a two-byte JSON body. `/api/mcp/mcp` returned `503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE` with `X-SafeClaw-Rate-Limit: distributed` and `Retry-After: 5`. This proves distributed admission is configured but currently unhealthy, and that the request fails closed before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification passes 3 files / 65 focused tests and 8 files / 126 adjacent MCP tests with zero dependency vulnerabilities. This does not substitute for restored distributed backend health, a valid authenticated 96 KiB boundary probe, or a fresh security scan.
+Production commit `9a4a703b6b1ff370a362bfafee42dfff9141be31` was re-probed with an intentionally invalid, non-secret bearer and a two-byte JSON body. `GET /api/export/pdf` returned `configurationState=absent`, `mode=unavailable`, and `reason=distributed_limiter_unavailable`. `/api/mcp/mcp` returned `503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE` with `X-SafeClaw-Rate-Limit: distributed` and `Retry-After: 5`. Together these prove distributed admission is required but not configured, and that the request fails closed before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification passes 3 files / 65 focused tests and 8 files / 126 adjacent MCP tests with zero dependency vulnerabilities. This does not substitute for distributed activation, a valid authenticated 96 KiB boundary probe, or a fresh security scan.
 
 ## Boundaries
 
 - The product source is deployed, but a valid authenticated runtime body/rate-limit probe is pending.
 - A fresh security rescan is still required before the canonical finding can be reclassified.
-- Production distributed limiter activation is observed; distributed backend health remains open.
+- Production distributed limiter activation remains open; backend health is not evaluated until configuration exists.
 - No DB, provider, Share-session, embedding/vector, wiki, or KOSHA exact-registry mutation occurred.
 - Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.

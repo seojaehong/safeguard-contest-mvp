@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-27T11:45:41.562Z",
+  "generatedAt": "2026-08-27T12:28:33.656Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "3d726b5cdb7d7cc6e05b2135d6ac9f0336ea70a8",
-  "productionCommit": "3d726b5cdb7d7cc6e05b2135d6ac9f0336ea70a8",
+  "sourceHead": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+  "productionCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "3d726b5cdb7d7cc6e05b2135d6ac9f0336ea70a8",
+    "commitSha": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-1gf9xq3p7-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-rlut51oac-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "3d726b5cdb7d7cc6e05b2135d6ac9f0336ea70a8",
-  "liveRollupLiveCommit": "3d726b5cdb7d7cc6e05b2135d6ac9f0336ea70a8",
+  "liveExactEvidenceCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
+  "liveRollupLiveCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -189,7 +189,7 @@
     {
       "gate": "mcp_generation_work_budget_security",
       "state": "notice",
-      "reason": "distributed MCP admission is activated but currently unhealthy and fails closed before authentication; backend health, a valid authenticated runtime probe, and fresh rescan remain open"
+      "reason": "deployed source includes measured MCP body and token-bound admission budgets, but distributed configuration is absent and requests fail closed before authentication; activation, a valid authenticated runtime probe, and fresh rescan remain open"
     },
     {
       "gate": "improvement_photo_analysis_budget",
@@ -703,9 +703,9 @@
   },
   "documentExportCapabilityTruth": {
     "verdict": "PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH",
-    "sourceHead": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
+    "sourceHead": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
     "productCommit": "f28ed068f76109453d9265314d406242badbe40c",
-    "productionCommit": "62b8bb4a2f43bf8cb1e79843b384a0e7ea2f83a9",
+    "productionCommit": "9a4a703b6b1ff370a362bfafee42dfff9141be31",
     "admissionMode": "unavailable",
     "admissionReason": "distributed_limiter_unavailable",
     "admissionReady": false,
@@ -1268,11 +1268,13 @@
     "postBodyMaxBytes": 98304,
     "adjacentTests": 77,
     "validAuthenticatedRuntimeProbeRequired": true,
-    "distributedActivationRequired": false,
-    "distributedHealthRequired": true,
+    "distributedActivationRequired": true,
+    "distributedHealthRequired": false,
     "currentRefreshStatus": 503,
     "currentRefreshRateLimitMode": "distributed",
     "currentRefreshErrorCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "currentRefreshConfigurationState": "absent",
+    "currentRefreshReadinessReason": "distributed_limiter_unavailable",
     "freshRescanRequired": true,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },

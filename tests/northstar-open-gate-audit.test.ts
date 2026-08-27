@@ -2751,7 +2751,7 @@ function createFixtureRoot(): string {
     sourceHeadMatchesProduction: true,
     capability: {
       getStatus: 200,
-      admission: { mode: "unavailable", ready: false, reason: "distributed_limiter_unavailable" },
+      admission: { configurationState: "absent", mode: "unavailable", ready: false, reason: "distributed_limiter_unavailable" },
       credentialMaterialExposed: false,
       serverExportWorkExecuted: false,
     },
