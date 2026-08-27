@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-27T13:41:29.436Z
-Source HEAD at generation: 60e4799ea397f4d287a74e079142b4b828867705
-Live commit at generation: 60e4799ea397f4d287a74e079142b4b828867705
+Generated at: 2026-08-27T14:35:02.301Z
+Source HEAD at generation: 99c7df721af566510a96793c75701bd78392a034
+Live commit at generation: 99c7df721af566510a96793c75701bd78392a034
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -123,8 +123,8 @@ Overall: `northstar_open_approval_gated`
 
 ## Public Generation Admission Security
 
-- Verdict: `PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN`
-- Live admission mode: instance; distributed hardening open=true
+- Verdict: `PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_DISTRIBUTED_CONFIGURATION_TRUTH`
+- Live configuration/readiness/response: absent/unavailable/distributed; fail closed observed=true; distributed activation pending=true
 - Dependency audit vulnerabilities: 0
 - Fresh diff scan required: true
 - Exact saved Share: MISSING_EVIDENCE
@@ -512,8 +512,8 @@ Overall: `northstar_open_approval_gated`
 | public_provider_admission | ancestor | ancestor_of_head | evaluation\public-provider-admission-2026-08-11\report.json |
 | public_ask_distributed_admission | ancestor | ancestor_of_head | evaluation\public-ask-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_admission | ancestor | ancestor_of_head | evaluation\public-search-distributed-admission-2026-08-14\report.json |
-| public_search_distributed_rate_limit_readiness | exact | matches_live | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
-| public_generation_admission_security | missing | ancestor_of_head | evaluation\security-public-generation-admission-2026-08-04\report.json |
+| public_search_distributed_rate_limit_readiness | ancestor | ancestor_of_head | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
+| public_generation_admission_security | missing | matches_live | evaluation\security-public-generation-admission-2026-08-04\report.json |
 | security_followup_remediation | ancestor | missing | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
 | security_resource_remediation | ancestor | ancestor_of_head | evaluation\security-resource-remediation-2026-08-11\report.json |
 | security_upstream_transport_remediation | ancestor | ancestor_of_head | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |

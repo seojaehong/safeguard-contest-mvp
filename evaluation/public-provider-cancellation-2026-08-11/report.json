@@ -56,6 +56,47 @@
     "liveAfterDeploymentPending": false,
     "liveProviderCallExecuted": false
   },
+  "currentSourceRefresh": {
+    "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_CANCELLATION_CURRENT_SOURCE_REFRESH",
+    "sourceHead": "99c7df721af566510a96793c75701bd78392a034",
+    "productionCommit": "99c7df721af566510a96793c75701bd78392a034",
+    "productionBranch": "master",
+    "productionEnvironment": "production",
+    "deploymentUrl": "safeguard-contest-ikhpmfwgp-seojaehongs-projects.vercel.app",
+    "liveProviderCallExecuted": false,
+    "contracts": {
+      "weatherSharedWork": {
+        "requestSignalForwarded": true,
+        "equivalentRequestsCoalesced": true,
+        "singleConsumerDisconnectDoesNotCancelSharedProvider": true,
+        "finalConsumerDisconnectCancelsSharedProvider": true
+      },
+      "knowledgeRegeneration": {
+        "requestSignalForwardedToGeneration": true,
+        "abortSkipsProviderFallback": true
+      },
+      "workpackRemediation": {
+        "requestSignalForwardedToReferenceSearch": true,
+        "requestSignalForwardedToGeneration": true,
+        "abortSkipsProviderFallback": true
+      }
+    },
+    "verification": {
+      "focusedAndAdjacentVitest": {
+        "files": 6,
+        "tests": 49,
+        "failed": 0
+      }
+    },
+    "mutationBoundary": {
+      "dbMutationPerformed": false,
+      "providerDispatchCalled": false,
+      "shareSessionCreated": false,
+      "vectorRuntimeMutationPerformed": false,
+      "wikiPublicationPerformed": false,
+      "koshaRegistryMutationPerformed": false
+    }
+  },
   "mutationBoundary": {
     "dbMutationPerformed": false,
     "providerDispatchCalled": false,

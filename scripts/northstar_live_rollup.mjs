@@ -973,8 +973,11 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       productionCommit: isRecord(publicGenerationAdmissionSecurity)
         ? asString(publicGenerationAdmissionSecurity.productionCommit)
         : "",
-      liveMode: asString(recordAt(publicGenerationAdmissionSecurity, "runtimeBoundary")?.liveMode),
-      distributedHardeningOpen: recordAt(publicGenerationAdmissionSecurity, "runtimeBoundary")?.distributedProductionHardeningOpen === true,
+      configurationState: asString(recordAt(publicGenerationAdmissionSecurity, "runtimeBoundary")?.configurationState),
+      readinessMode: asString(recordAt(publicGenerationAdmissionSecurity, "runtimeBoundary")?.readinessMode),
+      observedResponseMode: asString(recordAt(publicGenerationAdmissionSecurity, "runtimeBoundary")?.observedResponseMode),
+      productionFailClosedObserved: recordAt(publicGenerationAdmissionSecurity, "runtimeBoundary")?.productionFailClosedObserved === true,
+      distributedActivationPending: recordAt(publicGenerationAdmissionSecurity, "runtimeBoundary")?.distributedProductionActivationPending === true,
       freshRescanRequired: recordAt(publicGenerationAdmissionSecurity, "remainingBoundaries")?.freshPostChangeSecurityRescanRequired === true,
       vulnerabilityCount: asNumber(recordAt(recordAt(publicGenerationAdmissionSecurity, "verification"), "npmAudit")?.vulnerabilityCount),
       exactSavedShareVerdict: asString(recordAt(publicGenerationAdmissionSecurity, "remainingBoundaries")?.exactSavedShareVerdict),
@@ -2165,7 +2168,7 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     "## Public Generation Admission Security",
     "",
     `- Verdict: \`${rollup.publicGenerationAdmissionSecurity.verdict}\``,
-    `- Live admission mode: ${rollup.publicGenerationAdmissionSecurity.liveMode || "unknown"}; distributed hardening open=${rollup.publicGenerationAdmissionSecurity.distributedHardeningOpen}`,
+    `- Live configuration/readiness/response: ${rollup.publicGenerationAdmissionSecurity.configurationState || "unknown"}/${rollup.publicGenerationAdmissionSecurity.readinessMode || "unknown"}/${rollup.publicGenerationAdmissionSecurity.observedResponseMode || "unknown"}; fail closed observed=${rollup.publicGenerationAdmissionSecurity.productionFailClosedObserved}; distributed activation pending=${rollup.publicGenerationAdmissionSecurity.distributedActivationPending}`,
     `- Dependency audit vulnerabilities: ${rollup.publicGenerationAdmissionSecurity.vulnerabilityCount ?? "unknown"}`,
     `- Fresh diff scan required: ${rollup.publicGenerationAdmissionSecurity.freshRescanRequired}`,
     `- Exact saved Share: ${rollup.publicGenerationAdmissionSecurity.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,

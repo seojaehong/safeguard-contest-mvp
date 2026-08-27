@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-27T13:41:28.370Z",
-  "sourceSha": "60e4799ea397f4d287a74e079142b4b828867705",
+  "generatedAt": "2026-08-27T14:34:55.992Z",
+  "sourceSha": "99c7df721af566510a96793c75701bd78392a034",
   "overall": "open",
   "gates": [
     {
@@ -414,7 +414,7 @@
       "state": "notice",
       "label": "Public provider cancellation",
       "evidencePath": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
-      "detail": "Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests plus a current 1 file / 18 tests Knowledge regeneration cancellation compatibility receipt, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Weather coalescing cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The original deployed receipt remains 9 files / 104 tests, and current source 99c7df72 adds a 6 files / 49 tests cancellation refresh; no live provider cancellation call was executed. The canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Run a fresh full-repository security scan before reclassifying the immutable finding or making a security-complete claim."
       ]
@@ -468,10 +468,10 @@
       "state": "notice",
       "label": "Public generation admission security",
       "evidencePath": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
-      "detail": "Current production 73f4ac1d re-proves fail-fast instance admission before request parsing, reference search, and AI work on both public generation routes with zero provider or mutation work. The dependency audit remains zero; distributed production activation and the separate fresh diff scan remain open. The immutable baseline is preserved, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Current production 99c7df72 requires distributed admission before body parsing on both public generation routes. The before-live 400/instance behavior is preserved, while local and live after-remediation probes return 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before reference search, AI/provider work, or DB mutation when configurationState=absent. Distributed activation and a fresh scan remain open; the immutable baseline is preserved, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Preserve completed scan 8fe9c06a at immutable f0c8a7be, and run a fresh post-159aa38c security scan before closing the remediated finding.",
-        "Configure approved server-only Upstash credentials and verify distributed mode before claiming multi-instance protection."
+        "Preserve the immutable scan baseline and run a fresh full repository scan before closing the remediated generation finding.",
+        "Configure approved server-only Upstash credentials and require configurationState=ready before claiming active distributed protection."
       ]
     },
     {

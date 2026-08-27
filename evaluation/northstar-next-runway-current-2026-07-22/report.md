@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `60e4799ea397f4d287a74e079142b4b828867705`
+Source HEAD: `99c7df721af566510a96793c75701bd78392a034`
 
-Production `/api/build-info`: `60e4799ea397f4d287a74e079142b4b828867705`
+Production `/api/build-info`: `99c7df721af566510a96793c75701bd78392a034`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `60e4799ea397f4d287a74e079142b4b828867705`
+Live rollup source head: `99c7df721af566510a96793c75701bd78392a034`
 
 Live rollup matches production: `true`
 
@@ -59,7 +59,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - LLM Wiki candidate content readiness is measured separately: `PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS`; local/live viewport rows `8/8` and `8/8`, required sections `4`, ready/revision fixtures `2/1`, approval fail-closed `true`, and site-only/reject availability `true/true`. Human review remains `false`, publication remains `unpublished` with publishAllowed=`false`; exact saved Share remains `MISSING_EVIDENCE`, while Wiki publication and Supabase RLS remain `APPROVAL_GATED/APPROVAL_GATED`.
 - Wiki candidate generation content is measured separately from that browser fixture: `PASS_LIVE_PRODUCTION_WIKI_EVENT_SEMANTIC_AND_EVIDENCE_VISIBILITY_LLM_ENHANCED_RUNTIME_BLOCKED`; deterministic fallback local/live scenarios `5/5` and `5/5`. Reviewer-visible evidence traces move `0->5/5`; live KOSHA technical/official-source and current-law candidate boundaries are `5/5` and `5/5`. Explicit safe event semantics move `0->5/5` with private exposure `0`; arbitrary raw payload accepted=`false`. The enhanced provider remains `0/5` with blocker `distributed_rate_limit_unavailable_before_ai_generation`. This does not read the production candidate queue or claim enhanced LLM quality: queueRead=`false`, fixtureAcceptedAsGenerationProof=`false`, enhancedLive=`false`, humanReviewCompleted=`false`, exact saved Share=`MISSING_EVIDENCE`, Wiki/RLS=`APPROVAL_GATED/APPROVAL_GATED`.
 - Reviewer-visible SIF evidence is measured by a separate companion matrix: `PASS_LIVE_PRODUCTION_SIF_KOSHA_LAW_WIKI_CANDIDATE_EVIDENCE`; local/live `5/5` and `5/5`, authority order `sif -> kosha -> law`, live SIF/KOSHA/law boundaries `5/5/5` of 5, event facts `5/5`, and private exposure `0`. This does not read the production candidate queue, complete human review, enable enhanced runtime, publish Wiki content, mutate DB/vector/KOSHA registry state, or close exact saved Share `MISSING_EVIDENCE`.
-- Public generation admission security is measured separately: `PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN`, live mode `instance`, dependency vulnerabilities `0`, distributed hardening open=`true`, and fresh diff scan required=`true`. This notice does not close multi-instance protection, the immutable scan finding, approval-gated operations, or exact saved Share; exact saved Share remains `MISSING_EVIDENCE`.
+- Public generation admission security is measured separately: `PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_DISTRIBUTED_CONFIGURATION_TRUTH`, configuration/readiness/response `absent/unavailable/distributed`, production fail-closed observed=`true`, dependency vulnerabilities `0`, distributed activation pending=`true`, and fresh full-repository scan required=`true`. The response mode header is not proof of configured multi-instance protection. This notice does not close the immutable scan finding, approval-gated operations, or exact saved Share; exact saved Share remains `MISSING_EVIDENCE`.
 - Security follow-up remediation is separately proven: `PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP`, sealed findings `3`, focused tests `129`, and remaining security work `0`. The immutable original baseline remains `18` findings with rewritten=`false`; two deferred candidates and the separate public-admission notice remain visible, no live provider cancellation probe is claimed, and exact saved Share remains `MISSING_EVIDENCE`.
 - Fresh security resource remediation is scoped rather than security-complete: `PASS_LIVE_PRODUCTION_SECURITY_RESOURCE_REMEDIATION`, remediated `6/20`, remaining `14`, provider persistence `APPROVAL_GATED`, exact saved Share `MISSING_EVIDENCE`.
 - Upstream transport remediation is separately live/source-proven without an external provider probe: `PASS_LIVE_PRODUCTION_SOURCE_PROVEN_UPSTREAM_TRANSPORT_SECURITY_NO_PROVIDER_PROBE`, remediated this wave `2`, cumulative `8/20`, remaining `12`, provider probe executed `false`, provider persistence `APPROVAL_GATED`, exact saved Share `MISSING_EVIDENCE`.

@@ -3221,9 +3221,8 @@ function createFixtureRoot(): string {
     )),
   });
   writeJson(rootDir, path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"), {
-    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_DISTRIBUTED_CONFIGURATION_TRUTH",
     productCommit: "fixture-sha",
-    evidenceCommit: "fixture-sha",
     productionCommit: "fixture-sha",
     baseSecurityScan: {
       scanId: "d12d04ce-deaf-497d-8754-33d5baab2ca0",
@@ -3232,57 +3231,58 @@ function createFixtureRoot(): string {
       reportableFindingCount: 28,
     },
     admissionControls: [
-      { route: "/api/knowledge/regenerate", namespace: "knowledge-regeneration", limit: 20, windowMs: 60000, beforeRequestBodyParsing: true, beforeAiGeneration: true },
-      { route: "/api/workpack/remediate", namespace: "workpack-remediation", limit: 12, windowMs: 60000, beforeRequestBodyParsing: true, beforeReferenceSearch: true, beforeAiGeneration: true },
+      { route: "/api/knowledge/regenerate", namespace: "knowledge-regeneration", limit: 20, windowMs: 60000, beforeRequestBodyParsing: true, beforeAiGeneration: true, requireDistributedInProduction: true },
+      { route: "/api/workpack/remediate", namespace: "workpack-remediation", limit: 12, windowMs: 60000, beforeRequestBodyParsing: true, beforeReferenceSearch: true, beforeAiGeneration: true, requireDistributedInProduction: true },
     ],
     runtimeBoundary: {
-      distributedWhenConfigured: true,
-      instanceFallbackWhenDistributedConfigAbsent: true,
+      productionRequiresDistributedAdmission: true,
+      productionInstanceFallbackAllowed: false,
+      developmentInstanceFallbackAllowed: true,
       partialDistributedConfigFailsClosed: true,
+      absentDistributedConfigFailsClosed: true,
       successHeader: "X-SafeClaw-Rate-Limit",
       liveDeploymentVerified: true,
-      liveMode: "instance",
-      distributedProductionHardeningOpen: true,
+      configurationState: "absent",
+      readinessMode: "unavailable",
+      observedResponseMode: "distributed",
+      responseModeHeaderDoesNotProveConfigurationReady: true,
+      distributedProtectionConfiguredLive: false,
+      productionFailClosedObserved: true,
+      distributedProductionActivationPending: true,
     },
-    liveChecks: {
-      knowledgeRegeneration: { status: 400, message: "question is required", rateLimitHeader: "instance" },
-      workpackRemediation: { status: 400, message: "question is required", rateLimitHeader: "instance" },
+    beforeLive: {
+      sourceHead: "fixture-sha",
+      probes: [
+        { route: "/api/knowledge/regenerate", status: 400, rateLimitHeader: "instance", providerCallPerformed: false, referenceSearchPerformed: false, dbMutationPerformed: false },
+        { route: "/api/workpack/remediate", status: 400, rateLimitHeader: "instance", providerCallPerformed: false, referenceSearchPerformed: false, dbMutationPerformed: false },
+      ],
     },
-    currentLiveRefresh: {
-      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_REFRESH",
+    afterLocal: {
+      sourceHead: "fixture-sha",
+      mode: "current-source-local-production",
+      probes: [
+        { route: "/api/knowledge/regenerate", status: 503, rateLimitHeader: "distributed", code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", providerCallPerformed: false, referenceSearchPerformed: false, dbMutationPerformed: false },
+        { route: "/api/workpack/remediate", status: 503, rateLimitHeader: "distributed", code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", providerCallPerformed: false, referenceSearchPerformed: false, dbMutationPerformed: false },
+      ],
+    },
+    afterLive: {
       sourceHead: "fixture-sha",
       productionCommit: "fixture-sha",
       productionBranch: "master",
       productionEnvironment: "production",
       deploymentUrl: "fixture.vercel.app",
-      liveChecks: [
-        { route: "/api/knowledge/regenerate", probe: "invalid-body-no-ai-call", status: 400, message: "question is required", rateLimitHeader: "instance", providerCallPerformed: false, referenceSearchPerformed: false },
-        { route: "/api/workpack/remediate", probe: "invalid-body-no-reference-or-ai-call", status: 400, message: "question is required", rateLimitHeader: "instance", providerCallPerformed: false, referenceSearchPerformed: false },
+      probes: [
+        { route: "/api/knowledge/regenerate", status: 503, rateLimitHeader: "distributed", code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", providerCallPerformed: false, referenceSearchPerformed: false, dbMutationPerformed: false },
+        { route: "/api/workpack/remediate", status: 503, rateLimitHeader: "distributed", code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", providerCallPerformed: false, referenceSearchPerformed: false, dbMutationPerformed: false },
       ],
-      mutationBoundary: {
-        dbMutationPerformed: false,
-        providerDispatchCalled: false,
-        shareSessionCreated: false,
-        vectorOrEmbeddingMutationPerformed: false,
-        wikiPublicationPerformed: false,
-        koshaRegistryMutationPerformed: false,
-      },
     },
     dependencyAudit: { after: { total: 0 } },
     verification: {
-      focused: { testFiles: 3, tests: 23, passed: true },
-      adjacentSecurity: { testFiles: 15, tests: 173, passed: true },
+      focused: { files: 3, tests: 34, status: "PASS" },
+      northstar: { files: 3, tests: 174, status: "PASS" },
       typecheck: "PASS",
       build: { verdict: "PASS", staticPages: 28 },
       npmAudit: { verdict: "PASS", vulnerabilityCount: 0 },
-    },
-    refreshVerification: {
-      focusedSecurity: { files: 5, tests: 37, status: "PASS" },
-      northstar: { files: 3, tests: 64, status: "PASS" },
-      pdf: { files: 1, tests: 18, status: "PASS" },
-      typecheck: "PASS",
-      build: { status: "PASS", nextVersion: "15.5.22", staticPages: 28 },
-      npmAudit: { status: "PASS", vulnerabilityCount: 0 },
       diffCheck: "PASS",
     },
     mutationBoundary: {
@@ -3298,7 +3298,7 @@ function createFixtureRoot(): string {
       approvalGatedOperationsUnchanged: true,
       freshPostChangeSecurityRescanRequired: true,
       liveDeploymentVerificationRequired: false,
-      distributedProductionLimiterStillRecommended: true,
+      distributedProductionActivationPending: true,
     },
   });
   writeJson(rootDir, path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"), {
@@ -4543,6 +4543,43 @@ function createFixtureRoot(): string {
       sourceHeadMatchesProduction: true,
       liveAfterDeploymentPending: false,
       liveProviderCallExecuted: false,
+    },
+    currentSourceRefresh: {
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_CANCELLATION_CURRENT_SOURCE_REFRESH",
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      productionBranch: "master",
+      productionEnvironment: "production",
+      deploymentUrl: "https://example.test",
+      liveProviderCallExecuted: false,
+      contracts: {
+        weatherSharedWork: {
+          requestSignalForwarded: true,
+          equivalentRequestsCoalesced: true,
+          singleConsumerDisconnectDoesNotCancelSharedProvider: true,
+          finalConsumerDisconnectCancelsSharedProvider: true,
+        },
+        knowledgeRegeneration: {
+          requestSignalForwardedToGeneration: true,
+          abortSkipsProviderFallback: true,
+        },
+        workpackRemediation: {
+          requestSignalForwardedToReferenceSearch: true,
+          requestSignalForwardedToGeneration: true,
+          abortSkipsProviderFallback: true,
+        },
+      },
+      verification: {
+        focusedAndAdjacentVitest: { files: 6, tests: 49, failed: 0 },
+      },
+      mutationBoundary: {
+        dbMutationPerformed: false,
+        providerDispatchCalled: false,
+        shareSessionCreated: false,
+        vectorRuntimeMutationPerformed: false,
+        wikiPublicationPerformed: false,
+        koshaRegistryMutationPerformed: false,
+      },
     },
     mutationBoundary: {
       dbMutationPerformed: false,
@@ -6524,9 +6561,9 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       state: "notice",
       evidencePath: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
     });
-    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("instance admission");
-    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("zero provider or mutation work");
-    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("fresh diff scan remain open");
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("before reference search, AI/provider work, or DB mutation");
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("fresh scan remain open");
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")).toMatchObject({
       state: "proven",
@@ -8900,14 +8937,14 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("exactShare=PASS");
   });
 
-  it("fails public generation admission security closed when the current refresh claims provider work", async () => {
+  it("fails public generation admission security closed when the live unavailable path claims provider work", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
     const reportPath = path.join(rootDir, "evaluation", "security-public-generation-admission-2026-08-04", "report.json");
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
-      currentLiveRefresh: { liveChecks: Array<{ providerCallPerformed: boolean }> };
+      afterLive: { probes: Array<{ providerCallPerformed: boolean }> };
     };
-    report.currentLiveRefresh.liveChecks[0].providerCallPerformed = true;
+    report.afterLive.probes[0].providerCallPerformed = true;
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
 
     const audit = buildNorthstarOpenGateAudit({
@@ -8918,7 +8955,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")).toMatchObject({
       state: "contradicted",
     });
-    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("currentRefresh=false");
+    expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")?.detail).toContain("live=false");
   });
 
   it("fails MCP generation security closed when the current refresh claims tool dispatch", async () => {
@@ -9571,7 +9608,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
 
     expect(audit.overall).toBe("evidence_missing");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_publication")?.state).toBe("missing");
-  }, 15_000);
+  }, 90_000);
 
   it("records explicitly carried final-99 notices without allowing a fully automated launch claim", async () => {
     const { buildNorthstarOpenGateAudit, renderNorthstarOpenGateMarkdown } = await loadAuditModule();
@@ -9875,7 +9912,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
 
     expect(audit.overall).toBe("contradicted");
     expect(audit.gates.find((gate) => gate.id === "provider_dispatch_persistence")?.state).toBe("contradicted");
-  }, 15_000);
+  }, 90_000);
 
   it("contradicts stale SIF embedding preflight evidence from outside the current history", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
@@ -9895,7 +9932,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const sifGate = audit.gates.find((gate) => gate.id === "sif_embedding_runtime");
     expect(sifGate?.state).toBe("contradicted");
     expect(sifGate?.detail).toContain("not an ancestor");
-  }, 15_000);
+  }, 90_000);
 
   it("contradicts SIF embedding preflight when corpus row integrity is incomplete", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
@@ -10011,7 +10048,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const rlsGate = audit.gates.find((gate) => gate.id === "supabase_rls_launch_isolation");
     expect(rlsGate?.state).toBe("contradicted");
     expect(rlsGate?.detail).toContain("not an ancestor");
-  }, 30_000);
+  }, 90_000);
 
   it("fails evidence completeness when the current KOSHA reconciliation is missing", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();

@@ -22,6 +22,10 @@ This bounded wave remediates corrected scan finding `csf_278e8efc9722eb80016c42a
 - Production marker: `84a4bf301e4869e4263bff78931228caff27319b` on `master`, deployment `safeguard-contest-9ndq3celh-seojaehongs-projects.vercel.app`.
 - No live provider cancellation call was executed; cancellation behavior remains source-test proven.
 
+## Current Source Refresh
+
+Current source and production commit `99c7df721af566510a96793c75701bd78392a034` revalidate the cancellation contracts with 6 focused and adjacent files / 49 tests. The refresh covers shared weather-provider lifetime, knowledge generation, workpack reference and generation signals, provider request lifetime, descendant cancellation, and Vertex cancellation. No live provider call was executed.
+
 ## Boundaries
 
 No live provider call, DB mutation, provider dispatch, Share-session creation, vector runtime mutation, wiki publication, or KOSHA registry mutation was performed. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`. Security-complete remains false and a fresh follow-up scan is required.

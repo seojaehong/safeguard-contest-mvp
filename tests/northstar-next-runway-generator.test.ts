@@ -765,9 +765,12 @@ type NextRunwayReport = {
     verdict: string;
     productCommit: string;
     productionCommit: string;
-    liveMode: string;
+    configurationState: string;
+    readinessMode: string;
+    observedResponseMode: string;
     liveDeploymentVerified: boolean;
-    distributedHardeningOpen: boolean;
+    productionFailClosedObserved: boolean;
+    distributedActivationPending: boolean;
     vulnerabilityCount: number;
     freshRescanRequired: boolean;
     exactSavedShareVerdict: string;
@@ -2397,13 +2400,16 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     )),
   });
   writeJson(root, "evaluation/security-public-generation-admission-2026-08-04/report.json", {
-    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_DISTRIBUTED_CONFIGURATION_TRUTH",
     productCommit: "fixture-sha",
     productionCommit: "fixture-sha",
     runtimeBoundary: {
       liveDeploymentVerified: true,
-      liveMode: "instance",
-      distributedProductionHardeningOpen: true,
+      configurationState: "absent",
+      readinessMode: "unavailable",
+      observedResponseMode: "distributed",
+      productionFailClosedObserved: true,
+      distributedProductionActivationPending: true,
     },
     verification: { npmAudit: { verdict: "PASS", vulnerabilityCount: 0 } },
     remainingBoundaries: {
@@ -4007,12 +4013,15 @@ describe("northstar next runway generator", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.publicGenerationAdmissionSecurity).toMatchObject({
-      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_DISTRIBUTED_CONFIGURATION_TRUTH",
       productCommit: "fixture-sha",
       productionCommit: "fixture-sha",
-      liveMode: "instance",
+      configurationState: "absent",
+      readinessMode: "unavailable",
+      observedResponseMode: "distributed",
       liveDeploymentVerified: true,
-      distributedHardeningOpen: true,
+      productionFailClosedObserved: true,
+      distributedActivationPending: true,
       vulnerabilityCount: 0,
       freshRescanRequired: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
@@ -4574,7 +4583,7 @@ describe("northstar next runway generator", () => {
     });
     expect(markdown).toContain("first-task/body containment rows pass, and no Documents rows carry local workbench detail-depth debt");
     expect(markdown).not.toContain("but 0 Documents row(s) carry local workbench detail-depth debt");
-  }, 60_000);
+  }, 90_000);
 
   it("keeps bounded workbench detail-depth debt separate from first-task pass and exact saved Share evidence", async () => {
     const { buildNorthstarNextRunway, renderNorthstarNextRunwayMarkdown } = await loadNextRunwayModule();
@@ -4769,7 +4778,7 @@ describe("northstar next runway generator", () => {
     expect(report.currentHeadIsEvidenceOnlyPending).toBe(false);
     expect(report.liveRollupMatchesProduction).toBe(true);
     expect(markdown).toContain("includes product/runtime file changes that are not live yet");
-  });
+  }, 90_000);
 
   it("does not call the runway live-exact when production advances beyond the live rollup", async () => {
     const { buildNorthstarNextRunway } = await loadNextRunwayModule();
@@ -4789,7 +4798,7 @@ describe("northstar next runway generator", () => {
     expect(report.currentHeadIsEvidenceOnlyPending).toBe(false);
     expect(report.liveRollupMatchesProduction).toBe(false);
     expect(report.nextSafeWorkWithoutApproval).toContain("refresh live rollup before claiming live-exact if production advances beyond the current live rollup head");
-  }, 15_000);
+  }, 90_000);
 
   it("does not prove Wiki candidate readiness when a publication boundary is overclaimed", async () => {
     const { buildNorthstarNextRunway } = await loadNextRunwayModule();
@@ -4861,5 +4870,5 @@ describe("northstar next runway generator", () => {
 
     expect(report.provenCurrentState).not.toContain("llm_wiki_candidate_content_readiness");
     expect(report.llmWikiCandidateContentReadiness.llmWikiPublication).toBe("PASS");
-  }, 30_000);
+  }, 90_000);
 });

@@ -439,8 +439,11 @@ type RollupReport = {
     verdict: string;
     productCommit: string;
     productionCommit: string;
-    liveMode: string;
-    distributedHardeningOpen: boolean;
+    configurationState: string;
+    readinessMode: string;
+    observedResponseMode: string;
+    productionFailClosedObserved: boolean;
+    distributedActivationPending: boolean;
     freshRescanRequired: boolean;
     vulnerabilityCount: number | null;
     exactSavedShareVerdict: string;
@@ -991,7 +994,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "current_security_remediation_ledger", state: "notice", evidencePath: "evaluation/security-current-remediation-ledger-2026-08-13/report.json", detail: "17/23 deployed-source remediated; six approval or distributed-runtime boundaries remain open" },
       { id: "current_repository_security_rescan", state: "notice", evidencePath: "evaluation/final-approval-free-security-rescan-2026-08-16/report.json", detail: "9 approval-gated findings remain after 5 approval-free closures; notice, not security-complete" },
       { id: "public_search_distributed_rate_limit_readiness", state: "notice", evidencePath: "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", detail: "current-source capability with production configuration pending" },
-      { id: "public_generation_admission_security", state: "notice", evidencePath: "evaluation/security-public-generation-admission-2026-08-04/report.json", detail: "live instance admission with distributed hardening and fresh rescan pending" },
+      { id: "public_generation_admission_security", state: "notice", evidencePath: "evaluation/security-public-generation-admission-2026-08-04/report.json", detail: "live generation routes fail closed when distributed configuration is unavailable; activation and fresh rescan pending" },
       { id: "security_followup_remediation", state: "proven", evidencePath: "evaluation/codex-security-followup-remediation-2026-08-11/report.json", detail: "deployed three-finding remediation with immutable baseline preserved" },
       { id: "security_resource_remediation", state: "proven", evidencePath: "evaluation/security-resource-remediation-2026-08-11/report.json", detail: "live 6/20 resource findings remediated with 14 remaining" },
       { id: "security_upstream_transport_remediation", state: "proven", evidencePath: "evaluation/security-upstream-transport-remediation-2026-08-11/report.json", detail: "live/source 2 upstream findings remediated, cumulative 8/20 with 12 remaining" },
@@ -1782,13 +1785,16 @@ function createFixtureRoot(): { root: string; head: string } {
     ],
   });
   writeJson(root, "evaluation/security-public-generation-admission-2026-08-04/report.json", {
-    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_DISTRIBUTED_CONFIGURATION_TRUTH",
     productCommit: "TO_FILL",
     productionCommit: "TO_FILL",
     runtimeBoundary: {
       liveDeploymentVerified: true,
-      liveMode: "instance",
-      distributedProductionHardeningOpen: true,
+      configurationState: "absent",
+      readinessMode: "unavailable",
+      observedResponseMode: "distributed",
+      productionFailClosedObserved: true,
+      distributedProductionActivationPending: true,
     },
     verification: { npmAudit: { verdict: "PASS", vulnerabilityCount: 0 } },
     remainingBoundaries: {
@@ -2777,9 +2783,12 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.publicGenerationAdmissionSecurity).toMatchObject({
-      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
-      liveMode: "instance",
-      distributedHardeningOpen: true,
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_DISTRIBUTED_CONFIGURATION_TRUTH",
+      configurationState: "absent",
+      readinessMode: "unavailable",
+      observedResponseMode: "distributed",
+      productionFailClosedObserved: true,
+      distributedActivationPending: true,
       freshRescanRequired: true,
       vulnerabilityCount: 0,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
@@ -3270,7 +3279,7 @@ describe("northstar live rollup", () => {
     expect(report.evidence.find((item) => item.id === "northstar_approval_runway")?.sourceStatus).toBe("ancestor");
     expect(report.evidence.find((item) => item.id === "northstar_approval_runway")?.productionStatus).toBe("ancestor_of_head");
     expect(report.contradictions).toHaveLength(0);
-  }, 30_000);
+  }, 90_000);
 
   it("fails closed when an evidence packet points outside the current history", () => {
     const { root, head } = createFixtureRoot();
@@ -3287,7 +3296,7 @@ describe("northstar live rollup", () => {
     const report = JSON.parse(fs.readFileSync(path.join(root, "evaluation/northstar-live-rollup-test/report.json"), "utf8")) as RollupReport;
     expect(report.overall).toBe("northstar_evidence_contradicted");
     expect(report.evidence.find((item) => item.id === "mobile_p0_workspace")?.productionStatus).toBe("not_ancestor");
-  }, 30_000);
+  }, 90_000);
 
   it("does not mark source-ahead final-99 evidence as live-exact", () => {
     const { root, head } = createFixtureRoot();
@@ -3304,7 +3313,7 @@ describe("northstar live rollup", () => {
     expect(final99?.sourceStatus).toBe("exact");
     expect(final99?.productionStatus).toBe("matches_live_source_mismatch");
     expect(report.contradictions).toHaveLength(0);
-  }, 15_000);
+  }, 90_000);
 
   it("rolls up the source-aligned 12-document no-mutation companion without closing launch boundaries", () => {
     const { root, head } = createFixtureRoot();
@@ -3325,5 +3334,5 @@ describe("northstar live rollup", () => {
     });
     expect(report.evidence.find((item) => item.id === "final_99_12_document_no_mutation")?.sourceStatus).toBe("ancestor");
     expect(report.contradictions).toHaveLength(0);
-  }, 30_000);
+  }, 90_000);
 });

@@ -1,9 +1,9 @@
 {
-  "schema": "safeclaw-security-public-generation-admission/v1",
-  "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN",
-  "productCommit": "159aa38ccc74073c8c60b9a78adb48afa059fd01",
-  "evidenceCommit": "159aa38ccc74073c8c60b9a78adb48afa059fd01",
-  "productionCommit": "159aa38ccc74073c8c60b9a78adb48afa059fd01",
+  "schema": "safeclaw-security-public-generation-admission/v2",
+  "generatedAt": "2026-08-27T14:15:15.0072814Z",
+  "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_DISTRIBUTED_CONFIGURATION_TRUTH",
+  "productCommit": "99c7df721af566510a96793c75701bd78392a034",
+  "productionCommit": "99c7df721af566510a96793c75701bd78392a034",
   "baseSecurityScan": {
     "scanId": "d12d04ce-deaf-497d-8754-33d5baab2ca0",
     "targetCommit": "e087d474a1de72bd3687c703a61a4263fe792fa4",
@@ -18,7 +18,8 @@
       "limit": 20,
       "windowMs": 60000,
       "beforeRequestBodyParsing": true,
-      "beforeAiGeneration": true
+      "beforeAiGeneration": true,
+      "requireDistributedInProduction": true
     },
     {
       "route": "/api/workpack/remediate",
@@ -27,71 +28,116 @@
       "windowMs": 60000,
       "beforeRequestBodyParsing": true,
       "beforeReferenceSearch": true,
-      "beforeAiGeneration": true
+      "beforeAiGeneration": true,
+      "requireDistributedInProduction": true
     }
   ],
   "runtimeBoundary": {
-    "distributedWhenConfigured": true,
-    "instanceFallbackWhenDistributedConfigAbsent": true,
+    "productionRequiresDistributedAdmission": true,
+    "productionInstanceFallbackAllowed": false,
+    "developmentInstanceFallbackAllowed": true,
     "partialDistributedConfigFailsClosed": true,
+    "absentDistributedConfigFailsClosed": true,
     "successHeader": "X-SafeClaw-Rate-Limit",
     "liveDeploymentVerified": true,
-    "liveMode": "instance",
-    "distributedProductionHardeningOpen": true
+    "configurationState": "absent",
+    "readinessMode": "unavailable",
+    "observedResponseMode": "distributed",
+    "responseModeHeaderDoesNotProveConfigurationReady": true,
+    "distributedProtectionConfiguredLive": false,
+    "productionFailClosedObserved": true,
+    "distributedProductionActivationPending": true
   },
-  "liveChecks": {
-    "baseUrl": "https://www.safeclaw.kr",
-    "productionEnvironment": "production",
-    "productionBranch": "master",
-    "deploymentUrl": "safeguard-contest-fny5wz6fk-seojaehongs-projects.vercel.app",
-    "knowledgeRegeneration": {
-      "probe": "invalid-body-no-ai-call",
-      "status": 400,
-      "message": "question is required",
-      "rateLimitHeader": "instance"
-    },
-    "workpackRemediation": {
-      "probe": "invalid-body-no-reference-or-ai-call",
-      "status": 400,
-      "message": "question is required",
-      "rateLimitHeader": "instance"
-    }
-  },
-  "currentLiveRefresh": {
-    "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_REFRESH",
-    "sourceHead": "73f4ac1dfaccb7ceaa12171450783d2c6c9e70be",
-    "productionCommit": "73f4ac1dfaccb7ceaa12171450783d2c6c9e70be",
-    "productionBranch": "master",
-    "productionEnvironment": "production",
-    "deploymentUrl": "safeguard-contest-pkhxiv5hm-seojaehongs-projects.vercel.app",
-    "liveChecks": [
+  "beforeLive": {
+    "sourceHead": "f86fb44f550ebb7f6a4345b7a6e37b09c69a70e3",
+    "checkedAt": "2026-08-27T14:08:34.3661239Z",
+    "mode": "live-production-before-remediation",
+    "probes": [
       {
         "route": "/api/knowledge/regenerate",
-        "probe": "invalid-body-no-ai-call",
+        "probe": "empty-json-no-ai-call",
         "status": 400,
         "message": "question is required",
         "rateLimitHeader": "instance",
         "providerCallPerformed": false,
-        "referenceSearchPerformed": false
+        "referenceSearchPerformed": false,
+        "dbMutationPerformed": false
       },
       {
         "route": "/api/workpack/remediate",
-        "probe": "invalid-body-no-reference-or-ai-call",
+        "probe": "empty-json-no-reference-or-ai-call",
         "status": 400,
         "message": "question is required",
         "rateLimitHeader": "instance",
         "providerCallPerformed": false,
-        "referenceSearchPerformed": false
+        "referenceSearchPerformed": false,
+        "dbMutationPerformed": false
       }
-    ],
-    "mutationBoundary": {
-      "dbMutationPerformed": false,
-      "providerDispatchCalled": false,
-      "shareSessionCreated": false,
-      "vectorOrEmbeddingMutationPerformed": false,
-      "wikiPublicationPerformed": false,
-      "koshaRegistryMutationPerformed": false
-    }
+    ]
+  },
+  "afterLocal": {
+    "sourceHead": "99c7df721af566510a96793c75701bd78392a034",
+    "checkedAt": "2026-08-27T14:13:54.3956876Z",
+    "mode": "current-source-local-production",
+    "baseUrl": "http://127.0.0.1:3086",
+    "probes": [
+      {
+        "route": "/api/knowledge/regenerate",
+        "probe": "empty-json-distributed-admission-first",
+        "status": 503,
+        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        "rateLimitHeader": "distributed",
+        "retryAfter": "5",
+        "providerCallPerformed": false,
+        "referenceSearchPerformed": false,
+        "dbMutationPerformed": false
+      },
+      {
+        "route": "/api/workpack/remediate",
+        "probe": "empty-json-distributed-admission-first",
+        "status": 503,
+        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        "rateLimitHeader": "distributed",
+        "retryAfter": "5",
+        "providerCallPerformed": false,
+        "referenceSearchPerformed": false,
+        "dbMutationPerformed": false
+      }
+    ]
+  },
+  "afterLive": {
+    "sourceHead": "99c7df721af566510a96793c75701bd78392a034",
+    "productionCommit": "99c7df721af566510a96793c75701bd78392a034",
+    "checkedAt": "2026-08-27T14:15:15.0072814Z",
+    "mode": "live-production",
+    "baseUrl": "https://www.safeclaw.kr",
+    "productionBranch": "master",
+    "productionEnvironment": "production",
+    "deploymentUrl": "safeguard-contest-ikhpmfwgp-seojaehongs-projects.vercel.app",
+    "probes": [
+      {
+        "route": "/api/knowledge/regenerate",
+        "probe": "empty-json-distributed-admission-first",
+        "status": 503,
+        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        "rateLimitHeader": "distributed",
+        "retryAfter": "5",
+        "providerCallPerformed": false,
+        "referenceSearchPerformed": false,
+        "dbMutationPerformed": false
+      },
+      {
+        "route": "/api/workpack/remediate",
+        "probe": "empty-json-distributed-admission-first",
+        "status": 503,
+        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        "rateLimitHeader": "distributed",
+        "retryAfter": "5",
+        "providerCallPerformed": false,
+        "referenceSearchPerformed": false,
+        "dbMutationPerformed": false
+      }
+    ]
   },
   "dependencyAudit": {
     "before": {
@@ -103,69 +149,27 @@
       "total": 0,
       "high": 0,
       "moderate": 0
-    },
-    "overrides": {
-      "brace-expansion": "5.0.9",
-      "fast-uri": "3.1.5",
-      "hono": "4.13.0",
-      "ip-address": "10.4.0",
-      "nanoid": "3.3.18",
-      "pdfjs-dist": "6.2.108",
-      "korean-law-mcp>pdfjs-dist": "6.2.108"
-    },
-    "currentDriftBefore": {
-      "total": 2,
-      "high": 2,
-      "moderate": 0
     }
   },
   "verification": {
     "focused": {
-      "testFiles": 3,
-      "tests": 23,
-      "passed": true
-    },
-    "adjacentSecurity": {
-      "testFiles": 15,
-      "tests": 173,
-      "passed": true
-    },
-    "typecheck": "PASS",
-    "build": {
-      "verdict": "PASS",
-      "nextVersion": "15.5.22",
-      "staticPages": 28
-    },
-    "npmAudit": {
-      "verdict": "PASS",
-      "vulnerabilityCount": 0
-    },
-    "diffCheck": "PASS"
-  },
-  "refreshVerification": {
-    "focusedSecurity": {
-      "files": 5,
-      "tests": 37,
+      "files": 3,
+      "tests": 34,
       "status": "PASS"
     },
     "northstar": {
       "files": 3,
-      "tests": 64,
-      "status": "PASS"
-    },
-    "pdf": {
-      "files": 1,
-      "tests": 18,
+      "tests": 174,
       "status": "PASS"
     },
     "typecheck": "PASS",
     "build": {
-      "status": "PASS",
+      "verdict": "PASS",
       "nextVersion": "15.5.22",
       "staticPages": 28
     },
     "npmAudit": {
-      "status": "PASS",
+      "verdict": "PASS",
       "vulnerabilityCount": 0
     },
     "diffCheck": "PASS"
@@ -183,6 +187,6 @@
     "approvalGatedOperationsUnchanged": true,
     "freshPostChangeSecurityRescanRequired": true,
     "liveDeploymentVerificationRequired": false,
-    "distributedProductionLimiterStillRecommended": true
+    "distributedProductionActivationPending": true
   }
 }

@@ -1,47 +1,41 @@
-# Public generation admission security evidence
+# Public generation distributed admission truth
 
 ## Verdict
 
-`PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN`
+`PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_DISTRIBUTED_CONFIGURATION_TRUTH`
 
-Product commit: `159aa38ccc74073c8c60b9a78adb48afa059fd01`
+Product and production commit: `99c7df721af566510a96793c75701bd78392a034`
 
-The immutable security baseline remains scan `d12d04ce-deaf-497d-8754-33d5baab2ca0` at target `e087d474a1de72bd3687c703a61a4263fe792fa4`. This remediation does not rewrite the baseline or claim that all 28 reportable findings are closed.
+The immutable security baseline remains scan `d12d04ce-deaf-497d-8754-33d5baab2ca0` at target `e087d474a1de72bd3687c703a61a4263fe792fa4`. This evidence does not rewrite that baseline or claim that its 28 reportable findings are closed.
 
-## Current-source remediation
+## Measured Change
 
-- `/api/knowledge/regenerate`: `knowledge-regeneration`, 20 requests per 60 seconds.
-- `/api/workpack/remediate`: `workpack-remediation`, 12 requests per 60 seconds.
-- Admission runs before request parsing and AI generation; remediation also runs before reference search.
-- Complete Upstash configuration uses distributed admission. Absent configuration uses the existing instance limiter. Partial or invalid distributed configuration fails closed.
-- Successful and normal error responses expose `X-SafeClaw-Rate-Limit` for runtime observability.
+Before remediation, live production at `f86fb44f` returned `400 question is required` with `X-SafeClaw-Rate-Limit: instance` for empty JSON requests to both public generation routes.
 
-## Dependency audit
+Current source and live production at `99c7df72` require distributed admission before request-body parsing:
 
-The original install-time audit moved from five advisories (four high, one moderate) to zero. A fresh dependency drift check then found two high advisories in `nanoid` and `pdfjs-dist`; `nanoid@3.3.18` plus `pdfjs-dist@6.2.108` (including the `korean-law-mcp` transitive copy) returned the current audit to zero.
+- `/api/knowledge/regenerate`: `503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`, mode header `distributed`, retry after 5 seconds.
+- `/api/workpack/remediate`: `503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`, mode header `distributed`, retry after 5 seconds.
+
+Both routes stopped before reference search, AI or provider work, and database mutation. Production no longer accepts the instance limiter as a fallback for these routes.
+
+## Runtime Boundary
+
+Production currently reports distributed configuration state `absent` and readiness `unavailable`. The `distributed` response header identifies the required admission path; it does not prove that an active distributed limiter is configured. Multi-instance protection remains pending until approved server-only credentials produce `configurationState=ready`.
+
+Development may retain the instance limiter for local work. Partial or absent distributed production configuration fails closed.
 
 ## Verification
 
-- Focused admission tests: 3 files, 23 tests, PASS.
-- Adjacent public/API/MCP/OpenClaw security tests: 15 files, 173 tests, PASS.
+- Focused route and admission tests: 3 files, 34 tests, PASS.
+- Northstar contract suite: 3 files, 174 tests, PASS.
 - Strict typecheck: PASS.
 - Production build: PASS, Next.js 15.5.22, 28 static pages.
 - `npm audit`: 0 vulnerabilities.
 - `git diff --check`: PASS.
-- Current refresh security suite: 5 files, 37 tests, PASS.
-- Current Northstar suite: 3 files, 64 tests, PASS.
-- PDF.js 6 integration: 1 file, 18 tests, PASS.
-
-## Live production
-
-Production reports product commit `159aa38ccc74073c8c60b9a78adb48afa059fd01` on `master` at deployment `safeguard-contest-fny5wz6fk-seojaehongs-projects.vercel.app`. Read-only invalid-body probes returned `400 question is required` from both routes before AI work and included `X-SafeClaw-Rate-Limit: instance`.
-
-This proves the route admission boundary is deployed. It also proves production currently uses the instance fallback, not the distributed limiter. Multi-instance distributed hardening remains open and is not represented as complete.
-
-## Current live refresh
-
-Production commit `73f4ac1dfaccb7ceaa12171450783d2c6c9e70be` was re-probed after the later bounded security waves. Both public generation routes still returned `400 question is required` with `X-SafeClaw-Rate-Limit: instance` for an empty JSON body. The probes stopped before provider, reference-search, dispatch, or storage work. This refresh restores current governed-path evidence without rewriting the immutable scan or claiming distributed activation.
+- Local production probe: `2026-08-27T14:13:54.3956876Z`.
+- Live production probe: `2026-08-27T14:15:15.0072814Z`.
 
 ## Boundaries
 
-No database mutation, provider dispatch, Share-session creation, vector or embedding mutation, wiki publication, or KOSHA registry mutation was performed. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`. Approval-gated operations remain approval-gated. A fresh post-change security rescan is still required before claiming canonical scan closure, and production distributed limiter configuration remains a recommended hardening step.
+No database mutation, provider dispatch, Share-session creation, vector or embedding mutation, wiki publication, or KOSHA registry mutation was performed. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`. Approval-gated operations remain approval-gated. A fresh full-repository security scan remains required before claiming canonical scan closure.

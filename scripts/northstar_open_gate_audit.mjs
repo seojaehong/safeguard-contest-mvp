@@ -9332,13 +9332,62 @@ function evaluatePublicProviderCancellationGate(rootDir) {
   const tests = isRecord(verification.focusedAndAdjacentVitest) ? verification.focusedAndAdjacentVitest : {};
   const build = isRecord(verification.build) ? verification.build : {};
   const production = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const currentRefresh = isRecord(report.currentSourceRefresh) ? report.currentSourceRefresh : {};
+  const currentRefreshContracts = isRecord(currentRefresh.contracts) ? currentRefresh.contracts : {};
+  const currentRefreshWeather = isRecord(currentRefreshContracts.weatherSharedWork)
+    ? currentRefreshContracts.weatherSharedWork
+    : {};
+  const currentRefreshKnowledge = isRecord(currentRefreshContracts.knowledgeRegeneration)
+    ? currentRefreshContracts.knowledgeRegeneration
+    : {};
+  const currentRefreshRemediation = isRecord(currentRefreshContracts.workpackRemediation)
+    ? currentRefreshContracts.workpackRemediation
+    : {};
+  const currentRefreshVerification = isRecord(currentRefresh.verification) ? currentRefresh.verification : {};
+  const currentRefreshTests = isRecord(currentRefreshVerification.focusedAndAdjacentVitest)
+    ? currentRefreshVerification.focusedAndAdjacentVitest
+    : {};
+  const currentRefreshMutation = isRecord(currentRefresh.mutationBoundary)
+    ? currentRefresh.mutationBoundary
+    : {};
   const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
   const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
   const sourceHead = readString(report.sourceHead);
   const wikiCandidateCancellationCompatibility = isWikiCandidateProviderCancellationCompatibilityCurrent(rootDir, sourceHead);
   const wikiSifCancellationCompatibility = isWikiSifProviderCancellationCompatibilityCurrent(rootDir, sourceHead);
   const eventFactCancellationCompatibility = isHermesEventFactProviderCancellationCompatibilityCurrent(rootDir, sourceHead);
+  const currentRefreshSourceHead = readString(currentRefresh.sourceHead);
+  const currentRefreshPresent = Object.keys(currentRefresh).length > 0;
+  const currentRefreshNoMutation = currentRefreshMutation.dbMutationPerformed === false
+    && currentRefreshMutation.providerDispatchCalled === false
+    && currentRefreshMutation.shareSessionCreated === false
+    && currentRefreshMutation.vectorRuntimeMutationPerformed === false
+    && currentRefreshMutation.wikiPublicationPerformed === false
+    && currentRefreshMutation.koshaRegistryMutationPerformed === false;
+  const currentRefreshReceiptPass = readString(currentRefresh.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_PROVIDER_CANCELLATION_CURRENT_SOURCE_REFRESH"
+    && currentRefreshSourceHead.length > 0
+    && readString(currentRefresh.productionCommit) === currentRefreshSourceHead
+    && readString(currentRefresh.productionBranch) === "master"
+    && readString(currentRefresh.productionEnvironment) === "production"
+    && readString(currentRefresh.deploymentUrl).length > 0
+    && currentRefresh.liveProviderCallExecuted === false
+    && isGitAncestor(rootDir, currentRefreshSourceHead)
+    && currentRefreshWeather.requestSignalForwarded === true
+    && currentRefreshWeather.equivalentRequestsCoalesced === true
+    && currentRefreshWeather.singleConsumerDisconnectDoesNotCancelSharedProvider === true
+    && currentRefreshWeather.finalConsumerDisconnectCancelsSharedProvider === true
+    && currentRefreshKnowledge.requestSignalForwardedToGeneration === true
+    && currentRefreshKnowledge.abortSkipsProviderFallback === true
+    && currentRefreshRemediation.requestSignalForwardedToReferenceSearch === true
+    && currentRefreshRemediation.requestSignalForwardedToGeneration === true
+    && currentRefreshRemediation.abortSkipsProviderFallback === true
+    && readNumber(currentRefreshTests.files) === 6
+    && readNumber(currentRefreshTests.tests) === 49
+    && readNumber(currentRefreshTests.failed) === 0
+    && currentRefreshNoMutation;
   const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_PROVIDER_CANCELLATION_PATHS)
+    || (currentRefreshReceiptPass
+      && isEvidenceCurrentForPaths(rootDir, currentRefreshSourceHead, PUBLIC_PROVIDER_CANCELLATION_PATHS))
     || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isPublicAskDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isPublicSearchDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
@@ -9390,7 +9439,8 @@ function evaluatePublicProviderCancellationGate(rootDir) {
     && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && remaining.securityCompleteClaimAllowed === false
     && readString(remaining.followUpSecurityScan) === "REQUIRED"
-    && remaining.approvalGatedOperationsUnchanged === true;
+    && remaining.approvalGatedOperationsUnchanged === true
+    && (!currentRefreshPresent || currentRefreshReceiptPass);
 
   return gateResult({
     id: "public_provider_cancellation",
@@ -9398,8 +9448,8 @@ function evaluatePublicProviderCancellationGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? `Weather coalescing now cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The product commit is live with 9 files / 104 tests${wikiCandidateCancellationCompatibility || wikiSifCancellationCompatibility ? " plus a current 1 file / 18 tests Knowledge regeneration cancellation compatibility receipt" : " plus a current governed-path companion"}, but no live provider cancellation call was executed, the canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.`
-      : `Provider cancellation verdict=${readString(report.verdict) || "unknown"}, sourceCurrent=${sourceCurrent}, tests=${readNumber(tests.tests)}, liveProviderCall=${production.liveProviderCallExecuted === true}, followUp=${readString(remaining.followUpSecurityScan) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+      ? `Weather coalescing cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The original deployed receipt remains 9 files / 104 tests, and current source ${currentRefreshSourceHead.slice(0, 8)} adds a 6 files / 49 tests cancellation refresh${wikiCandidateCancellationCompatibility || wikiSifCancellationCompatibility || eventFactCancellationCompatibility ? " plus a current 1 file / 18 tests Knowledge regeneration cancellation compatibility receipt" : ""}; no live provider cancellation call was executed. The canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.`
+      : `Provider cancellation verdict=${readString(report.verdict) || "unknown"}, sourceCurrent=${sourceCurrent}, refresh=${currentRefreshReceiptPass}, refreshHead=${currentRefreshSourceHead || "missing"}, tests=${readNumber(tests.tests)}/${readNumber(currentRefreshTests.tests)}, liveProviderCall=${production.liveProviderCallExecuted === true || currentRefresh.liveProviderCallExecuted === true}, followUp=${readString(remaining.followUpSecurityScan) || "missing"}, noMutation=${noMutation && (!currentRefreshPresent || currentRefreshNoMutation)}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? ["Run a fresh full-repository security scan before reclassifying the immutable finding or making a security-complete claim."]
       : ["Restore deployed source alignment, all cancellation contracts, verification totals, no-mutation boundaries, follow-up scan requirement, and exact Share MISSING_EVIDENCE."],
@@ -9831,80 +9881,55 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
 
   const baseScan = isRecord(report.baseSecurityScan) ? report.baseSecurityScan : {};
   const runtimeBoundary = isRecord(report.runtimeBoundary) ? report.runtimeBoundary : {};
-  const liveChecks = isRecord(report.liveChecks) ? report.liveChecks : {};
-  const currentLiveRefresh = isRecord(report.currentLiveRefresh) ? report.currentLiveRefresh : {};
-  const currentRefreshChecks = Array.isArray(currentLiveRefresh.liveChecks)
-    ? currentLiveRefresh.liveChecks.filter(isRecord)
-    : [];
-  const currentRefreshMutation = isRecord(currentLiveRefresh.mutationBoundary)
-    ? currentLiveRefresh.mutationBoundary
-    : {};
-  const knowledge = isRecord(liveChecks.knowledgeRegeneration) ? liveChecks.knowledgeRegeneration : {};
-  const remediation = isRecord(liveChecks.workpackRemediation) ? liveChecks.workpackRemediation : {};
+  const beforeLive = isRecord(report.beforeLive) ? report.beforeLive : {};
+  const afterLocal = isRecord(report.afterLocal) ? report.afterLocal : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const beforeLiveChecks = Array.isArray(beforeLive.probes) ? beforeLive.probes.filter(isRecord) : [];
+  const afterLocalChecks = Array.isArray(afterLocal.probes) ? afterLocal.probes.filter(isRecord) : [];
+  const afterLiveChecks = Array.isArray(afterLive.probes) ? afterLive.probes.filter(isRecord) : [];
   const dependencyAudit = isRecord(report.dependencyAudit) ? report.dependencyAudit : {};
   const auditAfter = isRecord(dependencyAudit.after) ? dependencyAudit.after : {};
   const verification = isRecord(report.verification) ? report.verification : {};
-  const refreshVerification = isRecord(report.refreshVerification) ? report.refreshVerification : {};
-  const refreshFocused = isRecord(refreshVerification.focusedSecurity) ? refreshVerification.focusedSecurity : {};
-  const refreshNorthstar = isRecord(refreshVerification.northstar) ? refreshVerification.northstar : {};
-  const refreshPdf = isRecord(refreshVerification.pdf) ? refreshVerification.pdf : {};
-  const refreshBuild = isRecord(refreshVerification.build) ? refreshVerification.build : {};
-  const refreshAudit = isRecord(refreshVerification.npmAudit) ? refreshVerification.npmAudit : {};
   const focused = isRecord(verification.focused) ? verification.focused : {};
-  const adjacent = isRecord(verification.adjacentSecurity) ? verification.adjacentSecurity : {};
+  const northstar = isRecord(verification.northstar) ? verification.northstar : {};
   const build = isRecord(verification.build) ? verification.build : {};
   const npmAudit = isRecord(verification.npmAudit) ? verification.npmAudit : {};
   const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
   const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
   const controls = Array.isArray(report.admissionControls) ? report.admissionControls.filter(isRecord) : [];
   const productCommit = readString(report.productCommit);
-  const currentRefreshSourceHead = readString(currentLiveRefresh.sourceHead);
   const noMutation = mutationBoundary.dbMutationPerformed === false
     && mutationBoundary.providerDispatchCalled === false
     && mutationBoundary.shareSessionCreated === false
     && mutationBoundary.vectorOrEmbeddingMutationPerformed === false
     && mutationBoundary.wikiPublicationPerformed === false
     && mutationBoundary.koshaRegistryMutationPerformed === false;
-  const currentRefreshNoMutation = currentRefreshMutation.dbMutationPerformed === false
-    && currentRefreshMutation.providerDispatchCalled === false
-    && currentRefreshMutation.shareSessionCreated === false
-    && currentRefreshMutation.vectorOrEmbeddingMutationPerformed === false
-    && currentRefreshMutation.wikiPublicationPerformed === false
-    && currentRefreshMutation.koshaRegistryMutationPerformed === false;
-  const currentRefreshBoundaryPass = readString(currentLiveRefresh.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_REFRESH"
-    && currentRefreshSourceHead.length > 0
-    && readString(currentLiveRefresh.productionCommit) === currentRefreshSourceHead
-    && readString(currentLiveRefresh.productionBranch) === "master"
-    && readString(currentLiveRefresh.productionEnvironment) === "production"
-    && readString(currentLiveRefresh.deploymentUrl).length > 0
-    && isGitAncestor(rootDir, currentRefreshSourceHead)
-    && currentRefreshChecks.length === 2
-    && currentRefreshChecks.every((check) => readNumber(check.status) === 400
-      && readString(check.message) === "question is required"
-      && readString(check.rateLimitHeader) === "instance"
+  const routeSetPass = (checks, expectedStatus, expectedMode, expectedCode = "") => checks.length === 2
+    && checks.some((check) => readString(check.route) === "/api/knowledge/regenerate")
+    && checks.some((check) => readString(check.route) === "/api/workpack/remediate")
+    && checks.every((check) => readNumber(check.status) === expectedStatus
+      && readString(check.rateLimitHeader) === expectedMode
+      && (expectedCode.length === 0 || readString(check.code) === expectedCode)
       && check.providerCallPerformed === false
-      && check.referenceSearchPerformed === false)
-    && currentRefreshChecks.some((check) => readString(check.route) === "/api/knowledge/regenerate"
-      && readString(check.probe) === "invalid-body-no-ai-call")
-    && currentRefreshChecks.some((check) => readString(check.route) === "/api/workpack/remediate"
-      && readString(check.probe) === "invalid-body-no-reference-or-ai-call")
-    && currentRefreshNoMutation;
-  const currentRefreshPass = currentRefreshBoundaryPass
-    && isEvidenceCurrentForPaths(rootDir, currentRefreshSourceHead, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS);
-  const currentCompatibilityPass = isCurrentSecurityRemediationCompatibilityCurrent(
-    rootDir,
-    "public_generation_admission_security",
-    PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS,
-  ) || isPublicAskDistributedAdmissionCompatibilityCurrent(
-    rootDir,
-    "public_generation_admission_security",
-    PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS,
-  );
-  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_ADMISSION_INSTANCE_MODE_DISTRIBUTED_HARDENING_OPEN"
+      && check.referenceSearchPerformed === false
+      && check.dbMutationPerformed === false);
+  const beforeLivePass = readString(beforeLive.sourceHead).length > 0
+    && isGitAncestor(rootDir, readString(beforeLive.sourceHead))
+    && routeSetPass(beforeLiveChecks, 400, "instance");
+  const afterLocalPass = readString(afterLocal.sourceHead) === productCommit
+    && readString(afterLocal.mode) === "current-source-local-production"
+    && routeSetPass(afterLocalChecks, 503, "distributed", "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+  const afterLivePass = readString(afterLive.sourceHead) === productCommit
+    && readString(afterLive.productionCommit) === productCommit
+    && readString(afterLive.productionBranch) === "master"
+    && readString(afterLive.productionEnvironment) === "production"
+    && readString(afterLive.deploymentUrl).length > 0
+    && routeSetPass(afterLiveChecks, 503, "distributed", "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_DISTRIBUTED_CONFIGURATION_TRUTH"
     && productCommit.length > 0
     && isGitAncestor(rootDir, productCommit)
-    && readString(report.evidenceCommit).length > 0
-    && readString(report.evidenceCommit) === readString(report.productionCommit)
+    && isEvidenceCurrentForPaths(rootDir, productCommit, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)
+    && readString(report.productionCommit) === productCommit
     && readString(baseScan.scanId) === "d12d04ce-deaf-497d-8754-33d5baab2ca0"
     && readString(baseScan.targetCommit) === "e087d474a1de72bd3687c703a61a4263fe792fa4"
     && baseScan.immutableBaselinePreserved === true
@@ -9915,62 +9940,51 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
       && readNumber(control.limit) === 20
       && readNumber(control.windowMs) === 60_000
       && control.beforeRequestBodyParsing === true
-      && control.beforeAiGeneration === true)
+      && control.beforeAiGeneration === true
+      && control.requireDistributedInProduction === true)
     && controls.some((control) => readString(control.route) === "/api/workpack/remediate"
       && readString(control.namespace) === "workpack-remediation"
       && readNumber(control.limit) === 12
       && readNumber(control.windowMs) === 60_000
       && control.beforeRequestBodyParsing === true
       && control.beforeReferenceSearch === true
-      && control.beforeAiGeneration === true)
-    && runtimeBoundary.distributedWhenConfigured === true
-    && runtimeBoundary.instanceFallbackWhenDistributedConfigAbsent === true
+      && control.beforeAiGeneration === true
+      && control.requireDistributedInProduction === true)
+    && runtimeBoundary.productionRequiresDistributedAdmission === true
+    && runtimeBoundary.productionInstanceFallbackAllowed === false
+    && runtimeBoundary.developmentInstanceFallbackAllowed === true
     && runtimeBoundary.partialDistributedConfigFailsClosed === true
+    && runtimeBoundary.absentDistributedConfigFailsClosed === true
     && runtimeBoundary.liveDeploymentVerified === true
-    && readString(runtimeBoundary.liveMode) === "instance"
-    && runtimeBoundary.distributedProductionHardeningOpen === true
+    && readString(runtimeBoundary.configurationState) === "absent"
+    && readString(runtimeBoundary.readinessMode) === "unavailable"
+    && readString(runtimeBoundary.observedResponseMode) === "distributed"
+    && runtimeBoundary.responseModeHeaderDoesNotProveConfigurationReady === true
+    && runtimeBoundary.distributedProtectionConfiguredLive === false
+    && runtimeBoundary.distributedProductionActivationPending === true
     && readString(runtimeBoundary.successHeader) === "X-SafeClaw-Rate-Limit"
-    && readNumber(knowledge.status) === 400
-    && readString(knowledge.message) === "question is required"
-    && readString(knowledge.rateLimitHeader) === "instance"
-    && readNumber(remediation.status) === 400
-    && readString(remediation.message) === "question is required"
-    && readString(remediation.rateLimitHeader) === "instance"
+    && beforeLivePass
+    && afterLocalPass
+    && afterLivePass
     && readNumber(auditAfter.total) === 0
-    && focused.passed === true
-    && readNumber(focused.testFiles) === 3
-    && readNumber(focused.tests) === 23
-    && adjacent.passed === true
-    && readNumber(adjacent.testFiles) === 15
-    && readNumber(adjacent.tests) === 173
+    && readString(focused.status) === "PASS"
+    && readNumber(focused.files) === 3
+    && readNumber(focused.tests) === 34
+    && readString(northstar.status) === "PASS"
+    && readNumber(northstar.files) === 3
+    && readNumber(northstar.tests) >= 174
     && verification.typecheck === "PASS"
     && readString(build.verdict) === "PASS"
     && readNumber(build.staticPages) === 28
     && readString(npmAudit.verdict) === "PASS"
     && readNumber(npmAudit.vulnerabilityCount) === 0
-    && readString(refreshFocused.status) === "PASS"
-    && readNumber(refreshFocused.files) === 5
-    && readNumber(refreshFocused.tests) === 37
-    && readString(refreshNorthstar.status) === "PASS"
-    && readNumber(refreshNorthstar.files) === 3
-    && readNumber(refreshNorthstar.tests) === 64
-    && readString(refreshPdf.status) === "PASS"
-    && readNumber(refreshPdf.files) === 1
-    && readNumber(refreshPdf.tests) === 18
-    && refreshVerification.typecheck === "PASS"
-    && readString(refreshBuild.status) === "PASS"
-    && readNumber(refreshBuild.staticPages) === 28
-    && readString(refreshAudit.status) === "PASS"
-    && readNumber(refreshAudit.vulnerabilityCount) === 0
-    && refreshVerification.diffCheck === "PASS"
+    && verification.diffCheck === "PASS"
     && noMutation
     && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && remainingBoundaries.approvalGatedOperationsUnchanged === true
     && remainingBoundaries.freshPostChangeSecurityRescanRequired === true
     && remainingBoundaries.liveDeploymentVerificationRequired === false
-    && remainingBoundaries.distributedProductionLimiterStillRecommended === true
-    && currentRefreshBoundaryPass
-    && (currentRefreshPass || currentCompatibilityPass);
+    && remainingBoundaries.distributedProductionActivationPending === true;
 
   return gateResult({
     id: "public_generation_admission_security",
@@ -9978,12 +9992,12 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? `Current production ${currentRefreshSourceHead.slice(0, 8)} re-proves fail-fast instance admission before request parsing, reference search, and AI work on both public generation routes with zero provider or mutation work. The dependency audit remains zero; distributed production activation and the separate fresh diff scan remain open. The immutable baseline is preserved, and exact saved Share remains MISSING_EVIDENCE.`
-      : `Generation admission verdict=${readString(report.verdict) || "unknown"}, productPathsCurrent=${productCommit.length > 0 && isEvidenceCurrentForPaths(rootDir, productCommit, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)}, currentRefresh=${currentRefreshPass}, refreshHead=${currentRefreshSourceHead || "missing"}, liveMode=${readString(runtimeBoundary.liveMode) || "unknown"}, knowledge=${readNumber(knowledge.status)}/${readString(knowledge.rateLimitHeader) || "missing"}, remediation=${readNumber(remediation.status)}/${readString(remediation.rateLimitHeader) || "missing"}, audit=${readNumber(auditAfter.total)}, refresh=${readNumber(refreshFocused.tests)}/${readNumber(refreshNorthstar.tests)}/${readNumber(refreshPdf.tests)}, rescanPending=${remainingBoundaries.freshPostChangeSecurityRescanRequired === true}, noMutation=${noMutation && currentRefreshNoMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+      ? `Current production ${productCommit.slice(0, 8)} requires distributed admission before body parsing on both public generation routes. The before-live 400/instance behavior is preserved, while local and live after-remediation probes return 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before reference search, AI/provider work, or DB mutation when configurationState=absent. Distributed activation and a fresh scan remain open; the immutable baseline is preserved, and exact saved Share remains MISSING_EVIDENCE.`
+      : `Generation admission verdict=${readString(report.verdict) || "unknown"}, productPathsCurrent=${productCommit.length > 0 && isEvidenceCurrentForPaths(rootDir, productCommit, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)}, before=${beforeLivePass}, local=${afterLocalPass}, live=${afterLivePass}, config=${readString(runtimeBoundary.configurationState) || "unknown"}, focused=${readNumber(focused.tests)}, northstar=${readNumber(northstar.tests)}, rescanPending=${remainingBoundaries.freshPostChangeSecurityRescanRequired === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
-          "Preserve completed scan 8fe9c06a at immutable f0c8a7be, and run a fresh post-159aa38c security scan before closing the remediated finding.",
-          "Configure approved server-only Upstash credentials and verify distributed mode before claiming multi-instance protection.",
+          "Preserve the immutable scan baseline and run a fresh full repository scan before closing the remediated generation finding.",
+          "Configure approved server-only Upstash credentials and require configurationState=ready before claiming active distributed protection.",
         ]
       : ["Restore the live admission, zero-audit, no-mutation, immutable-baseline, rescan-pending, and exact-Share boundaries."],
   });
