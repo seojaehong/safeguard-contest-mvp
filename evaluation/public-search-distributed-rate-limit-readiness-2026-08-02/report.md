@@ -1,32 +1,38 @@
-# Public Search Distributed Rate-Limit Readiness
+# Public Search Distributed Admission Configuration Truth
 
-Verdict: `PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING`
+Verdict: `PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_DISTRIBUTED_CONFIGURATION_TRUTH`
 
 ## Result
 
-Current source `c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56` adds one shared distributed admission-control contract to `/api/search` and `/api/safety-reference/search`.
+Source and production are aligned at `60e4799ea397f4d287a74e079142b4b828867705`. Both public search routes require distributed admission in production.
 
-- Both routes use an atomic fixed-window counter through the Upstash Redis REST API.
-- Client identifiers are SHA-256 hashed before they become Redis keys; raw IP values are not sent as key material.
-- The endpoint must be HTTPS and both server-only variables must be present.
-- Partial or unsafe configuration fails closed with HTTP 503 before legal/KOSHA provider work.
-- A configured distributed counter outage also fails closed before provider work.
-- When both variables are absent, the existing per-instance guard remains active and responses disclose `X-SafeClaw-Rate-Limit: instance` rather than pretending distributed protection is active.
+- The shared limiter uses an atomic Upstash Redis REST counter when both server-only variables are valid.
+- Client identifiers are SHA-256 hashed before becoming Redis keys; raw IP values are not sent as key material.
+- Partial, unsafe, absent, or unavailable distributed configuration fails closed before legal or KOSHA provider work.
+- Production does not use the development-only per-instance fallback when configuration is absent.
+- `X-SafeClaw-Rate-Limit: distributed` on an unavailable response identifies the required guard path. It does not prove the Upstash configuration is ready.
 
-The protocol shape follows the official [Upstash Redis REST API documentation](https://upstash.com/docs/redis/features/restapi), including a command JSON array and a single atomic `EVAL` operation.
+## Live Verification
+
+At `2026-08-27T13:34:25.5248512Z`, one bounded read-only request per route produced the same fail-closed result:
+
+| Route | Status | Mode header | Retry | Code | Provider work |
+| --- | ---: | --- | ---: | --- | --- |
+| `/api/search` | 503 | `distributed` | 5 seconds | `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE` | not executed |
+| `/api/safety-reference/search` | 503 | `distributed` | 5 seconds | `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE` | not executed |
+
+The production configuration state is `absent`, readiness mode is `unavailable`, and distributed activation remains pending. This is honest fail-closed configuration truth, not a claim that distributed protection is configured.
 
 ## Verification
 
-- Focused and adjacent security tests: 6 files, 88 tests, 0 failures.
+- Focused public-search admission tests: 3 files, 19 tests, 0 failures.
 - TypeScript strict typecheck: PASS.
-- Next.js 15.5.22 production build: PASS, 28 static pages.
+- Next.js 15.5.22 production build at the same source head: PASS, 28 static pages.
 - `git diff --check`: PASS.
 - Targeted secret scan: PASS.
 
-## Live Boundary
+## Boundary
 
-Production reached `7efd21138066842017c206dbb5c0f3ef1d1ba54a`, which contains product commit `c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56`. One read-only request per route returned HTTP 200 and `X-SafeClaw-Rate-Limit: instance`: `/api/search` returned 9 results and `/api/safety-reference/search` returned 1 result. The capability is live, but Upstash is not configured and this report does not claim `X-SafeClaw-Rate-Limit: distributed` is active.
+The immutable original 18-finding baseline and completed scan `8fe9c06a-018c-446f-aa98-1b37df95287a` remain unchanged. This companion evidence does not mark either sealed public-search finding remediated; a fresh full repository scan is required after configuration reaches `ready`.
 
-The sealed scan `8fe9c06a-018c-446f-aa98-1b37df95287a` remains immutable. Its two public-search findings are not marked closed by this companion evidence; a future full repository scan must reclassify them after the production mode is verified. Thirteen DB/RLS findings remain separately approval-gated.
-
-No DB mutation, provider dispatch, Share-session creation, vector mutation, wiki publication, or KOSHA registry mutation occurred. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
+Database findings remain approval-gated. No DB mutation, provider dispatch, Share-session creation, vector mutation, wiki publication, or KOSHA registry mutation occurred. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.

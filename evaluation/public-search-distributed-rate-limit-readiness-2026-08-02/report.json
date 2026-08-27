@@ -1,14 +1,14 @@
 {
-  "schema": "safeclaw-public-search-distributed-rate-limit-readiness/v1",
-  "generatedAt": "2026-08-02T09:00:35.2024979Z",
-  "verdict": "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING",
-  "sourceHead": "c1e5a98ff75d8d67b7ebd7eb8b2ed00c2bedcd56",
+  "schema": "safeclaw-public-search-distributed-rate-limit-readiness/v2",
+  "generatedAt": "2026-08-27T13:34:25.5248512Z",
+  "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_DISTRIBUTED_CONFIGURATION_TRUTH",
+  "sourceHead": "60e4799ea397f4d287a74e079142b4b828867705",
   "productionBuild": {
-    "commitSha": "7efd21138066842017c206dbb5c0f3ef1d1ba54a",
+    "commitSha": "60e4799ea397f4d287a74e079142b4b828867705",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-gh5l9zcnw-seojaehongs-projects.vercel.app",
-    "sourceHeadMatchesProduction": false,
+    "deploymentUrl": "safeguard-contest-9efjy048a-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true,
     "productCommitIsAncestorOfProduction": true
   },
   "scope": {
@@ -17,6 +17,7 @@
       "/api/safety-reference/search"
     ],
     "sealedScanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+    "immutableOriginalBaselineFindingCount": 18,
     "sealedFindings": [
       {
         "findingId": "csf_e45a58b22598698e0bf4de16",
@@ -36,13 +37,17 @@
     "rawClientIpSentToStore": false,
     "partialConfigurationFailsClosed": true,
     "distributedFailureFailsClosedBeforeProviderWork": true,
+    "productionRequiresDistributedAdmission": true,
+    "absentConfigurationFailsClosedBeforeProviderWork": true,
+    "productionInstanceFallbackAllowed": false,
+    "developmentInstanceFallbackAllowed": true,
     "distributedLimitResponseStatus": 429,
     "distributedUnavailableResponseStatus": 503,
-    "instanceFallbackWhenCompletelyUnconfigured": true,
     "responseModeHeader": "X-SafeClaw-Rate-Limit",
     "configuredModeHeaderValue": "distributed",
-    "unconfiguredModeHeaderValue": "instance",
-    "providerCallsOnPartialConfiguration": 0
+    "unavailableModeHeaderValue": "distributed",
+    "providerCallsOnPartialConfiguration": 0,
+    "providerCallsOnAbsentConfiguration": 0
   },
   "configuration": {
     "requiredVariables": [
@@ -51,28 +56,35 @@
     ],
     "productionConfigured": false,
     "productionModeVerified": true,
-    "observedMode": "instance",
+    "configurationState": "absent",
+    "readinessMode": "unavailable",
+    "observedResponseMode": "distributed",
+    "responseModeHeaderDoesNotProveConfigurationReady": true,
     "distributedActivationPending": true,
     "officialProtocolReference": "https://upstash.com/docs/redis/features/restapi"
   },
   "liveProbes": [
     {
       "route": "/api/search",
-      "status": 200,
-      "rateLimitHeader": "instance",
-      "resultCount": 9
+      "status": 503,
+      "rateLimitHeader": "distributed",
+      "retryAfterSeconds": 5,
+      "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      "providerCallExecuted": false
     },
     {
       "route": "/api/safety-reference/search",
-      "status": 200,
-      "rateLimitHeader": "instance",
-      "resultCount": 1
+      "status": 503,
+      "rateLimitHeader": "distributed",
+      "retryAfterSeconds": 5,
+      "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      "providerCallExecuted": false
     }
   ],
   "verification": {
     "focusedAndAdjacentTests": {
-      "files": 6,
-      "tests": 88,
+      "files": 3,
+      "tests": 19,
       "failed": 0,
       "status": "PASS"
     },
@@ -88,10 +100,10 @@
   "boundary": {
     "sealedScanMutated": false,
     "sealedFindingsClosedWithoutRescan": false,
-    "capabilityIncludedInProduction": true,
-    "distributedProtectionClaimedLive": false,
-    "remainingDbRlsFindings": 13,
-    "remainingDbRlsFindingsRequireApproval": true,
+    "immutableOriginalBaselinePreserved": true,
+    "distributedProtectionConfiguredLive": false,
+    "productionFailClosedObserved": true,
+    "databaseFindingsRemainApprovalGated": true,
     "dbMutationPerformed": false,
     "providerDispatchCalled": false,
     "shareSessionCreated": false,
@@ -102,8 +114,8 @@
   },
   "nextActions": [
     "Configure both Upstash REST variables in the production environment through an approved operator change.",
-    "After deployment, probe both routes and require X-SafeClaw-Rate-Limit=distributed without invoking sustained load.",
+    "After deployment, require configurationState=ready and verify bounded successful requests use distributed admission before provider work.",
     "Rerun the full repository security scan before changing either sealed finding to remediated or claiming security completion.",
-    "Keep the remaining 13 DB/RLS findings approval-gated until an approved migration and live tenant-isolation verification exist."
+    "Keep database findings approval-gated until an approved migration and live tenant-isolation verification exist."
   ]
 }

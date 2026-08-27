@@ -1607,12 +1607,13 @@ function publicSearchDistributedRateLimitReadinessSummary(report) {
     productionCommit: asString(productionBuild.commitSha),
     sourceHeadMatchesProduction: asBoolean(productionBuild.sourceHeadMatchesProduction),
     productionModeVerified: asBoolean(configuration.productionModeVerified),
-    observedMode: asString(configuration.observedMode),
+    configurationState: asString(configuration.configurationState),
+    readinessMode: asString(configuration.readinessMode),
+    observedResponseMode: asString(configuration.observedResponseMode),
     distributedActivationPending: asBoolean(configuration.distributedActivationPending),
     sealedFindingsClosedWithoutRescan: asBoolean(boundary.sealedFindingsClosedWithoutRescan),
-    remainingDbRlsFindings: typeof boundary.remainingDbRlsFindings === "number"
-      ? boundary.remainingDbRlsFindings
-      : 0,
+    productionFailClosedObserved: asBoolean(boundary.productionFailClosedObserved),
+    databaseFindingsRemainApprovalGated: asBoolean(boundary.databaseFindingsRemainApprovalGated),
     exactSavedShareVerdict: asString(boundary.exactSavedShareVerdict),
   };
 }
@@ -3366,7 +3367,7 @@ export function buildNorthstarNextRunway(options) {
       {
         gate: "public_search_distributed_rate_limit_readiness",
         state: "notice",
-        reason: "live capability is verified with X-SafeClaw-Rate-Limit=instance; production distributed configuration remains pending",
+        reason: "production fail-closed behavior is verified at configurationState=absent; both routes return 503 distributed-unavailable before provider work, and distributed activation remains pending",
       },
       {
         gate: "public_generation_admission_security",

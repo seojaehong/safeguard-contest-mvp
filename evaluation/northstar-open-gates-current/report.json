@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-27T13:24:22.684Z",
-  "sourceSha": "cc7fdcc48245e064f6ee93f9cc2afe8d7d890219",
+  "generatedAt": "2026-08-27T13:41:28.370Z",
+  "sourceSha": "60e4799ea397f4d287a74e079142b4b828867705",
   "overall": "open",
   "gates": [
     {
@@ -457,10 +457,10 @@
       "state": "notice",
       "label": "Public search distributed rate-limit readiness",
       "evidencePath": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
-      "detail": "Live production contains an atomic, IP-hashed, fail-closed distributed limiter capability for both public search routes, while read-only probes honestly report X-SafeClaw-Rate-Limit=instance because production Upstash configuration is absent. Distributed activation and a future full scan remain required before closing the two sealed search findings; 13 DB/RLS findings remain approval-gated and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Live production requires distributed admission for both public search routes and fails closed before provider work when the Upstash configuration state is absent. Both bounded probes returned HTTP 503 with X-SafeClaw-Rate-Limit=distributed and DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; that response mode identifies the required guard path, not configured distributed protection. Activation and a fresh full scan remain required before closing the two sealed search findings; database findings remain approval-gated and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Configure both server-only Upstash REST variables through an approved production environment change.",
-        "Verify both public search routes return X-SafeClaw-Rate-Limit=distributed, then rerun the full repository scan before closing either sealed finding."
+        "After configuration reaches ready, verify bounded successful requests use distributed admission, then rerun the full repository scan before closing either sealed finding."
       ]
     },
     {

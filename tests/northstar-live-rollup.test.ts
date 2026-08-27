@@ -426,10 +426,13 @@ type RollupReport = {
     sourceHead: string;
     productionCommit: string;
     productionModeVerified: boolean;
-    observedMode: string;
+    configurationState: string;
+    readinessMode: string;
+    observedResponseMode: string;
     distributedActivationPending: boolean;
     sealedFindingsClosedWithoutRescan: boolean;
-    remainingDbRlsFindings: number | null;
+    productionFailClosedObserved: boolean;
+    databaseFindingsRemainApprovalGated: boolean;
     exactSavedShareVerdict: string;
   };
   publicGenerationAdmissionSecurity: {
@@ -1529,17 +1532,20 @@ function createFixtureRoot(): { root: string; head: string } {
     },
   });
   writeJson(root, "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", {
-    verdict: "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING",
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_DISTRIBUTED_CONFIGURATION_TRUTH",
     sourceHead: "TO_FILL",
-    productionBuild: { commitSha: "TO_FILL", sourceHeadMatchesProduction: false },
+    productionBuild: { commitSha: "TO_FILL", sourceHeadMatchesProduction: true },
     configuration: {
       productionModeVerified: true,
-      observedMode: "instance",
+      configurationState: "absent",
+      readinessMode: "unavailable",
+      observedResponseMode: "distributed",
       distributedActivationPending: true,
     },
     boundary: {
       sealedFindingsClosedWithoutRescan: false,
-      remainingDbRlsFindings: 13,
+      productionFailClosedObserved: true,
+      databaseFindingsRemainApprovalGated: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
@@ -2759,12 +2765,15 @@ describe("northstar live rollup", () => {
     });
     expect(report.evidence.find((item) => item.id === "full_repository_security_scan")?.productionStatus).toBe("ancestor_of_head");
     expect(report.publicSearchDistributedRateLimitReadiness).toMatchObject({
-      verdict: "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING",
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_DISTRIBUTED_CONFIGURATION_TRUTH",
       productionModeVerified: true,
-      observedMode: "instance",
+      configurationState: "absent",
+      readinessMode: "unavailable",
+      observedResponseMode: "distributed",
       distributedActivationPending: true,
       sealedFindingsClosedWithoutRescan: false,
-      remainingDbRlsFindings: 13,
+      productionFailClosedObserved: true,
+      databaseFindingsRemainApprovalGated: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.publicGenerationAdmissionSecurity).toMatchObject({

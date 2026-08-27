@@ -953,10 +953,13 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
         ? asString(publicSearchDistributedRateLimitReadiness.productionBuild.commitSha)
         : "",
       productionModeVerified: recordAt(publicSearchDistributedRateLimitReadiness, "configuration")?.productionModeVerified === true,
-      observedMode: asString(recordAt(publicSearchDistributedRateLimitReadiness, "configuration")?.observedMode),
+      configurationState: asString(recordAt(publicSearchDistributedRateLimitReadiness, "configuration")?.configurationState),
+      readinessMode: asString(recordAt(publicSearchDistributedRateLimitReadiness, "configuration")?.readinessMode),
+      observedResponseMode: asString(recordAt(publicSearchDistributedRateLimitReadiness, "configuration")?.observedResponseMode),
       distributedActivationPending: recordAt(publicSearchDistributedRateLimitReadiness, "configuration")?.distributedActivationPending === true,
       sealedFindingsClosedWithoutRescan: recordAt(publicSearchDistributedRateLimitReadiness, "boundary")?.sealedFindingsClosedWithoutRescan === true,
-      remainingDbRlsFindings: asNumber(recordAt(publicSearchDistributedRateLimitReadiness, "boundary")?.remainingDbRlsFindings),
+      productionFailClosedObserved: recordAt(publicSearchDistributedRateLimitReadiness, "boundary")?.productionFailClosedObserved === true,
+      databaseFindingsRemainApprovalGated: recordAt(publicSearchDistributedRateLimitReadiness, "boundary")?.databaseFindingsRemainApprovalGated === true,
       exactSavedShareVerdict: asString(recordAt(publicSearchDistributedRateLimitReadiness, "boundary")?.exactSavedShareVerdict),
     },
     publicGenerationAdmissionSecurity: {

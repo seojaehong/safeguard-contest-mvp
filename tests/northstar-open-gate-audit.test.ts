@@ -992,11 +992,11 @@ function createFixtureRoot(): string {
     },
   });
   writeJson(rootDir, path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"), {
-    verdict: "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING",
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_DISTRIBUTED_CONFIGURATION_TRUTH",
     sourceHead: "fixture-sha",
     productionBuild: {
-      commitSha: "previous-live-sha",
-      sourceHeadMatchesProduction: false,
+      commitSha: "fixture-sha",
+      sourceHeadMatchesProduction: true,
       productCommitIsAncestorOfProduction: true,
     },
     currentSourceContract: {
@@ -1007,28 +1007,39 @@ function createFixtureRoot(): string {
       rawClientIpSentToStore: false,
       partialConfigurationFailsClosed: true,
       distributedFailureFailsClosedBeforeProviderWork: true,
-      instanceFallbackWhenCompletelyUnconfigured: true,
+      productionRequiresDistributedAdmission: true,
+      absentConfigurationFailsClosedBeforeProviderWork: true,
+      productionInstanceFallbackAllowed: false,
+      developmentInstanceFallbackAllowed: true,
       responseModeHeader: "X-SafeClaw-Rate-Limit",
       providerCallsOnPartialConfiguration: 0,
+      providerCallsOnAbsentConfiguration: 0,
     },
     configuration: {
       productionConfigured: false,
       productionModeVerified: true,
-      observedMode: "instance",
+      configurationState: "absent",
+      readinessMode: "unavailable",
+      observedResponseMode: "distributed",
+      responseModeHeaderDoesNotProveConfigurationReady: true,
       distributedActivationPending: true,
     },
+    liveProbes: [
+      { route: "/api/search", status: 503, rateLimitHeader: "distributed", retryAfterSeconds: 5, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", providerCallExecuted: false },
+      { route: "/api/safety-reference/search", status: 503, rateLimitHeader: "distributed", retryAfterSeconds: 5, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", providerCallExecuted: false },
+    ],
     verification: {
-      focusedAndAdjacentTests: { files: 6, tests: 88, failed: 0 },
+      focusedAndAdjacentTests: { files: 3, tests: 19, failed: 0 },
       typecheck: "PASS",
       build: { status: "PASS", staticPages: 28 },
     },
     boundary: {
       sealedScanMutated: false,
       sealedFindingsClosedWithoutRescan: false,
-      capabilityIncludedInProduction: true,
-      distributedProtectionClaimedLive: false,
-      remainingDbRlsFindings: 13,
-      remainingDbRlsFindingsRequireApproval: true,
+      immutableOriginalBaselinePreserved: true,
+      distributedProtectionConfiguredLive: false,
+      productionFailClosedObserved: true,
+      databaseFindingsRemainApprovalGated: true,
       dbMutationPerformed: false,
       providerDispatchCalled: false,
       shareSessionCreated: false,
@@ -6505,8 +6516,9 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       state: "notice",
       evidencePath: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
     });
-    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("X-SafeClaw-Rate-Limit=instance");
-    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("13 DB/RLS findings");
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("HTTP 503");
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("not configured distributed protection");
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("database findings remain approval-gated");
     expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "public_generation_admission_security")).toMatchObject({
       state: "notice",
@@ -6839,6 +6851,47 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.forbiddenClaims).toContain("KOSHA operator checklist completion alone approves exact-trust promotion.");
     expect(audit.forbiddenClaims).toContain("Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval.");
     expect(audit.safeDemoClaims).toContain("Photo hazard analysis readiness supports up to 10 images and keeps Before/After improvements as reviewed operation memory.");
+  });
+
+  it.each([
+    {
+      label: "configuration is claimed ready despite the absent live state",
+      mutate: (report: {
+        configuration: { configurationState: string };
+        liveProbes: Array<{ providerCallExecuted: boolean }>;
+      }) => {
+        report.configuration.configurationState = "ready";
+      },
+    },
+    {
+      label: "a provider call is claimed on the unavailable guard path",
+      mutate: (report: {
+        configuration: { configurationState: string };
+        liveProbes: Array<{ providerCallExecuted: boolean }>;
+      }) => {
+        report.liveProbes[0].providerCallExecuted = true;
+      },
+    },
+  ])("fails public-search distributed configuration truth closed when $label", async ({ mutate }) => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "public-search-distributed-rate-limit-readiness-2026-08-02",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      configuration: { configurationState: string };
+      liveProbes: Array<{ providerCallExecuted: boolean }>;
+    };
+    mutate(report);
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "public_search_distributed_rate_limit_readiness")).toMatchObject({
+      state: "contradicted",
+    });
   });
 
   it("fails the current editorial runtime boundary closed on a provider-backed overclaim", async () => {

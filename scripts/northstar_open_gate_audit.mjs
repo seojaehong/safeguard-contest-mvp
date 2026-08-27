@@ -7415,9 +7415,17 @@ function evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir) {
   const tests = isRecord(verification.focusedAndAdjacentTests) ? verification.focusedAndAdjacentTests : {};
   const build = isRecord(verification.build) ? verification.build : {};
   const boundary = isRecord(report.boundary) ? report.boundary : {};
-  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING"
+  const liveProbes = Array.isArray(report.liveProbes) ? report.liveProbes : [];
+  const liveProbePass = liveProbes.length === 2
+    && liveProbes.every((probe) => isRecord(probe)
+      && readNumber(probe.status) === 503
+      && readString(probe.rateLimitHeader) === "distributed"
+      && readNumber(probe.retryAfterSeconds) === 5
+      && readString(probe.code) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+      && probe.providerCallExecuted === false);
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_DISTRIBUTED_CONFIGURATION_TRUTH"
     && readString(report.sourceHead).length > 0
-    && productionBuild.sourceHeadMatchesProduction === false
+    && productionBuild.sourceHeadMatchesProduction === true
     && productionBuild.productCommitIsAncestorOfProduction === true
     && contract.atomicDistributedCounter === true
     && contract.serverOnlyRestCredentials === true
@@ -7426,25 +7434,33 @@ function evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir) {
     && contract.rawClientIpSentToStore === false
     && contract.partialConfigurationFailsClosed === true
     && contract.distributedFailureFailsClosedBeforeProviderWork === true
-    && contract.instanceFallbackWhenCompletelyUnconfigured === true
+    && contract.productionRequiresDistributedAdmission === true
+    && contract.absentConfigurationFailsClosedBeforeProviderWork === true
+    && contract.productionInstanceFallbackAllowed === false
+    && contract.developmentInstanceFallbackAllowed === true
     && readString(contract.responseModeHeader) === "X-SafeClaw-Rate-Limit"
     && readNumber(contract.providerCallsOnPartialConfiguration) === 0
+    && readNumber(contract.providerCallsOnAbsentConfiguration) === 0
     && configuration.productionConfigured === false
     && configuration.productionModeVerified === true
-    && readString(configuration.observedMode) === "instance"
+    && readString(configuration.configurationState) === "absent"
+    && readString(configuration.readinessMode) === "unavailable"
+    && readString(configuration.observedResponseMode) === "distributed"
+    && configuration.responseModeHeaderDoesNotProveConfigurationReady === true
     && configuration.distributedActivationPending === true
-    && readNumber(tests.files) === 6
-    && readNumber(tests.tests) === 88
+    && liveProbePass
+    && readNumber(tests.files) === 3
+    && readNumber(tests.tests) === 19
     && readNumber(tests.failed) === 0
     && readString(verification.typecheck) === "PASS"
     && readString(build.status) === "PASS"
     && readNumber(build.staticPages) === 28
     && boundary.sealedScanMutated === false
     && boundary.sealedFindingsClosedWithoutRescan === false
-    && boundary.capabilityIncludedInProduction === true
-    && boundary.distributedProtectionClaimedLive === false
-    && readNumber(boundary.remainingDbRlsFindings) === 13
-    && boundary.remainingDbRlsFindingsRequireApproval === true
+    && boundary.immutableOriginalBaselinePreserved === true
+    && boundary.distributedProtectionConfiguredLive === false
+    && boundary.productionFailClosedObserved === true
+    && boundary.databaseFindingsRemainApprovalGated === true
     && boundary.dbMutationPerformed === false
     && boundary.providerDispatchCalled === false
     && boundary.shareSessionCreated === false
@@ -7459,12 +7475,12 @@ function evaluatePublicSearchDistributedRateLimitReadinessGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Live production contains an atomic, IP-hashed, fail-closed distributed limiter capability for both public search routes, while read-only probes honestly report X-SafeClaw-Rate-Limit=instance because production Upstash configuration is absent. Distributed activation and a future full scan remain required before closing the two sealed search findings; 13 DB/RLS findings remain approval-gated and exact saved Share remains MISSING_EVIDENCE."
-      : `Distributed limiter verdict=${readString(report.verdict) || "unknown"}, liveVerified=${configuration.productionModeVerified === true}, tests=${readNumber(tests.tests)}, sealedClosed=${boundary.sealedFindingsClosedWithoutRescan === true}, DB/RLS=${readNumber(boundary.remainingDbRlsFindings)}, exactShare=${readString(boundary.exactSavedShareVerdict) || "missing"}.`,
+      ? "Live production requires distributed admission for both public search routes and fails closed before provider work when the Upstash configuration state is absent. Both bounded probes returned HTTP 503 with X-SafeClaw-Rate-Limit=distributed and DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; that response mode identifies the required guard path, not configured distributed protection. Activation and a fresh full scan remain required before closing the two sealed search findings; database findings remain approval-gated and exact saved Share remains MISSING_EVIDENCE."
+      : `Distributed configuration-truth verdict=${readString(report.verdict) || "unknown"}, config=${readString(configuration.configurationState) || "unknown"}, responseMode=${readString(configuration.observedResponseMode) || "unknown"}, liveProbes=${liveProbePass}, tests=${readNumber(tests.tests)}, sealedClosed=${boundary.sealedFindingsClosedWithoutRescan === true}, exactShare=${readString(boundary.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
           "Configure both server-only Upstash REST variables through an approved production environment change.",
-          "Verify both public search routes return X-SafeClaw-Rate-Limit=distributed, then rerun the full repository scan before closing either sealed finding.",
+          "After configuration reaches ready, verify bounded successful requests use distributed admission, then rerun the full repository scan before closing either sealed finding.",
         ]
       : ["Restore every current-source, fail-closed, verification, no-mutation, sealed-scan, and exact-Share predicate."],
   });

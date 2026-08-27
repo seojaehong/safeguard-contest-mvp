@@ -480,10 +480,13 @@ type NextRunwayReport = {
     productionCommit: string;
     sourceHeadMatchesProduction: boolean;
     productionModeVerified: boolean;
-    observedMode: string;
+    configurationState: string;
+    readinessMode: string;
+    observedResponseMode: string;
     distributedActivationPending: boolean;
     sealedFindingsClosedWithoutRescan: boolean;
-    remainingDbRlsFindings: number;
+    productionFailClosedObserved: boolean;
+    databaseFindingsRemainApprovalGated: boolean;
     exactSavedShareVerdict: string;
   };
   learningExportRendererSecurity: {
@@ -1844,17 +1847,20 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
   });
   writeJson(root, "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", {
-    verdict: "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING",
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_DISTRIBUTED_CONFIGURATION_TRUTH",
     sourceHead: "fixture-sha",
-    productionBuild: { commitSha: "previous-live-sha", sourceHeadMatchesProduction: false },
+    productionBuild: { commitSha: "fixture-sha", sourceHeadMatchesProduction: true },
     configuration: {
       productionModeVerified: true,
-      observedMode: "instance",
+      configurationState: "absent",
+      readinessMode: "unavailable",
+      observedResponseMode: "distributed",
       distributedActivationPending: true,
     },
     boundary: {
       sealedFindingsClosedWithoutRescan: false,
-      remainingDbRlsFindings: 13,
+      productionFailClosedObserved: true,
+      databaseFindingsRemainApprovalGated: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
@@ -3644,15 +3650,18 @@ describe("northstar next runway generator", () => {
       state: "notice",
     }));
     expect(report.publicSearchDistributedRateLimitReadiness).toMatchObject({
-      verdict: "PASS_LIVE_PRODUCTION_DISTRIBUTED_LIMITER_CAPABILITY_INSTANCE_FALLBACK_CONFIG_PENDING",
+      verdict: "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_DISTRIBUTED_CONFIGURATION_TRUTH",
       sourceHead: "fixture-sha",
-      productionCommit: "previous-live-sha",
-      sourceHeadMatchesProduction: false,
+      productionCommit: "fixture-sha",
+      sourceHeadMatchesProduction: true,
       productionModeVerified: true,
-      observedMode: "instance",
+      configurationState: "absent",
+      readinessMode: "unavailable",
+      observedResponseMode: "distributed",
       distributedActivationPending: true,
       sealedFindingsClosedWithoutRescan: false,
-      remainingDbRlsFindings: 13,
+      productionFailClosedObserved: true,
+      databaseFindingsRemainApprovalGated: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.provenCurrentState).toContain("learning_export_renderer_security");

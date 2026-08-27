@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-27T13:24:23.866Z
-Source HEAD at generation: cc7fdcc48245e064f6ee93f9cc2afe8d7d890219
-Live commit at generation: cc7fdcc48245e064f6ee93f9cc2afe8d7d890219
+Generated at: 2026-08-27T13:41:29.436Z
+Source HEAD at generation: 60e4799ea397f4d287a74e079142b4b828867705
+Live commit at generation: 60e4799ea397f4d287a74e079142b4b828867705
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -472,7 +472,7 @@ Overall: `northstar_open_approval_gated`
 | --- | --- | --- | --- |
 | open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
-| final_99_12_document_no_mutation | exact | matches_live | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
+| final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | live_document_quality_matrix | ancestor | ancestor_of_head | evaluation\live-document-quality-matrix-2026-07-24\report.json |
 | live_document_quality_stress_matrix | ancestor | ancestor_of_head | evaluation\live-document-quality-stress-matrix-2026-07-24\report.json |
@@ -512,7 +512,7 @@ Overall: `northstar_open_approval_gated`
 | public_provider_admission | ancestor | ancestor_of_head | evaluation\public-provider-admission-2026-08-11\report.json |
 | public_ask_distributed_admission | ancestor | ancestor_of_head | evaluation\public-ask-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_admission | ancestor | ancestor_of_head | evaluation\public-search-distributed-admission-2026-08-14\report.json |
-| public_search_distributed_rate_limit_readiness | ancestor | ancestor_of_head | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
+| public_search_distributed_rate_limit_readiness | exact | matches_live | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | missing | ancestor_of_head | evaluation\security-public-generation-admission-2026-08-04\report.json |
 | security_followup_remediation | ancestor | missing | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
 | security_resource_remediation | ancestor | ancestor_of_head | evaluation\security-resource-remediation-2026-08-11\report.json |
