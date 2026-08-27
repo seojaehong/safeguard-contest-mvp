@@ -1691,21 +1691,27 @@
   }
 
   .riskRowTabs {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
     gap: 4px;
-    overflow-x: visible;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    padding-bottom: 2px;
+    scroll-snap-type: inline proximity;
+    scrollbar-width: thin;
   }
 
   .riskRowTabs button {
+    flex: 0 0 86px;
     grid-template-columns: auto minmax(0, 1fr);
     gap: 0 4px;
-    min-width: 0;
-    max-width: none;
+    min-width: 86px;
+    max-width: 86px;
     height: 44px;
     min-height: 44px;
     overflow: hidden;
     padding: 3px 6px;
+    scroll-snap-align: start;
   }
 
   .riskRowTabHazard {

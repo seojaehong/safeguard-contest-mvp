@@ -1988,6 +1988,63 @@ describe("documents editor layout", () => {
     90_000,
   );
 
+  it("keeps the short mobile risk-row selector on one horizontal rail", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 390, height: 723 } });
+    const sample = buildSampleWorkpack();
+    const seedRows = sample.structured?.riskAssessmentRows ?? [];
+    if (seedRows.length < 3) throw new Error("Risk-row seed fixture is incomplete");
+    const riskRows = [
+      ...seedRows,
+      { ...seedRows[0], hazard: "강풍 중 이동식 비계 흔들림과 추락 위험" },
+      { ...seedRows[1], hazard: "도장재 비산과 피부 접촉 위험" }
+    ];
+    sample.deliverables.riskAssessmentDraft = serializeRiskAssessmentRowsToDraft(riskRows);
+    sample.structured = {
+      riskAssessmentRows: riskRows,
+      riskAssessmentValidation: { ok: true, issueCount: 0, issues: [] }
+    };
+    const stored = buildStoredCurrentWorkpack(sample);
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+    await selectDocumentFromWorkbench(page, "riskAssessmentDraft");
+    await page.getByTestId("risk-rows-editor").waitFor({ state: "visible" });
+
+    const metrics = await page.evaluate(() => {
+      const rail = document.querySelector<HTMLElement>('[role="tablist"][aria-label="위험 항목 선택"]');
+      const selectors = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="risk-row-selector"]'));
+      const firstHazard = document.querySelector<HTMLElement>('[aria-label="행 1 유해·위험요인"]');
+      if (!rail || selectors.length < 3 || !firstHazard) {
+        throw new Error("Missing five-row short mobile risk-row rail target");
+      }
+      const railRect = rail.getBoundingClientRect();
+      const hazardRect = firstHazard.getBoundingClientRect();
+      return {
+        viewportHeight: window.innerHeight,
+        bodyHeight: document.documentElement.scrollHeight,
+        pageScrollWidth: document.documentElement.scrollWidth,
+        railHeight: Math.round(railRect.height),
+        railClientWidth: rail.clientWidth,
+        railScrollWidth: rail.scrollWidth,
+        selectorTops: selectors.map((selector) => Math.round(selector.getBoundingClientRect().top)),
+        selectorHeights: selectors.map((selector) => Math.round(selector.getBoundingClientRect().height)),
+        firstHazardBottom: Math.round(hazardRect.bottom)
+      };
+    });
+
+    expect(metrics.viewportHeight).toBe(723);
+    expect(metrics.selectorTops).toHaveLength(5);
+    expect(metrics.bodyHeight).toBeLessThanOrEqual(728);
+    expect(metrics.pageScrollWidth).toBeLessThanOrEqual(391);
+    expect(metrics.railHeight).toBeLessThanOrEqual(48);
+    expect(metrics.railScrollWidth).toBeGreaterThan(metrics.railClientWidth);
+    expect(new Set(metrics.selectorTops).size).toBe(1);
+    expect(metrics.selectorHeights.every((height) => height >= 44)).toBe(true);
+    expect(metrics.firstHazardBottom).toBeLessThanOrEqual(723);
+  }, 90_000);
+
   it("renders every landing light-grid label at AA text contrast", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
