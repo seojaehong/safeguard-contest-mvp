@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-27T21:45:14.788Z",
-  "sourceSha": "ab5a9011ec0c970c7efcece8bff2d1bcde48bbe8",
-  "overall": "contradicted",
+  "generatedAt": "2026-08-27T22:31:03.901Z",
+  "sourceSha": "e20605523592fee0df26a95d5108a167141a1ac0",
+  "overall": "open",
   "gates": [
     {
       "id": "final_99_gate",
@@ -358,22 +358,22 @@
     },
     {
       "id": "share_session_revocation_security",
-      "state": "contradicted",
+      "state": "notice",
       "label": "Share session revocation security",
       "evidencePath": "evaluation\\share-session-revocation-remediation-2026-08-14\\report.json",
-      "detail": "Share revocation verdict=PASS_LIVE_PRODUCTION_OWNER_SHARE_SESSION_REVOCATION_RESCAN_PENDING, sourceLive=true, sourceCurrent=false, auth=401, destructiveProbe=false, noMutation=true, exactShare=MISSING_EVIDENCE.",
+      "detail": "Live production exposes an authenticated owner-only Share session revoke action scoped by session, workpack, organization, and site with durable status/timestamp evidence. The current-source compatibility receipt=true preserves the unauthenticated 401 fail-closed proof after adjacent admission changes; no production session was created or revoked, the canonical low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore live source alignment, owner/tuple scoping, focused and browser verification, 401 fail-closed proof, no-mutation boundaries, and exact Share MISSING_EVIDENCE."
+        "Run a fresh Standard scan before reclassifying the immutable finding; keep exact saved Share and DB-backed session creation approval-gated."
       ]
     },
     {
       "id": "share_recipient_contact_verification_security",
-      "state": "contradicted",
+      "state": "notice",
       "label": "Share recipient contact verification security",
       "evidencePath": "evaluation\\share-recipient-contact-verification-2026-08-14\\report.json",
-      "detail": "Share recipient verification verdict=PASS_LIVE_DEPLOYED_SOURCE_SHARE_RECIPIENT_CONTACT_VERIFICATION_RESCAN_PENDING, sourceLive=true, sourceCurrent=false, workerIdOnly=false, persisted=false, liveStatus=404, noMutation=true, exactShare=MISSING_EVIDENCE, ack=APPROVAL_GATED.",
+      "detail": "Live source requires full snapshotted phone or email verification before an invited worker-attributed Share confirmation insert. The value is not stored or returned, mobile/desktop recipient geometry remains bounded, and current compatibility=true records that the safe live missing-session probe now fails earlier at distributed admission with 503 and creates no confirmation. The sealed low finding remains immutable pending a fresh rescan, recipient ACK stays approval-gated, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore source/live alignment, full contact verification before insert, non-persistence, browser containment, no-mutation evidence, fresh-rescan requirement, exact Share MISSING_EVIDENCE, and ACK approval gating."
+        "Run a fresh Standard scan before reclassifying the immutable finding; keep exact saved Share and live recipient ACK approval-gated."
       ]
     },
     {
@@ -399,12 +399,13 @@
     },
     {
       "id": "mcp_provider_admission_security",
-      "state": "contradicted",
+      "state": "notice",
       "label": "MCP provider admission security",
       "evidencePath": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
-      "detail": "MCP provider admission verdict=PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING, sourceLive=true, sourceCurrent=false, distributed=OPEN_OPERATOR_CONFIGURATION, authProbe=NOT_EXECUTED_NO_MCP_TOKEN, noMutation=true, exactShare=MISSING_EVIDENCE.",
+      "detail": "Live source requires token-and-tenant-bound distributed rate admission plus a weighted durable lease before either provider-generating MCP tool runs, while read-only tools and deterministic template mode remain available. Current compatibility=true records that an invalid non-secret token now fails earlier at distributed admission with 503 before auth, tool dispatch, or provider work. Valid authenticated generation remains unprobed without an MCP token and fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore deployed source alignment, token/tenant rate admission, weighted lease, verification receipts, no-mutation boundaries, rescan requirement, and exact Share MISSING_EVIDENCE."
+        "Configure the approved distributed backend and run a bounded authenticated no-provider MCP admission probe.",
+        "Run a fresh Standard scan before reclassifying the immutable finding or claiming security completion."
       ]
     },
     {

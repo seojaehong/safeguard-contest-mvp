@@ -1,23 +1,23 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T21:45:26.729Z",
-  "head": "ab5a9011ec0c970c7efcece8bff2d1bcde48bbe8",
+  "generatedAt": "2026-08-27T22:31:04.732Z",
+  "head": "e20605523592fee0df26a95d5108a167141a1ac0",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "ab5a9011ec0c970c7efcece8bff2d1bcde48bbe8",
+    "commitSha": "e20605523592fee0df26a95d5108a167141a1ac0",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-fs09o5dqy-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-f3vyvwmuy-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "overall": "northstar_evidence_missing_or_unknown",
+  "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
   "launchReadiness": false,
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-    "overall": "contradicted",
+    "overall": "open",
     "gateCount": 79
   },
   "provenGates": [
@@ -232,10 +232,28 @@
       "detail": "Fresh Standard scan bd135da7 is sealed at 20 findings (12 medium, 8 low) across five reviewed surfaces. Live source closes two findings and mitigates one public-status fanout finding while retaining its distributed-admission residual; 18 findings remain open or only partially mitigated before a fresh rescan. The immutable 18-finding baseline is preserved, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
+      "id": "share_session_revocation_security",
+      "state": "notice",
+      "artifact": "evaluation\\share-session-revocation-remediation-2026-08-14\\report.json",
+      "detail": "Live production exposes an authenticated owner-only Share session revoke action scoped by session, workpack, organization, and site with durable status/timestamp evidence. The current-source compatibility receipt=true preserves the unauthenticated 401 fail-closed proof after adjacent admission changes; no production session was created or revoked, the canonical low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "share_recipient_contact_verification_security",
+      "state": "notice",
+      "artifact": "evaluation\\share-recipient-contact-verification-2026-08-14\\report.json",
+      "detail": "Live source requires full snapshotted phone or email verification before an invited worker-attributed Share confirmation insert. The value is not stored or returned, mobile/desktop recipient geometry remains bounded, and current compatibility=true records that the safe live missing-session probe now fails earlier at distributed admission with 503 and creates no confirmation. The sealed low finding remains immutable pending a fresh rescan, recipient ACK stays approval-gated, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
       "id": "agent_chat_durable_admission_security",
       "state": "notice",
       "artifact": "evaluation\\security-agent-chat-durable-admission-2026-08-14\\report.json",
       "detail": "Live source requires a distributed authenticated-user quota and engine-work lease before Agent Chat model or tool execution, with busy, failure, completion, and cancellation release covered by 24 focused and 55 adjacent tests. Production still reports pre-auth instance mode, so authenticated Agent Chat is fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "mcp_provider_admission_security",
+      "state": "notice",
+      "artifact": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
+      "detail": "Live source requires token-and-tenant-bound distributed rate admission plus a weighted durable lease before either provider-generating MCP tool runs, while read-only tools and deterministic template mode remain available. Current compatibility=true records that an invalid non-secret token now fails earlier at distributed admission with 503 before auth, tool dispatch, or provider work. Valid authenticated generation remains unprobed without an MCP token and fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "public_json_request_body_budget",
@@ -1871,9 +1889,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "ab5a9011ec0c970c7efcece8bff2d1bcde48bbe8",
+      "sourceCommit": "e20605523592fee0df26a95d5108a167141a1ac0",
       "sourceStatus": "exact",
-      "productionCommit": "ab5a9011ec0c970c7efcece8bff2d1bcde48bbe8",
+      "productionCommit": "e20605523592fee0df26a95d5108a167141a1ac0",
       "productionStatus": "matches_live"
     },
     {

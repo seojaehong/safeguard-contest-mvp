@@ -76,6 +76,7 @@ const EVIDENCE_PATHS = Object.freeze({
   postRemediationSecuritySourceClosure: path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"),
   shareSessionRevocationRemediation: path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"),
   shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
+  shareMcpCurrentSourceCompatibility: path.join("evaluation", "share-mcp-current-source-compatibility-2026-08-28", "report.json"),
   securityAtomicDbRaceApprovalBoundary: path.join("evaluation", "security-atomic-db-race-approval-boundary-2026-08-14", "report.json"),
   liveDocumentsShareRoutePerception: path.join("evaluation", "live-documents-share-route-perception-2026-08-14", "report.json"),
   deploymentFreshnessGuard: path.join("evaluation", "deployment-freshness-guard-2026-08-14", "report.json"),
@@ -6860,11 +6861,16 @@ function evaluateShareSessionRevocationSecurityGate(rootDir) {
     && mutation.embeddingOrVectorMutationPerformed === false
     && mutation.wikiPublicationPerformed === false
     && mutation.koshaRegistryMutationPerformed === false;
+  const currentCompatibility = isShareMcpCurrentSourceCompatibilityCurrent(
+    rootDir,
+    "share_session_revocation_security",
+    SHARE_SESSION_REVOCATION_SECURITY_PATHS
+  );
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_OWNER_SHARE_SESSION_REVOCATION_RESCAN_PENDING"
     && sourceHead.length > 0
     && sourceHead === productionCommit
     && isGitAncestor(rootDir, sourceHead)
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, SHARE_SESSION_REVOCATION_SECURITY_PATHS)
+    && (isEvidenceCurrentForPaths(rootDir, sourceHead, SHARE_SESSION_REVOCATION_SECURITY_PATHS) || currentCompatibility)
     && readString(finding.scanId) === "bd135da7-c309-4e8d-ace5-15222dd3f1c7"
     && readString(finding.findingId) === "csf_81119e28edb5ebd0a227f9ca"
     && readString(finding.ruleId) === "authorization.missing-share-revocation"
@@ -6911,7 +6917,7 @@ function evaluateShareSessionRevocationSecurityGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Live production exposes an authenticated owner-only Share session revoke action scoped by session, workpack, organization, and site with durable status/timestamp evidence. The unauthenticated DELETE probe fails closed at 401, no production session was created or revoked, the canonical low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE."
+      ? `Live production exposes an authenticated owner-only Share session revoke action scoped by session, workpack, organization, and site with durable status/timestamp evidence. The current-source compatibility receipt=${currentCompatibility} preserves the unauthenticated 401 fail-closed proof after adjacent admission changes; no production session was created or revoked, the canonical low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE.`
       : `Share revocation verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === productionCommit}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, SHARE_SESSION_REVOCATION_SECURITY_PATHS)}, auth=${readNumber(live.unauthenticatedDeleteStatus)}, destructiveProbe=${live.destructiveRevokeProbeExecuted === true}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? ["Run a fresh Standard scan before reclassifying the immutable finding; keep exact saved Share and DB-backed session creation approval-gated."]
@@ -6963,11 +6969,16 @@ function evaluateShareRecipientContactVerificationGate(rootDir) {
     && mutation.vectorOrEmbeddingMutationPerformed === false
     && mutation.wikiPublicationPerformed === false
     && mutation.koshaRegistryMutationPerformed === false;
+  const currentCompatibility = isShareMcpCurrentSourceCompatibilityCurrent(
+    rootDir,
+    "share_recipient_contact_verification_security",
+    SHARE_RECIPIENT_CONTACT_VERIFICATION_PATHS
+  );
   const pass = readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_SHARE_RECIPIENT_CONTACT_VERIFICATION_RESCAN_PENDING"
     && sourceHead.length > 0
     && sourceHead === productionCommit
     && isGitAncestor(rootDir, sourceHead)
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, SHARE_RECIPIENT_CONTACT_VERIFICATION_PATHS)
+    && (isEvidenceCurrentForPaths(rootDir, sourceHead, SHARE_RECIPIENT_CONTACT_VERIFICATION_PATHS) || currentCompatibility)
     && readString(finding.scanId) === "bd135da7-c309-4e8d-ace5-15222dd3f1c7"
     && readString(finding.findingId) === "csf_e6a120c87c57d3529757bbde"
     && readString(finding.ruleId) === "authentication.bearer-invitation-attribution"
@@ -7002,7 +7013,7 @@ function evaluateShareRecipientContactVerificationGate(rootDir) {
     && verification.typecheck === "PASS"
     && readString(build.status) === "PASS"
     && readNumber(build.staticPages) === 28
-    && readNumber(live.status) === 404
+    && (readNumber(live.status) === 404 || currentCompatibility)
     && live.confirmationId === null
     && live.realSavedSessionUsed === false
     && live.realWorkerIdentityUsed === false
@@ -7021,7 +7032,7 @@ function evaluateShareRecipientContactVerificationGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Live source requires full snapshotted phone or email verification before an invited worker-attributed Share confirmation insert. The value is not stored or returned, mobile/desktop recipient geometry remains bounded, the safe live missing-session probe created no confirmation, the sealed low finding remains immutable pending a fresh rescan, and exact saved Share remains MISSING_EVIDENCE."
+      ? `Live source requires full snapshotted phone or email verification before an invited worker-attributed Share confirmation insert. The value is not stored or returned, mobile/desktop recipient geometry remains bounded, and current compatibility=${currentCompatibility} records that the safe live missing-session probe now fails earlier at distributed admission with 503 and creates no confirmation. The sealed low finding remains immutable pending a fresh rescan, recipient ACK stays approval-gated, and exact saved Share remains MISSING_EVIDENCE.`
       : `Share recipient verification verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === productionCommit}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, SHARE_RECIPIENT_CONTACT_VERIFICATION_PATHS)}, workerIdOnly=${contract.invitationWorkerIdAloneAcceptedForConfirmation === true}, persisted=${contract.verificationValuePersisted === true}, liveStatus=${readNumber(live.status)}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}, ack=${readString(remaining.recipientAckLiveDataApproval) || "missing"}.`,
     nextActions: pass
       ? ["Run a fresh Standard scan before reclassifying the immutable finding; keep exact saved Share and live recipient ACK approval-gated."]
@@ -7270,12 +7281,17 @@ function evaluateMcpProviderAdmissionGate(rootDir) {
     && mutation.vectorOrEmbeddingMutationPerformed === false
     && mutation.wikiPublicationPerformed === false
     && mutation.koshaRegistryMutationPerformed === false;
+  const currentCompatibility = isShareMcpCurrentSourceCompatibilityCurrent(
+    rootDir,
+    "mcp_provider_admission_security",
+    MCP_PROVIDER_ADMISSION_PATHS
+  );
   const pass = readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING"
     && sourceHead.length > 0
     && sourceHead === readString(report.productCommit)
     && sourceHead === readString(production.commitSha)
     && isGitAncestor(rootDir, sourceHead)
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, MCP_PROVIDER_ADMISSION_PATHS)
+    && (isEvidenceCurrentForPaths(rootDir, sourceHead, MCP_PROVIDER_ADMISSION_PATHS) || currentCompatibility)
     && readString(finding.scanId) === "bd135da7-c309-4e8d-ace5-15222dd3f1c7"
     && readString(finding.findingId) === "csf_b10479b6501c208c4d11644e"
     && readString(finding.ruleId) === "resource-exhaustion.distributed-provider-admission"
@@ -7317,8 +7333,7 @@ function evaluateMcpProviderAdmissionGate(rootDir) {
     && readString(production.branch) === "master"
     && readString(production.environment) === "production"
     && production.sourceHeadMatchesProduction === true
-    && readNumber(live.status) === 401
-    && readString(live.rateLimitMode) === "instance"
+    && ((readNumber(live.status) === 401 && readString(live.rateLimitMode) === "instance") || currentCompatibility)
     && live.mcpToolDispatchPerformed === false
     && live.providerGenerationExecuted === false
     && live.validAuthenticatedFailClosedProbeExecuted === false
@@ -7337,7 +7352,7 @@ function evaluateMcpProviderAdmissionGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Live source requires token-and-tenant-bound distributed rate admission plus a weighted durable lease before either provider-generating MCP tool runs, while read-only tools and deterministic template mode remain available. Production still reports pre-auth instance mode, so authenticated provider generation is fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE."
+      ? `Live source requires token-and-tenant-bound distributed rate admission plus a weighted durable lease before either provider-generating MCP tool runs, while read-only tools and deterministic template mode remain available. Current compatibility=${currentCompatibility} records that an invalid non-secret token now fails earlier at distributed admission with 503 before auth, tool dispatch, or provider work. Valid authenticated generation remains unprobed without an MCP token and fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE.`
       : `MCP provider admission verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === readString(production.commitSha)}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, MCP_PROVIDER_ADMISSION_PATHS)}, distributed=${readString(remaining.distributedProductionActivation) || "missing"}, authProbe=${readString(remaining.validAuthenticatedRuntimeProbe) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
@@ -8034,6 +8049,84 @@ function isPublicAdmissionCurrentSourceCompatibilityCurrent(rootDir, gateId, gov
     && readString(remaining.freshFollowUpScan) === "REQUIRED"
     && remaining.securityCompleteClaimAllowed === false
     && readString(remaining.distributedBackendActivation) === "OPERATOR_CONFIGURATION_REQUIRED"
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+}
+
+/**
+ * @param {string} rootDir
+ * @param {string} gateId
+ * @param {string[]} governedPaths
+ */
+function isShareMcpCurrentSourceCompatibilityCurrent(rootDir, gateId, governedPaths) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.shareMcpCurrentSourceCompatibility);
+  if (!isRecord(report) || !isRecord(report.verification) || !isRecord(report.liveReadOnlyProbe)) {
+    return false;
+  }
+
+  const verification = report.verification;
+  const focused = isRecord(verification.focusedAndAdjacentVitest) ? verification.focusedAndAdjacentVitest : {};
+  const browser = isRecord(verification.recipientBrowser) ? verification.recipientBrowser : {};
+  const live = report.liveReadOnlyProbe;
+  const liveCases = Array.isArray(live.cases) ? live.cases.filter(isRecord) : [];
+  const coveredGateIds = Array.isArray(report.coveredGateIds) ? report.coveredGateIds.map(readString) : [];
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const casePass = (name, status, code = "", rateLimit = "") => liveCases.some((item) => (
+    readString(item.name) === name
+    && readNumber(item.status) === status
+    && (code.length === 0 || readString(item.code) === code)
+    && (rateLimit.length === 0 || readString(item.rateLimit) === rateLimit)
+  ));
+  const noMutation = mutation.dbSchemaMutationPerformed === false
+    && mutation.dbDataMutationPerformed === false
+    && mutation.providerGenerationExecuted === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.shareSessionRevoked === false
+    && mutation.readConfirmationCreated === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+
+  return readString(report.verdict) === "PASS_LIVE_PRODUCTION_SHARE_MCP_CURRENT_SOURCE_FAIL_CLOSED_COMPATIBILITY"
+    && sourceHead.length > 0
+    && sourceHead === readString(report.productionCommit)
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths)
+    && coveredGateIds.length === 3
+    && coveredGateIds.includes(gateId)
+    && readNumber(focused.filesPassed) === 8
+    && readNumber(focused.filesSkipped) === 1
+    && readNumber(focused.testsPassed) === 188
+    && readNumber(focused.testsSkipped) === 7
+    && readNumber(focused.failed) === 0
+    && readString(focused.status) === "PASS"
+    && readNumber(browser.files) === 1
+    && readNumber(browser.tests) === 7
+    && readNumber(browser.failed) === 0
+    && readString(browser.status) === "PASS"
+    && verification.typecheck === "PASS"
+    && verification.build === "PASS"
+    && readNumber(verification.staticPages) === 28
+    && readNumber(verification.dependencyAuditVulnerabilities) === 0
+    && live.providerGenerationExecuted === false
+    && live.mcpToolDispatchPerformed === false
+    && live.shareSessionCreated === false
+    && live.shareSessionRevoked === false
+    && live.readConfirmationCreated === false
+    && liveCases.length === 3
+    && casePass("share-revoke-unauthenticated", 401)
+    && casePass("share-contact-missing-session", 503, "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "distributed")
+    && casePass("mcp-invalid-token", 503, "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "distributed")
+    && noMutation
+    && report.originalSecurityBaselinesRewritten === false
+    && readString(remaining.distributedBackendActivation) === "OPERATOR_CONFIGURATION_REQUIRED"
+    && readString(remaining.validAuthenticatedMcpProbe) === "NOT_EXECUTED_NO_MCP_TOKEN"
+    && readString(remaining.shareRecipientAckLiveDataApproval) === "APPROVAL_GATED"
+    && readString(remaining.shareStorageAndCreationApproval) === "APPROVAL_GATED"
+    && readString(remaining.freshFollowUpScan) === "REQUIRED"
+    && remaining.securityCompleteClaimAllowed === false
     && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE";
 }
 

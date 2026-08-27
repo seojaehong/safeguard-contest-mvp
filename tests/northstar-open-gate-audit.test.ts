@@ -5556,6 +5556,75 @@ function createFixtureRoot(): string {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "share-mcp-current-source-compatibility-2026-08-28", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_SHARE_MCP_CURRENT_SOURCE_FAIL_CLOSED_COMPATIBILITY",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    coveredGateIds: [
+      "share_session_revocation_security",
+      "share_recipient_contact_verification_security",
+      "mcp_provider_admission_security",
+    ],
+    verification: {
+      focusedAndAdjacentVitest: {
+        filesPassed: 8,
+        filesSkipped: 1,
+        testsPassed: 188,
+        testsSkipped: 7,
+        failed: 0,
+        status: "PASS",
+      },
+      recipientBrowser: { files: 1, tests: 7, failed: 0, status: "PASS" },
+      typecheck: "PASS",
+      build: "PASS",
+      staticPages: 28,
+      dependencyAuditVulnerabilities: 0,
+    },
+    liveReadOnlyProbe: {
+      providerGenerationExecuted: false,
+      mcpToolDispatchPerformed: false,
+      shareSessionCreated: false,
+      shareSessionRevoked: false,
+      readConfirmationCreated: false,
+      cases: [
+        { name: "share-revoke-unauthenticated", status: 401 },
+        {
+          name: "share-contact-missing-session",
+          status: 503,
+          code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+          rateLimit: "distributed",
+        },
+        {
+          name: "mcp-invalid-token",
+          status: 503,
+          code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+          rateLimit: "distributed",
+        },
+      ],
+    },
+    originalSecurityBaselinesRewritten: false,
+    mutationBoundary: {
+      dbSchemaMutationPerformed: false,
+      dbDataMutationPerformed: false,
+      providerGenerationExecuted: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      shareSessionRevoked: false,
+      readConfirmationCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      distributedBackendActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      validAuthenticatedMcpProbe: "NOT_EXECUTED_NO_MCP_TOKEN",
+      shareRecipientAckLiveDataApproval: "APPROVAL_GATED",
+      shareStorageAndCreationApproval: "APPROVAL_GATED",
+      freshFollowUpScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "document-risk-row-mobile-density-2026-08-27", "report.json"), {
     schema: "safeclaw-document-risk-row-mobile-density/v1",
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_MOBILE_DENSITY",
@@ -8378,6 +8447,60 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       "public_provider_cancellation",
       "public_ask_distributed_admission",
       "public_search_distributed_admission",
+    ]) {
+      expect(contradicted.gates.find((gate) => gate.id === gateId)?.state).toBe("contradicted");
+    }
+  });
+
+  it("keeps current Share and MCP compatibility fail-closed on live or saved-session overclaim", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const changedPaths = [
+      path.join("app", "api", "workpacks", "[id]", "share-sessions", "route.ts"),
+      path.join("app", "api", "share-sessions", "[sessionId]", "route.ts"),
+      path.join("app", "api", "mcp", "[transport]", "implementation.ts"),
+    ];
+    for (const changedPath of changedPaths) {
+      writeText(rootDir, changedPath, `export const compatibilityRefresh = ${JSON.stringify(changedPath)};\n`);
+    }
+    execFileSync("git", ["add", ...changedPaths.map((item) => item.replaceAll("\\", "/"))], {
+      cwd: rootDir,
+      stdio: "ignore",
+    });
+    execFileSync("git", ["commit", "-m", "refresh Share and MCP admission"], { cwd: rootDir, stdio: "ignore" });
+    const currentSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: rootDir, encoding: "utf8" }).trim();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "share-mcp-current-source-compatibility-2026-08-28",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      sourceHead: string;
+      productionCommit: string;
+      liveReadOnlyProbe: { cases: Array<{ name: string; status: number }> };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.sourceHead = currentSha;
+    report.productionCommit = currentSha;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const compatible = buildNorthstarOpenGateAudit({ rootDir });
+    expect(compatible.gates.find((gate) => gate.id === "share_session_revocation_security")?.state).toBe("notice");
+    expect(compatible.gates.find((gate) => gate.id === "share_recipient_contact_verification_security")?.state).toBe("notice");
+    expect(compatible.gates.find((gate) => gate.id === "mcp_provider_admission_security")?.state).toBe("notice");
+
+    const mcpCase = report.liveReadOnlyProbe.cases.find((item) => item.name === "mcp-invalid-token");
+    if (!mcpCase) throw new Error("mcp-invalid-token fixture is missing");
+    mcpCase.status = 200;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    for (const gateId of [
+      "share_session_revocation_security",
+      "share_recipient_contact_verification_security",
+      "mcp_provider_admission_security",
     ]) {
       expect(contradicted.gates.find((gate) => gate.id === gateId)?.state).toBe("contradicted");
     }

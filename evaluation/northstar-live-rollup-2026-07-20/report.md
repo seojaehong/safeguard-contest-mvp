@@ -1,11 +1,11 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-27T21:45:26.729Z
-Source HEAD at generation: ab5a9011ec0c970c7efcece8bff2d1bcde48bbe8
-Live commit at generation: ab5a9011ec0c970c7efcece8bff2d1bcde48bbe8
+Generated at: 2026-08-27T22:31:04.732Z
+Source HEAD at generation: e20605523592fee0df26a95d5108a167141a1ac0
+Live commit at generation: e20605523592fee0df26a95d5108a167141a1ac0
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
-Overall: `northstar_evidence_missing_or_unknown`
+Overall: `northstar_open_approval_gated`
 
 ## Current Workspace Mobile Geometry
 
@@ -426,7 +426,10 @@ Overall: `northstar_evidence_missing_or_unknown`
 | weather_fallback_error_redaction_security | notice | evaluation\weather-fallback-error-redaction-2026-08-28\report.json |
 | hwpx_archive_expansion_security | notice | evaluation\hwpx-archive-expansion-security-2026-08-28\report.json |
 | post_remediation_repository_security_scan | notice | evaluation\post-remediation-full-repository-security-scan-2026-08-14\report.json |
+| share_session_revocation_security | notice | evaluation\share-session-revocation-remediation-2026-08-14\report.json |
+| share_recipient_contact_verification_security | notice | evaluation\share-recipient-contact-verification-2026-08-14\report.json |
 | agent_chat_durable_admission_security | notice | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
+| mcp_provider_admission_security | notice | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
 | public_json_request_body_budget | proven | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | security_resource_remediation | proven | evaluation\security-resource-remediation-2026-08-11\report.json |
 | security_upstream_transport_remediation | proven | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |
