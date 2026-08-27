@@ -254,6 +254,7 @@ describe("foreign worker transmission context", () => {
     const transmission = buildForeignWorkerTransmission(chemicalInput);
 
     expect(transmission).not.toContain("우천·젖은 바닥");
+    expect(transmission).not.toContain("더위·자외선 작업에서는");
     expect(transmission).toContain("국소배기·비산·피부접촉");
   });
 
@@ -268,6 +269,19 @@ describe("foreign worker transmission context", () => {
     };
 
     expect(buildForeignWorkerTransmission(rainyInput)).toContain("우천·젖은 바닥");
+  });
+
+  it("keeps heat guidance only for an explicit heat condition", () => {
+    const heatInput = {
+      ...input,
+      question: `${input.question} 폭염과 자외선 노출에 대비한다.`,
+      scenario: {
+        ...input.scenario,
+        weatherNote: "폭염과 자외선 노출, 온열질환 예방 확인 필요"
+      }
+    };
+
+    expect(buildForeignWorkerTransmission(heatInput)).toContain("더위·자외선 작업에서는");
   });
 });
 
