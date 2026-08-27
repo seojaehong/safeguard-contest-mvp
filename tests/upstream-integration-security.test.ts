@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 afterEach(() => {
+  vi.restoreAllMocks();
   vi.resetModules();
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
@@ -14,12 +15,17 @@ describe("Weather and KOSHA upstream integration security", () => {
       headers: { "content-length": String(1_048_577) },
     }));
     vi.stubGlobal("fetch", fetchMock);
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const { fetchWeatherSignal } = await import("@/lib/weather");
 
     const result = await fetchWeatherSignal("서울 실내 작업");
 
     expect(result.mode).toBe("fallback");
-    expect(result.detail).toContain("1048576-byte response limit");
+    expect(result.detail).not.toContain("1048576-byte response limit");
+    expect(error).toHaveBeenCalledWith(
+      "weather provider request failed",
+      expect.objectContaining({ error: expect.any(Error) }),
+    );
     expect(fetchMock).toHaveBeenCalled();
     expect(fetchMock.mock.calls.every(([, init]) => init?.redirect === "manual")).toBe(true);
   });
@@ -30,14 +36,44 @@ describe("Weather and KOSHA upstream integration security", () => {
     vi.stubEnv("SAFECLAW_UPSTREAM_ALLOWED_ORIGINS", "https://127.0.0.1");
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response("unavailable", { status: 503 }));
     vi.stubGlobal("fetch", fetchMock);
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const { fetchWeatherSignal } = await import("@/lib/weather");
 
     const result = await fetchWeatherSignal("서울 옥외 폭염 작업");
     const erythemal = result.signals.find((item) => item.endpoint === "실시간 홍반자외선");
 
     expect(erythemal?.mode).toBe("fallback");
-    expect(erythemal?.detail).toContain("public addresses");
+    expect(erythemal?.detail).not.toContain("public addresses");
+    expect(error).toHaveBeenCalledWith(
+      "weather provider request failed",
+      expect.objectContaining({ endpoint: "실시간 홍반자외선", error: expect.any(Error) }),
+    );
     expect(fetchMock.mock.calls.some(([input]) => String(input).includes("127.0.0.1"))).toBe(false);
+  });
+
+  it("keeps raw failures server-side across every weather provider fallback", async () => {
+    vi.stubEnv("DATA_GO_KR_SERVICE_KEY", "test-service-key");
+    const upstreamDiagnostic = "upstream-secret-diagnostic";
+    const fetchMock = vi.fn(async () => {
+      throw new Error(upstreamDiagnostic);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { fetchWeatherSignal } = await import("@/lib/weather");
+
+    const result = await fetchWeatherSignal("서울 옥외 폭염 작업");
+
+    expect(result.mode).toBe("fallback");
+    expect(result.signals).toHaveLength(8);
+    expect(result.signals.every((signal) => signal.mode === "fallback")).toBe(true);
+    expect(result.signals.every((signal) => signal.detail.endsWith("연결 점검이 필요합니다."))).toBe(true);
+    expect(JSON.stringify(result)).not.toContain(upstreamDiagnostic);
+    const providerFailureLogs = error.mock.calls.filter(([message]) => message === "weather provider request failed");
+    expect(providerFailureLogs).toHaveLength(8);
+    expect(providerFailureLogs.every(([, context]) => {
+      if (!context || typeof context !== "object" || !("error" in context)) return false;
+      return context.error instanceof Error && context.error.message === upstreamDiagnostic;
+    })).toBe(true);
   });
 
   it("rejects an oversized KOSHA response and keeps bounded fallback evidence", async () => {

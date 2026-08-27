@@ -455,6 +455,11 @@ function normalizeArray<T>(item?: T[] | T) {
   return item ? [item] : [];
 }
 
+function weatherProviderFallbackDetail(endpoint: KmaSignal["endpoint"], error: unknown) {
+  console.error("weather provider request failed", { endpoint, error });
+  return `${endpoint} 연결 점검이 필요합니다.`;
+}
+
 async function fetchWarningSignal(location: LocationConfig, signal?: AbortSignal): Promise<KmaSignal> {
   try {
     const url = new URL("https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnList");
@@ -492,12 +497,11 @@ async function fetchWarningSignal(location: LocationConfig, signal?: AbortSignal
     };
   } catch (error) {
     signal?.throwIfAborted();
-    const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "기상특보",
       mode: "fallback",
       summary: "기상특보 연결 보류",
-      detail: `기상청 기상특보 연결 점검 필요: ${message}`
+      detail: weatherProviderFallbackDetail("기상특보", error)
     };
   }
 }
@@ -537,12 +541,11 @@ async function fetchImpactForecastSignal(location: LocationConfig, signal?: Abor
     };
   } catch (error) {
     signal?.throwIfAborted();
-    const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "영향예보",
       mode: "fallback",
       summary: "영향예보 연결 보류",
-      detail: `기상청 영향예보 연결 점검 필요: ${message}`
+      detail: weatherProviderFallbackDetail("영향예보", error)
     };
   }
 }
@@ -580,12 +583,11 @@ async function fetchLivingUvSignal(location: LocationConfig, signal?: AbortSigna
     };
   } catch (error) {
     signal?.throwIfAborted();
-    const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "생활기상 자외선",
       mode: "fallback",
       summary: "자외선지수 연결 보류",
-      detail: `기상청 생활기상지수 자외선 연결 점검 필요: ${message}`
+      detail: weatherProviderFallbackDetail("생활기상 자외선", error)
     };
   }
 }
@@ -625,12 +627,11 @@ async function fetchLivingHeatIndexSignal(location: LocationConfig, signal?: Abo
     };
   } catch (error) {
     signal?.throwIfAborted();
-    const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "생활기상 체감온도",
       mode: "fallback",
       summary: "여름철 체감온도 연결 보류",
-      detail: `기상청 생활기상지수 체감온도 연결 점검 필요: ${message}`
+      detail: weatherProviderFallbackDetail("생활기상 체감온도", error)
     };
   }
 }
@@ -695,12 +696,11 @@ async function fetchErythemalUvSignal(location: LocationConfig, signal?: AbortSi
     };
   } catch (error) {
     signal?.throwIfAborted();
-    const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "실시간 홍반자외선",
       mode: "fallback",
       summary: "실시간 홍반자외선 연결 보류",
-      detail: `한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: ${message}`
+      detail: weatherProviderFallbackDetail("실시간 홍반자외선", error)
     };
   }
 }
@@ -732,12 +732,11 @@ async function fetchUltraNowSignal(location: LocationConfig, signal?: AbortSigna
     };
   } catch (error) {
     signal?.throwIfAborted();
-    const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "초단기실황",
       mode: "fallback",
       summary: "현재 실황 연결 보류",
-      detail: `기상청 초단기실황 연결 점검 필요: ${message}`
+      detail: weatherProviderFallbackDetail("초단기실황", error)
     };
   }
 }
@@ -772,12 +771,11 @@ async function fetchUltraForecastSignal(location: LocationConfig, signal?: Abort
     };
   } catch (error) {
     signal?.throwIfAborted();
-    const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "초단기예보",
       mode: "fallback",
       summary: "단시간 예보 연결 보류",
-      detail: `기상청 초단기예보 연결 점검 필요: ${message}`
+      detail: weatherProviderFallbackDetail("초단기예보", error)
     };
   }
 }
@@ -814,12 +812,11 @@ async function fetchVillageForecastSignal(location: LocationConfig, signal?: Abo
     };
   } catch (error) {
     signal?.throwIfAborted();
-    const message = error instanceof Error ? error.message : String(error);
     return {
       endpoint: "단기예보",
       mode: "fallback",
       summary: "단기예보 연결 보류",
-      detail: `기상청 단기예보 연결 점검 필요: ${message}`
+      detail: weatherProviderFallbackDetail("단기예보", error)
     };
   }
 }
