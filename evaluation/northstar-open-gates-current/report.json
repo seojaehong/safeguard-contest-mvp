@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-27T00:14:13.535Z",
-  "sourceSha": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+  "generatedAt": "2026-08-27T00:34:53.107Z",
+  "sourceSha": "9e49be8454fdf594834e6947b07bca411b2a57ad",
   "overall": "open",
   "gates": [
     {
@@ -60,7 +60,7 @@
       "state": "proven",
       "label": "Live document scenario field isolation",
       "evidencePath": "evaluation\\live-document-field-isolation-2026-07-25\\report.json",
-      "detail": "Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate.",
+      "detail": "Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. The companion evaluation\\live-foreign-worker-scenario-guidance-2026-08-27\\report.json additionally proves heat guidance absent for chemical cleaning and present for explicit heat work in template mode with work-unit 0. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate.",
       "nextActions": [
         "Keep the 10-scenario field-isolation gate in release evidence and preserve broad human wording review as a separate boundary."
       ]

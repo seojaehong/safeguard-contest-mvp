@@ -1,0 +1,82 @@
+{
+  "schema": "safeclaw-live-foreign-worker-scenario-guidance/v1",
+  "generatedAt": "2026-08-27T00:30:29.7813508+00:00",
+  "verdict": "PASS_LIVE_PRODUCTION_FOREIGN_WORKER_SCENARIO_GUIDANCE",
+  "productCommit": "9e49be8454fdf594834e6947b07bca411b2a57ad",
+  "productionCommit": "9e49be8454fdf594834e6947b07bca411b2a57ad",
+  "productionDeployment": "safeguard-contest-qz2xdnkub-seojaehongs-projects.vercel.app",
+  "before": {
+    "artifact": "evaluation/live-document-editorial-template-runtime-2026-08-27/after-live/report.json",
+    "sourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+    "chemicalScenarioHeatGuidancePresent": true,
+    "finding": "The foreign-worker transmission included heat and UV guidance in a chemical-cleaning-only scenario."
+  },
+  "afterLive": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "cases": [
+      {
+        "id": "chemical-cleaning-negative",
+        "status": 200,
+        "elapsedMs": 788,
+        "requestedAiMode": "template",
+        "responseAiMode": "template",
+        "providerWorkUnit": 0,
+        "heatGuidancePresent": false,
+        "expectedScenarioContextPresent": true,
+        "expectedScenarioContext": "국소배기·비산·피부접촉",
+        "pass": true
+      },
+      {
+        "id": "heat-logistics-positive",
+        "status": 200,
+        "elapsedMs": 602,
+        "requestedAiMode": "template",
+        "responseAiMode": "template",
+        "providerWorkUnit": 0,
+        "heatGuidancePresent": true,
+        "expectedScenarioContextPresent": true,
+        "expectedScenarioContext": "고온 작업조건, 온열질환 예방과 휴식 기준",
+        "pass": true
+      }
+    ],
+    "passed": 2,
+    "failed": 0,
+    "heatGuidanceNegativeCasesPassed": 1,
+    "heatGuidancePositiveCasesPassed": 1,
+    "providerGenerationRequested": false
+  },
+  "stressContract": {
+    "artifact": "evaluation/live-document-quality-stress-matrix-2026-07-24/scenarios.json",
+    "forbiddenFragment": "더위·자외선 작업에서는",
+    "appliesToFiveNonHeatStressScenarios": true,
+    "localDeterministicForbiddenFragmentFailures": 0,
+    "localDeterministicOverallPassClaimed": false,
+    "note": "The local deterministic stress baseline still has three unrelated semantic-contract failures; this report does not relabel that 2/5 baseline as an overall PASS."
+  },
+  "verification": {
+    "focusedTests": {
+      "files": 4,
+      "tests": 76,
+      "passed": true
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28,
+    "dependencyAuditVulnerabilities": 0
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerGenerationPerformed": false,
+    "providerDispatchPerformed": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "humanReviewCompleted": false,
+    "broadHumanWordingReviewRequired": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "fullyAutomatedLaunchClaimAllowed": false
+  }
+}

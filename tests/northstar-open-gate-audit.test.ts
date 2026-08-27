@@ -2371,6 +2371,48 @@ function createFixtureRoot(): string {
       providerDispatchCalled: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "live-foreign-worker-scenario-guidance-2026-08-27", "report.json"), {
+    schema: "safeclaw-live-foreign-worker-scenario-guidance/v1",
+    verdict: "PASS_LIVE_PRODUCTION_FOREIGN_WORKER_SCENARIO_GUIDANCE",
+    productCommit: "fixture-product",
+    productionCommit: "fixture-product",
+    afterLive: {
+      passed: 2,
+      failed: 0,
+      providerGenerationRequested: false,
+      cases: [
+        {
+          id: "chemical-cleaning-negative",
+          status: 200,
+          responseAiMode: "template",
+          providerWorkUnit: 0,
+          heatGuidancePresent: false,
+          expectedScenarioContextPresent: true,
+          pass: true,
+        },
+        {
+          id: "heat-logistics-positive",
+          status: 200,
+          responseAiMode: "template",
+          providerWorkUnit: 0,
+          heatGuidancePresent: true,
+          expectedScenarioContextPresent: true,
+          pass: true,
+        },
+      ],
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerGenerationPerformed: false,
+      providerDispatchPerformed: false,
+      shareSessionCreated: false,
+    },
+    remainingBoundaries: {
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "hermes-review-decision-first-viewport-2026-08-27", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_DECISION_FIRST_VIEWPORT",
     sourceHead: "fixture-sha",
@@ -5870,6 +5912,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       evidencePath: path.join("evaluation", "live-document-field-isolation-2026-07-25", "report.json"),
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("process/task/equipment");
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("heat guidance absent for chemical cleaning");
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("work-unit 0");
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("exact saved Share geometry remain separate");
     expect(audit.gates.find((gate) => gate.id === "live_kosha_exact_materialization")).toMatchObject({
       state: "proven",
@@ -9701,6 +9745,35 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     });
 
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("fails document field isolation closed when foreign-worker heat guidance leaks into chemical work", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const guidancePath = path.join(
+      rootDir,
+      "evaluation",
+      "live-foreign-worker-scenario-guidance-2026-08-27",
+      "report.json",
+    );
+    const guidance = JSON.parse(fs.readFileSync(guidancePath, "utf8")) as {
+      afterLive: { cases: Array<{ id: string; heatGuidancePresent: boolean }> };
+    };
+    const chemicalCase = guidance.afterLive.cases.find((item) => item.id === "chemical-cleaning-negative");
+    expect(chemicalCase).toBeDefined();
+    chemicalCase!.heatGuidancePresent = true;
+    writeJson(rootDir, path.relative(rootDir, guidancePath), guidance);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("foreignWorkerGuidance=false");
   });
 
   it("renders the approval boundary and forbidden claims in the Markdown report", async () => {

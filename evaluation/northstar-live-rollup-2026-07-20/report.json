@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T00:14:16.326Z",
-  "head": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+  "generatedAt": "2026-08-27T00:34:56.003Z",
+  "head": "9e49be8454fdf594834e6947b07bca411b2a57ad",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+    "commitSha": "9e49be8454fdf594834e6947b07bca411b2a57ad",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-91hmpdcir-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-qz2xdnkub-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -55,7 +55,7 @@
       "id": "live_document_field_isolation",
       "state": "proven",
       "artifact": "evaluation\\live-document-field-isolation-2026-07-25\\report.json",
-      "detail": "Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate."
+      "detail": "Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. The companion evaluation\\live-foreign-worker-scenario-guidance-2026-08-27\\report.json additionally proves heat guidance absent for chemical cleaning and present for explicit heat work in template mode with work-unit 0. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate."
     },
     {
       "id": "live_kosha_exact_materialization",
@@ -1733,9 +1733,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+      "sourceCommit": "9e49be8454fdf594834e6947b07bca411b2a57ad",
       "sourceStatus": "exact",
-      "productionCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
+      "productionCommit": "9e49be8454fdf594834e6947b07bca411b2a57ad",
       "productionStatus": "matches_live"
     },
     {
@@ -1750,9 +1750,9 @@
       "id": "final_99_12_document_no_mutation",
       "artifact": "evaluation\\final-99-12-document-no-mutation-2026-08-17\\report.json",
       "sourceCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "dc97877267a48525b9c30b80f9bdd2b2e5d82e18",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "live_harness_quality",

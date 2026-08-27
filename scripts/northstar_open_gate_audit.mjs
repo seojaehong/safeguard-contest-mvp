@@ -33,6 +33,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentQualityMatrix: path.join("evaluation", "live-document-quality-matrix-2026-07-24", "report.json"),
   liveDocumentQualityStressMatrix: path.join("evaluation", "live-document-quality-stress-matrix-2026-07-24", "report.json"),
   liveDocumentFieldIsolation: path.join("evaluation", "live-document-field-isolation-2026-07-25", "report.json"),
+  liveForeignWorkerScenarioGuidance: path.join("evaluation", "live-foreign-worker-scenario-guidance-2026-08-27", "report.json"),
   liveKoshaExactMaterialization: path.join("evaluation", "live-kosha-exact-materialization-2026-07-25", "report.json"),
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
@@ -955,6 +956,41 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
   const normal = isRecord(afterLive.normal) ? afterLive.normal : {};
   const stress = isRecord(afterLive.stress) ? afterLive.stress : {};
   const boundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const guidance = readJsonFile(rootDir, EVIDENCE_PATHS.liveForeignWorkerScenarioGuidance);
+  const guidanceAfterLive = isRecord(guidance) && isRecord(guidance.afterLive) ? guidance.afterLive : {};
+  const guidanceCases = Array.isArray(guidanceAfterLive.cases) ? guidanceAfterLive.cases.filter(isRecord) : [];
+  const chemicalGuidanceCase = guidanceCases.find((item) => readString(item.id) === "chemical-cleaning-negative");
+  const heatGuidanceCase = guidanceCases.find((item) => readString(item.id) === "heat-logistics-positive");
+  const guidanceMutation = isRecord(guidance) && isRecord(guidance.mutationBoundary) ? guidance.mutationBoundary : {};
+  const guidanceRemaining = isRecord(guidance) && isRecord(guidance.remainingBoundaries) ? guidance.remainingBoundaries : {};
+  const guidanceReady = isRecord(guidance)
+    && readString(guidance.schema) === "safeclaw-live-foreign-worker-scenario-guidance/v1"
+    && readString(guidance.verdict) === "PASS_LIVE_PRODUCTION_FOREIGN_WORKER_SCENARIO_GUIDANCE"
+    && readString(guidance.productCommit) === readString(guidance.productionCommit)
+    && readNumber(guidanceAfterLive.passed) === 2
+    && readNumber(guidanceAfterLive.failed) === 0
+    && guidanceAfterLive.providerGenerationRequested === false
+    && isRecord(chemicalGuidanceCase)
+    && readNumber(chemicalGuidanceCase.status) === 200
+    && readString(chemicalGuidanceCase.responseAiMode) === "template"
+    && readNumber(chemicalGuidanceCase.providerWorkUnit) === 0
+    && chemicalGuidanceCase.heatGuidancePresent === false
+    && chemicalGuidanceCase.expectedScenarioContextPresent === true
+    && chemicalGuidanceCase.pass === true
+    && isRecord(heatGuidanceCase)
+    && readNumber(heatGuidanceCase.status) === 200
+    && readString(heatGuidanceCase.responseAiMode) === "template"
+    && readNumber(heatGuidanceCase.providerWorkUnit) === 0
+    && heatGuidanceCase.heatGuidancePresent === true
+    && heatGuidanceCase.expectedScenarioContextPresent === true
+    && heatGuidanceCase.pass === true
+    && guidanceMutation.dbMutationPerformed === false
+    && guidanceMutation.providerGenerationPerformed === false
+    && guidanceMutation.providerDispatchPerformed === false
+    && guidanceMutation.shareSessionCreated === false
+    && guidanceRemaining.humanReviewCompleted === false
+    && readString(guidanceRemaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && guidanceRemaining.fullyAutomatedLaunchClaimAllowed === false;
   const livePass = readNumber(normal.pass) + readNumber(stress.pass);
   const liveFail = readNumber(normal.fail) + readNumber(stress.fail);
   const noMutation = boundary.dbMutationPerformed === false
@@ -965,7 +1001,8 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
     && livePass === 10
     && liveFail === 0
     && report.liveAfterDeploymentPending === false
-    && noMutation;
+    && noMutation
+    && guidanceReady;
 
   if (liveReady) {
     return gateResult({
@@ -973,7 +1010,7 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
       label: "Live document scenario field isolation",
       state: "proven",
       evidencePath,
-      detail: "Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate.",
+      detail: `Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. The companion ${EVIDENCE_PATHS.liveForeignWorkerScenarioGuidance} additionally proves heat guidance absent for chemical cleaning and present for explicit heat work in template mode with work-unit 0. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate.`,
       nextActions: ["Keep the 10-scenario field-isolation gate in release evidence and preserve broad human wording review as a separate boundary."],
     });
   }
@@ -983,7 +1020,7 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
     label: "Live document scenario field isolation",
     state: "contradicted",
     evidencePath,
-    detail: `Field-isolation verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/10, failed=${liveFail}, livePending=${report.liveAfterDeploymentPending === true}, noMutation=${noMutation}.`,
+    detail: `Field-isolation verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/10, failed=${liveFail}, livePending=${report.liveAfterDeploymentPending === true}, noMutation=${noMutation}, foreignWorkerGuidance=${guidanceReady}.`,
     nextActions: ["Fix process/task/equipment grounding or cross-scenario leakage and rerun the unchanged normal and stress matrices."],
   });
 }
