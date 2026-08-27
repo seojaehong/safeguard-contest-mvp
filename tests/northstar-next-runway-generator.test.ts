@@ -483,6 +483,27 @@ type NextRunwayReport = {
     databaseSecurityRemediation: string;
     approvalFreeProductSourceRemediation: string;
   };
+  freshCurrentSourceSecurityScan: {
+    verdict: string;
+    scanId: string;
+    sourceHead: string;
+    deployedProductSource: string;
+    status: string;
+    coverageCompleteness: string;
+    reviewedSurfaceCount: number | null;
+    deferredCoverageItemCount: number | null;
+    reportableFindingCount: number | null;
+    mediumFindingCount: number | null;
+    lowFindingCount: number | null;
+    immutableOriginalFindingCount: number | null;
+    approvalGatedDatabaseOrAtomicityCount: number | null;
+    approvalSensitiveShareCapabilityCount: number | null;
+    approvalFreeProductSourceResidualCount: number | null;
+    fullyClosedBoundedSourceCandidateCount: number | null;
+    freshFullRepositoryScanCompleted: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   publicSearchDistributedRateLimitReadiness: {
     verdict: string;
     sourceHead: string;
@@ -1354,6 +1375,45 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
     results,
+  };
+}
+
+function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
+  return {
+    verdict: "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE",
+    scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    sourceHead: "899951952ee184d527742d541f976f7e72482f2e",
+    deployedProductSource: "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+    scan: { status: "completed", mode: "standard", targetKind: "git_revision", coverageCompleteness: "partial", reviewedSurfaceCount: 18, deferredCoverageItemCount: 21, reportableFindingCount: 17, severity: { critical: 0, high: 0, medium: 13, low: 4 } },
+    baseline: { immutableOriginalFindingCount: 18, preserved: true, rewritten: false },
+    currentDisposition: { approvalGatedDatabaseOrAtomicityCount: 12, approvalSensitiveShareCapabilityCount: 1, approvalFreeProductSourceResidualCount: 4, fullyClosedBoundedSourceCandidateCount: 2, securityCompleteClaimAllowed: false },
+    canonicalArtifacts: {
+      manifest: "evaluation/current-source-standard-security-scan-2026-08-28/canonical/scan-manifest.json",
+      findings: "evaluation/current-source-standard-security-scan-2026-08-28/canonical/findings.json",
+      coverage: "evaluation/current-source-standard-security-scan-2026-08-28/canonical/coverage.json",
+      markdown: "evaluation/current-source-standard-security-scan-2026-08-28/scan-report.md",
+      findingWriteupCount: 17,
+      supportingEvidenceCount: 17,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      wikiPublished: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      databaseSecurityRemediation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      llmWikiPublication: "APPROVAL_GATED",
+      sifVectorRuntime: "APPROVAL_GATED",
+      koshaExactRegistryPromotion: "APPROVAL_GATED",
+      freshFullRepositoryScanCompleted: true,
+      securityCompleteClaimAllowed: false,
+    },
   };
 }
 
@@ -2683,6 +2743,15 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       securityCompleteClaimAllowed: false,
     },
   });
+  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-28/report.json", freshCurrentSourceSecurityScanFixture());
+  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-28/canonical/scan-manifest.json", { scan: { status: "completed" } });
+  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-28/canonical/findings.json", { findings: [] });
+  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-28/canonical/coverage.json", { completeness: "partial" });
+  fs.writeFileSync(
+    path.join(root, "evaluation/current-source-standard-security-scan-2026-08-28/scan-report.md"),
+    "# sealed fixture\n",
+    "utf8",
+  );
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "fixture-sha",
@@ -4211,6 +4280,32 @@ describe("northstar next runway generator", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       databaseSecurityRemediation: "APPROVAL_GATED",
       approvalFreeProductSourceRemediation: "LIVE_SOURCE_INCLUDED_FRESH_RESCAN_REQUIRED",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "fresh_current_source_security_scan",
+      state: "notice",
+      reason: expect.stringContaining("17 open findings"),
+    }));
+    expect(report.freshCurrentSourceSecurityScan).toMatchObject({
+      verdict: "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE",
+      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+      sourceHead: "899951952ee184d527742d541f976f7e72482f2e",
+      deployedProductSource: "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+      status: "completed",
+      coverageCompleteness: "partial",
+      reviewedSurfaceCount: 18,
+      deferredCoverageItemCount: 21,
+      reportableFindingCount: 17,
+      mediumFindingCount: 13,
+      lowFindingCount: 4,
+      immutableOriginalFindingCount: 18,
+      approvalGatedDatabaseOrAtomicityCount: 12,
+      approvalSensitiveShareCapabilityCount: 1,
+      approvalFreeProductSourceResidualCount: 4,
+      fullyClosedBoundedSourceCandidateCount: 2,
+      freshFullRepositoryScanCompleted: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.provenCurrentState).toContain("public_json_request_body_budget");
     expect(report.publicJsonRequestBodyBudget).toMatchObject({

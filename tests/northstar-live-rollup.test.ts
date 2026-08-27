@@ -430,6 +430,25 @@ type RollupReport = {
     databaseSecurityRemediation: string;
     approvalFreeProductSourceRemediation: string;
   };
+  freshCurrentSourceSecurityScan: {
+    verdict: string;
+    scanId: string;
+    sourceHead: string;
+    deployedProductSource: string;
+    reportableFindingCount: number | null;
+    mediumFindingCount: number | null;
+    lowFindingCount: number | null;
+    coverageCompleteness: string;
+    reviewedSurfaceCount: number | null;
+    deferredCoverageItemCount: number | null;
+    approvalGatedDatabaseOrAtomicityCount: number | null;
+    approvalSensitiveShareCapabilityCount: number | null;
+    approvalFreeProductSourceResidualCount: number | null;
+    fullyClosedBoundedSourceCandidateCount: number | null;
+    freshFullRepositoryScanCompleted: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   publicSearchDistributedRateLimitReadiness: {
     verdict: string;
     sourceHead: string;
@@ -948,6 +967,19 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
   };
 }
 
+function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
+  return {
+    verdict: "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE",
+    scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    sourceHead: "TO_FILL",
+    deployedProductSource: "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+    scan: { status: "completed", mode: "standard", targetKind: "git_revision", coverageCompleteness: "partial", reviewedSurfaceCount: 18, deferredCoverageItemCount: 21, reportableFindingCount: 17, severity: { critical: 0, high: 0, medium: 13, low: 4 } },
+    baseline: { immutableOriginalFindingCount: 18, preserved: true, rewritten: false },
+    currentDisposition: { approvalGatedDatabaseOrAtomicityCount: 12, approvalSensitiveShareCapabilityCount: 1, approvalFreeProductSourceResidualCount: 4, fullyClosedBoundedSourceCandidateCount: 2, securityCompleteClaimAllowed: false },
+    remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", freshFullRepositoryScanCompleted: true, securityCompleteClaimAllowed: false },
+  };
+}
+
 function documentEditorialReviewReceiptFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
@@ -1002,6 +1034,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "repository_security_scan_reconciliation", state: "notice", evidencePath: "evaluation/repository-security-scan-reconciliation-2026-08-11/report.json", detail: "same-target scan conflict with fail-open receipts" },
       { id: "current_security_remediation_ledger", state: "notice", evidencePath: "evaluation/security-current-remediation-ledger-2026-08-13/report.json", detail: "17/23 deployed-source remediated; six approval or distributed-runtime boundaries remain open" },
       { id: "current_repository_security_rescan", state: "notice", evidencePath: "evaluation/current-full-repository-security-scan-2026-08-27/report.json", detail: "19 findings with partial coverage; 12 approval-gated and 7 approval-free source candidates remain open" },
+      { id: "fresh_current_source_security_scan", state: "notice", evidencePath: "evaluation/current-source-standard-security-scan-2026-08-28/report.json", detail: "17 findings with partial coverage; four approval-free source residuals and approval-gated boundaries remain open" },
       { id: "public_search_distributed_rate_limit_readiness", state: "notice", evidencePath: "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json", detail: "current-source capability with production configuration pending" },
       { id: "public_generation_admission_security", state: "notice", evidencePath: "evaluation/security-public-generation-admission-2026-08-04/report.json", detail: "live generation routes fail closed when distributed configuration is unavailable; activation and fresh rescan pending" },
       { id: "security_followup_remediation", state: "proven", evidencePath: "evaluation/codex-security-followup-remediation-2026-08-11/report.json", detail: "deployed three-finding remediation with immutable baseline preserved" },
@@ -2004,6 +2037,7 @@ function createFixtureRoot(): { root: string; head: string } {
       securityCompleteClaimAllowed: false,
     },
   });
+  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-28/report.json", freshCurrentSourceSecurityScanFixture());
   writeJson(root, "evaluation/security-mcp-generation-work-budget-2026-08-04/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING",
     sourceHead: "TO_FILL",
@@ -2393,6 +2427,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/security-safety-reference-surface-remediation-2026-08-11/report.json",
     "evaluation/security-current-remediation-ledger-2026-08-13/report.json",
     "evaluation/current-full-repository-security-scan-2026-08-27/report.json",
+    "evaluation/current-source-standard-security-scan-2026-08-28/report.json",
     "evaluation/public-json-request-body-budget-2026-08-11/report.json",
     "evaluation/improvement-photo-analysis-budget-2026-08-11/report.json",
     "evaluation/public-provider-cancellation-2026-08-11/report.json",
@@ -2925,6 +2960,28 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       databaseSecurityRemediation: "APPROVAL_GATED",
       approvalFreeProductSourceRemediation: "LIVE_SOURCE_INCLUDED_FRESH_RESCAN_REQUIRED",
+    });
+    expect(report.evidence.find((item) => item.id === "fresh_current_source_security_scan")).toMatchObject({
+      artifact: path.join("evaluation", "current-source-standard-security-scan-2026-08-28", "report.json"),
+    });
+    expect(report.freshCurrentSourceSecurityScan).toMatchObject({
+      verdict: "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE",
+      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      deployedProductSource: "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+      reportableFindingCount: 17,
+      mediumFindingCount: 13,
+      lowFindingCount: 4,
+      coverageCompleteness: "partial",
+      reviewedSurfaceCount: 18,
+      deferredCoverageItemCount: 21,
+      approvalGatedDatabaseOrAtomicityCount: 12,
+      approvalSensitiveShareCapabilityCount: 1,
+      approvalFreeProductSourceResidualCount: 4,
+      fullyClosedBoundedSourceCandidateCount: 2,
+      freshFullRepositoryScanCompleted: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.publicJsonRequestBodyBudget).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET",

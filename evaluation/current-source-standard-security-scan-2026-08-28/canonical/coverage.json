@@ -1,0 +1,321 @@
+{
+  "completeness": "partial",
+  "deferred": [
+    {
+      "candidateId": "deferred-history",
+      "id": "deferred-history",
+      "reason": "Thousands of evidence files; product entrypoints prioritized.",
+      "summary": "Historical/generated evaluation and output files were not exhaustively audited as executable code."
+    },
+    {
+      "candidateId": "deferred-live-db",
+      "id": "deferred-live-db",
+      "reason": "Approval-gated.",
+      "summary": "Live grants, policies, migration state, and tenant A/B proof."
+    },
+    {
+      "candidateId": "deferred-exact-share",
+      "id": "deferred-exact-share",
+      "reason": "No URL; creation mutates DB.",
+      "summary": "Concrete saved production Share session."
+    },
+    {
+      "candidateId": "deferred-runtime",
+      "id": "deferred-runtime",
+      "reason": "External activation excluded.",
+      "summary": "Actual Hermes/provider/vector/Wiki/KOSHA activation."
+    },
+    {
+      "candidateId": "pending-01",
+      "id": "pending-01",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "Documents table missing RLS"
+    },
+    {
+      "candidateId": "pending-02",
+      "id": "pending-02",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "query_logs missing RLS"
+    },
+    {
+      "candidateId": "pending-03",
+      "id": "pending-03",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "NULL dispatch tenant RLS bypass"
+    },
+    {
+      "candidateId": "pending-04",
+      "id": "pending-04",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "organization-only RLS mixed-tenant tuples"
+    },
+    {
+      "candidateId": "pending-05",
+      "id": "pending-05",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "knowledge review state forgery"
+    },
+    {
+      "candidateId": "pending-06",
+      "id": "pending-06",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "improvement approval forgery"
+    },
+    {
+      "candidateId": "pending-07",
+      "id": "pending-07",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "provider dispatch receipt forgery"
+    },
+    {
+      "candidateId": "pending-08",
+      "id": "pending-08",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "public raw safety-reference body/payload RLS exposure"
+    },
+    {
+      "candidateId": "pending-09",
+      "id": "pending-09",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "knowledge review non-atomic transition"
+    },
+    {
+      "candidateId": "pending-10",
+      "id": "pending-10",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "MCP token quota non-atomic issuance"
+    },
+    {
+      "candidateId": "pending-11",
+      "id": "pending-11",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "worker site-transfer race"
+    },
+    {
+      "candidateId": "pending-12",
+      "id": "pending-12",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "workspace provisioning duplicate race"
+    },
+    {
+      "candidateId": "pending-13",
+      "id": "pending-13",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "Share sessionId+workerId object-ID credential"
+    },
+    {
+      "candidateId": "pending-14",
+      "id": "pending-14",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "safety-status disconnect releases lease before underlying work settles"
+    },
+    {
+      "candidateId": "pending-15",
+      "id": "pending-15",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "Share ACK admission occurs after unauthenticated body read"
+    },
+    {
+      "candidateId": "pending-16",
+      "id": "pending-16",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "weather fallback carries raw upstream error text"
+    },
+    {
+      "candidateId": "pending-17",
+      "id": "pending-17",
+      "reason": "Awaiting parent validation and attack-path adjudication.",
+      "summary": "HWPX compressed limits omit uncompressed/peak memory budget"
+    }
+  ],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [
+    {
+      "pattern": "live-database-mutation",
+      "reason": "Explicit approval required."
+    },
+    {
+      "pattern": "provider-dispatch",
+      "reason": "Persistence approval remains closed."
+    },
+    {
+      "pattern": "saved-share-session-creation",
+      "reason": "MISSING_EVIDENCE and mutation-gated."
+    },
+    {
+      "pattern": "vector-wiki-kosha-registry-mutation",
+      "reason": "Separate approvals required."
+    },
+    {
+      "pattern": "provider-dispatch",
+      "reason": "Persistent idempotency approval gate remains closed."
+    },
+    {
+      "pattern": "saved-share-session-creation",
+      "reason": "DB mutation and exact-session approval required."
+    },
+    {
+      "pattern": "vector-wiki-kosha-registry-mutation",
+      "reason": "Separate operator approvals required."
+    }
+  ],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "repository",
+  "mode": "repository",
+  "openQuestions": [
+    {
+      "question": "Are migrations 001-010 applied with ordinary PostgREST grants in production?"
+    },
+    {
+      "question": "Can an existing saved Share URL be supplied?"
+    },
+    {
+      "question": "Which pending candidates survive current-source parent validation?"
+    },
+    {
+      "question": "What repository coverage can be claimed fully reviewed versus deferred?"
+    },
+    {
+      "question": "Does independent architecture review change the threat model?"
+    },
+    {
+      "question": "Do public-export and DB-focused packets produce additional distinct findings?"
+    },
+    {
+      "question": "Can final coverage exceed the previous partial scan honestly?"
+    }
+  ],
+  "scanId": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "reported",
+      "id": "surface_direct-supabase-rls-and-tenant-integrity",
+      "label": "Direct Supabase RLS and tenant integrity",
+      "notes": "Twelve DB/RLS/atomicity findings; live database not probed.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_public-share-2",
+      "label": "Public Share",
+      "notes": "Object-ID credential and pre-body admission; exact saved session MISSING_EVIDENCE.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_public-status-and-weather",
+      "label": "Public status and weather",
+      "notes": "Disconnect lease residual and fallback error exposure.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_public-document-exports",
+      "label": "Public document exports",
+      "notes": "HWPX expansion residual; XLSX and archive-error closures reviewed.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_mcp-boundary",
+      "label": "MCP boundary",
+      "notes": "Token quota race remains; scope controls reviewed.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_hermes-and-openclaw",
+      "label": "Hermes and OpenClaw",
+      "notes": "No additional issue confirmed; deployment remains unproven.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_authenticated-service-role-apis-2",
+      "label": "Authenticated service-role APIs",
+      "notes": "No extra bypass beyond direct PostgREST findings.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_knowledge-kosha-vector-governance-2",
+      "label": "Knowledge KOSHA vector governance",
+      "notes": "Review authority/atomicity findings; mutation excluded.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_public-generation/search/provider-routes",
+      "label": "Public generation/search/provider routes",
+      "notes": "Assigned review returned; parent validation pending.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_public-exports-and-parsers",
+      "label": "Public exports and parsers",
+      "notes": "Assigned review returned; parent validation pending.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_public-share",
+      "label": "Public Share",
+      "notes": "Assigned review returned; parent validation pending.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_authenticated-service-role-apis",
+      "label": "Authenticated service-role APIs",
+      "notes": "Assigned review returned; parent validation pending.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_direct-supabase-rls",
+      "label": "Direct Supabase RLS",
+      "notes": "Assigned review returned; parent validation pending.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_mcp-token-and-tool-boundary",
+      "label": "MCP token and tool boundary",
+      "notes": "Assigned review returned; parent validation pending.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_hermes-and-openclaw-runtimes",
+      "label": "Hermes and OpenClaw runtimes",
+      "notes": "Assigned review returned; parent validation pending.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_knowledge-kosha-vector-governance",
+      "label": "Knowledge KOSHA vector governance",
+      "notes": "Assigned review returned; parent validation pending.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_independent-baseline-audit",
+      "label": "Independent baseline audit",
+      "notes": "Fourteen source-backed candidates preserved for parent validation; fully reviewed file list retained by the worker.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_share-mcp-hermes-focused-review",
+      "label": "Share MCP Hermes focused review",
+      "notes": "Three overlapping candidates and source-backed control dispositions returned; parent validation pending.",
+      "receiptRefs": []
+    }
+  ]
+}

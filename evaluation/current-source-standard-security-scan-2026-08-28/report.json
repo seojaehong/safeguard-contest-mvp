@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "safeclaw-current-source-standard-security-scan/v1",
+  "verdict": "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE",
+  "scanId": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+  "sourceHead": "899951952ee184d527742d541f976f7e72482f2e",
+  "deployedProductSource": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+  "scan": {
+    "status": "completed",
+    "mode": "standard",
+    "targetKind": "git_revision",
+    "coverageCompleteness": "partial",
+    "reviewedSurfaceCount": 18,
+    "deferredCoverageItemCount": 21,
+    "reportableFindingCount": 17,
+    "severity": {
+      "critical": 0,
+      "high": 0,
+      "medium": 13,
+      "low": 4
+    },
+    "sealedAt": "2026-08-27T18:23:47.932556Z"
+  },
+  "baseline": {
+    "immutableOriginalFindingCount": 18,
+    "preserved": true,
+    "rewritten": false
+  },
+  "currentDisposition": {
+    "approvalGatedDatabaseOrAtomicityCount": 12,
+    "approvalSensitiveShareCapabilityCount": 1,
+    "approvalFreeProductSourceResidualCount": 4,
+    "fullyClosedBoundedSourceCandidateCount": 2,
+    "securityCompleteClaimAllowed": false,
+    "residualFindingIds": [
+      "share-ack",
+      "safety-reference-status",
+      "weather-fallback",
+      "hwpx-template"
+    ],
+    "fullyClosedBoundedSourceCandidates": [
+      "xlsx-internal-error-projection",
+      "hwpx-archive-filesystem-error-projection"
+    ]
+  },
+  "canonicalArtifacts": {
+    "manifest": "evaluation/current-source-standard-security-scan-2026-08-28/canonical/scan-manifest.json",
+    "findings": "evaluation/current-source-standard-security-scan-2026-08-28/canonical/findings.json",
+    "coverage": "evaluation/current-source-standard-security-scan-2026-08-28/canonical/coverage.json",
+    "markdown": "evaluation/current-source-standard-security-scan-2026-08-28/scan-report.md",
+    "findingWriteupCount": 17,
+    "supportingEvidenceCount": 17,
+    "sha256": {
+      "manifest": "d584a758ee866a0da87508e170f62d5f10ee8f2ec775e416f6736df0e19f4e7f",
+      "findings": "368e7db27b207e6a171e4cd7a5bb1c8a0ba4a4dac1b680b6ecb2d3d1d631dd7a",
+      "coverage": "0a596f22aef06a588b3d345a0b21d3b67cca0fa20b0a2d3ffc45a9f491ffa7ae",
+      "markdown": "a4e0ba6431894bdbea89ec15e42288bda599b8fb4b9bad4d9d36b66edfca6a7f"
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseSecurityRemediation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "sifVectorRuntime": "APPROVAL_GATED",
+    "koshaExactRegistryPromotion": "APPROVAL_GATED",
+    "freshFullRepositoryScanCompleted": true,
+    "securityCompleteClaimAllowed": false
+  }
+}

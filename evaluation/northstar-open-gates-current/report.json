@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-27T17:56:12.399Z",
-  "sourceSha": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+  "generatedAt": "2026-08-27T18:57:08.162Z",
+  "sourceSha": "899951952ee184d527742d541f976f7e72482f2e",
   "overall": "contradicted",
   "gates": [
     {
@@ -293,6 +293,17 @@
       "detail": "Standard scan da97e400 is sealed at 4e3e7e5d with 19 findings (14 medium, 5 low) while preserving the immutable original baseline of 18. Coverage remains partial across 9 reviewed surfaces with 26 deferred items. Production 607c39b3 includes focused remediation for six approval-free candidates, but a fresh full-repository rescan is required; the Share object-ID credential finding and twelve database/RLS/atomicity findings remain approval-gated. No mutation occurred and exact saved Share remains MISSING_EVIDENCE. This gate remains notice and is not a proven or security-complete claim.",
       "nextActions": [
         "Run a fresh full-repository scan over the six current-source remediations; separately obtain explicit approval before the Share capability credential and twelve database/RLS/atomicity remediations, and close the 26 deferred coverage items before any security-complete claim."
+      ]
+    },
+    {
+      "id": "fresh_current_source_security_scan",
+      "state": "notice",
+      "label": "Fresh current-source security scan",
+      "evidencePath": "evaluation\\current-source-standard-security-scan-2026-08-28\\report.json",
+      "detail": "Fresh Standard scan 1411fb32 is sealed at current source 89995195 with 17 open findings (13 medium, 4 low), partial coverage across 18 recorded surfaces, and 21 deferred coverage items. The immutable original 18-finding baseline is preserved. Two bounded public-error candidates are closed, while four narrower approval-free source residuals, one Share capability boundary, and twelve database/RLS/atomicity findings remain. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Remediate the four approval-free source residuals in bounded waves and rerun focused validation.",
+        "Keep the Share capability and twelve database/RLS/atomicity findings approval-gated; do not claim security completion from scan completion."
       ]
     },
     {

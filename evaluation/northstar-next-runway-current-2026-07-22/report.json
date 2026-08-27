@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-27T17:56:34.901Z",
+  "generatedAt": "2026-08-27T18:57:42.867Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
-  "productionCommit": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+  "sourceHead": "899951952ee184d527742d541f976f7e72482f2e",
+  "productionCommit": "899951952ee184d527742d541f976f7e72482f2e",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+    "commitSha": "899951952ee184d527742d541f976f7e72482f2e",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-kdbkqwrce-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-8fncz81z7-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
-  "liveRollupLiveCommit": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+  "liveExactEvidenceCommit": "899951952ee184d527742d541f976f7e72482f2e",
+  "liveRollupLiveCommit": "899951952ee184d527742d541f976f7e72482f2e",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -62,6 +62,7 @@
     "repositorySecurityScanReconciliation": "evaluation\\repository-security-scan-reconciliation-2026-08-11\\report.json",
     "currentSecurityRemediationLedger": "evaluation\\security-current-remediation-ledger-2026-08-13\\report.json",
     "currentRepositorySecurityRescan": "evaluation\\current-full-repository-security-scan-2026-08-27\\report.json",
+    "freshCurrentSourceSecurityScan": "evaluation\\current-source-standard-security-scan-2026-08-28\\report.json",
     "agentChatDurableAdmission": "evaluation\\security-agent-chat-durable-admission-2026-08-14\\report.json",
     "mcpProviderAdmission": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
     "shareRecipientContactVerification": "evaluation\\share-recipient-contact-verification-2026-08-14\\report.json",
@@ -185,6 +186,11 @@
       "gate": "current_repository_security_rescan",
       "state": "notice",
       "reason": "sealed Standard scan records 19 findings with partial coverage; current source remediates six bounded source candidates, while one Share capability credential and 12 database/RLS/atomicity findings remain approval-gated and a fresh full scan is required"
+    },
+    {
+      "gate": "fresh_current_source_security_scan",
+      "state": "notice",
+      "reason": "fresh Standard scan 1411fb32-5c18-4d6a-b8ba-d52697757d8a records 17 open findings with partial coverage; 4 approval-free source residuals, 1 Share capability boundary, and 12 database/RLS/atomicity findings remain open; security-complete is false and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "mcp_generation_work_budget_security",
@@ -1034,6 +1040,27 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "databaseSecurityRemediation": "APPROVAL_GATED",
     "approvalFreeProductSourceRemediation": "LIVE_SOURCE_INCLUDED_FRESH_RESCAN_REQUIRED"
+  },
+  "freshCurrentSourceSecurityScan": {
+    "verdict": "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE",
+    "scanId": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    "sourceHead": "899951952ee184d527742d541f976f7e72482f2e",
+    "deployedProductSource": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+    "status": "completed",
+    "coverageCompleteness": "partial",
+    "reviewedSurfaceCount": 18,
+    "deferredCoverageItemCount": 21,
+    "reportableFindingCount": 17,
+    "mediumFindingCount": 13,
+    "lowFindingCount": 4,
+    "immutableOriginalFindingCount": 18,
+    "approvalGatedDatabaseOrAtomicityCount": 12,
+    "approvalSensitiveShareCapabilityCount": 1,
+    "approvalFreeProductSourceResidualCount": 4,
+    "fullyClosedBoundedSourceCandidateCount": 2,
+    "freshFullRepositoryScanCompleted": true,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "publicSearchDistributedRateLimitReadiness": {
     "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_DISTRIBUTED_CONFIGURATION_TRUTH",

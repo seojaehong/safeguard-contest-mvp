@@ -1,0 +1,2020 @@
+{
+  "documentType": "codex-security.findings",
+  "findings": [
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Migration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed.",
+          "sink": "supabase/migrations/001_init.sql",
+          "source": "supabase/migrations/001_init.sql",
+          "summary": "No later canonical migration protects documents."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Migration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "No later canonical migration protects documents."
+        },
+        "limitations": [
+          "Live grants were not probed."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/001_init.sql",
+          "outcome": "Migration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed.",
+          "summary": "No later canonical migration protects documents."
+        },
+        "summary": "No later canonical migration protects documents."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "No later canonical migration protects documents."
+      },
+      "findingId": "csf_21ef431767305615cd2342d9",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c16f1ff3bdfd4ee4bb0312f6833e3c79028ffe10fd2ab0c3edae0a1c156aa420"
+      },
+      "identity": {
+        "anchor": "authorization-bypass.missing-row-level-security",
+        "instance": "documents-no-rls"
+      },
+      "locations": [
+        {
+          "endLine": 16,
+          "path": "supabase/migrations/001_init.sql",
+          "role": "source",
+          "startLine": 8
+        }
+      ],
+      "occurrenceId": "occ_a537651e1c6f9d6bfebe7648",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "candidateId": "current-001",
+        "originalCandidates": [
+          {
+            "confidence": "high",
+            "cwe": [
+              "CWE-862"
+            ],
+            "evidence": "supabase/migrations/001_init.sql:8-16",
+            "ruleId": "authorization-bypass.missing-row-level-security",
+            "severity": "medium",
+            "title": "Documents table is exposed without row-level security"
+          }
+        ],
+        "previousFindings": [],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Enable RLS, revoke broad grants, and add least-privilege tenant policies.",
+      "remediationTests": [
+        "Reject the negative path for documents-no-rls.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "authorization-bypass.missing-row-level-security",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Migration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed."
+      },
+      "summary": "Migration 001 creates document bodies and citations without RLS; normal Supabase grants can expose direct REST access if deployed.",
+      "taxonomy": {
+        "category": "Missing authorization / RLS",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Documents table is exposed without row-level security",
+      "validation": {
+        "assertions": [
+          "No later canonical migration protects documents."
+        ],
+        "limitations": [
+          "Live grants were not probed."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "No later canonical migration protects documents. Parent validation confirmed controlling blobs are identical at 4e3e7e5d and 89995195."
+      },
+      "writeup": {
+        "reportPath": "findings/documents-no-rls/documents-no-rls.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Migration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed.",
+          "sink": "supabase/migrations/001_init.sql",
+          "source": "supabase/migrations/001_init.sql",
+          "summary": "No later canonical migration protects query_logs."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Migration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "No later canonical migration protects query_logs."
+        },
+        "limitations": [
+          "Live grants were not probed."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/001_init.sql",
+          "outcome": "Migration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed.",
+          "summary": "No later canonical migration protects query_logs."
+        },
+        "summary": "No later canonical migration protects query_logs."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "No later canonical migration protects query_logs."
+      },
+      "findingId": "csf_ff01d65d4d13040b3b940324",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c8fd851e904e4c62c12a70cc6fcbb8f210d2055567f110537f74197c43e5a3f7"
+      },
+      "identity": {
+        "anchor": "authorization-bypass.missing-row-level-security",
+        "instance": "query-logs-no-rls"
+      },
+      "locations": [
+        {
+          "endLine": 6,
+          "path": "supabase/migrations/001_init.sql",
+          "role": "source",
+          "startLine": 1
+        }
+      ],
+      "occurrenceId": "occ_da75a9261cb82e75c2890617",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "candidateId": "current-002",
+        "originalCandidates": [
+          {
+            "confidence": "high",
+            "cwe": [
+              "CWE-862"
+            ],
+            "evidence": "supabase/migrations/001_init.sql:1-6",
+            "ruleId": "authorization-bypass.missing-row-level-security",
+            "severity": "low",
+            "title": "Query logs table is exposed without row-level security"
+          }
+        ],
+        "previousFindings": [],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Enable RLS and make writes service-role-only.",
+      "remediationTests": [
+        "Reject the negative path for query-logs-no-rls.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "authorization-bypass.missing-row-level-security",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "low",
+        "rationale": "Migration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed."
+      },
+      "summary": "Migration 001 creates query_logs without RLS, exposing stored query text under normal grants if deployed.",
+      "taxonomy": {
+        "category": "Missing authorization / RLS",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Query logs table is exposed without row-level security",
+      "validation": {
+        "assertions": [
+          "No later canonical migration protects query_logs."
+        ],
+        "limitations": [
+          "Live grants were not probed."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "No later canonical migration protects query_logs. Parent validation confirmed controlling blobs are identical at 4e3e7e5d and 89995195."
+      },
+      "writeup": {
+        "reportPath": "findings/query-logs-no-rls/query-logs-no-rls.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "dispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts.",
+          "sink": "supabase/migrations/002_workspace_productization.sql",
+          "source": "supabase/migrations/002_workspace_productization.sql",
+          "summary": "The policy explicitly accepts NULL for reads and writes."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "dispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "The policy explicitly accepts NULL for reads and writes."
+        },
+        "limitations": [
+          "Direct PostgREST bypasses application filters.",
+          "Live grants were not probed."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/002_workspace_productization.sql",
+          "outcome": "dispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts.",
+          "summary": "The policy explicitly accepts NULL for reads and writes."
+        },
+        "summary": "The policy explicitly accepts NULL for reads and writes."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "The policy explicitly accepts NULL for reads and writes."
+      },
+      "findingId": "csf_46f8a918c02d6ab6c6754b34",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:f009021f878c7e27193c278f8d1f519576683411c692bd6bd1da87ea5be24dd7"
+      },
+      "identity": {
+        "anchor": "authorization-bypass.null-tenant-rls",
+        "instance": "null-dispatch-tenant"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 76
+        },
+        {
+          "endLine": 200,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "sink",
+          "startLine": 183
+        }
+      ],
+      "occurrenceId": "occ_3769ba5413fd16e370cb193b",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "candidateId": "current-003",
+        "originalCandidates": [
+          {
+            "confidence": "high",
+            "cwe": [
+              "CWE-862"
+            ],
+            "evidence": "supabase/migrations/002_workspace_productization.sql:76-90,183-200",
+            "ruleId": "authorization-bypass.null-tenant-rls",
+            "severity": "medium",
+            "title": "NULL dispatch-log tenants bypass row-level authorization"
+          }
+        ],
+        "previousFindings": [],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Make organization_id non-null and remove NULL wildcard policies.",
+      "remediationTests": [
+        "Reject the negative path for null-dispatch-tenant.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "authorization-bypass.null-tenant-rls",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "dispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts."
+      },
+      "summary": "dispatch_logs is nullable and its RLS accepts NULL, so authenticated roles can manage unscoped receipts.",
+      "taxonomy": {
+        "category": "Authorization bypass / audit integrity",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "NULL dispatch-log tenants bypass row-level authorization",
+      "validation": {
+        "assertions": [
+          "The policy explicitly accepts NULL for reads and writes."
+        ],
+        "limitations": [
+          "Direct PostgREST bypasses application filters.",
+          "Live grants were not probed."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "The policy explicitly accepts NULL for reads and writes. Parent validation confirmed controlling blobs are identical at 4e3e7e5d and 89995195."
+      },
+      "writeup": {
+        "reportPath": "findings/null-dispatch-tenant/null-dispatch-tenant.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Child tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples.",
+          "sink": "supabase/migrations/010_commercial_operations.sql",
+          "source": "supabase/migrations/002_workspace_productization.sql",
+          "summary": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Child tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+        },
+        "limitations": [
+          "Routes often add checks.",
+          "Migration 010 deployment was not probed."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/002_workspace_productization.sql",
+          "outcome": "Child tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples.",
+          "summary": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+        },
+        "summary": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+      },
+      "findingId": "csf_44d1529d7c4559355db37fe1",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:8e294d4fffffc22acf684619caf1f6fa037f88f95e46c28b69a6030a765f4f51"
+      },
+      "identity": {
+        "anchor": "tenant-integrity.related-object-binding",
+        "instance": "composite-tenant-binding"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "endLine": 181,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "sink",
+          "startLine": 132
+        },
+        {
+          "endLine": 64,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "sink",
+          "startLine": 1
+        },
+        {
+          "endLine": 126,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "sink",
+          "startLine": 77
+        },
+        {
+          "endLine": 95,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "sink",
+          "startLine": 21
+        },
+        {
+          "endLine": 227,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "sink",
+          "startLine": 161
+        }
+      ],
+      "occurrenceId": "occ_0a238d2d74e8ffd0548f9be5",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "candidateId": "current-004",
+        "originalCandidates": [
+          {
+            "confidence": "high",
+            "cwe": [
+              "CWE-639"
+            ],
+            "evidence": "supabase/migrations/002_workspace_productization.sql;003_knowledge_runtime.sql;010_commercial_operations.sql",
+            "ruleId": "tenant-integrity.related-object-binding",
+            "severity": "medium",
+            "title": "Organization-only RLS permits inconsistent cross-tenant relationship tuples"
+          }
+        ],
+        "previousFindings": [],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Add composite tenant foreign keys and RLS checks for every related object.",
+      "remediationTests": [
+        "Reject the negative path for composite-tenant-binding.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Child tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples."
+      },
+      "summary": "Child tables authorize only organization_id while accepting independent related-object IDs, permitting mixed-tenant tuples.",
+      "taxonomy": {
+        "category": "Authorization bypass / tenant integrity",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Organization-only RLS permits inconsistent cross-tenant relationship tuples",
+      "validation": {
+        "assertions": [
+          "Independent foreign keys and organization-only policies do not enforce one tenant tuple."
+        ],
+        "limitations": [
+          "Routes often add checks.",
+          "Migration 010 deployment was not probed."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "Independent foreign keys and organization-only policies do not enforce one tenant tuple. Parent validation confirmed controlling blobs are identical at 4e3e7e5d and 89995195."
+      },
+      "writeup": {
+        "reportPath": "findings/composite-tenant-binding/composite-tenant-binding.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Owner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts.",
+          "sink": "lib/knowledge-review.ts",
+          "source": "supabase/migrations/003_knowledge_runtime.sql",
+          "summary": "Direct PostgREST can write state guarded review code later trusts."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Owner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Direct PostgREST can write state guarded review code later trusts."
+        },
+        "limitations": [
+          "Publication remains approval-gated."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/003_knowledge_runtime.sql",
+          "outcome": "Owner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts.",
+          "summary": "Direct PostgREST can write state guarded review code later trusts."
+        },
+        "summary": "Direct PostgREST can write state guarded review code later trusts."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Direct PostgREST can write state guarded review code later trusts."
+      },
+      "findingId": "csf_393e16d588fcc75c427ba241",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:31e2340a451194a69eced34fb222f61afccbc8816049231a0c9e87593bd547d0"
+      },
+      "identity": {
+        "anchor": "authorization-bypass.review-state-forgery",
+        "instance": "knowledge-review-forgery"
+      },
+      "locations": [
+        {
+          "endLine": 64,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "endLine": 126,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "sink",
+          "startLine": 94
+        },
+        {
+          "endLine": 1208,
+          "path": "lib/knowledge-review.ts",
+          "role": "sink",
+          "startLine": 1029
+        }
+      ],
+      "occurrenceId": "occ_6945fd8f2e2b36a9864d8e6b",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "candidateId": "current-005",
+        "originalCandidates": [
+          {
+            "confidence": "high",
+            "cwe": [
+              "CWE-862"
+            ],
+            "evidence": "supabase/migrations/003_knowledge_runtime.sql:21-64,94-126;lib/knowledge-review.ts:885-953",
+            "ruleId": "authorization-bypass.review-state-forgery",
+            "severity": "medium",
+            "title": "Tenant owners can forge knowledge approval and review-receipt state"
+          }
+        ],
+        "previousFindings": [],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Revoke direct approval-field writes and use a transactional SECURITY DEFINER review RPC.",
+      "remediationTests": [
+        "Reject the negative path for knowledge-review-forgery.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "authorization-bypass.review-state-forgery",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Owner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts."
+      },
+      "summary": "Owner FOR ALL policies permit direct writes to review status, provider attribution, output, and receipts.",
+      "taxonomy": {
+        "category": "Authorization bypass / governance integrity",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Tenant owners can forge knowledge approval and review-receipt state",
+      "validation": {
+        "assertions": [
+          "Direct PostgREST can write state guarded review code later trusts."
+        ],
+        "limitations": [
+          "Publication remains approval-gated."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "Direct PostgREST can write state guarded review code later trusts. Parent validation confirmed controlling blobs are identical at 4e3e7e5d and 89995195."
+      },
+      "writeup": {
+        "reportPath": "findings/knowledge-review-forgery/knowledge-review-forgery.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Owners can set improvement approval metadata while harness memory trusts approved or reflected rows.",
+          "sink": "lib/tenant-harness-memory.ts",
+          "source": "supabase/migrations/010_commercial_operations.sql",
+          "summary": "The owner policy can fabricate the status consumed as approval evidence."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Owners can set improvement approval metadata while harness memory trusts approved or reflected rows."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "The owner policy can fabricate the status consumed as approval evidence."
+        },
+        "limitations": [
+          "Migration 010 is approval-gated."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/010_commercial_operations.sql",
+          "outcome": "Owners can set improvement approval metadata while harness memory trusts approved or reflected rows.",
+          "summary": "The owner policy can fabricate the status consumed as approval evidence."
+        },
+        "summary": "The owner policy can fabricate the status consumed as approval evidence."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "The owner policy can fabricate the status consumed as approval evidence."
+      },
+      "findingId": "csf_ea82f29c8e9761af55fc15f1",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:9f11e26fccc0d4c14afdf9f224f454dd6176c3fca620c9499f765161cab9a970"
+      },
+      "identity": {
+        "anchor": "authorization-bypass.review-state-forgery",
+        "instance": "improvement-review-forgery"
+      },
+      "locations": [
+        {
+          "endLine": 68,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "source",
+          "startLine": 51
+        },
+        {
+          "endLine": 210,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "sink",
+          "startLine": 195
+        },
+        {
+          "endLine": 175,
+          "path": "lib/tenant-harness-memory.ts",
+          "role": "sink",
+          "startLine": 151
+        },
+        {
+          "endLine": 316,
+          "path": "lib/tenant-harness-memory.ts",
+          "role": "sink",
+          "startLine": 243
+        }
+      ],
+      "occurrenceId": "occ_44015e7112ff712cb0caed1e",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "candidateId": "current-006",
+        "originalCandidates": [
+          {
+            "confidence": "high",
+            "cwe": [
+              "CWE-862"
+            ],
+            "evidence": "supabase/migrations/010_commercial_operations.sql:51-68,195-210;lib/tenant-harness-memory.ts:151-175",
+            "ruleId": "authorization-bypass.review-state-forgery",
+            "severity": "medium",
+            "title": "Direct improvement approval forgery can poison tenant harness memory"
+          }
+        ],
+        "previousFindings": [],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Make approval fields server-only and require an immutable review receipt.",
+      "remediationTests": [
+        "Reject the negative path for improvement-review-forgery.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "authorization-bypass.review-state-forgery",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Owners can set improvement approval metadata while harness memory trusts approved or reflected rows."
+      },
+      "summary": "Owners can set improvement approval metadata while harness memory trusts approved or reflected rows.",
+      "taxonomy": {
+        "category": "Authorization bypass / generation integrity",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Direct improvement approval forgery can poison tenant harness memory",
+      "validation": {
+        "assertions": [
+          "The owner policy can fabricate the status consumed as approval evidence."
+        ],
+        "limitations": [
+          "Migration 010 is approval-gated."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "The owner policy can fabricate the status consumed as approval evidence. Parent validation confirmed controlling blobs are identical at 4e3e7e5d and 89995195."
+      },
+      "writeup": {
+        "reportPath": "findings/improvement-review-forgery/improvement-review-forgery.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "The owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes.",
+          "sink": "app/api/dispatch-logs/route.ts",
+          "source": "supabase/migrations/002_workspace_productization.sql",
+          "summary": "Direct table access bypasses the API server-receipt gate."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "The owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Direct table access bypasses the API server-receipt gate."
+        },
+        "limitations": [
+          "Provider dispatch is preview-only."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/002_workspace_productization.sql",
+          "outcome": "The owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes.",
+          "summary": "Direct table access bypasses the API server-receipt gate."
+        },
+        "summary": "Direct table access bypasses the API server-receipt gate."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Direct table access bypasses the API server-receipt gate."
+      },
+      "findingId": "csf_3a7389105c348505c09d1b6b",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:b19c7c81b143e74c06ada65ce2586482ce5610b8f5c07328501dc7ba60f5dfab"
+      },
+      "identity": {
+        "anchor": "data-authenticity.provider-receipt-forgery",
+        "instance": "provider-receipt-forgery"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 76
+        },
+        {
+          "endLine": 200,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "sink",
+          "startLine": 183
+        },
+        {
+          "endLine": 77,
+          "path": "app/api/dispatch-logs/route.ts",
+          "role": "sink",
+          "startLine": 72
+        },
+        {
+          "endLine": 157,
+          "path": "app/api/dispatch-logs/route.ts",
+          "role": "sink",
+          "startLine": 105
+        }
+      ],
+      "occurrenceId": "occ_e4add3f02557aa06b8a9d49d",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "candidateId": "current-007",
+        "originalCandidates": [
+          {
+            "confidence": "high",
+            "cwe": [
+              "CWE-345"
+            ],
+            "evidence": "supabase/migrations/002_workspace_productization.sql:76-90,183-200;app/api/dispatch-logs/route.ts",
+            "ruleId": "data-authenticity.provider-receipt-forgery",
+            "severity": "medium",
+            "title": "Owners can forge provider dispatch receipts through direct PostgREST"
+          }
+        ],
+        "previousFindings": [],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Revoke tenant mutation rights and write receipts only through a server path.",
+      "remediationTests": [
+        "Reject the negative path for provider-receipt-forgery.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "data-authenticity.provider-receipt-forgery",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "The owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes."
+      },
+      "summary": "The owner FOR ALL dispatch_logs policy exposes provider receipt fields to direct tenant writes.",
+      "taxonomy": {
+        "category": "Data authenticity / audit integrity",
+        "cwe": [
+          "CWE-345"
+        ]
+      },
+      "title": "Owners can forge provider dispatch receipts through direct PostgREST",
+      "validation": {
+        "assertions": [
+          "Direct table access bypasses the API server-receipt gate."
+        ],
+        "limitations": [
+          "Provider dispatch is preview-only."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "Direct table access bypasses the API server-receipt gate. Parent validation confirmed controlling blobs are identical at 4e3e7e5d and 89995195."
+      },
+      "writeup": {
+        "reportPath": "findings/provider-receipt-forgery/provider-receipt-forgery.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Raw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection.",
+          "sink": "lib/safety-reference-catalog.ts",
+          "source": "supabase/migrations/004_safety_reference_catalog.sql",
+          "summary": "The HTTP API redacts body and payload but direct PostgREST does not."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Raw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "The HTTP API redacts body and payload but direct PostgREST does not."
+        },
+        "limitations": [
+          "Source PDFs may be public; normalized payload is outside the public contract."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "supabase/migrations/004_safety_reference_catalog.sql",
+          "outcome": "Raw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection.",
+          "summary": "The HTTP API redacts body and payload but direct PostgREST does not."
+        },
+        "summary": "The HTTP API redacts body and payload but direct PostgREST does not."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "The HTTP API redacts body and payload but direct PostgREST does not."
+      },
+      "findingId": "csf_5f6a26717450806f76b32ef0",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:1b23a75b436fe88c8cf66ebded212af21a54502d4d254943b1de44f2c132c95b"
+      },
+      "identity": {
+        "anchor": "information-exposure.raw-corpus",
+        "instance": "raw-safety-corpus"
+      },
+      "locations": [
+        {
+          "endLine": 31,
+          "path": "supabase/migrations/004_safety_reference_catalog.sql",
+          "role": "source",
+          "startLine": 16
+        },
+        {
+          "endLine": 72,
+          "path": "supabase/migrations/004_safety_reference_catalog.sql",
+          "role": "sink",
+          "startLine": 58
+        },
+        {
+          "endLine": 335,
+          "path": "lib/safety-reference-catalog.ts",
+          "role": "sink",
+          "startLine": 250
+        }
+      ],
+      "occurrenceId": "occ_a205b1170807e52473c45cee",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "candidateId": "current-008",
+        "originalCandidates": [
+          {
+            "confidence": "high",
+            "cwe": [
+              "CWE-200"
+            ],
+            "evidence": "supabase/migrations/004_safety_reference_catalog.sql:1-72",
+            "ruleId": "information-exposure.raw-corpus",
+            "severity": "medium",
+            "title": "Public RLS exposes complete safety-reference bodies and ingestion payloads"
+          }
+        ],
+        "previousFindings": [],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Remove anon SELECT and expose an approved bounded view.",
+      "remediationTests": [
+        "Reject the negative path for raw-safety-corpus.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "information-exposure.raw-corpus",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Raw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection."
+      },
+      "summary": "Raw safety-reference rows include body and payload while public SELECT bypasses the bounded API projection.",
+      "taxonomy": {
+        "category": "Information exposure / corpus boundary",
+        "cwe": [
+          "CWE-200"
+        ]
+      },
+      "title": "Public RLS exposes complete safety-reference bodies and payloads",
+      "validation": {
+        "assertions": [
+          "The HTTP API redacts body and payload but direct PostgREST does not."
+        ],
+        "limitations": [
+          "Source PDFs may be public; normalized payload is outside the public contract."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "The HTTP API redacts body and payload but direct PostgREST does not. Parent validation confirmed controlling blobs are identical at 4e3e7e5d and 89995195."
+      },
+      "writeup": {
+        "reportPath": "findings/raw-safety-corpus/raw-safety-corpus.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Knowledge review updates events sequentially and the run separately, leaving partial states on failure.",
+          "sink": "lib/knowledge-review.ts",
+          "source": "lib/knowledge-review.ts",
+          "summary": "Error paths explicitly acknowledge partial event commits."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Knowledge review updates events sequentially and the run separately, leaving partial states on failure."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Error paths explicitly acknowledge partial event commits."
+        },
+        "limitations": [
+          "Compare-and-set aids recovery but not atomicity."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "lib/knowledge-review.ts",
+          "outcome": "Knowledge review updates events sequentially and the run separately, leaving partial states on failure.",
+          "summary": "Error paths explicitly acknowledge partial event commits."
+        },
+        "summary": "Error paths explicitly acknowledge partial event commits."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Error paths explicitly acknowledge partial event commits."
+      },
+      "findingId": "csf_e1a64eafc25218ab1a4d8909",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:26f2b568b226e9c260744f1aa12909bbd1b7ecfc3ac466da5f89aa21fe1b42ff"
+      },
+      "identity": {
+        "anchor": "race-condition.review-transition",
+        "instance": "knowledge-review-atomicity"
+      },
+      "locations": [
+        {
+          "endLine": 1343,
+          "path": "lib/knowledge-review.ts",
+          "role": "source",
+          "startLine": 1285
+        },
+        {
+          "endLine": 1422,
+          "path": "lib/knowledge-review.ts",
+          "role": "sink",
+          "startLine": 1392
+        }
+      ],
+      "occurrenceId": "occ_1d1bc726af8584256b2b9815",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "candidateId": "current-009",
+        "originalCandidates": [
+          {
+            "confidence": "high",
+            "cwe": [
+              "CWE-362"
+            ],
+            "evidence": "lib/knowledge-review.ts:1285-1423",
+            "ruleId": "race-condition.knowledge-review-transition",
+            "severity": "medium",
+            "title": "Knowledge review transitions are not atomic"
+          }
+        ],
+        "previousFindings": [],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Move the entire transition into one locked database transaction.",
+      "remediationTests": [
+        "Reject the negative path for knowledge-review-atomicity.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "race-condition.review-transition",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Knowledge review updates events sequentially and the run separately, leaving partial states on failure."
+      },
+      "summary": "Knowledge review updates events sequentially and the run separately, leaving partial states on failure.",
+      "taxonomy": {
+        "category": "Race condition / governance integrity",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Knowledge review transitions are not atomic",
+      "validation": {
+        "assertions": [
+          "Error paths explicitly acknowledge partial event commits."
+        ],
+        "limitations": [
+          "Compare-and-set aids recovery but not atomicity."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "Error paths explicitly acknowledge partial event commits. Parent validation confirmed controlling blobs are identical at 4e3e7e5d and 89995195."
+      },
+      "writeup": {
+        "reportPath": "findings/knowledge-review-atomicity/knowledge-review-atomicity.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Concurrent issuance calls can all pass a separate count check and insert past the cap.",
+          "sink": "supabase/migrations/007_mcp_tokens.sql",
+          "source": "app/api/mcp-tokens/route.ts",
+          "summary": "No serialized database operation enforces the cap."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Concurrent issuance calls can all pass a separate count check and insert past the cap."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "No serialized database operation enforces the cap."
+        },
+        "limitations": [
+          "Tokens remain site-bound and expiring."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "app/api/mcp-tokens/route.ts",
+          "outcome": "Concurrent issuance calls can all pass a separate count check and insert past the cap.",
+          "summary": "No serialized database operation enforces the cap."
+        },
+        "summary": "No serialized database operation enforces the cap."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "No serialized database operation enforces the cap."
+      },
+      "findingId": "csf_490f3ec0bc5623527698a2a5",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:579d68e1ee0f95866c53ce326974ddcebe60cd38c9a63be959429008c8760a04"
+      },
+      "identity": {
+        "anchor": "race-condition.token-quota",
+        "instance": "mcp-token-quota-race"
+      },
+      "locations": [
+        {
+          "endLine": 278,
+          "path": "app/api/mcp-tokens/route.ts",
+          "role": "source",
+          "startLine": 247
+        },
+        {
+          "endLine": 82,
+          "path": "lib/mcp-token-service.ts",
+          "role": "sink",
+          "startLine": 80
+        },
+        {
+          "endLine": 30,
+          "path": "supabase/migrations/007_mcp_tokens.sql",
+          "role": "sink",
+          "startLine": 14
+        }
+      ],
+      "occurrenceId": "occ_c180fc72f7a31ec2531e5837",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "candidateId": "current-010",
+        "originalCandidates": [
+          {
+            "confidence": "high",
+            "cwe": [
+              "CWE-362"
+            ],
+            "evidence": "app/api/mcp-tokens/route.ts:247-278;supabase/migrations/007_mcp_tokens.sql",
+            "ruleId": "race-condition.token-quota",
+            "severity": "medium",
+            "title": "MCP token quota check and issuance are non-atomic"
+          }
+        ],
+        "previousFindings": [],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use a locked transactional recount-and-insert RPC.",
+      "remediationTests": [
+        "Reject the negative path for mcp-token-quota-race.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "race-condition.token-quota",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Concurrent issuance calls can all pass a separate count check and insert past the cap."
+      },
+      "summary": "Concurrent issuance calls can all pass a separate count check and insert past the cap.",
+      "taxonomy": {
+        "category": "Race condition / credential issuance",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "MCP token quota check and issuance are non-atomic",
+      "validation": {
+        "assertions": [
+          "No serialized database operation enforces the cap."
+        ],
+        "limitations": [
+          "Tokens remain site-bound and expiring."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "No serialized database operation enforces the cap. Parent validation confirmed controlling blobs are identical at 4e3e7e5d and 89995195."
+      },
+      "writeup": {
+        "reportPath": "findings/mcp-token-quota-race/mcp-token-quota-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Concurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id.",
+          "sink": "supabase/migrations/002_workspace_productization.sql",
+          "source": "app/api/workers/route.ts",
+          "summary": "Lookup and upsert are separate and the payload contains site_id."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Concurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Lookup and upsert are separate and the payload contains site_id."
+        },
+        "limitations": [
+          "Sequential transfers are rejected."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "app/api/workers/route.ts",
+          "outcome": "Concurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id.",
+          "summary": "Lookup and upsert are separate and the payload contains site_id."
+        },
+        "summary": "Lookup and upsert are separate and the payload contains site_id."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Lookup and upsert are separate and the payload contains site_id."
+      },
+      "findingId": "csf_13399cd391234fe2a86afb48",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:7c8ed0068c7a1d828022d375f17dd462936fa1406add940191e86e6281831fd1"
+      },
+      "identity": {
+        "anchor": "race-condition.worker-site-binding",
+        "instance": "worker-site-race"
+      },
+      "locations": [
+        {
+          "endLine": 120,
+          "path": "app/api/workers/route.ts",
+          "role": "source",
+          "startLine": 84
+        },
+        {
+          "endLine": 42,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "sink",
+          "startLine": 21
+        }
+      ],
+      "occurrenceId": "occ_cececad4a92e032d7f7499ad",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "candidateId": "current-011",
+        "originalCandidates": [
+          {
+            "confidence": "high",
+            "cwe": [
+              "CWE-362"
+            ],
+            "evidence": "app/api/workers/route.ts:84-120",
+            "ruleId": "race-condition.worker-site-binding",
+            "severity": "medium",
+            "title": "Concurrent worker upserts bypass the site-transfer check"
+          }
+        ],
+        "previousFindings": [],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Lock the natural key and reject site changes transactionally.",
+      "remediationTests": [
+        "Reject the negative path for worker-site-race.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "race-condition.worker-site-binding",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Concurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id."
+      },
+      "summary": "Concurrent first imports for one natural key and different sites can pass preflight and race an upsert that updates site_id.",
+      "taxonomy": {
+        "category": "Race condition / tenant integrity",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Concurrent worker upserts bypass the site-transfer check",
+      "validation": {
+        "assertions": [
+          "Lookup and upsert are separate and the payload contains site_id."
+        ],
+        "limitations": [
+          "Sequential transfers are rejected."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "Lookup and upsert are separate and the payload contains site_id. Parent validation confirmed controlling blobs are identical at 4e3e7e5d and 89995195."
+      },
+      "writeup": {
+        "reportPath": "findings/worker-site-race/worker-site-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Concurrent first-use calls can duplicate organizations and same-name sites through select-then-insert.",
+          "sink": "supabase/migrations/002_workspace_productization.sql",
+          "source": "lib/supabase-admin.ts",
+          "summary": "Provisioning is non-atomic and lacks natural-key uniqueness."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Concurrent first-use calls can duplicate organizations and same-name sites through select-then-insert."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Provisioning is non-atomic and lacks natural-key uniqueness."
+        },
+        "limitations": [
+          "Duplicates remain same-user owned."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "lib/supabase-admin.ts",
+          "outcome": "Concurrent first-use calls can duplicate organizations and same-name sites through select-then-insert.",
+          "summary": "Provisioning is non-atomic and lacks natural-key uniqueness."
+        },
+        "summary": "Provisioning is non-atomic and lacks natural-key uniqueness."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Provisioning is non-atomic and lacks natural-key uniqueness."
+      },
+      "findingId": "csf_f75d6f1cd78d8c433440f49c",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:644d0bbee0a8366456cc7b5e86eeaebb3d3011350539a82de81d0090c2ae4e2b"
+      },
+      "identity": {
+        "anchor": "race-condition.workspace-provisioning",
+        "instance": "workspace-provisioning-race"
+      },
+      "locations": [
+        {
+          "endLine": 715,
+          "path": "lib/supabase-admin.ts",
+          "role": "source",
+          "startLine": 645
+        },
+        {
+          "endLine": 19,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "sink",
+          "startLine": 3
+        }
+      ],
+      "occurrenceId": "occ_a5ee75b432e9149097c869f7",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "candidateId": "current-012",
+        "originalCandidates": [
+          {
+            "confidence": "high",
+            "cwe": [
+              "CWE-362"
+            ],
+            "evidence": "lib/supabase-admin.ts:645-715",
+            "ruleId": "race-condition.workspace-provisioning",
+            "severity": "low",
+            "title": "Workspace provisioning can create duplicate organizations and sites"
+          }
+        ],
+        "previousFindings": [],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Add idempotency keys, uniqueness, and transactional provisioning.",
+      "remediationTests": [
+        "Reject the negative path for workspace-provisioning-race.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "race-condition.workspace-provisioning",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "low",
+        "rationale": "Concurrent first-use calls can duplicate organizations and same-name sites through select-then-insert."
+      },
+      "summary": "Concurrent first-use calls can duplicate organizations and same-name sites through select-then-insert.",
+      "taxonomy": {
+        "category": "Race condition / tenant provisioning",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Workspace provisioning can create duplicate organizations and sites",
+      "validation": {
+        "assertions": [
+          "Provisioning is non-atomic and lacks natural-key uniqueness."
+        ],
+        "limitations": [
+          "Duplicates remain same-user owned."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "Provisioning is non-atomic and lacks natural-key uniqueness. Parent validation confirmed controlling blobs are identical at 4e3e7e5d and 89995195."
+      },
+      "writeup": {
+        "reportPath": "findings/workspace-provisioning-race/workspace-provisioning-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Unauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents.",
+          "sink": "lib/workpack-commercial-store.ts",
+          "source": "app/api/share-sessions/[sessionId]/route.ts",
+          "summary": "Possession of two UUIDs is the complete document-read credential."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Unauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Possession of two UUIDs is the complete document-read credential."
+        },
+        "limitations": [
+          "Sessions expire.",
+          "Production storage is missing and exact Share is MISSING_EVIDENCE."
+        ],
+        "reachability": {
+          "attacker": "Remote public caller or authenticated tenant as described",
+          "entrypoint": "app/api/share-sessions/[sessionId]/route.ts",
+          "outcome": "Unauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents.",
+          "summary": "Possession of two UUIDs is the complete document-read credential."
+        },
+        "summary": "Possession of two UUIDs is the complete document-read credential."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Possession of two UUIDs is the complete document-read credential."
+      },
+      "findingId": "csf_898fe45c59bcb15db8827642",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:aa430029cb82f2dd75f1a3907ab5efa26773e6409fecdca80bf8b0df93643c03"
+      },
+      "identity": {
+        "anchor": "authorization-bypass.share-object-id",
+        "instance": "share-id-credential"
+      },
+      "locations": [
+        {
+          "endLine": 130,
+          "path": "app/api/share-sessions/[sessionId]/route.ts",
+          "role": "source",
+          "startLine": 79
+        },
+        {
+          "endLine": 449,
+          "path": "lib/workpack-commercial-store.ts",
+          "role": "sink",
+          "startLine": 320
+        }
+      ],
+      "occurrenceId": "occ_ad1d5b588f07fab495c08bee",
+      "preventiveControls": [
+        "Enforce the invariant in a shared database or admission control.",
+        "Add a negative regression test for the direct path."
+      ],
+      "provenance": {
+        "candidateId": "current-013",
+        "originalCandidates": [
+          {
+            "confidence": "high",
+            "cwe": [
+              "CWE-639"
+            ],
+            "evidence": "app/api/share-sessions/[sessionId]/route.ts:63-134;lib/workpack-commercial-store.ts:320-449",
+            "ruleId": "authorization-bypass.share-object-id",
+            "severity": "medium",
+            "title": "Public Share documents treat tenant object identifiers as recipient credentials"
+          }
+        ],
+        "previousFindings": [],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Require recipient-specific random or signed short-lived invitation proof.",
+      "remediationTests": [
+        "Reject the negative path for share-id-credential.",
+        "Preserve the intended bounded path."
+      ],
+      "ruleId": "authorization-bypass.share-object-id",
+      "severity": {
+        "changeConditions": "Reassess if deployed controls close the path or runtime evidence changes impact.",
+        "level": "medium",
+        "rationale": "Unauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents."
+      },
+      "summary": "Unauthenticated GET uses sessionId plus workerId membership as sufficient authority to return workpack documents.",
+      "taxonomy": {
+        "category": "Authorization bypass / public Share",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Public Share documents treat tenant object identifiers as recipient credentials",
+      "validation": {
+        "assertions": [
+          "Possession of two UUIDs is the complete document-read credential."
+        ],
+        "limitations": [
+          "Sessions expire.",
+          "Production storage is missing and exact Share is MISSING_EVIDENCE."
+        ],
+        "method": "Static current-source trace at 4e3e7e5d",
+        "summary": "Possession of two UUIDs is the complete document-read credential. Parent validation confirmed controlling blobs are identical at 4e3e7e5d and 89995195."
+      },
+      "writeup": {
+        "reportPath": "findings/share-id-credential/share-id-credential.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "Aggregate resource pressure",
+          "sink": "POST /api/share-sessions/[sessionId]",
+          "source": "Unauthenticated Share caller",
+          "summary": "Many slow bodies consume pre-admission serverless work."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "Aggregate resource pressure"
+        },
+        "likelihood": {
+          "level": "high",
+          "why": "Many slow bodies consume pre-admission serverless work."
+        },
+        "limitations": [
+          "16 KiB and ten-second per-request caps."
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated Share caller",
+          "entrypoint": "POST /api/share-sessions/[sessionId]",
+          "outcome": "Aggregate resource pressure",
+          "summary": "Many slow bodies consume pre-admission serverless work."
+        },
+        "summary": "Many slow bodies consume pre-admission serverless work."
+      },
+      "codeEvidence": [
+        {
+          "code": "enforcePublicJsonRequestBodyBudget(...); JSON.parse(...); checkPublicRateLimit(...);",
+          "endLine": 153,
+          "explanation": "Body read and parse precede distributed admission.",
+          "id": "evidence-1",
+          "label": "Pre-admission body read",
+          "language": "typescript",
+          "path": "app/api/share-sessions/[sessionId]/route.ts",
+          "role": "entrypoint",
+          "startLine": 137
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Current route order is explicit."
+      },
+      "findingId": "csf_e98761caf4a6116ab2b26e32",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:b8323758b0d432f40eb7d548702e9452706f5cb7d8438111b1b14ff010fedeee"
+      },
+      "identity": {
+        "anchor": "public-request-prebody-admission",
+        "instance": "share-ack"
+      },
+      "locations": [
+        {
+          "endLine": 153,
+          "path": "app/api/share-sessions/[sessionId]/route.ts",
+          "role": "entrypoint",
+          "startLine": 137
+        },
+        {
+          "endLine": 35,
+          "path": "lib/public-work-budget.ts",
+          "role": "root_control",
+          "startLine": 28
+        }
+      ],
+      "occurrenceId": "occ_6ac82792ca3ca6e3add95e6b",
+      "preventiveControls": [
+        "Centralize public pre-body admission.",
+        "Add route-order tests."
+      ],
+      "provenance": {
+        "candidateId": "current-014",
+        "originalCandidates": [
+          {
+            "confidence": "high",
+            "cwe": [
+              "CWE-400"
+            ],
+            "evidence": "app/api/safety-reference/status/route.ts:14-37;lib/public-distributed-rate-limit.ts:609-648",
+            "ruleId": "resource-exhaustion.disconnect-cancellation",
+            "severity": "medium",
+            "title": "Safety-reference status cancellation releases admission but does not cancel underlying work"
+          }
+        ],
+        "previousFindings": [],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Acquire a coarse distributed IP rate/concurrency lease before body reads, retaining the recipient-specific limiter after parsing.",
+      "remediationTests": [
+        "Assert coarse admission precedes body reader.",
+        "Verify parallel slow bodies are rejected."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "Admission is ordered after attacker-controlled body consumption."
+      },
+      "ruleId": "resource-exhaustion.share-prebody-admission",
+      "severity": {
+        "changeConditions": "Lower if durable coarse admission precedes every body read.",
+        "level": "medium",
+        "rationale": "Parallel unauthenticated slow bodies occupy request work before admission."
+      },
+      "summary": "The public ACK route reads and parses up to 16 KiB for up to ten seconds before distributed admission.",
+      "taxonomy": {
+        "category": "Resource exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Share acknowledgement admission occurs after unauthenticated body consumption",
+      "validation": {
+        "assertions": [
+          "Body budget line 138 precedes limiter line 152"
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No load test or saved session creation."
+        ],
+        "method": "Static source-order trace",
+        "summary": "Body read and parse precede admission."
+      },
+      "writeup": {
+        "reportPath": "findings/share-ack-prebody-admission/share-ack-prebody-admission.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "Detached DB/filesystem work",
+          "sink": "GET /api/safety-reference/status",
+          "source": "Unauthenticated caller",
+          "summary": "Start work then disconnect repeatedly while leases release early."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "medium",
+          "why": "Detached DB/filesystem work"
+        },
+        "likelihood": {
+          "level": "high",
+          "why": "Start work then disconnect repeatedly while leases release early."
+        },
+        "limitations": [
+          "Pre-aborted requests are rejected."
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated caller",
+          "entrypoint": "GET /api/safety-reference/status",
+          "outcome": "Detached DB/filesystem work",
+          "summary": "Start work then disconnect repeatedly while leases release early."
+        },
+        "summary": "Start work then disconnect repeatedly while leases release early."
+      },
+      "codeEvidence": [
+        {
+          "code": "waitForStatusWork(Promise.all([getSafetyReferenceStats(), loadKoshaGuideCorpus(), loadBundledExactKoshaReferences()]), request.signal)",
+          "endLine": 37,
+          "explanation": "Underlying operations receive no signal.",
+          "id": "evidence-1",
+          "label": "Wrapper-only cancellation",
+          "language": "typescript",
+          "path": "app/api/safety-reference/status/route.ts",
+          "role": "entrypoint",
+          "startLine": 14
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Signal and lease lifetimes are explicit in current source."
+      },
+      "findingId": "csf_b08a96f6b1ba27a33af52a6a",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:0c784234cadca20405e2658184c07b6eeaec6af3e5cf5c59a2c3e4f5ce78a1e5"
+      },
+      "identity": {
+        "anchor": "resource-exhaustion.disconnect-cancellation",
+        "instance": "status-disconnect"
+      },
+      "locations": [
+        {
+          "endLine": 37,
+          "path": "app/api/safety-reference/status/route.ts",
+          "role": "entrypoint",
+          "startLine": 14
+        },
+        {
+          "endLine": 648,
+          "path": "lib/public-distributed-rate-limit.ts",
+          "role": "root_control",
+          "startLine": 641
+        },
+        {
+          "endLine": 3427,
+          "path": "lib/safety-reference-catalog.ts",
+          "role": "sink",
+          "startLine": 3382
+        }
+      ],
+      "occurrenceId": "occ_5356ed840fdbf34f95ca5b73",
+      "preventiveControls": [
+        "Require cancellation-aware protected APIs.",
+        "Test actual work lifetime."
+      ],
+      "provenance": {
+        "candidateId": "current-015",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Propagate AbortSignal to every operation or retain the lease until Promise.all settles.",
+      "remediationTests": [
+        "Abort after start and assert lease remains until settlement.",
+        "Verify disconnects cannot exceed concurrency."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "Cancellation and lease lifetime attach to wrapper, not actual work."
+      },
+      "ruleId": "resource-exhaustion.disconnect-cancellation",
+      "severity": {
+        "changeConditions": "Lower when operations cancel or lease tracks underlying settlement.",
+        "level": "medium",
+        "rationale": "Repeated disconnects can create detached work beyond configured concurrency."
+      },
+      "summary": "The abort wrapper rejects and releases its lease while three operations without AbortSignal continue.",
+      "taxonomy": {
+        "category": "Resource exhaustion / cancellation",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Disconnected safety-status requests release admission while underlying work continues",
+      "validation": {
+        "assertions": [
+          "No AbortSignal parameters",
+          "Lease follows wrapper finally"
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "Corpus caching limits some repeats."
+        ],
+        "method": "Static cancellation trace",
+        "summary": "All protected operations continue after wrapper abort."
+      },
+      "writeup": {
+        "reportPath": "findings/status-disconnect-residual/status-disconnect-residual.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "Operational diagnostic disclosure",
+          "sink": "GET /api/weather",
+          "source": "Unauthenticated weather caller",
+          "summary": "Observe fallback output during provider failure."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "low",
+          "why": "Operational diagnostic disclosure"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Observe fallback output during provider failure."
+        },
+        "limitations": [
+          "Top-level exceptions are redacted."
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated weather caller",
+          "entrypoint": "GET /api/weather",
+          "outcome": "Operational diagnostic disclosure",
+          "summary": "Observe fallback output during provider failure."
+        },
+        "summary": "Observe fallback output during provider failure."
+      },
+      "codeEvidence": [
+        {
+          "code": "const message = error instanceof Error ? error.message : String(error); detail: `... ${message}`",
+          "endLine": 500,
+          "explanation": "Raw upstream error text enters a normal response.",
+          "id": "evidence-1",
+          "label": "Fallback interpolation",
+          "language": "typescript",
+          "path": "lib/weather.ts",
+          "role": "source",
+          "startLine": 489
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "error.message is interpolated into public detail fields."
+      },
+      "findingId": "csf_fdda99ed09c6fb65bc74caff",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:94a1d90014911b0de78b0cb9acfe2e4bec01cbd03ce8f92ecc2a1f18ba3d6712"
+      },
+      "identity": {
+        "anchor": "information-exposure.upstream-errors",
+        "instance": "weather-error-detail"
+      },
+      "locations": [
+        {
+          "endLine": 500,
+          "path": "lib/weather.ts",
+          "role": "source",
+          "startLine": 409
+        },
+        {
+          "endLine": 703,
+          "path": "lib/weather.ts",
+          "role": "source",
+          "startLine": 540
+        },
+        {
+          "endLine": 951,
+          "path": "lib/weather.ts",
+          "role": "sink",
+          "startLine": 940
+        },
+        {
+          "endLine": 110,
+          "path": "app/api/weather/route.ts",
+          "role": "entrypoint",
+          "startLine": 108
+        }
+      ],
+      "occurrenceId": "occ_e54c99614cfa49feb5b55ffc",
+      "preventiveControls": [
+        "Separate internal diagnostics from DTOs.",
+        "Use a shared public projection."
+      ],
+      "provenance": {
+        "candidateId": "current-016",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Log raw provider failures server-side and return fixed fallback messages or enumerated public codes.",
+      "remediationTests": [
+        "Inject raw provider error and assert response omits it.",
+        "Cover every provider branch."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "Public error projection excludes fallback DTO construction."
+      },
+      "ruleId": "information-exposure.upstream-errors",
+      "severity": {
+        "changeConditions": "Raise if secrets are demonstrated; close with fixed public codes.",
+        "level": "low",
+        "rationale": "Operational diagnostics can leak, though no credential is shown in the proven path."
+      },
+      "summary": "Provider errors become successful fallback signal details despite route-level catch redaction.",
+      "taxonomy": {
+        "category": "Information exposure / error handling",
+        "cwe": [
+          "CWE-209"
+        ]
+      },
+      "title": "Weather fallback responses still expose raw upstream error text",
+      "validation": {
+        "assertions": [
+          "Error message interpolated",
+          "Fallback returned with success"
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "No live provider failure induced."
+        ],
+        "method": "Static provider-error trace",
+        "summary": "Upstream diagnostics reach weather.detail and signals[].detail."
+      },
+      "writeup": {
+        "reportPath": "findings/weather-fallback-error-exposure/weather-fallback-error-exposure.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "evidenceRefs": [
+            "evidence-1"
+          ],
+          "outcome": "Higher-than-declared memory pressure",
+          "sink": "POST /api/export/hwpx-template",
+          "source": "Unauthenticated export caller",
+          "summary": "Repeat the largest allowlisted template to force archive expansion."
+        },
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "impact": {
+          "level": "low",
+          "why": "Higher-than-declared memory pressure"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Repeat the largest allowlisted template to force archive expansion."
+        },
+        "limitations": [
+          "Distributed admission and concurrency two apply."
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated export caller",
+          "entrypoint": "POST /api/export/hwpx-template",
+          "outcome": "Higher-than-declared memory pressure",
+          "summary": "Repeat the largest allowlisted template to force archive expansion."
+        },
+        "summary": "Repeat the largest allowlisted template to force archive expansion."
+      },
+      "codeEvidence": [
+        {
+          "code": "statSync compressed check; new AdmZip; entry.getData(); inputZip.toBuffer(); output budget check",
+          "endLine": 201,
+          "explanation": "No uncompressed or pre-allocation budget executes.",
+          "id": "evidence-1",
+          "label": "Post-allocation budget",
+          "language": "typescript",
+          "path": "lib/hwpx-template.ts",
+          "role": "sink",
+          "startLine": 176
+        }
+      ],
+      "confidence": {
+        "level": "high",
+        "rationale": "Code and offline central-directory dimensions establish the gap."
+      },
+      "findingId": "csf_f8f783170119f2531bcc3163",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:775d13b6327b6dbd2248e9591c882738c8216d8000b03f33c4c9cad97e4a7ae8"
+      },
+      "identity": {
+        "anchor": "archive-expansion-budget",
+        "instance": "hwpx-template"
+      },
+      "locations": [
+        {
+          "endLine": 20,
+          "path": "lib/hwpx-template.ts",
+          "role": "root_control",
+          "startLine": 16
+        },
+        {
+          "endLine": 201,
+          "path": "lib/hwpx-template.ts",
+          "role": "sink",
+          "startLine": 176
+        },
+        {
+          "endLine": 1,
+          "path": "templates/hwpx/moel-workplan-truck.hwpx",
+          "role": "evidence",
+          "startLine": 1
+        }
+      ],
+      "occurrenceId": "occ_017f2ee99d5eac6cf9561f13",
+      "preventiveControls": [
+        "Separate compressed/uncompressed budgets.",
+        "Audit binary assets in CI."
+      ],
+      "provenance": {
+        "candidateId": "current-017",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Validate entry count, total uncompressed bytes, and maximum entry size before decompression; enforce peak-memory and streaming caps.",
+      "remediationTests": [
+        "Reject over-budget archive before getData.",
+        "Validate template manifest in CI."
+      ],
+      "rootCause": {
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "summary": "Budgets govern compressed artifacts, not expansion and peak memory."
+      },
+      "ruleId": "resource-exhaustion.hwpx-archive-expansion",
+      "severity": {
+        "changeConditions": "Raise if templates become attacker-controlled or outage is demonstrated.",
+        "level": "low",
+        "rationale": "Allowlisted templates and concurrency constrain abuse, but current archive expands beyond nominal 8 MiB limits."
+      },
+      "summary": "Compressed input and final output are capped, but decompressed entries and peak allocation are not.",
+      "taxonomy": {
+        "category": "Resource exhaustion / document export",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "HWPX limits bound compressed artifacts but not peak archive-expansion memory",
+      "validation": {
+        "assertions": [
+          "No uncompressed budget",
+          "getData/toBuffer precede rejection"
+        ],
+        "evidenceRefs": [
+          "evidence-1"
+        ],
+        "limitations": [
+          "Templates are committed."
+        ],
+        "method": "Static flow plus ZIP central-directory inspection",
+        "summary": "Current template is 3.72 MiB compressed, 15.18 MiB uncompressed, largest entry 8.53 MiB."
+      },
+      "writeup": {
+        "reportPath": "findings/hwpx-archive-expansion/hwpx-archive-expansion.md"
+      }
+    }
+  ],
+  "scanId": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+  "schemaVersion": "1.0"
+}

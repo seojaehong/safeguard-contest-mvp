@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T17:56:13.708Z",
-  "head": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+  "generatedAt": "2026-08-27T18:57:17.600Z",
+  "head": "899951952ee184d527742d541f976f7e72482f2e",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+    "commitSha": "899951952ee184d527742d541f976f7e72482f2e",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-kdbkqwrce-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-8fncz81z7-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_evidence_missing_or_unknown",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "contradicted",
-    "gateCount": 74
+    "gateCount": 75
   },
   "provenGates": [
     {
@@ -194,6 +194,12 @@
       "state": "notice",
       "artifact": "evaluation\\current-full-repository-security-scan-2026-08-27\\report.json",
       "detail": "Standard scan da97e400 is sealed at 4e3e7e5d with 19 findings (14 medium, 5 low) while preserving the immutable original baseline of 18. Coverage remains partial across 9 reviewed surfaces with 26 deferred items. Production 607c39b3 includes focused remediation for six approval-free candidates, but a fresh full-repository rescan is required; the Share object-ID credential finding and twelve database/RLS/atomicity findings remain approval-gated. No mutation occurred and exact saved Share remains MISSING_EVIDENCE. This gate remains notice and is not a proven or security-complete claim."
+    },
+    {
+      "id": "fresh_current_source_security_scan",
+      "state": "notice",
+      "artifact": "evaluation\\current-source-standard-security-scan-2026-08-28\\report.json",
+      "detail": "Fresh Standard scan 1411fb32 is sealed at current source 89995195 with 17 open findings (13 medium, 4 low), partial coverage across 18 recorded surfaces, and 21 deferred coverage items. The immutable original 18-finding baseline is preserved. Two bounded public-error candidates are closed, while four narrower approval-free source residuals, one Share capability boundary, and twelve database/RLS/atomicity findings remain. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "post_remediation_repository_security_scan",
@@ -670,6 +676,26 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "databaseSecurityRemediation": "APPROVAL_GATED",
     "approvalFreeProductSourceRemediation": "LIVE_SOURCE_INCLUDED_FRESH_RESCAN_REQUIRED"
+  },
+  "freshCurrentSourceSecurityScan": {
+    "artifact": "evaluation\\current-source-standard-security-scan-2026-08-28\\report.json",
+    "verdict": "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE",
+    "scanId": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    "sourceHead": "899951952ee184d527742d541f976f7e72482f2e",
+    "deployedProductSource": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+    "reportableFindingCount": 17,
+    "mediumFindingCount": 13,
+    "lowFindingCount": 4,
+    "coverageCompleteness": "partial",
+    "reviewedSurfaceCount": 18,
+    "deferredCoverageItemCount": 21,
+    "approvalGatedDatabaseOrAtomicityCount": 12,
+    "approvalSensitiveShareCapabilityCount": 1,
+    "approvalFreeProductSourceResidualCount": 4,
+    "fullyClosedBoundedSourceCandidateCount": 2,
+    "freshFullRepositoryScanCompleted": true,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "publicSearchDistributedRateLimitReadiness": {
     "artifact": "evaluation\\public-search-distributed-rate-limit-readiness-2026-08-02\\report.json",
@@ -1705,9 +1731,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+      "sourceCommit": "899951952ee184d527742d541f976f7e72482f2e",
       "sourceStatus": "exact",
-      "productionCommit": "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+      "productionCommit": "899951952ee184d527742d541f976f7e72482f2e",
       "productionStatus": "matches_live"
     },
     {
@@ -1941,6 +1967,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "4e3e7e5d9ebad7e91f428a856019122431410be4",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "fresh_current_source_security_scan",
+      "artifact": "evaluation\\current-source-standard-security-scan-2026-08-28\\report.json",
+      "sourceCommit": "899951952ee184d527742d541f976f7e72482f2e",
+      "sourceStatus": "exact",
+      "productionCommit": null,
+      "productionStatus": "missing"
     },
     {
       "id": "agent_chat_durable_admission_security",

@@ -172,6 +172,60 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
   };
 }
 
+function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
+  return {
+    verdict: "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE",
+    scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    sourceHead: "899951952ee184d527742d541f976f7e72482f2e",
+    deployedProductSource: "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+    scan: {
+      status: "completed",
+      mode: "standard",
+      targetKind: "git_revision",
+      coverageCompleteness: "partial",
+      reviewedSurfaceCount: 18,
+      deferredCoverageItemCount: 21,
+      reportableFindingCount: 17,
+      severity: { critical: 0, high: 0, medium: 13, low: 4 },
+    },
+    baseline: { immutableOriginalFindingCount: 18, preserved: true, rewritten: false },
+    currentDisposition: {
+      approvalGatedDatabaseOrAtomicityCount: 12,
+      approvalSensitiveShareCapabilityCount: 1,
+      approvalFreeProductSourceResidualCount: 4,
+      fullyClosedBoundedSourceCandidateCount: 2,
+      securityCompleteClaimAllowed: false,
+    },
+    canonicalArtifacts: {
+      manifest: "evaluation/current-source-standard-security-scan-2026-08-28/canonical/scan-manifest.json",
+      findings: "evaluation/current-source-standard-security-scan-2026-08-28/canonical/findings.json",
+      coverage: "evaluation/current-source-standard-security-scan-2026-08-28/canonical/coverage.json",
+      markdown: "evaluation/current-source-standard-security-scan-2026-08-28/scan-report.md",
+      findingWriteupCount: 17,
+      supportingEvidenceCount: 17,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      wikiPublished: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      databaseSecurityRemediation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      llmWikiPublication: "APPROVAL_GATED",
+      sifVectorRuntime: "APPROVAL_GATED",
+      koshaExactRegistryPromotion: "APPROVAL_GATED",
+      freshFullRepositoryScanCompleted: true,
+      securityCompleteClaimAllowed: false,
+    },
+  };
+}
+
 function documentEditorialReviewReceiptFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_EDITORIAL_REVIEW_RECEIPT",
@@ -3775,6 +3829,12 @@ function createFixtureRoot(): string {
       securityCompleteClaimAllowed: false,
     },
   });
+  const freshScanRoot = path.join("evaluation", "current-source-standard-security-scan-2026-08-28");
+  writeJson(rootDir, path.join(freshScanRoot, "report.json"), freshCurrentSourceSecurityScanFixture());
+  writeJson(rootDir, path.join(freshScanRoot, "canonical", "scan-manifest.json"), { scan: { status: "completed" } });
+  writeJson(rootDir, path.join(freshScanRoot, "canonical", "findings.json"), { findings: [] });
+  writeJson(rootDir, path.join(freshScanRoot, "canonical", "coverage.json"), { completeness: "partial" });
+  fs.writeFileSync(path.join(rootDir, freshScanRoot, "scan-report.md"), "# sealed fixture\n", "utf8");
   writeJson(rootDir, path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
     sourceHead: "fixture-sha",
@@ -7683,6 +7743,40 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const audit = buildNorthstarOpenGateAudit({ rootDir });
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.state).toBe("contradicted");
     expect(audit.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("compatibilityPass=false");
+  });
+
+  it("records the fresh current-source scan as notice and fails closed on boundary drift", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-standard-security-scan-2026-08-28",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "fresh_current_source_security_scan");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("17 open findings (13 medium, 4 low)");
+    expect(gate?.detail).toContain("partial coverage across 18 recorded surfaces");
+    expect(gate?.detail).toContain("21 deferred coverage items");
+    expect(gate?.detail).toContain("four narrower approval-free source residuals");
+    expect(gate?.detail).toContain("one Share capability boundary");
+    expect(gate?.detail).toContain("twelve database/RLS/atomicity findings");
+    expect(gate?.detail).toContain("not security-complete");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      scan: { reportableFindingCount: number };
+      currentDisposition: { approvalFreeProductSourceResidualCount: number };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "fresh_current_source_security_scan")?.state)
+      .toBe("contradicted");
   });
 
   it("keeps accident-case governed-path compatibility fail-closed", async () => {

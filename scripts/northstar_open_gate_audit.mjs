@@ -67,6 +67,7 @@ const EVIDENCE_PATHS = Object.freeze({
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
+  freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-28", "report.json"),
   postRemediationRepositorySecurityScan: path.join("evaluation", "post-remediation-full-repository-security-scan-2026-08-14", "report.json"),
   postRemediationSecuritySourceClosure: path.join("evaluation", "post-remediation-security-source-closure-2026-08-14", "report.json"),
   shareSessionRevocationRemediation: path.join("evaluation", "share-session-revocation-remediation-2026-08-14", "report.json"),
@@ -7946,6 +7947,96 @@ function isDocumentExportAdmissionCompatibilityCurrent(rootDir, gateId, governed
     && readString(compatibility.exactSavedShareVerdict) === "MISSING_EVIDENCE";
 }
 
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateFreshCurrentSourceSecurityScanGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.freshCurrentSourceSecurityScan;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "fresh_current_source_security_scan",
+      label: "Fresh current-source security scan",
+      state: "missing",
+      evidencePath,
+      detail: "The sealed current-source Standard scan is missing or invalid.",
+      nextActions: ["Restore the sealed current-source scan and its canonical artifacts without rewriting the immutable 18-finding baseline."],
+    });
+  }
+
+  const scan = isRecord(report.scan) ? report.scan : {};
+  const severity = isRecord(scan.severity) ? scan.severity : {};
+  const baseline = isRecord(report.baseline) ? report.baseline : {};
+  const disposition = isRecord(report.currentDisposition) ? report.currentDisposition : {};
+  const canonical = isRecord(report.canonicalArtifacts) ? report.canonicalArtifacts : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const canonicalPaths = [canonical.manifest, canonical.findings, canonical.coverage, canonical.markdown]
+    .map(readString)
+    .filter(Boolean);
+  const canonicalFilesPresent = canonicalPaths.length === 4
+    && canonicalPaths.every((relativePath) => isRegularEvidenceFile(rootDir, relativePath));
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.embeddingGenerated === false
+    && mutation.vectorUploadPerformed === false
+    && mutation.wikiPublished === false
+    && mutation.exactTrustRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE"
+    && readString(report.scanId) === "1411fb32-5c18-4d6a-b8ba-d52697757d8a"
+    && readString(report.sourceHead) === "899951952ee184d527742d541f976f7e72482f2e"
+    && readString(report.deployedProductSource) === "607c39b3204fd4e1732890bcc6dbad30e4815ea2"
+    && readString(scan.status) === "completed"
+    && readString(scan.mode) === "standard"
+    && readString(scan.targetKind) === "git_revision"
+    && readString(scan.coverageCompleteness) === "partial"
+    && readNumber(scan.reviewedSurfaceCount) === 18
+    && readNumber(scan.deferredCoverageItemCount) === 21
+    && readNumber(scan.reportableFindingCount) === 17
+    && readNumber(severity.critical) === 0
+    && readNumber(severity.high) === 0
+    && readNumber(severity.medium) === 13
+    && readNumber(severity.low) === 4
+    && readNumber(baseline.immutableOriginalFindingCount) === 18
+    && baseline.preserved === true
+    && baseline.rewritten === false
+    && readNumber(disposition.approvalGatedDatabaseOrAtomicityCount) === 12
+    && readNumber(disposition.approvalSensitiveShareCapabilityCount) === 1
+    && readNumber(disposition.approvalFreeProductSourceResidualCount) === 4
+    && readNumber(disposition.fullyClosedBoundedSourceCandidateCount) === 2
+    && disposition.securityCompleteClaimAllowed === false
+    && readNumber(canonical.findingWriteupCount) === 17
+    && readNumber(canonical.supportingEvidenceCount) === 17
+    && canonicalFilesPresent
+    && noMutation
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remaining.databaseSecurityRemediation) === "APPROVAL_GATED"
+    && readString(remaining.providerDispatchPersistence) === "APPROVAL_GATED"
+    && readString(remaining.llmWikiPublication) === "APPROVAL_GATED"
+    && readString(remaining.sifVectorRuntime) === "APPROVAL_GATED"
+    && readString(remaining.koshaExactRegistryPromotion) === "APPROVAL_GATED"
+    && remaining.freshFullRepositoryScanCompleted === true
+    && remaining.securityCompleteClaimAllowed === false;
+
+  return gateResult({
+    id: "fresh_current_source_security_scan",
+    label: "Fresh current-source security scan",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Fresh Standard scan 1411fb32 is sealed at current source 89995195 with 17 open findings (13 medium, 4 low), partial coverage across 18 recorded surfaces, and 21 deferred coverage items. The immutable original 18-finding baseline is preserved. Two bounded public-error candidates are closed, while four narrower approval-free source residuals, one Share capability boundary, and twelve database/RLS/atomicity findings remain. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      : `Fresh scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(report.scanId) || "missing"}, source=${readString(report.sourceHead) || "missing"}, findings=${readNumber(scan.reportableFindingCount)}, severity=${readNumber(severity.medium)}/${readNumber(severity.low)}, coverage=${readString(scan.coverageCompleteness) || "missing"}/${readNumber(scan.reviewedSurfaceCount)}/${readNumber(scan.deferredCoverageItemCount)}, canonical=${canonicalFilesPresent}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Remediate the four approval-free source residuals in bounded waves and rerun focused validation.",
+          "Keep the Share capability and twelve database/RLS/atomicity findings approval-gated; do not claim security completion from scan completion.",
+        ]
+      : ["Restore the exact sealed scan identity, 17-finding counts, canonical files, partial-coverage boundary, no-mutation state, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
 const SECURITY_ACCIDENT_CASE_COMPATIBILITY_CHANGED_PATHS = [
   "lib/accident-cases.ts",
 ];
@@ -11340,6 +11431,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateRepositorySecurityScanReconciliationGate(rootDir),
     evaluateCurrentSecurityRemediationLedgerGate(rootDir),
     evaluateCurrentRepositorySecurityRescanGate(rootDir),
+    evaluateFreshCurrentSourceSecurityScanGate(rootDir),
     evaluatePostRemediationRepositorySecurityScanGate(rootDir),
     evaluateShareSessionRevocationSecurityGate(rootDir),
     evaluateShareRecipientContactVerificationGate(rootDir),

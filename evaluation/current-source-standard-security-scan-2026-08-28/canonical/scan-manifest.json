@@ -1,0 +1,94 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "368e7db27b207e6a171e4cd7a5bb1c8a0ba4a4dac1b680b6ecb2d3d1d631dd7a"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "0a596f22aef06a588b3d345a0b21d3b67cca0fa20b0a2d3ffc45a9f491ffa7ae"
+      }
+    ],
+    "completedAt": "2026-08-27T18:23:47.932556Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
+    "preservedSources": {
+      "checkpoints/1b42201f83fbc88f86ef82f9fd5cb0410e8edc5bc938b6aa38638b2441e448c2.json": "6f619bf93a987e7bb7893c9932ef3c47760217d6359d2145b5222750f8940662",
+      "checkpoints/832687e411cb2e4bf2992a213f0855c3752f41588f9d0db95ce6d89d95c9055e.json": "832687e411cb2e4bf2992a213f0855c3752f41588f9d0db95ce6d89d95c9055e",
+      "checkpoints/e0c61a68a68232815683b3265fd57696b3463fc398c82630f993a4b7633afebd.json": "087f4e763f58f0d0e192c4589ac48a3b423caae7bddea41c9340d7a255be7069",
+      "checkpoints/e527487f13882a3c280011ecdeb1cf22bcb973c0ce40acdc1470760881d6a949.json": "59e6b6c9166fd80ee21cad27627c6b412adda75bd1365b66c5b32acc0613df24",
+      "checkpoints/f4526228cba792f90d02b33b271c916aa5e1fbfbdd8c3734d6cf01ffc3e82b59.json": "a94021e168017aa6fb3729cdf55b3b62c6de4627fa9af97733441ff3d9dce532"
+    },
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.22"
+    },
+    "scope": {
+      "context": "Preserve immutable original 18-finding baseline. Verify current 899951952ee184d527742d541f976f7e72482f2e source with deployed product source at 607c39b3204fd4e1732890bcc6dbad30e4815ea2 without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed. Validate the six bounded current-source remediations and report partial coverage honestly.",
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "Partial coverage for historical/generated files.",
+        "Live DB and exact saved Share unverified."
+      ],
+      "runtimeStatus": "No privileged mutation or provider action.",
+      "summary": "Whole-repository Standard scan at 89995195.",
+      "validationMode": "offline static review and Git object comparison to deployed product source 607c39b"
+    },
+    "sealedAt": "2026-08-27T18:23:47.932556Z",
+    "startedAt": "2026-08-27T18:00:56.575619Z",
+    "status": "completed",
+    "target": {
+      "displayName": "safeclaw-northstar-current",
+      "kind": "git_revision",
+      "revision": "899951952ee184d527742d541f976f7e72482f2e",
+      "targetId": "target_sha256_59a91dd8129f171a6e0ff82b60460781f1067b1940d76c7a524e5f0e2b7ec5de"
+    },
+    "threatModel": {
+      "assets": [
+        "Tenant/workpack data",
+        "Share content",
+        "MCP tokens",
+        "Safety evidence",
+        "Dispatch/engine attestations"
+      ],
+      "assumptions": [
+        "No privileged mutation.",
+        "Static source identity is not runtime proof.",
+        "Exact Share MISSING_EVIDENCE."
+      ],
+      "attackerCapabilities": [
+        "Unauthenticated remote caller",
+        "Authenticated tenant PostgREST caller",
+        "MCP token holder",
+        "Failing external provider"
+      ],
+      "securityObjectives": [
+        "Tenant binding",
+        "Capability Share access",
+        "Fail-closed admission/dispatch",
+        "Bounded work/stable errors",
+        "Governed promotion",
+        "Immutable baseline"
+      ],
+      "summary": "Next.js/Vercel app with public Share/export/provider work, service-role Supabase, direct RLS, MCP, Hermes/OpenClaw, and governed knowledge/KOSHA/vector workflows.",
+      "trustBoundaries": [
+        "Browser/API",
+        "Service-role Supabase",
+        "Public Share",
+        "MCP tools",
+        "Public expensive work",
+        "Provider/engine",
+        "Operator publication"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

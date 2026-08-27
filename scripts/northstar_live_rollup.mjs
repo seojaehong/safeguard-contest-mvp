@@ -46,6 +46,7 @@ const ARTIFACTS = Object.freeze({
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
+  freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-28", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
   shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
@@ -562,6 +563,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const repositorySecurityScanReconciliation = tryReadJson(rootDir, ARTIFACTS.repositorySecurityScanReconciliation);
   const currentSecurityRemediationLedger = tryReadJson(rootDir, ARTIFACTS.currentSecurityRemediationLedger);
   const currentRepositorySecurityRescan = tryReadJson(rootDir, ARTIFACTS.currentRepositorySecurityRescan);
+  const freshCurrentSourceSecurityScan = tryReadJson(rootDir, ARTIFACTS.freshCurrentSourceSecurityScan);
   const agentChatDurableAdmission = tryReadJson(rootDir, ARTIFACTS.agentChatDurableAdmission);
   const mcpProviderAdmission = tryReadJson(rootDir, ARTIFACTS.mcpProviderAdmission);
   const shareRecipientContactVerification = tryReadJson(rootDir, ARTIFACTS.shareRecipientContactVerification);
@@ -697,6 +699,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "repository_security_scan_reconciliation", ARTIFACTS.repositorySecurityScanReconciliation, repositorySecurityScanReconciliation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_security_remediation_ledger", ARTIFACTS.currentSecurityRemediationLedger, currentSecurityRemediationLedger),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_repository_security_rescan", ARTIFACTS.currentRepositorySecurityRescan, currentRepositorySecurityRescan),
+    evidenceStatus(rootDir, currentHead, liveCommit, "fresh_current_source_security_scan", ARTIFACTS.freshCurrentSourceSecurityScan, freshCurrentSourceSecurityScan),
     evidenceStatus(rootDir, currentHead, liveCommit, "agent_chat_durable_admission_security", ARTIFACTS.agentChatDurableAdmission, agentChatDurableAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "mcp_provider_admission_security", ARTIFACTS.mcpProviderAdmission, mcpProviderAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "share_recipient_contact_verification_security", ARTIFACTS.shareRecipientContactVerification, shareRecipientContactVerification),
@@ -947,6 +950,26 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareVerdict: asString(recordAt(currentRepositorySecurityRescan, "remainingBoundaries")?.exactSavedShareVerdict),
       databaseSecurityRemediation: asString(recordAt(currentRepositorySecurityRescan, "remainingBoundaries")?.databaseSecurityRemediation),
       approvalFreeProductSourceRemediation: asString(recordAt(currentRepositorySecurityRescan, "remainingBoundaries")?.approvalFreeProductSourceRemediation),
+    },
+    freshCurrentSourceSecurityScan: {
+      artifact: ARTIFACTS.freshCurrentSourceSecurityScan,
+      verdict: isRecord(freshCurrentSourceSecurityScan) ? asString(freshCurrentSourceSecurityScan.verdict) : "missing",
+      scanId: isRecord(freshCurrentSourceSecurityScan) ? asString(freshCurrentSourceSecurityScan.scanId) : "",
+      sourceHead: isRecord(freshCurrentSourceSecurityScan) ? asString(freshCurrentSourceSecurityScan.sourceHead) : "",
+      deployedProductSource: isRecord(freshCurrentSourceSecurityScan) ? asString(freshCurrentSourceSecurityScan.deployedProductSource) : "",
+      reportableFindingCount: asNumber(recordAt(freshCurrentSourceSecurityScan, "scan")?.reportableFindingCount),
+      mediumFindingCount: asNumber(recordAt(recordAt(freshCurrentSourceSecurityScan, "scan"), "severity")?.medium),
+      lowFindingCount: asNumber(recordAt(recordAt(freshCurrentSourceSecurityScan, "scan"), "severity")?.low),
+      coverageCompleteness: asString(recordAt(freshCurrentSourceSecurityScan, "scan")?.coverageCompleteness),
+      reviewedSurfaceCount: asNumber(recordAt(freshCurrentSourceSecurityScan, "scan")?.reviewedSurfaceCount),
+      deferredCoverageItemCount: asNumber(recordAt(freshCurrentSourceSecurityScan, "scan")?.deferredCoverageItemCount),
+      approvalGatedDatabaseOrAtomicityCount: asNumber(recordAt(freshCurrentSourceSecurityScan, "currentDisposition")?.approvalGatedDatabaseOrAtomicityCount),
+      approvalSensitiveShareCapabilityCount: asNumber(recordAt(freshCurrentSourceSecurityScan, "currentDisposition")?.approvalSensitiveShareCapabilityCount),
+      approvalFreeProductSourceResidualCount: asNumber(recordAt(freshCurrentSourceSecurityScan, "currentDisposition")?.approvalFreeProductSourceResidualCount),
+      fullyClosedBoundedSourceCandidateCount: asNumber(recordAt(freshCurrentSourceSecurityScan, "currentDisposition")?.fullyClosedBoundedSourceCandidateCount),
+      freshFullRepositoryScanCompleted: recordAt(freshCurrentSourceSecurityScan, "remainingBoundaries")?.freshFullRepositoryScanCompleted === true,
+      securityCompleteClaimAllowed: recordAt(freshCurrentSourceSecurityScan, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(freshCurrentSourceSecurityScan, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     publicSearchDistributedRateLimitReadiness: {
       artifact: ARTIFACTS.publicSearchDistributedRateLimitReadiness,
