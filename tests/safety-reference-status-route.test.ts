@@ -272,20 +272,32 @@ describe("safety-reference status route", () => {
     expect(JSON.stringify(payload)).not.toContain("C:/private/kosha-corpus");
   });
 
-  it("releases status admission when the client disconnects", async () => {
-    const controller = new AbortController();
-    mocks.getSafetyReferenceStats.mockImplementationOnce(() => new Promise(() => undefined));
+  it("holds status admission until disconnected work settles", async () => {
+    const firstController = new AbortController();
+    const secondController = new AbortController();
+    const deferred: Array<(value: typeof readyCatalogStats) => void> = [];
+    mocks.getSafetyReferenceStats.mockImplementation(() => new Promise((resolve) => deferred.push(resolve)));
     mocks.loadKoshaGuideCorpus.mockResolvedValue({
       status: "unconfigured",
       rootDir: null,
       failures: []
     });
 
-    const pending = GET(statusRequest(controller.signal));
-    await vi.waitFor(() => expect(mocks.getSafetyReferenceStats).toHaveBeenCalledOnce());
-    controller.abort(new DOMException("client disconnected", "AbortError"));
+    const first = GET(statusRequest(firstController.signal));
+    const second = GET(statusRequest(secondController.signal));
+    await vi.waitFor(() => expect(mocks.getSafetyReferenceStats).toHaveBeenCalledTimes(2));
+    firstController.abort(new DOMException("client disconnected", "AbortError"));
+    secondController.abort(new DOMException("client disconnected", "AbortError"));
 
-    await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+    const busy = await GET(statusRequest());
+    expect(busy.status).toBe(503);
+    await expect(busy.json()).resolves.toMatchObject({
+      code: "SAFETY_REFERENCE_STATUS_CONCURRENCY_LIMIT"
+    });
+
+    deferred.forEach((resolve) => resolve(readyCatalogStats));
+    await expect(first).rejects.toMatchObject({ name: "AbortError" });
+    await expect(second).rejects.toMatchObject({ name: "AbortError" });
   });
 
   it("does not start status work for an already disconnected request", async () => {

@@ -14,9 +14,21 @@ const STATUS_CACHE_CONTROL = "public, max-age=5, s-maxage=30, stale-while-revali
 function waitForStatusWork<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
   signal.throwIfAborted();
   return new Promise<T>((resolve, reject) => {
-    const abort = () => reject(signal.reason);
+    let disconnected = false;
+    const abort = () => {
+      disconnected = true;
+    };
     signal.addEventListener("abort", abort, { once: true });
-    promise.then(resolve, reject).finally(() => {
+    promise.then(
+      (value) => {
+        if (disconnected || signal.aborted) reject(signal.reason);
+        else resolve(value);
+      },
+      (error: unknown) => {
+        if (disconnected || signal.aborted) reject(signal.reason);
+        else reject(error);
+      },
+    ).finally(() => {
       signal.removeEventListener("abort", abort);
     });
   });
