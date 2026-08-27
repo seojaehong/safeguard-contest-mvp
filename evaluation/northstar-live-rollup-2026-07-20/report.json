@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-27T21:31:23.655Z",
-  "head": "b56800c428afc484e6f4d53616e592f69e1141bf",
+  "generatedAt": "2026-08-27T21:45:26.729Z",
+  "head": "ab5a9011ec0c970c7efcece8bff2d1bcde48bbe8",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "b56800c428afc484e6f4d53616e592f69e1141bf",
+    "commitSha": "ab5a9011ec0c970c7efcece8bff2d1bcde48bbe8",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-etf8mqcdb-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-fs09o5dqy-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_evidence_missing_or_unknown",
@@ -238,6 +238,12 @@
       "detail": "Live source requires a distributed authenticated-user quota and engine-work lease before Agent Chat model or tool execution, with busy, failure, completion, and cancellation release covered by 24 focused and 55 adjacent tests. Production still reports pre-auth instance mode, so authenticated Agent Chat is fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
+      "id": "public_json_request_body_budget",
+      "state": "proven",
+      "artifact": "evaluation\\public-json-request-body-budget-2026-08-11\\report.json",
+      "detail": "The corrected current-source scan's medium public JSON body-budget finding is source-remediated and live-proven across /api/ask, /api/ask/stream, and /api/knowledge/match with pre-parse byte limits, 48 focused/adjacent tests, and a current 23 files / 215 tests governed-path companion. The immutable 14-finding scan and nine deferred candidates remain visible, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
       "id": "security_resource_remediation",
       "state": "proven",
       "artifact": "evaluation\\security-resource-remediation-2026-08-11\\report.json",
@@ -262,10 +268,28 @@
       "detail": "Improvement and dedicated photo analysis now share pre-provider byte, count, MIME/signature, rate, and concurrency controls with 76 tests plus a current 23 files / 215 tests governed-path companion. Production currently reports instance fallback rather than distributed admission, the immutable 14-finding scan remains unchanged, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
+      "id": "public_provider_cancellation",
+      "state": "notice",
+      "artifact": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
+      "detail": "Weather coalescing cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The original deployed receipt remains 9 files / 104 tests, and current source 99c7df72 adds a 6 files / 49 tests cancellation refresh; no live provider cancellation call was executed. The canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
       "id": "public_provider_admission",
       "state": "notice",
       "artifact": "evaluation\\public-provider-admission-2026-08-11\\report.json",
       "detail": "Current production enforces mode-weighted provider work units (template 0, enhanced 2, full 12) with completion/cancellation release, 23 files / 215 tests governed-path compatibility, and live no-provider work-budget probes across ask, weather, and knowledge. Production still reports process-instance admission because Upstash is not configured; both canonical medium findings remain immutable, distributed activation and a fresh follow-up scan remain required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "public_ask_distributed_admission",
+      "state": "proven",
+      "artifact": "evaluation\\public-ask-distributed-admission-2026-08-14\\report.json",
+      "detail": "Current production keeps template work at zero and fails JSON/SSE enhanced/full closed with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before provider work when distributed admission is unavailable. The immutable csf_9b3cc6648586dabf4bfa61e9 finding still requires a fresh scan; backend activation is OPERATOR_CONFIGURATION_REQUIRED, no provider or mutation was used, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "public_search_distributed_admission",
+      "state": "proven",
+      "artifact": "evaluation\\public-search-distributed-admission-2026-08-14\\report.json",
+      "detail": "Live legal, safety-reference, and weather provider work fails closed before upstream calls without distributed admission. Shared capacity is 12 with weights 6/3/1 per coalesced job. Immutable finding csf_bb897a39277591f4fbab0ca7 still requires a fresh scan; activation is OPERATOR_CONFIGURATION_REQUIRED, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "public_search_distributed_rate_limit_readiness",
@@ -1847,9 +1871,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "b56800c428afc484e6f4d53616e592f69e1141bf",
+      "sourceCommit": "ab5a9011ec0c970c7efcece8bff2d1bcde48bbe8",
       "sourceStatus": "exact",
-      "productionCommit": "b56800c428afc484e6f4d53616e592f69e1141bf",
+      "productionCommit": "ab5a9011ec0c970c7efcece8bff2d1bcde48bbe8",
       "productionStatus": "matches_live"
     },
     {
@@ -1976,9 +2000,9 @@
       "id": "document_export_capability_truth",
       "artifact": "evaluation\\document-export-capability-truth-2026-08-17\\report.json",
       "sourceCommit": "b56800c428afc484e6f4d53616e592f69e1141bf",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "b56800c428afc484e6f4d53616e592f69e1141bf",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "ontology_viewport_workbench",

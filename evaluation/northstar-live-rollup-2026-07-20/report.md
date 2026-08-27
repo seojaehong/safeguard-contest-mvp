@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-27T21:31:23.655Z
-Source HEAD at generation: b56800c428afc484e6f4d53616e592f69e1141bf
-Live commit at generation: b56800c428afc484e6f4d53616e592f69e1141bf
+Generated at: 2026-08-27T21:45:26.729Z
+Source HEAD at generation: ab5a9011ec0c970c7efcece8bff2d1bcde48bbe8
+Live commit at generation: ab5a9011ec0c970c7efcece8bff2d1bcde48bbe8
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_evidence_missing_or_unknown`
@@ -427,11 +427,15 @@ Overall: `northstar_evidence_missing_or_unknown`
 | hwpx_archive_expansion_security | notice | evaluation\hwpx-archive-expansion-security-2026-08-28\report.json |
 | post_remediation_repository_security_scan | notice | evaluation\post-remediation-full-repository-security-scan-2026-08-14\report.json |
 | agent_chat_durable_admission_security | notice | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
+| public_json_request_body_budget | proven | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | security_resource_remediation | proven | evaluation\security-resource-remediation-2026-08-11\report.json |
 | security_upstream_transport_remediation | proven | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |
 | security_safety_reference_surface_remediation | proven | evaluation\security-safety-reference-surface-remediation-2026-08-11\report.json |
 | improvement_photo_analysis_budget | notice | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
+| public_provider_cancellation | notice | evaluation\public-provider-cancellation-2026-08-11\report.json |
 | public_provider_admission | notice | evaluation\public-provider-admission-2026-08-11\report.json |
+| public_ask_distributed_admission | proven | evaluation\public-ask-distributed-admission-2026-08-14\report.json |
+| public_search_distributed_admission | proven | evaluation\public-search-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_rate_limit_readiness | notice | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | notice | evaluation\security-public-generation-admission-2026-08-04\report.json |
 | security_followup_remediation | proven | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
@@ -484,7 +488,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
 | launch_operations_readiness_cockpit | ancestor | ancestor_of_head | evaluation\launch-operations-readiness-2026-08-26\report.json |
-| document_export_capability_truth | exact | matches_live | evaluation\document-export-capability-truth-2026-08-17\report.json |
+| document_export_capability_truth | ancestor | ancestor_of_head | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | ontology_viewport_workbench | ancestor | ancestor_of_head | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
 | knowledge_viewport_workbench | ancestor | ancestor_of_head | evaluation\knowledge-viewport-workbench-2026-08-17\report.json |
 | llm_wiki_candidate_content_readiness | ancestor | ancestor_of_head | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |

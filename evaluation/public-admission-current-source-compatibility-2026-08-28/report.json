@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "safeclaw-public-admission-current-source-compatibility/v1",
+  "generatedAt": "2026-08-27T21:43:30.000Z",
+  "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_ADMISSION_CURRENT_SOURCE_COMPATIBILITY",
+  "sourceHead": "b56800c428afc484e6f4d53616e592f69e1141bf",
+  "productionCommit": "b56800c428afc484e6f4d53616e592f69e1141bf",
+  "productionBranch": "master",
+  "productionEnvironment": "production",
+  "deploymentUrl": "safeguard-contest-etf8mqcdb-seojaehongs-projects.vercel.app",
+  "coveredGateIds": [
+    "public_json_request_body_budget",
+    "public_provider_cancellation",
+    "public_ask_distributed_admission",
+    "public_search_distributed_admission"
+  ],
+  "scope": {
+    "publicJsonRoutes": [
+      "app/api/ask/route.ts",
+      "app/api/ask/stream/route.ts",
+      "app/api/knowledge/match/route.ts",
+      "lib/public-work-budget.ts"
+    ],
+    "providerCancellationPaths": [
+      "app/api/weather/route.ts",
+      "app/api/workpack/remediate/route.ts",
+      "lib/ai.ts",
+      "lib/knowledge-candidate-route.ts"
+    ],
+    "publicAskPaths": [
+      "app/api/ask/route.ts",
+      "app/api/ask/stream/route.ts",
+      "components/SafeGuardCommandCenter.tsx",
+      "lib/ask-stream-client.ts",
+      "lib/public-ask-admission.ts"
+    ],
+    "publicSearchPaths": [
+      "app/api/search/route.ts",
+      "app/api/safety-reference/search/route.ts",
+      "app/api/weather/route.ts",
+      "lib/public-search-admission.ts"
+    ],
+    "originalReportsRewritten": false,
+    "compatibilityOnly": true
+  },
+  "currentContracts": {
+    "oversizedJsonRejectedBeforeParsing": true,
+    "templateAskProviderWorkUnit": 0,
+    "providerBackedAskRequiresDistributedAdmission": true,
+    "legalSafetyWeatherRequireDistributedAdmission": true,
+    "requestAbortPropagatesToProviderDescendants": true,
+    "weatherRawProviderErrorsRemainServerOnly": true
+  },
+  "verification": {
+    "focusedAndAdjacentVitest": {
+      "files": 13,
+      "tests": 101,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "nextVersion": "15.5.22",
+    "staticPages": 28,
+    "dependencyAuditVulnerabilities": 0,
+    "diffCheck": "PASS"
+  },
+  "liveReadOnlyProbe": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "providerCallExecuted": false,
+    "caseCount": 11,
+    "passedCount": 11,
+    "failedCount": 0,
+    "cases": [
+      { "name": "oversize-ask", "path": "/api/ask", "method": "POST", "status": 413, "code": "PUBLIC_WORK_BUDGET_EXCEEDED", "rateLimit": "instance", "limit": 131072 },
+      { "name": "oversize-ask-stream", "path": "/api/ask/stream", "method": "POST", "status": 413, "code": "PUBLIC_WORK_BUDGET_EXCEEDED", "rateLimit": "instance", "limit": 131072 },
+      { "name": "oversize-knowledge-match", "path": "/api/knowledge/match", "method": "POST", "status": 413, "code": "PUBLIC_WORK_BUDGET_EXCEEDED", "rateLimit": "instance", "limit": 16384 },
+      { "name": "ask-template", "path": "/api/ask", "method": "POST", "status": 200, "code": "", "rateLimit": "instance", "aiMode": "template", "workUnit": 0 },
+      { "name": "ask-enhanced", "path": "/api/ask", "method": "POST", "status": 503, "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "rateLimit": "distributed", "retryAfterSeconds": 5 },
+      { "name": "ask-full", "path": "/api/ask", "method": "POST", "status": 503, "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "rateLimit": "distributed", "retryAfterSeconds": 5 },
+      { "name": "ask-stream-enhanced", "path": "/api/ask/stream", "method": "POST", "status": 503, "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "rateLimit": "distributed", "retryAfterSeconds": 5 },
+      { "name": "ask-stream-full", "path": "/api/ask/stream", "method": "POST", "status": 503, "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "rateLimit": "distributed", "retryAfterSeconds": 5 },
+      { "name": "search-legal", "path": "/api/search", "method": "GET", "status": 503, "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "rateLimit": "distributed", "retryAfterSeconds": 5 },
+      { "name": "search-safety-reference", "path": "/api/safety-reference/search", "method": "GET", "status": 503, "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "rateLimit": "distributed", "retryAfterSeconds": 5 },
+      { "name": "search-weather", "path": "/api/weather", "method": "GET", "status": 503, "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "rateLimit": "distributed", "retryAfterSeconds": 5 }
+    ]
+  },
+  "originalSecurityBaselinesRewritten": false,
+  "mutationBoundary": {
+    "dbSchemaMutationPerformed": false,
+    "dbDataMutationPerformed": false,
+    "providerCallPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "freshFollowUpScan": "REQUIRED",
+    "securityCompleteClaimAllowed": false,
+    "distributedBackendActivation": "OPERATOR_CONFIGURATION_REQUIRED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedOperationsUnchanged": true
+  }
+}

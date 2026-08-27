@@ -5506,6 +5506,56 @@ function createFixtureRoot(): string {
       },
     })),
   });
+  writeJson(rootDir, path.join("evaluation", "public-admission-current-source-compatibility-2026-08-28", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_ADMISSION_CURRENT_SOURCE_COMPATIBILITY",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    coveredGateIds: [
+      "public_json_request_body_budget",
+      "public_provider_cancellation",
+      "public_ask_distributed_admission",
+      "public_search_distributed_admission",
+    ],
+    verification: {
+      focusedAndAdjacentVitest: { files: 13, tests: 101, failed: 0, status: "PASS" },
+      typecheck: "PASS",
+      build: "PASS",
+      dependencyAuditVulnerabilities: 0,
+    },
+    liveReadOnlyProbe: {
+      providerCallExecuted: false,
+      cases: [
+        { name: "oversize-ask", status: 413, code: "PUBLIC_WORK_BUDGET_EXCEEDED", rateLimit: "instance" },
+        { name: "oversize-ask-stream", status: 413, code: "PUBLIC_WORK_BUDGET_EXCEEDED", rateLimit: "instance" },
+        { name: "oversize-knowledge-match", status: 413, code: "PUBLIC_WORK_BUDGET_EXCEEDED", rateLimit: "instance" },
+        { name: "ask-template", status: 200, code: "", rateLimit: "instance" },
+        { name: "ask-enhanced", status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimit: "distributed" },
+        { name: "ask-full", status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimit: "distributed" },
+        { name: "ask-stream-enhanced", status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimit: "distributed" },
+        { name: "ask-stream-full", status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimit: "distributed" },
+        { name: "search-legal", status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimit: "distributed" },
+        { name: "search-safety-reference", status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimit: "distributed" },
+        { name: "search-weather", status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimit: "distributed" },
+      ],
+    },
+    originalSecurityBaselinesRewritten: false,
+    mutationBoundary: {
+      dbSchemaMutationPerformed: false,
+      dbDataMutationPerformed: false,
+      providerCallPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      freshFollowUpScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      distributedBackendActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "document-risk-row-mobile-density-2026-08-27", "report.json"), {
     schema: "safeclaw-document-risk-row-mobile-density/v1",
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_RISK_ROW_MOBILE_DENSITY",
@@ -8284,6 +8334,53 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("liveProviderCall=true");
     expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("followUp=NOT_REQUIRED");
     expect(audit.gates.find((gate) => gate.id === "public_provider_cancellation")?.detail).toContain("exactShare=PASS");
+  });
+
+  it("keeps current public admission compatibility fail-closed on live probe or Share overclaim", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    writeText(rootDir, path.join("app", "api", "ask", "stream", "route.ts"), "export const currentAskStreamAdmission = true;\n");
+    writeText(rootDir, path.join("app", "api", "weather", "route.ts"), "export const currentWeatherAdmission = true;\n");
+    execFileSync("git", ["add", "app/api/ask/stream/route.ts", "app/api/weather/route.ts"], { cwd: rootDir, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "refresh public admission"], { cwd: rootDir, stdio: "ignore" });
+    const currentSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: rootDir, encoding: "utf8" }).trim();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "public-admission-current-source-compatibility-2026-08-28",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      sourceHead: string;
+      productionCommit: string;
+      liveReadOnlyProbe: { cases: Array<{ name: string; status: number }> };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.sourceHead = currentSha;
+    report.productionCommit = currentSha;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const compatible = buildNorthstarOpenGateAudit({ rootDir });
+    expect(compatible.gates.find((gate) => gate.id === "public_json_request_body_budget")?.state).toBe("proven");
+    expect(compatible.gates.find((gate) => gate.id === "public_provider_cancellation")?.state).toBe("notice");
+    expect(compatible.gates.find((gate) => gate.id === "public_ask_distributed_admission")?.state).toBe("proven");
+    expect(compatible.gates.find((gate) => gate.id === "public_search_distributed_admission")?.state).toBe("proven");
+
+    const fullCase = report.liveReadOnlyProbe.cases.find((item) => item.name === "ask-full");
+    if (!fullCase) throw new Error("ask-full fixture is missing");
+    fullCase.status = 200;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    for (const gateId of [
+      "public_json_request_body_budget",
+      "public_provider_cancellation",
+      "public_ask_distributed_admission",
+      "public_search_distributed_admission",
+    ]) {
+      expect(contradicted.gates.find((gate) => gate.id === gateId)?.state).toBe("contradicted");
+    }
   });
 
   it("keeps provider cancellation current through the Wiki SIF compatibility receipt and fails closed when it breaks", async () => {

@@ -87,6 +87,7 @@ const EVIDENCE_PATHS = Object.freeze({
   publicProviderAdmission: path.join("evaluation", "public-provider-admission-2026-08-11", "report.json"),
   publicAskDistributedAdmission: path.join("evaluation", "public-ask-distributed-admission-2026-08-14", "report.json"),
   publicSearchDistributedAdmission: path.join("evaluation", "public-search-distributed-admission-2026-08-14", "report.json"),
+  publicAdmissionCurrentSourceCompatibility: path.join("evaluation", "public-admission-current-source-compatibility-2026-08-28", "report.json"),
   publicSearchDistributedRateLimitReadiness: path.join("evaluation", "public-search-distributed-rate-limit-readiness-2026-08-02", "report.json"),
   publicGenerationAdmissionSecurity: path.join("evaluation", "security-public-generation-admission-2026-08-04", "report.json"),
   securityFollowupRemediation: path.join("evaluation", "codex-security-followup-remediation-2026-08-11", "report.json"),
@@ -7971,6 +7972,73 @@ function isDocumentExportAdmissionCompatibilityCurrent(rootDir, gateId, governed
 
 /**
  * @param {string} rootDir
+ * @param {string} gateId
+ * @param {string[]} governedPaths
+ */
+function isPublicAdmissionCurrentSourceCompatibilityCurrent(rootDir, gateId, governedPaths) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.publicAdmissionCurrentSourceCompatibility);
+  if (!isRecord(report) || !isRecord(report.verification) || !isRecord(report.liveReadOnlyProbe)) {
+    return false;
+  }
+  const verification = report.verification;
+  const tests = isRecord(verification.focusedAndAdjacentVitest) ? verification.focusedAndAdjacentVitest : {};
+  const live = report.liveReadOnlyProbe;
+  const liveCases = Array.isArray(live.cases) ? live.cases.filter(isRecord) : [];
+  const coveredGateIds = Array.isArray(report.coveredGateIds) ? report.coveredGateIds.map(readString) : [];
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const casePass = (name, status, code, rateLimit = "") => liveCases.some((item) => (
+    readString(item.name) === name
+    && readNumber(item.status) === status
+    && readString(item.code) === code
+    && (rateLimit.length === 0 || readString(item.rateLimit) === rateLimit)
+  ));
+  const noMutation = mutation.dbSchemaMutationPerformed === false
+    && mutation.dbDataMutationPerformed === false
+    && mutation.providerCallPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  return readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_ADMISSION_CURRENT_SOURCE_COMPATIBILITY"
+    && sourceHead.length > 0
+    && sourceHead === readString(report.productionCommit)
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths)
+    && coveredGateIds.length === 4
+    && coveredGateIds.includes(gateId)
+    && readNumber(tests.files) === 13
+    && readNumber(tests.tests) === 101
+    && readNumber(tests.failed) === 0
+    && readString(tests.status) === "PASS"
+    && verification.typecheck === "PASS"
+    && verification.build === "PASS"
+    && readNumber(verification.dependencyAuditVulnerabilities) === 0
+    && live.providerCallExecuted === false
+    && liveCases.length === 11
+    && casePass("oversize-ask", 413, "PUBLIC_WORK_BUDGET_EXCEEDED", "instance")
+    && casePass("oversize-ask-stream", 413, "PUBLIC_WORK_BUDGET_EXCEEDED", "instance")
+    && casePass("oversize-knowledge-match", 413, "PUBLIC_WORK_BUDGET_EXCEEDED", "instance")
+    && casePass("ask-template", 200, "", "instance")
+    && casePass("ask-enhanced", 503, "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "distributed")
+    && casePass("ask-full", 503, "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "distributed")
+    && casePass("ask-stream-enhanced", 503, "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "distributed")
+    && casePass("ask-stream-full", 503, "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "distributed")
+    && casePass("search-legal", 503, "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "distributed")
+    && casePass("search-safety-reference", 503, "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "distributed")
+    && casePass("search-weather", 503, "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "distributed")
+    && noMutation
+    && report.originalSecurityBaselinesRewritten === false
+    && readString(remaining.freshFollowUpScan) === "REQUIRED"
+    && remaining.securityCompleteClaimAllowed === false
+    && readString(remaining.distributedBackendActivation) === "OPERATOR_CONFIGURATION_REQUIRED"
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+}
+
+/**
+ * @param {string} rootDir
  * @returns {GateResult}
  */
 function evaluateFreshCurrentSourceSecurityScanGate(rootDir) {
@@ -9196,7 +9264,8 @@ function evaluatePublicJsonRequestBodyBudgetGate(rootDir) {
     || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
     || isPublicAskDistributedAdmissionCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
     || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
-    || isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS);
+    || isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
+    || isPublicAdmissionCurrentSourceCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS);
   const expectedCases = [
     { path: "/api/ask", limit: 131072 },
     { path: "/api/ask/stream", limit: 131072 },
@@ -9912,7 +9981,8 @@ function evaluatePublicProviderCancellationGate(rootDir) {
     || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || wikiCandidateCancellationCompatibility
     || wikiSifCancellationCompatibility
-    || eventFactCancellationCompatibility;
+    || eventFactCancellationCompatibility
+    || isPublicAdmissionCurrentSourceCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS);
   const noMutation = mutation.dbMutationPerformed === false
     && mutation.providerDispatchCalled === false
     && mutation.shareSessionCreated === false
@@ -10185,7 +10255,8 @@ function evaluatePublicAskDistributedAdmissionGate(rootDir) {
     && productionCommit.length > 0
     && isGitAncestor(rootDir, sourceHead)
     && isGitAncestor(rootDir, productionCommit)
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_ASK_DISTRIBUTED_ADMISSION_PATHS)
+    && (isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_ASK_DISTRIBUTED_ADMISSION_PATHS)
+      || isPublicAdmissionCurrentSourceCompatibilityCurrent(rootDir, "public_ask_distributed_admission", PUBLIC_ASK_DISTRIBUTED_ADMISSION_PATHS))
     && readString(finding.findingId) === "csf_9b3cc6648586dabf4bfa61e9"
     && finding.canonicalFindingRemainsImmutable === true
     && finding.freshFollowUpScanRequired === true
@@ -10313,7 +10384,8 @@ function evaluatePublicSearchDistributedAdmissionGate(rootDir) {
     && sourceHead === productCommit
     && productCommit === productionCommit
     && isGitAncestor(rootDir, sourceHead)
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_SEARCH_DISTRIBUTED_ADMISSION_PATHS)
+    && (isEvidenceCurrentForPaths(rootDir, sourceHead, PUBLIC_SEARCH_DISTRIBUTED_ADMISSION_PATHS)
+      || isPublicAdmissionCurrentSourceCompatibilityCurrent(rootDir, "public_search_distributed_admission", PUBLIC_SEARCH_DISTRIBUTED_ADMISSION_PATHS))
     && readString(finding.findingId) === "csf_bb897a39277591f4fbab0ca7"
     && finding.canonicalFindingRemainsImmutable === true
     && finding.freshFollowUpScanRequired === true
