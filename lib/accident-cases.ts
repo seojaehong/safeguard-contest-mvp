@@ -316,12 +316,12 @@ function buildFatalAccidentUrlCandidates(question: string) {
 }
 
 function pickKeyword(question: string) {
-  const candidates = ["비계", "추락", "지게차", "충돌", "용접", "화재", "절단", "감전", "밀폐", "화학", "세척", "폭염", "온열"];
+  const candidates = ["지붕", "비계", "추락", "고소", "개구부", "지게차", "충돌", "용접", "화재", "절단", "감전", "밀폐", "화학", "세척", "폭염", "온열"];
   return candidates.find((keyword) => question.includes(keyword)) || "산업재해";
 }
 
 function pickBusiness(question: string) {
-  if (["건설", "비계", "추락", "외벽"].some((keyword) => question.includes(keyword))) return "건설업";
+  if (["건설", "비계", "추락", "외벽", "지붕", "고소", "개구부"].some((keyword) => question.includes(keyword))) return "건설업";
   if (["조선", "선박", "조선소"].some((keyword) => question.includes(keyword))) return "조선업";
   if (["제조", "용접", "절단", "금속"].some((keyword) => question.includes(keyword))) return "제조업";
   if (["물류", "지게차", "상하차", "창고", "청소", "세척", "서비스", "시설"].some((keyword) => question.includes(keyword))) return "서비스업";
@@ -346,6 +346,9 @@ function rankAccidentCase(question: string, item: AccidentCaseWithMeta): RankedA
   const haystack = `${item.title} ${item.industry || ""} ${item.accidentType || ""} ${item.summary}`.toLowerCase();
   const signals = [
     "비계",
+    "지붕",
+    "고소",
+    "개구부",
     "추락",
     "떨어",
     "지게차",
@@ -484,13 +487,29 @@ export function selectFallbackAccidentCases(question: string): AccidentCase[] {
       preventionPoint: "차단·잠금표시, 절연 보호구, 2인 1조, 누수구역 표시와 배수 확인을 작업 전 조치합니다.",
       sourceUrl: FALLBACK_SOURCE_URL,
       matchedReason: "시설관리·지하·감전·누수 작업 조건과 연결됩니다."
+    },
+    {
+      title: "옥외 고온 작업 중 온열질환 재해사례",
+      industry: "전 업종 옥외작업",
+      accidentType: "온열질환",
+      summary: "폭염·고온·자외선에 노출된 옥외 작업에서 수분과 휴식이 부족하면 열탈진·열사병으로 이어질 수 있습니다.",
+      preventionPoint: "물·그늘·휴식 기준을 작업 전에 정하고 어지러움·두통·구토감이 있으면 즉시 작업을 중지해 시원한 장소로 이동합니다.",
+      sourceUrl: FALLBACK_SOURCE_URL,
+      matchedReason: "폭염·고온·온열질환 작업조건과 직접 연결되는 예방 사례입니다."
     }
   ];
 
-  if (["세척", "화학", "청소"].some((keyword) => lower.includes(keyword))) return [fallback[3], fallback[1], fallback[0]];
-  if (["지게차", "물류", "상하차"].some((keyword) => lower.includes(keyword))) return [fallback[1], fallback[0], fallback[4]];
-  if (["용접", "절단", "화기", "제조"].some((keyword) => lower.includes(keyword))) return [fallback[2], fallback[0], fallback[4]];
-  if (["기계실", "감전", "지하", "시설"].some((keyword) => lower.includes(keyword))) return [fallback[4], fallback[1], fallback[0]];
+  const appendHeatCase = (cases: AccidentCase[]) =>
+    ["폭염", "고온", "온열", "자외선"].some((keyword) => lower.includes(keyword))
+      ? [...cases, fallback[5]]
+      : cases;
+
+  if (["세척", "화학", "청소"].some((keyword) => lower.includes(keyword))) return appendHeatCase([fallback[3]]);
+  if (["지게차", "물류", "상하차", "창고", "피킹"].some((keyword) => lower.includes(keyword))) return appendHeatCase([fallback[1]]);
+  if (["용접", "절단", "화기", "제조"].some((keyword) => lower.includes(keyword))) return appendHeatCase([fallback[2]]);
+  if (["기계실", "감전", "지하", "시설"].some((keyword) => lower.includes(keyword))) return appendHeatCase([fallback[4]]);
+  if (["지붕", "고소", "개구부", "비계", "추락", "외벽"].some((keyword) => lower.includes(keyword))) return appendHeatCase([fallback[0]]);
+  if (["폭염", "고온", "온열", "자외선"].some((keyword) => lower.includes(keyword))) return [fallback[5]];
   return [fallback[0], fallback[1], fallback[2]];
 }
 
