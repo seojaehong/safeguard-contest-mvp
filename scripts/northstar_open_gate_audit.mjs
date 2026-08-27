@@ -36,6 +36,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveForeignWorkerScenarioGuidance: path.join("evaluation", "live-foreign-worker-scenario-guidance-2026-08-27", "report.json"),
   liveRoofRepairScenarioIsolation: path.join("evaluation", "live-roof-repair-scenario-isolation-2026-08-27", "report.json"),
   liveAccidentCaseScenarioIsolation: path.join("evaluation", "live-accident-case-scenario-isolation-2026-08-27", "report.json"),
+  liveAccidentCaseMaintenanceIsolation: path.join("evaluation", "live-accident-case-maintenance-isolation-2026-08-27", "report.json"),
   liveKoshaExactMaterialization: path.join("evaluation", "live-kosha-exact-materialization-2026-07-25", "report.json"),
   liveDocumentWordingReview: path.join("evaluation", "live-document-wording-review-2026-07-24", "report.json"),
   liveDocumentBroadReview: path.join("evaluation", "live-document-broad-review-2026-07-25", "report.json"),
@@ -1082,6 +1083,56 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
     && accidentRemaining.humanReviewCompleted === false
     && readString(accidentRemaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && accidentRemaining.fullyAutomatedLaunchClaimAllowed === false;
+  const maintenanceIsolation = readJsonFile(rootDir, EVIDENCE_PATHS.liveAccidentCaseMaintenanceIsolation);
+  const maintenanceAfterLive = isRecord(maintenanceIsolation) && isRecord(maintenanceIsolation.afterLive)
+    ? maintenanceIsolation.afterLive
+    : {};
+  const maintenanceCases = Array.isArray(maintenanceAfterLive.cases)
+    ? maintenanceAfterLive.cases.filter(isRecord)
+    : [];
+  const maintenanceMutation = isRecord(maintenanceIsolation) && isRecord(maintenanceIsolation.mutationBoundary)
+    ? maintenanceIsolation.mutationBoundary
+    : {};
+  const maintenanceRemaining = isRecord(maintenanceIsolation) && isRecord(maintenanceIsolation.remainingBoundaries)
+    ? maintenanceIsolation.remainingBoundaries
+    : {};
+  /** @param {string} id @param {string} requiredTitle @param {string[]} forbiddenTitles */
+  const maintenanceCasePass = (id, requiredTitle, forbiddenTitles) => {
+    const item = maintenanceCases.find((candidate) => readString(candidate.id) === id);
+    if (!isRecord(item)) return false;
+    const titleSurface = readStringArray(item.titles).join(" ");
+    return readNumber(item.status) === 200
+      && readString(item.responseAiMode) === "template"
+      && readNumber(item.providerWorkUnit) === 0
+      && readString(item.rateLimitMode) === "instance"
+      && readString(item.accidentMode) === "fallback"
+      && readNumber(item.caseCount) === 1
+      && titleSurface.includes(requiredTitle)
+      && forbiddenTitles.every((term) => !titleSurface.includes(term))
+      && item.forbiddenIndustryPresent === false
+      && item.pass === true;
+  };
+  const maintenanceIsolationReady = isRecord(maintenanceIsolation)
+    && readString(maintenanceIsolation.schema) === "safeclaw-live-accident-case-maintenance-isolation/v1"
+    && readString(maintenanceIsolation.verdict) === "PASS_LIVE_PRODUCTION_ACCIDENT_CASE_MAINTENANCE_ISOLATION"
+    && readString(maintenanceIsolation.productCommit) === readString(maintenanceIsolation.productionCommit)
+    && readNumber(maintenanceAfterLive.total) === 5
+    && readNumber(maintenanceAfterLive.passed) === 5
+    && readNumber(maintenanceAfterLive.failed) === 0
+    && readNumber(maintenanceAfterLive.forbiddenIndustryCaseCount) === 0
+    && maintenanceAfterLive.providerGenerationRequested === false
+    && maintenanceCasePass("ulsan-chemical", "세척", ["지게차", "용접", "비계", "기계실", "자동화설비 정비", "양중·화기"])
+    && maintenanceCasePass("pyeongtaek-simultaneous", "양중·화기 동시작업", ["지게차", "세척", "비계", "기계실", "자동화설비 정비"])
+    && maintenanceCasePass("daejeon-maintenance", "자동화설비 정비", ["지게차", "용접", "비계", "기계실", "세척", "양중·화기"])
+    && maintenanceCasePass("gumi-guarding", "자동화설비 정비", ["지게차", "용접", "비계", "기계실", "세척", "양중·화기"])
+    && maintenanceCasePass("jeju-electrical", "기계실", ["지게차", "용접", "비계", "세척", "자동화설비 정비", "양중·화기"])
+    && maintenanceMutation.dbMutationPerformed === false
+    && maintenanceMutation.providerGenerationPerformed === false
+    && maintenanceMutation.providerDispatchPerformed === false
+    && maintenanceMutation.shareSessionCreated === false
+    && maintenanceRemaining.humanReviewCompleted === false
+    && readString(maintenanceRemaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && maintenanceRemaining.fullyAutomatedLaunchClaimAllowed === false;
   const livePass = readNumber(normal.pass) + readNumber(stress.pass);
   const liveFail = readNumber(normal.fail) + readNumber(stress.fail);
   const noMutation = boundary.dbMutationPerformed === false
@@ -1095,7 +1146,8 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
     && noMutation
     && guidanceReady
     && roofIsolationReady
-    && accidentIsolationReady;
+    && accidentIsolationReady
+    && maintenanceIsolationReady;
 
   if (liveReady) {
     return gateResult({
@@ -1103,7 +1155,7 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
       label: "Live document scenario field isolation",
       state: "proven",
       evidencePath,
-      detail: `Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. The companion ${EVIDENCE_PATHS.liveForeignWorkerScenarioGuidance} additionally proves heat guidance absent for chemical cleaning and present for explicit heat work in template mode with work-unit 0. ${EVIDENCE_PATHS.liveRoofRepairScenarioIsolation} proves the roof-repair heat case keeps roof/fall identity with warehouse seed absent while the warehouse control retains its intended identity. ${EVIDENCE_PATHS.liveAccidentCaseScenarioIsolation} separately proves 5/5 live fallback accident-case arrays retain only scenario-relevant fall, heat, forklift, chemical, hot-work, or facility evidence with 0 unrelated-industry cases. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate.`,
+      detail: `Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. The companion ${EVIDENCE_PATHS.liveForeignWorkerScenarioGuidance} additionally proves heat guidance absent for chemical cleaning and present for explicit heat work in template mode with work-unit 0. ${EVIDENCE_PATHS.liveRoofRepairScenarioIsolation} proves the roof-repair heat case keeps roof/fall identity with warehouse seed absent while the warehouse control retains its intended identity. ${EVIDENCE_PATHS.liveAccidentCaseScenarioIsolation} proves 5/5 live fallback accident-case arrays retain only scenario-relevant fall, heat, forklift, chemical, hot-work, or facility evidence. ${EVIDENCE_PATHS.liveAccidentCaseMaintenanceIsolation} adds 5/5 chemical, simultaneous lifting/hot-work, conveyor maintenance, automation guarding, and electrical repair evidence with 0 unrelated-industry cases. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate.`,
       nextActions: ["Keep the 10-scenario field-isolation gate in release evidence and preserve broad human wording review as a separate boundary."],
     });
   }
@@ -1113,7 +1165,7 @@ function evaluateLiveDocumentFieldIsolationGate(rootDir) {
     label: "Live document scenario field isolation",
     state: "contradicted",
     evidencePath,
-    detail: `Field-isolation verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/10, failed=${liveFail}, livePending=${report.liveAfterDeploymentPending === true}, noMutation=${noMutation}, foreignWorkerGuidance=${guidanceReady}, roofRepairIsolation=${roofIsolationReady}, accidentCaseIsolation=${accidentIsolationReady}.`,
+    detail: `Field-isolation verdict=${readString(report.verdict) || "unknown"}, live=${livePass}/10, failed=${liveFail}, livePending=${report.liveAfterDeploymentPending === true}, noMutation=${noMutation}, foreignWorkerGuidance=${guidanceReady}, roofRepairIsolation=${roofIsolationReady}, accidentCaseIsolation=${accidentIsolationReady}, maintenanceAccidentIsolation=${maintenanceIsolationReady}.`,
     nextActions: ["Fix process/task/equipment grounding or cross-scenario leakage and rerun the unchanged normal and stress matrices."],
   });
 }
@@ -7534,7 +7586,7 @@ function isSecurityAccidentCaseCompatibilityCurrent(rootDir, gateId, governedPat
     && changedGovernedPaths.length === SECURITY_ACCIDENT_CASE_COMPATIBILITY_CHANGED_PATHS.length
     && SECURITY_ACCIDENT_CASE_COMPATIBILITY_CHANGED_PATHS.every((item) => changedGovernedPaths.includes(item))
     && readNumber(focused.files) === 6
-    && readNumber(focused.tests) === 142
+    && readNumber(focused.tests) === 146
     && readNumber(focused.failed) === 0
     && readString(focused.status) === "PASS"
     && verification.typecheck === "PASS"
@@ -8201,7 +8253,7 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     state: pass ? "proven" : "contradicted",
     evidencePath,
     detail: pass
-      ? `The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its ${readNumber(compatibilityFocused.files)}/${readNumber(compatibilityFocused.tests)} compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (${accidentCompatibilityCurrent ? "6 files / 142 tests" : "covered by another current receipt"}). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.`
+      ? `The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its ${readNumber(compatibilityFocused.files)}/${readNumber(compatibilityFocused.tests)} compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (${accidentCompatibilityCurrent ? "6 files / 146 tests" : "covered by another current receipt"}). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.`
       : `Security follow-up verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceHead.length > 0 && sourceHead === readString(deployment.productionCommit)}, compatibilityPass=${compatibilityPass}, latestCompatibilityPass=${latestCompatibilityPass}, latestCompatibilityCurrent=${latestCompatibilityCurrent}, accidentCompatibilityCurrent=${accidentCompatibilityCurrent}, productPathsCurrent=${currentProductPaths}, exportAdmissionCompatibility=${exportAdmissionCompatibilityCurrent}, findings=${readNumber(scan.sealedFindingCount)}, baseline=${readNumber(scan.immutableOriginalBaselineFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, remediations=${remediations.length}, tests=${readNumber(focused.tests)}, compatibilityTests=${readNumber(compatibilityFocused.tests)}, latestCompatibilityTests=${readNumber(latestCompatibilityFocused.tests)}, liveProviderProbe=${deployment.liveProviderCancellationProbeExecuted === true}, baselineRewritten=${boundaries.originalBaselineRewritten === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [

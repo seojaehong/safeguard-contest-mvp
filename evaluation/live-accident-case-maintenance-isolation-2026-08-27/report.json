@@ -1,0 +1,134 @@
+{
+  "schema": "safeclaw-live-accident-case-maintenance-isolation/v1",
+  "generatedAt": "2026-08-27T11:14:03.1252118+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_ACCIDENT_CASE_MAINTENANCE_ISOLATION",
+  "productCommit": "3d6a011d6870fe347248a83083bf248f5fb864c1",
+  "productionCommit": "3d6a011d6870fe347248a83083bf248f5fb864c1",
+  "productionDeployment": "safeguard-contest-qu7sp9yxi-seojaehongs-projects.vercel.app",
+  "beforeLiveDiagnostic": {
+    "sourceCommit": "bf7195409fcb35b1f33be1e76709887f1f762fcc",
+    "caseId": "gumi-guarding",
+    "canonicalArtifactAvailable": false,
+    "caseCount": 3,
+    "titles": [
+      "이동식 비계 작업 중 추락 재해사례",
+      "지게차 후진 중 보행자 충돌 재해사례",
+      "용접 불티에 의한 화재 재해사례"
+    ],
+    "unrelatedIndustryCaseCount": 3,
+    "finding": "Automation-equipment guarding and maintenance fell through to the generic representative fallback instead of machinery entanglement and unexpected-startup evidence."
+  },
+  "beforeLocalDiagnostic": {
+    "caseId": "pyeongtaek-simultaneous",
+    "canonicalArtifactAvailable": false,
+    "caseCount": 1,
+    "titles": [
+      "지게차 후진 중 보행자 충돌 재해사례"
+    ],
+    "unrelatedIndustryCaseCount": 1,
+    "finding": "The logistics-site label outranked the explicit upper lifting and lower hot-work cross-risk before the final bounded selector correction."
+  },
+  "afterLive": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "total": 5,
+    "passed": 5,
+    "failed": 0,
+    "forbiddenIndustryCaseCount": 0,
+    "providerGenerationRequested": false,
+    "cases": [
+      {
+        "id": "ulsan-chemical",
+        "status": 200,
+        "elapsedMs": 710,
+        "responseAiMode": "template",
+        "providerWorkUnit": 0,
+        "rateLimitMode": "instance",
+        "accidentMode": "fallback",
+        "caseCount": 1,
+        "titles": ["세척 작업 중 화학물질 노출 및 미끄럼 재해사례"],
+        "forbiddenIndustryPresent": false,
+        "pass": true
+      },
+      {
+        "id": "pyeongtaek-simultaneous",
+        "status": 200,
+        "elapsedMs": 102,
+        "responseAiMode": "template",
+        "providerWorkUnit": 0,
+        "rateLimitMode": "instance",
+        "accidentMode": "fallback",
+        "caseCount": 1,
+        "titles": ["상하부 양중·화기 동시작업 중 낙하물·화재 재해사례"],
+        "forbiddenIndustryPresent": false,
+        "pass": true
+      },
+      {
+        "id": "daejeon-maintenance",
+        "status": 200,
+        "elapsedMs": 278,
+        "responseAiMode": "template",
+        "providerWorkUnit": 0,
+        "rateLimitMode": "instance",
+        "accidentMode": "fallback",
+        "caseCount": 1,
+        "titles": ["자동화설비 정비 중 끼임·예기치 않은 기동 재해사례"],
+        "forbiddenIndustryPresent": false,
+        "pass": true
+      },
+      {
+        "id": "gumi-guarding",
+        "status": 200,
+        "elapsedMs": 75,
+        "responseAiMode": "template",
+        "providerWorkUnit": 0,
+        "rateLimitMode": "instance",
+        "accidentMode": "fallback",
+        "caseCount": 1,
+        "titles": ["자동화설비 정비 중 끼임·예기치 않은 기동 재해사례"],
+        "forbiddenIndustryPresent": false,
+        "pass": true
+      },
+      {
+        "id": "jeju-electrical",
+        "status": 200,
+        "elapsedMs": 82,
+        "responseAiMode": "template",
+        "providerWorkUnit": 0,
+        "rateLimitMode": "instance",
+        "accidentMode": "fallback",
+        "caseCount": 1,
+        "titles": ["지하 기계실 점검 중 감전·미끄럼 재해사례"],
+        "forbiddenIndustryPresent": false,
+        "pass": true
+      }
+    ]
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {"files": 4, "tests": 134, "failed": 0, "status": "PASS"},
+    "securityCompatibilityTests": {"files": 6, "tests": 146, "failed": 0, "status": "PASS"},
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 28,
+    "dependencyAuditVulnerabilities": 0
+  },
+  "diagnosticNotes": {
+    "initialDistributedAdmissionUnavailableObserved": true,
+    "finalMeasuredRunRequiredRetry": false,
+    "collectorHeaderCastErrorWasProductFailure": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerGenerationPerformed": false,
+    "providerDispatchPerformed": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "humanReviewCompleted": false,
+    "broadHumanWordingReviewRequired": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "fullyAutomatedLaunchClaimAllowed": false
+  }
+}

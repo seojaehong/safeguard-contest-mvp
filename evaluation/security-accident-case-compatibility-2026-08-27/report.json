@@ -1,14 +1,14 @@
 {
   "schema": "safeclaw-security-accident-case-compatibility/v1",
-  "generatedAt": "2026-08-27T10:52:55.4073362+09:00",
+  "generatedAt": "2026-08-27T11:14:03.1252118+09:00",
   "verdict": "PASS_LIVE_PRODUCTION_ACCIDENT_CASE_SECURITY_COMPATIBILITY",
-  "productCommit": "41872e1a5e321c2cf234bbd1c249e489b2960940",
-  "productionCommit": "41872e1a5e321c2cf234bbd1c249e489b2960940",
-  "productionDeployment": "safeguard-contest-6bmtjmzma-seojaehongs-projects.vercel.app",
+  "productCommit": "3d6a011d6870fe347248a83083bf248f5fb864c1",
+  "productionCommit": "3d6a011d6870fe347248a83083bf248f5fb864c1",
+  "productionDeployment": "safeguard-contest-qu7sp9yxi-seojaehongs-projects.vercel.app",
   "governedPathCompatibility": {
     "verdict": "PASS_LIVE_PRODUCTION_ACCIDENT_CASE_GOVERNED_PATH_COMPATIBILITY",
-    "sourceHead": "41872e1a5e321c2cf234bbd1c249e489b2960940",
-    "productionCommit": "41872e1a5e321c2cf234bbd1c249e489b2960940",
+    "sourceHead": "3d6a011d6870fe347248a83083bf248f5fb864c1",
+    "productionCommit": "3d6a011d6870fe347248a83083bf248f5fb864c1",
     "coveredGateIds": [
       "security_followup_remediation"
     ],
@@ -19,7 +19,7 @@
   "verification": {
     "focusedAndAdjacentTests": {
       "files": 6,
-      "tests": 142,
+      "tests": 146,
       "failed": 0,
       "status": "PASS"
     },

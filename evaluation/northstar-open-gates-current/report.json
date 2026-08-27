@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-27T01:37:14.389Z",
-  "sourceSha": "41872e1a5e321c2cf234bbd1c249e489b2960940",
+  "generatedAt": "2026-08-27T02:43:50.442Z",
+  "sourceSha": "3d6a011d6870fe347248a83083bf248f5fb864c1",
   "overall": "open",
   "gates": [
     {
@@ -60,7 +60,7 @@
       "state": "proven",
       "label": "Live document scenario field isolation",
       "evidencePath": "evaluation\\live-document-field-isolation-2026-07-25\\report.json",
-      "detail": "Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. The companion evaluation\\live-foreign-worker-scenario-guidance-2026-08-27\\report.json additionally proves heat guidance absent for chemical cleaning and present for explicit heat work in template mode with work-unit 0. evaluation\\live-roof-repair-scenario-isolation-2026-08-27\\report.json proves the roof-repair heat case keeps roof/fall identity with warehouse seed absent while the warehouse control retains its intended identity. evaluation\\live-accident-case-scenario-isolation-2026-08-27\\report.json separately proves 5/5 live fallback accident-case arrays retain only scenario-relevant fall, heat, forklift, chemical, hot-work, or facility evidence with 0 unrelated-industry cases. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate.",
+      "detail": "Ten live normal and stress scenarios keep process/task/equipment fields grounded in their own work identity and free of other scenario-exclusive fingerprints. The companion evaluation\\live-foreign-worker-scenario-guidance-2026-08-27\\report.json additionally proves heat guidance absent for chemical cleaning and present for explicit heat work in template mode with work-unit 0. evaluation\\live-roof-repair-scenario-isolation-2026-08-27\\report.json proves the roof-repair heat case keeps roof/fall identity with warehouse seed absent while the warehouse control retains its intended identity. evaluation\\live-accident-case-scenario-isolation-2026-08-27\\report.json proves 5/5 live fallback accident-case arrays retain only scenario-relevant fall, heat, forklift, chemical, hot-work, or facility evidence. evaluation\\live-accident-case-maintenance-isolation-2026-08-27\\report.json adds 5/5 chemical, simultaneous lifting/hot-work, conveyor maintenance, automation guarding, and electrical repair evidence with 0 unrelated-industry cases. No DB/share-session/provider mutation occurred; broad human wording review and exact saved Share geometry remain separate.",
       "nextActions": [
         "Keep the 10-scenario field-isolation gate in release evidence and preserve broad human wording review as a separate boundary."
       ]
@@ -479,7 +479,7 @@
       "state": "proven",
       "label": "Security follow-up remediation",
       "evidencePath": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
-      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (6 files / 142 tests). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (6 files / 146 tests). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Keep the immutable baseline and two deferred candidates visible in future security review; do not convert this scoped remediation into a security-complete claim.",
         "Retain the separate public generation admission notice and exact saved Share boundary until their own evidence contracts close."

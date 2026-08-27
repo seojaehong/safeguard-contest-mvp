@@ -2492,6 +2492,37 @@ function createFixtureRoot(): string {
       fullyAutomatedLaunchClaimAllowed: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "live-accident-case-maintenance-isolation-2026-08-27", "report.json"), {
+    schema: "safeclaw-live-accident-case-maintenance-isolation/v1",
+    verdict: "PASS_LIVE_PRODUCTION_ACCIDENT_CASE_MAINTENANCE_ISOLATION",
+    productCommit: "fixture-product",
+    productionCommit: "fixture-product",
+    afterLive: {
+      total: 5,
+      passed: 5,
+      failed: 0,
+      forbiddenIndustryCaseCount: 0,
+      providerGenerationRequested: false,
+      cases: [
+        { id: "ulsan-chemical", status: 200, responseAiMode: "template", providerWorkUnit: 0, rateLimitMode: "instance", accidentMode: "fallback", caseCount: 1, titles: ["세척 작업 중 화학물질 노출 및 미끄럼 재해사례"], forbiddenIndustryPresent: false, pass: true },
+        { id: "pyeongtaek-simultaneous", status: 200, responseAiMode: "template", providerWorkUnit: 0, rateLimitMode: "instance", accidentMode: "fallback", caseCount: 1, titles: ["상하부 양중·화기 동시작업 중 낙하물·화재 재해사례"], forbiddenIndustryPresent: false, pass: true },
+        { id: "daejeon-maintenance", status: 200, responseAiMode: "template", providerWorkUnit: 0, rateLimitMode: "instance", accidentMode: "fallback", caseCount: 1, titles: ["자동화설비 정비 중 끼임·예기치 않은 기동 재해사례"], forbiddenIndustryPresent: false, pass: true },
+        { id: "gumi-guarding", status: 200, responseAiMode: "template", providerWorkUnit: 0, rateLimitMode: "instance", accidentMode: "fallback", caseCount: 1, titles: ["자동화설비 정비 중 끼임·예기치 않은 기동 재해사례"], forbiddenIndustryPresent: false, pass: true },
+        { id: "jeju-electrical", status: 200, responseAiMode: "template", providerWorkUnit: 0, rateLimitMode: "instance", accidentMode: "fallback", caseCount: 1, titles: ["지하 기계실 점검 중 감전·미끄럼 재해사례"], forbiddenIndustryPresent: false, pass: true },
+      ],
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerGenerationPerformed: false,
+      providerDispatchPerformed: false,
+      shareSessionCreated: false,
+    },
+    remainingBoundaries: {
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      fullyAutomatedLaunchClaimAllowed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "hermes-review-decision-first-viewport-2026-08-27", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_DECISION_FIRST_VIEWPORT",
     sourceHead: "fixture-sha",
@@ -3397,7 +3428,7 @@ function createFixtureRoot(): string {
       changedGovernedPaths: ["lib/accident-cases.ts"],
     },
     verification: {
-      focusedAndAdjacentTests: { files: 6, tests: 142, failed: 0, status: "PASS" },
+      focusedAndAdjacentTests: { files: 6, tests: 146, failed: 0, status: "PASS" },
       typecheck: "PASS",
       build: { status: "PASS", staticPages: 28 },
     },
@@ -7245,7 +7276,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
 
     const compatible = buildNorthstarOpenGateAudit({ rootDir });
     expect(compatible.gates.find((gate) => gate.id === "security_followup_remediation")?.state).toBe("proven");
-    expect(compatible.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("6 files / 142 tests");
+    expect(compatible.gates.find((gate) => gate.id === "security_followup_remediation")?.detail).toContain("6 files / 146 tests");
 
     report.securityContracts.callerAbortPropagated = false;
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
@@ -9994,6 +10025,36 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("accidentCaseIsolation=false");
+  });
+
+  it("fails document field isolation closed when maintenance accident evidence leaks another industry", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const maintenancePath = path.join(
+      rootDir,
+      "evaluation",
+      "live-accident-case-maintenance-isolation-2026-08-27",
+      "report.json",
+    );
+    const maintenanceReport = JSON.parse(fs.readFileSync(maintenancePath, "utf8")) as {
+      afterLive: { cases: Array<{ id: string; titles: string[]; forbiddenIndustryPresent: boolean }> };
+    };
+    const maintenanceCase = maintenanceReport.afterLive.cases.find((item) => item.id === "gumi-guarding");
+    expect(maintenanceCase).toBeDefined();
+    maintenanceCase!.titles = ["지게차 후진 충돌 재해사례"];
+    maintenanceCase!.forbiddenIndustryPresent = true;
+    writeJson(rootDir, path.relative(rootDir, maintenancePath), maintenanceReport);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("maintenanceAccidentIsolation=false");
   });
 
   it("renders the approval boundary and forbidden claims in the Markdown report", async () => {
