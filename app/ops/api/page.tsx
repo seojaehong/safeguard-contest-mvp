@@ -77,6 +77,14 @@ export default async function ApiOperationsPage() {
   const photoVision = getPhotoVisionReadiness(process.env);
   const configurationRequired = !publicAdmission.ready;
   const approvalRequired = !dispatch.emailReady;
+  const publicAdmissionLabel = publicAdmission.configurationState === "absent"
+    ? "분산 설정 없음"
+    : publicAdmission.configurationState === "invalid"
+      ? "분산 설정 오류"
+      : "분산 설정 감지";
+  const publicAdmissionDetail = publicAdmission.configurationState === "ready"
+    ? "설정 존재와 실제 요청 성공을 구분해 확인합니다."
+    : "공개 생성·검색은 provider 작업 전에 안전하게 차단됩니다.";
   const operationsBoundary = configurationRequired
     ? "운영 설정 필요"
     : approvalRequired
@@ -98,6 +106,7 @@ export default async function ApiOperationsPage() {
         aria-label="런칭 실행 준비 경계"
         data-testid="launch-operations-readiness"
         data-public-admission={publicAdmission.mode}
+        data-public-admission-configuration={publicAdmission.configurationState}
         data-provider-dispatch={dispatch.mode}
         data-photo-vision={photoVision.status}
       >
@@ -108,8 +117,8 @@ export default async function ApiOperationsPage() {
         </article>
         <article>
           <span>공개 AI 작업 보호</span>
-          <strong>{publicAdmission.ready ? "분산 보호 준비" : "분산 설정 필요"}</strong>
-          <p>{publicAdmission.ready ? "공개 생성·검색 작업을 분산 제어합니다." : "설정 전 공개 생성·검색은 안전하게 차단됩니다."}</p>
+          <strong>{publicAdmissionLabel}</strong>
+          <p>{publicAdmissionDetail}</p>
         </article>
         <article>
           <span>실제 이메일 전파</span>

@@ -4862,13 +4862,22 @@ function createFixtureRoot(): string {
         rateLimitHeader: "distributed",
         errorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
         retryAfterSeconds: 5,
-        distributedAdmissionConfigured: true,
-        distributedAdmissionHealthy: false,
+        distributedAdmissionRequired: true,
+        distributedAdmissionAvailable: false,
         distributedAdmissionFailedClosed: true,
         authenticationNotReachedBecauseAdmissionFailedClosed: true,
         mcpToolDispatchPerformed: false,
         providerCallPerformed: false,
         validAuthenticatedBudgetProbeExecuted: false,
+      },
+      configurationReadiness: {
+        path: "/api/export/pdf",
+        method: "GET",
+        status: 200,
+        configurationState: "absent",
+        mode: "unavailable",
+        ready: false,
+        reason: "distributed_limiter_unavailable",
       },
       verification: {
         focused: { files: 3, tests: 65, failed: 0, status: "PASS" },
@@ -4890,8 +4899,8 @@ function createFixtureRoot(): string {
       liveAfterDeploymentRequired: false,
       validAuthenticatedRuntimeProbeRequired: true,
       freshSecurityRescanRequired: true,
-      distributedProductionActivationRequired: false,
-      distributedProductionHealthRequired: true,
+      distributedProductionActivationRequired: true,
+      distributedProductionHealthRequired: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       approvalGatedBoundariesUnchanged: true,
     },
@@ -6600,6 +6609,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     });
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("96 KiB");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("configurationState=absent");
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("required but not configured");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("8 files / 126 adjacent MCP tests");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("valid authenticated runtime probe");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("MISSING_EVIDENCE");
@@ -8876,6 +8887,20 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const audit = buildNorthstarOpenGateAudit({ rootDir });
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.state).toBe("contradicted");
     expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.detail).toContain("currentRefresh=false");
+  });
+
+  it("fails MCP generation security closed when an absent configuration is overclaimed as ready", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "security-mcp-generation-work-budget-2026-08-04", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      currentLiveRefresh: { configurationReadiness: { configurationState: string } };
+    };
+    report.currentLiveRefresh.configurationReadiness.configurationState = "ready";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "mcp_generation_work_budget_security")?.state).toBe("contradicted");
   });
 
   it("contradicts the UI gate when a document action loses its inner-pane margin", async () => {

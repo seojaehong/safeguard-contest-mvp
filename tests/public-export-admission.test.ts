@@ -35,6 +35,7 @@ describe("public export aggregate admission", () => {
       environment: { VERCEL_ENV: "production" },
       requireDistributedInProduction: true,
     })).toEqual({
+      configurationState: "absent",
       mode: "unavailable",
       ready: false,
       reason: "distributed_limiter_unavailable",
@@ -47,6 +48,7 @@ describe("public export aggregate admission", () => {
       },
       requireDistributedInProduction: true,
     })).toEqual({
+      configurationState: "ready",
       mode: "distributed",
       ready: true,
       reason: "distributed_configured",
@@ -60,6 +62,7 @@ describe("public export aggregate admission", () => {
     };
     expect(response.status).toBe(200);
     expect(payload.admission).toEqual({
+      configurationState: "absent",
       mode: "unavailable",
       ready: false,
       reason: "distributed_limiter_unavailable",
@@ -73,6 +76,7 @@ describe("public export aggregate admission", () => {
       environment: {},
       requireDistributedInProduction: true,
     })).toEqual({
+      configurationState: "absent",
       mode: "instance",
       ready: true,
       reason: "instance_fallback",
@@ -81,6 +85,7 @@ describe("public export aggregate admission", () => {
       environment: { UPSTASH_REDIS_REST_URL: "https://example.upstash.io" },
       requireDistributedInProduction: true,
     })).toEqual({
+      configurationState: "invalid",
       mode: "unavailable",
       ready: false,
       reason: "distributed_limiter_misconfigured",

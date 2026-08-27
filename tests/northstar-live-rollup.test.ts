@@ -635,6 +635,8 @@ type RollupReport = {
     currentRefreshStatus: number | null;
     currentRefreshRateLimitMode: string;
     currentRefreshErrorCode: string;
+    currentRefreshConfigurationState: string;
+    currentRefreshReadinessReason: string;
     freshRescanRequired: boolean;
     exactSavedShareVerdict: string;
   };
@@ -1974,11 +1976,15 @@ function createFixtureRoot(): { root: string; head: string } {
         rateLimitHeader: "distributed",
         errorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
       },
+      configurationReadiness: {
+        configurationState: "absent",
+        reason: "distributed_limiter_unavailable",
+      },
     },
     remainingBoundaries: {
       validAuthenticatedRuntimeProbeRequired: true,
-      distributedProductionActivationRequired: false,
-      distributedProductionHealthRequired: true,
+      distributedProductionActivationRequired: true,
+      distributedProductionHealthRequired: false,
       freshSecurityRescanRequired: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
@@ -2977,11 +2983,13 @@ describe("northstar live rollup", () => {
       postBodyMaxBytes: 98304,
       adjacentTests: 77,
       validAuthenticatedRuntimeProbeRequired: true,
-      distributedActivationRequired: false,
-      distributedHealthRequired: true,
+      distributedActivationRequired: true,
+      distributedHealthRequired: false,
       currentRefreshStatus: 503,
       currentRefreshRateLimitMode: "distributed",
       currentRefreshErrorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      currentRefreshConfigurationState: "absent",
+      currentRefreshReadinessReason: "distributed_limiter_unavailable",
       freshRescanRequired: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });

@@ -68,7 +68,9 @@ export async function GET() {
       admission,
       message: admission.ready
         ? "POST SafeClaw document rows to render binary PDF by default. Use ?format=html for print-ready HTML source."
-        : "Server document export is temporarily locked until distributed admission is configured. Browser-side formats remain available."
+        : admission.configurationState === "invalid"
+          ? "Server document export is locked because distributed admission configuration is incomplete or unsafe. Browser-side formats remain available."
+          : "Server document export is temporarily locked until distributed admission is configured. Browser-side formats remain available."
     },
     {
       headers: {

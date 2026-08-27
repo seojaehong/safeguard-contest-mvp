@@ -128,7 +128,10 @@ describe("engine runtime readiness policy", () => {
     expect(source).toContain("resolveBriefingEmailDispatchStatus");
     expect(source).toContain("getPhotoVisionReadiness");
     expect(source).toContain('data-testid="launch-operations-readiness"');
-    expect(source).toContain("분산 설정 필요");
+    expect(source).toContain("분산 설정 없음");
+    expect(source).toContain("분산 설정 오류");
+    expect(source).toContain("분산 설정 감지");
+    expect(source).toContain("data-public-admission-configuration");
     expect(source).toContain("승인 전 잠금");
     expect(source).toContain("채택한 위험 후보만 문서에 반영합니다.");
     expect(source).toContain("완전 자동 런칭 승인을 뜻하지 않습니다.");

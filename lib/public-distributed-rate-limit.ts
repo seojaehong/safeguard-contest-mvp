@@ -115,6 +115,7 @@ type UpstashConfiguration =
   | { state: "ready"; token: string; url: string };
 
 export type PublicDistributedAdmissionReadiness = {
+  configurationState: UpstashConfiguration["state"];
   mode: "distributed" | "instance" | "unavailable";
   ready: boolean;
   reason:
@@ -410,15 +411,35 @@ export function getPublicDistributedAdmissionReadiness(input: {
   const environment = input.environment ?? process.env;
   const config = readUpstashConfiguration(environment);
   if (config.state === "ready") {
-    return { mode: "distributed", ready: true, reason: "distributed_configured" };
+    return {
+      configurationState: config.state,
+      mode: "distributed",
+      ready: true,
+      reason: "distributed_configured",
+    };
   }
   if (config.state === "invalid") {
-    return { mode: "unavailable", ready: false, reason: "distributed_limiter_misconfigured" };
+    return {
+      configurationState: config.state,
+      mode: "unavailable",
+      ready: false,
+      reason: "distributed_limiter_misconfigured",
+    };
   }
   if (input.requireDistributedInProduction && environment.VERCEL_ENV === "production") {
-    return { mode: "unavailable", ready: false, reason: "distributed_limiter_unavailable" };
+    return {
+      configurationState: config.state,
+      mode: "unavailable",
+      ready: false,
+      reason: "distributed_limiter_unavailable",
+    };
   }
-  return { mode: "instance", ready: true, reason: "instance_fallback" };
+  return {
+    configurationState: config.state,
+    mode: "instance",
+    ready: true,
+    reason: "instance_fallback",
+  };
 }
 
 async function acquireDocumentExportLease(): Promise<(() => Promise<void>) | null | undefined> {

@@ -965,6 +965,8 @@ type NextRunwayReport = {
     currentRefreshStatus: number | null;
     currentRefreshRateLimitMode: string;
     currentRefreshErrorCode: string;
+    currentRefreshConfigurationState: string;
+    currentRefreshReadinessReason: string;
     freshRescanRequired: boolean;
     exactSavedShareVerdict: string;
   };
@@ -2653,11 +2655,15 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
         rateLimitHeader: "distributed",
         errorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
       },
+      configurationReadiness: {
+        configurationState: "absent",
+        reason: "distributed_limiter_unavailable",
+      },
     },
     remainingBoundaries: {
       validAuthenticatedRuntimeProbeRequired: true,
-      distributedProductionActivationRequired: false,
-      distributedProductionHealthRequired: true,
+      distributedProductionActivationRequired: true,
+      distributedProductionHealthRequired: false,
       freshSecurityRescanRequired: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
@@ -4234,18 +4240,20 @@ describe("northstar next runway generator", () => {
       postBodyMaxBytes: 98304,
       adjacentTests: 77,
       validAuthenticatedRuntimeProbeRequired: true,
-      distributedActivationRequired: false,
-      distributedHealthRequired: true,
+      distributedActivationRequired: true,
+      distributedHealthRequired: false,
       currentRefreshStatus: 503,
       currentRefreshRateLimitMode: "distributed",
       currentRefreshErrorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      currentRefreshConfigurationState: "absent",
+      currentRefreshReadinessReason: "distributed_limiter_unavailable",
       freshRescanRequired: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "mcp_generation_work_budget_security",
       state: "notice",
-      reason: expect.stringContaining("activated but currently unhealthy"),
+      reason: expect.stringContaining("distributed configuration is absent"),
     }));
     expect(report.mcpProviderAdmission).toMatchObject({
       verdict: "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING",

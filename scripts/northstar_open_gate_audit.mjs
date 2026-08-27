@@ -10000,6 +10000,9 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
   const liveProbe = isRecord(verification.liveReadOnlyProbe) ? verification.liveReadOnlyProbe : {};
   const currentLiveRefresh = isRecord(report.currentLiveRefresh) ? report.currentLiveRefresh : {};
   const currentRefreshProbe = isRecord(currentLiveRefresh.probe) ? currentLiveRefresh.probe : {};
+  const currentRefreshReadiness = isRecord(currentLiveRefresh.configurationReadiness)
+    ? currentLiveRefresh.configurationReadiness
+    : {};
   const currentRefreshMutation = isRecord(currentLiveRefresh.mutationBoundary)
     ? currentLiveRefresh.mutationBoundary
     : {};
@@ -10033,10 +10036,17 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     && readString(currentRefreshProbe.rateLimitHeader) === "distributed"
     && readString(currentRefreshProbe.errorCode) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
     && readNumber(currentRefreshProbe.retryAfterSeconds) === 5
-    && currentRefreshProbe.distributedAdmissionConfigured === true
-    && currentRefreshProbe.distributedAdmissionHealthy === false
+    && currentRefreshProbe.distributedAdmissionRequired === true
+    && currentRefreshProbe.distributedAdmissionAvailable === false
     && currentRefreshProbe.distributedAdmissionFailedClosed === true
     && currentRefreshProbe.authenticationNotReachedBecauseAdmissionFailedClosed === true;
+  const distributedConfigurationAbsent = readString(currentRefreshReadiness.path) === "/api/export/pdf"
+    && readString(currentRefreshReadiness.method) === "GET"
+    && readNumber(currentRefreshReadiness.status) === 200
+    && readString(currentRefreshReadiness.configurationState) === "absent"
+    && readString(currentRefreshReadiness.mode) === "unavailable"
+    && currentRefreshReadiness.ready === false
+    && readString(currentRefreshReadiness.reason) === "distributed_limiter_unavailable";
   const invalidTokenFailClosed = readNumber(currentRefreshProbe.status) === 401
     && currentRefreshProbe.authenticationFailedClosed === true
     && ["instance", "distributed"].includes(readString(currentRefreshProbe.rateLimitHeader));
@@ -10052,7 +10062,7 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     && readString(currentRefreshProbe.method) === "POST"
     && readString(currentRefreshProbe.credential) === "intentionally_invalid_non_secret"
     && readNumber(currentRefreshProbe.requestBodyBytes) === 2
-    && (distributedUnavailableFailClosed || invalidTokenFailClosed)
+    && ((distributedUnavailableFailClosed && distributedConfigurationAbsent) || invalidTokenFailClosed)
     && currentRefreshProbe.mcpToolDispatchPerformed === false
     && currentRefreshProbe.providerCallPerformed === false
     && currentRefreshProbe.validAuthenticatedBudgetProbeExecuted === false
@@ -10124,11 +10134,16 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     currentRefreshProbe.mcpToolDispatchPerformed === false
     && currentRefreshProbe.providerCallPerformed === false
     && currentRefreshProbe.validAuthenticatedBudgetProbeExecuted === false
+    && (
+      readNumber(currentRefreshProbe.status) === 503
+        ? distributedUnavailableFailClosed && distributedConfigurationAbsent
+        : invalidTokenFailClosed
+    )
     && currentRefreshNoMutation
   );
-  const distributedBoundaryCurrent = distributedUnavailableFailClosed
-    ? remaining.distributedProductionActivationRequired === false
-      && remaining.distributedProductionHealthRequired === true
+  const distributedBoundaryCurrent = distributedUnavailableFailClosed && distributedConfigurationAbsent
+    ? remaining.distributedProductionActivationRequired === true
+      && remaining.distributedProductionHealthRequired === false
     : remaining.distributedProductionActivationRequired === true;
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING"
     && sourceHead.length > 0
@@ -10185,8 +10200,8 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     && (currentRefreshPass || currentCompatibilityPass || providerCompanionPass);
 
   const currentProofHead = currentRefreshPass ? currentRefreshSourceHead : companionSourceHead;
-  const currentProofDescription = distributedUnavailableFailClosed
-    ? `Current production ${currentProofHead.slice(0, 8)} proves distributed MCP admission is configured but unhealthy: the pre-auth guard returned 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE and failed closed before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification preserves the 96 KiB body contract with ${readNumber(currentRefreshFocused.files)} files / ${readNumber(currentRefreshFocused.tests)} focused tests and ${readNumber(currentRefreshAdjacent.files)} files / ${readNumber(currentRefreshAdjacent.tests)} adjacent MCP tests. Distributed activation is observed, while backend health, a valid authenticated runtime probe, and a fresh security rescan remain open.`
+  const currentProofDescription = distributedUnavailableFailClosed && distributedConfigurationAbsent
+    ? `Current production ${currentProofHead.slice(0, 8)} proves distributed MCP admission is required but not configured: the readiness endpoint reports configurationState=absent and the pre-auth guard returns 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification preserves the 96 KiB body contract with ${readNumber(currentRefreshFocused.files)} files / ${readNumber(currentRefreshFocused.tests)} focused tests and ${readNumber(currentRefreshAdjacent.files)} files / ${readNumber(currentRefreshAdjacent.tests)} adjacent MCP tests. Distributed activation, a valid authenticated runtime probe, and a fresh security rescan remain open.`
     : `Current production ${currentProofHead.slice(0, 8)} re-proves MCP invalid-token 401 fail-closed before any MCP tool dispatch, provider call, or mutation. The provider-admission companion preserves the 96 KiB measured body and authentication contracts through ${readNumber(companionAdjacent.tests)} adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open.`;
 
   return gateResult({
@@ -10200,8 +10215,8 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     nextActions: pass
       ? [
           "Run a valid credential-safe production MCP boundary probe without exposing the token.",
-          distributedUnavailableFailClosed
-            ? "Restore distributed limiter backend health before claiming authenticated MCP availability, then complete a fresh security rescan."
+          distributedUnavailableFailClosed && distributedConfigurationAbsent
+            ? "Activate the approved distributed limiter configuration before claiming authenticated MCP availability, then complete a fresh security rescan."
             : "Activate the approved distributed limiter configuration and complete a fresh security rescan before reclassifying the sealed finding.",
         ]
       : ["Restore every deployed-source, body-budget, limiter, verification, no-mutation, rescan, and exact-Share predicate."],
