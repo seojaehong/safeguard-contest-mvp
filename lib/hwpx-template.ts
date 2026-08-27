@@ -16,8 +16,33 @@ import {
 export const HWPX_TEMPLATE_BUDGETS = {
   companyNameCharacters: DOCUMENT_EXPORT_BUDGETS.fieldCharacters,
   templateBytes: 8 * 1024 * 1024,
-  outputBytes: 8 * 1024 * 1024
+  outputBytes: 8 * 1024 * 1024,
+  archiveEntries: 64,
+  archiveTotalUncompressedBytes: 20 * 1024 * 1024,
+  archiveEntryUncompressedBytes: 10 * 1024 * 1024,
+  archivePeakWorkingBytes: 40 * 1024 * 1024
 } as const;
+
+export type HwpxArchiveBudgetReceipt = {
+  entryCount: number;
+  totalUncompressedBytes: number;
+  largestEntryUncompressedBytes: number;
+  estimatedPeakWorkingBytes: number;
+};
+
+export type HwpxArchiveBudgetEntry = {
+  entryName: string;
+  isDirectory: boolean;
+  header: {
+    size: number;
+    compressedSize: number;
+  };
+};
+
+export type HwpxArchive = {
+  getEntries(): AdmZip.IZipEntry[];
+  toBuffer(): Buffer;
+};
 
 export type HwpxTemplateKind =
   | "risk-assessment"
@@ -167,30 +192,88 @@ export function assertHwpxTemplateOutputBudget(buffer: Buffer): void {
   }
 }
 
-export function buildHwpxFromTemplate(kind: HwpxTemplateKind, companyName: string): Buffer {
-  assertDocumentExportInputBudget({ companyName });
+function assertArchiveByteCount(value: number, reason: string): void {
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new DocumentExportLimitError(reason);
+  }
+}
+
+export function assertHwpxArchiveBudget(
+  entries: readonly HwpxArchiveBudgetEntry[],
+  compressedBytes: number,
+): HwpxArchiveBudgetReceipt {
+  assertArchiveByteCount(compressedBytes, "hwpx_archive_compressed_bytes");
+  if (entries.length > HWPX_TEMPLATE_BUDGETS.archiveEntries) {
+    throw new DocumentExportLimitError("hwpx_archive_entries");
+  }
+
+  let totalUncompressedBytes = 0;
+  let largestEntryUncompressedBytes = 0;
+  for (const entry of entries) {
+    const uncompressedBytes = entry.header.size;
+    const entryCompressedBytes = entry.header.compressedSize;
+    assertArchiveByteCount(uncompressedBytes, "hwpx_archive_entry_bytes");
+    assertArchiveByteCount(entryCompressedBytes, "hwpx_archive_entry_compressed_bytes");
+
+    if (uncompressedBytes > HWPX_TEMPLATE_BUDGETS.archiveEntryUncompressedBytes) {
+      throw new DocumentExportLimitError("hwpx_archive_entry_bytes");
+    }
+    totalUncompressedBytes += uncompressedBytes;
+    if (!Number.isSafeInteger(totalUncompressedBytes)
+      || totalUncompressedBytes > HWPX_TEMPLATE_BUDGETS.archiveTotalUncompressedBytes) {
+      throw new DocumentExportLimitError("hwpx_archive_total_uncompressed_bytes");
+    }
+    largestEntryUncompressedBytes = Math.max(largestEntryUncompressedBytes, uncompressedBytes);
+  }
+
+  const estimatedPeakWorkingBytes = compressedBytes
+    + totalUncompressedBytes
+    + HWPX_TEMPLATE_BUDGETS.outputBytes;
+  if (!Number.isSafeInteger(estimatedPeakWorkingBytes)
+    || estimatedPeakWorkingBytes > HWPX_TEMPLATE_BUDGETS.archivePeakWorkingBytes) {
+    throw new DocumentExportLimitError("hwpx_archive_peak_working_bytes");
+  }
+
+  return {
+    entryCount: entries.length,
+    totalUncompressedBytes,
+    largestEntryUncompressedBytes,
+    estimatedPeakWorkingBytes,
+  };
+}
+
+export function inspectHwpxTemplateArchive(kind: HwpxTemplateKind): HwpxArchiveBudgetReceipt {
   const srcPath = path.join(templatesDir(), TEMPLATE_FILES[kind]);
   if (!fs.existsSync(srcPath)) {
     throw new Error(`HWPX template not found: ${kind}`);
   }
-  if (fs.statSync(srcPath).size > HWPX_TEMPLATE_BUDGETS.templateBytes) {
+  const compressedBytes = fs.statSync(srcPath).size;
+  if (compressedBytes > HWPX_TEMPLATE_BUDGETS.templateBytes) {
     throw new DocumentExportLimitError("hwpx_template_bytes");
   }
-
-  const replaceCompany = String(companyName ?? "").trim();
   const inputZip = new AdmZip(srcPath, { noSort: true });
+  return assertHwpxArchiveBudget(inputZip.getEntries(), compressedBytes);
+}
 
-  for (const entry of inputZip.getEntries()) {
+export function localizeBudgetedHwpxArchive(
+  inputZip: HwpxArchive,
+  compressedBytes: number,
+  companyName: string,
+): Buffer {
+  const entries = inputZip.getEntries();
+  assertHwpxArchiveBudget(entries, compressedBytes);
+
+  for (const entry of entries) {
     if (entry.isDirectory) continue;
     if (/\.txt$/i.test(entry.entryName)) {
       const text = entry.getData().toString("utf8");
-      const localized = localizeHwpxPlainText(text, replaceCompany);
+      const localized = localizeHwpxPlainText(text, companyName);
       if (localized !== text) {
         entry.setData(Buffer.from(localized, "utf8"));
       }
     } else if (/\.(xml|hpf|rdf)$/i.test(entry.entryName)) {
       const text = entry.getData().toString("utf8");
-      const localized = localizeHwpxXmlText(text, replaceCompany);
+      const localized = localizeHwpxXmlText(text, companyName);
       if (localized !== text) {
         entry.setData(Buffer.from(localized, "utf8"));
       }
@@ -200,4 +283,20 @@ export function buildHwpxFromTemplate(kind: HwpxTemplateKind, companyName: strin
   const output = inputZip.toBuffer();
   assertHwpxTemplateOutputBudget(output);
   return output;
+}
+
+export function buildHwpxFromTemplate(kind: HwpxTemplateKind, companyName: string): Buffer {
+  assertDocumentExportInputBudget({ companyName });
+  const srcPath = path.join(templatesDir(), TEMPLATE_FILES[kind]);
+  if (!fs.existsSync(srcPath)) {
+    throw new Error(`HWPX template not found: ${kind}`);
+  }
+  const compressedBytes = fs.statSync(srcPath).size;
+  if (compressedBytes > HWPX_TEMPLATE_BUDGETS.templateBytes) {
+    throw new DocumentExportLimitError("hwpx_template_bytes");
+  }
+
+  const replaceCompany = String(companyName ?? "").trim();
+  const inputZip = new AdmZip(srcPath, { noSort: true });
+  return localizeBudgetedHwpxArchive(inputZip, compressedBytes, replaceCompany);
 }

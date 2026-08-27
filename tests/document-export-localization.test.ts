@@ -2,13 +2,16 @@ import path from "node:path";
 import AdmZip from "adm-zip";
 import { HwpDocument } from "@rhwp/core";
 import { NextRequest } from "next/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { POST as exportHwp } from "@/app/api/export/hwp/route";
 import { POST as exportPdf } from "@/app/api/export/pdf/route";
 import {
   assertHwpxTemplateOutputBudget,
   buildHwpxFromTemplate,
   HWPX_TEMPLATE_BUDGETS,
+  inspectHwpxTemplateArchive,
+  listAvailableTemplates,
+  localizeBudgetedHwpxArchive,
   localizeHwpxPlainText,
   localizeHwpxXmlText
 } from "@/lib/hwpx-template";
@@ -73,6 +76,46 @@ describe("localized editable document exports", () => {
 
     expect(() => assertHwpxTemplateOutputBudget(oversized))
       .toThrow(DocumentExportLimitError);
+  });
+
+  it("rejects archive expansion from central-directory metadata before entry data is read", () => {
+    const getData = vi.fn(() => Buffer.alloc(0));
+    const oversizedEntry = {
+      entryName: "Contents/oversized.xml",
+      isDirectory: false,
+      header: {
+        size: HWPX_TEMPLATE_BUDGETS.archiveEntryUncompressedBytes + 1,
+        compressedSize: 1,
+      },
+      getData,
+    };
+    const toBuffer = vi.fn(() => Buffer.alloc(0));
+    const inputZip = {
+      getEntries: () => [oversizedEntry as unknown as AdmZip.IZipEntry],
+      toBuffer,
+    };
+
+    expect(() => localizeBudgetedHwpxArchive(inputZip, 1, "SafeClaw"))
+      .toThrowError(new DocumentExportLimitError("hwpx_archive_entry_bytes"));
+    expect(getData).not.toHaveBeenCalled();
+    expect(toBuffer).not.toHaveBeenCalled();
+  });
+
+  it("keeps every committed HWPX template inside the pre-decompression archive manifest", () => {
+    const templates = listAvailableTemplates();
+
+    expect(templates).toHaveLength(25);
+    expect(templates.every((template) => template.available)).toBe(true);
+    for (const template of templates) {
+      const receipt = inspectHwpxTemplateArchive(template.kind);
+      expect(receipt.entryCount).toBeLessThanOrEqual(HWPX_TEMPLATE_BUDGETS.archiveEntries);
+      expect(receipt.totalUncompressedBytes)
+        .toBeLessThanOrEqual(HWPX_TEMPLATE_BUDGETS.archiveTotalUncompressedBytes);
+      expect(receipt.largestEntryUncompressedBytes)
+        .toBeLessThanOrEqual(HWPX_TEMPLATE_BUDGETS.archiveEntryUncompressedBytes);
+      expect(receipt.estimatedPeakWorkingBytes)
+        .toBeLessThanOrEqual(HWPX_TEMPLATE_BUDGETS.archivePeakWorkingBytes);
+    }
   });
 
   it("keeps HWPX mimetype first and stored while localizing only intended XML text", () => {
