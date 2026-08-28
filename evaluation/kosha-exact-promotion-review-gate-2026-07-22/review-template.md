@@ -1,8 +1,8 @@
 # KOSHA Exact Promotion Human Review Checklist
 
-Generated at: `2026-08-28T13:02:03.791Z`
+Generated at: `2026-08-28T13:08:19.218Z`
 
-Source HEAD: `7e28d6c4884b6f7ce9e9479da30a6736cc7158bc`
+Source HEAD: `eea3e284b35085fa084d362c8f7c050d0879572d`
 
 Candidates: `8`
 
@@ -294,4 +294,3 @@ Candidates: `8`
 - [ ] 현재 lifecycle 상태를 확인했고 폐기되거나 대체된 버전을 제외했다.
 - [ ] exact-kosha registry JSON 생성 전에 사람의 최종 확인을 기록한다.
 - [ ] 최종 사람 확인 완료 (`humanConfirmed=true` 입력 전 마지막 확인)
-
