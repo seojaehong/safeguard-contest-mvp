@@ -1,7 +1,8 @@
 # Current-source Security Residual Remediation
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_SECURITY_RESIDUAL_REMEDIATION_LIVE_RESCAN_PENDING`
+- Verdict: `PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING`
 - Product source: `c68cc7b7a63c3dfb64ed2be147248ecd186c2098`
+- Production marker: `b1a60eb846f796659a0fcc47da08adce3dfe0ecc` (`master`, production)
 - Sealed scan baseline: `3358978a-75d1-454a-9dcd-4b63b52b9768` at `ab30f5c5269430a558fcd8ef5c6331fb3c952a4e`
 - Scope: the three approval-free source residuals only
 
@@ -17,9 +18,10 @@
 - Adjacent public admission and product harness: 7 files, 141 tests, PASS.
 - Strict typecheck: PASS.
 - Production build: PASS, 28 static pages.
+- Live verification: deployed source marker includes the product commit. No behavioral probe was claimed because these controls do not expose a safe deterministic read-only endpoint.
 
 ## Boundary
 
-This is current-source local evidence, not live or follow-up scan closure. The sealed 17-finding scan and immutable 18-finding baseline are unchanged. Live deployment and a follow-up security scan are required before these findings can be marked closed.
+This is deployed-source plus local contract evidence, not follow-up scan closure or a claim that production behavior was directly probed. The sealed 17-finding scan and immutable 18-finding baseline are unchanged. A follow-up security scan is required before these findings can be marked closed.
 
 No database, provider dispatch, Share-session, embedding/vector, Wiki publication, or KOSHA exact-registry mutation occurred. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`; all approval-gated findings remain open.

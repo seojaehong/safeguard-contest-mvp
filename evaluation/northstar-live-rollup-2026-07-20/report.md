@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-28T05:09:15.567Z
-Source HEAD at generation: e09778029e485d3c513174a32124cf8d13df4980
-Live commit at generation: ab30f5c5269430a558fcd8ef5c6331fb3c952a4e
+Generated at: 2026-08-28T06:22:42.544Z
+Source HEAD at generation: d95e8759cb2dc6c8b355f5ab59f40e9588e51546
+Live commit at generation: b1a60eb846f796659a0fcc47da08adce3dfe0ecc
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -421,6 +421,7 @@ Overall: `northstar_open_approval_gated`
 | current_security_remediation_ledger | notice | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | notice | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | fresh_current_source_security_scan | notice | evaluation\current-source-standard-security-scan-2026-08-28-complete\report.json |
+| current_source_security_residual_remediation | notice | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | notice | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | notice | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
 | weather_fallback_error_redaction_security | notice | evaluation\weather-fallback-error-redaction-2026-08-28\report.json |
@@ -506,6 +507,7 @@ Overall: `northstar_open_approval_gated`
 | current_security_remediation_ledger | ancestor | ancestor_of_head | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | fresh_current_source_security_scan | ancestor | missing | evaluation\current-source-standard-security-scan-2026-08-28-complete\report.json |
+| current_source_security_residual_remediation | ancestor | matches_live_source_mismatch | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | ancestor | ancestor_of_head | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | ancestor | ancestor_of_head | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
 | weather_fallback_error_redaction_security | ancestor | ancestor_of_head | evaluation\weather-fallback-error-redaction-2026-08-28\report.json |

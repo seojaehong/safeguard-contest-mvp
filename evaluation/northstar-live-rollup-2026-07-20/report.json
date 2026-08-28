@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-28T05:09:15.567Z",
-  "head": "e09778029e485d3c513174a32124cf8d13df4980",
+  "generatedAt": "2026-08-28T06:22:42.544Z",
+  "head": "d95e8759cb2dc6c8b355f5ab59f40e9588e51546",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "ab30f5c5269430a558fcd8ef5c6331fb3c952a4e",
+    "commitSha": "b1a60eb846f796659a0fcc47da08adce3dfe0ecc",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-icbzo6ppr-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-1k8g7yuxm-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 79
+    "gateCount": 80
   },
   "provenGates": [
     {
@@ -200,6 +200,12 @@
       "state": "notice",
       "artifact": "evaluation\\current-source-standard-security-scan-2026-08-28-complete\\report.json",
       "detail": "Fresh Standard scan 3358978a is sealed at source/live ab30f5c5 with 17 open findings (2 medium, 15 low), partial canonical coverage across 12 recorded surfaces, and 66 finalizer-recovered deferred draft entries. The immutable original 18-finding baseline and completed prior scan are preserved. Three approval-free source residuals and fourteen database/RLS/atomicity findings remain; the standalone Share identifier candidate was rejected as unproven. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "current_source_security_residual_remediation",
+      "state": "notice",
+      "artifact": "evaluation\\current-source-security-residual-remediation-2026-08-28\\report.json",
+      "detail": "Deployed source includes bounded remediation for provider-detail, dns-toctou, and xff-spoof with 174 focused and adjacent tests, strict typecheck, and a 28-page production build. This is deployed-source plus local contract evidence only: the immutable 18-finding baseline and sealed 17-finding partial-coverage scan remain visible, no mutation occurred, a follow-up full scan is required, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "share_ack_prebody_admission_security",
@@ -766,6 +772,20 @@
     "approvalFreeProductSourceResidualCount": 3,
     "fullyClosedBoundedSourceCandidateCount": 0,
     "freshFullRepositoryScanCompleted": true,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "currentSourceSecurityResidualRemediation": {
+    "artifact": "evaluation\\current-source-security-residual-remediation-2026-08-28\\report.json",
+    "verdict": "PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING",
+    "sourceHead": "c68cc7b7a63c3dfb64ed2be147248ecd186c2098",
+    "productionCommit": "b1a60eb846f796659a0fcc47da08adce3dfe0ecc",
+    "residualCount": 3,
+    "focusedTests": 33,
+    "adjacentTests": 141,
+    "liveStatus": "PASS_DEPLOYED_SOURCE_MARKER_ONLY",
+    "behavioralProbeExecuted": false,
+    "followUpSecurityScanRequired": true,
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
@@ -1889,9 +1909,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "e09778029e485d3c513174a32124cf8d13df4980",
+      "sourceCommit": "d95e8759cb2dc6c8b355f5ab59f40e9588e51546",
       "sourceStatus": "exact",
-      "productionCommit": "e09778029e485d3c513174a32124cf8d13df4980",
+      "productionCommit": "d95e8759cb2dc6c8b355f5ab59f40e9588e51546",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -2133,6 +2153,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
+    },
+    {
+      "id": "current_source_security_residual_remediation",
+      "artifact": "evaluation\\current-source-security-residual-remediation-2026-08-28\\report.json",
+      "sourceCommit": "c68cc7b7a63c3dfb64ed2be147248ecd186c2098",
+      "sourceStatus": "ancestor",
+      "productionCommit": "b1a60eb846f796659a0fcc47da08adce3dfe0ecc",
+      "productionStatus": "matches_live_source_mismatch"
     },
     {
       "id": "share_ack_prebody_admission_security",

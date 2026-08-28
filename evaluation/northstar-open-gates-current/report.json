@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-28T05:09:09.075Z",
-  "sourceSha": "e09778029e485d3c513174a32124cf8d13df4980",
+  "generatedAt": "2026-08-28T06:21:56.664Z",
+  "sourceSha": "d95e8759cb2dc6c8b355f5ab59f40e9588e51546",
   "overall": "open",
   "gates": [
     {
@@ -304,6 +304,16 @@
       "nextActions": [
         "Remediate the three approval-free source residuals in bounded waves and rerun focused validation.",
         "Keep the fourteen database/RLS/atomicity findings approval-gated and exact saved Share separate; do not claim security completion from scan completion."
+      ]
+    },
+    {
+      "id": "current_source_security_residual_remediation",
+      "state": "notice",
+      "label": "Current-source security residual remediation",
+      "evidencePath": "evaluation\\current-source-security-residual-remediation-2026-08-28\\report.json",
+      "detail": "Deployed source includes bounded remediation for provider-detail, dns-toctou, and xff-spoof with 174 focused and adjacent tests, strict typecheck, and a 28-page production build. This is deployed-source plus local contract evidence only: the immutable 18-finding baseline and sealed 17-finding partial-coverage scan remain visible, no mutation occurred, a follow-up full scan is required, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Run a fresh full-repository security scan before reclassifying the three immutable findings or making any security-complete claim."
       ]
     },
     {
