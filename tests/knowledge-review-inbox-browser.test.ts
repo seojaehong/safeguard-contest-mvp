@@ -19,6 +19,7 @@ const queueItem = {
     "1) 위험요인 요약: 작업발판 단부 추락 위험 / 원본 이벤트 검토 사실: 야간 교대 작업 · 청각 경보 보조수단 필요",
     "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
     "3) 통제대책: 안전난간 상태와 추락방지 조치를 작업 전 확인",
+    "- 작업발판 개구부 덮개 상태도 함께 확인",
     "4) 검수 필요 항목: 현장 책임자가 실제 적용 상태 확인"
   ].join("\n"),
   matchedHazardCount: 1,
@@ -270,6 +271,8 @@ describe("knowledge review inbox browser", () => {
     expect(await structuredCandidate.locator("[data-review-candidate-section]").count()).toBe(4);
     await expect.poll(() => structuredCandidate.getByText("위험요인 요약", { exact: true }).isVisible()).toBe(true);
     expect(await structuredCandidate.getByText("작업발판 단부 추락 위험", { exact: true }).isVisible()).toBe(true);
+    const multilineControl = structuredCandidate.locator('[data-review-candidate-section="3"] p');
+    expect(await multilineControl.textContent()).toContain("작업 전 확인\n- 작업발판 개구부 덮개 상태도 함께 확인");
     expect(await structuredCandidate.getByText("검수 필요 항목", { exact: true }).isVisible()).toBe(true);
     expect(await inbox.getByText(secondQueueItem.candidateText).isVisible()).toBe(false);
     await inbox.getByRole("tab", { name: /작업계획서 현장 지식 검토/u }).click();

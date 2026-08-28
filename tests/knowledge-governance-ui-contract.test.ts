@@ -80,6 +80,9 @@ describe("knowledge governance UI contract", () => {
     expect(cssSource).toMatch(/\.reviewWorkbench\s*\{[\s\S]*?grid-template-columns:\s*minmax\(220px, 280px\) minmax\(0, 1fr\);/u);
     expect(cssSource).toMatch(/\.candidateText\s*\{[\s\S]*?overflow:\s*auto;/u);
     expect(cssSource).toMatch(/\.candidateSections\s*\{[\s\S]*?list-style:\s*none;/u);
+    expect(cssSource).toMatch(/\.candidateSections p\s*\{[\s\S]*?white-space:\s*pre-line;/u);
+    expect(inboxSource).toContain('const CANDIDATE_SECTION_LABELS = ["위험요인 요약", "문서 반영 위치", "통제대책", "검수 필요 항목"] as const;');
+    expect(inboxSource).toContain("current.content = `${current.content}\\n${line}`;");
   });
 
   it("keeps the review subject ahead of readiness and visible beside evidence", () => {
@@ -165,6 +168,7 @@ describe("knowledge governance UI contract", () => {
     expect(browserRunnerSource).toContain("metrics.candidateSectionCount === 4");
     expect(browserRunnerSource).toContain('metrics.candidateSectionLabels.join("|") === "위험요인 요약|문서 반영 위치|통제대책|검수 필요 항목"');
     expect(browserRunnerSource).toContain("metrics.candidateSectionContents.every(Boolean)");
+    expect(browserRunnerSource).toContain("metrics.candidateMultilineContinuationPreserved");
     expect(browserRunnerSource).toContain("evidenceInspectorMode || candidateReadinessMode");
     expect(browserRunnerSource).toContain("/^sb-[a-z0-9_-]+-auth-token$/iu.test(key)");
     expect(browserRunnerSource).toContain("metrics.selectedBodyTopVisible");

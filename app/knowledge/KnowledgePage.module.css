@@ -533,6 +533,7 @@
   margin: 0;
   color: var(--workspace-muted, #606873);
   overflow-wrap: anywhere;
+  white-space: pre-line;
 }
 
 .evidenceSubjectContext {

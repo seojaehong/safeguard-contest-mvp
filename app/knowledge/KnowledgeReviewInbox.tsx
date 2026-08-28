@@ -139,6 +139,8 @@ const PRIVATE_REVIEW_FACT_PATTERNS = [
 ] as const;
 const EVENT_FACT_MARKER_PATTERN = /\s*\/\s*원본 이벤트 검토 사실:\s*([^\r\n]*)/u;
 const CANDIDATE_SECTION_PATTERN = /^\s*(\d+)\)\s*([^:\r\n]+):\s*(.+)$/u;
+const CANDIDATE_SECTION_LABELS = ["위험요인 요약", "문서 반영 위치", "통제대책", "검수 필요 항목"] as const;
+const MALFORMED_CANDIDATE_SECTION_PATTERN = /^\s*\d+\s*[).]/u;
 let browserClient: SupabaseClient | null = null;
 
 function getBrowserSupabaseClient(): SupabaseClient | null {
@@ -173,20 +175,29 @@ function readReviewFacts(value: unknown): string[] {
 
 function readCandidateSections(body: string) {
   const lines = body.split(/\r?\n/u).map((line) => line.trim()).filter(Boolean);
-  if (lines.length !== 4) return [];
-
-  const sections = lines.map((line, index) => {
+  const sections: Array<{ number: number; label: string; content: string }> = [];
+  for (const line of lines) {
     const match = line.match(CANDIDATE_SECTION_PATTERN);
-    if (!match || Number(match[1]) !== index + 1) return null;
-    return {
-      number: index + 1,
-      label: match[2].trim(),
-      content: match[3].trim()
-    };
-  });
+    if (match) {
+      const index = sections.length;
+      const label = match[2].trim();
+      const content = match[3].trim();
+      if (index >= CANDIDATE_SECTION_LABELS.length
+        || Number(match[1]) !== index + 1
+        || label !== CANDIDATE_SECTION_LABELS[index]
+        || !content) return [];
+      sections.push({ number: index + 1, label, content });
+      continue;
+    }
 
-  return sections.every((section) => section !== null)
-    ? sections.filter((section): section is NonNullable<typeof section> => section !== null)
+    const current = sections.at(-1);
+    if (!current || MALFORMED_CANDIDATE_SECTION_PATTERN.test(line)) return [];
+    current.content = `${current.content}\n${line}`;
+  }
+
+  return sections.length === CANDIDATE_SECTION_LABELS.length
+    && sections.every((section) => section.content.trim().length > 0)
+    ? sections
     : [];
 }
 

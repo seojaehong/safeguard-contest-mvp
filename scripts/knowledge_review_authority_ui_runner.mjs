@@ -135,6 +135,7 @@ const queueItem = {
       : "1) 위험요인 요약: 작업발판 단부 추락 위험",
     "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
     "3) 통제대책: 안전난간 상태와 추락방지 조치를 작업 전 확인",
+    "- 작업발판 개구부 덮개 상태도 함께 확인",
     "4) 검수 필요 항목: 현장 책임자가 실제 적용 상태 확인"
   ].join("\n"),
   matchedHazardCount: traceMatrixMode ? canonicalTraceItems.length : 1,
@@ -506,6 +507,9 @@ try {
           candidateSectionNumbers: candidateSections.map((section) => section.getAttribute("data-review-candidate-section") || ""),
           candidateSectionLabels: candidateSections.map((section) => section.querySelector("strong")?.textContent?.trim() || ""),
           candidateSectionContents: candidateSections.map((section) => section.querySelector("p")?.textContent?.trim() || ""),
+          candidateMultilineContinuationPreserved: candidateSections[2]?.querySelector("p")?.textContent?.includes(
+            "작업 전 확인\n- 작업발판 개구부 덮개 상태도 함께 확인"
+          ) === true,
           selectedBodyOverflowY: getComputedStyle(selectedBody).overflowY,
           selectedBodyBeforeReadiness: Boolean(selectedBody.compareDocumentPosition(readiness) & Node.DOCUMENT_POSITION_FOLLOWING),
           selectedBodyText: selectedBody.textContent?.trim() || "",
@@ -787,6 +791,7 @@ try {
         && metrics.candidateSectionNumbers.every((number, index) => number === String(index + 1))
         && metrics.candidateSectionLabels.join("|") === "위험요인 요약|문서 반영 위치|통제대책|검수 필요 항목"
         && metrics.candidateSectionContents.every(Boolean)
+        && metrics.candidateMultilineContinuationPreserved
         && metrics.selectedBodyOverflowY === "auto"
         && metrics.selectedBodyBeforeReadiness
         && metrics.selectedBodyTopVisible
@@ -990,6 +995,7 @@ const report = {
     candidateSectionCount: 4,
     candidateSectionLabels: ["위험요인 요약", "문서 반영 위치", "통제대책", "검수 필요 항목"],
     candidateSectionsNonEmpty: results.every((result) => result.metrics.candidateSectionContents.every(Boolean)),
+    candidateMultilineContinuationPreserved: results.every((result) => result.metrics.candidateMultilineContinuationPreserved),
     desktopColumns: 2,
     mobileColumns: 1,
     candidateBodyInternalScroll: true,
@@ -1147,7 +1153,7 @@ ${rows}
 - Organization and site memory cannot be promoted publicly.
 - Site-manager acceptance is required before workpack use.
 - Machine evidence does not replace human review.
-- The candidate navigator contains three fixtures while exactly one selected candidate body is mounted; its four required sections are presented as numbered, labelled, non-empty reviewer blocks.
+- The candidate navigator contains three fixtures while exactly one selected candidate body is mounted; its four required sections are presented as numbered, labelled, non-empty reviewer blocks, including bounded multiline continuation text inside a section.
 - Candidate tabs expose one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and Arrow/Home/End keyboard navigation.
 - Desktop uses a two-column review workbench; mobile uses one column and keeps the candidate body internally scrollable.
 - Desktop mounts the selected candidate and five-item evidence inspector together; mobile mounts one linked pane behind a keyboard-operable segmented tab control.
