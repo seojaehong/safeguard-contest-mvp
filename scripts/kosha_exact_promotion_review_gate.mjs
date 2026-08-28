@@ -840,7 +840,7 @@ export function renderKoshaExactPromotionReviewTemplateMarkdown(template) {
       "",
     );
   }
-  return `${lines.join("\n")}\n`;
+  return `${lines.join("\n").trimEnd()}\n`;
 }
 
 /**

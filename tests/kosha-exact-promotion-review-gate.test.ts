@@ -859,6 +859,7 @@ describe("KOSHA exact promotion review gate", () => {
     expect(reviewerChecklist).toContain("공식 URL이 선택한 stable key의 KOSHA PDF를 연다.");
     expect(reviewerChecklist.match(/^- \[ \]/gmu)).toHaveLength(12);
     expect(reviewerChecklist).not.toContain("- [x]");
+    expect(reviewerChecklist).not.toMatch(/\n\n$/u);
 
     execFileSync("node", [
       path.resolve("scripts", "kosha_exact_promotion_review_gate.mjs"),
