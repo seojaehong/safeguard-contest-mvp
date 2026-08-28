@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-residual-remediation/v1",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_SECURITY_RESIDUAL_REMEDIATION_LIVE_RESCAN_PENDING",
+  "sourceHead": "c68cc7b7a63c3dfb64ed2be147248ecd186c2098",
+  "baseline": {
+    "scanId": "3358978a-75d1-454a-9dcd-4b63b52b9768",
+    "scannedSourceHead": "ab30f5c5269430a558fcd8ef5c6331fb3c952a4e",
+    "immutableOriginalFindingCount": 18,
+    "currentScanFindingCount": 17,
+    "coverageCompleteness": "partial",
+    "baselineRewritten": false
+  },
+  "remediatedSourceResiduals": [
+    {
+      "anchor": "provider-detail",
+      "status": "PASS_CURRENT_SOURCE_LOCAL",
+      "controls": [
+        "provider exceptions and response diagnostics are logged server-side",
+        "public integration details expose stable provider mode and health summaries only",
+        "private relay URLs and upstream exception text are not returned to clients"
+      ]
+    },
+    {
+      "anchor": "dns-toctou",
+      "status": "PASS_CURRENT_SOURCE_LOCAL",
+      "controls": [
+        "allowlisted HTTPS origins are resolved exactly once",
+        "all resolved addresses must be public",
+        "the selected validated address is pinned into the Node HTTPS lookup",
+        "TLS certificate verification and Host preserve the original hostname",
+        "the connected socket address must match the selected DNS pin"
+      ]
+    },
+    {
+      "anchor": "xff-spoof",
+      "status": "PASS_CURRENT_SOURCE_LOCAL",
+      "controls": [
+        "Vercel production prefers the platform-authenticated x-vercel-forwarded-for value",
+        "missing Vercel identity fails closed to unknown",
+        "non-Vercel production proxy headers require SAFECLAW_TRUST_PROXY_HEADERS=true",
+        "accepted production client identity values must be valid IP addresses"
+      ]
+    }
+  ],
+  "verification": {
+    "focusedSecurity": {
+      "testFiles": 3,
+      "tests": 33,
+      "status": "PASS"
+    },
+    "adjacentPublicAdmissionAndHarness": {
+      "testFiles": 7,
+      "tests": 141,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "productionBuild": "PASS",
+    "staticPages": 28
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseSecurityRemediation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "sifVectorRuntime": "APPROVAL_GATED",
+    "koshaExactRegistryPromotion": "APPROVAL_GATED",
+    "liveDeploymentRequired": true,
+    "followUpSecurityScanRequired": true,
+    "securityCompleteClaimAllowed": false
+  }
+}
