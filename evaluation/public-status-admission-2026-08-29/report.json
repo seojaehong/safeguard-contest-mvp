@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "safeclaw-public-status-admission/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_STATUS_ADMISSION_FAIL_CLOSED_RUNTIME_LIMITER_UNAVAILABLE",
+  "generatedAt": "2026-08-29T01:20:43.0011580+09:00",
+  "sourceHead": "a3b2acab509d4e4f601f1ffc2a7854eada2086cc",
+  "productionBuild": {
+    "commitSha": "a3b2acab509d4e4f601f1ffc2a7854eada2086cc",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-mtfknodij-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "securityBaseline": {
+    "scanId": "c5175a50-038b-402e-9fd3-6af9eec6582b",
+    "targetRevision": "c9e24f31b7c9e9db5896bd221401bcef3e35ed24",
+    "finding": "resource-exhaustion.public-status-admission-bypass",
+    "immutableOriginalBaselinePreserved": true
+  },
+  "currentSourceContract": {
+    "surfaces": [
+      "/evidence",
+      "/knowledge",
+      "/ops/api",
+      "/ontology",
+      "/api/ontology/graph"
+    ],
+    "directSafetyReferenceStatsReadFromPage": false,
+    "directPublishedOntologyGraphReadFromPageOrApi": false,
+    "distributedRateAdmissionRequiredInProduction": true,
+    "weightedStatusLeaseRequired": true,
+    "databaseReadExecutedWhenAdmissionUnavailable": false,
+    "controlledPageFallbackProvided": true
+  },
+  "verification": {
+    "focusedVitest": {
+      "files": 3,
+      "tests": 7,
+      "passed": 7,
+      "failed": 0
+    },
+    "strictTypecheck": "PASS",
+    "productionBuild": "PASS",
+    "staticPages": 28,
+    "gitDiffCheck": "PASS",
+    "liveReadOnly": {
+      "evidence": { "status": 200, "admissionHoldRendered": true },
+      "knowledge": { "status": 200, "admissionHoldRendered": true },
+      "opsApi": { "status": 200, "admissionHoldRendered": true },
+      "ontology": { "status": 200, "publicSeedFallbackRendered": true },
+      "ontologyGraphApi": {
+        "status": 503,
+        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        "rateLimitMode": "distributed",
+        "workUnit": "safety-reference-status"
+      },
+      "applicationErrorRendered": false
+    }
+  },
+  "runtimeBoundary": {
+    "distributedLimiterReady": false,
+    "runtimeStatus": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "fullStatusDataAvailabilityClaimed": false,
+    "operatorRemediationRequired": "Restore or validate the production distributed limiter before claiming live status-data readiness."
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedWorkOverclaimed": false,
+    "securityCompletionClaimed": false,
+    "otherScanFindingsRemainOpen": true
+  }
+}
