@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `83c3b1c59a7cae4bcf4d6fa3c42e3330f29026ba`
+Source HEAD: `02508e88b01f61360460917ce5950479ba2b44e1`
 
-Production `/api/build-info`: `83c3b1c59a7cae4bcf4d6fa3c42e3330f29026ba`
+Production `/api/build-info`: `02508e88b01f61360460917ce5950479ba2b44e1`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `83c3b1c59a7cae4bcf4d6fa3c42e3330f29026ba`
+Live rollup source head: `02508e88b01f61360460917ce5950479ba2b44e1`
 
 Live rollup matches production: `true`
 
@@ -53,6 +53,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live editorial duplicate classification is measured separately: `PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY`, generic template overuse `4->0`, retained reviewer findings exact/near `31/100`, and humanReviewCompleted=`false`. Only generic template overuse fails automatically; safety-control and legal-reference repetition remains visible, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live editorial near-duplicate classification preserves `100->100` findings while reducing unclassified human-review-required `54->0`. The retained role-prefix/context/hazard/control categories are `81/9/8/2`; humanReviewCompleted=`false` and exact saved Share remains `MISSING_EVIDENCE`.
 - Live product capability truth is measured separately: `PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH`; manual/provider dispatch is `preview_only` with reason `persistent_idempotency_unavailable`, scheduled briefing email ready=`false`, photo Vision/OCR ready/accepted-only=`true/true`, and AI modes are `template, enhanced, full`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains `MISSING_EVIDENCE` and Documents/Share IA remains `PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP`.
+- Pinned CI supply-chain/full-suite proof is `PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED`: GitHub run `33202526232` concluded `success` with `3103` tests passed, `26` skipped, and build `success`. Checkout/setup-node remain immutable SHAs. This does not close unrelated security findings or approval-gated runtime work; exact saved Share remains `MISSING_EVIDENCE`.
 - Knowledge preparation capability truth is a separate notice: `PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD`; distributed configuration failures use `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`, temporary load uses `PUBLIC_ASK_CONCURRENCY_LIMIT`, and the UI distinction is `true`. Live evidence is `PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD` with behavioral probe=`false`. Enhanced runtime remains `BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION`, authenticated preparation/Wiki/RLS remain `APPROVAL_GATED/APPROVAL_GATED/APPROVAL_GATED`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live launch operations readiness is measured separately: `PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH`; first-viewport receipts `4/4`, desktop four-column `2/2`, mobile local-scroll `2/2`, and console errors `0`. Runtime truth remains admission `unavailable`, dispatch `preview_only`, and photo Vision `ready`; distributed configured/provider ready/fully automated remain `false/false/false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live document export capability truth is measured separately: `PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH`; admission is `unavailable/distributed_limiter_unavailable` with ready=`false`. Desktop panel/beta width is `843/191.25px`; mobile is `262/220px`. This proves fail-closed export truth and browser fallbacks, not distributed activation; activation remains `OPERATOR_CONFIGURATION_REQUIRED`, fully automated launch remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.

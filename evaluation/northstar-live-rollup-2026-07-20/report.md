@@ -1,11 +1,11 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-28T14:39:40.062Z
-Source HEAD at generation: 83c3b1c59a7cae4bcf4d6fa3c42e3330f29026ba
-Live commit at generation: 83c3b1c59a7cae4bcf4d6fa3c42e3330f29026ba
+Generated at: 2026-08-28T20:06:39.859Z
+Source HEAD at generation: 02508e88b01f61360460917ce5950479ba2b44e1
+Live commit at generation: 02508e88b01f61360460917ce5950479ba2b44e1
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
-Overall: `northstar_open_approval_gated`
+Overall: `northstar_evidence_missing_or_unknown`
 
 ## Current Workspace Mobile Geometry
 
@@ -245,6 +245,14 @@ Overall: `northstar_open_approval_gated`
 - Exact saved Share: MISSING_EVIDENCE
 - Documents/Share IA: PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP
 
+## Pinned CI Supply Chain And Full Suite
+
+- Verdict: `PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED`
+- GitHub run: 33202526232; conclusion=success; tests=3103 passed/26 skipped; files=256 passed/11 skipped; build=success
+- Immutable actions: checkout=11bd71901bbe5b1630ceea73d27597364c9af683; setup-node=49933ea5288caeca8642d1e84afbd3f7d6820020
+- Exact saved Share: MISSING_EVIDENCE; approval-gated boundaries closed=false
+- Boundary: CI and deployment proof does not close unrelated security findings or approval-gated runtime work.
+
 ## Knowledge Preparation Capability Truth
 
 - Verdict: `PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD`
@@ -413,6 +421,7 @@ Overall: `northstar_open_approval_gated`
 | document_editorial_review_cockpit | proven | evaluation\document-editorial-review-cockpit-2026-08-16\report.json |
 | current_live_document_editorial_runtime | proven | evaluation\live-document-editorial-template-runtime-2026-08-27\report.json |
 | product_capability_truth | proven | evaluation\product-capability-truth-2026-07-25\report.json |
+| ci_supply_chain_full_suite | proven | evaluation\ci-full-suite-remediation-2026-08-29\report.json |
 | knowledge_preparation_capability_truth | notice | evaluation\knowledge-preparation-capability-truth-2026-08-28\report.json |
 | launch_operations_readiness_cockpit | proven | evaluation\launch-operations-readiness-2026-08-26\report.json |
 | document_export_capability_truth | proven | evaluation\document-export-capability-truth-2026-08-17\report.json |
@@ -432,24 +441,17 @@ Overall: `northstar_open_approval_gated`
 | current_repository_security_rescan | notice | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | fresh_current_source_security_scan | notice | evaluation\current-source-standard-security-scan-2026-08-28-complete\report.json |
 | current_source_security_residual_remediation | notice | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
-| share_ack_prebody_admission_security | notice | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | notice | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
 | weather_fallback_error_redaction_security | notice | evaluation\weather-fallback-error-redaction-2026-08-28\report.json |
 | hwpx_archive_expansion_security | notice | evaluation\hwpx-archive-expansion-security-2026-08-28\report.json |
 | post_remediation_repository_security_scan | notice | evaluation\post-remediation-full-repository-security-scan-2026-08-14\report.json |
 | share_session_revocation_security | notice | evaluation\share-session-revocation-remediation-2026-08-14\report.json |
-| share_recipient_contact_verification_security | notice | evaluation\share-recipient-contact-verification-2026-08-14\report.json |
 | agent_chat_durable_admission_security | notice | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
 | mcp_provider_admission_security | notice | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
-| public_json_request_body_budget | proven | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | security_resource_remediation | proven | evaluation\security-resource-remediation-2026-08-11\report.json |
 | security_upstream_transport_remediation | proven | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |
 | security_safety_reference_surface_remediation | proven | evaluation\security-safety-reference-surface-remediation-2026-08-11\report.json |
-| improvement_photo_analysis_budget | notice | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | notice | evaluation\public-provider-cancellation-2026-08-11\report.json |
-| public_provider_admission | notice | evaluation\public-provider-admission-2026-08-11\report.json |
-| public_ask_distributed_admission | proven | evaluation\public-ask-distributed-admission-2026-08-14\report.json |
-| public_search_distributed_admission | proven | evaluation\public-search-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_rate_limit_readiness | notice | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | notice | evaluation\security-public-generation-admission-2026-08-04\report.json |
 | security_followup_remediation | proven | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
@@ -501,6 +503,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_editorial_duplicate_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
+| ci_supply_chain_full_suite | ancestor | ancestor_of_head | evaluation\ci-full-suite-remediation-2026-08-29\report.json |
 | knowledge_preparation_capability_truth | ancestor | ancestor_of_head | evaluation\knowledge-preparation-capability-truth-2026-08-28\report.json |
 | launch_operations_readiness_cockpit | ancestor | ancestor_of_head | evaluation\launch-operations-readiness-2026-08-26\report.json |
 | document_export_capability_truth | ancestor | ancestor_of_head | evaluation\document-export-capability-truth-2026-08-17\report.json |
@@ -527,7 +530,7 @@ Overall: `northstar_open_approval_gated`
 | mcp_provider_admission_security | ancestor | ancestor_of_head | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
 | share_recipient_contact_verification_security | ancestor | ancestor_of_head | evaluation\share-recipient-contact-verification-2026-08-14\report.json |
 | security_atomic_db_race_remediation | ancestor | missing | evaluation\security-atomic-db-race-approval-boundary-2026-08-14\report.json |
-| live_documents_share_route_perception | exact | matches_live | evaluation\live-documents-share-route-perception-2026-08-28\report.json |
+| live_documents_share_route_perception | ancestor | ancestor_of_head | evaluation\live-documents-share-route-perception-2026-08-28\report.json |
 | deployment_freshness_guard | ancestor | ancestor_of_head | evaluation\deployment-freshness-guard-2026-08-14\report.json |
 | public_json_request_body_budget | ancestor | ancestor_of_head | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | improvement_photo_analysis_budget | ancestor | ancestor_of_head | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |

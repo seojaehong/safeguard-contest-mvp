@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-28T14:39:23.293Z",
-  "sourceSha": "83c3b1c59a7cae4bcf4d6fa3c42e3330f29026ba",
-  "overall": "open",
+  "generatedAt": "2026-08-28T20:05:36.265Z",
+  "sourceSha": "02508e88b01f61360460917ce5950479ba2b44e1",
+  "overall": "contradicted",
   "gates": [
     {
       "id": "final_99_gate",
@@ -138,6 +138,16 @@
       "nextActions": [
         "Keep provider dispatch persistence approval-gated.",
         "Measure exact saved Share geometry with a concrete existing session URL or separately approved creation flow."
+      ]
+    },
+    {
+      "id": "ci_supply_chain_full_suite",
+      "state": "proven",
+      "label": "Pinned CI supply chain and full suite",
+      "evidencePath": "evaluation\\ci-full-suite-remediation-2026-08-29\\report.json",
+      "detail": "GitHub CI preserves contents:read and immutable checkout/setup-node SHAs, then closes the recorded 3098-pass/5-fail baseline with 3103/3129 passing and 26 skipped tests plus successful typecheck/build on production-aligned a6f25afc. This is CI and deployment evidence only: it does not close other security findings or approval-gated work, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Keep action SHAs and the full-suite contract fail-closed when updating CI dependencies."
       ]
     },
     {
@@ -328,12 +338,12 @@
     },
     {
       "id": "share_ack_prebody_admission_security",
-      "state": "notice",
+      "state": "contradicted",
       "label": "Share ACK pre-body admission security",
       "evidencePath": "evaluation\\share-ack-prebody-admission-2026-08-28\\report.json",
-      "detail": "Live production now acquires coarse distributed IP admission and a bounded body-read concurrency lease before the public Share ACK body budget and JSON parser, while retaining recipient-specific admission after parsing. The no-mutation oversized probe failed closed at pre-body admission, but the sealed finding remains open pending a fresh full scan; live recipient ACK approval and exact saved Share MISSING_EVIDENCE remain unchanged.",
+      "detail": "Share ACK pre-body verdict=PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED, sourceLive=true, sourceCurrent=false, ordering=true/true/true, live=503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE, noMutation=true, rescan=true, exactShare=MISSING_EVIDENCE.",
       "nextActions": [
-        "Run a fresh Standard scan before reclassifying the sealed finding; keep exact saved Share and live recipient ACK approval-gated."
+        "Restore source/live alignment, pre-body rate and concurrency ordering, recipient-specific post-parse admission, no-mutation live proof, fresh-rescan requirement, and exact Share MISSING_EVIDENCE."
       ]
     },
     {
@@ -388,12 +398,12 @@
     },
     {
       "id": "share_recipient_contact_verification_security",
-      "state": "notice",
+      "state": "contradicted",
       "label": "Share recipient contact verification security",
       "evidencePath": "evaluation\\share-recipient-contact-verification-2026-08-14\\report.json",
-      "detail": "Live source requires full snapshotted phone or email verification before an invited worker-attributed Share confirmation insert. The value is not stored or returned, mobile/desktop recipient geometry remains bounded, and current compatibility=true records that the safe live missing-session probe now fails earlier at distributed admission with 503 and creates no confirmation. The sealed low finding remains immutable pending a fresh rescan, recipient ACK stays approval-gated, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Share recipient verification verdict=PASS_LIVE_DEPLOYED_SOURCE_SHARE_RECIPIENT_CONTACT_VERIFICATION_RESCAN_PENDING, sourceLive=true, sourceCurrent=false, workerIdOnly=false, persisted=false, liveStatus=404, noMutation=true, exactShare=MISSING_EVIDENCE, ack=APPROVAL_GATED.",
       "nextActions": [
-        "Run a fresh Standard scan before reclassifying the immutable finding; keep exact saved Share and live recipient ACK approval-gated."
+        "Restore source/live alignment, full contact verification before insert, non-persistence, browser containment, no-mutation evidence, fresh-rescan requirement, exact Share MISSING_EVIDENCE, and ACK approval gating."
       ]
     },
     {
@@ -430,13 +440,12 @@
     },
     {
       "id": "public_json_request_body_budget",
-      "state": "proven",
+      "state": "contradicted",
       "label": "Public JSON request body budget",
       "evidencePath": "evaluation\\public-json-request-body-budget-2026-08-11\\report.json",
-      "detail": "The corrected current-source scan's medium public JSON body-budget finding is source-remediated and live-proven across /api/ask, /api/ask/stream, and /api/knowledge/match with pre-parse byte limits, 48 focused/adjacent tests, and a current 23 files / 215 tests governed-path companion. The immutable 14-finding scan and nine deferred candidates remain visible, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Public JSON budget verdict=PASS_LIVE_PRODUCTION_PUBLIC_JSON_PRE_PARSE_BUDGET, sourceCurrent=false, liveCases=3, tests=48, followUp=REQUIRED, securityComplete=false, noMutation=true, exactShare=MISSING_EVIDENCE.",
       "nextActions": [
-        "Keep the canonical 14 findings and nine deferred candidates visible until a fresh follow-up scan revalidates the patched source.",
-        "Continue approval-free remediation without weakening exact saved Share or other approval-gated boundaries."
+        "Restore deployed SHA ancestry, all three live 413 cases, verification totals, immutable-scan preservation, follow-up scan requirement, no-mutation boundaries, and exact Share MISSING_EVIDENCE."
       ]
     },
     {
@@ -471,13 +480,12 @@
     },
     {
       "id": "improvement_photo_analysis_budget",
-      "state": "notice",
+      "state": "contradicted",
       "label": "Improvement photo analysis budget",
       "evidencePath": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
-      "detail": "Improvement and dedicated photo analysis now share pre-provider byte, count, MIME/signature, rate, and concurrency controls with 76 tests plus a current 23 files / 215 tests governed-path companion. Production currently reports instance fallback rather than distributed admission, the immutable 14-finding scan remains unchanged, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Improvement photo verdict=PASS_LIVE_PRODUCTION_IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_WITH_INSTANCE_ADMISSION, sourceCurrent=false, liveCases=2, admission=INSTANCE_FALLBACK_ACTIVE, tests=76, followUp=REQUIRED, noMutation=true, exactShare=MISSING_EVIDENCE.",
       "nextActions": [
-        "Activate approved distributed photo-analysis admission before treating process-instance fallback as horizontally durable.",
-        "Keep the canonical findings visible until a fresh follow-up security scan revalidates the patched source."
+        "Restore deployed source ancestry, file budgets, shared live admission, verification totals, no-mutation boundaries, follow-up scan requirement, and exact Share MISSING_EVIDENCE."
       ]
     },
     {
@@ -492,35 +500,32 @@
     },
     {
       "id": "public_provider_admission",
-      "state": "notice",
+      "state": "contradicted",
       "label": "Public provider admission",
       "evidencePath": "evaluation\\public-provider-admission-2026-08-11\\report.json",
-      "detail": "Current production enforces mode-weighted provider work units (template 0, enhanced 2, full 12) with completion/cancellation release, 23 files / 215 tests governed-path compatibility, and live no-provider work-budget probes across ask, weather, and knowledge. Production still reports process-instance admission because Upstash is not configured; both canonical medium findings remain immutable, distributed activation and a fresh follow-up scan remain required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Public provider admission verdict=PARTIAL_LIVE_PRODUCTION_WEIGHTED_INSTANCE_ADMISSION_DISTRIBUTED_ACTIVATION_PENDING, sourceCurrent=false, findings=2, liveChecks=3, distributed=PENDING_CONFIGURATION, followUp=REQUIRED, noMutation=true, exactShare=MISSING_EVIDENCE.",
       "nextActions": [
-        "Configure and verify an approved distributed admission backend before claiming horizontal durability.",
-        "Run a fresh full-repository security scan before reclassifying either immutable finding or making a security-complete claim."
+        "Restore source/live alignment, weighted contracts, all three no-provider live probes, verification totals, instance/distributed boundary, no-mutation boundary, follow-up scan requirement, and exact Share MISSING_EVIDENCE."
       ]
     },
     {
       "id": "public_ask_distributed_admission",
-      "state": "proven",
+      "state": "contradicted",
       "label": "Public Ask distributed admission",
       "evidencePath": "evaluation\\public-ask-distributed-admission-2026-08-14\\report.json",
-      "detail": "Current production keeps template work at zero and fails JSON/SSE enhanced/full closed with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before provider work when distributed admission is unavailable. The immutable csf_9b3cc6648586dabf4bfa61e9 finding still requires a fresh scan; backend activation is OPERATOR_CONFIGURATION_REQUIRED, no provider or mutation was used, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Public Ask distributed admission verdict=PASS_LIVE_PRODUCTION_PUBLIC_ASK_PROVIDER_MODES_FAIL_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION, sourceCurrent=false, finding=csf_9b3cc6648586dabf4bfa61e9, localCases=3, liveCases=5, providerCall=false, activation=OPERATOR_CONFIGURATION_REQUIRED, rescan=REQUIRED, noMutation=true, exactShare=MISSING_EVIDENCE.",
       "nextActions": [
-        "Configure and verify an approved distributed admission backend before enabling enhanced/full provider modes horizontally.",
-        "Run a fresh repository security scan before reclassifying the immutable finding or making a security-complete claim."
+        "Restore deployed source alignment, all JSON/SSE template/enhanced/full cases, verification totals, no-provider/no-mutation boundaries, fresh-scan requirement, and exact Share MISSING_EVIDENCE."
       ]
     },
     {
       "id": "public_search_distributed_admission",
-      "state": "proven",
+      "state": "contradicted",
       "label": "Public search distributed admission",
       "evidencePath": "evaluation\\public-search-distributed-admission-2026-08-14\\report.json",
-      "detail": "Live legal, safety-reference, and weather provider work fails closed before upstream calls without distributed admission. Shared capacity is 12 with weights 6/3/1 per coalesced job. Immutable finding csf_bb897a39277591f4fbab0ca7 still requires a fresh scan; activation is OPERATOR_CONFIGURATION_REQUIRED, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Public search admission verdict=PASS_LIVE_PRODUCTION_PUBLIC_SEARCH_PROVIDER_WORK_FAILS_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION, sourceCurrent=false, finding=csf_bb897a39277591f4fbab0ca7, liveCases=3, providerCall=false, activation=OPERATOR_CONFIGURATION_REQUIRED, rescan=REQUIRED, noMutation=true, exactShare=MISSING_EVIDENCE.",
       "nextActions": [
-        "Configure and verify the approved distributed backend before enabling horizontal provider work.",
-        "Run a fresh repository security scan before reclassifying the immutable finding."
+        "Restore source/live alignment, all three live cases, weighted coalesced lease receipts, no-mutation boundaries, fresh-scan requirement, and exact Share MISSING_EVIDENCE."
       ]
     },
     {
