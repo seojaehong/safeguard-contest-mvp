@@ -15471,7 +15471,7 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-form-card-head strong {
     font-size: var(--text-caption);
-    font-weight: 700;
+    font-weight: 600;
     line-height: var(--leading-caption);
     letter-spacing: var(--tracking-body);
   }
