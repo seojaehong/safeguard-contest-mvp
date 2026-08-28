@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
-import { assembleGraph, loadGraph } from "@/lib/ontology/graph-store";
+import { assembleGraph } from "@/lib/ontology/graph-store";
 import { SEED_EDGES, SEED_NODES, SEED_STATS } from "@/lib/ontology/seed/core-triples";
 import { buildOntologyVisualizationModel } from "@/lib/ontology/visualization";
 import { OntologyExplorer } from "./OntologyExplorer";
 import styles from "./OntologyWorkbench.module.css";
+import { createPublicPageAdmissionRequest, readPublicAdmissionMessage } from "@/lib/public-page-admission";
+import { runPublicOntologyGraphRead } from "@/lib/public-status-operation";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +26,17 @@ function isPublishedSeedRow(value: unknown) {
 }
 
 export default async function OntologyPage() {
-  const result = await loadGraph("published");
+  const incomingHeaders = await headers();
+  const request = createPublicPageAdmissionRequest("/ontology", incomingHeaders.entries());
+  const graphRead = await runPublicOntologyGraphRead(request);
+  const result = graphRead.ok
+    ? graphRead.data
+    : {
+        ok: false as const,
+        configured: true,
+        graph: null,
+        message: await readPublicAdmissionMessage(graphRead.response),
+      };
   const fallbackGraph = result.ok ? null : assembleGraph(
     SEED_NODES.filter(isPublishedSeedRow),
     SEED_EDGES.filter(isPublishedSeedRow)

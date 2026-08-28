@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { getLatestDryrunSnapshot } from "@/lib/dryrun-status";
-import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { toDryrunPresentationSnapshot } from "@/lib/web-safe-presentation";
 import {
@@ -10,6 +10,11 @@ import {
 import { getPhotoVisionReadiness } from "@/lib/photo-vision-analysis";
 import { getPublicDistributedAdmissionReadiness } from "@/lib/public-distributed-rate-limit";
 import { resolveBriefingEmailDispatchStatus } from "@/lib/server/briefing-dispatch-status";
+import { createPublicPageAdmissionRequest, readPublicAdmissionMessage } from "@/lib/public-page-admission";
+import {
+  runPublicSafetyReferenceStatsRead,
+  unavailableSafetyReferenceStats,
+} from "@/lib/public-status-operation";
 
 export const dynamic = "force-dynamic";
 
@@ -67,7 +72,12 @@ export default async function ApiOperationsPage() {
   } catch (error: unknown) {
     console.error("API operations dry-run snapshot presentation read failed", error);
   }
-  const safetyDb = await getSafetyReferenceStats();
+  const incomingHeaders = await headers();
+  const request = createPublicPageAdmissionRequest("/ops/api", incomingHeaders.entries());
+  const statusRead = await runPublicSafetyReferenceStatsRead(request);
+  const safetyDb = statusRead.ok
+    ? statusRead.data
+    : unavailableSafetyReferenceStats(await readPublicAdmissionMessage(statusRead.response));
   const engine = enginePresentation(assessEngineRuntimeReadiness(process.env));
   const publicAdmission = getPublicDistributedAdmissionReadiness({
     environment: process.env,

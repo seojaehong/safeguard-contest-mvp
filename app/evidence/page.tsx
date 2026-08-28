@@ -1,14 +1,24 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { CurrentEvidenceModule } from "@/components/CurrentWorkpackModules";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
-import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
+import { createPublicPageAdmissionRequest, readPublicAdmissionMessage } from "@/lib/public-page-admission";
+import {
+  runPublicSafetyReferenceStatsRead,
+  unavailableSafetyReferenceStats,
+} from "@/lib/public-status-operation";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
 
 export const dynamic = "force-dynamic";
 
 export default async function EvidencePage() {
   const data = buildSampleWorkpack();
-  const stats = await getSafetyReferenceStats();
+  const incomingHeaders = await headers();
+  const request = createPublicPageAdmissionRequest("/evidence", incomingHeaders.entries());
+  const statusRead = await runPublicSafetyReferenceStatsRead(request);
+  const stats = statusRead.ok
+    ? statusRead.data
+    : unavailableSafetyReferenceStats(await readPublicAdmissionMessage(statusRead.response));
 
   return (
     <SafeClawModuleShell

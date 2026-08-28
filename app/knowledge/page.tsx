@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { headers } from "next/headers";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import {
   KNOWLEDGE_AUTHORITY_LANES,
@@ -10,9 +11,13 @@ import type {
   KnowledgePromotionStageId
 } from "@/lib/knowledge-governance";
 import {
-  getSafetyReferenceStats,
   normalizeApprovedSafetyReferenceProvenanceUrl
 } from "@/lib/safety-reference-catalog";
+import { createPublicPageAdmissionRequest, readPublicAdmissionMessage } from "@/lib/public-page-admission";
+import {
+  runPublicSafetyReferenceStatsRead,
+  unavailableSafetyReferenceStats,
+} from "@/lib/public-status-operation";
 import { KnowledgeSectionNavigator } from "./KnowledgeSectionNavigator";
 import { KnowledgeReviewInbox } from "./KnowledgeReviewInbox";
 import styles from "./KnowledgePage.module.css";
@@ -240,7 +245,12 @@ export default async function KnowledgePage() {
   const schemaDisplayMarkdown = localizeSchemaForPresentation(schemaPresentationSource);
   const hazardEntries = await readWikiEntries("hazards");
   const formEntries = await readWikiEntries("forms");
-  const stats = await getSafetyReferenceStats();
+  const incomingHeaders = await headers();
+  const request = createPublicPageAdmissionRequest("/knowledge", incomingHeaders.entries());
+  const statusRead = await runPublicSafetyReferenceStatsRead(request);
+  const stats = statusRead.ok
+    ? statusRead.data
+    : unavailableSafetyReferenceStats(await readPublicAdmissionMessage(statusRead.response));
 
   return (
     <SafeClawModuleShell
