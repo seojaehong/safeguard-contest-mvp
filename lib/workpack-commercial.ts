@@ -65,7 +65,7 @@ export type ReadConfirmationDraft = {
     worker_display_name: string;
     worker_snapshot: Record<string, unknown>;
     language_code: string;
-    confirmation_method: "button";
+    confirmation_method: "button" | "admin_marked";
   };
 } | {
   ok: false;
@@ -368,6 +368,7 @@ export function buildReadConfirmationDraft(input: {
   displayName: string;
   workerSnapshot: Record<string, unknown>;
   languageCode?: string;
+  confirmationMethod?: "button" | "admin_marked";
 }): ReadConfirmationDraft {
   const displayName = input.displayName.trim();
   if (!displayName) {
@@ -398,7 +399,7 @@ export function buildReadConfirmationDraft(input: {
         displayName
       },
       language_code: cleanLanguageCode(input.languageCode),
-      confirmation_method: "button"
+      confirmation_method: input.confirmationMethod === "admin_marked" ? "admin_marked" : "button"
     }
   };
 }

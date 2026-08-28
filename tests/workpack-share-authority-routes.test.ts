@@ -228,9 +228,13 @@ function makeShareInsertClient() {
 function makeConfirmationClient(existingId: string | null) {
   let insertCount = 0;
   let inserted: unknown = null;
+  const filters: Array<[string, unknown]> = [];
   const query = {
     select() { return query; },
-    eq() { return query; },
+    eq(field: string, value: unknown) {
+      filters.push([field, value]);
+      return query;
+    },
     maybeSingle: async () => ({ data: existingId ? { id: existingId } : null, error: null }),
     insert(value: unknown) {
       insertCount += 1;
@@ -244,6 +248,7 @@ function makeConfirmationClient(existingId: string | null) {
   };
   return {
     client: { from: () => query },
+    filters: () => filters,
     insertCount: () => insertCount,
     inserted: () => inserted
   };
@@ -2169,6 +2174,7 @@ describe("read confirmation route authority", () => {
 
     expect(body.confirmationId).toBe("confirmation-existing");
     expect(fake.insertCount()).toBe(0);
+    expect(fake.filters()).toContainEqual(["confirmation_method", "admin_marked"]);
   });
 
   it("uses the snapshotted session worker instead of client confirmation fields", async () => {
@@ -2189,7 +2195,8 @@ describe("read confirmation route authority", () => {
       worker_id: WORKER_ID,
       worker_display_name: "Server Nguyen",
       language_code: "vi",
-      worker_snapshot: serverRecipient.workerSnapshot
+      worker_snapshot: serverRecipient.workerSnapshot,
+      confirmation_method: "admin_marked"
     });
   });
 
@@ -2374,7 +2381,7 @@ describe("read confirmation route authority", () => {
       shareSessionId: SESSION_ID,
       workerId: WORKER_ID,
       workerDisplayName: "Server Nguyen",
-      confirmationMethod: "button"
+      confirmationMethod: "admin_marked"
     };
     const confirmationId = buildReadConfirmationId(identity);
     const fake = makeConfirmationRaceClient({
@@ -2412,7 +2419,7 @@ describe("read confirmation route authority", () => {
       shareSessionId: SESSION_ID,
       workerId: WORKER_ID,
       workerDisplayName: "Server Nguyen",
-      confirmationMethod: "button"
+      confirmationMethod: "admin_marked"
     };
     const fake = makeConfirmationRaceClient({
       id: buildReadConfirmationId(identity),
@@ -2423,6 +2430,38 @@ describe("read confirmation route authority", () => {
       worker_id: identity.workerId,
       worker_display_name: identity.workerDisplayName,
       confirmation_method: identity.confirmationMethod
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { POST } = await import("@/app/api/workpacks/[id]/read-confirmations/route");
+
+    const response = await POST(jsonRequest(`/api/workpacks/${WORKPACK_ID}/read-confirmations`, {
+      shareSessionId: SESSION_ID,
+      workerId: WORKER_ID
+    }), { params: Promise.resolve({ id: WORKPACK_ID }) });
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({ confirmationId: null });
+  });
+
+  it("does not reuse a recipient button confirmation as an administrator mark", async () => {
+    const adminIdentity = {
+      organizationId: "org-1",
+      siteId: "site-1",
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      workerId: WORKER_ID,
+      workerDisplayName: "Server Nguyen",
+      confirmationMethod: "admin_marked"
+    };
+    const fake = makeConfirmationRaceClient({
+      id: buildReadConfirmationId(adminIdentity),
+      organization_id: adminIdentity.organizationId,
+      site_id: adminIdentity.siteId,
+      workpack_id: adminIdentity.workpackId,
+      share_session_id: adminIdentity.shareSessionId,
+      worker_id: adminIdentity.workerId,
+      worker_display_name: adminIdentity.workerDisplayName,
+      confirmation_method: "button"
     });
     mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
     const { POST } = await import("@/app/api/workpacks/[id]/read-confirmations/route");

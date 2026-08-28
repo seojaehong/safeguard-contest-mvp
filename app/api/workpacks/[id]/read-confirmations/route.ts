@@ -131,7 +131,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
     .eq("workpack_id", owned.context.workpackId)
     .eq("organization_id", owned.context.organizationId)
     .eq("share_session_id", activeSession.session.id)
-    .eq("worker_id", workerId);
+    .eq("worker_id", workerId)
+    .eq("confirmation_method", "admin_marked");
   existingQuery = owned.context.siteId === null
     ? existingQuery.is("site_id", null)
     : existingQuery.eq("site_id", owned.context.siteId);
@@ -159,7 +160,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
     workerId,
     displayName: recipient.displayName,
     workerSnapshot: recipient.workerSnapshot,
-    languageCode: recipient.languageCode
+    languageCode: recipient.languageCode,
+    confirmationMethod: "admin_marked"
   });
 
   if (!draft.ok) {
@@ -175,7 +177,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       shareSessionId: draft.insert.share_session_id || activeSession.session.id,
       workerId: draft.insert.worker_id ?? null,
       workerDisplayName: draft.insert.worker_display_name,
-      confirmationMethod: draft.insert.confirmation_method || "button"
+      confirmationMethod: draft.insert.confirmation_method || "admin_marked"
     }),
     worker_snapshot: toJson(draft.insert.worker_snapshot)
   };
@@ -194,7 +196,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       shareSessionId: insert.share_session_id || activeSession.session.id,
       workerId: insert.worker_id ?? null,
       workerDisplayName: insert.worker_display_name,
-      confirmationMethod: insert.confirmation_method || "button"
+      confirmationMethod: insert.confirmation_method || "admin_marked"
     };
     const { data: concurrent, error: concurrentError } = await client
       .from("workpack_read_confirmations")
@@ -210,7 +212,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       configured: true,
       confirmationId: concurrent.id,
       idempotent: true,
-      message: "이미 저장된 작업자 열람 확인입니다."
+      message: "이미 저장된 관리자 확인 표시입니다."
     });
   }
   if (error) {
@@ -222,6 +224,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
     ok: true,
     configured: true,
     confirmationId: data.id,
-    message: "작업자 열람 확인을 저장했습니다."
+    message: "관리자 확인 표시를 저장했습니다. 작업자 본인 확인과 별도로 집계됩니다."
   });
 }

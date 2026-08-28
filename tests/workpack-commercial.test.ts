@@ -72,6 +72,22 @@ describe("commercial workpack operation contracts", () => {
     expect(draft.message).toContain("snapshot");
   });
 
+  it("preserves administrator-marked provenance separately from recipient buttons", () => {
+    const draft = buildReadConfirmationDraft({
+      organizationId: "org-1",
+      siteId: "site-1",
+      workpackId: "wp-1",
+      shareSessionId: "session-1",
+      workerId: "worker-1",
+      displayName: "Nguyen",
+      workerSnapshot: { workerId: "worker-1" },
+      confirmationMethod: "admin_marked",
+    });
+
+    if (!draft.ok) throw new Error(draft.message);
+    expect(draft.insert.confirmation_method).toBe("admin_marked");
+  });
+
   it("verifies an invited worker with the full snapshotted phone or email", () => {
     const recipient = {
       workerId: "worker-1",
