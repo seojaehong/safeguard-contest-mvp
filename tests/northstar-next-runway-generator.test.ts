@@ -45,6 +45,8 @@ type NextRunwayReport = {
     distributedAdmissionBlocked: boolean;
     distributedAdmissionActivation: string;
     exactSavedShareVerdict: string;
+    rawAuditFresh: boolean;
+    rawAuditFreshnessReasons: string[];
     documentCoverage: {
       expectedCount: number;
       presentCount: number;
@@ -1850,6 +1852,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     providerDispatchLiveClaimed: false,
     dispatchCalled: false,
     apiAsk: { ok: true },
+    rawAuditFreshness: { ready: true, reasons: [] },
     documentCoverage: {
       expectedCount: 12,
       presentCount: 12,
@@ -5591,6 +5594,7 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
         rateLimit: "distributed",
         workUnit: "generation",
       },
+      rawAuditFreshness: { ready: true, reasons: [] },
       runtimeBoundary: {
         distributedAdmissionBlocked: true,
         distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
@@ -5622,11 +5626,46 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       distributedAdmissionBlocked: true,
       distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
       exactSavedShareVerdict: "MISSING_EVIDENCE",
+      rawAuditFresh: true,
+      rawAuditFreshnessReasons: [],
     });
     expect(markdown).toContain("BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH");
     expect(markdown).toContain("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
     expect(markdown).toContain("demo allowed=`false`");
     expect(markdown).toContain("exact saved Share remains `MISSING_EVIDENCE`");
+  });
+
+  it("fails launch claims closed when the child launch report carries a stale raw audit", async () => {
+    const { buildNorthstarNextRunway, renderNorthstarNextRunwayMarkdown } = await loadNextRunwayModule();
+    const { root, secondHead } = createFixtureRoot();
+    const launchPath = path.join(root, "evaluation/launch-readiness-current-2026-07-22/report.json");
+    const launch = JSON.parse(fs.readFileSync(launchPath, "utf8")) as Record<string, unknown>;
+    writeJson(root, "evaluation/launch-readiness-current-2026-07-22/report.json", {
+      ...launch,
+      verdict: "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
+      safeLaunchDemoClaimAllowed: true,
+      guidedPilotClaimAllowed: true,
+      rawAuditFreshness: {
+        ready: false,
+        reasons: ["raw_audit_production_commit_mismatch"],
+      },
+    });
+
+    const report = buildNorthstarNextRunway({
+      rootDir: root,
+      buildInfo: { commitSha: secondHead },
+      generatedAt: "2026-08-29T00:00:00.000Z",
+    });
+    const markdown = renderNorthstarNextRunwayMarkdown(report);
+
+    expect(report.launchReadiness).toMatchObject({
+      verdict: "STALE_LIVE_PROBE_REQUIRES_RERUN_NO_DISPATCH",
+      safeLaunchDemoClaimAllowed: false,
+      rawAuditFresh: false,
+      rawAuditFreshnessReasons: ["raw_audit_production_commit_mismatch"],
+    });
+    expect(markdown).toContain("raw audit fresh=`false`");
+    expect(markdown).toContain("raw_audit_production_commit_mismatch");
   });
 
   it("keeps an evidence-only source head pending after refreshing the rollup from that source head", async () => {

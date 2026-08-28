@@ -21,7 +21,13 @@ const delayedStdoutPreload = `data:text/javascript,${encodeURIComponent(`
   };
 `)}`;
 
-type FixtureMode = "success" | "http-failure" | "distributed-unavailable" | "timeout" | "malformed-json";
+type FixtureMode =
+  | "success"
+  | "build-info-failure"
+  | "http-failure"
+  | "distributed-unavailable"
+  | "timeout"
+  | "malformed-json";
 
 type FixtureRequest = {
   body: string;
@@ -56,6 +62,13 @@ const successPayload = {
   },
 };
 
+const buildInfoPayload = {
+  ok: true,
+  commitSha: "fixture-production-commit",
+  branch: "master",
+  environment: "test",
+};
+
 function asJsonObject(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error("Expected a JSON object");
@@ -81,6 +94,23 @@ async function startFixtureServer(mode: FixtureMode): Promise<FixtureServer> {
         method: request.method,
         url: request.url,
       });
+
+      if (request.method === "GET" && request.url === "/api/build-info") {
+        if (mode === "build-info-failure") {
+          response.writeHead(503, { "content-type": "application/json" });
+          response.end(JSON.stringify({ error: "fixture build marker unavailable" }));
+          return;
+        }
+        response.writeHead(200, { "content-type": "application/json" });
+        response.end(JSON.stringify(buildInfoPayload));
+        return;
+      }
+
+      if (request.method !== "POST" || request.url !== "/api/ask") {
+        response.writeHead(404, { "content-type": "application/json" });
+        response.end(JSON.stringify({ error: "fixture route not found" }));
+        return;
+      }
 
       if (mode === "timeout") return;
       if (mode === "http-failure") {
@@ -235,10 +265,12 @@ async function runAudit(
   }
 }
 
-function expectOnlyAskRequest(result: ChildResult): void {
-  expect(result.requests).toHaveLength(1);
-  expect(result.requests[0]).toMatchObject({ method: "POST", url: "/api/ask" });
-  expect(parseJsonObject(result.requests[0].body)).toEqual({
+function expectBuildInfoThenAskRequests(result: ChildResult): void {
+  expect(result.requests).toHaveLength(2);
+  expect(result.requests[0]).toMatchObject({ method: "GET", url: "/api/build-info" });
+  expect(result.requests[0].body).toBe("");
+  expect(result.requests[1]).toMatchObject({ method: "POST", url: "/api/ask" });
+  expect(parseJsonObject(result.requests[1].body)).toEqual({
     question: "Local fixture launch readiness question",
   });
 }
@@ -271,12 +303,30 @@ describe("launch readiness audit process lifecycle", () => {
       apiAskStatus: 200,
       dispatchOk: null,
       dispatchStatus: null,
+      productionCommit: "fixture-production-commit",
+      productionBuild: buildInfoPayload,
     });
     expect(asJsonObject(report.documents)).toMatchObject({
       workPermitDraft: true,
       workpackSummaryDraft: true,
     });
-    expectOnlyAskRequest(result);
+    expectBuildInfoThenAskRequests(result);
+  });
+
+  it("fails closed before the audit request when the production marker is unavailable", async () => {
+    const result = await runAudit("build-info-failure", { preseedOutput: true });
+
+    expect(result.code).toBe(1);
+    expect(result.signal).toBeNull();
+    expect(result.stdout).toBe("");
+    expect(parseJsonObject(result.stderr.trim())).toMatchObject({
+      error: "Launch readiness audit failed",
+      detail: "Production build marker unavailable (503).",
+    });
+    expect(result.outputFiles).toEqual([]);
+    expect(result.outputText).toBeNull();
+    expect(result.requests).toHaveLength(1);
+    expect(result.requests[0]).toMatchObject({ method: "GET", url: "/api/build-info" });
   });
 
   it("keeps the HTTP failure report and exits one after flushing its summary", async () => {
@@ -291,7 +341,7 @@ describe("launch readiness audit process lifecycle", () => {
       apiAskOk: false,
       apiAskStatus: 503,
     });
-    expectOnlyAskRequest(result);
+    expectBuildInfoThenAskRequests(result);
   });
 
   it("preserves distributed admission failure details without dispatch", async () => {
@@ -314,7 +364,7 @@ describe("launch readiness audit process lifecycle", () => {
       apiAskWorkUnit: "generation",
       dispatchStatus: null,
     });
-    expectOnlyAskRequest(result);
+    expectBuildInfoThenAskRequests(result);
   });
 
   it("removes stale output and exits one when the request times out", async () => {
@@ -328,7 +378,7 @@ describe("launch readiness audit process lifecycle", () => {
     });
     expect(result.outputFiles).toEqual([]);
     expect(result.outputText).toBeNull();
-    expectOnlyAskRequest(result);
+    expectBuildInfoThenAskRequests(result);
   });
 
   it("preserves HTTP semantics for a malformed successful response", async () => {
@@ -347,6 +397,6 @@ describe("launch readiness audit process lifecycle", () => {
     const documents = asJsonObject(report.documents);
     expect(Object.values(documents).every((value) => value === false)).toBe(true);
     expect(result.outputFiles).toEqual(["audit.json"]);
-    expectOnlyAskRequest(result);
+    expectBuildInfoThenAskRequests(result);
   });
 });
