@@ -48,6 +48,7 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   liveDocumentRainContextIsolation: path.join("evaluation", "live-document-rain-context-isolation-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  knowledgePreparationCapabilityTruth: path.join("evaluation", "knowledge-preparation-capability-truth-2026-08-28", "report.json"),
   launchOperationsReadiness: path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"),
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
@@ -1801,6 +1802,107 @@ function evaluateProductCapabilityTruthGate(rootDir) {
     evidencePath,
     detail: `Capability verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, dispatch=${readString(providerDispatch.mode) || "unknown"}/${readString(providerDispatch.reason) || "unknown"}, providerCalled=${providerDispatch.providerCalled === true}, briefingEmailReady=${briefing.emailReady === true}, photoReady=${photo.ready === true}, photoAcceptedOnly=${photo.acceptedOnly === true}, photoPost=${photo.photoPostAnalysisExecuted === true}, uiTruthPass=${uiTruthPass}, entryTruthPass=${entryTruthPass}, landingTruthPass=${landingTruthPass}, viewportIaPass=${currentViewportIaPass}, aiModes=${sortedModes || "missing"}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, ia=${readString(remainingBoundaries.documentsShareIaVerdict) || "missing"}.`,
     nextActions: ["Restore the fail-closed capability boundaries and rerun current-production truth evidence without mutation."],
+  });
+}
+
+const KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_PATHS = [
+  "app/api/knowledge/review/prepare/route.ts",
+  "app/knowledge/KnowledgeReviewInbox.tsx",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateKnowledgePreparationCapabilityTruthGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.knowledgePreparationCapabilityTruth;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "knowledge_preparation_capability_truth",
+      label: "Knowledge preparation capability truth",
+      state: "missing",
+      evidencePath,
+      detail: "Knowledge preparation capability truth evidence is missing or invalid.",
+      nextActions: ["Restore the deployed-source capability receipt without executing an authenticated preparation run."],
+    });
+  }
+
+  const before = isRecord(report.before) ? report.before : {};
+  const current = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focused) ? verification.focused : {};
+  const adjacent = isRecord(verification.adjacentKnowledgeAndAdmission)
+    ? verification.adjacentKnowledgeAndAdmission
+    : {};
+  const live = isRecord(report.liveVerification) ? report.liveVerification : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerCallPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.ontologyPublicationPerformed === false
+    && mutation.embeddingGenerated === false
+    && mutation.vectorUploadPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict)
+      === "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD"
+    && sourceHead.length === 40
+    && productionCommit.length === 40
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_PATHS)
+    && isGitAncestor(rootDir, productionCommit)
+    && report.productionIncludesProductCommit === true
+    && readString(before.distributedAdmissionFailurePublicCode) === "PUBLIC_ASK_CONCURRENCY_LIMIT"
+    && readString(before.reviewInboxFailureMessage) === "검토 후보를 준비하지 못했습니다."
+    && before.configurationLockDistinguishedFromLoad === false
+    && readString(current.distributedAdmissionFailurePublicCode) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+    && readString(current.temporaryConcurrencyPublicCode) === "PUBLIC_ASK_CONCURRENCY_LIMIT"
+    && current.configurationLockDistinguishedFromLoad === true
+    && current.rawAdmissionErrorPubliclyExposed === false
+    && current.configurationLockMessageVisible === true
+    && current.temporaryLoadMessageVisible === true
+    && current.authenticationMessageVisible === true
+    && current.storageOrGuardMessageVisible === true
+    && current.existingCandidateReviewRemainsAvailable === true
+    && readString(current.publicationState) === "unpublished"
+    && current.publishAllowed === false
+    && readNumber(focused.files) === 2
+    && readNumber(focused.tests) === 29
+    && readNumber(focused.failed) === 0
+    && readNumber(adjacent.files) === 4
+    && readNumber(adjacent.tests) === 88
+    && readNumber(adjacent.failed) === 0
+    && verification.strictTypecheck === "PASS"
+    && verification.productionBuild === "PASS"
+    && readNumber(verification.staticPages) === 28
+    && readString(live.status) === "PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD"
+    && readString(live.buildInfoCommit) === productionCommit
+    && readString(live.branch) === "master"
+    && readString(live.environment) === "production"
+    && live.behavioralProbeExecuted === false
+    && noMutation
+    && readString(remaining.enhancedLlmRuntime) === "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION"
+    && readString(remaining.authenticatedLivePreparationProbe) === "APPROVAL_GATED"
+    && readString(remaining.llmWikiPublication) === "APPROVAL_GATED"
+    && readString(remaining.supabaseRlsLaunchIsolation) === "APPROVAL_GATED"
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remaining.securityCompleteClaimAllowed === false;
+
+  return gateResult({
+    id: "knowledge_preparation_capability_truth",
+    label: "Knowledge preparation capability truth",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Deployed source distinguishes a distributed-configuration lock from temporary load in the knowledge preparation route and review UI, with 117 focused and adjacent tests, strict typecheck, and a 28-page production build. This is marker-only capability truth: enhanced LLM preparation remains blocked, the authenticated preparation probe and Wiki/RLS publication remain approval-gated, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+      : `Knowledge preparation verdict=${readString(report.verdict) || "missing"}, source=${sourceHead || "missing"}, production=${productionCommit || "missing"}, codes=${readString(current.distributedAdmissionFailurePublicCode) || "missing"}/${readString(current.temporaryConcurrencyPublicCode) || "missing"}, tests=${readNumber(focused.tests)}+${readNumber(adjacent.tests)}, live=${readString(live.status) || "missing"}/${live.behavioralProbeExecuted === true}, runtime=${readString(remaining.enhancedLlmRuntime) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Configure approved distributed admission, then run one bounded authenticated preparation probe before claiming enhanced LLM runtime readiness; keep Wiki publication and RLS as separate approvals."]
+      : ["Restore source/live ancestry, the distinct configuration and load codes/messages, 117 passing tests, no-mutation boundaries, blocked runtime, approval gates, and exact Share MISSING_EVIDENCE."],
   });
 }
 
@@ -12135,6 +12237,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateDocumentEditorialReviewCockpitGate(rootDir),
     evaluateCurrentLiveDocumentEditorialRuntimeGate(rootDir),
     evaluateProductCapabilityTruthGate(rootDir),
+    evaluateKnowledgePreparationCapabilityTruthGate(rootDir),
     evaluateLaunchOperationsReadinessGate(rootDir),
     evaluateDocumentExportCapabilityTruthGate(rootDir),
     evaluateOntologyViewportWorkbenchGate(rootDir),

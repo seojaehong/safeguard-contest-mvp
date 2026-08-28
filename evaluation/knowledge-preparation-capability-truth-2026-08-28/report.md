@@ -1,8 +1,8 @@
 # Knowledge Preparation Capability Truth
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_LIVE_PENDING`
+- Verdict: `PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD`
 - Product source: `3beaa4d89727b0bfbfed0fb9dd4a341542f07cfa`
-- Current production: `2273a95be0fc6af605d451212051570a1c6d977a`
+- Current production: `df2e96b8c081ace0483ca8e8c93b0a6679343d19`
 - Scope: knowledge-review candidate preparation failure truth only
 
 ## Finding
@@ -25,6 +25,6 @@ The enhanced LLM candidate path remains unavailable when distributed admission i
 
 ## Boundary
 
-This does not activate enhanced LLM generation, perform an authenticated live candidate preparation, publish Wiki content, or prove RLS. Production deployment of the product commit is pending. No database, provider, dispatch, Share-session, ontology, Wiki, embedding/vector, or KOSHA registry mutation occurred.
+This does not activate enhanced LLM generation, perform an authenticated live candidate preparation, publish Wiki content, or prove RLS. Production includes the product commit, but the live evidence is intentionally marker-only because a behavioral preparation probe would create a real review run. No database, provider, dispatch, Share-session, ontology, Wiki, embedding/vector, or KOSHA registry mutation occurred.
 
 Enhanced LLM runtime remains `BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION`; LLM Wiki publication and RLS remain `APPROVAL_GATED`; exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`; security-complete remains false.

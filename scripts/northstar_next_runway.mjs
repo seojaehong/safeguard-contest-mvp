@@ -34,6 +34,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  knowledgePreparationCapabilityTruth: path.join("evaluation", "knowledge-preparation-capability-truth-2026-08-28", "report.json"),
   launchOperationsReadiness: path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"),
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
@@ -699,6 +700,35 @@ function productCapabilityTruthSummary(report) {
     photoAnalysisPostCalled: asBoolean(mutationBoundary.photoAnalysisPostCalled),
     exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
     documentsShareIaVerdict: asString(remainingBoundaries.documentsShareIaVerdict),
+  };
+}
+
+/**
+ * @param {unknown} report
+ */
+function knowledgePreparationCapabilityTruthSummary(report) {
+  if (!isRecord(report)) return {};
+  const contract = isRecord(report.currentSourceContract) ? report.currentSourceContract : {};
+  const live = isRecord(report.liveVerification) ? report.liveVerification : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(report.productionCommit),
+    productionIncludesProductCommit: asBoolean(report.productionIncludesProductCommit),
+    distributedAdmissionCode: asString(contract.distributedAdmissionFailurePublicCode),
+    temporaryConcurrencyCode: asString(contract.temporaryConcurrencyPublicCode),
+    configurationLockDistinguishedFromLoad: asBoolean(contract.configurationLockDistinguishedFromLoad),
+    publicationState: asString(contract.publicationState),
+    publishAllowed: asBoolean(contract.publishAllowed),
+    liveStatus: asString(live.status),
+    behavioralProbeExecuted: asBoolean(live.behavioralProbeExecuted),
+    enhancedLlmRuntime: asString(remaining.enhancedLlmRuntime),
+    authenticatedLivePreparationProbe: asString(remaining.authenticatedLivePreparationProbe),
+    llmWikiPublication: asString(remaining.llmWikiPublication),
+    supabaseRlsLaunchIsolation: asString(remaining.supabaseRlsLaunchIsolation),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+    securityCompleteClaimAllowed: asBoolean(remaining.securityCompleteClaimAllowed),
   };
 }
 
@@ -3306,6 +3336,10 @@ export function buildNorthstarNextRunway(options) {
     ARTIFACTS.liveDocumentEditorialNearClassification,
   );
   const productCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.productCapabilityTruth);
+  const knowledgePreparationCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.knowledgePreparationCapabilityTruth);
+  const knowledgePreparationCapabilityTruthResult = knowledgePreparationCapabilityTruthSummary(
+    knowledgePreparationCapabilityTruth,
+  );
   const launchOperationsReadiness = readOptionalJson(options.rootDir, ARTIFACTS.launchOperationsReadiness);
   const launchOperationsReadinessResult = launchOperationsReadinessSummary(launchOperationsReadiness);
   const documentExportCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.documentExportCapabilityTruth);
@@ -3661,6 +3695,11 @@ export function buildNorthstarNextRunway(options) {
         reason: `deployed source includes ${currentSourceSecurityResidualRemediationResult.residualAnchors?.join(", ") || "missing residuals"} with ${(currentSourceSecurityResidualRemediationResult.focusedTests ?? 0) + (currentSourceSecurityResidualRemediationResult.adjacentTests ?? 0)} local contract tests; live status is ${currentSourceSecurityResidualRemediationResult.liveStatus || "missing"} with behavioral probe=${currentSourceSecurityResidualRemediationResult.behavioralProbeExecuted === true}, the sealed scan remains open pending a fresh full scan, security-complete is false, and exact saved Share remains ${currentSourceSecurityResidualRemediationResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
       },
       {
+        gate: "knowledge_preparation_capability_truth",
+        state: "notice",
+        reason: `deployed source distinguishes distributed configuration lock ${knowledgePreparationCapabilityTruthResult.distributedAdmissionCode || "missing"} from temporary load ${knowledgePreparationCapabilityTruthResult.temporaryConcurrencyCode || "missing"}; live evidence is ${knowledgePreparationCapabilityTruthResult.liveStatus || "missing"} with behavioral probe=${knowledgePreparationCapabilityTruthResult.behavioralProbeExecuted === true}, enhanced runtime remains ${knowledgePreparationCapabilityTruthResult.enhancedLlmRuntime || "missing"}, Wiki/RLS remain ${knowledgePreparationCapabilityTruthResult.llmWikiPublication || "APPROVAL_GATED"}/${knowledgePreparationCapabilityTruthResult.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}, security-complete is false, and exact saved Share remains ${knowledgePreparationCapabilityTruthResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+      },
+      {
         gate: "share_ack_prebody_admission_security",
         state: "notice",
         reason: `deployed Share ACK source now applies coarse rate and body-read concurrency admission before application body consumption, with ${shareAckPreBodyAdmissionResult.testsPassed ?? "unknown"} tests and live ${shareAckPreBodyAdmissionResult.liveStatus ?? "unknown"}/${shareAckPreBodyAdmissionResult.liveCode || "missing"}; the sealed finding still requires a fresh scan, live recipient ACK remains ${shareAckPreBodyAdmissionResult.recipientAckLiveDataApproval || "APPROVAL_GATED"}, and exact saved Share remains ${shareAckPreBodyAdmissionResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
@@ -3826,6 +3865,7 @@ export function buildNorthstarNextRunway(options) {
       liveDocumentEditorialNearClassification,
     ),
     productCapabilityTruth: productCapabilityTruthSummary(productCapabilityTruth),
+    knowledgePreparationCapabilityTruth: knowledgePreparationCapabilityTruthResult,
     launchOperationsReadiness: launchOperationsReadinessResult,
     documentExportCapabilityTruth: documentExportCapabilityTruthSummary(documentExportCapabilityTruth),
     ontologyViewportWorkbench: ontologyViewportWorkbenchSummary(ontologyViewportWorkbench),
@@ -3912,6 +3952,7 @@ export function buildNorthstarNextRunway(options) {
       "keep invited-recipient ACK canary approval-gated: production workpack_share_sessions and workpack_read_confirmations rows require explicit live-data mutation approval before any real ACK readback claim",
       "keep Hermes/OpenClaw authenticated live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and the explicit opt-in atomic attempt/terminal ledger are source/live-proven, while operator configuration and the authenticated canary remain approval-gated",
       "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
+      "keep knowledge preparation capability truth separate from runtime activation: configure approved distributed admission and run one bounded authenticated preparation probe before claiming enhanced LLM readiness, while Wiki publication and RLS stay separately approval-gated",
       "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
       "preserve the immutable original 18-finding repository scan as the historical baseline; the sealed follow-up scan accounts for 5,241 files and retains 17 reportable findings plus one renderer-dependent deferred candidate, while the companion no-DB wave bounds 2 findings and mitigates 2 with a distributed-rate residual; resolve the remaining DB/RLS, renderer, distributed-rate, and exact saved Share boundaries before any security-complete claim",
     ],
@@ -4001,6 +4042,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Live editorial duplicate classification is measured separately: \`${report.liveDocumentEditorialDuplicateClassification.verdict || "missing"}\`, generic template overuse \`${report.liveDocumentEditorialDuplicateClassification.beforeGenericTemplateOveruseCount ?? 0}->${report.liveDocumentEditorialDuplicateClassification.liveGenericTemplateOveruseCount ?? 0}\`, retained reviewer findings exact/near \`${report.liveDocumentEditorialDuplicateClassification.exactLineOveruseCount ?? 0}/${report.liveDocumentEditorialDuplicateClassification.nearDuplicateLineOveruseCount ?? 0}\`, and humanReviewCompleted=\`${report.liveDocumentEditorialDuplicateClassification.humanReviewCompleted === true}\`. Only generic template overuse fails automatically; safety-control and legal-reference repetition remains visible, and exact saved Share remains \`${report.liveDocumentEditorialDuplicateClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live editorial near-duplicate classification preserves \`${report.liveDocumentEditorialNearClassification.beforeNearDuplicateLineOveruseCount ?? 0}->${report.liveDocumentEditorialNearClassification.liveNearDuplicateLineOveruseCount ?? 0}\` findings while reducing unclassified human-review-required \`${report.liveDocumentEditorialNearClassification.beforeHumanReviewRequiredCount ?? 0}->${report.liveDocumentEditorialNearClassification.liveHumanReviewRequiredCount ?? 0}\`. The retained role-prefix/context/hazard/control categories are \`${report.liveDocumentEditorialNearClassification.rolePrefixVariantCount ?? 0}/${report.liveDocumentEditorialNearClassification.independentContextCount ?? 0}/${report.liveDocumentEditorialNearClassification.hazardConsistencyCount ?? 0}/${report.liveDocumentEditorialNearClassification.controlConsistencyCount ?? 0}\`; humanReviewCompleted=\`${report.liveDocumentEditorialNearClassification.humanReviewCompleted === true}\` and exact saved Share remains \`${report.liveDocumentEditorialNearClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live product capability truth is measured separately: \`${report.productCapabilityTruth.verdict || "missing"}\`; manual/provider dispatch is \`${report.productCapabilityTruth.dispatchMode || "unknown"}\` with reason \`${report.productCapabilityTruth.dispatchReason || "unknown"}\`, scheduled briefing email ready=\`${report.productCapabilityTruth.briefingEmailReady === true}\`, photo Vision/OCR ready/accepted-only=\`${report.productCapabilityTruth.photoVisionReady === true}/${report.productCapabilityTruth.photoAcceptedOnly === true}\`, and AI modes are \`${report.productCapabilityTruth.aiModes?.join(", ") || "missing"}\`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains \`${report.productCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\` and Documents/Share IA remains \`${report.productCapabilityTruth.documentsShareIaVerdict || "OPEN_SEPARATE_VIEWPORT_IA_WAVE"}\`.
+- Knowledge preparation capability truth is a separate notice: \`${report.knowledgePreparationCapabilityTruth.verdict || "missing"}\`; distributed configuration failures use \`${report.knowledgePreparationCapabilityTruth.distributedAdmissionCode || "missing"}\`, temporary load uses \`${report.knowledgePreparationCapabilityTruth.temporaryConcurrencyCode || "missing"}\`, and the UI distinction is \`${report.knowledgePreparationCapabilityTruth.configurationLockDistinguishedFromLoad === true}\`. Live evidence is \`${report.knowledgePreparationCapabilityTruth.liveStatus || "missing"}\` with behavioral probe=\`${report.knowledgePreparationCapabilityTruth.behavioralProbeExecuted === true}\`. Enhanced runtime remains \`${report.knowledgePreparationCapabilityTruth.enhancedLlmRuntime || "missing"}\`, authenticated preparation/Wiki/RLS remain \`${report.knowledgePreparationCapabilityTruth.authenticatedLivePreparationProbe || "APPROVAL_GATED"}/${report.knowledgePreparationCapabilityTruth.llmWikiPublication || "APPROVAL_GATED"}/${report.knowledgePreparationCapabilityTruth.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}\`, security-complete remains \`${report.knowledgePreparationCapabilityTruth.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.knowledgePreparationCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live launch operations readiness is measured separately: \`${report.launchOperationsReadiness.verdict || "missing"}\`; first-viewport receipts \`${report.launchOperationsReadiness.firstViewportCount ?? 0}/${report.launchOperationsReadiness.rowCount ?? 0}\`, desktop four-column \`${report.launchOperationsReadiness.desktopFourColumnCount ?? 0}/2\`, mobile local-scroll \`${report.launchOperationsReadiness.mobileLocalScrollCount ?? 0}/2\`, and console errors \`${report.launchOperationsReadiness.browserConsoleErrorCount ?? 0}\`. Runtime truth remains admission \`${report.launchOperationsReadiness.publicAdmission || "unknown"}\`, dispatch \`${report.launchOperationsReadiness.providerDispatch || "unknown"}\`, and photo Vision \`${report.launchOperationsReadiness.photoVision || "unknown"}\`; distributed configured/provider ready/fully automated remain \`${report.launchOperationsReadiness.distributedAdmissionConfigured === true}/${report.launchOperationsReadiness.providerDispatchReady === true}/${report.launchOperationsReadiness.fullyAutomatedLaunchClaimAllowed === true}\`, and exact saved Share remains \`${report.launchOperationsReadiness.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live document export capability truth is measured separately: \`${report.documentExportCapabilityTruth.verdict || "missing"}\`; admission is \`${report.documentExportCapabilityTruth.admissionMode || "unknown"}/${report.documentExportCapabilityTruth.admissionReason || "unknown"}\` with ready=\`${report.documentExportCapabilityTruth.admissionReady === true}\`. Desktop panel/beta width is \`${report.documentExportCapabilityTruth.desktopPanelWidth ?? 0}/${report.documentExportCapabilityTruth.desktopBetaButtonWidth ?? 0}px\`; mobile is \`${report.documentExportCapabilityTruth.mobilePanelWidth ?? 0}/${report.documentExportCapabilityTruth.mobileBetaButtonWidth ?? 0}px\`. This proves fail-closed export truth and browser fallbacks, not distributed activation; activation remains \`${report.documentExportCapabilityTruth.distributedAdmissionActivation || "OPERATOR_CONFIGURATION_REQUIRED"}\`, fully automated launch remains \`${report.documentExportCapabilityTruth.fullyAutomatedLaunchClaimAllowed === true}\`, and exact saved Share remains \`${report.documentExportCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live Ontology viewport workbench is measured separately: \`${report.ontologyViewportWorkbench.verdict || "missing"}\`; browser rows \`${report.ontologyViewportWorkbench.passCount ?? 0}/${report.ontologyViewportWorkbench.rowCount ?? 0}\`, maximum body ratio \`${report.ontologyViewportWorkbench.maxBodyRatio ?? 0}\`, mobile task switches \`${report.ontologyViewportWorkbench.mobileTaskSwitchVerifiedCount ?? 0}/4\`. Route splitting alone is not treated as the fix; long content remains in local-scroll panes. Exact saved Share remains \`${report.ontologyViewportWorkbench.exactSavedShareVerdict || "MISSING_EVIDENCE"}\` and fully automated launch remains \`${report.ontologyViewportWorkbench.fullyAutomatedLaunchClaimAllowed === true}\`.

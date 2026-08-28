@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-knowledge-preparation-capability-truth/v1",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_LIVE_PENDING",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD",
   "sourceHead": "3beaa4d89727b0bfbfed0fb9dd4a341542f07cfa",
-  "productionCommit": "2273a95be0fc6af605d451212051570a1c6d977a",
-  "productionIncludesProductCommit": false,
+  "productionCommit": "df2e96b8c081ace0483ca8e8c93b0a6679343d19",
+  "productionIncludesProductCommit": true,
   "before": {
     "distributedAdmissionFailurePublicCode": "PUBLIC_ASK_CONCURRENCY_LIMIT",
     "reviewInboxFailureMessage": "검토 후보를 준비하지 못했습니다.",
@@ -38,10 +38,13 @@
     "staticPages": 28
   },
   "liveVerification": {
-    "status": "PENDING_PRODUCT_DEPLOYMENT",
-    "buildInfoCommit": "2273a95be0fc6af605d451212051570a1c6d977a",
+    "status": "PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD",
+    "buildInfoCommit": "df2e96b8c081ace0483ca8e8c93b0a6679343d19",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-cyq8lqxk3-seojaehongs-projects.vercel.app",
     "behavioralProbeExecuted": false,
-    "reason": "The product commit is not yet included in the production marker. An authenticated candidate preparation probe would also require a real review run and is not executed without approval."
+    "reason": "Production includes the product commit. The evidence is intentionally marker-only because an authenticated candidate preparation probe would create a real review run and is not executed without approval."
   },
   "mutationBoundary": {
     "dbMutationPerformed": false,

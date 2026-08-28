@@ -651,6 +651,8 @@ function createFixtureRoot(): string {
   execFileSync("git", ["init"], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["config", "user.email", "test@example.com"], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["config", "user.name", "SafeClaw Test"], { cwd: rootDir, stdio: "ignore" });
+  writeText(rootDir, "app/api/knowledge/review/prepare/route.ts", "export const fixture = true;\n");
+  writeText(rootDir, "app/knowledge/KnowledgeReviewInbox.tsx", "export const fixture = true;\n");
 
   writeJson(rootDir, path.join("evaluation", "final-99-gate", "report.json"), {
     overall: "pass_with_notice",
@@ -1001,6 +1003,63 @@ function createFixtureRoot(): string {
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
       providerDispatchApprovalRequired: true,
       humanEditorialReviewCompleted: false,
+    },
+  });
+  writeJson(rootDir, path.join("evaluation", "knowledge-preparation-capability-truth-2026-08-28", "report.json"), {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    productionIncludesProductCommit: true,
+    before: {
+      distributedAdmissionFailurePublicCode: "PUBLIC_ASK_CONCURRENCY_LIMIT",
+      reviewInboxFailureMessage: "검토 후보를 준비하지 못했습니다.",
+      configurationLockDistinguishedFromLoad: false,
+    },
+    currentSourceContract: {
+      distributedAdmissionFailurePublicCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      temporaryConcurrencyPublicCode: "PUBLIC_ASK_CONCURRENCY_LIMIT",
+      configurationLockDistinguishedFromLoad: true,
+      rawAdmissionErrorPubliclyExposed: false,
+      configurationLockMessageVisible: true,
+      temporaryLoadMessageVisible: true,
+      authenticationMessageVisible: true,
+      storageOrGuardMessageVisible: true,
+      existingCandidateReviewRemainsAvailable: true,
+      publicationState: "unpublished",
+      publishAllowed: false,
+    },
+    verification: {
+      focused: { files: 2, tests: 29, failed: 0 },
+      adjacentKnowledgeAndAdmission: { files: 4, tests: 88, failed: 0 },
+      strictTypecheck: "PASS",
+      productionBuild: "PASS",
+      staticPages: 28,
+    },
+    liveVerification: {
+      status: "PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD",
+      buildInfoCommit: "fixture-sha",
+      branch: "master",
+      environment: "production",
+      behavioralProbeExecuted: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerCallPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      wikiPublicationPerformed: false,
+      ontologyPublicationPerformed: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      enhancedLlmRuntime: "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
+      authenticatedLivePreparationProbe: "APPROVAL_GATED",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      securityCompleteClaimAllowed: false,
     },
   });
   writeJson(rootDir, path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"), {
@@ -7007,6 +7066,13 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("landing-human-review-boundary");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("Scoped Documents and Workspace/fixture Share viewport IA");
+    expect(audit.gates.find((gate) => gate.id === "knowledge_preparation_capability_truth")).toMatchObject({
+      state: "notice",
+      evidencePath: path.join("evaluation", "knowledge-preparation-capability-truth-2026-08-28", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "knowledge_preparation_capability_truth")?.detail).toContain("marker-only capability truth");
+    expect(audit.gates.find((gate) => gate.id === "knowledge_preparation_capability_truth")?.detail).toContain("enhanced LLM preparation remains blocked");
+    expect(audit.gates.find((gate) => gate.id === "knowledge_preparation_capability_truth")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "launch_operations_readiness_cockpit")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"),
@@ -9258,6 +9324,37 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("securityComplete=true");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("candidateKeyboard=false");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_evidence_inspector")?.detail).toContain("mobilePaneKeyboard=false");
+  });
+
+  it("fails knowledge preparation capability truth closed when runtime or exact Share is overclaimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "knowledge-preparation-capability-truth-2026-08-28",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remainingBoundaries: {
+        enhancedLlmRuntime: string;
+        exactSavedShareVerdict: string;
+      };
+    };
+    report.remainingBoundaries.enhancedLlmRuntime = "READY";
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-08-28T00:00:00.000Z",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "knowledge_preparation_capability_truth")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "knowledge_preparation_capability_truth")?.detail).toContain("runtime=READY");
+    expect(audit.gates.find((gate) => gate.id === "knowledge_preparation_capability_truth")?.detail).toContain("exactShare=PASS");
   });
 
   it("fails the standalone dispatch gate closed when desktop hidden root scroll debt returns", async () => {

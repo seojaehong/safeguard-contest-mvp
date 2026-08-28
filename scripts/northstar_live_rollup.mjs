@@ -31,6 +31,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  knowledgePreparationCapabilityTruth: path.join("evaluation", "knowledge-preparation-capability-truth-2026-08-28", "report.json"),
   launchOperationsReadiness: path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"),
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
@@ -553,6 +554,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveDocumentEditorialDuplicateClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialDuplicateClassification);
   const liveDocumentEditorialNearClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialNearClassification);
   const productCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.productCapabilityTruth);
+  const knowledgePreparationCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.knowledgePreparationCapabilityTruth);
   const launchOperationsReadiness = tryReadJson(rootDir, ARTIFACTS.launchOperationsReadiness);
   const documentExportCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.documentExportCapabilityTruth);
   const ontologyViewportWorkbench = tryReadJson(rootDir, ARTIFACTS.ontologyViewportWorkbench);
@@ -694,6 +696,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_duplicate_classification", ARTIFACTS.liveDocumentEditorialDuplicateClassification, liveDocumentEditorialDuplicateClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_near_classification", ARTIFACTS.liveDocumentEditorialNearClassification, liveDocumentEditorialNearClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "product_capability_truth", ARTIFACTS.productCapabilityTruth, productCapabilityTruth),
+    evidenceStatus(rootDir, currentHead, liveCommit, "knowledge_preparation_capability_truth", ARTIFACTS.knowledgePreparationCapabilityTruth, knowledgePreparationCapabilityTruth),
     evidenceStatus(rootDir, currentHead, liveCommit, "launch_operations_readiness_cockpit", ARTIFACTS.launchOperationsReadiness, launchOperationsReadiness),
     evidenceStatus(rootDir, currentHead, liveCommit, "document_export_capability_truth", ARTIFACTS.documentExportCapabilityTruth, documentExportCapabilityTruth),
     evidenceStatus(rootDir, currentHead, liveCommit, "ontology_viewport_workbench", ARTIFACTS.ontologyViewportWorkbench, ontologyViewportWorkbench),
@@ -1598,6 +1601,27 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareVerdict: asString(recordAt(productCapabilityTruth, "remainingBoundaries")?.exactSavedShareVerdict),
       documentsShareIaVerdict: asString(recordAt(productCapabilityTruth, "remainingBoundaries")?.documentsShareIaVerdict),
     },
+    knowledgePreparationCapabilityTruth: {
+      artifact: ARTIFACTS.knowledgePreparationCapabilityTruth,
+      verdict: isRecord(knowledgePreparationCapabilityTruth) ? asString(knowledgePreparationCapabilityTruth.verdict) : "missing",
+      sourceHead: isRecord(knowledgePreparationCapabilityTruth) ? asString(knowledgePreparationCapabilityTruth.sourceHead) : "",
+      productionCommit: extractProductionCommit(knowledgePreparationCapabilityTruth),
+      productionIncludesProductCommit: isRecord(knowledgePreparationCapabilityTruth)
+        && knowledgePreparationCapabilityTruth.productionIncludesProductCommit === true,
+      distributedAdmissionCode: asString(recordAt(knowledgePreparationCapabilityTruth, "currentSourceContract")?.distributedAdmissionFailurePublicCode),
+      temporaryConcurrencyCode: asString(recordAt(knowledgePreparationCapabilityTruth, "currentSourceContract")?.temporaryConcurrencyPublicCode),
+      configurationLockDistinguishedFromLoad: recordAt(knowledgePreparationCapabilityTruth, "currentSourceContract")?.configurationLockDistinguishedFromLoad === true,
+      publicationState: asString(recordAt(knowledgePreparationCapabilityTruth, "currentSourceContract")?.publicationState),
+      publishAllowed: recordAt(knowledgePreparationCapabilityTruth, "currentSourceContract")?.publishAllowed === true,
+      liveStatus: asString(recordAt(knowledgePreparationCapabilityTruth, "liveVerification")?.status),
+      behavioralProbeExecuted: recordAt(knowledgePreparationCapabilityTruth, "liveVerification")?.behavioralProbeExecuted === true,
+      enhancedLlmRuntime: asString(recordAt(knowledgePreparationCapabilityTruth, "remainingBoundaries")?.enhancedLlmRuntime),
+      authenticatedLivePreparationProbe: asString(recordAt(knowledgePreparationCapabilityTruth, "remainingBoundaries")?.authenticatedLivePreparationProbe),
+      llmWikiPublication: asString(recordAt(knowledgePreparationCapabilityTruth, "remainingBoundaries")?.llmWikiPublication),
+      supabaseRlsLaunchIsolation: asString(recordAt(knowledgePreparationCapabilityTruth, "remainingBoundaries")?.supabaseRlsLaunchIsolation),
+      exactSavedShareVerdict: asString(recordAt(knowledgePreparationCapabilityTruth, "remainingBoundaries")?.exactSavedShareVerdict),
+      securityCompleteClaimAllowed: recordAt(knowledgePreparationCapabilityTruth, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+    },
     launchOperationsReadiness: {
       artifact: ARTIFACTS.launchOperationsReadiness,
       verdict: isRecord(launchOperationsReadiness) ? asString(launchOperationsReadiness.verdict) : "missing",
@@ -2442,6 +2466,15 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- AI generation modes: ${rollup.productCapabilityTruth.aiModes.join(", ") || "missing"}`,
     `- Exact saved Share: ${rollup.productCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     `- Documents/Share IA: ${rollup.productCapabilityTruth.documentsShareIaVerdict || "OPEN_SEPARATE_VIEWPORT_IA_WAVE"}`,
+    "",
+    "## Knowledge Preparation Capability Truth",
+    "",
+    `- Verdict: \`${rollup.knowledgePreparationCapabilityTruth.verdict}\``,
+    `- Deployed-source marker: ${rollup.knowledgePreparationCapabilityTruth.productionIncludesProductCommit}; live status=${rollup.knowledgePreparationCapabilityTruth.liveStatus || "missing"}; behavioral probe=${rollup.knowledgePreparationCapabilityTruth.behavioralProbeExecuted}`,
+    `- Public failure truth: distributed=${rollup.knowledgePreparationCapabilityTruth.distributedAdmissionCode || "missing"}; temporary load=${rollup.knowledgePreparationCapabilityTruth.temporaryConcurrencyCode || "missing"}; distinguished=${rollup.knowledgePreparationCapabilityTruth.configurationLockDistinguishedFromLoad}`,
+    `- Candidate state: ${rollup.knowledgePreparationCapabilityTruth.publicationState || "missing"}; publishAllowed=${rollup.knowledgePreparationCapabilityTruth.publishAllowed}`,
+    `- Runtime and approvals: enhanced=${rollup.knowledgePreparationCapabilityTruth.enhancedLlmRuntime || "missing"}; authenticated probe=${rollup.knowledgePreparationCapabilityTruth.authenticatedLivePreparationProbe || "missing"}; Wiki/RLS=${rollup.knowledgePreparationCapabilityTruth.llmWikiPublication || "missing"}/${rollup.knowledgePreparationCapabilityTruth.supabaseRlsLaunchIsolation || "missing"}`,
+    `- Exact saved Share: ${rollup.knowledgePreparationCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}; security-complete=${rollup.knowledgePreparationCapabilityTruth.securityCompleteClaimAllowed}`,
     "- Boundary: capability truth does not unlock provider persistence, exact saved Share, or Documents/Share viewport IA.",
     "",
     "## Live Launch Operations Readiness",

@@ -152,6 +152,23 @@ type RollupReport = {
     exactSavedShareVerdict: string;
     documentsShareIaVerdict: string;
   };
+  knowledgePreparationCapabilityTruth: {
+    verdict: string;
+    productionIncludesProductCommit: boolean;
+    distributedAdmissionCode: string;
+    temporaryConcurrencyCode: string;
+    configurationLockDistinguishedFromLoad: boolean;
+    publicationState: string;
+    publishAllowed: boolean;
+    liveStatus: string;
+    behavioralProbeExecuted: boolean;
+    enhancedLlmRuntime: string;
+    authenticatedLivePreparationProbe: string;
+    llmWikiPublication: string;
+    supabaseRlsLaunchIsolation: string;
+    exactSavedShareVerdict: string;
+    securityCompleteClaimAllowed: boolean;
+  };
   launchOperationsReadiness: {
     verdict: string;
     rowCount: number;
@@ -1255,6 +1272,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "live_document_editorial_review", state: "proven", evidencePath: "evaluation/live-document-editorial-review-2026-07-25/report.json", detail: "all 60 editorial surfaces passed automated contract" },
       { id: "document_editorial_review_cockpit", state: "proven", evidencePath: "evaluation/document-editorial-review-cockpit-2026-08-16/report.json", detail: "live 4/4 cockpit preserves human review and exact Share boundaries" },
       { id: "product_capability_truth", state: "proven", evidencePath: "evaluation/product-capability-truth-2026-07-25/report.json", detail: "live capability truth passed without unlocking provider dispatch" },
+      { id: "knowledge_preparation_capability_truth", state: "notice", evidencePath: "evaluation/knowledge-preparation-capability-truth-2026-08-28/report.json", detail: "deployed-source lock truth passed while enhanced runtime remains blocked" },
       { id: "document_export_capability_truth", state: "proven", evidencePath: "evaluation/document-export-capability-truth-2026-08-17/report.json", detail: "live export truth passed while distributed admission remains locked" },
       { id: "ontology_viewport_workbench", state: "proven", evidencePath: "evaluation/ontology-viewport-workbench-2026-08-17/report.json", detail: "live ontology viewport workbench passed with exact Share boundary retained" },
       { id: "tenant_authorization_remediation", state: "proven", evidencePath: "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json", detail: "two tenant findings remediated" },
@@ -1606,6 +1624,31 @@ function createFixtureRoot(): { root: string; head: string } {
     remainingBoundaries: {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
+    },
+  });
+  writeJson(root, "evaluation/knowledge-preparation-capability-truth-2026-08-28/report.json", {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    productionIncludesProductCommit: true,
+    currentSourceContract: {
+      distributedAdmissionFailurePublicCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      temporaryConcurrencyPublicCode: "PUBLIC_ASK_CONCURRENCY_LIMIT",
+      configurationLockDistinguishedFromLoad: true,
+      publicationState: "unpublished",
+      publishAllowed: false,
+    },
+    liveVerification: {
+      status: "PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD",
+      behavioralProbeExecuted: false,
+    },
+    remainingBoundaries: {
+      enhancedLlmRuntime: "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
+      authenticatedLivePreparationProbe: "APPROVAL_GATED",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      securityCompleteClaimAllowed: false,
     },
   });
   writeJson(root, "evaluation/launch-operations-readiness-2026-08-26/report.json", {
@@ -2646,6 +2689,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-document-editorial-duplicate-classification-2026-07-25/report.json",
     "evaluation/live-document-editorial-near-classification-2026-07-25/report.json",
     "evaluation/product-capability-truth-2026-07-25/report.json",
+    "evaluation/knowledge-preparation-capability-truth-2026-08-28/report.json",
     "evaluation/launch-operations-readiness-2026-08-26/report.json",
     "evaluation/document-export-capability-truth-2026-08-17/report.json",
     "evaluation/ontology-viewport-workbench-2026-08-17/report.json",
@@ -2889,6 +2933,24 @@ describe("northstar live rollup", () => {
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
     });
     expect(report.evidence.find((item) => item.id === "product_capability_truth")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.knowledgePreparationCapabilityTruth).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD",
+      productionIncludesProductCommit: true,
+      distributedAdmissionCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      temporaryConcurrencyCode: "PUBLIC_ASK_CONCURRENCY_LIMIT",
+      configurationLockDistinguishedFromLoad: true,
+      publicationState: "unpublished",
+      publishAllowed: false,
+      liveStatus: "PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD",
+      behavioralProbeExecuted: false,
+      enhancedLlmRuntime: "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
+      authenticatedLivePreparationProbe: "APPROVAL_GATED",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      securityCompleteClaimAllowed: false,
+    });
+    expect(report.evidence.find((item) => item.id === "knowledge_preparation_capability_truth")?.productionStatus).toBe("ancestor_of_head");
     expect(report.launchOperationsReadiness).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
       rowCount: 4,

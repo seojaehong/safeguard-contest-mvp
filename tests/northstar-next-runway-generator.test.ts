@@ -213,6 +213,23 @@ type NextRunwayReport = {
     exactSavedShareVerdict: string;
     documentsShareIaVerdict: string;
   };
+  knowledgePreparationCapabilityTruth: {
+    verdict: string;
+    productionIncludesProductCommit: boolean;
+    distributedAdmissionCode: string;
+    temporaryConcurrencyCode: string;
+    configurationLockDistinguishedFromLoad: boolean;
+    publicationState: string;
+    publishAllowed: boolean;
+    liveStatus: string;
+    behavioralProbeExecuted: boolean;
+    enhancedLlmRuntime: string;
+    authenticatedLivePreparationProbe: string;
+    llmWikiPublication: string;
+    supabaseRlsLaunchIsolation: string;
+    exactSavedShareVerdict: string;
+    securityCompleteClaimAllowed: boolean;
+  };
   launchOperationsReadiness: {
     verdict: string;
     rowCount: number;
@@ -2088,6 +2105,31 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
     },
   });
+  writeJson(root, "evaluation/knowledge-preparation-capability-truth-2026-08-28/report.json", {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    productionIncludesProductCommit: true,
+    currentSourceContract: {
+      distributedAdmissionFailurePublicCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      temporaryConcurrencyPublicCode: "PUBLIC_ASK_CONCURRENCY_LIMIT",
+      configurationLockDistinguishedFromLoad: true,
+      publicationState: "unpublished",
+      publishAllowed: false,
+    },
+    liveVerification: {
+      status: "PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD",
+      behavioralProbeExecuted: false,
+    },
+    remainingBoundaries: {
+      enhancedLlmRuntime: "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
+      authenticatedLivePreparationProbe: "APPROVAL_GATED",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      securityCompleteClaimAllowed: false,
+    },
+  });
   writeJson(root, "evaluation/launch-operations-readiness-2026-08-26/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
     sourceHead: "fixture-sha",
@@ -3830,6 +3872,28 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
     });
     expect(report.provenCurrentState).toContain("product_capability_truth");
+    expect(report.knowledgePreparationCapabilityTruth).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD",
+      productionIncludesProductCommit: true,
+      distributedAdmissionCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      temporaryConcurrencyCode: "PUBLIC_ASK_CONCURRENCY_LIMIT",
+      configurationLockDistinguishedFromLoad: true,
+      publicationState: "unpublished",
+      publishAllowed: false,
+      liveStatus: "PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD",
+      behavioralProbeExecuted: false,
+      enhancedLlmRuntime: "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
+      authenticatedLivePreparationProbe: "APPROVAL_GATED",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      securityCompleteClaimAllowed: false,
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "knowledge_preparation_capability_truth",
+      state: "notice",
+    }));
+    expect(report.provenCurrentState).not.toContain("knowledge_preparation_capability_truth");
     expect(report.launchOperationsReadiness).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
       rowCount: 4,
