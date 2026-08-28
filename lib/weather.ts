@@ -1,7 +1,7 @@
 import { IntegrationMode } from "./types";
 import {
-  assertApprovedUpstreamUrl,
   configuredUpstreamAllowedOrigins,
+  fetchApprovedUpstream,
   readBoundedResponseText,
 } from "./server/upstream-http";
 
@@ -388,7 +388,12 @@ function valueByCategory(items: ForecastItem[], category: string, key: "obsrValu
   return items.find((item) => item.category === category)?.[key] || "";
 }
 
-async function fetchWithTimeout(url: string, label: string, signal?: AbortSignal) {
+async function fetchWithTimeout(
+  url: string,
+  label: string,
+  signal?: AbortSignal,
+  approvedOrigins?: string[],
+) {
   let lastError: Error | null = null;
   for (let attempt = 0; attempt <= KMA_RETRY_COUNT; attempt += 1) {
     const controller = new AbortController();
@@ -397,11 +402,13 @@ async function fetchWithTimeout(url: string, label: string, signal?: AbortSignal
     signal?.addEventListener("abort", abortFromCaller, { once: true });
     const timeout = setTimeout(() => controller.abort(new Error(`${label} timeout`)), KMA_TIMEOUT_MS);
     try {
-      const response = await fetch(url, {
-        cache: "no-store",
-        redirect: "manual",
-        signal: controller.signal,
-      });
+      const response = approvedOrigins
+        ? await fetchApprovedUpstream(url, { signal: controller.signal }, { allowedOrigins: approvedOrigins })
+        : await fetch(url, {
+            cache: "no-store",
+            redirect: "manual",
+            signal: controller.signal,
+          });
       const text = await readBoundedResponseText(response, {
         label,
         maxBytes: WEATHER_RESPONSE_MAX_BYTES,
@@ -668,10 +675,12 @@ async function fetchErythemalUvSignal(location: LocationConfig, signal?: AbortSi
       url.searchParams.set("lot", String(location.longitude));
     }
 
-    const approvedUrl = await assertApprovedUpstreamUrl(url.toString(), {
-      allowedOrigins: ["https://apis.data.go.kr", ...configuredUpstreamAllowedOrigins()],
-    });
-    const text = await fetchWithTimeout(approvedUrl.toString(), "실시간 홍반자외선", signal);
+    const text = await fetchWithTimeout(
+      url.toString(),
+      "실시간 홍반자외선",
+      signal,
+      ["https://apis.data.go.kr", ...configuredUpstreamAllowedOrigins()],
+    );
     const parsed = JSON.parse(text) as ErythemalUvEnvelope;
     const header = parsed.header || parsed.response?.header;
     const body = parsed.body || parsed.response?.body;

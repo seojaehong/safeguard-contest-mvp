@@ -102,15 +102,39 @@ describe("Weather and KOSHA upstream integration security", () => {
       headers: { "content-length": String(1_048_577) },
     }));
     vi.stubGlobal("fetch", fetchMock);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const { fetchKoshaOpenApiEvidence } = await import("@/lib/kosha-openapi");
 
     const result = await fetchKoshaOpenApiEvidence("서울 건설업 비계 추락 작업");
 
     expect(result.mode).toBe("fallback");
-    expect(result.detail).toContain("1048576-byte response limit");
+    expect(result.detail).not.toContain("1048576-byte response limit");
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("kosha-openapi"));
     expect(fetchMock).toHaveBeenCalled();
     expect(fetchMock.mock.calls.every(([input]) => new URL(String(input)).protocol === "https:")).toBe(true);
     expect(fetchMock.mock.calls.every(([, init]) => init?.redirect === "manual")).toBe(true);
+  });
+
+  it("keeps Work24 and KOSHA provider exception details server-side", async () => {
+    vi.stubEnv("DATA_GO_KR_SERVICE_KEY", "test-service-key");
+    vi.stubEnv("WORK24_AUTH_KEY", "test-work24-key");
+    const upstreamDiagnostic = "private-upstream-diagnostic";
+    vi.stubGlobal("fetch", vi.fn(async () => {
+      throw new Error(upstreamDiagnostic);
+    }));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const { fetchTrainingRecommendations } = await import("@/lib/work24");
+    const { fetchKoshaOpenApiEvidence } = await import("@/lib/kosha-openapi");
+
+    const [training, kosha] = await Promise.all([
+      fetchTrainingRecommendations("서울 안전교육"),
+      fetchKoshaOpenApiEvidence("서울 안전교육"),
+    ]);
+
+    expect(JSON.stringify(training)).not.toContain(upstreamDiagnostic);
+    expect(JSON.stringify(kosha)).not.toContain(upstreamDiagnostic);
+    expect(warn.mock.calls.some(([message]) => String(message).includes("work24"))).toBe(true);
+    expect(warn.mock.calls.some(([message]) => String(message).includes("kosha-openapi"))).toBe(true);
   });
 
   it("never sends the relay token to a rejected private proxy", async () => {
@@ -120,6 +144,7 @@ describe("Weather and KOSHA upstream integration security", () => {
     vi.stubEnv("SAFECLAW_UPSTREAM_ALLOWED_ORIGINS", "https://169.254.169.254");
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response("{}", { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const { fetchAccidentCases } = await import("@/lib/accident-cases");
 
     const result = await fetchAccidentCases("서울 비계 추락 작업", {
@@ -127,7 +152,9 @@ describe("Weather and KOSHA upstream integration security", () => {
       requestTimeoutMs: 500,
     });
 
-    expect(result.detail).toContain("relay 보안 검증 실패");
+    expect(result.detail).toContain("relay 연결 점검 필요");
+    expect(result.detail).not.toContain("169.254.169.254");
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("accident-cases"));
     expect(fetchMock.mock.calls.some(([input]) => String(input).includes("169.254.169.254"))).toBe(false);
     expect(fetchMock.mock.calls.some(([, init]) => {
       const headers = new Headers(init?.headers);

@@ -1,9 +1,12 @@
 import { AccidentCase, IntegrationMode } from "./types";
 import {
-  assertApprovedUpstreamUrl,
   configuredUpstreamAllowedOrigins,
+  fetchApprovedUpstream,
   readBoundedResponseText,
 } from "./server/upstream-http";
+import { createLogger } from "./logger";
+
+const log = createLogger("accident-cases");
 
 type AccidentCaseResult = {
   source: "kosha-accident";
@@ -135,20 +138,6 @@ async function fetchWithRetry(url: string, options: ResolvedFetchOptions) {
 async function fetchProxy(question: string, options: ResolvedFetchOptions): Promise<ParseResult | null> {
   if (!proxyUrl) return null;
 
-  let approvedProxyUrl: URL;
-  try {
-    approvedProxyUrl = await assertApprovedUpstreamUrl(proxyUrl, {
-      allowedOrigins: configuredUpstreamAllowedOrigins(),
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return {
-      kind: "api_error",
-      cases: [],
-      detail: `KOSHA 재해사례 relay 보안 검증 실패: ${message}`,
-    };
-  }
-
   const controller = new AbortController();
   const abortFromCaller = () => controller.abort(options.signal?.reason);
   options.signal?.throwIfAborted();
@@ -158,10 +147,8 @@ async function fetchProxy(question: string, options: ResolvedFetchOptions): Prom
     options.requestTimeoutMs,
   );
   try {
-    const response = await fetch(approvedProxyUrl, {
+    const response = await fetchApprovedUpstream(proxyUrl, {
       method: "POST",
-      cache: "no-store",
-      redirect: "manual",
       signal: controller.signal,
       headers: {
         "content-type": "application/json",
@@ -175,26 +162,29 @@ async function fetchProxy(question: string, options: ResolvedFetchOptions): Prom
         numOfRows: 100,
         callApiId: "1060"
       })
+    }, {
+      allowedOrigins: configuredUpstreamAllowedOrigins(),
     });
     const text = await readBoundedResponseText(response, {
       label: "KOSHA accident relay",
       maxBytes: ACCIDENT_RESPONSE_MAX_BYTES,
     });
     if (!response.ok) {
+      log.warn("accident relay returned a non-success response", { status: response.status });
       return {
         kind: "api_error",
         cases: [],
-        detail: `KOSHA 재해사례 relay HTTP ${response.status}: ${text.slice(0, 180)}`
+        detail: `KOSHA 재해사례 relay HTTP ${response.status} 응답 점검 필요`
       };
     }
     return parseAccidentCases(question, text);
   } catch (error) {
     options.signal?.throwIfAborted();
-    const message = error instanceof Error ? error.message : String(error);
+    log.warn("accident relay request failed", { error });
     return {
       kind: "api_error",
       cases: [],
-      detail: `KOSHA 재해사례 relay 연결 실패: ${message}`
+      detail: "KOSHA 재해사례 relay 연결 점검 필요"
     };
   } finally {
     clearTimeout(timeout);

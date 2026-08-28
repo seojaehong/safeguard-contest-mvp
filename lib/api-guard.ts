@@ -1,12 +1,32 @@
 import type { RateLimiter } from "@/lib/rate-limit";
+import { isIP } from "node:net";
+
+function singleIp(value: string | null, requireValidIp: boolean): string | undefined {
+  const candidate = value?.trim();
+  if (!candidate || candidate.includes(",")) return undefined;
+  return !requireValidIp || isIP(candidate) !== 0 ? candidate : undefined;
+}
 
 export function getClientIp(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) return first;
+  const vercelForwarded = singleIp(request.headers.get("x-vercel-forwarded-for"), true);
+  if (vercelForwarded) return vercelForwarded;
+
+  const production = process.env.NODE_ENV === "production";
+  const trustedProxy = process.env.SAFECLAW_TRUST_PROXY_HEADERS === "true";
+  if (process.env.VERCEL === "1" && production) {
+    return "unknown";
   }
-  return request.headers.get("x-real-ip") ?? "unknown";
+
+  if (trustedProxy || !production) {
+    const forwarded = request.headers.get("x-forwarded-for");
+    if (forwarded) {
+      const first = forwarded.split(",")[0]?.trim();
+      if (first && (!production || isIP(first) !== 0)) return first;
+    }
+    return singleIp(request.headers.get("x-real-ip"), production) ?? "unknown";
+  }
+
+  return "unknown";
 }
 
 /**

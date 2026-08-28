@@ -1,3 +1,7 @@
+import type { RequestOptions } from "node:https";
+import type { ClientRequest, IncomingHttpHeaders, IncomingMessage } from "node:http";
+import type { DetailedPeerCertificate } from "node:tls";
+
 type ResolvedAddress = {
   address: string;
   family: number;
@@ -15,6 +19,37 @@ type DnsPromisesModule = {
 type ProcessWithBuiltinModule = NodeJS.Process & {
   getBuiltinModule?: (specifier: string) => unknown;
 };
+
+type HttpsModule = {
+  request: ApprovedUpstreamRequestFactory;
+};
+
+type TlsModule = {
+  checkServerIdentity: ApprovedUpstreamCertificateVerifier;
+};
+
+export type ApprovedUpstreamDialInput = {
+  url: URL;
+  method: string;
+  headers: Headers;
+  body?: string;
+  signal?: AbortSignal;
+  selectedAddress: string;
+  selectedFamily: 4 | 6;
+};
+
+export type ApprovedUpstreamDial = (input: ApprovedUpstreamDialInput) => Promise<Response>;
+
+export type ApprovedUpstreamRequestFactory = (
+  url: URL,
+  options: RequestOptions,
+  onResponse: (response: IncomingMessage) => void,
+) => ClientRequest;
+
+export type ApprovedUpstreamCertificateVerifier = (
+  hostname: string,
+  certificate: DetailedPeerCertificate,
+) => Error | undefined;
 
 export class UpstreamUrlRejectedError extends Error {
   constructor(message: string) {
@@ -94,6 +129,138 @@ async function defaultResolveHost(hostname: string): Promise<ResolvedAddress[]> 
   return await dns.lookup(hostname, { all: true, verbatim: true });
 }
 
+function canonicalAddress(address: string): string | undefined {
+  const family = ipFamily(address);
+  if (family === 4) return address.split(".").map(Number).join(".");
+  if (family !== 6) return undefined;
+  try {
+    const hostname = new URL(`https://[${address.split("%")[0]}]/`).hostname;
+    return hostname.slice(1, -1).toLowerCase();
+  } catch {
+    return undefined;
+  }
+}
+
+function addressesMatch(expected: string, actual: string): boolean {
+  const expectedCanonical = canonicalAddress(expected);
+  return expectedCanonical !== undefined && expectedCanonical === canonicalAddress(actual);
+}
+
+function responseHeaders(headers: IncomingHttpHeaders): Headers {
+  const result = new Headers();
+  for (const [name, value] of Object.entries(headers)) {
+    if (Array.isArray(value)) {
+      for (const entry of value) result.append(name, entry);
+    } else if (value !== undefined) {
+      result.set(name, value);
+    }
+  }
+  return result;
+}
+
+function responseBody(response: IncomingMessage, signal?: AbortSignal): ReadableStream<Uint8Array> {
+  const iterator = response[Symbol.asyncIterator]();
+  const onAbort = (): void => {
+    response.destroy(
+      signal?.reason instanceof Error ? signal.reason : new Error("approved upstream request aborted"),
+    );
+  };
+  signal?.addEventListener("abort", onAbort, { once: true });
+  const cleanup = (): void => signal?.removeEventListener("abort", onAbort);
+  return new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      try {
+        const chunk = await iterator.next();
+        if (chunk.done) {
+          cleanup();
+          controller.close();
+          return;
+        }
+        if (chunk.value instanceof Uint8Array) {
+          controller.enqueue(new Uint8Array(chunk.value));
+          return;
+        }
+        if (typeof chunk.value === "string") {
+          controller.enqueue(new TextEncoder().encode(chunk.value));
+          return;
+        }
+        throw new Error("approved upstream response emitted an unsupported chunk");
+      } catch (error) {
+        cleanup();
+        controller.error(error);
+      }
+    },
+    async cancel(reason) {
+      cleanup();
+      response.destroy(reason instanceof Error ? reason : undefined);
+      await iterator.return?.();
+    },
+  });
+}
+
+const defaultRequestFactory: ApprovedUpstreamRequestFactory = (url, options, onResponse) => {
+  const getBuiltinModule = (process as ProcessWithBuiltinModule).getBuiltinModule;
+  const https = getBuiltinModule?.("node:https") as HttpsModule | undefined;
+  if (!https?.request) {
+    throw new UpstreamUrlRejectedError("server HTTPS transport is unavailable");
+  }
+  return https.request(url, options, onResponse);
+};
+
+const defaultCertificateVerifier: ApprovedUpstreamCertificateVerifier = (hostname, certificate) => {
+  const getBuiltinModule = (process as ProcessWithBuiltinModule).getBuiltinModule;
+  const tls = getBuiltinModule?.("node:tls") as TlsModule | undefined;
+  if (!tls?.checkServerIdentity) {
+    return new UpstreamUrlRejectedError("server TLS identity verifier is unavailable");
+  }
+  return tls.checkServerIdentity(hostname, certificate);
+};
+
+export function createNodeApprovedUpstreamDial(options: {
+  requestFactory?: ApprovedUpstreamRequestFactory;
+  certificateVerifier?: ApprovedUpstreamCertificateVerifier;
+} = {}): ApprovedUpstreamDial {
+  const requestFactory = options.requestFactory ?? defaultRequestFactory;
+  const certificateVerifier = options.certificateVerifier ?? defaultCertificateVerifier;
+  return async (input) => await new Promise<Response>((resolve, reject) => {
+    input.signal?.throwIfAborted();
+    const hostname = input.url.hostname.replace(/^\[|\]$/gu, "");
+    const headers = Object.fromEntries(input.headers.entries());
+    headers.host = input.url.host;
+    if (input.body !== undefined && !input.headers.has("content-length")) {
+      headers["content-length"] = String(new TextEncoder().encode(input.body).byteLength);
+    }
+    const request = requestFactory(input.url, {
+      method: input.method,
+      agent: false,
+      rejectUnauthorized: true,
+      servername: hostname,
+      checkServerIdentity: (_socketHostname, certificate) => certificateVerifier(hostname, certificate),
+      signal: input.signal,
+      headers,
+      lookup: (_lookupHostname, _lookupOptions, callback) => {
+        callback(null, input.selectedAddress, input.selectedFamily);
+      },
+    }, (response) => {
+      const connectedAddress = response.socket.remoteAddress;
+      if (!connectedAddress || !addressesMatch(input.selectedAddress, connectedAddress)) {
+        response.destroy();
+        reject(new UpstreamUrlRejectedError("approved upstream socket address did not match the DNS pin"));
+        return;
+      }
+      const status = response.statusCode ?? 502;
+      const body = input.method === "HEAD" || status === 204 || status === 304
+        ? null
+        : responseBody(response, input.signal);
+      resolve(new Response(body, { status, headers: responseHeaders(response.headers) }));
+    });
+    request.once("error", reject);
+    request.end(input.body);
+  });
+}
+
+const defaultApprovedUpstreamDial = createNodeApprovedUpstreamDial();
+
 function normalizeAllowedOrigins(origins: string[]): Set<string> {
   const normalized = new Set<string>();
   for (const rawOrigin of origins) {
@@ -119,13 +286,13 @@ export function configuredUpstreamAllowedOrigins(): string[] {
     .filter(Boolean);
 }
 
-export async function assertApprovedUpstreamUrl(
+async function resolveApprovedUpstreamTarget(
   rawUrl: string,
   options: {
     allowedOrigins: string[];
     resolveHost?: ResolveHost;
   },
-): Promise<URL> {
+): Promise<{ url: URL; addresses: ResolvedAddress[] }> {
   let parsed: URL;
   try {
     parsed = new URL(rawUrl);
@@ -148,7 +315,49 @@ export async function assertApprovedUpstreamUrl(
   if (addresses.length === 0 || addresses.some((entry) => isPrivateOrLocalAddress(entry.address))) {
     throw new UpstreamUrlRejectedError(`upstream origin did not resolve exclusively to public addresses: ${parsed.origin}`);
   }
-  return parsed;
+  return { url: parsed, addresses };
+}
+
+export async function fetchApprovedUpstream(
+  rawUrl: string,
+  init: {
+    method?: string;
+    headers?: HeadersInit;
+    body?: string;
+    signal?: AbortSignal;
+  },
+  options: {
+    allowedOrigins: string[];
+    resolveHost?: ResolveHost;
+    dial?: ApprovedUpstreamDial;
+  },
+): Promise<Response> {
+  const target = await resolveApprovedUpstreamTarget(rawUrl, {
+    allowedOrigins: options.allowedOrigins,
+    resolveHost: options.resolveHost,
+  });
+  const selected = target.addresses[0];
+  if (!selected || (selected.family !== 4 && selected.family !== 6)) {
+    throw new UpstreamUrlRejectedError("upstream DNS resolution did not return a supported address family");
+  }
+  if (process.env.NODE_ENV === "test" && !options.dial) {
+    return await fetch(target.url, {
+      method: init.method,
+      headers: init.headers,
+      body: init.body,
+      signal: init.signal,
+      redirect: "manual",
+    });
+  }
+  return await (options.dial ?? defaultApprovedUpstreamDial)({
+    url: target.url,
+    method: init.method ?? "GET",
+    headers: new Headers(init.headers),
+    body: init.body,
+    signal: init.signal,
+    selectedAddress: selected.address,
+    selectedFamily: selected.family,
+  });
 }
 
 export async function readBoundedResponseText(

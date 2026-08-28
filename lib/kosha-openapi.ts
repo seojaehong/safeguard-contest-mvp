@@ -1,5 +1,8 @@
 import { IntegrationMode } from "./types";
 import { readBoundedResponseText } from "./server/upstream-http";
+import { createLogger } from "./logger";
+
+const log = createLogger("kosha-openapi");
 
 type JsonRecord = Record<string, unknown>;
 
@@ -181,8 +184,8 @@ function parseJsonRecords(text: string) {
     }
     return { records: readArrayEnvelope(parsed), detail: "정상 응답" };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return { records: [], detail: `JSON 파싱 실패: ${message}` };
+    log.warn("provider JSON parsing failed", { error });
+    return { records: [], detail: "JSON 응답 파싱 점검 필요" };
   }
 }
 
@@ -199,8 +202,8 @@ function parseJsonRecordsWithBody(text: string) {
     }
     return base;
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return { records: [], detail: `JSON 파싱 실패: ${message}` };
+    log.warn("provider body JSON parsing failed", { error });
+    return { records: [], detail: "JSON 응답 파싱 점검 필요" };
   }
 }
 
@@ -239,8 +242,8 @@ async function fetchSmartSearch(question: string, signal?: AbortSignal): Promise
     }));
   } catch (error) {
     signal?.throwIfAborted();
-    const message = error instanceof Error ? error.message : String(error);
-    return { detail: `smartSearch searchValue=${keyword}: ${message}` };
+    log.warn("smart search provider request failed", { keyword, error });
+    return { detail: `smartSearch searchValue=${keyword}: 연결 점검 필요` };
   }
 }
 
@@ -270,8 +273,8 @@ async function fetchSafetyMedia(question: string, signal?: AbortSignal): Promise
     }));
   } catch (error) {
     signal?.throwIfAborted();
-    const message = error instanceof Error ? error.message : String(error);
-    return { detail: message };
+    log.warn("safety media provider request failed", { error });
+    return { detail: "안전보건자료 연결 점검 필요" };
   }
 }
 
@@ -302,8 +305,8 @@ async function fetchMsds(question: string, signal?: AbortSignal): Promise<KoshaO
       details.push(`${param}: 응답 항목 없음`);
     } catch (error) {
       signal?.throwIfAborted();
-      const message = error instanceof Error ? error.message : String(error);
-      details.push(`${param}: ${message}`);
+      log.warn("MSDS provider request failed", { parameter: param, error });
+      details.push(`${param}: 연결 점검 필요`);
     }
   }
 
@@ -357,8 +360,8 @@ async function fetchConstructionDailyDisaster(question: string, signal?: AbortSi
       });
     } catch (error) {
       signal?.throwIfAborted();
-      const message = error instanceof Error ? error.message : String(error);
-      details.push(`${dsstrDy}: ${message}`);
+      log.warn("construction disaster provider request failed", { date: dsstrDy, error });
+      details.push(`${dsstrDy}: 연결 점검 필요`);
     }
   }
 

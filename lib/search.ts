@@ -3075,7 +3075,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         weather: weather.mode,
         work24: training.mode,
         kosha: kosha.mode,
-        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${koshaOpenApi.detail} / ${accidentCases.detail} / 지식 DB 매칭 ${safetyKnowledgeMatches.length}건 / Supabase 카탈로그 매칭 ${safetyReference.count}건 (configured=${safetyReference.configured}) / structured 위험성평가 rows ${structuredRiskRows.length}건, 검증 이슈 ${structuredRiskIssues.length}건 (${structuredRiskSourceDetail}) / TBM-risk 연결 ${tbmRiskLinks.length}건 (${tbmRiskSourceDetail}) / ${tbmStructuredSourceDetail} / ${aiModeAppliedDetail}`
+        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / 기상 근거 ${weather.mode} / 고용24 근거 ${training.mode} / KOSHA 교육 근거 ${koshaEducation.mode} / KOSHA 기술 근거 ${kosha.mode} / KOSHA OpenAPI 근거 ${koshaOpenApi.mode} / 재해사례 근거 ${accidentCases.mode} / 지식 DB 매칭 ${safetyKnowledgeMatches.length}건 / Supabase 카탈로그 매칭 ${safetyReference.count}건 (configured=${safetyReference.configured}) / structured 위험성평가 rows ${structuredRiskRows.length}건, 검증 이슈 ${structuredRiskIssues.length}건 (${structuredRiskSourceDetail}) / TBM-risk 연결 ${tbmRiskLinks.length}건 (${tbmRiskSourceDetail}) / ${tbmStructuredSourceDetail} / ${aiModeAppliedDetail}`
       },
       sourceMix
     };

@@ -1,10 +1,14 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { getClientIp, enforceRateLimit } from "@/lib/api-guard";
 import { createRateLimiter } from "@/lib/rate-limit";
 
 function req(headers: Record<string, string>): Request {
   return new Request("https://www.safeclaw.kr/api/ask", { headers });
 }
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 describe("getClientIp", () => {
   test("uses first entry of x-forwarded-for", () => {
@@ -17,6 +21,26 @@ describe("getClientIp", () => {
 
   test("returns 'unknown' when no headers present", () => {
     expect(getClientIp(req({}))).toBe("unknown");
+  });
+
+  test("prefers the Vercel-authenticated client IP over a spoofed forwarded chain", () => {
+    expect(getClientIp(req({
+      "x-vercel-forwarded-for": "203.0.113.21",
+      "x-forwarded-for": "198.51.100.77, 10.0.0.1",
+    }))).toBe("203.0.113.21");
+  });
+
+  test("fails closed in production when Vercel client identity is missing", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL", "1");
+    expect(getClientIp(req({ "x-forwarded-for": "198.51.100.77" }))).toBe("unknown");
+  });
+
+  test("uses a configured trusted proxy chain outside Vercel", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL", "");
+    vi.stubEnv("SAFECLAW_TRUST_PROXY_HEADERS", "true");
+    expect(getClientIp(req({ "x-forwarded-for": "8.8.8.8, 10.0.0.1" }))).toBe("8.8.8.8");
   });
 });
 

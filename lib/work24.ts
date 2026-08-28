@@ -1,5 +1,8 @@
 import { IntegrationMode } from "./types";
 import { readBoundedResponseText } from "./server/upstream-http";
+import { createLogger } from "./logger";
+
+const log = createLogger("work24");
 
 export const WORK24_RESPONSE_MAX_BYTES = 256 * 1_024;
 export const WORK24_REQUEST_TIMEOUT_MS = 20_000;
@@ -218,11 +221,11 @@ export async function fetchTrainingRecommendations(question: string, signal?: Ab
     };
   } catch (error) {
     signal?.throwIfAborted();
-    const message = error instanceof Error ? error.message : String(error);
+    log.warn("training provider request failed", { error });
     return {
       source: "work24",
       mode: "fallback",
-      detail: `고용24 사업주훈련 연결 점검 필요: ${message}`,
+      detail: "고용24 사업주훈련 연결 점검이 필요합니다.",
       recommendations: []
     };
   }
