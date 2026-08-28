@@ -1,63 +1,38 @@
 {
   "schemaVersion": "safeclaw-share-mcp-current-source-compatibility/v1",
-  "generatedAt": "2026-08-27T21:56:30.000Z",
+  "generatedAt": "2026-08-28T20:25:23.147Z",
   "verdict": "PASS_LIVE_PRODUCTION_SHARE_MCP_CURRENT_SOURCE_FAIL_CLOSED_COMPATIBILITY",
-  "sourceHead": "e20605523592fee0df26a95d5108a167141a1ac0",
-  "productionCommit": "e20605523592fee0df26a95d5108a167141a1ac0",
+  "sourceHead": "812fa1afa16edea0aa2998b6d47fc9d015439535",
+  "productionCommit": "812fa1afa16edea0aa2998b6d47fc9d015439535",
   "productionBranch": "master",
   "productionEnvironment": "production",
-  "deploymentUrl": "safeguard-contest-f3vyvwmuy-seojaehongs-projects.vercel.app",
+  "deploymentUrl": "safeguard-contest-r4wmybh7q-seojaehongs-projects.vercel.app",
   "coveredGateIds": [
     "share_session_revocation_security",
     "share_recipient_contact_verification_security",
+    "share_ack_prebody_admission_security",
     "mcp_provider_admission_security"
   ],
   "scope": {
-    "shareSessionRevocationPaths": [
-      "app/api/workpacks/[id]/share-sessions/route.ts",
-      "components/WorkflowSharePanel.tsx",
-      "lib/workflow-share-client.ts"
-    ],
-    "shareRecipientContactPaths": [
-      "app/api/share-sessions/[sessionId]/route.ts",
-      "app/share/[sessionId]/page.tsx",
-      "lib/workpack-commercial.ts"
-    ],
-    "mcpProviderAdmissionPaths": [
-      "app/api/mcp/[transport]/implementation.ts",
-      "lib/mcp-auth.ts",
-      "lib/mcp-provider-admission.ts",
-      "lib/mcp-tools.ts",
-      "tests/mcp-auth.test.ts",
-      "tests/mcp-provider-admission.test.ts",
-      "tests/mcp-work-budget.test.ts"
-    ],
+    "shareSessionRevocationPaths": ["app/api/workpacks/[id]/share-sessions/route.ts", "components/WorkflowSharePanel.tsx", "lib/workflow-share-client.ts"],
+    "shareRecipientContactPaths": ["app/api/share-sessions/[sessionId]/route.ts", "app/share/[sessionId]/page.tsx", "lib/workpack-commercial.ts"],
+    "shareAckPrebodyPaths": ["app/api/share-sessions/[sessionId]/route.ts", "tests/workpack-share-authority-routes.test.ts"],
+    "mcpProviderAdmissionPaths": ["app/api/mcp/[transport]/implementation.ts", "lib/mcp-auth.ts", "lib/mcp-provider-admission.ts", "lib/mcp-tools.ts", "tests/mcp-auth.test.ts", "tests/mcp-provider-admission.test.ts", "tests/mcp-work-budget.test.ts"],
     "originalReportsRewritten": false,
     "compatibilityOnly": true
   },
   "currentContracts": {
     "ownerRevocationStillRequiresAuthentication": true,
     "recipientContactVerificationStillPrecedesConfirmationInsert": true,
+    "shareAckAdmissionStillPrecedesBodyRead": true,
     "mcpProviderGenerationStillRequiresDurableAdmission": true,
     "shareAndMcpPreBodyAdmissionRequiresDistributedProductionConfiguration": true,
     "validAuthenticatedProviderProbeExecuted": false,
     "destructiveShareProbeExecuted": false
   },
   "verification": {
-    "focusedAndAdjacentVitest": {
-      "filesPassed": 8,
-      "filesSkipped": 1,
-      "testsPassed": 188,
-      "testsSkipped": 7,
-      "failed": 0,
-      "status": "PASS"
-    },
-    "recipientBrowser": {
-      "files": 1,
-      "tests": 7,
-      "failed": 0,
-      "status": "PASS"
-    },
+    "focusedAndAdjacentVitest": { "filesPassed": 8, "filesSkipped": 0, "testsPassed": 205, "testsSkipped": 0, "failed": 0, "status": "PASS" },
+    "recipientBrowser": { "files": 1, "tests": 7, "failed": 0, "status": "PASS" },
     "typecheck": "PASS",
     "build": "PASS",
     "nextVersion": "15.5.22",
@@ -71,33 +46,14 @@
     "shareSessionCreated": false,
     "shareSessionRevoked": false,
     "readConfirmationCreated": false,
+    "caseCount": 4,
+    "passedCount": 4,
+    "failedCount": 0,
     "cases": [
-      {
-        "name": "share-revoke-unauthenticated",
-        "method": "DELETE",
-        "path": "/api/workpacks/[missing-workpack]/share-sessions?sessionId=[missing-session]",
-        "status": 401,
-        "configured": true,
-        "revokedSessionId": null
-      },
-      {
-        "name": "share-contact-missing-session",
-        "method": "POST",
-        "path": "/api/share-sessions/[missing-session]",
-        "status": 503,
-        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
-        "rateLimit": "distributed",
-        "confirmationId": null
-      },
-      {
-        "name": "mcp-invalid-token",
-        "method": "POST",
-        "path": "/api/mcp/mcp",
-        "status": 503,
-        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
-        "rateLimit": "distributed",
-        "credential": "invalid_non_secret"
-      }
+      { "name": "share-revoke-unauthenticated", "method": "DELETE", "path": "/api/workpacks/[missing-workpack]/share-sessions?sessionId=[missing-session]", "status": 401, "configured": true, "revokedSessionId": null },
+      { "name": "share-contact-missing-session", "method": "POST", "path": "/api/share-sessions/[missing-session]", "requestBodyBytes": 71, "status": 503, "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "rateLimit": "distributed", "confirmationId": null },
+      { "name": "share-ack-oversize-missing-session", "method": "POST", "path": "/api/share-sessions/[missing-session]", "requestBodyBytes": 49261, "status": 503, "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "rateLimit": "distributed", "applicationBodyBudgetReached": false, "sessionLookupReached": false, "confirmationId": null },
+      { "name": "mcp-invalid-token", "method": "POST", "path": "/api/mcp/mcp", "requestBodyBytes": 2, "status": 503, "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "rateLimit": "distributed", "credential": "intentionally_invalid_non_secret" }
     ]
   },
   "originalSecurityBaselinesRewritten": false,
