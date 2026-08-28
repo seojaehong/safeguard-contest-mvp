@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "safeclaw-knowledge-preparation-capability-truth/v1",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_LIVE_PENDING",
+  "sourceHead": "3beaa4d89727b0bfbfed0fb9dd4a341542f07cfa",
+  "productionCommit": "2273a95be0fc6af605d451212051570a1c6d977a",
+  "productionIncludesProductCommit": false,
+  "before": {
+    "distributedAdmissionFailurePublicCode": "PUBLIC_ASK_CONCURRENCY_LIMIT",
+    "reviewInboxFailureMessage": "검토 후보를 준비하지 못했습니다.",
+    "configurationLockDistinguishedFromLoad": false
+  },
+  "currentSourceContract": {
+    "distributedAdmissionFailurePublicCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "temporaryConcurrencyPublicCode": "PUBLIC_ASK_CONCURRENCY_LIMIT",
+    "configurationLockDistinguishedFromLoad": true,
+    "rawAdmissionErrorPubliclyExposed": false,
+    "configurationLockMessageVisible": true,
+    "temporaryLoadMessageVisible": true,
+    "authenticationMessageVisible": true,
+    "storageOrGuardMessageVisible": true,
+    "existingCandidateReviewRemainsAvailable": true,
+    "publicationState": "unpublished",
+    "publishAllowed": false
+  },
+  "verification": {
+    "focused": {
+      "files": 2,
+      "tests": 29,
+      "failed": 0
+    },
+    "adjacentKnowledgeAndAdmission": {
+      "files": 4,
+      "tests": 88,
+      "failed": 0
+    },
+    "strictTypecheck": "PASS",
+    "productionBuild": "PASS",
+    "staticPages": 28
+  },
+  "liveVerification": {
+    "status": "PENDING_PRODUCT_DEPLOYMENT",
+    "buildInfoCommit": "2273a95be0fc6af605d451212051570a1c6d977a",
+    "behavioralProbeExecuted": false,
+    "reason": "The product commit is not yet included in the production marker. An authenticated candidate preparation probe would also require a real review run and is not executed without approval."
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerCallPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "wikiPublicationPerformed": false,
+    "ontologyPublicationPerformed": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "enhancedLlmRuntime": "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
+    "authenticatedLivePreparationProbe": "APPROVAL_GATED",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "securityCompleteClaimAllowed": false
+  }
+}
