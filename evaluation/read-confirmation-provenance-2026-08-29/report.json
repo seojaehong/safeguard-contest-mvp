@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "safeclaw-read-confirmation-provenance/v1",
+  "verdict": "PASS_DEPLOYED_SOURCE_ACKNOWLEDGEMENT_PROVENANCE_NO_LIVE_MUTATION",
+  "generatedAt": "2026-08-29T01:43:28.7670243+09:00",
+  "sourceHead": "097221ee0841a845d59cad3cd395fa137b52118a",
+  "productionBuild": {
+    "commitSha": "097221ee0841a845d59cad3cd395fa137b52118a",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-zzch5vnd0-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "securityBaseline": {
+    "scanId": "c5175a50-038b-402e-9fd3-6af9eec6582b",
+    "targetRevision": "c9e24f31b7c9e9db5896bd221401bcef3e35ed24",
+    "finding": "integrity.acknowledgement-provenance-confusion",
+    "immutableOriginalBaselinePreserved": true
+  },
+  "provenanceContract": {
+    "publicRecipientRoute": {
+      "path": "/api/share-sessions/[sessionId]",
+      "confirmationMethod": "button",
+      "meaning": "recipient-performed confirmation"
+    },
+    "authenticatedManagerRoute": {
+      "path": "/api/workpacks/[id]/read-confirmations",
+      "confirmationMethod": "admin_marked",
+      "meaning": "administrator mark separate from recipient confirmation"
+    },
+    "idempotencyIncludesConfirmationMethod": true,
+    "managerPrecheckFiltersAdminMarkedOnly": true,
+    "recipientButtonCannotBeReusedAsAdministratorMark": true,
+    "userFacingManagerMessageClaimsWorkerConfirmation": false
+  },
+  "verification": {
+    "focusedVitest": {
+      "files": 4,
+      "tests": 102,
+      "passed": 102,
+      "failed": 0
+    },
+    "strictTypecheck": "PASS",
+    "productionBuild": "PASS",
+    "staticPages": 28,
+    "gitDiffCheck": "PASS",
+    "liveReadOnly": {
+      "unauthenticatedManagerPostStatus": 401,
+      "responseMessage": "관리자 로그인이 필요합니다.",
+      "authenticatedConfirmationWriteExecuted": false,
+      "readConfirmationInserted": false
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "liveAuthenticatedProvenanceCanary": "NOT_EXECUTED_REQUIRES_DB_WRITE_PATH",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedWorkOverclaimed": false,
+    "securityCompletionClaimed": false,
+    "otherScanFindingsRemainOpen": true
+  }
+}
