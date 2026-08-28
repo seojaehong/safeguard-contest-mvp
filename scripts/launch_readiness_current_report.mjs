@@ -5,7 +5,7 @@ import process from "node:process";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-const SCHEMA_VERSION = "safeclaw-launch-readiness-current/v4";
+const SCHEMA_VERSION = "safeclaw-launch-readiness-current/v5";
 const DEFAULT_BASE_URL = "https://www.safeclaw.kr";
 const DEFAULT_OUTPUT_DIR = path.join("evaluation", "launch-readiness-current-2026-07-22");
 const DEFAULT_RAW_AUDIT = path.join(DEFAULT_OUTPUT_DIR, "api-connection-audit.json");
@@ -22,6 +22,7 @@ const DEFAULT_PROVIDER_DISPATCH = path.join("evaluation", "provider-dispatch-ide
 const DEFAULT_SIF_PREFLIGHT = path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json");
 const DEFAULT_RLS_WIKI = path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json");
 const DEFAULT_APPROVAL_RUNWAY = path.join("evaluation", "northstar-approval-runway-2026-07-21", "report.json");
+const DEFAULT_RAW_AUDIT_MAX_AGE_MS = 4 * 60 * 60 * 1000;
 
 const EXPECTED_DOCUMENT_KEYS = [
   "workpackSummaryDraft",
@@ -86,6 +87,40 @@ async function fetchProductionBuildInfo(baseUrl, timeoutMs) {
 
 function buildInfoCommit(buildInfo) {
   return asString(buildInfo.commitSha) || asString(buildInfo.commit) || asString(buildInfo.gitCommit) || asString(buildInfo.sha) || "";
+}
+
+function rawAuditFreshness(rawAudit, productionCommit, generatedAt, maxAgeMs) {
+  const auditGeneratedAt = asString(rawAudit.generatedAt);
+  const auditTimestamp = Date.parse(auditGeneratedAt);
+  const reportTimestamp = Date.parse(generatedAt);
+  const auditProductionCommit = asString(rawAudit.productionCommit)
+    || buildInfoCommit(asRecord(rawAudit.productionBuild));
+  const validTimestamps = Number.isFinite(auditTimestamp) && Number.isFinite(reportTimestamp);
+  const ageMs = validTimestamps ? reportTimestamp - auditTimestamp : null;
+  const commitMatchesProduction = Boolean(
+    auditProductionCommit
+    && productionCommit
+    && auditProductionCommit === productionCommit
+  );
+  const timestampWithinWindow = ageMs !== null && ageMs >= -5 * 60 * 1000 && ageMs <= maxAgeMs;
+  const ready = commitMatchesProduction && timestampWithinWindow;
+  const reasons = [];
+  if (!auditProductionCommit) reasons.push("raw_audit_production_commit_missing");
+  else if (!commitMatchesProduction) reasons.push("raw_audit_production_commit_mismatch");
+  if (!validTimestamps) reasons.push("raw_audit_timestamp_invalid");
+  else if (ageMs < -5 * 60 * 1000) reasons.push("raw_audit_timestamp_in_future");
+  else if (ageMs > maxAgeMs) reasons.push("raw_audit_too_old");
+  return {
+    ready,
+    auditGeneratedAt,
+    auditProductionCommit,
+    reportGeneratedAt: generatedAt,
+    ageMs,
+    maxAgeMs,
+    commitMatchesProduction,
+    timestampWithinWindow,
+    reasons
+  };
 }
 
 function documentCoverage(rawAudit) {
@@ -201,20 +236,31 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
   const approvalRunwayPath = options.approvalRunwayPath || DEFAULT_APPROVAL_RUNWAY;
   const approvalRunway = readJson(rootDir, approvalRunwayPath);
   const approvalGatedBoundaries = buildApprovalGatedBoundaries(approvalRunway);
+  const generatedAt = options.generatedAt || new Date().toISOString();
   const sourceHeadAtGeneration = options.sourceHead || gitHead(rootDir);
   const productionBuild = isRecord(options.productionBuild) ? options.productionBuild : {};
   const productionCommit = options.productionCommit || buildInfoCommit(productionBuild);
+  const auditFreshness = rawAuditFreshness(
+    rawAudit,
+    productionCommit,
+    generatedAt,
+    options.rawAuditMaxAgeMs || DEFAULT_RAW_AUDIT_MAX_AGE_MS
+  );
   const coverage = documentCoverage(rawAudit);
   const summary = connectionSummary(rawAudit);
   const dispatchCalled = rawAudit.dispatchStatus !== null && rawAudit.dispatchStatus !== undefined;
-  const distributedAdmissionBlocked = asNumber(rawAudit.apiAskStatus) === 503
+  const distributedAdmissionBlocked = auditFreshness.ready
+    && asNumber(rawAudit.apiAskStatus) === 503
     && asString(rawAudit.apiAskErrorCode) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
     && !dispatchCalled;
-  const liveGenerationPassed = rawAudit.apiAskOk === true
+  const liveGenerationPassed = auditFreshness.ready
+    && rawAudit.apiAskOk === true
     && coverage.missing.length === 0
     && summary.needsCheckCount === 0
     && !dispatchCalled;
-  const verdict = liveGenerationPassed
+  const verdict = !auditFreshness.ready
+    ? "STALE_LIVE_PROBE_REQUIRES_RERUN_NO_DISPATCH"
+    : liveGenerationPassed
     ? "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES"
     : distributedAdmissionBlocked
       ? "BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH"
@@ -222,7 +268,7 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
 
   return {
     schemaVersion: SCHEMA_VERSION,
-    generatedAt: options.generatedAt || new Date().toISOString(),
+    generatedAt,
     baseUrl: options.baseUrl || asString(rawAudit.baseUrl) || DEFAULT_BASE_URL,
     sourceHeadAtGeneration,
     productionCommit,
@@ -246,6 +292,7 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
       rateLimit: asString(rawAudit.apiAskRateLimit),
       workUnit: asString(rawAudit.apiAskWorkUnit)
     },
+    rawAuditFreshness: auditFreshness,
     runtimeBoundary: {
       distributedAdmissionBlocked,
       providerWorkExecuted: distributedAdmissionBlocked ? false : null,
@@ -258,7 +305,9 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
     },
     scenario: isRecord(rawAudit.scenario) ? rawAudit.scenario : null,
     documentCoverage: coverage,
-    connectionVerdict: distributedAdmissionBlocked
+    connectionVerdict: !auditFreshness.ready
+      ? "STALE_PROBE_NOT_CURRENT_LIVE_EVIDENCE"
+      : distributedAdmissionBlocked
       ? "BLOCKED_BEFORE_CONNECTION_CHECK_NO_DISPATCH"
       : summary.needsCheckCount === 0 && summary.partialCount === 0
         ? "PASS_CONNECTED_NO_DISPATCH"
@@ -305,7 +354,9 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
           "Documents selected-only bounded workbench evidence is current in scoped artifacts; route split alone is not accepted as the UX fix."
         ]
       : [
-          "The current live launch smoke fails closed before generation while distributed admission is unavailable.",
+          auditFreshness.ready
+            ? "The current live launch smoke fails closed before generation while distributed admission is unavailable."
+            : "The stored live launch smoke is stale or does not match the current production commit and cannot support a current launch claim.",
           "No provider dispatch or database mutation was executed by the current launch smoke.",
           "Documents and Share scoped UI evidence remains separate from current live generation availability.",
           "Exact saved user Share remains MISSING_EVIDENCE."
@@ -318,6 +369,7 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
       "Live Supabase RLS tenant isolation is launch-proven.",
       "Exact saved/generated user share session has been reproduced unless a concrete session URL/state is measured.",
       "n8n/provider dispatch was executed in the latest launch-readiness smoke.",
+      ...(!auditFreshness.ready ? ["The stored launch smoke proves the current production runtime is launch-ready."] : []),
       ...(distributedAdmissionBlocked ? ["Current live /api/ask generation is available for a launch demo."] : [])
     ],
     uiArchitectureBoundary: buildUiArchitectureBoundary(nextRunway),
@@ -371,6 +423,10 @@ ${report.safeLaunchDemoClaimAllowed
 
 \`scripts/launch_readiness_audit.mjs\` was run against production with \`SAFETYGUARD_AUDIT_DISPATCH=false\`.
 
+- raw audit generated: \`${report.rawAuditFreshness?.auditGeneratedAt || "missing"}\`
+- raw audit production commit: \`${report.rawAuditFreshness?.auditProductionCommit || "missing"}\`
+- raw audit current for this report: \`${report.rawAuditFreshness?.ready === true}\`
+- raw audit freshness reasons: \`${Array.isArray(report.rawAuditFreshness?.reasons) && report.rawAuditFreshness.reasons.length ? report.rawAuditFreshness.reasons.join(", ") : "none"}\`
 - \`/api/ask\`: ${report.apiAsk?.status ?? "unknown"} ${report.apiAsk?.ok ? "OK" : "CHECK"}
 - error code: \`${report.apiAsk?.errorCode || "none"}\`
 - admission: \`${report.apiAsk?.rateLimit || "unknown"}\` / \`${report.apiAsk?.workUnit || "unknown"}\`

@@ -47,6 +47,14 @@ function errorMessage(error) {
   return error instanceof Error ? error.message : String(error);
 }
 
+function buildInfoCommit(buildInfo) {
+  if (!buildInfo || typeof buildInfo !== "object" || Array.isArray(buildInfo)) return "";
+  for (const key of ["commitSha", "commit", "gitCommit", "sha"]) {
+    if (typeof buildInfo[key] === "string" && buildInfo[key].trim()) return buildInfo[key].trim();
+  }
+  return "";
+}
+
 async function writeJsonLine(stream, value) {
   const output = `${JSON.stringify(value, null, 2)}\n`;
   await new Promise((resolve, reject) => {
@@ -158,6 +166,11 @@ function buildAuditRows(result) {
 
 try {
   const startedAt = Date.now();
+  const buildInfo = await fetchJson(`${baseUrl}/api/build-info`);
+  const productionCommit = buildInfoCommit(buildInfo.parsed);
+  if (!buildInfo.response.ok || !productionCommit) {
+    throw new Error(`Production build marker unavailable (${buildInfo.response.status}).`);
+  }
   const ask = await fetchJson(`${baseUrl}/api/ask`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -185,6 +198,8 @@ try {
   const audit = {
     generatedAt: new Date().toISOString(),
     baseUrl,
+    productionCommit,
+    productionBuild: buildInfo.parsed,
     elapsedMs: Date.now() - startedAt,
     apiAskStatus: ask.response.status,
     apiAskOk: ask.response.ok,

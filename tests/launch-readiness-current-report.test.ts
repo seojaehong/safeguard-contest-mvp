@@ -40,6 +40,10 @@ type LaunchReadinessReport = {
   fullyAutomatedLaunchClaimAllowed: boolean;
   productionCommit: string;
   providerDispatchLiveClaimed: boolean;
+  rawAuditFreshness: {
+    ready: boolean;
+    reasons: string[];
+  };
   runtimeBoundary: {
     databaseMutationPerformed: boolean;
     distributedAdmissionActivation: string;
@@ -101,6 +105,7 @@ function createFixtureRoot(): { head: string; rootDir: string } {
   git(rootDir, ["config", "user.email", "codex@example.test"]);
   git(rootDir, ["config", "user.name", "Codex Test"]);
   writeJson(rootDir, "evaluation/launch-readiness-current-2026-07-22/api-connection-audit.json", {
+    generatedAt: "2026-07-22T00:00:00.000Z",
     apiAskOk: true,
     apiAskStatus: 200,
     baseUrl: "https://www.safeclaw.kr",
@@ -185,7 +190,14 @@ function createFixtureRoot(): { head: string; rootDir: string } {
   fs.writeFileSync(path.join(rootDir, "README.md"), "fixture\n", "utf8");
   git(rootDir, ["add", "."]);
   git(rootDir, ["commit", "-qm", "fixture"]);
-  return { head: git(rootDir, ["rev-parse", "HEAD"]), rootDir };
+  const head = git(rootDir, ["rev-parse", "HEAD"]);
+  const rawAuditPath = path.join(rootDir, "evaluation/launch-readiness-current-2026-07-22/api-connection-audit.json");
+  const rawAudit = JSON.parse(fs.readFileSync(rawAuditPath, "utf8")) as Record<string, unknown>;
+  writeJson(rootDir, "evaluation/launch-readiness-current-2026-07-22/api-connection-audit.json", {
+    ...rawAudit,
+    productionCommit: head,
+  });
+  return { head, rootDir };
 }
 
 afterEach(() => {
@@ -223,6 +235,7 @@ describe("launch readiness current report", () => {
       presentCount: 12,
     });
     expect(report.documentCoverage.present).toContain("workPermitDraft");
+    expect(report.rawAuditFreshness).toMatchObject({ ready: true, reasons: [] });
     expect(report.approvalGatedBoundaryCount).toBe(8);
     expect(report.approvalGatedBoundaryIds).toEqual([
       "distributed_admission_activation",
@@ -261,6 +274,12 @@ describe("launch readiness current report", () => {
   it("marks a source-only evidence head pending when production lags", async () => {
     const module = await loadReportModule();
     const { rootDir } = createFixtureRoot();
+    const rawAuditPath = "evaluation/launch-readiness-current-2026-07-22/api-connection-audit.json";
+    const rawAudit = JSON.parse(fs.readFileSync(path.join(rootDir, rawAuditPath), "utf8")) as Record<string, unknown>;
+    writeJson(rootDir, rawAuditPath, {
+      ...rawAudit,
+      productionCommit: "previous-live-commit",
+    });
 
     const report = module.buildLaunchReadinessCurrentReport({
       generatedAt: "2026-07-22T00:00:00.000Z",
@@ -282,6 +301,8 @@ describe("launch readiness current report", () => {
     const module = await loadReportModule();
     const { head, rootDir } = createFixtureRoot();
     writeJson(rootDir, "evaluation/launch-readiness-current-2026-07-22/api-connection-audit.json", {
+      generatedAt: "2026-08-28T00:00:00.000Z",
+      productionCommit: head,
       apiAskError: "request protection unavailable",
       apiAskErrorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
       apiAskOk: false,
@@ -334,6 +355,35 @@ describe("launch readiness current report", () => {
     expect(report.forbiddenClaims).toContain("Current live /api/ask generation is available for a launch demo.");
     expect(markdown).toContain("Current live launch demo generation is not allowed");
     expect(markdown).toContain("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+  });
+
+  it("fails closed when a historical raw audit is relabeled with the current production marker", async () => {
+    const module = await loadReportModule();
+    const { head, rootDir } = createFixtureRoot();
+    const rawAuditPath = "evaluation/launch-readiness-current-2026-07-22/api-connection-audit.json";
+    const rawAudit = JSON.parse(fs.readFileSync(path.join(rootDir, rawAuditPath), "utf8")) as Record<string, unknown>;
+    writeJson(rootDir, rawAuditPath, {
+      ...rawAudit,
+      generatedAt: "2026-07-22T00:00:00.000Z",
+      productionCommit: "historical-production-commit",
+    });
+
+    const report = module.buildLaunchReadinessCurrentReport({
+      generatedAt: "2026-08-29T00:00:00.000Z",
+      productionCommit: head,
+      rootDir,
+    });
+
+    expect(report).toMatchObject({
+      connectionVerdict: "STALE_PROBE_NOT_CURRENT_LIVE_EVIDENCE",
+      safeLaunchDemoClaimAllowed: false,
+      verdict: "STALE_LIVE_PROBE_REQUIRES_RERUN_NO_DISPATCH",
+    });
+    expect(report.rawAuditFreshness).toMatchObject({
+      ready: false,
+      reasons: ["raw_audit_production_commit_mismatch", "raw_audit_too_old"],
+    });
+    expect(report.forbiddenClaims).toContain("The stored launch smoke proves the current production runtime is launch-ready.");
   });
 
   it("fails closed when the canonical approval runway is incomplete", async () => {
