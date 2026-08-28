@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-28T21:48:55.451Z",
+  "generatedAt": "2026-08-28T22:00:52.302Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "da2c1b952a6e84ddd7d5bab58accf6e37d84ddc2",
-  "productionCommit": "da2c1b952a6e84ddd7d5bab58accf6e37d84ddc2",
+  "sourceHead": "56a60031738e12e29a32caa02c6f443cd54d8a30",
+  "productionCommit": "56a60031738e12e29a32caa02c6f443cd54d8a30",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "da2c1b952a6e84ddd7d5bab58accf6e37d84ddc2",
+    "commitSha": "56a60031738e12e29a32caa02c6f443cd54d8a30",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-bbdwbuajz-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-4gnq1tlzn-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "da2c1b952a6e84ddd7d5bab58accf6e37d84ddc2",
-  "liveRollupLiveCommit": "da2c1b952a6e84ddd7d5bab58accf6e37d84ddc2",
+  "liveExactEvidenceCommit": "56a60031738e12e29a32caa02c6f443cd54d8a30",
+  "liveRollupLiveCommit": "56a60031738e12e29a32caa02c6f443cd54d8a30",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -409,25 +409,26 @@
     }
   ],
   "launchReadiness": {
-    "verdict": "BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH",
-    "safeLaunchDemoClaimAllowed": false,
-    "guidedPilotClaimAllowed": false,
+    "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
+    "safeLaunchDemoClaimAllowed": true,
+    "guidedPilotClaimAllowed": true,
     "fullyAutomatedLaunchClaimAllowed": false,
     "selfServeSaasLaunchClaimAllowed": false,
     "providerDispatchLiveClaimed": false,
-    "apiAskOk": false,
-    "apiAskStatus": 503,
-    "apiAskErrorCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
-    "apiAskRateLimit": "distributed",
+    "apiAskOk": true,
+    "apiAskStatus": 200,
+    "apiAskErrorCode": "",
+    "apiAskRateLimit": "",
     "apiAskWorkUnit": "",
     "dispatchCalled": false,
-    "distributedAdmissionBlocked": true,
-    "distributedAdmissionActivation": "OPERATOR_CONFIGURATION_REQUIRED",
+    "distributedAdmissionBlocked": false,
+    "distributedAdmissionActivation": "NOT_MEASURED_BY_THIS_SMOKE",
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "documentCoverage": {
       "expectedCount": 12,
-      "presentCount": 0,
-      "missing": [
+      "presentCount": 12,
+      "missing": [],
+      "present": [
         "workpackSummaryDraft",
         "riskAssessmentDraft",
         "workPlanDraft",
@@ -440,8 +441,7 @@
         "foreignWorkerBriefing",
         "foreignWorkerTransmission",
         "kakaoMessage"
-      ],
-      "present": []
+      ]
     }
   },
   "final99TwelveDocumentNoMutation": {
