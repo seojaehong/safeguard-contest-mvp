@@ -173,6 +173,7 @@ const EVIDENCE_PATHS = Object.freeze({
   koshaCurrentReconciliation: path.join("evaluation", "kosha-current-master-reconciliation-2026-07-19", "report.json"),
   koshaCurrentLive: path.join("evaluation", "kosha-exact-trust-current-live-2026-07-19", "report.md"),
   koshaExactPromotionReviewGate: path.join("evaluation", "kosha-exact-promotion-review-gate-2026-07-22", "report.json"),
+  koshaExactPromotionHumanChecklist: path.join("evaluation", "kosha-exact-promotion-review-gate-2026-07-22", "review-template.md"),
   koshaExactOfficialPdfAudit: path.join("evaluation", "kosha-exact-official-pdf-audit-2026-07-25", "report.json"),
   koshaExactOfficialLifecycleAudit: path.join("evaluation", "kosha-exact-official-lifecycle-audit-2026-07-25", "report.json"),
   koshaExactPromotionReviewerSupport: path.join("evaluation", "kosha-exact-promotion-reviewer-support-2026-07-25", "report.json"),
@@ -11834,6 +11835,24 @@ function evaluateKoshaExactTrustGate(rootDir) {
 function evaluateKoshaExactPromotionReviewGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.koshaExactPromotionReviewGate;
   const report = readJsonFile(rootDir, evidencePath);
+  const humanChecklistPath = EVIDENCE_PATHS.koshaExactPromotionHumanChecklist;
+  const humanChecklist = readTextFile(rootDir, humanChecklistPath) || "";
+  const checklistCandidateCount = humanChecklist.match(/^## \d+\. /gmu)?.length ?? 0;
+  const checklistInputCount = humanChecklist.match(/^- \[ \] /gmu)?.length ?? 0;
+  const checklistPrecheckedCount = humanChecklist.match(/^- \[[xX]\] /gmu)?.length ?? 0;
+  const checklistOfficialPdfLinkCount = humanChecklist.match(/\[KOSHA PDF 열기\]\(/gu)?.length ?? 0;
+  const checklistPageReceiptCount = humanChecklist.match(/^  - page receipt: /gmu)?.length ?? 0;
+  const humanChecklistPass = checklistCandidateCount === 8
+    && checklistInputCount === 48
+    && checklistPrecheckedCount === 0
+    && checklistOfficialPdfLinkCount === 8
+    && checklistPageReceiptCount === 24
+    && humanChecklist.includes("기계 evidence는 사람 검토를 대체하지 않습니다.")
+    && humanChecklist.includes("체크 완료만으로 exact-trust promotion이 승인되거나 registry artifact가 생성되지 않습니다.")
+    && humanChecklist.includes("별도 promotion 승인 전에는 exact-kosha registry를 생성하거나 수정하지 않습니다.");
+  const humanChecklistDetail = humanChecklistPass
+    ? ` Reviewer-facing checklist ${humanChecklistPath} exposes 8 candidates, 48 initially unchecked human inputs, 8 official PDF links, and 24 page receipts with no pre-checked items; machine evidence does not replace human review and checklist completion does not approve promotion.`
+    : "";
   const officialPdfAuditPath = EVIDENCE_PATHS.koshaExactOfficialPdfAudit;
   const officialPdfAudit = readJsonFile(rootDir, officialPdfAuditPath);
   const officialLifecycleAuditPath = EVIDENCE_PATHS.koshaExactOfficialLifecycleAudit;
@@ -12213,7 +12232,8 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && officialLifecycleAuditProvesCurrentInventory
     && reviewerSupportProvesSemanticCoverage
     && reviewerCockpitPass
-    && reviewerCockpitBrowserPass;
+    && reviewerCockpitBrowserPass
+    && humanChecklistPass;
 
   if (blockedTemplate) {
     return gateResult({
@@ -12221,7 +12241,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
       label: "KOSHA exact promotion review gate",
       state: "approval_gated",
       evidencePath,
-      detail: `Review template covers ${candidateCount} KOSHA candidates and is blocked by default (${failures.length} checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.${officialPdfAuditDetail}${officialLifecycleAuditDetail}${reviewerSupportDetail}${reviewerCockpitDetail}${contractAuditDetail}`,
+      detail: `Review template covers ${candidateCount} KOSHA candidates and is blocked by default (${failures.length} checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.${humanChecklistDetail}${officialPdfAuditDetail}${officialLifecycleAuditDetail}${reviewerSupportDetail}${reviewerCockpitDetail}${contractAuditDetail}`,
       nextActions: [
         "Fill the generated KOSHA review template with reviewer, reviewedAt, humanConfirmed, and every required check before promotion.",
         "Re-run scripts\\kosha_exact_promotion_review_gate.mjs on the completed review input, then seek separate explicit approval before writing any exact-trust registry changes.",
@@ -12245,7 +12265,8 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && officialLifecycleAuditProvesCurrentInventory
     && reviewerSupportProvesSemanticCoverage
     && reviewerCockpitPass
-    && reviewerCockpitBrowserPass;
+    && reviewerCockpitBrowserPass
+    && humanChecklistPass;
 
   if (completedButStillApprovalGated) {
     return gateResult({
@@ -12253,7 +12274,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
       label: "KOSHA exact promotion review gate",
       state: "approval_gated",
       evidencePath,
-      detail: `Human checklist is complete for ${candidateCount} KOSHA candidates, but exact-trust promotion remains approval-gated and no mutation has been performed.${officialPdfAuditDetail}${officialLifecycleAuditDetail}${reviewerSupportDetail}${reviewerCockpitDetail}${contractAuditDetail}`,
+      detail: `Human checklist is complete for ${candidateCount} KOSHA candidates, but exact-trust promotion remains approval-gated and no mutation has been performed.${humanChecklistDetail}${officialPdfAuditDetail}${officialLifecycleAuditDetail}${reviewerSupportDetail}${reviewerCockpitDetail}${contractAuditDetail}`,
       nextActions: [
         "Request explicit approval for the bounded exact-trust promotion before writing registry, DB, embedding, or production runtime changes.",
       ],

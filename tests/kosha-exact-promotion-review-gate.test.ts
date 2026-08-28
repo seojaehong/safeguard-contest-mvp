@@ -140,6 +140,7 @@ type ReviewGateModule = {
       requiredReviewChecks: Array<{ text: string; confirmed: boolean }>;
     }>;
   };
+  renderKoshaExactPromotionReviewTemplateMarkdown: (template: ReturnType<ReviewGateModule["buildKoshaExactPromotionReviewTemplate"]>) => string;
 };
 
 async function loadReviewGateModule(): Promise<ReviewGateModule> {
@@ -848,6 +849,17 @@ describe("KOSHA exact promotion review gate", () => {
     expect(template.candidateReviews.every((row) => row.requiredReviewChecks.length === 5)).toBe(true);
     expect(template.candidateReviews.every((row) => row.requiredReviewChecks.every((check) => check.confirmed === false))).toBe(true);
 
+    const reviewerChecklist = module.renderKoshaExactPromotionReviewTemplateMarkdown(template);
+    expect(reviewerChecklist).toContain("# KOSHA Exact Promotion Human Review Checklist");
+    expect(reviewerChecklist).toContain("기계 evidence는 사람 검토를 대체하지 않습니다.");
+    expect(reviewerChecklist).toContain("체크 완료만으로 exact-trust promotion이 승인되거나 registry artifact가 생성되지 않습니다.");
+    expect(reviewerChecklist).toContain("[KOSHA PDF 열기](https://kosha.example.test/D-C-10.pdf)");
+    expect(reviewerChecklist).toContain("corpus 원제목: D-C-10-2026 D-C-10 official current title corpus source");
+    expect(reviewerChecklist).toContain("page receipt: p.1 chars 10-20 sha dddddddddddd");
+    expect(reviewerChecklist).toContain("공식 URL이 선택한 stable key의 KOSHA PDF를 연다.");
+    expect(reviewerChecklist.match(/^- \[ \]/gmu)).toHaveLength(12);
+    expect(reviewerChecklist).not.toContain("- [x]");
+
     execFileSync("node", [
       path.resolve("scripts", "kosha_exact_promotion_review_gate.mjs"),
       "--root",
@@ -862,7 +874,10 @@ describe("KOSHA exact promotion review gate", () => {
     ], { encoding: "utf8" });
 
     const templatePath = path.join(root, "evaluation/kosha-exact-promotion-review-gate-2026-07-22/review-template.json");
+    const checklistPath = path.join(root, "evaluation/kosha-exact-promotion-review-gate-2026-07-22/review-template.md");
     expect(fs.existsSync(templatePath)).toBe(true);
+    expect(fs.existsSync(checklistPath)).toBe(true);
+    expect(fs.readFileSync(checklistPath, "utf8")).toContain("최종 사람 확인 완료");
     let exitStatus = 0;
     try {
       execFileSync("node", [

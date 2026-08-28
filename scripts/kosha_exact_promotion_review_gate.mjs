@@ -737,6 +737,112 @@ export function buildKoshaExactPromotionReviewTemplate(options) {
   };
 }
 
+const REVIEW_CHECK_LABELS = new Map([
+  [
+    "official URL opens the expected KOSHA file for the selected stable key",
+    "공식 URL이 선택한 stable key의 KOSHA PDF를 연다.",
+  ],
+  [
+    "official file id, version, and publication date match metadata and body-corpus provenance",
+    "공식 파일 ID, 버전, 게시일이 metadata와 body corpus provenance에 일치한다.",
+  ],
+  [
+    "body SHA-256 and PDF SHA-256 are rechecked against immutable acquisition evidence",
+    "body SHA-256과 PDF SHA-256을 immutable acquisition evidence와 다시 대조했다.",
+  ],
+  [
+    "operator confirms lifecycle/current status and excludes stale superseded versions",
+    "현재 lifecycle 상태를 확인했고 폐기되거나 대체된 버전을 제외했다.",
+  ],
+  [
+    "human confirmation is recorded before any exact-kosha registry JSON is created",
+    "exact-kosha registry JSON 생성 전에 사람의 최종 확인을 기록한다.",
+  ],
+]);
+
+/**
+ * @param {unknown} value
+ */
+function markdownText(value) {
+  return asString(value).replaceAll("`", "'").replace(/\s+/gu, " ").trim();
+}
+
+/**
+ * @param {ReturnType<typeof buildKoshaExactPromotionReviewTemplate>} template
+ */
+export function renderKoshaExactPromotionReviewTemplateMarkdown(template) {
+  const lines = [
+    "# KOSHA Exact Promotion Human Review Checklist",
+    "",
+    `Generated at: \`${template.generatedAt}\``,
+    "",
+    `Source HEAD: \`${template.sourceHead}\``,
+    "",
+    `Candidates: \`${template.candidateReviews.length}\``,
+    "",
+    "## Review Boundary",
+    "",
+    "- 이 문서는 사람 검토를 돕는 읽기 전용 packet입니다.",
+    "- 기계 evidence는 사람 검토를 대체하지 않습니다.",
+    "- 체크 완료만으로 exact-trust promotion이 승인되거나 registry artifact가 생성되지 않습니다.",
+    "- 실제 입력은 같은 폴더의 `review-template.json`에 기록한 뒤 review gate를 실행합니다.",
+    "",
+    "## Review Instructions",
+    "",
+    "1. 공식 PDF를 열고 stable key, 버전, 제목, 파일 ID, 게시일을 확인합니다.",
+    "2. body/PDF hash와 lifecycle evidence를 대조합니다.",
+    "3. 세 semantic group의 발췌와 page receipt를 직접 확인합니다.",
+    "4. 후보별 reviewer, reviewedAt, 다섯 확인 항목과 최종 사람 확인을 JSON에 기록합니다.",
+    "5. 별도 promotion 승인 전에는 exact-kosha registry를 생성하거나 수정하지 않습니다.",
+    "",
+  ];
+
+  for (const candidate of template.candidateReviews) {
+    lines.push(
+      `## ${candidate.order ?? "?"}. ${markdownText(candidate.stableKey)} · ${markdownText(candidate.officialCurrentTitle)}`,
+      "",
+      `- 버전: \`${markdownText(candidate.version)}\``,
+      `- 분야: ${markdownText(candidate.category) || "미기재"}`,
+      `- 게시일: \`${markdownText(candidate.publishedAt)}\``,
+      `- 공식 파일 ID: \`${markdownText(candidate.officialFileId)}\``,
+      `- 공식 PDF: [KOSHA PDF 열기](${candidate.officialUrl})`,
+      `- 본문/PDF SHA-256: \`${candidate.bodySha256}\` / \`${candidate.pdfSha256}\``,
+      `- 페이지/정규화 문자: ${candidate.pageCount ?? "unknown"} / ${candidate.normalizedCharCount ?? "unknown"}`,
+      `- 선정 근거: ${markdownText(candidate.rationale)}`,
+    );
+    if (candidate.titleReconciled) {
+      lines.push(`- corpus 원제목: ${markdownText(candidate.sourceTitle)}`);
+    }
+    lines.push("", "### Machine Evidence To Inspect", "");
+    for (const group of candidate.machineReviewerSupport.semanticGroups) {
+      const matchedTerms = group.matchedTerms.map(markdownText).join(", ");
+      const receipts = group.pageReceipts.map((receipt) => (
+        `p.${receipt.pageNumber} chars ${receipt.matchCharStart}-${receipt.matchCharEnd} sha ${receipt.normalizedTextSha256.slice(0, 12)}`
+      )).join("; ");
+      lines.push(
+        `- Group ${group.group ?? "?"}: ${matchedTerms}`,
+        `  - 본문 발췌: ${markdownText(group.excerpt)}`,
+        `  - page receipt: ${receipts}`,
+      );
+    }
+    lines.push(
+      "",
+      "### Human Review Input",
+      "",
+      "- Reviewer: ______________________________",
+      "- Reviewed at (ISO 8601): ______________________________",
+    );
+    for (const check of candidate.requiredReviewChecks) {
+      lines.push(`- [ ] ${REVIEW_CHECK_LABELS.get(check.text) || markdownText(check.text)}`);
+    }
+    lines.push(
+      "- [ ] 최종 사람 확인 완료 (`humanConfirmed=true` 입력 전 마지막 확인)",
+      "",
+    );
+  }
+  return `${lines.join("\n")}\n`;
+}
+
 /**
  * @param {ReturnType<typeof buildKoshaExactPromotionReviewGate>} report
  */
@@ -864,7 +970,17 @@ async function main() {
       generatedAt: args.generatedAt || undefined,
     });
     fs.writeFileSync(path.join(outputDir, "review-template.json"), `${JSON.stringify(template, null, 2)}\n`, "utf8");
-    console.log(JSON.stringify({ output: args.output, template: "review-template.json", candidateCount: template.candidateReviews.length }, null, 2));
+    fs.writeFileSync(
+      path.join(outputDir, "review-template.md"),
+      renderKoshaExactPromotionReviewTemplateMarkdown(template),
+      "utf8",
+    );
+    console.log(JSON.stringify({
+      output: args.output,
+      template: "review-template.json",
+      reviewerChecklist: "review-template.md",
+      candidateCount: template.candidateReviews.length,
+    }, null, 2));
     return;
   }
   const report = buildKoshaExactPromotionReviewGate({
