@@ -138,6 +138,7 @@ const PRIVATE_REVIEW_FACT_PATTERNS = [
   /(?:주민번호|휴대폰|전화번호|이메일|비밀번호|비밀키)/u
 ] as const;
 const EVENT_FACT_MARKER_PATTERN = /\s*\/\s*원본 이벤트 검토 사실:\s*([^\r\n]*)/u;
+const CANDIDATE_SECTION_PATTERN = /^\s*(\d+)\)\s*([^:\r\n]+):\s*(.+)$/u;
 let browserClient: SupabaseClient | null = null;
 
 function getBrowserSupabaseClient(): SupabaseClient | null {
@@ -170,6 +171,25 @@ function readReviewFacts(value: unknown): string[] {
   return facts;
 }
 
+function readCandidateSections(body: string) {
+  const lines = body.split(/\r?\n/u).map((line) => line.trim()).filter(Boolean);
+  if (lines.length !== 4) return [];
+
+  const sections = lines.map((line, index) => {
+    const match = line.match(CANDIDATE_SECTION_PATTERN);
+    if (!match || Number(match[1]) !== index + 1) return null;
+    return {
+      number: index + 1,
+      label: match[2].trim(),
+      content: match[3].trim()
+    };
+  });
+
+  return sections.every((section) => section !== null)
+    ? sections.filter((section): section is NonNullable<typeof section> => section !== null)
+    : [];
+}
+
 function buildCandidatePresentation(candidateText: string, evidenceItems: ReviewEvidenceItem[]) {
   const eventFacts = readReviewFacts(evidenceItems.flatMap((evidence) => evidence.reviewFacts));
   const markerMatch = candidateText.match(EVENT_FACT_MARKER_PATTERN);
@@ -180,7 +200,8 @@ function buildCandidatePresentation(candidateText: string, evidenceItems: Review
   return {
     body,
     subject: body.split(/\r?\n/u).map((line) => line.trim()).find(Boolean) ?? "후보 문장 확인 필요",
-    eventFacts
+    eventFacts,
+    sections: readCandidateSections(body)
   };
 }
 
@@ -849,7 +870,30 @@ export function KnowledgeReviewInbox() {
                           data-review-pane="candidate"
                         >
                           <span className={styles.reviewPaneLabel}>후보 문장</span>
-                          <p className={styles.candidateText} data-selected-candidate-body="true">{candidatePresentation.body}</p>
+                          {candidatePresentation.sections.length === 4 ? (
+                            <ol
+                              className={`${styles.candidateText} ${styles.candidateSections}`}
+                              aria-label="후보 문장 필수 섹션"
+                              data-selected-candidate-body="true"
+                              data-review-candidate-format="structured"
+                            >
+                              {candidatePresentation.sections.map((section) => (
+                                <li key={section.number} data-review-candidate-section={section.number}>
+                                  <span aria-hidden="true">{section.number}</span>
+                                  <div>
+                                    <strong>{section.label}</strong>
+                                    <p>{section.content}</p>
+                                  </div>
+                                </li>
+                              ))}
+                            </ol>
+                          ) : (
+                            <p
+                              className={styles.candidateText}
+                              data-selected-candidate-body="true"
+                              data-review-candidate-format="raw"
+                            >{candidatePresentation.body}</p>
+                          )}
                           {item.contentReadiness ? (
                             <section
                               className={styles.reviewReadiness}

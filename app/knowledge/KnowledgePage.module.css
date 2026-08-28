@@ -475,6 +475,66 @@
   flex: 0 0 auto;
 }
 
+.candidateSections {
+  display: grid;
+  gap: 0;
+  margin-bottom: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.candidateSections li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--workspace-rule, #e2e5e9);
+}
+
+.candidateSections li:first-child {
+  padding-top: 0;
+}
+
+.candidateSections li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.candidateSections li > span {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 1px solid var(--workspace-rule-strong, #c8cdd4);
+  border-radius: var(--radius-control);
+  color: var(--workspace-text, #24282f);
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
+  font-weight: 800;
+}
+
+.candidateSections li > div {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.candidateSections strong,
+.candidateSections p {
+  font-size: var(--text-caption);
+  line-height: var(--leading-body);
+}
+
+.candidateSections strong {
+  color: var(--workspace-text, #24282f);
+}
+
+.candidateSections p {
+  margin: 0;
+  color: var(--workspace-muted, #606873);
+  overflow-wrap: anywhere;
+}
+
 .evidenceSubjectContext {
   display: grid;
   gap: var(--space-1);

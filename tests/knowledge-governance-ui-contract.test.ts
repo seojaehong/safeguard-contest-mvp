@@ -72,9 +72,14 @@ describe("knowledge governance UI contract", () => {
     expect(inboxSource).toContain("data-knowledge-review-state");
     expect(inboxSource).toContain('data-selected-review-candidate="true"');
     expect(inboxSource).toContain('data-selected-candidate-body="true"');
+    expect(inboxSource).toContain('data-review-candidate-format="structured"');
+    expect(inboxSource).toContain('data-review-candidate-format="raw"');
+    expect(inboxSource).toContain('data-review-candidate-section={section.number}');
+    expect(inboxSource).toContain('aria-label="후보 문장 필수 섹션"');
     expect(inboxSource).toContain("matchedHazardCount");
     expect(cssSource).toMatch(/\.reviewWorkbench\s*\{[\s\S]*?grid-template-columns:\s*minmax\(220px, 280px\) minmax\(0, 1fr\);/u);
     expect(cssSource).toMatch(/\.candidateText\s*\{[\s\S]*?overflow:\s*auto;/u);
+    expect(cssSource).toMatch(/\.candidateSections\s*\{[\s\S]*?list-style:\s*none;/u);
   });
 
   it("keeps the review subject ahead of readiness and visible beside evidence", () => {
