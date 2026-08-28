@@ -178,6 +178,15 @@ export async function runBrowserProbe(options) {
             .every((paragraph) => (paragraph.textContent || "").trim().length > 0),
           exportInitiallyDisabled: element("[data-export]") instanceof HTMLButtonElement
             && element("[data-export]").disabled,
+          reviewChecklistVisible: element("[data-review-checklist]") instanceof HTMLAnchorElement
+            && element("[data-review-checklist]").getClientRects().length > 0,
+          reviewChecklistHref: element("[data-review-checklist]")?.getAttribute("href") ?? "",
+          footerActions: rectangle(".footer-actions"),
+          footerControlMaxHeight: Math.max(
+            0,
+            ...[...document.querySelectorAll(".footer-actions a,.footer-actions button")]
+              .map((control) => control.getBoundingClientRect().height),
+          ),
           nextIncompleteVisible: element("[data-next-incomplete]") instanceof HTMLButtonElement
             && element("[data-next-incomplete]").getClientRects().length > 0,
           nextIncompleteInitiallyEnabled: element("[data-next-incomplete]") instanceof HTMLButtonElement
@@ -215,6 +224,8 @@ export async function runBrowserProbe(options) {
       results.push({
         name: probe.name,
         ...metrics,
+        reviewChecklistTargetExists: Boolean(metrics.reviewChecklistHref)
+          && fs.existsSync(path.resolve(outputDir, metrics.reviewChecklistHref)),
         candidateEndState,
         candidateHomeState,
         mobileKeyboardState,
@@ -378,6 +389,13 @@ export async function runBrowserProbe(options) {
     && row.openRawExcerptDisclosureCount === 0
     && row.rawExcerptTextPreserved
     && row.exportInitiallyDisabled
+    && row.reviewChecklistVisible
+    && row.reviewChecklistHref === "../kosha-exact-promotion-review-gate-2026-07-22/review-template.md"
+    && row.reviewChecklistTargetExists
+    && (row.viewport.width > 767 || (
+      row.footerActions?.height <= 100
+      && row.footerControlMaxHeight <= 44
+    ))
     && !row.horizontalOverflow
   ));
   const desktopPass = Boolean(
@@ -496,6 +514,11 @@ export async function runBrowserProbe(options) {
     && draftStorageIdentity?.futureTimestampState?.ariaInvalid === "true"
     && draftStorageIdentity?.futureTimestampState?.errorVisible === true
     && draftStorageIdentity?.futureTimestampState?.candidateProgress === "0/8";
+  const reviewChecklistAccessPass = results.every((row) => (
+    row.reviewChecklistVisible === true
+    && row.reviewChecklistHref === "../kosha-exact-promotion-review-gate-2026-07-22/review-template.md"
+    && row.reviewChecklistTargetExists === true
+  ));
   const verdict = allRowsPass
     && desktopPass
     && mobilePass
@@ -508,6 +531,7 @@ export async function runBrowserProbe(options) {
     && draftPersistenceVisibilityPass
     && nextIncompleteNavigationPass
     && futureReviewTimestampPass
+    && reviewChecklistAccessPass
     ? "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY"
     : "RED_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY";
   const report = {
@@ -528,6 +552,7 @@ export async function runBrowserProbe(options) {
     draftPersistenceVisibilityPass,
     nextIncompleteNavigationPass,
     futureReviewTimestampPass,
+    reviewChecklistAccessPass,
     draftStorageIdentity,
     results,
     mutationBoundary: {
@@ -565,6 +590,7 @@ Verdict: \`${report.verdict}\`
 - Candidate-bound draft restore: ${report.draftStorageIdentityPass}
 - Official/corpus title provenance: ${report.titleReconciliationPass}
 - Candidate navigation readability: ${report.candidateNavigationReadabilityPass}
+- Reviewer checklist access: ${report.reviewChecklistAccessPass}
 - Evidence reading hierarchy: ${report.evidenceReadingHierarchyPass}
 - Mobile candidate progress visibility: ${report.mobileCandidateProgressVisibilityPass}
 - Draft persistence visibility: ${report.draftPersistenceVisibilityPass}

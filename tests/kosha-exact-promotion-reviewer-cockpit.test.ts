@@ -9,6 +9,7 @@ type CockpitModule = {
     template: Record<string, unknown>,
     pdfAudit: Record<string, unknown>,
     lifecycleAudit: Record<string, unknown>,
+    options?: { reviewChecklistHref?: string },
   ) => {
     html: string;
     payload: {
@@ -20,7 +21,16 @@ type CockpitModule = {
       bodySnapshotId: string;
       bodySourceIdentitySha256: string;
       boundary: Record<string, boolean>;
+      reviewChecklistHref: string;
     };
+  };
+  validateReviewerChecklistMarkdown: (markdown: string) => {
+    candidateCount: number;
+    uncheckedInputCount: number;
+    precheckedInputCount: number;
+    officialPdfLinkCount: number;
+    pageReceiptCount: number;
+    boundaryPreserved: boolean;
   };
 };
 
@@ -125,7 +135,9 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
   it("renders eight candidates and keeps all human review inputs incomplete by default", async () => {
     const module = await loadModule();
     const data = fixture();
-    const result = module.buildReviewerCockpit(data.template, data.pdfAudit, data.lifecycleAudit);
+    const result = module.buildReviewerCockpit(data.template, data.pdfAudit, data.lifecycleAudit, {
+      reviewChecklistHref: "../review-template.md",
+    });
 
     expect(result.payload).toMatchObject({
       candidateCount: 8,
@@ -135,6 +147,7 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
       checklistInputCount: 64,
       bodySnapshotId: "fixture-snapshot",
       bodySourceIdentitySha256: "d".repeat(64),
+      reviewChecklistHref: "../review-template.md",
       boundary: {
         localReviewOnly: true,
         dbMutationPerformed: false,
@@ -211,6 +224,37 @@ describe("KOSHA exact promotion reviewer cockpit", () => {
     expect(result.html).toContain("validReviewedAt(row.reviewedAt)");
     expect(result.html).toContain('setAttribute("aria-invalid", String(reviewedAtInvalid))');
     expect(result.html).toContain("기계 근거는 검토를 돕지만 판단을 대신하지 않습니다.");
+    expect(result.html).toContain('href="../review-template.md"');
+    expect(result.html).toContain("data-review-checklist>사람 검토 체크리스트 열기");
+    expect(result.html).toContain(".footer-actions button,.footer-actions a");
+  });
+
+  it("validates the reviewer checklist packet and fails closed on pre-checked input", async () => {
+    const module = await loadModule();
+    const markdown = [
+      "# KOSHA Exact Promotion Human Review Checklist",
+      "- 기계 evidence는 사람 검토를 대체하지 않습니다.",
+      "- 체크 완료만으로 exact-trust promotion이 승인되거나 registry artifact가 생성되지 않습니다.",
+      "- 별도 promotion 승인 전에는 exact-kosha registry를 생성하거나 수정하지 않습니다.",
+      ...Array.from({ length: 8 }, (_, candidateIndex) => [
+        `## ${candidateIndex + 1}. KEY-${candidateIndex}`,
+        `- [KOSHA PDF 열기](https://kosha.example.test/${candidateIndex}.pdf)`,
+        ...Array.from({ length: 3 }, (_, groupIndex) => `  - page receipt: p.${groupIndex + 1}`),
+        ...Array.from({ length: 6 }, (_, inputIndex) => `- [ ] input ${inputIndex + 1}`),
+      ]).flat(),
+    ].join("\n");
+
+    expect(module.validateReviewerChecklistMarkdown(markdown)).toMatchObject({
+      candidateCount: 8,
+      uncheckedInputCount: 48,
+      precheckedInputCount: 0,
+      officialPdfLinkCount: 8,
+      pageReceiptCount: 24,
+      boundaryPreserved: true,
+    });
+    expect(() => module.validateReviewerChecklistMarkdown(
+      markdown.replace("- [ ] input 1", "- [x] input 1"),
+    )).toThrow("kosha-reviewer-cockpit-human-checklist-not-ready");
   });
 
   it("fails closed when a machine-supported semantic group has no reviewer excerpt", async () => {

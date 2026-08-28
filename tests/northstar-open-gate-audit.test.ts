@@ -6696,6 +6696,15 @@ function createFixtureRoot(): string {
     checklistInputCount: 64,
     initialCompletedInputCount: 0,
     exportInitiallyDisabled: true,
+    reviewChecklistPath: path.join("evaluation", "kosha-exact-promotion-review-gate-2026-07-22", "review-template.md"),
+    reviewChecklistMetrics: {
+      candidateCount: 8,
+      uncheckedInputCount: 48,
+      precheckedInputCount: 0,
+      officialPdfLinkCount: 8,
+      pageReceiptCount: 24,
+      boundaryPreserved: true,
+    },
     accessibilityContract: {
       candidateTabCount: 8,
       candidateRovingTabStop: true,
@@ -6719,6 +6728,8 @@ function createFixtureRoot(): string {
       selectedCandidateAutoReveal: true,
       readableEvidenceCues: true,
       rawEvidenceExcerptPreservedInDisclosure: true,
+      reviewerChecklistLinkVisible: true,
+      reviewerChecklistLinkAvailableBeforeCompletion: true,
     },
     boundary: {
       localReviewOnly: true,
@@ -6878,6 +6889,7 @@ function createFixtureRoot(): string {
     draftPersistenceVisibilityPass: true,
     nextIncompleteNavigationPass: true,
     futureReviewTimestampPass: true,
+    reviewChecklistAccessPass: true,
     draftStorageIdentity: {
       sameFingerprintPreserved: true,
       sourceIdentityPresent: true,
@@ -6954,6 +6966,9 @@ function createFixtureRoot(): string {
         ? null
         : { fullyVisibleInsidePane: true },
       exportInitiallyDisabled: true,
+      reviewChecklistVisible: true,
+      reviewChecklistHref: "../kosha-exact-promotion-review-gate-2026-07-22/review-template.md",
+      reviewChecklistTargetExists: true,
       nextIncompleteVisible: true,
       nextIncompleteInitiallyEnabled: true,
       reviewedAtMaxPresent: true,
@@ -7560,6 +7575,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("2 reconciled official/corpus title provenance rows");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("64 required human inputs");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("viewport-contained no-mutation UI");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("human checklist is directly reachable before completion");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("48 initially unchecked human inputs");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("8 official PDF links");
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.detail).toContain("24 page receipts");
@@ -11322,6 +11338,30 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       results: Array<{ candidateControlLinksValid: boolean }>;
     };
     browser.results[0]!.candidateControlLinksValid = false;
+    writeJson(rootDir, path.relative(rootDir, browserPath), browser);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("fails closed when the KOSHA reviewer cockpit loses the human checklist link", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const browserPath = path.join(
+      rootDir,
+      "evaluation",
+      "kosha-exact-promotion-reviewer-cockpit-2026-07-25",
+      "browser-report.json",
+    );
+    const browser = JSON.parse(fs.readFileSync(browserPath, "utf8")) as {
+      reviewChecklistAccessPass: boolean;
+    };
+    browser.reviewChecklistAccessPass = false;
     writeJson(rootDir, path.relative(rootDir, browserPath), browser);
 
     const audit = buildNorthstarOpenGateAudit({

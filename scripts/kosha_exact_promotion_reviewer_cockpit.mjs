@@ -14,6 +14,11 @@ const DEFAULT_TEMPLATE_PATH = path.join(
   "kosha-exact-promotion-review-gate-2026-07-22",
   "review-template.json",
 );
+const DEFAULT_REVIEW_CHECKLIST_PATH = path.join(
+  "evaluation",
+  "kosha-exact-promotion-review-gate-2026-07-22",
+  "review-template.md",
+);
 const DEFAULT_PDF_AUDIT_PATH = path.join(
   "evaluation",
   "kosha-exact-official-pdf-audit-2026-07-25",
@@ -154,6 +159,49 @@ function readJson(rootDir, relativePath) {
 }
 
 /**
+ * @param {string} rootDir
+ * @param {string} relativePath
+ */
+function readText(rootDir, relativePath) {
+  const absolutePath = path.resolve(rootDir, relativePath);
+  const relative = path.relative(rootDir, absolutePath);
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    throw new Error("kosha-reviewer-cockpit-path-outside-root");
+  }
+  return fs.readFileSync(absolutePath, "utf8");
+}
+
+/**
+ * @param {string} markdown
+ */
+export function validateReviewerChecklistMarkdown(markdown) {
+  const candidateCount = markdown.match(/^## \d+\. /gmu)?.length ?? 0;
+  const uncheckedInputCount = markdown.match(/^- \[ \] /gmu)?.length ?? 0;
+  const precheckedInputCount = markdown.match(/^- \[[xX]\] /gmu)?.length ?? 0;
+  const officialPdfLinkCount = markdown.match(/\[KOSHA PDF 열기\]\(/gu)?.length ?? 0;
+  const pageReceiptCount = markdown.match(/^  - page receipt: /gmu)?.length ?? 0;
+  const boundaryPreserved = markdown.includes("기계 evidence는 사람 검토를 대체하지 않습니다.")
+    && markdown.includes("체크 완료만으로 exact-trust promotion이 승인되거나 registry artifact가 생성되지 않습니다.")
+    && markdown.includes("별도 promotion 승인 전에는 exact-kosha registry를 생성하거나 수정하지 않습니다.");
+  if (candidateCount !== 8
+    || uncheckedInputCount !== 48
+    || precheckedInputCount !== 0
+    || officialPdfLinkCount !== 8
+    || pageReceiptCount !== 24
+    || !boundaryPreserved) {
+    throw new Error("kosha-reviewer-cockpit-human-checklist-not-ready");
+  }
+  return {
+    candidateCount,
+    uncheckedInputCount,
+    precheckedInputCount,
+    officialPdfLinkCount,
+    pageReceiptCount,
+    boundaryPreserved,
+  };
+}
+
+/**
  * @param {string} value
  */
 function escapeHtml(value) {
@@ -186,8 +234,9 @@ function gitHead(rootDir) {
  * @param {JsonRecord} template
  * @param {JsonRecord} pdfAudit
  * @param {JsonRecord} lifecycleAudit
+ * @param {{reviewChecklistHref?: string}} [options]
  */
-export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
+export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit, options = {}) {
   if (asString(template.schemaVersion) !== "safeclaw-kosha-exact-promotion-review/v1") {
     throw new Error("kosha-reviewer-cockpit-template-schema");
   }
@@ -315,6 +364,8 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     candidateTotal + candidate.semanticGroups.reduce((groupTotal, group) => groupTotal + group.pageReceipts.length, 0)
   ), 0);
   const titleReconciledCandidateCount = candidates.filter((candidate) => candidate.titleReconciled).length;
+  const reviewChecklistHref = asString(options.reviewChecklistHref)
+    || "../kosha-exact-promotion-review-gate-2026-07-22/review-template.md";
   const payload = {
     schemaVersion: "safeclaw-kosha-exact-promotion-reviewer-cockpit/v1",
     candidateCount: candidates.length,
@@ -324,6 +375,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     checklistInputCount,
     bodySnapshotId,
     bodySourceIdentitySha256,
+    reviewChecklistHref,
     candidates,
     boundary: {
       localReviewOnly: true,
@@ -436,9 +488,9 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     .review-pane>header{display:flex;justify-content:space-between;align-items:center}.review-pane>header span{font-size:12px;color:var(--muted);font-weight:700}.review-pane>header strong{font-size:13px;color:var(--warn)}.boundary-note{font-size:12px;color:#704100;background:#fff4dd;border:1px solid #e3bf75;padding:8px 10px;border-radius:6px}
     .check-stack{display:grid;gap:6px}.check-row,.human-confirm{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:start;border:1px solid var(--line);background:#fff;padding:9px;border-radius:6px;font-size:12px;line-height:1.4}.check-row input,.human-confirm input{margin:2px 0 0;accent-color:var(--accent)}
     .field-label{display:grid;gap:5px;margin-top:10px;font-size:12px;font-weight:700}.field-label input{width:100%;border:1px solid #aebbb3;background:#fff;padding:9px;border-radius:4px}.field-label input[aria-invalid="true"]{border-color:#b42318;background:#fff5f4}.field-error{color:#b42318;font-size:11px}.human-confirm{margin-top:10px;border-color:#9ec5b2;background:#eef8f2}
-    .footer-actions{display:flex;justify-content:flex-end;gap:8px;padding:8px 12px;background:#e8eeea;border-top:1px solid var(--line)}.footer-actions button{border:1px solid #295d48;padding:9px 12px;border-radius:5px;background:#fff;color:#184b38;font-weight:700;cursor:pointer}.footer-actions .primary{background:#087f5b;color:#fff;white-space:nowrap}.footer-actions button:disabled{cursor:not-allowed;opacity:.45}
+    .footer-actions{display:flex;justify-content:flex-end;gap:8px;padding:8px 12px;background:#e8eeea;border-top:1px solid var(--line)}.footer-actions button,.footer-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:38px;border:1px solid #295d48;padding:9px 12px;border-radius:5px;background:#fff;color:#184b38;font-weight:700;cursor:pointer;text-decoration:none}.footer-actions .primary{background:#087f5b;color:#fff;white-space:nowrap}.footer-actions button:disabled{cursor:not-allowed;opacity:.45}
     button:focus-visible,input:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #0b6eeb;outline-offset:2px}.mobile-mode{display:none}.status-live{color:#8ce0bc}.complete .candidate-button small{color:#087f5b}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-    @media(max-width:767px){.topbar{align-items:flex-start;padding:12px;height:68px}.topbar-purpose{display:none}.draft-status{margin-left:0}.topbar-purpose+.draft-status::before{content:""}.metrics{display:none}.workspace{display:flex;flex-direction:column;height:auto;overflow:hidden}.candidate-rail{flex:none;border-right:0;border-bottom:1px solid var(--line);padding:6px 8px;overflow:hidden}.candidate-rail-header{display:flex;min-height:16px;margin:0 4px 4px}.candidate-rail-header .rail-label{display:none}.candidate-list{display:flex;gap:6px;width:auto;overflow-x:auto;overscroll-behavior-inline:contain;scroll-padding-inline:0;scroll-snap-type:x mandatory;scrollbar-width:thin}.candidate-button{flex:0 0 calc((100vw - 38px)/2);width:auto;min-height:44px;padding:4px 8px;scroll-snap-align:start}.content{flex:1;min-height:0}.candidate-panel{display:flex;flex-direction:column;height:100%;min-height:0}.candidate-panel[hidden]{display:none}.mobile-mode{display:grid;grid-template-columns:1fr 1fr;flex:none;border-bottom:1px solid var(--line);background:#f7faf8;padding:2px 8px}.mobile-mode button{min-height:44px;border:0;border-bottom:2px solid transparent;background:transparent;padding:4px 8px;color:var(--muted);font-weight:700}.mobile-mode button[aria-selected="true"]{border-color:var(--accent);color:var(--accent)}.candidate-panel[data-mobile-view="evidence"] .review-pane,.candidate-panel[data-mobile-view="review"] .evidence-pane{display:none}.evidence-pane,.review-pane{flex:1;min-height:0;overflow:auto;padding:14px 12px}.review-pane{border-left:0}.identity-grid{grid-template-columns:repeat(2,1fr)}.identity-grid div:nth-child(2){border-right:0}.candidate-heading{display:block}.candidate-heading a{display:inline-block;margin-top:8px}.evidence-group{padding:8px 10px 0}.receipt-list{margin-top:6px}.receipt-list li{min-height:24px;padding:2px 6px}.footer-actions{padding:7px 8px}.footer-actions button{padding:8px 9px;font-size:13px}}
+    @media(max-width:767px){.topbar{align-items:flex-start;padding:12px;height:68px}.topbar-purpose{display:none}.draft-status{margin-left:0}.topbar-purpose+.draft-status::before{content:""}.metrics{display:none}.workspace{display:flex;flex-direction:column;height:auto;overflow:hidden}.candidate-rail{flex:none;border-right:0;border-bottom:1px solid var(--line);padding:6px 8px;overflow:hidden}.candidate-rail-header{display:flex;min-height:16px;margin:0 4px 4px}.candidate-rail-header .rail-label{display:none}.candidate-list{display:flex;gap:6px;width:auto;overflow-x:auto;overscroll-behavior-inline:contain;scroll-padding-inline:0;scroll-snap-type:x mandatory;scrollbar-width:thin}.candidate-button{flex:0 0 calc((100vw - 38px)/2);width:auto;min-height:44px;padding:4px 8px;scroll-snap-align:start}.content{flex:1;min-height:0}.candidate-panel{display:flex;flex-direction:column;height:100%;min-height:0}.candidate-panel[hidden]{display:none}.mobile-mode{display:grid;grid-template-columns:1fr 1fr;flex:none;border-bottom:1px solid var(--line);background:#f7faf8;padding:2px 8px}.mobile-mode button{min-height:44px;border:0;border-bottom:2px solid transparent;background:transparent;padding:4px 8px;color:var(--muted);font-weight:700}.mobile-mode button[aria-selected="true"]{border-color:var(--accent);color:var(--accent)}.candidate-panel[data-mobile-view="evidence"] .review-pane,.candidate-panel[data-mobile-view="review"] .evidence-pane{display:none}.evidence-pane,.review-pane{flex:1;min-height:0;overflow:auto;padding:14px 12px}.review-pane{border-left:0}.identity-grid{grid-template-columns:repeat(2,1fr)}.identity-grid div:nth-child(2){border-right:0}.candidate-heading{display:block}.candidate-heading a{display:inline-block;margin-top:8px}.evidence-group{padding:8px 10px 0}.receipt-list{margin-top:6px}.receipt-list li{min-height:24px;padding:2px 6px}.footer-actions{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;padding:7px 8px}.footer-actions button,.footer-actions a{min-width:0;min-height:38px;padding:7px 8px;font-size:12px;white-space:nowrap}.footer-actions .primary{grid-column:1/-1}}
     @media(max-width:767px){.evidence-pane{display:flex;flex-direction:column}.evidence-pane .candidate-heading{order:1}.evidence-pane .identity-grid{order:2}.evidence-pane .rationale{order:3}.evidence-pane .evidence-stack{order:4}.evidence-pane .title-provenance{order:5}.evidence-pane .hash-details{order:6}}
   </style>
 </head>
@@ -457,6 +509,7 @@ export function buildReviewerCockpit(template, pdfAudit, lifecycleAudit) {
     </div>
     <div class="footer-actions">
       <p class="sr-only" role="status" aria-live="polite" data-progress-live>64개 입력이 남았습니다.</p>
+      <a href="${escapeHtml(reviewChecklistHref)}" target="_blank" rel="noreferrer" data-review-checklist>사람 검토 체크리스트 열기</a>
       <button type="button" data-reset title="이 브라우저에 저장된 입력을 모두 지웁니다">입력 초기화</button>
       <button type="button" data-next-incomplete>다음 미완료 후보</button>
       <button class="primary" type="button" data-export disabled>검토 JSON 내보내기 · 64개 입력 필요</button>
@@ -769,6 +822,7 @@ function parseArgs(argv) {
   const options = {
     rootDir: REPO_ROOT,
     templatePath: DEFAULT_TEMPLATE_PATH,
+    reviewChecklistPath: DEFAULT_REVIEW_CHECKLIST_PATH,
     pdfAuditPath: DEFAULT_PDF_AUDIT_PATH,
     lifecycleAuditPath: DEFAULT_LIFECYCLE_AUDIT_PATH,
     outputDir: DEFAULT_OUTPUT_DIR,
@@ -777,6 +831,7 @@ function parseArgs(argv) {
     const value = argv[index];
     if (value === "--root") options.rootDir = path.resolve(argv[++index] || "");
     else if (value === "--template") options.templatePath = argv[++index] || "";
+    else if (value === "--review-checklist") options.reviewChecklistPath = argv[++index] || "";
     else if (value === "--pdf-audit") options.pdfAuditPath = argv[++index] || "";
     else if (value === "--lifecycle-audit") options.lifecycleAuditPath = argv[++index] || "";
     else if (value === "--output") options.outputDir = argv[++index] || "";
@@ -792,10 +847,15 @@ export function runReviewerCockpit(options) {
   const template = requireRecord(readJson(options.rootDir, options.templatePath), "template");
   const pdfAudit = requireRecord(readJson(options.rootDir, options.pdfAuditPath), "pdf-audit");
   const lifecycleAudit = requireRecord(readJson(options.rootDir, options.lifecycleAuditPath), "lifecycle-audit");
-  const { html, payload } = buildReviewerCockpit(template, pdfAudit, lifecycleAudit);
+  const outputDir = path.resolve(options.rootDir, options.outputDir);
+  const reviewChecklistAbsolutePath = path.resolve(options.rootDir, options.reviewChecklistPath);
+  const reviewChecklistMetrics = validateReviewerChecklistMarkdown(
+    readText(options.rootDir, options.reviewChecklistPath),
+  );
+  const reviewChecklistHref = path.relative(outputDir, reviewChecklistAbsolutePath).replaceAll(path.sep, "/");
+  const { html, payload } = buildReviewerCockpit(template, pdfAudit, lifecycleAudit, { reviewChecklistHref });
   const cleanHtml = html.replace(/[ \t]+$/gmu, "");
   const outputPayload = { ...payload, sourceHead: gitHead(options.rootDir) };
-  const outputDir = path.resolve(options.rootDir, options.outputDir);
   fs.mkdirSync(outputDir, { recursive: true });
   fs.writeFileSync(
     path.join(outputDir, "index.html"),
@@ -816,6 +876,8 @@ export function runReviewerCockpit(options) {
     checklistInputCount: outputPayload.checklistInputCount,
     initialCompletedInputCount: 0,
     exportInitiallyDisabled: true,
+    reviewChecklistPath: path.relative(options.rootDir, reviewChecklistAbsolutePath),
+    reviewChecklistMetrics,
     accessibilityContract: {
       candidateTabCount: outputPayload.candidateCount,
       candidateRovingTabStop: true,
@@ -839,6 +901,8 @@ export function runReviewerCockpit(options) {
       selectedCandidateAutoReveal: true,
       readableEvidenceCues: true,
       rawEvidenceExcerptPreservedInDisclosure: true,
+      reviewerChecklistLinkVisible: true,
+      reviewerChecklistLinkAvailableBeforeCompletion: true,
     },
     outputHtml: path.relative(options.rootDir, path.join(outputDir, "index.html")),
     boundary: outputPayload.boundary,
@@ -855,6 +919,7 @@ Verdict: \`${report.verdict}\`
 - Required human inputs: ${report.checklistInputCount}
 - Initial completed inputs: ${report.initialCompletedInputCount}
 - Export initially disabled: ${report.exportInitiallyDisabled}
+- Reviewer checklist: \`${report.reviewChecklistPath}\` (${report.reviewChecklistMetrics.uncheckedInputCount} unchecked inputs, ${report.reviewChecklistMetrics.precheckedInputCount} pre-checked)
 - Candidate keyboard tabs: ${report.accessibilityContract.candidateTabCount} with one roving tab stop
 - Breakpoint orientation synchronized: ${report.accessibilityContract.breakpointOrientationSynchronized}
 - Mobile evidence/review tabs: ${report.accessibilityContract.mobileEvidenceReviewTabs}
@@ -875,6 +940,7 @@ Verdict: \`${report.verdict}\`
 - Selected candidate auto reveal: ${report.accessibilityContract.selectedCandidateAutoReveal}
 - Readable evidence cues: ${report.accessibilityContract.readableEvidenceCues}
 - Raw evidence excerpt preserved in disclosure: ${report.accessibilityContract.rawEvidenceExcerptPreservedInDisclosure}
+- Reviewer checklist link visible before completion: ${report.accessibilityContract.reviewerChecklistLinkVisible && report.accessibilityContract.reviewerChecklistLinkAvailableBeforeCompletion}
 - HTML: \`${report.outputHtml}\`
 
 ## Boundary
