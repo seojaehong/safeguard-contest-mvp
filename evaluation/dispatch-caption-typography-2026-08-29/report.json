@@ -1,0 +1,96 @@
+{
+  "schemaVersion": "safeclaw-dispatch-caption-typography/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_DISPATCH_CAPTION_TYPOGRAPHY",
+  "generatedAt": "2026-08-29T02:07:16.5772880+09:00",
+  "sourceHead": "44a07ac0b269b484c233e29e945d1d0c5e25454a",
+  "productionBuild": {
+    "commitSha": "44a07ac0b269b484c233e29e945d1d0c5e25454a",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-lu24wccmg-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "typographyContract": {
+    "selector": ".safeclaw-module-shell[data-module-route=\"/dispatch\"] .share-form-card-head strong",
+    "role": "caption",
+    "fontSize": "var(--text-caption)",
+    "fontWeight": "600",
+    "lineHeight": "var(--leading-caption)",
+    "letterSpacing": "var(--tracking-body)"
+  },
+  "verification": {
+    "frontendConsistencyAudit": {
+      "status": "pass",
+      "pageFiles": 33,
+      "componentFiles": 24,
+      "cssLines": 24803,
+      "coverageIssues": 0,
+      "violationCount": 0,
+      "artifact": "evaluation/dispatch-caption-typography-2026-08-29/frontend-consistency-audit.json"
+    },
+    "focusedStaticVitest": {
+      "files": 1,
+      "tests": 6,
+      "passed": 6,
+      "failed": 0
+    },
+    "focusedBrowserVitest": {
+      "files": 1,
+      "tests": 1,
+      "passed": 1,
+      "skipped": 3,
+      "failed": 0
+    },
+    "localGeneratedFixture": {
+      "desktop1440x723": {
+        "pageHeight": 771,
+        "rootWidth": 1156,
+        "rootHeight": 400,
+        "primaryBottom": 448.390625,
+        "previewBottom": 639.390625,
+        "channelActionBottom": 706.390625,
+        "channelHeadingFontSize": 12,
+        "channelCardWidths": [193, 193, 193],
+        "horizontalOverflow": 0
+      },
+      "mobile390x723": {
+        "pageHeight": 743,
+        "rootClientHeight": 429,
+        "rootScrollHeight": 616,
+        "rootOverflowY": "auto",
+        "primaryBottom": 581,
+        "configCardsVisible": 0,
+        "horizontalOverflow": 0
+      }
+    },
+    "liveDefaultDispatch": {
+      "viewport": { "width": 1440, "height": 723 },
+      "pageHeight": 723,
+      "horizontalOverflow": 0,
+      "computedTypography": {
+        "fontSize": "12px",
+        "fontWeight": "600",
+        "lineHeight": "18px",
+        "letterSpacing": "normal"
+      },
+      "sampleGridWidth": 1156,
+      "sampleGridColumns": "683.422px 460.578px",
+      "distinctColumns": true,
+      "panelWidths": [635, 413],
+      "screenshot": "evaluation/dispatch-caption-typography-2026-08-29/live-dispatch-default-1440x723.png"
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "routeSplitAloneAcceptedAsFix": false,
+    "approvalGatedWorkOverclaimed": false
+  }
+}

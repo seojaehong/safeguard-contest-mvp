@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-28T01:22:13.492Z",
+  "checkedAt": "2026-08-28T17:01:37.708Z",
   "route": "/dispatch?theme=day",
   "viewport": {
     "width": 1440,
@@ -8,27 +8,76 @@
   "verdict": "PASS",
   "metrics": {
     "viewportHeight": 723,
-    "pageHeight": 755,
+    "pageHeight": 771,
     "rootWidth": 1156,
-    "rootHeight": 384,
+    "rootHeight": 400,
+    "rootClientHeight": 398,
+    "rootScrollHeight": 399,
     "previewLeft": 883,
-    "previewBottom": 717.390625,
+    "previewBottom": 639.390625,
     "primaryRight": 875,
-    "primaryBottom": 538.390625,
+    "primaryBottom": 448.390625,
     "linesClientHeight": 60,
-    "linesScrollHeight": 220,
+    "linesScrollHeight": 172,
     "linesOverflowY": "auto",
+    "titleFontSize": 20,
+    "statusReasonFontSize": 12,
+    "channelHeadingFontSize": 12,
+    "channelActionBottom": 706.390625,
+    "layoutParts": {
+      "header": {
+        "top": 336,
+        "bottom": 396,
+        "height": 60,
+        "clientHeight": 60,
+        "scrollHeight": 60
+      },
+      "form": {
+        "top": 404,
+        "bottom": 711,
+        "height": 307,
+        "clientHeight": 307,
+        "scrollHeight": 307
+      },
+      "recipient": {
+        "top": 456,
+        "bottom": 540,
+        "height": 84,
+        "clientHeight": 82,
+        "scrollHeight": 82
+      },
+      "language": {
+        "top": 456,
+        "bottom": 559,
+        "height": 103,
+        "clientHeight": 101,
+        "scrollHeight": 101
+      },
+      "channels": {
+        "top": 567,
+        "bottom": 711,
+        "height": 144,
+        "clientHeight": 142,
+        "scrollHeight": 142
+      }
+    },
     "channelCards": [
       {
-        "width": 175,
+        "left": 278,
+        "top": 616,
+        "width": 193,
         "height": 44
       },
       {
-        "width": 175,
+        "left": 477,
+        "top": 616,
+        "width": 193,
         "height": 44
       },
       {
-        "width": 175,
+        "left": 677,
+        "top": 616,
+        "width": 193,
         "height": 44
       }
     ],
