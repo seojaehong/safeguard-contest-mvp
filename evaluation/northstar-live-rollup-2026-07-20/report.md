@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-28T20:33:14.733Z
-Source HEAD at generation: 451a3802f024b8315de3876a8eecf2370a0a3b78
-Live commit at generation: 451a3802f024b8315de3876a8eecf2370a0a3b78
+Generated at: 2026-08-28T21:20:37.204Z
+Source HEAD at generation: 86a4f6508bada4af3e196e369f9167976834cf63
+Live commit at generation: 0cebbc227caaf61a8c499dbc294422c45d86b37e
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -483,6 +483,7 @@ Overall: `northstar_open_approval_gated`
 | share_recipient_long_content_fixture | proven | evaluation\share-recipient-long-content-fixture-2026-07-25\report.json |
 | share_exact_saved_session_boundary | notice | evaluation\share-exact-session-boundary-2026-07-22\report.json |
 | kosha_exact_trust_registry | proven | evaluation\kosha-current-northstar-regression-2026-07-22\report.json |
+| distributed_admission_activation | approval_gated | evaluation\distributed-admission-activation-approval-2026-08-29\report.json |
 | security_atomic_db_race_remediation | approval_gated | evaluation\security-atomic-db-race-approval-boundary-2026-08-14\report.json |
 | share_recipient_ack_approval | approval_gated | evaluation\share-recipient-ack-approval-preflight-current-2026-07-19\report.json |
 | provider_dispatch_persistence | approval_gated | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json |
@@ -495,7 +496,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -584,6 +585,7 @@ Overall: `northstar_open_approval_gated`
 
 ## Approval-Gated Work
 
+- distributed_admission_activation: Production distributed admission is approval-ready but not activated: the packet requests exactly the Upstash REST URL/token, records no secret values, performs no Redis/DB/provider/Share/vector/Wiki/KOSHA mutation, keeps remote Hermes mode separate, requires a bounded post-deploy connectivity probe, and preserves exact saved Share as MISSING_EVIDENCE.
 - security_atomic_db_race_remediation: The MCP token-cap and worker site-binding races have bounded transactional database designs and concurrency test plans, but no migration, RPC, trigger, DB mutation, or closure claim was made. Both sealed low findings remain open pending explicit schema approval, database integration proof, deployment, and a fresh scan; exact saved Share remains MISSING_EVIDENCE.
 - share_recipient_ack_approval: Recipient ACK route/test preflight is operator-ready, but a real production invited-recipient ACK canary would create workpack_share_sessions and workpack_read_confirmations rows, so it remains approval-gated with no DB mutation or provider message sent.
 - provider_dispatch_persistence: Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists with an updated_at trigger, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred.

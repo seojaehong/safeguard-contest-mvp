@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-28T20:33:14.733Z",
-  "head": "451a3802f024b8315de3876a8eecf2370a0a3b78",
+  "generatedAt": "2026-08-28T21:20:37.204Z",
+  "head": "86a4f6508bada4af3e196e369f9167976834cf63",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "451a3802f024b8315de3876a8eecf2370a0a3b78",
+    "commitSha": "0cebbc227caaf61a8c499dbc294422c45d86b37e",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-a1bde67ct-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-o6hlybzih-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 82
+    "gateCount": 83
   },
   "provenGates": [
     {
@@ -473,6 +473,12 @@
     }
   ],
   "approvalGated": [
+    {
+      "id": "distributed_admission_activation",
+      "state": "approval_gated",
+      "artifact": "evaluation\\distributed-admission-activation-approval-2026-08-29\\report.json",
+      "detail": "Production distributed admission is approval-ready but not activated: the packet requests exactly the Upstash REST URL/token, records no secret values, performs no Redis/DB/provider/Share/vector/Wiki/KOSHA mutation, keeps remote Hermes mode separate, requires a bounded post-deploy connectivity probe, and preserves exact saved Share as MISSING_EVIDENCE."
+    },
     {
       "id": "security_atomic_db_race_remediation",
       "state": "approval_gated",
@@ -1964,10 +1970,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "451a3802f024b8315de3876a8eecf2370a0a3b78",
+      "sourceCommit": "86a4f6508bada4af3e196e369f9167976834cf63",
       "sourceStatus": "exact",
-      "productionCommit": "451a3802f024b8315de3876a8eecf2370a0a3b78",
-      "productionStatus": "matches_live"
+      "productionCommit": "86a4f6508bada4af3e196e369f9167976834cf63",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",

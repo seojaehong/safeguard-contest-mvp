@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-28T20:33:14.048Z",
-  "sourceSha": "451a3802f024b8315de3876a8eecf2370a0a3b78",
+  "generatedAt": "2026-08-28T21:20:36.143Z",
+  "sourceSha": "86a4f6508bada4af3e196e369f9167976834cf63",
   "overall": "open",
   "gates": [
     {
@@ -168,6 +168,16 @@
       "detail": "Live /ops/api passes 4/4 Day/Night desktop-short and mobile-short cases with four capability states inside the first viewport, desktop four-column presentation, mobile local-scroll containment, zero horizontal page overflow, and zero browser console errors. Production truth explicitly reports distributed configuration absent, provider dispatch preview-only, and Vision ready. This is operator readiness, not automatic launch approval or an unrelated whole-page height claim; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Configure distributed admission and obtain provider persistence approval separately; do not infer automatic launch approval from this cockpit."
+      ]
+    },
+    {
+      "id": "distributed_admission_activation",
+      "state": "approval_gated",
+      "label": "Distributed admission activation approval",
+      "evidencePath": "evaluation\\distributed-admission-activation-approval-2026-08-29\\report.json",
+      "detail": "Production distributed admission is approval-ready but not activated: the packet requests exactly the Upstash REST URL/token, records no secret values, performs no Redis/DB/provider/Share/vector/Wiki/KOSHA mutation, keeps remote Hermes mode separate, requires a bounded post-deploy connectivity probe, and preserves exact saved Share as MISSING_EVIDENCE.",
+      "nextActions": [
+        "Obtain operator approval, configure both Production-scoped variables together, run the bounded readiness/connectivity probes, and rerun the fresh Standard scan before any security-complete claim."
       ]
     },
     {

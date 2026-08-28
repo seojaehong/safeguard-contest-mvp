@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "safeclaw-distributed-admission-activation-preflight/v1",
+  "generatedAt": "2026-08-28T21:20:11.476Z",
+  "sourceSha": "86a4f6508bada4af3e196e369f9167976834cf63",
+  "verdict": "APPROVAL_REQUIRED_DISTRIBUTED_ADMISSION_ACTIVATION_NO_MUTATION",
+  "overall": "approval_ready_open",
+  "operatorApprovalRequired": true,
+  "configurationChangeApproved": false,
+  "activationPerformed": false,
+  "runtimeBehavioralProbePerformed": false,
+  "secretValuesInspected": false,
+  "secretValuesRecorded": false,
+  "ephemeralRedisMutationPerformed": false,
+  "requestedChange": {
+    "platform": "Vercel",
+    "environment": "Production",
+    "requiredVariables": [
+      "UPSTASH_REDIS_REST_URL",
+      "UPSTASH_REDIS_REST_TOKEN"
+    ],
+    "remoteHermesLedgerModeChangeRequested": false
+  },
+  "sharedCredentialBoundary": {
+    "publicAdmissionWouldUseCredentials": true,
+    "remoteHermesLedgerWouldUseCredentialsOnlyWhenExplicitModeIsUpstash": true,
+    "remoteHermesLedgerEnabledByThisChange": false
+  },
+  "requiredApproval": {
+    "id": "configure-production-distributed-admission",
+    "reason": "The operator change stores production secrets and the required behavioral probe creates short-lived Upstash counter and lease keys."
+  },
+  "postApprovalValidation": [
+    "Deploy once with both Production-scoped variables set; never commit their values.",
+    "GET /api/export/pdf and require admission.configurationState=ready without treating syntax readiness as connectivity proof.",
+    "Run one bounded invalid-payload POST /api/export/pdf to prove Upstash counter and lease commands succeed before document rendering; expect validation failure, no provider call, and no database mutation.",
+    "Verify /ops/api reports distributed admission ready while provider dispatch remains preview_only and exact saved Share remains MISSING_EVIDENCE.",
+    "Run bounded Ask/Search/Knowledge probes and a fresh Standard repository scan before closing immutable findings or claiming security completion."
+  ],
+  "rollbackPlan": [
+    "Remove both Production-scoped Upstash variables together and redeploy.",
+    "Require public provider-backed routes to return DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before provider work.",
+    "Confirm provider dispatch, DB, Share-session, vector, Wiki, and KOSHA registry boundaries remain unchanged."
+  ],
+  "forbiddenBeforeApproval": [
+    "Write either Upstash Production secret.",
+    "Create distributed rate or concurrency keys.",
+    "Enable SAFECLAW_REMOTE_HERMES_LEDGER_MODE=upstash as part of this change.",
+    "Execute provider generation or dispatch.",
+    "Claim distributed admission is operational from configurationState=ready alone.",
+    "Close exact saved Share, database/RLS, Wiki, vector, provider persistence, or KOSHA promotion gates."
+  ],
+  "mutationBoundary": {
+    "dbSchemaMutationPerformed": false,
+    "dbDataMutationPerformed": false,
+    "providerCallPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "checks": [
+    {
+      "id": "current_production_is_fail_closed_before_provider_work",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "required_secret_pair_is_exact_and_not_recorded",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "source_rejects_partial_or_unsafe_configuration",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "source_uses_namespaced_hashed_rate_and_lease_keys",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "remote_hermes_ledger_requires_separate_explicit_mode",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "operations_ui_reports_activation_boundary",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "no_mutation_or_security_completion_overclaim",
+      "passed": true,
+      "message": "ok"
+    }
+  ],
+  "failedCheckIds": [],
+  "inputs": {
+    "distributedAdmissionSource": "lib/public-distributed-rate-limit.ts",
+    "remoteHermesLedgerSource": "lib/remote-hermes-upstash-ledger.ts",
+    "readinessEvidence": "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json",
+    "launchOperationsEvidence": "evaluation/launch-operations-readiness-2026-08-26/report.json"
+  }
+}
