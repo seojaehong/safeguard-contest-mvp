@@ -1,0 +1,119 @@
+{
+  "generatedAt": "2026-08-28T00:00:11.872Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "elapsedMs": 209,
+  "apiAskStatus": 503,
+  "apiAskOk": false,
+  "apiAskErrorCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+  "apiAskError": "요청 보호 서비스를 확인하는 동안 요청을 잠시 처리할 수 없습니다.",
+  "apiAskRetryAfterSeconds": 5,
+  "apiAskRateLimit": "distributed",
+  "apiAskWorkUnit": null,
+  "dispatchStatus": null,
+  "dispatchOk": null,
+  "scenario": null,
+  "documents": {
+    "workpackSummaryDraft": false,
+    "riskAssessmentDraft": false,
+    "workPlanDraft": false,
+    "workPermitDraft": false,
+    "tbmBriefing": false,
+    "tbmLogDraft": false,
+    "safetyEducationRecordDraft": false,
+    "emergencyResponseDraft": false,
+    "photoEvidenceDraft": false,
+    "foreignWorkerBriefing": false,
+    "foreignWorkerTransmission": false,
+    "kakaoMessage": false
+  },
+  "connections": [
+    {
+      "name": "Law.go / korean-law-mcp",
+      "keyPresent": false,
+      "liveStatus": "연결 점검 필요",
+      "reflectedIn": [
+        "위험성평가표",
+        "작업계획서",
+        "TBM",
+        "안전보건교육",
+        "사진/증빙"
+      ],
+      "detail": ""
+    },
+    {
+      "name": "Gemini",
+      "keyPresent": true,
+      "liveStatus": "연결 점검 필요",
+      "reflectedIn": [
+        "핵심 판단",
+        "문서팩 본문"
+      ],
+      "detail": ""
+    },
+    {
+      "name": "기상청",
+      "keyPresent": false,
+      "liveStatus": "연결 점검 필요",
+      "reflectedIn": [
+        "위험성평가표",
+        "작업계획서",
+        "TBM"
+      ],
+      "detail": ""
+    },
+    {
+      "name": "Work24",
+      "keyPresent": false,
+      "liveStatus": "연결 점검 필요",
+      "reflectedIn": [
+        "안전보건교육",
+        "후속 교육"
+      ],
+      "detail": ""
+    },
+    {
+      "name": "KOSHA 교육",
+      "keyPresent": true,
+      "liveStatus": "연결 점검 필요",
+      "reflectedIn": [
+        "안전보건교육",
+        "후속 교육"
+      ],
+      "detail": ""
+    },
+    {
+      "name": "KOSHA 공식자료",
+      "keyPresent": true,
+      "liveStatus": "연결 점검 필요",
+      "reflectedIn": [
+        "위험성평가표",
+        "TBM",
+        "안전보건교육"
+      ],
+      "detail": ""
+    },
+    {
+      "name": "KOSHA 재해사례",
+      "keyPresent": false,
+      "liveStatus": "연결 점검 필요",
+      "reflectedIn": [
+        "TBM",
+        "안전보건교육",
+        "비상대응",
+        "사진/증빙"
+      ],
+      "detail": ""
+    },
+    {
+      "name": "n8n dispatch",
+      "keyPresent": false,
+      "liveStatus": "설정 점검만 수행",
+      "reflectedIn": [
+        "현장 전파"
+      ],
+      "detail": "로컬/서버 내부에서는 N8N_INTERNAL_BASE를 사용할 수 있습니다."
+    }
+  ],
+  "userFacingStatusPolicy": "연결됨 / 일부 근거 보류 / 연결 점검 필요",
+  "rawStatusDetail": ""
+}

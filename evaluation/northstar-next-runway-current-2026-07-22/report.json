@@ -1,29 +1,36 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-27T23:40:29.695Z",
+  "generatedAt": "2026-08-28T00:01:00.502Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "96b69242c276865f0d9b26c06236d55ba20fae54",
-  "productionCommit": "96b69242c276865f0d9b26c06236d55ba20fae54",
+  "sourceHead": "9e8d1a67064b62c5e098e09f7af9e8604a933934",
+  "productionCommit": "9b63945c9a1978c355539778bee9536654abc2cd",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "96b69242c276865f0d9b26c06236d55ba20fae54",
+    "commitSha": "9b63945c9a1978c355539778bee9536654abc2cd",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-pq07ufdhp-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-hzpizzw1p-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": true,
-  "currentHeadIsEvidenceOnlyPending": false,
-  "sourceHeadLivePending": false,
+  "latestEvidenceCommitLive": false,
+  "currentHeadIsEvidenceOnlyPending": true,
+  "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
-  "sourcePendingChangedPaths": [],
+  "sourcePendingChangedPaths": [
+    "scripts/launch_readiness_audit.mjs",
+    "scripts/launch_readiness_current_report.mjs",
+    "scripts/northstar_next_runway.mjs",
+    "tests/launch-readiness-audit.test.ts",
+    "tests/launch-readiness-current-report.test.ts",
+    "tests/northstar-next-runway-generator.test.ts"
+  ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "96b69242c276865f0d9b26c06236d55ba20fae54",
-  "liveRollupLiveCommit": "96b69242c276865f0d9b26c06236d55ba20fae54",
+  "liveExactEvidenceCommit": "9e8d1a67064b62c5e098e09f7af9e8604a933934",
+  "liveRollupLiveCommit": "9b63945c9a1978c355539778bee9536654abc2cd",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -376,19 +383,25 @@
     }
   ],
   "launchReadiness": {
-    "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
-    "safeLaunchDemoClaimAllowed": true,
-    "guidedPilotClaimAllowed": true,
+    "verdict": "BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH",
+    "safeLaunchDemoClaimAllowed": false,
+    "guidedPilotClaimAllowed": false,
     "fullyAutomatedLaunchClaimAllowed": false,
     "selfServeSaasLaunchClaimAllowed": false,
     "providerDispatchLiveClaimed": false,
-    "apiAskOk": true,
+    "apiAskOk": false,
+    "apiAskStatus": 503,
+    "apiAskErrorCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "apiAskRateLimit": "distributed",
+    "apiAskWorkUnit": "",
     "dispatchCalled": false,
+    "distributedAdmissionBlocked": true,
+    "distributedAdmissionActivation": "OPERATOR_CONFIGURATION_REQUIRED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "documentCoverage": {
       "expectedCount": 12,
-      "presentCount": 12,
-      "missing": [],
-      "present": [
+      "presentCount": 0,
+      "missing": [
         "workpackSummaryDraft",
         "riskAssessmentDraft",
         "workPlanDraft",
@@ -401,7 +414,8 @@
         "foreignWorkerBriefing",
         "foreignWorkerTransmission",
         "kakaoMessage"
-      ]
+      ],
+      "present": []
     }
   },
   "final99TwelveDocumentNoMutation": {

@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `96b69242c276865f0d9b26c06236d55ba20fae54`
+Source HEAD: `9e8d1a67064b62c5e098e09f7af9e8604a933934`
 
-Production `/api/build-info`: `96b69242c276865f0d9b26c06236d55ba20fae54`
+Production `/api/build-info`: `9b63945c9a1978c355539778bee9536654abc2cd`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `scripts/launch_readiness_audit.mjs`, `scripts/launch_readiness_current_report.mjs`, `scripts/northstar_next_runway.mjs`, `tests/launch-readiness-audit.test.ts`, `tests/launch-readiness-current-report.test.ts`, `tests/northstar-next-runway-generator.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `96b69242c276865f0d9b26c06236d55ba20fae54`
+Live rollup source head: `9e8d1a67064b62c5e098e09f7af9e8604a933934`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `9e8d1a67064b62c5e098e09f7af9e8604a933934` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `9b63945c9a1978c355539778bee9536654abc2cd`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -32,6 +32,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 
 ## Proven Current State
 
+- Current launch smoke is `BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH`: `/api/ask` status `503`, error `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`, admission `distributed/unknown`, demo allowed=`false`, dispatch called=`false`. Distributed admission activation is `OPERATOR_CONFIGURATION_REQUIRED`; exact saved Share remains `MISSING_EVIDENCE`.
 - Live harness quality is proven.
 - KOSHA exact trust registry is proven for the accepted exact-trust slice.
 - KOSHA next exact candidate audit identifies the 234-item current native technical-support subset and 231 metadata-verified non-exact candidates without mutation.

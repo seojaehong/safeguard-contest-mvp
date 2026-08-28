@@ -1,41 +1,43 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-07-24T19:10:46.552Z
+Generated: 2026-08-28T00:00:12.367Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD at generation: `53486a65f67ca5da5c6486c3c1dc9f428437ea56`
+Source HEAD at generation: `9e8d1a67064b62c5e098e09f7af9e8604a933934`
 
-Production runtime smoke commit: `53486a65f67ca5da5c6486c3c1dc9f428437ea56`
+Production runtime smoke commit: `9b63945c9a1978c355539778bee9536654abc2cd`
 
-Current HEAD is evidence-only pending relative to production: `false`
+Current HEAD is evidence-only pending relative to production: `true`
 
 ## Verdict
 
-`PASS_LIVE_PRODUCTION_WITH_BOUNDARIES`
+`BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH`
 
-Safe launch demo / guided pilot wording is allowed. Fully automated self-serve launch and real provider dispatch readiness are not allowed.
+Current live launch demo generation is not allowed while the measured runtime blocker remains active. Fully automated self-serve launch and real provider dispatch readiness are not allowed.
 
 ## Live Smoke
 
 `scripts/launch_readiness_audit.mjs` was run against production with `SAFETYGUARD_AUDIT_DISPATCH=false`.
 
-- `/api/ask`: 200 OK
-- elapsed: 22374 ms
+- `/api/ask`: 503 CHECK
+- error code: `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`
+- admission: `distributed` / `unknown`
+- elapsed: 209 ms
 - dispatch call: not run
-- generated documents: 12 / 12
-- connection verdict: `PASS_CONNECTED_NO_DISPATCH` (7 connected, 0 bounded fallback, 0 check-required)
-- scenario: `도시가스공사 열수송관 굴착공사`
+- generated documents: 0 / 12
+- connection verdict: `BLOCKED_BEFORE_CONNECTION_CHECK_NO_DISPATCH` (0 connected, 0 bounded fallback, 7 check-required)
+- scenario: `unknown`
 
 ## Connected Surfaces
 
-- Law.go / korean-law-mcp: 연결됨
-- Gemini: 연결됨
-- 기상청: 연결됨
-- Work24: 연결됨
-- KOSHA 교육: 연결됨
-- KOSHA 공식자료: 연결됨
-- KOSHA 재해사례: 연결됨
+- Law.go / korean-law-mcp: 연결 점검 필요
+- Gemini: 연결 점검 필요
+- 기상청: 연결 점검 필요
+- Work24: 연결 점검 필요
+- KOSHA 교육: 연결 점검 필요
+- KOSHA 공식자료: 연결 점검 필요
+- KOSHA 재해사례: 연결 점검 필요
 - n8n dispatch: 설정 점검만 수행
 
 ## Final-99 Notices
@@ -47,16 +49,16 @@ Final-99 remains `pass_with_notice`; 2 notices are carried. These are approval/a
 
 ## Safe Claims
 
-- Live /api/ask generated the expected 12-document workpack for the audited construction scenario.
-- Live public-data/AI surfaces returned connected statuses for 7 connection surface(s) in this smoke.
-- A safe launch demo or guided pilot can be claimed with explicit provider-dispatch, RLS, LLM Wiki, SIF vector, and admin-auth boundaries.
-- Documents selected-only bounded workbench evidence is current in scoped artifacts; route split alone is not accepted as the UX fix.
+- The current live launch smoke fails closed before generation while distributed admission is unavailable.
+- No provider dispatch or database mutation was executed by the current launch smoke.
+- Documents and Share scoped UI evidence remains separate from current live generation availability.
+- Exact saved user Share remains MISSING_EVIDENCE.
 
 ## UI / IA Boundary
 
 Route/page split alone is not accepted as the UX fix. The accepted structure is route split plus selected-only bounded workbench: first-viewport cockpit, one selected detail/editor, and long raw/provenance content in local scroll, drawer, accordion, or drilldown.
 
-- Documents scoped evidence verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION`
+- Documents scoped evidence verdict: `PASS_LIVE_PRODUCTION_MEASURED`
 - Share generated fixture verdict: `PASS_CURRENT_SOURCE_GENERATED_RESULT_FIXTURE`
 - Exact saved user share session reproduced: `false`
 - Share route evidence boundary: separate Share evidence into invited recipient fixture pass, exact saved/generated /share/[sessionId] missing evidence, and manager/workspace share-result route repro; do not use one route's pass to close another route's mobile-like complaint
@@ -70,6 +72,7 @@ Route/page split alone is not accepted as the UX fix. The accepted structure is 
 - Live Supabase RLS tenant isolation is launch-proven.
 - Exact saved/generated user share session has been reproduced unless a concrete session URL/state is measured.
 - n8n/provider dispatch was executed in the latest launch-readiness smoke.
+- Current live /api/ask generation is available for a launch demo.
 
 ## Approval-Gated Boundaries
 
@@ -81,7 +84,7 @@ Route/page split alone is not accepted as the UX fix. The accepted structure is 
 
 ## Evidence
 
-- rawAudit: `evaluation\launch-readiness-current-2026-07-22\api-connection-audit.json`
+- rawAudit: `evaluation/launch-readiness-current-2026-07-22/api-connection-audit-current.json`
 - final99Gate: `evaluation\final-99-gate-current-2026-07-22\report.json`
 - final99NoticeCarry: `evaluation\final-99-gate-current-2026-07-22\notice-carry.json`
 - northstarOpenGates: `evaluation\northstar-open-gates-current\report.json`
