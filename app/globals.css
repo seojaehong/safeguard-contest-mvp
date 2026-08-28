@@ -22187,6 +22187,12 @@ body:has(.safeclaw-landing) :is(
   padding: 20px 16px;
 }
 
+@media (min-width: 901px) and (max-height: 760px) {
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .safeclaw-module-rail {
+    padding-block: 18px;
+  }
+}
+
 .safeclaw-skip-link {
   position: fixed;
   top: 12px;

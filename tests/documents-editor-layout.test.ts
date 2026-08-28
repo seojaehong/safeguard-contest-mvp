@@ -664,6 +664,8 @@ describe("documents editor layout", () => {
           workpackShellClientWidth: document.querySelector<HTMLElement>(".workpack-shell")?.clientWidth || 0,
           workpackShellScrollWidth: document.querySelector<HTMLElement>(".workpack-shell")?.scrollWidth || 0,
           workpackShellScrollHeight: document.querySelector<HTMLElement>(".workpack-shell")?.scrollHeight || 0,
+          moduleRailClientHeight: document.querySelector<HTMLElement>(".safeclaw-module-rail")?.clientHeight || 0,
+          moduleRailScrollHeight: document.querySelector<HTMLElement>(".safeclaw-module-rail")?.scrollHeight || 0,
           firstRiskRowClientWidth: document.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"]')?.clientWidth || 0,
           firstRiskRowScrollWidth: document.querySelector<HTMLElement>('[data-testid="risk-row-editor-row"]')?.scrollWidth || 0,
           riskRowSelectorCount: document.querySelectorAll('[data-testid="risk-row-selector"]').length,
@@ -701,6 +703,9 @@ describe("documents editor layout", () => {
       expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth + 1);
       expect(metrics.workpackShellScrollWidth).toBeLessThanOrEqual(metrics.workpackShellClientWidth + 1);
       expect(metrics.firstRiskRowScrollWidth).toBeLessThanOrEqual(metrics.firstRiskRowClientWidth + 1);
+      if (viewport.name === "desktop short") {
+        expect(metrics.moduleRailScrollHeight).toBeLessThanOrEqual(metrics.moduleRailClientHeight);
+      }
       expect(metrics.bodyHeight / metrics.viewportHeight).toBeLessThanOrEqual(viewport.maxRatio);
       expect(metrics.selectedDocumentTitle).toBe("위험성평가표");
       expect(metrics.workpackShell.overflowY).toBe("auto");
