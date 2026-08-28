@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "safeclaw-hermes-knowledge-review-multiline-sections/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_HERMES_MULTILINE_CANDIDATE_REVIEW",
+  "sourceHead": "00945d276926470eaf519f2317cdabe98acc2e92",
+  "productCommit": "00945d276926470eaf519f2317cdabe98acc2e92",
+  "productionCommit": "00945d276926470eaf519f2317cdabe98acc2e92",
+  "deploymentUrl": "safeguard-contest-raeze89ki-seojaehongs-projects.vercel.app",
+  "finding": {
+    "previousBehavior": "A valid four-section candidate fell back to raw text whenever an LLM inserted a continuation line inside a section.",
+    "currentBehavior": "Exact ordered section labels remain fail-closed while bounded continuation lines stay inside their owning reviewer section.",
+    "rawFallbackPreserved": true,
+    "malformedNumberingFailsClosed": true,
+    "exactSectionLabelsRequired": true
+  },
+  "afterLocal": {
+    "path": "evaluation/hermes-knowledge-review-multiline-sections-2026-08-28/after-local/report.json",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_LLM_WIKI_CANDIDATE_CONTENT_READINESS",
+    "viewportCount": 8,
+    "passedCount": 8,
+    "failedCount": 0,
+    "candidateMultilineContinuationPreserved": true
+  },
+  "afterLive": {
+    "path": "evaluation/hermes-knowledge-review-multiline-sections-2026-08-28/after-live/report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS",
+    "productionAligned": true,
+    "viewportCount": 8,
+    "passedCount": 8,
+    "failedCount": 0,
+    "selectedCandidateCount": 1,
+    "selectedBodyCount": 1,
+    "candidateSectionCount": 4,
+    "candidateSectionsNonEmpty": true,
+    "candidateMultilineContinuationPreserved": true,
+    "desktopColumns": 2,
+    "mobileColumns": 1,
+    "candidateBodyInternalScroll": true,
+    "firstDecisionActionInViewport": true,
+    "horizontalOverflow": false,
+    "actualProductionCandidateQueueRead": false,
+    "routeControlledBrowserFixture": true
+  },
+  "verification": {
+    "focusedBrowserAndContract": {
+      "files": 2,
+      "tests": 21,
+      "failed": 0
+    },
+    "adjacentKnowledgeUi": {
+      "files": 4,
+      "tests": 32,
+      "failed": 0
+    },
+    "strictTypecheck": "PASS",
+    "productionBuild": "PASS",
+    "staticPages": 28
+  },
+  "reviewBoundary": {
+    "humanReviewCompleted": false,
+    "machineEvidenceReplacesHumanReview": false,
+    "publicationState": "unpublished",
+    "publishAllowed": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerCallPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "wikiPublished": false,
+    "ontologyPublicationPerformed": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "actualProductionCandidateQueueRead": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "enhancedLlmRuntime": "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
+    "securityComplete": false
+  }
+}
