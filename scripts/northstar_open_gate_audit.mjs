@@ -8301,17 +8301,17 @@ function isPublicAdmissionCurrentSourceCompatibilityCurrent(rootDir, gateId, gov
     && sourceHead === readString(report.productionCommit)
     && isGitAncestor(rootDir, sourceHead)
     && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths)
-    && coveredGateIds.length === 4
+    && coveredGateIds.length === 6
     && coveredGateIds.includes(gateId)
     && readNumber(tests.files) === 13
-    && readNumber(tests.tests) === 101
+    && readNumber(tests.tests) === 100
     && readNumber(tests.failed) === 0
     && readString(tests.status) === "PASS"
     && verification.typecheck === "PASS"
     && verification.build === "PASS"
     && readNumber(verification.dependencyAuditVulnerabilities) === 0
     && live.providerCallExecuted === false
-    && liveCases.length === 11
+    && liveCases.length === 12
     && casePass("oversize-ask", 413, "PUBLIC_WORK_BUDGET_EXCEEDED", "instance")
     && casePass("oversize-ask-stream", 413, "PUBLIC_WORK_BUDGET_EXCEEDED", "instance")
     && casePass("oversize-knowledge-match", 413, "PUBLIC_WORK_BUDGET_EXCEEDED", "instance")
@@ -8323,6 +8323,7 @@ function isPublicAdmissionCurrentSourceCompatibilityCurrent(rootDir, gateId, gov
     && casePass("search-legal", 503, "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "distributed")
     && casePass("search-safety-reference", 503, "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "distributed")
     && casePass("search-weather", 503, "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "distributed")
+    && casePass("photo-readiness", 200, "")
     && noMutation
     && report.originalSecurityBaselinesRewritten === false
     && readString(remaining.freshFollowUpScan) === "REQUIRED"
@@ -8373,12 +8374,12 @@ function isShareMcpCurrentSourceCompatibilityCurrent(rootDir, gateId, governedPa
     && sourceHead === readString(report.productionCommit)
     && isGitAncestor(rootDir, sourceHead)
     && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths)
-    && coveredGateIds.length === 3
+    && coveredGateIds.length === 4
     && coveredGateIds.includes(gateId)
     && readNumber(focused.filesPassed) === 8
-    && readNumber(focused.filesSkipped) === 1
-    && readNumber(focused.testsPassed) === 188
-    && readNumber(focused.testsSkipped) === 7
+    && readNumber(focused.filesSkipped) === 0
+    && readNumber(focused.testsPassed) === 205
+    && readNumber(focused.testsSkipped) === 0
     && readNumber(focused.failed) === 0
     && readString(focused.status) === "PASS"
     && readNumber(browser.files) === 1
@@ -8394,9 +8395,10 @@ function isShareMcpCurrentSourceCompatibilityCurrent(rootDir, gateId, governedPa
     && live.shareSessionCreated === false
     && live.shareSessionRevoked === false
     && live.readConfirmationCreated === false
-    && liveCases.length === 3
+    && liveCases.length === 4
     && casePass("share-revoke-unauthenticated", 401)
     && casePass("share-contact-missing-session", 503, "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "distributed")
+    && casePass("share-ack-oversize-missing-session", 503, "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "distributed")
     && casePass("mcp-invalid-token", 503, "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", "distributed")
     && noMutation
     && report.originalSecurityBaselinesRewritten === false
@@ -8646,7 +8648,8 @@ function evaluateShareAckPreBodyAdmissionGate(rootDir) {
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED"
     && sourceHead === productionCommit
     && isGitAncestor(rootDir, sourceHead)
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, SHARE_ACK_PREBODY_ADMISSION_PATHS)
+    && (isEvidenceCurrentForPaths(rootDir, sourceHead, SHARE_ACK_PREBODY_ADMISSION_PATHS)
+      || isShareMcpCurrentSourceCompatibilityCurrent(rootDir, "share_ack_prebody_admission_security", SHARE_ACK_PREBODY_ADMISSION_PATHS))
     && readString(finding.scanId) === "1411fb32-5c18-4d6a-b8ba-d52697757d8a"
     && readString(finding.slug) === "share-ack-prebody-admission"
     && contract.coarseIpRateAdmissionBeforeBody === true
@@ -10229,7 +10232,8 @@ function evaluateImprovementPhotoAnalysisBudgetGate(rootDir) {
   const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
     || isPublicProviderAdmissionCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
     || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
-    || isDocumentExportAdmissionCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS);
+    || isDocumentExportAdmissionCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
+    || isPublicAdmissionCurrentSourceCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS);
   const noMutation = mutation.dbSchemaMutation === false
     && mutation.dbDataMutation === false
     && mutation.providerDispatchCalled === false
@@ -10642,7 +10646,8 @@ function evaluatePublicProviderAdmissionGate(rootDir) {
       || isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
       || isPublicAskDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
       || isPublicSearchDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
-      || isDocumentExportAdmissionCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS))
+      || isDocumentExportAdmissionCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
+      || isPublicAdmissionCurrentSourceCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS))
     && findings.length === 2
     && findings.every((item) => readString(item.scanId) === "c4e9e2f1-7ce4-4313-a651-32205fca401f"
       && expectedFindingIds.has(readString(item.findingId))

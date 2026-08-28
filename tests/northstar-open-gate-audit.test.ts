@@ -5740,11 +5740,13 @@ function createFixtureRoot(): string {
     coveredGateIds: [
       "public_json_request_body_budget",
       "public_provider_cancellation",
+      "public_provider_admission",
       "public_ask_distributed_admission",
       "public_search_distributed_admission",
+      "improvement_photo_analysis_budget",
     ],
     verification: {
-      focusedAndAdjacentVitest: { files: 13, tests: 101, failed: 0, status: "PASS" },
+      focusedAndAdjacentVitest: { files: 13, tests: 100, failed: 0, status: "PASS" },
       typecheck: "PASS",
       build: "PASS",
       dependencyAuditVulnerabilities: 0,
@@ -5763,6 +5765,7 @@ function createFixtureRoot(): string {
         { name: "search-legal", status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimit: "distributed" },
         { name: "search-safety-reference", status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimit: "distributed" },
         { name: "search-weather", status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", rateLimit: "distributed" },
+        { name: "photo-readiness", status: 200, code: "", rateLimit: "" },
       ],
     },
     originalSecurityBaselinesRewritten: false,
@@ -5790,14 +5793,15 @@ function createFixtureRoot(): string {
     coveredGateIds: [
       "share_session_revocation_security",
       "share_recipient_contact_verification_security",
+      "share_ack_prebody_admission_security",
       "mcp_provider_admission_security",
     ],
     verification: {
       focusedAndAdjacentVitest: {
         filesPassed: 8,
-        filesSkipped: 1,
-        testsPassed: 188,
-        testsSkipped: 7,
+        filesSkipped: 0,
+        testsPassed: 205,
+        testsSkipped: 0,
         failed: 0,
         status: "PASS",
       },
@@ -5817,6 +5821,12 @@ function createFixtureRoot(): string {
         { name: "share-revoke-unauthenticated", status: 401 },
         {
           name: "share-contact-missing-session",
+          status: 503,
+          code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+          rateLimit: "distributed",
+        },
+        {
+          name: "share-ack-oversize-missing-session",
           status: 503,
           code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
           rateLimit: "distributed",
@@ -8809,8 +8819,10 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const compatible = buildNorthstarOpenGateAudit({ rootDir });
     expect(compatible.gates.find((gate) => gate.id === "public_json_request_body_budget")?.state).toBe("proven");
     expect(compatible.gates.find((gate) => gate.id === "public_provider_cancellation")?.state).toBe("notice");
+    expect(compatible.gates.find((gate) => gate.id === "public_provider_admission")?.state).toBe("notice");
     expect(compatible.gates.find((gate) => gate.id === "public_ask_distributed_admission")?.state).toBe("proven");
     expect(compatible.gates.find((gate) => gate.id === "public_search_distributed_admission")?.state).toBe("proven");
+    expect(compatible.gates.find((gate) => gate.id === "improvement_photo_analysis_budget")?.state).toBe("notice");
 
     const fullCase = report.liveReadOnlyProbe.cases.find((item) => item.name === "ask-full");
     if (!fullCase) throw new Error("ask-full fixture is missing");
@@ -8865,6 +8877,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const compatible = buildNorthstarOpenGateAudit({ rootDir });
     expect(compatible.gates.find((gate) => gate.id === "share_session_revocation_security")?.state).toBe("notice");
     expect(compatible.gates.find((gate) => gate.id === "share_recipient_contact_verification_security")?.state).toBe("notice");
+    expect(compatible.gates.find((gate) => gate.id === "share_ack_prebody_admission_security")?.state).toBe("notice");
     expect(compatible.gates.find((gate) => gate.id === "mcp_provider_admission_security")?.state).toBe("notice");
 
     const mcpCase = report.liveReadOnlyProbe.cases.find((item) => item.name === "mcp-invalid-token");
@@ -8877,6 +8890,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     for (const gateId of [
       "share_session_revocation_security",
       "share_recipient_contact_verification_security",
+      "share_ack_prebody_admission_security",
       "mcp_provider_admission_security",
     ]) {
       expect(contradicted.gates.find((gate) => gate.id === gateId)?.state).toBe("contradicted");
