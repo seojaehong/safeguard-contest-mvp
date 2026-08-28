@@ -166,6 +166,7 @@ describe("knowledge governance UI contract", () => {
     expect(browserRunnerSource).toContain('metrics.candidateSectionLabels.join("|") === "위험요인 요약|문서 반영 위치|통제대책|검수 필요 항목"');
     expect(browserRunnerSource).toContain("metrics.candidateSectionContents.every(Boolean)");
     expect(browserRunnerSource).toContain("evidenceInspectorMode || candidateReadinessMode");
+    expect(browserRunnerSource).toContain("/^sb-[a-z0-9_-]+-auth-token$/iu.test(key)");
     expect(browserRunnerSource).toContain("metrics.selectedBodyTopVisible");
     expect(browserRunnerSource).toContain("metrics.candidatePositionsComplete");
     expect(browserRunnerSource).toContain("candidatePositionLabels: results.every");

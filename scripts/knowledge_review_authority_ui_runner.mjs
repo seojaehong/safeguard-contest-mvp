@@ -274,7 +274,7 @@ try {
         browserErrors.push(`HTTP ${response.status()} ${url.pathname}`);
       });
       await page.addInitScript((storageKey) => {
-        localStorage.setItem(storageKey, JSON.stringify({
+        const fixtureSession = JSON.stringify({
           access_token: "fixture-access-token",
           refresh_token: "fixture-refresh-token",
           expires_in: 3600,
@@ -289,7 +289,13 @@ try {
             user_metadata: {},
             created_at: "2026-07-25T00:00:00.000Z"
           }
-        }));
+        });
+        const originalGetItem = Storage.prototype.getItem;
+        Storage.prototype.getItem = function getFixtureAuthSession(key) {
+          if (/^sb-[a-z0-9_-]+-auth-token$/iu.test(key)) return fixtureSession;
+          return originalGetItem.call(this, key);
+        };
+        localStorage.setItem(storageKey, fixtureSession);
       }, authStorageKey);
       await page.route("**/api/knowledge/review", async (route) => {
         if (route.request().method() === "POST") {
