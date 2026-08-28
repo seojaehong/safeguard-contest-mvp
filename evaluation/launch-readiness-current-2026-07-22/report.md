@@ -1,14 +1,14 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-08-28T00:00:12.367Z
+Generated: 2026-08-28T02:01:57.409Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD at generation: `9e8d1a67064b62c5e098e09f7af9e8604a933934`
+Source HEAD at generation: `5eddcd5e980ab96082e5f3c5314a9701aeba2808`
 
-Production runtime smoke commit: `9b63945c9a1978c355539778bee9536654abc2cd`
+Production runtime smoke commit: `5eddcd5e980ab96082e5f3c5314a9701aeba2808`
 
-Current HEAD is evidence-only pending relative to production: `true`
+Current HEAD is evidence-only pending relative to production: `false`
 
 ## Verdict
 
@@ -23,7 +23,7 @@ Current live launch demo generation is not allowed while the measured runtime bl
 - `/api/ask`: 503 CHECK
 - error code: `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`
 - admission: `distributed` / `unknown`
-- elapsed: 209 ms
+- elapsed: 944 ms
 - dispatch call: not run
 - generated documents: 0 / 12
 - connection verdict: `BLOCKED_BEFORE_CONNECTION_CHECK_NO_DISPATCH` (0 connected, 0 bounded fallback, 7 check-required)

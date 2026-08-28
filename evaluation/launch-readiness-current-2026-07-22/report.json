@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v4",
-  "generatedAt": "2026-08-28T00:00:12.367Z",
+  "generatedAt": "2026-08-28T02:01:57.409Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHeadAtGeneration": "9e8d1a67064b62c5e098e09f7af9e8604a933934",
-  "productionCommit": "9b63945c9a1978c355539778bee9536654abc2cd",
-  "runtimeSmokeCommit": "9b63945c9a1978c355539778bee9536654abc2cd",
-  "evidenceHeadBeforeThisReport": "9e8d1a67064b62c5e098e09f7af9e8604a933934",
-  "currentHeadIsEvidenceOnlyPending": true,
+  "sourceHeadAtGeneration": "5eddcd5e980ab96082e5f3c5314a9701aeba2808",
+  "productionCommit": "5eddcd5e980ab96082e5f3c5314a9701aeba2808",
+  "runtimeSmokeCommit": "5eddcd5e980ab96082e5f3c5314a9701aeba2808",
+  "evidenceHeadBeforeThisReport": "5eddcd5e980ab96082e5f3c5314a9701aeba2808",
+  "currentHeadIsEvidenceOnlyPending": false,
   "verdict": "BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH",
   "safeLaunchDemoClaimAllowed": false,
   "guidedPilotClaimAllowed": false,
@@ -17,7 +17,7 @@
   "apiAsk": {
     "status": 503,
     "ok": false,
-    "elapsedMs": 209,
+    "elapsedMs": 944,
     "errorCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
     "error": "요청 보호 서비스를 확인하는 동안 요청을 잠시 처리할 수 없습니다.",
     "retryAfterSeconds": 5,
@@ -205,9 +205,9 @@
     "verdict": "open"
   },
   "northstarLiveRollupOverall": {
-    "sourceHeadAtGeneration": "9b63945c9a1978c355539778bee9536654abc2cd",
+    "sourceHeadAtGeneration": "9e8d1a67064b62c5e098e09f7af9e8604a933934",
     "liveCommitAtGeneration": "9b63945c9a1978c355539778bee9536654abc2cd",
-    "liveCommitMatchesSourceHead": true
+    "liveCommitMatchesSourceHead": false
   },
   "approvalGatedBoundaries": [
     {
@@ -269,10 +269,10 @@
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "9b63945c9a1978c355539778bee9536654abc2cd",
+    "commitSha": "5eddcd5e980ab96082e5f3c5314a9701aeba2808",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-hzpizzw1p-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ogqpta7rv-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   }
 }
