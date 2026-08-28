@@ -260,6 +260,20 @@ type NextRunwayReport = {
     fullyAutomatedLaunchClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  distributedAdmissionActivationApproval: {
+    verdict: string;
+    sourceSha: string;
+    readyForOperatorReview: boolean;
+    configurationChangeApproved: boolean;
+    activationPerformed: boolean;
+    runtimeBehavioralProbePerformed: boolean;
+    secretValuesInspected: boolean;
+    secretValuesRecorded: boolean;
+    requiredVariables: string[];
+    remoteHermesLedgerEnabledByThisChange: boolean;
+    noMutation: boolean;
+    exactSavedShareVerdict: string;
+  };
   documentExportCapabilityTruth: {
     verdict: string;
     admissionMode: string;
@@ -830,7 +844,11 @@ type NextRunwayReport = {
   approvalGated: Array<{
     gate: string;
     state: string;
+    evidencePath: string;
+    readyForOperatorReview: boolean;
     currentSafetyLock: string;
+    approvalNeeded: string[];
+    forbiddenUntilApproved: string[];
   }>;
   koshaNextExactCandidateAudit: {
     verdict: string;
@@ -2201,6 +2219,39 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       koshaRegistryMutated: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       fullyAutomatedLaunchClaimAllowed: false,
+    },
+  });
+  writeJson(root, "evaluation/distributed-admission-activation-approval-2026-08-29/report.json", {
+    verdict: "APPROVAL_REQUIRED_DISTRIBUTED_ADMISSION_ACTIVATION_NO_MUTATION",
+    overall: "approval_ready_open",
+    sourceSha: "fixture-sha",
+    operatorApprovalRequired: true,
+    configurationChangeApproved: false,
+    activationPerformed: false,
+    runtimeBehavioralProbePerformed: false,
+    secretValuesInspected: false,
+    secretValuesRecorded: false,
+    ephemeralRedisMutationPerformed: false,
+    requestedChange: {
+      environment: "Production",
+      requiredVariables: ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"],
+      remoteHermesLedgerModeChangeRequested: false,
+    },
+    sharedCredentialBoundary: {
+      remoteHermesLedgerEnabledByThisChange: false,
+    },
+    checks: Array.from({ length: 7 }, (_, index) => ({ id: `check-${index + 1}`, passed: true })),
+    failedCheckIds: [],
+    mutationBoundary: {
+      dbSchemaMutationPerformed: false,
+      dbDataMutationPerformed: false,
+      providerCallPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
   writeJson(root, "evaluation/dependency-security-remediation-2026-07-28/report.json", {
@@ -3804,6 +3855,7 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
     expect(markdown).toContain("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
     expect(markdown).toContain("Exact saved Share remains `MISSING_EVIDENCE`");
     expect(report.approvalGated.map((gate) => gate.gate)).toEqual([
+      "distributed_admission_activation",
       "share_recipient_ack_approval",
       "provider_dispatch_persistence",
       "supabase_rls_launch_isolation",
@@ -3813,6 +3865,25 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       "security_atomic_db_race_remediation",
     ]);
     expect(report.approvalGated[0]).toMatchObject({
+      state: "approval_gated",
+      readyForOperatorReview: true,
+      currentSafetyLock: "production_secret_and_ephemeral_redis_mutation_approval_required",
+    });
+    expect(report.distributedAdmissionActivationApproval).toMatchObject({
+      verdict: "APPROVAL_REQUIRED_DISTRIBUTED_ADMISSION_ACTIVATION_NO_MUTATION",
+      readyForOperatorReview: true,
+      configurationChangeApproved: false,
+      activationPerformed: false,
+      runtimeBehavioralProbePerformed: false,
+      secretValuesInspected: false,
+      secretValuesRecorded: false,
+      requiredVariables: ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"],
+      remoteHermesLedgerEnabledByThisChange: false,
+      noMutation: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(markdown).toContain("Distributed admission activation remains a separate operator decision");
+    expect(report.approvalGated[1]).toMatchObject({
       state: "approval_gated",
       readyForOperatorReview: true,
       currentSafetyLock: "live_data_mutation_approval_required",
@@ -5237,11 +5308,40 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       generatedAt: "2026-07-28T00:00:00.000Z",
     });
 
-    expect(report.approvalGated[0]).toMatchObject({
+    expect(report.approvalGated[1]).toMatchObject({
       gate: "share_recipient_ack_approval",
       state: "approval_gated",
       readyForOperatorReview: false,
       currentSafetyLock: "preflight_missing_or_invalid",
+    });
+  });
+
+  it("keeps distributed admission approval fail-closed when activation is claimed without a probe", async () => {
+    const { buildNorthstarNextRunway } = await loadNextRunwayModule();
+    const { root, secondHead } = createFixtureRoot();
+    pointLiveRollupAt(root, secondHead);
+    const evidencePath = path.join(
+      root,
+      "evaluation",
+      "distributed-admission-activation-approval-2026-08-29",
+      "report.json",
+    );
+    const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8")) as Record<string, unknown>;
+    evidence.activationPerformed = true;
+    writeJson(root, path.relative(root, evidencePath), evidence);
+
+    const report = buildNorthstarNextRunway({
+      rootDir: root,
+      buildInfo: { commitSha: secondHead },
+      generatedAt: "2026-07-28T00:00:00.000Z",
+    });
+
+    expect(report.distributedAdmissionActivationApproval.readyForOperatorReview).toBe(false);
+    expect(report.approvalGated[0]).toMatchObject({
+      gate: "distributed_admission_activation",
+      state: "approval_gated",
+      readyForOperatorReview: false,
+      currentSafetyLock: "approval_packet_missing_or_invalid",
     });
   });
 

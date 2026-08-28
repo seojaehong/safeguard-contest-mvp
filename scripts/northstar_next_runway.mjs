@@ -37,6 +37,7 @@ const ARTIFACTS = Object.freeze({
   ciSupplyChainFullSuite: path.join("evaluation", "ci-full-suite-remediation-2026-08-29", "report.json"),
   knowledgePreparationCapabilityTruth: path.join("evaluation", "knowledge-preparation-capability-truth-2026-08-28", "report.json"),
   launchOperationsReadiness: path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"),
+  distributedAdmissionActivationApproval: path.join("evaluation", "distributed-admission-activation-approval-2026-08-29", "report.json"),
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
   knowledgeViewportWorkbench: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
@@ -817,6 +818,67 @@ function launchOperationsReadinessProven(summary) {
     && summary.providerDispatchReady === false
     && summary.fullyAutomatedLaunchClaimAllowed === false
     && summary.exactSavedShareVerdict === "MISSING_EVIDENCE";
+}
+
+/**
+ * @param {unknown} report
+ */
+function distributedAdmissionActivationApprovalSummary(report) {
+  if (!isRecord(report)) return {};
+  const requestedChange = isRecord(report.requestedChange) ? report.requestedChange : {};
+  const sharedCredentialBoundary = isRecord(report.sharedCredentialBoundary)
+    ? report.sharedCredentialBoundary
+    : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const checks = Array.isArray(report.checks) ? report.checks.filter(isRecord) : [];
+  const requiredVariables = Array.isArray(requestedChange.requiredVariables)
+    ? requestedChange.requiredVariables.map(asString).filter(Boolean)
+    : [];
+  const noMutation = report.ephemeralRedisMutationPerformed === false
+    && mutationBoundary.dbSchemaMutationPerformed === false
+    && mutationBoundary.dbDataMutationPerformed === false
+    && mutationBoundary.providerCallPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.vectorOrEmbeddingMutationPerformed === false
+    && mutationBoundary.wikiPublicationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const readyForOperatorReview = asString(report.verdict)
+      === "APPROVAL_REQUIRED_DISTRIBUTED_ADMISSION_ACTIVATION_NO_MUTATION"
+    && asString(report.overall) === "approval_ready_open"
+    && report.operatorApprovalRequired === true
+    && report.configurationChangeApproved === false
+    && report.activationPerformed === false
+    && report.runtimeBehavioralProbePerformed === false
+    && report.secretValuesInspected === false
+    && report.secretValuesRecorded === false
+    && requiredVariables.length === 2
+    && requiredVariables.includes("UPSTASH_REDIS_REST_URL")
+    && requiredVariables.includes("UPSTASH_REDIS_REST_TOKEN")
+    && asString(requestedChange.environment) === "Production"
+    && requestedChange.remoteHermesLedgerModeChangeRequested === false
+    && sharedCredentialBoundary.remoteHermesLedgerEnabledByThisChange === false
+    && checks.length >= 7
+    && checks.every((item) => item.passed === true)
+    && Array.isArray(report.failedCheckIds)
+    && report.failedCheckIds.length === 0
+    && noMutation
+    && asString(mutationBoundary.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+  return {
+    verdict: asString(report.verdict),
+    sourceSha: asString(report.sourceSha),
+    readyForOperatorReview,
+    operatorApprovalRequired: asBoolean(report.operatorApprovalRequired),
+    configurationChangeApproved: asBoolean(report.configurationChangeApproved),
+    activationPerformed: asBoolean(report.activationPerformed),
+    runtimeBehavioralProbePerformed: asBoolean(report.runtimeBehavioralProbePerformed),
+    secretValuesInspected: asBoolean(report.secretValuesInspected),
+    secretValuesRecorded: asBoolean(report.secretValuesRecorded),
+    requiredVariables,
+    remoteHermesLedgerEnabledByThisChange: asBoolean(sharedCredentialBoundary.remoteHermesLedgerEnabledByThisChange),
+    noMutation,
+    exactSavedShareVerdict: asString(mutationBoundary.exactSavedShareVerdict),
+  };
 }
 
 /**
@@ -3385,6 +3447,13 @@ export function buildNorthstarNextRunway(options) {
   );
   const launchOperationsReadiness = readOptionalJson(options.rootDir, ARTIFACTS.launchOperationsReadiness);
   const launchOperationsReadinessResult = launchOperationsReadinessSummary(launchOperationsReadiness);
+  const distributedAdmissionActivationApproval = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.distributedAdmissionActivationApproval,
+  );
+  const distributedAdmissionActivationApprovalResult = distributedAdmissionActivationApprovalSummary(
+    distributedAdmissionActivationApproval,
+  );
   const documentExportCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.documentExportCapabilityTruth);
   const knowledgeViewportWorkbench = readOptionalJson(options.rootDir, ARTIFACTS.knowledgeViewportWorkbench);
   const llmWikiCandidateContentReadiness = readOptionalJson(options.rootDir, ARTIFACTS.llmWikiCandidateContentReadiness);
@@ -3811,6 +3880,26 @@ export function buildNorthstarNextRunway(options) {
       },
     ],
     approvalGated: [
+      {
+        gate: "distributed_admission_activation",
+        state: "approval_gated",
+        evidencePath: ARTIFACTS.distributedAdmissionActivationApproval,
+        readyForOperatorReview: distributedAdmissionActivationApprovalResult.readyForOperatorReview === true,
+        currentSafetyLock: distributedAdmissionActivationApprovalResult.readyForOperatorReview === true
+          ? "production_secret_and_ephemeral_redis_mutation_approval_required"
+          : "approval_packet_missing_or_invalid",
+        approvalNeeded: [
+          "approve both Production-scoped Upstash REST variables as one configuration change",
+          "approve one bounded invalid-payload connectivity probe that creates short-lived Redis counter and lease keys",
+          "rerun bounded runtime readiness and the fresh Standard scan before any security-complete claim",
+        ],
+        forbiddenUntilApproved: [
+          "write either Production Upstash secret",
+          "create distributed rate or concurrency keys",
+          "enable remote Hermes Upstash ledger mode as part of this activation",
+          "claim distributed admission is operational from syntax readiness alone",
+        ],
+      },
       ...approvalGates(approvalRunway, shareRecipientAckApproval),
       {
         gate: "security_atomic_db_race_remediation",
@@ -3921,6 +4010,7 @@ export function buildNorthstarNextRunway(options) {
     ciSupplyChainFullSuite: ciSupplyChainFullSuiteResult,
     knowledgePreparationCapabilityTruth: knowledgePreparationCapabilityTruthResult,
     launchOperationsReadiness: launchOperationsReadinessResult,
+    distributedAdmissionActivationApproval: distributedAdmissionActivationApprovalResult,
     documentExportCapabilityTruth: documentExportCapabilityTruthSummary(documentExportCapabilityTruth),
     ontologyViewportWorkbench: ontologyViewportWorkbenchSummary(ontologyViewportWorkbench),
     knowledgeViewportWorkbench: knowledgeViewportWorkbenchSummary(knowledgeViewportWorkbench),
@@ -4099,6 +4189,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Pinned CI supply-chain/full-suite proof is \`${report.ciSupplyChainFullSuite.verdict || "missing"}\`: GitHub run \`${report.ciSupplyChainFullSuite.githubRunId ?? "missing"}\` concluded \`${report.ciSupplyChainFullSuite.githubConclusion || "missing"}\` with \`${report.ciSupplyChainFullSuite.testsPassed ?? "unknown"}\` tests passed, \`${report.ciSupplyChainFullSuite.testsSkipped ?? "unknown"}\` skipped, and build \`${report.ciSupplyChainFullSuite.build || "missing"}\`. Checkout/setup-node remain immutable SHAs. This does not close unrelated security findings or approval-gated runtime work; exact saved Share remains \`${report.ciSupplyChainFullSuite.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Knowledge preparation capability truth is a separate notice: \`${report.knowledgePreparationCapabilityTruth.verdict || "missing"}\`; distributed configuration failures use \`${report.knowledgePreparationCapabilityTruth.distributedAdmissionCode || "missing"}\`, temporary load uses \`${report.knowledgePreparationCapabilityTruth.temporaryConcurrencyCode || "missing"}\`, and the UI distinction is \`${report.knowledgePreparationCapabilityTruth.configurationLockDistinguishedFromLoad === true}\`. Live evidence is \`${report.knowledgePreparationCapabilityTruth.liveStatus || "missing"}\` with behavioral probe=\`${report.knowledgePreparationCapabilityTruth.behavioralProbeExecuted === true}\`. Enhanced runtime remains \`${report.knowledgePreparationCapabilityTruth.enhancedLlmRuntime || "missing"}\`, authenticated preparation/Wiki/RLS remain \`${report.knowledgePreparationCapabilityTruth.authenticatedLivePreparationProbe || "APPROVAL_GATED"}/${report.knowledgePreparationCapabilityTruth.llmWikiPublication || "APPROVAL_GATED"}/${report.knowledgePreparationCapabilityTruth.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}\`, security-complete remains \`${report.knowledgePreparationCapabilityTruth.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.knowledgePreparationCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live launch operations readiness is measured separately: \`${report.launchOperationsReadiness.verdict || "missing"}\`; first-viewport receipts \`${report.launchOperationsReadiness.firstViewportCount ?? 0}/${report.launchOperationsReadiness.rowCount ?? 0}\`, desktop four-column \`${report.launchOperationsReadiness.desktopFourColumnCount ?? 0}/2\`, mobile local-scroll \`${report.launchOperationsReadiness.mobileLocalScrollCount ?? 0}/2\`, and console errors \`${report.launchOperationsReadiness.browserConsoleErrorCount ?? 0}\`. Runtime truth remains admission \`${report.launchOperationsReadiness.publicAdmission || "unknown"}\`, dispatch \`${report.launchOperationsReadiness.providerDispatch || "unknown"}\`, and photo Vision \`${report.launchOperationsReadiness.photoVision || "unknown"}\`; distributed configured/provider ready/fully automated remain \`${report.launchOperationsReadiness.distributedAdmissionConfigured === true}/${report.launchOperationsReadiness.providerDispatchReady === true}/${report.launchOperationsReadiness.fullyAutomatedLaunchClaimAllowed === true}\`, and exact saved Share remains \`${report.launchOperationsReadiness.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Distributed admission activation remains a separate operator decision: \`${report.distributedAdmissionActivationApproval.verdict || "missing"}\`, reviewer-ready \`${report.distributedAdmissionActivationApproval.readyForOperatorReview === true}\`, configured/activated/probed \`${report.distributedAdmissionActivationApproval.configurationChangeApproved === true}/${report.distributedAdmissionActivationApproval.activationPerformed === true}/${report.distributedAdmissionActivationApproval.runtimeBehavioralProbePerformed === true}\`, no mutation \`${report.distributedAdmissionActivationApproval.noMutation === true}\`, remote Hermes enabled by this change \`${report.distributedAdmissionActivationApproval.remoteHermesLedgerEnabledByThisChange === true}\`, and exact saved Share \`${report.distributedAdmissionActivationApproval.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live document export capability truth is measured separately: \`${report.documentExportCapabilityTruth.verdict || "missing"}\`; admission is \`${report.documentExportCapabilityTruth.admissionMode || "unknown"}/${report.documentExportCapabilityTruth.admissionReason || "unknown"}\` with ready=\`${report.documentExportCapabilityTruth.admissionReady === true}\`. Desktop panel/beta width is \`${report.documentExportCapabilityTruth.desktopPanelWidth ?? 0}/${report.documentExportCapabilityTruth.desktopBetaButtonWidth ?? 0}px\`; mobile is \`${report.documentExportCapabilityTruth.mobilePanelWidth ?? 0}/${report.documentExportCapabilityTruth.mobileBetaButtonWidth ?? 0}px\`. This proves fail-closed export truth and browser fallbacks, not distributed activation; activation remains \`${report.documentExportCapabilityTruth.distributedAdmissionActivation || "OPERATOR_CONFIGURATION_REQUIRED"}\`, fully automated launch remains \`${report.documentExportCapabilityTruth.fullyAutomatedLaunchClaimAllowed === true}\`, and exact saved Share remains \`${report.documentExportCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live Ontology viewport workbench is measured separately: \`${report.ontologyViewportWorkbench.verdict || "missing"}\`; browser rows \`${report.ontologyViewportWorkbench.passCount ?? 0}/${report.ontologyViewportWorkbench.rowCount ?? 0}\`, maximum body ratio \`${report.ontologyViewportWorkbench.maxBodyRatio ?? 0}\`, mobile task switches \`${report.ontologyViewportWorkbench.mobileTaskSwitchVerifiedCount ?? 0}/4\`. Route splitting alone is not treated as the fix; long content remains in local-scroll panes. Exact saved Share remains \`${report.ontologyViewportWorkbench.exactSavedShareVerdict || "MISSING_EVIDENCE"}\` and fully automated launch remains \`${report.ontologyViewportWorkbench.fullyAutomatedLaunchClaimAllowed === true}\`.
 - Live Knowledge viewport workbench is measured separately: \`${report.knowledgeViewportWorkbench.verdict || "missing"}\`; browser rows \`${report.knowledgeViewportWorkbench.passCount ?? "unknown"}/${report.knowledgeViewportWorkbench.rowCount ?? "unknown"}\`, maximum body ratio \`${report.knowledgeViewportWorkbench.maxBodyRatio ?? "unknown"}\`, selected exposure \`${report.knowledgeViewportWorkbench.visiblePanelCountPerRow ?? "unknown"}\` visible panel and \`${report.knowledgeViewportWorkbench.reachableSectionCountPerRow ?? "unknown"}\` reachable tasks. Progressive disclosures technical/reference/wiki/governance are \`${report.knowledgeViewportWorkbench.technicalDisclosureCount ?? "unknown"}/${report.knowledgeViewportWorkbench.referenceDisclosureCount ?? "unknown"}/${report.knowledgeViewportWorkbench.wikiDisclosureCount ?? "unknown"}/${report.knowledgeViewportWorkbench.governanceDisclosureCount ?? "unknown"}\`, default open \`${report.knowledgeViewportWorkbench.defaultOpenDisclosureCount ?? "unknown"}\`, exclusive groups \`${report.knowledgeViewportWorkbench.exclusiveDisclosureGroups === true}\`, mobile ratios \`${report.knowledgeViewportWorkbench.maxMobileTechnicalScrollRatio ?? "unknown"}/${report.knowledgeViewportWorkbench.maxMobileReferenceScrollRatio ?? "unknown"}/${report.knowledgeViewportWorkbench.maxMobileWikiScrollRatio ?? "unknown"}/${report.knowledgeViewportWorkbench.maxMobileGovernanceScrollRatio ?? "unknown"}\`, and first item/review state panel-contained \`${report.knowledgeViewportWorkbench.firstDisclosureInsidePanel === true}/${report.knowledgeViewportWorkbench.firstReviewStateInsidePanel === true}\`. Route splitting alone is not treated as the fix; long content remains in local-scroll panels. Exact saved Share remains \`${report.knowledgeViewportWorkbench.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, Wiki publication remains \`${report.knowledgeViewportWorkbench.llmWikiPublicationVerdict || "APPROVAL_GATED"}\`, and SIF embedding remains \`${report.knowledgeViewportWorkbench.sifEmbeddingRuntimeVerdict || "APPROVAL_GATED"}\`.
