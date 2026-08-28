@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `5b1f246bcf0587b2c0ac66affab2680fb6ff5fd9`
+Source HEAD: `633ba47420a0d16c5c3ec8cbe161ed1096366749`
 
-Production `/api/build-info`: `5b1f246bcf0587b2c0ac66affab2680fb6ff5fd9`
+Production `/api/build-info`: `df2e96b8c081ace0483ca8e8c93b0a6679343d19`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `evaluation/knowledge-preparation-capability-truth-2026-08-28/report.json`, `evaluation/knowledge-preparation-capability-truth-2026-08-28/report.md`, `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `5b1f246bcf0587b2c0ac66affab2680fb6ff5fd9`
+Live rollup source head: `633ba47420a0d16c5c3ec8cbe161ed1096366749`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `633ba47420a0d16c5c3ec8cbe161ed1096366749` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `df2e96b8c081ace0483ca8e8c93b0a6679343d19`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -53,6 +53,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live editorial duplicate classification is measured separately: `PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY`, generic template overuse `4->0`, retained reviewer findings exact/near `31/100`, and humanReviewCompleted=`false`. Only generic template overuse fails automatically; safety-control and legal-reference repetition remains visible, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live editorial near-duplicate classification preserves `100->100` findings while reducing unclassified human-review-required `54->0`. The retained role-prefix/context/hazard/control categories are `81/9/8/2`; humanReviewCompleted=`false` and exact saved Share remains `MISSING_EVIDENCE`.
 - Live product capability truth is measured separately: `PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH`; manual/provider dispatch is `preview_only` with reason `persistent_idempotency_unavailable`, scheduled briefing email ready=`false`, photo Vision/OCR ready/accepted-only=`true/true`, and AI modes are `template, enhanced, full`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains `MISSING_EVIDENCE` and Documents/Share IA remains `PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP`.
+- Knowledge preparation capability truth is a separate notice: `PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD`; distributed configuration failures use `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`, temporary load uses `PUBLIC_ASK_CONCURRENCY_LIMIT`, and the UI distinction is `true`. Live evidence is `PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD` with behavioral probe=`false`. Enhanced runtime remains `BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION`, authenticated preparation/Wiki/RLS remain `APPROVAL_GATED/APPROVAL_GATED/APPROVAL_GATED`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live launch operations readiness is measured separately: `PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH`; first-viewport receipts `4/4`, desktop four-column `2/2`, mobile local-scroll `2/2`, and console errors `0`. Runtime truth remains admission `unavailable`, dispatch `preview_only`, and photo Vision `ready`; distributed configured/provider ready/fully automated remain `false/false/false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live document export capability truth is measured separately: `PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH`; admission is `unavailable/distributed_limiter_unavailable` with ready=`false`. Desktop panel/beta width is `843/191.25px`; mobile is `262/220px`. This proves fail-closed export truth and browser fallbacks, not distributed activation; activation remains `OPERATOR_CONFIGURATION_REQUIRED`, fully automated launch remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live Ontology viewport workbench is measured separately: `PASS_LIVE_PRODUCTION_ONTOLOGY_VIEWPORT_WORKBENCH`; browser rows `10/10`, maximum body ratio `1`, mobile task switches `4/4`. Route splitting alone is not treated as the fix; long content remains in local-scroll panes. Exact saved Share remains `MISSING_EVIDENCE` and fully automated launch remains `false`.
@@ -164,8 +165,9 @@ Required first-task containment:
 15. keep invited-recipient ACK canary approval-gated: production workpack_share_sessions and workpack_read_confirmations rows require explicit live-data mutation approval before any real ACK readback claim.
 16. keep Hermes/OpenClaw authenticated live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and the explicit opt-in atomic attempt/terminal ledger are source/live-proven, while operator configuration and the authenticated canary remain approval-gated.
 17. keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates.
-18. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
-19. preserve the immutable original 18-finding repository scan as the historical baseline; the sealed follow-up scan accounts for 5,241 files and retains 17 reportable findings plus one renderer-dependent deferred candidate, while the companion no-DB wave bounds 2 findings and mitigates 2 with a distributed-rate residual; resolve the remaining DB/RLS, renderer, distributed-rate, and exact saved Share boundaries before any security-complete claim.
+18. keep knowledge preparation capability truth separate from runtime activation: configure approved distributed admission and run one bounded authenticated preparation probe before claiming enhanced LLM readiness, while Wiki publication and RLS stay separately approval-gated.
+19. do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held.
+20. preserve the immutable original 18-finding repository scan as the historical baseline; the sealed follow-up scan accounts for 5,241 files and retains 17 reportable findings plus one renderer-dependent deferred candidate, while the companion no-DB wave bounds 2 findings and mitigates 2 with a distributed-rate residual; resolve the remaining DB/RLS, renderer, distributed-rate, and exact saved Share boundaries before any security-complete claim.
 
 ## KOSHA Candidate Boundary
 

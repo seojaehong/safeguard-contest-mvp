@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-28T06:30:07.620Z",
-  "sourceSha": "5b1f246bcf0587b2c0ac66affab2680fb6ff5fd9",
+  "generatedAt": "2026-08-28T09:08:09.495Z",
+  "sourceSha": "633ba47420a0d16c5c3ec8cbe161ed1096366749",
   "overall": "open",
   "gates": [
     {
@@ -138,6 +138,16 @@
       "nextActions": [
         "Keep provider dispatch persistence approval-gated.",
         "Measure exact saved Share geometry with a concrete existing session URL or separately approved creation flow."
+      ]
+    },
+    {
+      "id": "knowledge_preparation_capability_truth",
+      "state": "notice",
+      "label": "Knowledge preparation capability truth",
+      "evidencePath": "evaluation\\knowledge-preparation-capability-truth-2026-08-28\\report.json",
+      "detail": "Deployed source distinguishes a distributed-configuration lock from temporary load in the knowledge preparation route and review UI, with 117 focused and adjacent tests, strict typecheck, and a 28-page production build. This is marker-only capability truth: enhanced LLM preparation remains blocked, the authenticated preparation probe and Wiki/RLS publication remain approval-gated, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Configure approved distributed admission, then run one bounded authenticated preparation probe before claiming enhanced LLM runtime readiness; keep Wiki publication and RLS as separate approvals."
       ]
     },
     {

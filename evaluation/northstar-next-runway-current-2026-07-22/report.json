@@ -1,29 +1,38 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-28T06:30:39.653Z",
+  "generatedAt": "2026-08-28T09:08:46.208Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "5b1f246bcf0587b2c0ac66affab2680fb6ff5fd9",
-  "productionCommit": "5b1f246bcf0587b2c0ac66affab2680fb6ff5fd9",
+  "sourceHead": "633ba47420a0d16c5c3ec8cbe161ed1096366749",
+  "productionCommit": "df2e96b8c081ace0483ca8e8c93b0a6679343d19",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "5b1f246bcf0587b2c0ac66affab2680fb6ff5fd9",
+    "commitSha": "df2e96b8c081ace0483ca8e8c93b0a6679343d19",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-pshs506og-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-cyq8lqxk3-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": true,
-  "currentHeadIsEvidenceOnlyPending": false,
-  "sourceHeadLivePending": false,
+  "latestEvidenceCommitLive": false,
+  "currentHeadIsEvidenceOnlyPending": true,
+  "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
-  "sourcePendingChangedPaths": [],
+  "sourcePendingChangedPaths": [
+    "evaluation/knowledge-preparation-capability-truth-2026-08-28/report.json",
+    "evaluation/knowledge-preparation-capability-truth-2026-08-28/report.md",
+    "scripts/northstar_live_rollup.mjs",
+    "scripts/northstar_next_runway.mjs",
+    "scripts/northstar_open_gate_audit.mjs",
+    "tests/northstar-live-rollup.test.ts",
+    "tests/northstar-next-runway-generator.test.ts",
+    "tests/northstar-open-gate-audit.test.ts"
+  ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "5b1f246bcf0587b2c0ac66affab2680fb6ff5fd9",
-  "liveRollupLiveCommit": "5b1f246bcf0587b2c0ac66affab2680fb6ff5fd9",
+  "liveExactEvidenceCommit": "633ba47420a0d16c5c3ec8cbe161ed1096366749",
+  "liveRollupLiveCommit": "df2e96b8c081ace0483ca8e8c93b0a6679343d19",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -46,6 +55,7 @@
     "liveDocumentEditorialDuplicateClassification": "evaluation\\live-document-editorial-duplicate-classification-2026-07-25\\report.json",
     "liveDocumentEditorialNearClassification": "evaluation\\live-document-editorial-near-classification-2026-07-25\\report.json",
     "productCapabilityTruth": "evaluation\\product-capability-truth-2026-07-25\\report.json",
+    "knowledgePreparationCapabilityTruth": "evaluation\\knowledge-preparation-capability-truth-2026-08-28\\report.json",
     "launchOperationsReadiness": "evaluation\\launch-operations-readiness-2026-08-26\\report.json",
     "documentExportCapabilityTruth": "evaluation\\document-export-capability-truth-2026-08-17\\report.json",
     "ontologyViewportWorkbench": "evaluation\\ontology-viewport-workbench-2026-08-17\\report.json",
@@ -201,6 +211,11 @@
       "gate": "current_source_security_residual_remediation",
       "state": "notice",
       "reason": "deployed source includes dns-toctou, provider-detail, xff-spoof with 174 local contract tests; live status is PASS_DEPLOYED_SOURCE_MARKER_ONLY with behavioral probe=false, the sealed scan remains open pending a fresh full scan, security-complete is false, and exact saved Share remains MISSING_EVIDENCE"
+    },
+    {
+      "gate": "knowledge_preparation_capability_truth",
+      "state": "notice",
+      "reason": "deployed source distinguishes distributed configuration lock DISTRIBUTED_RATE_LIMIT_UNAVAILABLE from temporary load PUBLIC_ASK_CONCURRENCY_LIMIT; live evidence is PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD with behavioral probe=false, enhanced runtime remains BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION, Wiki/RLS remain APPROVAL_GATED/APPROVAL_GATED, security-complete is false, and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "share_ack_prebody_admission_security",
@@ -725,6 +740,25 @@
     "photoAnalysisPostCalled": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "documentsShareIaVerdict": "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP"
+  },
+  "knowledgePreparationCapabilityTruth": {
+    "verdict": "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD",
+    "sourceHead": "3beaa4d89727b0bfbfed0fb9dd4a341542f07cfa",
+    "productionCommit": "df2e96b8c081ace0483ca8e8c93b0a6679343d19",
+    "productionIncludesProductCommit": true,
+    "distributedAdmissionCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "temporaryConcurrencyCode": "PUBLIC_ASK_CONCURRENCY_LIMIT",
+    "configurationLockDistinguishedFromLoad": true,
+    "publicationState": "unpublished",
+    "publishAllowed": false,
+    "liveStatus": "PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD",
+    "behavioralProbeExecuted": false,
+    "enhancedLlmRuntime": "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
+    "authenticatedLivePreparationProbe": "APPROVAL_GATED",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "securityCompleteClaimAllowed": false
   },
   "launchOperationsReadiness": {
     "verdict": "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
@@ -2466,6 +2500,7 @@
     "keep invited-recipient ACK canary approval-gated: production workpack_share_sessions and workpack_read_confirmations rows require explicit live-data mutation approval before any real ACK readback claim",
     "keep Hermes/OpenClaw authenticated live execution held: tenant envelope, tool denial, Evidence Harness, DNS-pinned trusted transport, and the explicit opt-in atomic attempt/terminal ledger are source/live-proven, while operator configuration and the authenticated canary remain approval-gated",
     "keep provider dispatch, RLS, LLM Wiki publication, and SIF vector runtime as approval-required gates",
+    "keep knowledge preparation capability truth separate from runtime activation: configure approved distributed admission and run one bounded authenticated preparation probe before claiming enhanced LLM readiness, while Wiki publication and RLS stay separately approval-gated",
     "do not claim full launch completion while final-99 remains pass_with_notice and approval-gated runtime boundaries remain held",
     "preserve the immutable original 18-finding repository scan as the historical baseline; the sealed follow-up scan accounts for 5,241 files and retains 17 reportable findings plus one renderer-dependent deferred candidate, while the companion no-DB wave bounds 2 findings and mitigates 2 with a distributed-rate residual; resolve the remaining DB/RLS, renderer, distributed-rate, and exact saved Share boundaries before any security-complete claim"
   ],

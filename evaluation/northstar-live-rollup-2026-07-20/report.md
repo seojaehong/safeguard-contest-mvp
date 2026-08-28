@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-28T06:30:09.186Z
-Source HEAD at generation: 5b1f246bcf0587b2c0ac66affab2680fb6ff5fd9
-Live commit at generation: 5b1f246bcf0587b2c0ac66affab2680fb6ff5fd9
+Generated at: 2026-08-28T09:08:07.225Z
+Source HEAD at generation: 633ba47420a0d16c5c3ec8cbe161ed1096366749
+Live commit at generation: df2e96b8c081ace0483ca8e8c93b0a6679343d19
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -244,6 +244,15 @@ Overall: `northstar_open_approval_gated`
 - AI generation modes: template, enhanced, full
 - Exact saved Share: MISSING_EVIDENCE
 - Documents/Share IA: PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP
+
+## Knowledge Preparation Capability Truth
+
+- Verdict: `PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD`
+- Deployed-source marker: true; live status=PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD; behavioral probe=false
+- Public failure truth: distributed=DISTRIBUTED_RATE_LIMIT_UNAVAILABLE; temporary load=PUBLIC_ASK_CONCURRENCY_LIMIT; distinguished=true
+- Candidate state: unpublished; publishAllowed=false
+- Runtime and approvals: enhanced=BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION; authenticated probe=APPROVAL_GATED; Wiki/RLS=APPROVAL_GATED/APPROVAL_GATED
+- Exact saved Share: MISSING_EVIDENCE; security-complete=false
 - Boundary: capability truth does not unlock provider persistence, exact saved Share, or Documents/Share viewport IA.
 
 ## Live Launch Operations Readiness
@@ -404,6 +413,7 @@ Overall: `northstar_open_approval_gated`
 | document_editorial_review_cockpit | proven | evaluation\document-editorial-review-cockpit-2026-08-16\report.json |
 | current_live_document_editorial_runtime | proven | evaluation\live-document-editorial-template-runtime-2026-08-27\report.json |
 | product_capability_truth | proven | evaluation\product-capability-truth-2026-07-25\report.json |
+| knowledge_preparation_capability_truth | notice | evaluation\knowledge-preparation-capability-truth-2026-08-28\report.json |
 | launch_operations_readiness_cockpit | proven | evaluation\launch-operations-readiness-2026-08-26\report.json |
 | document_export_capability_truth | proven | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | ontology_viewport_workbench | proven | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
@@ -476,7 +486,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | ancestor | matches_live | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -491,6 +501,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_editorial_duplicate_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
+| knowledge_preparation_capability_truth | ancestor | matches_live_source_mismatch | evaluation\knowledge-preparation-capability-truth-2026-08-28\report.json |
 | launch_operations_readiness_cockpit | ancestor | ancestor_of_head | evaluation\launch-operations-readiness-2026-08-26\report.json |
 | document_export_capability_truth | ancestor | ancestor_of_head | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | ontology_viewport_workbench | ancestor | ancestor_of_head | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
@@ -507,7 +518,7 @@ Overall: `northstar_open_approval_gated`
 | current_security_remediation_ledger | ancestor | ancestor_of_head | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | fresh_current_source_security_scan | ancestor | missing | evaluation\current-source-standard-security-scan-2026-08-28-complete\report.json |
-| current_source_security_residual_remediation | ancestor | matches_live_source_mismatch | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
+| current_source_security_residual_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | ancestor | ancestor_of_head | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | ancestor | ancestor_of_head | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
 | weather_fallback_error_redaction_security | ancestor | ancestor_of_head | evaluation\weather-fallback-error-redaction-2026-08-28\report.json |
