@@ -18,6 +18,7 @@ Verdict: `PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY`
 - Candidate-bound draft restore: true
 - Official/corpus title provenance: true
 - Candidate navigation readability: true
+- Reviewer checklist access: true
 - Evidence reading hierarchy: true
 - Mobile candidate progress visibility: true
 - Draft persistence visibility: true

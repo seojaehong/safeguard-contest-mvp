@@ -9,6 +9,7 @@ Verdict: `PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY`
 - Required human inputs: 64
 - Initial completed inputs: 0
 - Export initially disabled: true
+- Reviewer checklist: `evaluation\kosha-exact-promotion-review-gate-2026-07-22\review-template.md` (48 unchecked inputs, 0 pre-checked)
 - Candidate keyboard tabs: 8 with one roving tab stop
 - Breakpoint orientation synchronized: true
 - Mobile evidence/review tabs: true
@@ -29,6 +30,7 @@ Verdict: `PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY`
 - Selected candidate auto reveal: true
 - Readable evidence cues: true
 - Raw evidence excerpt preserved in disclosure: true
+- Reviewer checklist link visible before completion: true
 - HTML: `evaluation\kosha-exact-promotion-reviewer-cockpit-2026-07-25\index.html`
 
 ## Boundary

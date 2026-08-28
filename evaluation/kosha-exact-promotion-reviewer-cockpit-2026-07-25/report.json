@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-reviewer-cockpit/v1",
   "verdict": "PASS_NO_MUTATION_KOSHA_REVIEWER_COCKPIT_READY",
-  "checkedAt": "2026-08-27T23:36:03.647Z",
-  "sourceHead": "89bdd9cc73bc68e5dcb8e2d0aca20086ec4aab9a",
+  "checkedAt": "2026-08-28T13:52:58.183Z",
+  "sourceHead": "5459d63ba3c3989fa9df5a7737e0c1348b76c972",
   "candidateCount": 8,
   "semanticGroupCount": 24,
   "pageReceiptCount": 24,
@@ -12,6 +12,15 @@
   "checklistInputCount": 64,
   "initialCompletedInputCount": 0,
   "exportInitiallyDisabled": true,
+  "reviewChecklistPath": "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\review-template.md",
+  "reviewChecklistMetrics": {
+    "candidateCount": 8,
+    "uncheckedInputCount": 48,
+    "precheckedInputCount": 0,
+    "officialPdfLinkCount": 8,
+    "pageReceiptCount": 24,
+    "boundaryPreserved": true
+  },
   "accessibilityContract": {
     "candidateTabCount": 8,
     "candidateRovingTabStop": true,
@@ -41,7 +50,9 @@
     "mobileCandidateScrollSnap": true,
     "selectedCandidateAutoReveal": true,
     "readableEvidenceCues": true,
-    "rawEvidenceExcerptPreservedInDisclosure": true
+    "rawEvidenceExcerptPreservedInDisclosure": true,
+    "reviewerChecklistLinkVisible": true,
+    "reviewerChecklistLinkAvailableBeforeCompletion": true
   },
   "outputHtml": "evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\index.html",
   "boundary": {

@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-28T13:11:04.717Z",
-  "head": "eea3e284b35085fa084d362c8f7c050d0879572d",
+  "generatedAt": "2026-08-28T13:53:36.106Z",
+  "head": "5459d63ba3c3989fa9df5a7737e0c1348b76c972",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "eea3e284b35085fa084d362c8f7c050d0879572d",
+    "commitSha": "db91dc1eb9ec486d2d09b8714271ed1ebd1c8395",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-l84eav4dl-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-969ji1114-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -507,7 +507,7 @@
       "id": "kosha_exact_promotion_review_gate",
       "state": "approval_gated",
       "artifact": "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\report.json",
-      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Reviewer-facing checklist evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\review-template.md exposes 8 candidates, 48 initially unchecked human inputs, 8 official PDF links, and 24 page receipts with no pre-checked items; machine evidence does not replace human review and checklist completion does not approve promotion. Official PDF audit evaluation\\kosha-exact-official-pdf-audit-2026-07-25\\report.json re-downloaded and machine-verified all 8 PDF/body pairs while preserving lifecycle, human-review, and promotion boundaries. Official lifecycle audit evaluation\\kosha-exact-official-lifecycle-audit-2026-07-25\\report.json reconciles all 8 packet versions against current and retired inventories with 8 exact official-current titles; corpus source titles remain separately preserved for provenance. Reviewer-support audit evaluation\\kosha-exact-promotion-reviewer-support-2026-07-25\\report.json records bounded excerpts plus 24/24 PDF page/body location receipts for 8/8 candidates and 24/24 semantic groups, bound to the corpus snapshot identity, without completing human review or creating a registry artifact. Reviewer cockpit evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\report.json presents 8 candidates, 24 readable page-and-term cues with each raw PDF excerpt preserved behind an initially closed disclosure, 24 PDF page/body receipts, 2 reconciled official/corpus title provenance rows, and all 64 required human inputs in a viewport-contained no-mutation UI; export remains locked until complete and promotion remains separate approval. Browser geometry evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\browser-report.json preserves one visible candidate, explicit official-current and corpus-source titles, 40 checks, receipt access in the bounded evidence pane, three bounded desktop/mobile cases, reciprocal breakpoint-aware tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection with the selected candidate fully visible, a two-card mobile rail with an always-visible `후보 1/8 · 현재 0/8 · 전체 0/64` candidate/current/global progress row, a next-incomplete command that wraps and skips completed candidates, fail-visible future review timestamp rejection, visible empty/changed/restored/stale-rejected draft states plus a fail-visible browser-storage error, all 24 reading cues plus 24 closed raw-excerpt disclosures, corpus-title-and-receipt-bound draft restore that rejects stale fingerprints, and polite live progress. Contract audit evaluation\\kosha-exact-promotion-review-contract-audit-2026-07-23\\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval."
+      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Reviewer-facing checklist evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\review-template.md exposes 8 candidates, 48 initially unchecked human inputs, 8 official PDF links, and 24 page receipts with no pre-checked items; machine evidence does not replace human review and checklist completion does not approve promotion. Official PDF audit evaluation\\kosha-exact-official-pdf-audit-2026-07-25\\report.json re-downloaded and machine-verified all 8 PDF/body pairs while preserving lifecycle, human-review, and promotion boundaries. Official lifecycle audit evaluation\\kosha-exact-official-lifecycle-audit-2026-07-25\\report.json reconciles all 8 packet versions against current and retired inventories with 8 exact official-current titles; corpus source titles remain separately preserved for provenance. Reviewer-support audit evaluation\\kosha-exact-promotion-reviewer-support-2026-07-25\\report.json records bounded excerpts plus 24/24 PDF page/body location receipts for 8/8 candidates and 24/24 semantic groups, bound to the corpus snapshot identity, without completing human review or creating a registry artifact. Reviewer cockpit evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\report.json presents 8 candidates, 24 readable page-and-term cues with each raw PDF excerpt preserved behind an initially closed disclosure, 24 PDF page/body receipts, 2 reconciled official/corpus title provenance rows, and all 64 required human inputs in a viewport-contained no-mutation UI; the 8-candidate/48-unchecked-input human checklist is directly reachable before completion, export remains locked until complete, and promotion remains separate approval. Browser geometry evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\browser-report.json preserves one visible candidate, explicit official-current and corpus-source titles, 40 checks, receipt access in the bounded evidence pane, three bounded desktop/mobile cases, reciprocal breakpoint-aware tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection with the selected candidate fully visible, a two-card mobile rail with an always-visible `후보 1/8 · 현재 0/8 · 전체 0/64` candidate/current/global progress row, a next-incomplete command that wraps and skips completed candidates, fail-visible future review timestamp rejection, visible empty/changed/restored/stale-rejected draft states plus a fail-visible browser-storage error, all 24 reading cues plus 24 closed raw-excerpt disclosures, corpus-title-and-receipt-bound draft restore that rejects stale fingerprints, and polite live progress. Contract audit evaluation\\kosha-exact-promotion-review-contract-audit-2026-07-23\\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval."
     }
   ],
   "mobileP0": {
@@ -1939,10 +1939,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "eea3e284b35085fa084d362c8f7c050d0879572d",
+      "sourceCommit": "5459d63ba3c3989fa9df5a7737e0c1348b76c972",
       "sourceStatus": "exact",
-      "productionCommit": "eea3e284b35085fa084d362c8f7c050d0879572d",
-      "productionStatus": "matches_live"
+      "productionCommit": "5459d63ba3c3989fa9df5a7737e0c1348b76c972",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",

@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-reviewer-cockpit-browser/v1",
   "verdict": "PASS_LOCAL_KOSHA_REVIEWER_COCKPIT_GEOMETRY",
-  "checkedAt": "2026-08-27T23:36:06.579Z",
-  "sourceHead": "89bdd9cc73bc68e5dcb8e2d0aca20086ec4aab9a",
+  "checkedAt": "2026-08-28T13:53:01.456Z",
+  "sourceHead": "5459d63ba3c3989fa9df5a7737e0c1348b76c972",
   "cases": 3,
   "passedCases": 3,
   "desktopPass": true,
@@ -16,6 +16,7 @@
   "draftPersistenceVisibilityPass": true,
   "nextIncompleteNavigationPass": true,
   "futureReviewTimestampPass": true,
+  "reviewChecklistAccessPass": true,
   "draftStorageIdentity": {
     "sameFingerprintPreserved": true,
     "sourceIdentityPresent": true,
@@ -161,6 +162,19 @@
       "openRawExcerptDisclosureCount": 0,
       "rawExcerptTextPreserved": true,
       "exportInitiallyDisabled": true,
+      "reviewChecklistVisible": true,
+      "reviewChecklistHref": "../kosha-exact-promotion-review-gate-2026-07-22/review-template.md",
+      "footerActions": {
+        "x": 0,
+        "y": 662,
+        "width": 1440,
+        "height": 61,
+        "top": 662,
+        "right": 1440,
+        "bottom": 723,
+        "left": 0
+      },
+      "footerControlMaxHeight": 44,
       "nextIncompleteVisible": true,
       "nextIncompleteInitiallyEnabled": true,
       "reviewedAtMaxPresent": true,
@@ -170,6 +184,7 @@
       "firstEvidenceReadingCueBottom": 439.390625,
       "firstCheckBottom": 224.59375,
       "horizontalOverflow": false,
+      "reviewChecklistTargetExists": true,
       "candidateEndState": {
         "selectedIndex": 7,
         "focusedIndex": 7,
@@ -206,10 +221,10 @@
         "x": 0,
         "y": 68,
         "width": 390,
-        "height": 584,
+        "height": 558,
         "top": 68,
         "right": 390,
-        "bottom": 652,
+        "bottom": 626,
         "left": 0
       },
       "candidateRail": {
@@ -250,20 +265,20 @@
         "x": 0,
         "y": 148,
         "width": 390,
-        "height": 504,
+        "height": 478,
         "top": 148,
         "right": 390,
-        "bottom": 652,
+        "bottom": 626,
         "left": 0
       },
       "evidencePane": {
         "x": 0,
         "y": 197,
         "width": 390,
-        "height": 455,
+        "height": 429,
         "top": 197,
         "right": 390,
-        "bottom": 652,
+        "bottom": 626,
         "left": 0
       },
       "reviewPane": {
@@ -307,6 +322,19 @@
       "openRawExcerptDisclosureCount": 0,
       "rawExcerptTextPreserved": true,
       "exportInitiallyDisabled": true,
+      "reviewChecklistVisible": true,
+      "reviewChecklistHref": "../kosha-exact-promotion-review-gate-2026-07-22/review-template.md",
+      "footerActions": {
+        "x": 0,
+        "y": 626,
+        "width": 390,
+        "height": 97,
+        "top": 626,
+        "right": 390,
+        "bottom": 723,
+        "left": 0
+      },
+      "footerControlMaxHeight": 38,
       "nextIncompleteVisible": true,
       "nextIncompleteInitiallyEnabled": true,
       "reviewedAtMaxPresent": true,
@@ -316,6 +344,7 @@
       "firstEvidenceReadingCueBottom": 658.78125,
       "firstCheckBottom": 0,
       "horizontalOverflow": false,
+      "reviewChecklistTargetExists": true,
       "candidateEndState": {
         "selectedIndex": 7,
         "focusedIndex": 7,
@@ -333,10 +362,10 @@
         "evidenceFocused": "0:evidence"
       },
       "receiptAccess": {
-        "receiptTop": 412.78125,
-        "receiptBottom": 436.78125,
+        "receiptTop": 399.78125,
+        "receiptBottom": 423.78125,
         "paneTop": 197,
-        "paneBottom": 652,
+        "paneBottom": 626,
         "fullyVisibleInsidePane": true
       },
       "screenshot": "evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\mobile-evidence-390x723.png"
@@ -357,10 +386,10 @@
         "x": 0,
         "y": 68,
         "width": 390,
-        "height": 584,
+        "height": 558,
         "top": 68,
         "right": 390,
-        "bottom": 652,
+        "bottom": 626,
         "left": 0
       },
       "candidateRail": {
@@ -401,10 +430,10 @@
         "x": 0,
         "y": 148,
         "width": 390,
-        "height": 504,
+        "height": 478,
         "top": 148,
         "right": 390,
-        "bottom": 652,
+        "bottom": 626,
         "left": 0
       },
       "evidencePane": {
@@ -421,10 +450,10 @@
         "x": 0,
         "y": 197,
         "width": 390,
-        "height": 455,
+        "height": 429,
         "top": 197,
         "right": 390,
-        "bottom": 652,
+        "bottom": 626,
         "left": 0
       },
       "candidatePanelColumns": "minmax(0px, 1fr) 360px",
@@ -458,6 +487,19 @@
       "openRawExcerptDisclosureCount": 0,
       "rawExcerptTextPreserved": true,
       "exportInitiallyDisabled": true,
+      "reviewChecklistVisible": true,
+      "reviewChecklistHref": "../kosha-exact-promotion-review-gate-2026-07-22/review-template.md",
+      "footerActions": {
+        "x": 0,
+        "y": 626,
+        "width": 390,
+        "height": 97,
+        "top": 626,
+        "right": 390,
+        "bottom": 723,
+        "left": 0
+      },
+      "footerControlMaxHeight": 38,
       "nextIncompleteVisible": true,
       "nextIncompleteInitiallyEnabled": true,
       "reviewedAtMaxPresent": true,
@@ -467,6 +509,7 @@
       "firstEvidenceReadingCueBottom": 0,
       "firstCheckBottom": 325.796875,
       "horizontalOverflow": false,
+      "reviewChecklistTargetExists": true,
       "candidateEndState": {
         "selectedIndex": 7,
         "focusedIndex": 7,
