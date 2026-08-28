@@ -2360,6 +2360,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       candidateBodyInternalScroll: true,
       firstDecisionActionInViewport: true,
       horizontalOverflow: false,
+      candidateMultilineContinuationPreserved: true,
       actualProductionCandidateQueueRead: false,
       routeControlledBrowserFixture: true,
     },

@@ -2013,6 +2013,7 @@ function createFixtureRoot(): { root: string; head: string } {
       candidateBodyInternalScroll: true,
       firstDecisionActionInViewport: true,
       horizontalOverflow: false,
+      candidateMultilineContinuationPreserved: true,
       actualProductionCandidateQueueRead: false,
       routeControlledBrowserFixture: true,
     },

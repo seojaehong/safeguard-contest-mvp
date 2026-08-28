@@ -1713,6 +1713,7 @@ function createFixtureRoot(): string {
       candidateBodyInternalScroll: true,
       firstDecisionActionInViewport: true,
       horizontalOverflow: false,
+      candidateMultilineContinuationPreserved: true,
       actualProductionCandidateQueueRead: false,
       routeControlledBrowserFixture: true,
     },
@@ -7333,6 +7334,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     });
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("8/8");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("four numbered");
+    expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("multiline continuation");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("actual production candidate queue");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("APPROVAL_GATED");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("MISSING_EVIDENCE");
@@ -9353,9 +9355,14 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const rootDir = createFixtureRoot();
     const reportPath = path.join(rootDir, "evaluation", "hermes-knowledge-review-structured-sections-2026-08-28", "report.json");
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
-      afterLive: { candidateSectionCount: number; actualProductionCandidateQueueRead: boolean };
+      afterLive: {
+        candidateSectionCount: number;
+        candidateMultilineContinuationPreserved: boolean;
+        actualProductionCandidateQueueRead: boolean;
+      };
     };
     report.afterLive.candidateSectionCount = 3;
+    report.afterLive.candidateMultilineContinuationPreserved = false;
     report.afterLive.actualProductionCandidateQueueRead = true;
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
 
@@ -9368,6 +9375,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(gate).toMatchObject({ state: "contradicted" });
     expect(gate?.detail).toContain("structuredCompanion=false");
     expect(gate?.detail).toContain("structuredSections=3");
+    expect(gate?.detail).toContain("multiline=false");
     expect(gate?.detail).toContain("actualQueueRead=true");
   });
 
