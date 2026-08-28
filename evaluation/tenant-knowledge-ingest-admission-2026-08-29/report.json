@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "safeclaw-tenant-knowledge-ingest-admission/v1",
+  "verdict": "PASS_DEPLOYED_SOURCE_TENANT_KNOWLEDGE_INGEST_ADMISSION_NO_LIVE_MUTATION",
+  "generatedAt": "2026-08-29T01:29:52.6150903+09:00",
+  "sourceHead": "b89acb8b077bb78f35af94a554ebf82f4301f044",
+  "productionBuild": {
+    "commitSha": "b89acb8b077bb78f35af94a554ebf82f4301f044",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-msj47qmv4-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "securityBaseline": {
+    "scanId": "c5175a50-038b-402e-9fd3-6af9eec6582b",
+    "targetRevision": "c9e24f31b7c9e9db5896bd221401bcef3e35ed24",
+    "finding": "resource-exhaustion.tenant-knowledge-ingest",
+    "immutableOriginalBaselinePreserved": true
+  },
+  "admissionPolicy": {
+    "actor": { "limit": 60, "windowMs": 3600000 },
+    "organization": { "limit": 500, "windowMs": 86400000 },
+    "requireDistributedInProduction": true,
+    "identifierStoredInRateKeyAsSha256Digest": true,
+    "workUnit": "knowledge-ingest-write",
+    "actorAdmissionBeforeOwnershipLookup": true,
+    "organizationAdmissionAfterOwnershipBeforeWrites": true,
+    "productionLimiterFailureBeforeWrites": true
+  },
+  "verification": {
+    "focusedVitest": {
+      "files": 3,
+      "tests": 22,
+      "passed": 22,
+      "failed": 0
+    },
+    "strictTypecheck": "PASS",
+    "productionBuild": "PASS",
+    "staticPages": 28,
+    "gitDiffCheck": "PASS",
+    "liveReadOnly": {
+      "unauthenticatedProbeStatus": 401,
+      "authenticatedIngestExecuted": false,
+      "knowledgeEventInserted": false,
+      "regenerationRunInserted": false
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "liveAuthenticatedAdmissionProbe": "NOT_EXECUTED_REQUIRES_DB_WRITE_PATH",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedWorkOverclaimed": false,
+    "securityCompletionClaimed": false,
+    "otherScanFindingsRemainOpen": true
+  }
+}
