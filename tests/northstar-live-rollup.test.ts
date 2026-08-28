@@ -449,6 +449,19 @@ type RollupReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceSecurityResidualRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    residualCount: number;
+    focusedTests: number | null;
+    adjacentTests: number | null;
+    liveStatus: string;
+    behavioralProbeExecuted: boolean;
+    followUpSecurityScanRequired: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   shareAckPreBodyAdmission: {
     verdict: string;
     sourceHead: string;
@@ -1059,6 +1072,33 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
     baseline: { immutableOriginalFindingCount: 18, preserved: true, rewritten: false },
     currentDisposition: { approvalGatedDatabaseOrAtomicityCount: 14, approvalSensitiveShareCapabilityCount: 0, approvalFreeProductSourceResidualCount: 3, fullyClosedBoundedSourceCandidateCount: 0, securityCompleteClaimAllowed: false },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", freshFullRepositoryScanCompleted: true, coverageClosureCompleted: false, securityCompleteClaimAllowed: false },
+  };
+}
+
+function currentSourceSecurityResidualRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    productionIncludesProductCommit: true,
+    remediatedSourceResiduals: [
+      { anchor: "provider-detail", status: "PASS_CURRENT_SOURCE_LOCAL" },
+      { anchor: "dns-toctou", status: "PASS_CURRENT_SOURCE_LOCAL" },
+      { anchor: "xff-spoof", status: "PASS_CURRENT_SOURCE_LOCAL" },
+    ],
+    verification: {
+      focusedSecurity: { tests: 33 },
+      adjacentPublicAdmissionAndHarness: { tests: 141 },
+    },
+    liveVerification: {
+      status: "PASS_DEPLOYED_SOURCE_MARKER_ONLY",
+      behavioralProbeExecuted: false,
+    },
+    remainingBoundaries: {
+      followUpSecurityScanRequired: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
   };
 }
 
@@ -2232,6 +2272,7 @@ function createFixtureRoot(): { root: string; head: string } {
     },
   });
   writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-28-complete/report.json", freshCurrentSourceSecurityScanFixture());
+  writeJson(root, "evaluation/current-source-security-residual-remediation-2026-08-28/report.json", currentSourceSecurityResidualRemediationFixture());
   writeJson(root, "evaluation/share-ack-prebody-admission-2026-08-28/report.json", shareAckPreBodyAdmissionFixture());
   writeJson(root, "evaluation/safety-status-disconnect-lease-2026-08-28/report.json", safetyStatusDisconnectLeaseFixture());
   writeJson(root, "evaluation/weather-fallback-error-redaction-2026-08-28/report.json", weatherFallbackErrorRedactionFixture());
@@ -2626,6 +2667,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/security-current-remediation-ledger-2026-08-13/report.json",
     "evaluation/current-full-repository-security-scan-2026-08-27/report.json",
     "evaluation/current-source-standard-security-scan-2026-08-28-complete/report.json",
+    "evaluation/current-source-security-residual-remediation-2026-08-28/report.json",
     "evaluation/share-ack-prebody-admission-2026-08-28/report.json",
     "evaluation/safety-status-disconnect-lease-2026-08-28/report.json",
     "evaluation/weather-fallback-error-redaction-2026-08-28/report.json",
@@ -3182,6 +3224,22 @@ describe("northstar live rollup", () => {
       approvalFreeProductSourceResidualCount: 3,
       fullyClosedBoundedSourceCandidateCount: 0,
       freshFullRepositoryScanCompleted: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "current_source_security_residual_remediation")).toMatchObject({
+      artifact: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
+    });
+    expect(report.currentSourceSecurityResidualRemediation).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      residualCount: 3,
+      focusedTests: 33,
+      adjacentTests: 141,
+      liveStatus: "PASS_DEPLOYED_SOURCE_MARKER_ONLY",
+      behavioralProbeExecuted: false,
+      followUpSecurityScanRequired: true,
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });

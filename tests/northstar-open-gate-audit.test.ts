@@ -227,6 +227,58 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
   };
 }
 
+function currentSourceSecurityResidualRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    productionIncludesProductCommit: true,
+    baseline: {
+      scanId: "3358978a-75d1-454a-9dcd-4b63b52b9768",
+      immutableOriginalFindingCount: 18,
+      currentScanFindingCount: 17,
+      coverageCompleteness: "partial",
+      baselineRewritten: false,
+    },
+    remediatedSourceResiduals: [
+      { anchor: "provider-detail", status: "PASS_CURRENT_SOURCE_LOCAL" },
+      { anchor: "dns-toctou", status: "PASS_CURRENT_SOURCE_LOCAL" },
+      { anchor: "xff-spoof", status: "PASS_CURRENT_SOURCE_LOCAL" },
+    ],
+    verification: {
+      focusedSecurity: { testFiles: 3, tests: 33, status: "PASS" },
+      adjacentPublicAdmissionAndHarness: { testFiles: 7, tests: 141, status: "PASS" },
+      typecheck: "PASS",
+      productionBuild: "PASS",
+      staticPages: 28,
+    },
+    liveVerification: {
+      status: "PASS_DEPLOYED_SOURCE_MARKER_ONLY",
+      buildInfoCommit: "fixture-sha",
+      behavioralProbeExecuted: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      wikiPublished: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      databaseSecurityRemediation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      llmWikiPublication: "APPROVAL_GATED",
+      sifVectorRuntime: "APPROVAL_GATED",
+      koshaExactRegistryPromotion: "APPROVAL_GATED",
+      followUpSecurityScanRequired: true,
+      securityCompleteClaimAllowed: false,
+    },
+  };
+}
+
 function shareAckPreBodyAdmissionFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED",
@@ -4069,6 +4121,11 @@ function createFixtureRoot(): string {
   writeJson(rootDir, path.join(freshScanRoot, "canonical", "findings.json"), { findings: [] });
   writeJson(rootDir, path.join(freshScanRoot, "canonical", "coverage.json"), { completeness: "partial" });
   fs.writeFileSync(path.join(rootDir, freshScanRoot, "scan-report.md"), "# sealed fixture\n", "utf8");
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
+    currentSourceSecurityResidualRemediationFixture(),
+  );
   writeJson(
     rootDir,
     path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
@@ -8157,6 +8214,78 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "fresh_current_source_security_scan")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records deployed security residual remediation as notice without closing the sealed scan", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-security-residual-remediation-2026-08-28",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_security_residual_remediation");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("provider-detail, dns-toctou, and xff-spoof");
+    expect(gate?.detail).toContain("174 focused and adjacent tests");
+    expect(gate?.detail).toContain("sealed 17-finding partial-coverage scan remain visible");
+    expect(gate?.detail).toContain("follow-up full scan is required");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "current_source_security_residual_remediation")?.state)
+      .toBe("contradicted");
+  });
+
+  it("uses the deployed residual receipt for older weather and follow-up governed paths", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    writeText(rootDir, path.join("lib", "weather.ts"), "export const redactedWeatherFallback = true;\n");
+    writeText(rootDir, path.join("lib", "work24.ts"), "export const redactedProviderDetail = true;\n");
+    execFileSync("git", ["add", "lib/weather.ts", "lib/work24.ts"], { cwd: rootDir, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "apply deployed residual remediation"], { cwd: rootDir, stdio: "ignore" });
+    const currentSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: rootDir, encoding: "utf8" }).trim();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-security-residual-remediation-2026-08-28",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      sourceHead: string;
+      productionCommit: string;
+      liveVerification: { buildInfoCommit: string };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.sourceHead = currentSha;
+    report.productionCommit = currentSha;
+    report.liveVerification.buildInfoCommit = currentSha;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const compatible = buildNorthstarOpenGateAudit({ rootDir });
+    expect(compatible.gates.find((item) => item.id === "current_source_security_residual_remediation")?.state)
+      .toBe("notice");
+    expect(compatible.gates.find((item) => item.id === "weather_fallback_error_redaction_security")?.state)
+      .toBe("notice");
+    expect(compatible.gates.find((item) => item.id === "security_followup_remediation")?.state)
+      .toBe("proven");
+
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "weather_fallback_error_redaction_security")?.state)
+      .toBe("contradicted");
+    expect(contradicted.gates.find((item) => item.id === "security_followup_remediation")?.state)
       .toBe("contradicted");
   });
 

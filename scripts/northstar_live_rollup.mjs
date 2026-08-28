@@ -47,6 +47,7 @@ const ARTIFACTS = Object.freeze({
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-28-complete", "report.json"),
+  currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
   shareAckPreBodyAdmission: path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
   safetyStatusDisconnectLease: path.join("evaluation", "safety-status-disconnect-lease-2026-08-28", "report.json"),
   weatherFallbackErrorRedaction: path.join("evaluation", "weather-fallback-error-redaction-2026-08-28", "report.json"),
@@ -568,6 +569,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const currentSecurityRemediationLedger = tryReadJson(rootDir, ARTIFACTS.currentSecurityRemediationLedger);
   const currentRepositorySecurityRescan = tryReadJson(rootDir, ARTIFACTS.currentRepositorySecurityRescan);
   const freshCurrentSourceSecurityScan = tryReadJson(rootDir, ARTIFACTS.freshCurrentSourceSecurityScan);
+  const currentSourceSecurityResidualRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityResidualRemediation);
   const shareAckPreBodyAdmission = tryReadJson(rootDir, ARTIFACTS.shareAckPreBodyAdmission);
   const safetyStatusDisconnectLease = tryReadJson(rootDir, ARTIFACTS.safetyStatusDisconnectLease);
   const weatherFallbackErrorRedaction = tryReadJson(rootDir, ARTIFACTS.weatherFallbackErrorRedaction);
@@ -708,6 +710,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "current_security_remediation_ledger", ARTIFACTS.currentSecurityRemediationLedger, currentSecurityRemediationLedger),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_repository_security_rescan", ARTIFACTS.currentRepositorySecurityRescan, currentRepositorySecurityRescan),
     evidenceStatus(rootDir, currentHead, liveCommit, "fresh_current_source_security_scan", ARTIFACTS.freshCurrentSourceSecurityScan, freshCurrentSourceSecurityScan),
+    evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_residual_remediation", ARTIFACTS.currentSourceSecurityResidualRemediation, currentSourceSecurityResidualRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "share_ack_prebody_admission_security", ARTIFACTS.shareAckPreBodyAdmission, shareAckPreBodyAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "safety_status_disconnect_lease_security", ARTIFACTS.safetyStatusDisconnectLease, safetyStatusDisconnectLease),
     evidenceStatus(rootDir, currentHead, liveCommit, "weather_fallback_error_redaction_security", ARTIFACTS.weatherFallbackErrorRedaction, weatherFallbackErrorRedaction),
@@ -982,6 +985,28 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       freshFullRepositoryScanCompleted: recordAt(freshCurrentSourceSecurityScan, "remainingBoundaries")?.freshFullRepositoryScanCompleted === true,
       securityCompleteClaimAllowed: recordAt(freshCurrentSourceSecurityScan, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
       exactSavedShareVerdict: asString(recordAt(freshCurrentSourceSecurityScan, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    currentSourceSecurityResidualRemediation: {
+      artifact: ARTIFACTS.currentSourceSecurityResidualRemediation,
+      verdict: isRecord(currentSourceSecurityResidualRemediation)
+        ? asString(currentSourceSecurityResidualRemediation.verdict)
+        : "missing",
+      sourceHead: isRecord(currentSourceSecurityResidualRemediation)
+        ? asString(currentSourceSecurityResidualRemediation.sourceHead)
+        : "",
+      productionCommit: isRecord(currentSourceSecurityResidualRemediation)
+        ? asString(currentSourceSecurityResidualRemediation.productionCommit)
+        : "",
+      residualCount: Array.isArray(currentSourceSecurityResidualRemediation?.remediatedSourceResiduals)
+        ? currentSourceSecurityResidualRemediation.remediatedSourceResiduals.length
+        : 0,
+      focusedTests: asNumber(recordAt(recordAt(currentSourceSecurityResidualRemediation, "verification"), "focusedSecurity")?.tests),
+      adjacentTests: asNumber(recordAt(recordAt(currentSourceSecurityResidualRemediation, "verification"), "adjacentPublicAdmissionAndHarness")?.tests),
+      liveStatus: asString(recordAt(currentSourceSecurityResidualRemediation, "liveVerification")?.status),
+      behavioralProbeExecuted: recordAt(currentSourceSecurityResidualRemediation, "liveVerification")?.behavioralProbeExecuted === true,
+      followUpSecurityScanRequired: recordAt(currentSourceSecurityResidualRemediation, "remainingBoundaries")?.followUpSecurityScanRequired === true,
+      securityCompleteClaimAllowed: recordAt(currentSourceSecurityResidualRemediation, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(currentSourceSecurityResidualRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     shareAckPreBodyAdmission: {
       artifact: ARTIFACTS.shareAckPreBodyAdmission,

@@ -514,6 +514,19 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceSecurityResidualRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    residualAnchors: string[];
+    focusedTests: number | null;
+    adjacentTests: number | null;
+    liveStatus: string;
+    behavioralProbeExecuted: boolean;
+    followUpSecurityScanRequired: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   shareAckPreBodyAdmission: {
     verdict: string;
     sourceHead: string;
@@ -1505,6 +1518,32 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
       koshaExactRegistryPromotion: "APPROVAL_GATED",
       freshFullRepositoryScanCompleted: true,
       securityCompleteClaimAllowed: false,
+    },
+  };
+}
+
+function currentSourceSecurityResidualRemediationFixture(sourceHead: string): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING",
+    sourceHead,
+    productionCommit: sourceHead,
+    remediatedSourceResiduals: [
+      { anchor: "provider-detail" },
+      { anchor: "dns-toctou" },
+      { anchor: "xff-spoof" },
+    ],
+    verification: {
+      focusedSecurity: { tests: 33 },
+      adjacentPublicAdmissionAndHarness: { tests: 141 },
+    },
+    liveVerification: {
+      status: "PASS_DEPLOYED_SOURCE_MARKER_ONLY",
+      behavioralProbeExecuted: false,
+    },
+    remainingBoundaries: {
+      followUpSecurityScanRequired: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   };
 }
@@ -3241,6 +3280,11 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
   const firstHead = commitAll(root, "seed");
   writeJson(
     root,
+    "evaluation/current-source-security-residual-remediation-2026-08-28/report.json",
+    currentSourceSecurityResidualRemediationFixture(firstHead),
+  );
+  writeJson(
+    root,
     "evaluation/share-ack-prebody-admission-2026-08-28/report.json",
     shareAckPreBodyAdmissionFixture(firstHead),
   );
@@ -4507,6 +4551,24 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       state: "notice",
       reason: expect.stringContaining("17 open findings"),
     }));
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "current_source_security_residual_remediation",
+      state: "notice",
+      reason: expect.stringContaining("174 local contract tests"),
+    }));
+    expect(report.currentSourceSecurityResidualRemediation).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      residualAnchors: ["dns-toctou", "provider-detail", "xff-spoof"],
+      focusedTests: 33,
+      adjacentTests: 141,
+      liveStatus: "PASS_DEPLOYED_SOURCE_MARKER_ONLY",
+      behavioralProbeExecuted: false,
+      followUpSecurityScanRequired: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "share_ack_prebody_admission_security",
       state: "notice",

@@ -68,6 +68,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-28-complete", "report.json"),
+  currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
   shareAckPreBodyAdmission: path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
   safetyStatusDisconnectLease: path.join("evaluation", "safety-status-disconnect-lease-2026-08-28", "report.json"),
   weatherFallbackErrorRedaction: path.join("evaluation", "weather-fallback-error-redaction-2026-08-28", "report.json"),
@@ -8220,6 +8221,109 @@ function evaluateFreshCurrentSourceSecurityScanGate(rootDir) {
   });
 }
 
+const CURRENT_SOURCE_SECURITY_RESIDUAL_PATHS = [
+  "lib/accident-cases.ts",
+  "lib/api-guard.ts",
+  "lib/kosha-openapi.ts",
+  "lib/search.ts",
+  "lib/server/upstream-http.ts",
+  "lib/weather.ts",
+  "lib/work24.ts",
+  "tests/api-guard.test.ts",
+  "tests/upstream-http-security.test.ts",
+  "tests/upstream-integration-security.test.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateCurrentSourceSecurityResidualRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourceSecurityResidualRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_source_security_residual_remediation",
+      label: "Current-source security residual remediation",
+      state: "missing",
+      evidencePath,
+      detail: "Current-source security residual remediation evidence is missing or invalid.",
+      nextActions: ["Restore the deployed-source receipt without rewriting or closing the sealed scan."],
+    });
+  }
+
+  const baseline = isRecord(report.baseline) ? report.baseline : {};
+  const residuals = Array.isArray(report.remediatedSourceResiduals)
+    ? report.remediatedSourceResiduals.filter(isRecord)
+    : [];
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedSecurity) ? verification.focusedSecurity : {};
+  const adjacent = isRecord(verification.adjacentPublicAdmissionAndHarness)
+    ? verification.adjacentPublicAdmissionAndHarness
+    : {};
+  const live = isRecord(report.liveVerification) ? report.liveVerification : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const residualAnchors = residuals.map((item) => readString(item.anchor)).sort();
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.embeddingGenerated === false
+    && mutation.vectorUploadPerformed === false
+    && mutation.wikiPublished === false
+    && mutation.exactTrustRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING"
+    && sourceHead.length === 40
+    && productionCommit.length === 40
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, CURRENT_SOURCE_SECURITY_RESIDUAL_PATHS)
+    && isGitAncestor(rootDir, productionCommit)
+    && report.productionIncludesProductCommit === true
+    && readString(baseline.scanId) === "3358978a-75d1-454a-9dcd-4b63b52b9768"
+    && readNumber(baseline.immutableOriginalFindingCount) === 18
+    && readNumber(baseline.currentScanFindingCount) === 17
+    && readString(baseline.coverageCompleteness) === "partial"
+    && baseline.baselineRewritten === false
+    && residuals.length === 3
+    && residuals.every((item) => readString(item.status) === "PASS_CURRENT_SOURCE_LOCAL")
+    && residualAnchors.join(",") === "dns-toctou,provider-detail,xff-spoof"
+    && readNumber(focused.testFiles) === 3
+    && readNumber(focused.tests) === 33
+    && readString(focused.status) === "PASS"
+    && readNumber(adjacent.testFiles) === 7
+    && readNumber(adjacent.tests) === 141
+    && readString(adjacent.status) === "PASS"
+    && verification.typecheck === "PASS"
+    && verification.productionBuild === "PASS"
+    && readNumber(verification.staticPages) === 28
+    && readString(live.status) === "PASS_DEPLOYED_SOURCE_MARKER_ONLY"
+    && readString(live.buildInfoCommit) === productionCommit
+    && live.behavioralProbeExecuted === false
+    && noMutation
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remaining.databaseSecurityRemediation) === "APPROVAL_GATED"
+    && readString(remaining.providerDispatchPersistence) === "APPROVAL_GATED"
+    && readString(remaining.llmWikiPublication) === "APPROVAL_GATED"
+    && readString(remaining.sifVectorRuntime) === "APPROVAL_GATED"
+    && readString(remaining.koshaExactRegistryPromotion) === "APPROVAL_GATED"
+    && remaining.followUpSecurityScanRequired === true
+    && remaining.securityCompleteClaimAllowed === false;
+
+  return gateResult({
+    id: "current_source_security_residual_remediation",
+    label: "Current-source security residual remediation",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Deployed source includes bounded remediation for provider-detail, dns-toctou, and xff-spoof with 174 focused and adjacent tests, strict typecheck, and a 28-page production build. This is deployed-source plus local contract evidence only: the immutable 18-finding baseline and sealed 17-finding partial-coverage scan remain visible, no mutation occurred, a follow-up full scan is required, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+      : `Security residual verdict=${readString(report.verdict) || "missing"}, source=${sourceHead || "missing"}, production=${productionCommit || "missing"}, residuals=${residualAnchors.join(",") || "missing"}, tests=${readNumber(focused.tests)}+${readNumber(adjacent.tests)}, live=${readString(live.status) || "missing"}/${live.behavioralProbeExecuted === true}, noMutation=${noMutation}, rescan=${remaining.followUpSecurityScanRequired === true}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Run a fresh full-repository security scan before reclassifying the three immutable findings or making any security-complete claim."]
+      : ["Restore exact source/live marker ancestry, the three residual anchors, 174 tests, no-mutation boundaries, follow-up scan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
 const SHARE_ACK_PREBODY_ADMISSION_PATHS = [
   "app/api/share-sessions/[sessionId]/route.ts",
   "tests/workpack-share-authority-routes.test.ts",
@@ -8406,6 +8510,55 @@ const WEATHER_FALLBACK_ERROR_REDACTION_PATHS = [
   "tests/upstream-integration-security.test.ts",
 ];
 
+/** @param {string} rootDir @param {string} gateId @param {string[]} governedPaths */
+function isCurrentSourceSecurityResidualCompatibilityCurrent(rootDir, gateId, governedPaths) {
+  if (!["weather_fallback_error_redaction_security", "security_followup_remediation"].includes(gateId)) {
+    return false;
+  }
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.currentSourceSecurityResidualRemediation);
+  if (!isRecord(report)) return false;
+  const residuals = Array.isArray(report.remediatedSourceResiduals)
+    ? report.remediatedSourceResiduals.filter(isRecord)
+    : [];
+  const anchors = residuals.map((item) => readString(item.anchor)).sort();
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedSecurity) ? verification.focusedSecurity : {};
+  const adjacent = isRecord(verification.adjacentPublicAdmissionAndHarness)
+    ? verification.adjacentPublicAdmissionAndHarness
+    : {};
+  const live = isRecord(report.liveVerification) ? report.liveVerification : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  return readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING"
+    && sourceHead.length === 40
+    && productionCommit.length === 40
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths)
+    && isGitAncestor(rootDir, productionCommit)
+    && report.productionIncludesProductCommit === true
+    && anchors.join(",") === "dns-toctou,provider-detail,xff-spoof"
+    && residuals.every((item) => readString(item.status) === "PASS_CURRENT_SOURCE_LOCAL")
+    && readNumber(focused.tests) === 33
+    && readString(focused.status) === "PASS"
+    && readNumber(adjacent.tests) === 141
+    && readString(adjacent.status) === "PASS"
+    && verification.typecheck === "PASS"
+    && verification.productionBuild === "PASS"
+    && readString(live.status) === "PASS_DEPLOYED_SOURCE_MARKER_ONLY"
+    && live.behavioralProbeExecuted === false
+    && mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.embeddingGenerated === false
+    && mutation.vectorUploadPerformed === false
+    && mutation.wikiPublished === false
+    && mutation.exactTrustRegistryMutationPerformed === false
+    && remaining.followUpSecurityScanRequired === true
+    && remaining.securityCompleteClaimAllowed === false
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+}
+
 /**
  * @param {string} rootDir
  * @returns {GateResult}
@@ -8435,6 +8588,12 @@ function evaluateWeatherFallbackErrorRedactionGate(rootDir) {
   const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
   const sourceHead = readString(report.sourceHead);
   const productionCommit = readString(report.productionCommit);
+  const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, WEATHER_FALLBACK_ERROR_REDACTION_PATHS)
+    || isCurrentSourceSecurityResidualCompatibilityCurrent(
+      rootDir,
+      "weather_fallback_error_redaction_security",
+      WEATHER_FALLBACK_ERROR_REDACTION_PATHS,
+    );
   const noMutation = mutation.dbMutationPerformed === false
     && mutation.shareSessionCreated === false
     && mutation.readConfirmationInserted === false
@@ -8445,7 +8604,7 @@ function evaluateWeatherFallbackErrorRedactionGate(rootDir) {
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_WEATHER_FALLBACK_ERROR_REDACTION_SOURCE_REMEDIATED"
     && sourceHead === productionCommit
     && isGitAncestor(rootDir, sourceHead)
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, WEATHER_FALLBACK_ERROR_REDACTION_PATHS)
+    && sourceCurrent
     && readString(finding.scanId) === "1411fb32-5c18-4d6a-b8ba-d52697757d8a"
     && readString(finding.findingId) === "csf_fdda99ed09c6fb65bc74caff"
     && readString(finding.slug) === "weather-fallback-error-exposure"
@@ -8484,7 +8643,7 @@ function evaluateWeatherFallbackErrorRedactionGate(rootDir) {
     evidencePath,
     detail: pass
       ? "Live production source now keeps raw failures from all eight weather provider fallbacks in server logs and exposes only fixed public details. Production remains fail-closed before provider work while durable admission is absent. The sealed finding still needs a fresh full scan; distributed activation and exact saved Share MISSING_EVIDENCE remain open."
-      : `Weather redaction verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === productionCommit}, sourceCurrent=${sourceHead.length > 0 && isEvidenceCurrentForPaths(rootDir, sourceHead, WEATHER_FALLBACK_ERROR_REDACTION_PATHS)}, redaction=${contract.allProviderFallbackBranchesUseFixedPublicDetail === true}/${contract.rawProviderErrorsLoggedServerSide === true}/${contract.aggregateWeatherDetailOmitsRawProviderErrors === true}, live=${readNumber(live.status)}/${readString(live.code) || "missing"}, noMutation=${noMutation}, rescan=${remaining.freshFullRepositoryRescanRequiredForScanClosure === true}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+      : `Weather redaction verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === productionCommit}, sourceCurrent=${sourceCurrent}, redaction=${contract.allProviderFallbackBranchesUseFixedPublicDetail === true}/${contract.rawProviderErrorsLoggedServerSide === true}/${contract.aggregateWeatherDetailOmitsRawProviderErrors === true}, live=${readNumber(live.status)}/${readString(live.code) || "missing"}, noMutation=${noMutation}, rescan=${remaining.freshFullRepositoryRescanRequiredForScanClosure === true}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? ["Run a fresh Standard scan before reclassifying the sealed finding; keep distributed activation and exact saved Share boundaries open."]
       : ["Restore source/live alignment, all-branch public redaction, server-only diagnostics, no-mutation live proof, fresh-rescan requirement, and exact Share MISSING_EVIDENCE."],
@@ -9261,12 +9420,17 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     || isSecuritySafetyReferenceSurfaceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS);
+  const currentResidualCompatibility = isCurrentSourceSecurityResidualCompatibilityCurrent(
+    rootDir,
+    "security_followup_remediation",
+    SECURITY_FOLLOWUP_REMEDIATION_PATHS,
+  );
   const exportAdmissionCompatibilityCurrent = isDocumentExportAdmissionCompatibilityCurrent(
     rootDir,
     "security_followup_remediation",
     SECURITY_FOLLOWUP_REMEDIATION_PATHS,
   );
-  const currentProductPaths = productPathsCurrent || exportAdmissionCompatibilityCurrent;
+  const currentProductPaths = productPathsCurrent || exportAdmissionCompatibilityCurrent || currentResidualCompatibility;
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP"
     && sourceHead.length > 0
     && sourceHead === readString(deployment.productionCommit)
@@ -11988,6 +12152,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentSecurityRemediationLedgerGate(rootDir),
     evaluateCurrentRepositorySecurityRescanGate(rootDir),
     evaluateFreshCurrentSourceSecurityScanGate(rootDir),
+    evaluateCurrentSourceSecurityResidualRemediationGate(rootDir),
     evaluateShareAckPreBodyAdmissionGate(rootDir),
     evaluateSafetyStatusDisconnectLeaseGate(rootDir),
     evaluateWeatherFallbackErrorRedactionGate(rootDir),
