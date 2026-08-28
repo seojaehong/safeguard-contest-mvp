@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-28T13:58:04.258Z",
-  "sourceSha": "c023ae2b4e2140334ae207da08821d48d91a739a",
+  "generatedAt": "2026-08-28T14:39:23.293Z",
+  "sourceSha": "83c3b1c59a7cae4bcf4d6fa3c42e3330f29026ba",
   "overall": "open",
   "gates": [
     {
@@ -691,8 +691,8 @@
       "id": "live_documents_share_route_perception",
       "state": "proven",
       "label": "Live Documents and workspace Share route perception",
-      "evidencePath": "evaluation\\live-documents-share-route-perception-2026-08-14\\report.json",
-      "detail": "Fresh aligned production geometry proves the default /documents route is one viewport at 1440x723 and 390x723 with the core 3 visible, supporting 9 hidden, and zero sticky overlap; workspace Share is a 1180px three-zone desktop workbench and a separate 390px mobile stack. This scoped route proof does not claim every data-dependent state or exact saved /share/[sessionId], which remains MISSING_EVIDENCE, and route split alone is not accepted as the UX fix.",
+      "evidencePath": "evaluation\\live-documents-share-route-perception-2026-08-28\\report.json",
+      "detail": "Fresh aligned production geometry proves the default /documents route is one viewport at 1440x723 and 390x723 with the core 3 visible, supporting 9 hidden, zero sticky overlap, and the redundant desktop module-rail overflow reduced from 1px to 0 while real overflow remains accessible; workspace Share is a 1180px three-zone desktop workbench and a separate 390px mobile stack. This scoped route proof does not claim every data-dependent state or exact saved /share/[sessionId], which remains MISSING_EVIDENCE, and route split alone is not accepted as the UX fix.",
       "nextActions": [
         "Obtain a concrete existing production /share/[sessionId]?workerId=... URL for no-mutation exact saved-session geometry; do not substitute workspace Share or fixtures."
       ]

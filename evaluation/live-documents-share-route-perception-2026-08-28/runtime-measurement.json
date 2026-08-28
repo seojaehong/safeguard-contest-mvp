@@ -1,0 +1,183 @@
+{
+  "generatedAt": "2026-08-28T14:33:05.187Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "cacheBust": "83c3b1c5-after-live",
+  "documents": [
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 723
+      },
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "bodyViewportRatio": 1,
+      "moduleRail": {
+        "clientHeight": 723,
+        "scrollHeight": 723,
+        "overflowDelta": 0,
+        "overflowY": "auto",
+        "paddingTop": "18px",
+        "paddingBottom": "18px"
+      },
+      "workbench": {
+        "left": 512,
+        "top": 205,
+        "right": 1424,
+        "bottom": 653,
+        "width": 912,
+        "height": 448,
+        "clientHeight": 448,
+        "scrollHeight": 786,
+        "overflowY": "auto"
+      },
+      "visibleDocumentKeys": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "tbmLogDraft"
+      ],
+      "uniqueDocumentKeyCount": 12,
+      "supportingDocumentsOpenDefault": false,
+      "horizontalOverflow": false,
+      "screenshot": "documents-desktop-after-live-1440x723.png"
+    },
+    {
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 723
+      },
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "bodyViewportRatio": 1,
+      "moduleRail": {
+        "clientHeight": 64,
+        "scrollHeight": 64,
+        "overflowDelta": 0,
+        "overflowY": "visible",
+        "paddingTop": "8px",
+        "paddingBottom": "8px"
+      },
+      "workbench": {
+        "left": 24,
+        "top": 320,
+        "right": 366,
+        "bottom": 672,
+        "width": 342,
+        "height": 352,
+        "clientHeight": 352,
+        "scrollHeight": 738,
+        "overflowY": "auto"
+      },
+      "visibleDocumentKeys": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "tbmLogDraft"
+      ],
+      "uniqueDocumentKeyCount": 12,
+      "supportingDocumentsOpenDefault": false,
+      "horizontalOverflow": false,
+      "screenshot": "documents-mobile-after-live-390x723.png"
+    }
+  ],
+  "workspaceShare": [
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 723
+      },
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "root": {
+        "left": 130,
+        "top": 195,
+        "right": 1310,
+        "bottom": 716,
+        "width": 1180,
+        "height": 521,
+        "clientHeight": 519,
+        "scrollHeight": 597,
+        "overflowY": "auto"
+      },
+      "gridTemplateColumns": [
+        515.188,
+        404.812,
+        230
+      ],
+      "messagePreview": {
+        "left": 660.19,
+        "top": 345,
+        "right": 1065,
+        "bottom": 571,
+        "width": 404.81,
+        "height": 226
+      },
+      "desktopStatusRail": {
+        "left": 1071,
+        "top": 345,
+        "right": 1301,
+        "bottom": 705,
+        "width": 230,
+        "height": 360,
+        "display": "grid"
+      },
+      "primaryActionBottom": 389,
+      "channelCardWidths": [
+        161.72,
+        161.73,
+        161.73
+      ],
+      "horizontalOverflow": false,
+      "screenshot": "workspace-share-desktop-after-live-1440x723.png"
+    },
+    {
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 723
+      },
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "root": {
+        "left": 27,
+        "top": 273.25,
+        "right": 363,
+        "bottom": 704.25,
+        "width": 336,
+        "height": 431,
+        "clientHeight": 429,
+        "scrollHeight": 489,
+        "overflowY": "auto"
+      },
+      "gridTemplateColumns": [
+        318
+      ],
+      "messagePreview": {
+        "left": 36,
+        "top": 445.25,
+        "right": 354,
+        "bottom": 637.25,
+        "width": 318,
+        "height": 192
+      },
+      "desktopStatusRail": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "primaryActionBottom": 696.25,
+      "channelCardWidths": [
+        0,
+        0,
+        0
+      ],
+      "horizontalOverflow": false,
+      "screenshot": "workspace-share-mobile-after-live-390x723.png"
+    }
+  ]
+}

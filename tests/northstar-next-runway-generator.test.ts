@@ -3174,7 +3174,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
-  writeJson(root, "evaluation/live-documents-share-route-perception-2026-08-14/report.json", {
+  writeJson(root, "evaluation/live-documents-share-route-perception-2026-08-28/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP",
     sourceHead: "fixture-sha",
     productionBuild: { commitSha: "fixture-sha" },

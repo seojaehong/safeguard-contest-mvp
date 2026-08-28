@@ -4395,12 +4395,12 @@ function createFixtureRoot(): string {
       supabaseRlsLaunchIsolation: "APPROVAL_GATED",
     },
   });
-  const routePerceptionDir = path.join("evaluation", "live-documents-share-route-perception-2026-08-14");
+  const routePerceptionDir = path.join("evaluation", "live-documents-share-route-perception-2026-08-28");
   const screenshots = [
-    "documents-desktop-1440x723.png",
-    "documents-mobile-390x723.png",
-    "workspace-share-desktop-1440x723.png",
-    "workspace-share-mobile-390x723.png",
+    "documents-desktop-after-live-1440x723.png",
+    "documents-mobile-after-live-390x723.png",
+    "workspace-share-desktop-after-live-1440x723.png",
+    "workspace-share-mobile-after-live-390x723.png",
   ];
   for (const screenshot of screenshots) {
     writeText(rootDir, path.join(routePerceptionDir, screenshot), "fixture image");
@@ -4414,6 +4414,7 @@ function createFixtureRoot(): string {
         {
           route: "/documents?theme=day", viewport: { width: 1440, height: 723 }, documentHeight: 723, bodyHeight: 723,
           bodyViewportRatio: 1, workbench: { bottom: 652 }, uniqueDocumentKeyCount: 12,
+          moduleRail: { clientHeight: 723, scrollHeight: 723, overflowDelta: 0 },
           frontVisibleCoreLauncherCount: 3, frontVisibleCoreLaunchers: ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"],
           frontVisibleSupportingLauncherCount: 0, horizontalOverflow: false, stickyOverlapCount: 0,
           screenshot: path.join(routePerceptionDir, screenshots[0]), verdict: "PASS",
@@ -4421,6 +4422,7 @@ function createFixtureRoot(): string {
         {
           route: "/documents?theme=day", viewport: { width: 390, height: 723 }, documentHeight: 723, bodyHeight: 723,
           bodyViewportRatio: 1, workbench: { bottom: 669 }, frontVisibleCoreLauncherCount: 3,
+          moduleRail: { clientHeight: 64, scrollHeight: 64, overflowDelta: 0 },
           frontVisibleCoreLaunchers: ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"],
           frontVisibleSupportingLauncherCount: 0, horizontalOverflow: false, stickyOverlapCount: 0,
           screenshot: path.join(routePerceptionDir, screenshots[1]), verdict: "PASS",
@@ -4440,6 +4442,17 @@ function createFixtureRoot(): string {
           screenshot: path.join(routePerceptionDir, screenshots[3]), verdict: "PASS_MOBILE_STACK",
         },
       ],
+      documentsRailRemediation: {
+        beforeLiveClientHeight: 723,
+        beforeLiveScrollHeight: 724,
+        beforeLiveOverflowDelta: 1,
+        afterLiveClientHeight: 723,
+        afterLiveScrollHeight: 723,
+        afterLiveOverflowDelta: 0,
+        actualOverflowAccessibilityPreserved: true,
+        liveAfterDeploymentRequired: false,
+        screenshot: path.join(routePerceptionDir, screenshots[0]),
+      },
     },
     interpretation: {
       reportedDocumentsBodyHeight2070Reproduced: false,
@@ -7506,7 +7519,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).not.toContain("Promote the Share staged rail");
     expect(audit.gates.find((gate) => gate.id === "live_documents_share_route_perception")).toMatchObject({
       state: "proven",
-      evidencePath: path.join("evaluation", "live-documents-share-route-perception-2026-08-14", "report.json"),
+      evidencePath: path.join("evaluation", "live-documents-share-route-perception-2026-08-28", "report.json"),
     });
     expect(audit.gates.find((gate) => gate.id === "live_documents_share_route_perception")?.detail).toContain("1180px three-zone desktop workbench");
     expect(audit.gates.find((gate) => gate.id === "live_documents_share_route_perception")?.detail).toContain("exact saved /share/[sessionId]");
@@ -9870,7 +9883,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
   it("fails live route perception closed when the reported long page and mobile-like desktop share return", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
-    const reportPath = path.join(rootDir, "evaluation", "live-documents-share-route-perception-2026-08-14", "report.json");
+    const reportPath = path.join(rootDir, "evaluation", "live-documents-share-route-perception-2026-08-28", "report.json");
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
       measurement: { documents: Array<{ viewport: { width: number }; bodyHeight: number }>; workspaceShare: Array<{ viewport: { width: number }; distinctDesktopRegions?: number }> };
       interpretation: { reportedDocumentsBodyHeight2070Reproduced: boolean; reportedWorkspaceShareDesktopMobileCardReproduced: boolean };
@@ -9894,6 +9907,30 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(gate?.detail).toContain("documents=false");
     expect(gate?.detail).toContain("share=false");
     expect(gate?.detail).toContain("exactShare=PASS");
+  });
+
+  it("fails live route perception closed when the redundant Documents rail scrollbar returns", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "live-documents-share-route-perception-2026-08-28", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      measurement: {
+        documents: Array<{ viewport: { width: number }; moduleRail: { overflowDelta: number } }>;
+        documentsRailRemediation: { afterLiveScrollHeight: number; afterLiveOverflowDelta: number };
+      };
+    };
+    const desktopDocument = report.measurement.documents.find((row) => row.viewport.width === 1440);
+    if (!desktopDocument) throw new Error("desktop route perception fixture row missing");
+    desktopDocument.moduleRail.overflowDelta = 1;
+    report.measurement.documentsRailRemediation.afterLiveScrollHeight = 724;
+    report.measurement.documentsRailRemediation.afterLiveOverflowDelta = 1;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, generatedAt: "2026-08-28T00:00:00.000Z", sourceSha: "fixture-sha" });
+    const gate = audit.gates.find((item) => item.id === "live_documents_share_route_perception");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.detail).toContain("documents=false");
+    expect(gate?.detail).toContain("railRemediation=false");
   });
 
   it("fails deployment freshness closed when the exact Share or mutation boundary is overclaimed", async () => {

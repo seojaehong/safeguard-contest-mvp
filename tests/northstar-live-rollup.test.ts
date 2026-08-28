@@ -1308,7 +1308,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "live_document_secondary_grounding", state: "proven", evidencePath: "evaluation/live-document-secondary-grounding-2026-07-25/report.json", detail: "all 30 supporting documents passed scenario grounding" },
       { id: "live_document_seed_profile_isolation", state: "proven", evidencePath: "evaluation/live-document-seed-profile-isolation-2026-07-25/report.json", detail: "all 60 documents passed seed-profile isolation" },
       { id: "security_atomic_db_race_remediation", state: "approval_gated", evidencePath: "evaluation/security-atomic-db-race-approval-boundary-2026-08-14/report.json", detail: "two sealed findings require transactional DB approval" },
-      { id: "live_documents_share_route_perception", state: "proven", evidencePath: "evaluation/live-documents-share-route-perception-2026-08-14/report.json", detail: "fresh scoped live route geometry with exact saved Share gap" },
+      { id: "live_documents_share_route_perception", state: "proven", evidencePath: "evaluation/live-documents-share-route-perception-2026-08-28/report.json", detail: "fresh scoped live route geometry with exact saved Share gap" },
       { id: "deployment_freshness_guard", state: "proven", evidencePath: "evaluation/deployment-freshness-guard-2026-08-14/report.json", detail: "live stale-tab refresh guard with exact saved Share gap" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json", detail: "preview only" },
       { id: "supabase_rls_launch_isolation", state: "approval_gated", evidencePath: "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json", detail: "approval required" },
@@ -2656,7 +2656,7 @@ function createFixtureRoot(): { root: string; head: string } {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
-  writeJson(root, "evaluation/live-documents-share-route-perception-2026-08-14/report.json", {
+  writeJson(root, "evaluation/live-documents-share-route-perception-2026-08-28/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP",
     sourceHead: "TO_FILL",
     productionBuild: { commitSha: "TO_FILL" },
@@ -2783,7 +2783,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/security-mcp-provider-admission-2026-08-14/report.json",
     "evaluation/share-recipient-contact-verification-2026-08-14/report.json",
     "evaluation/security-atomic-db-race-approval-boundary-2026-08-14/report.json",
-    "evaluation/live-documents-share-route-perception-2026-08-14/report.json",
+    "evaluation/live-documents-share-route-perception-2026-08-28/report.json",
     "evaluation/deployment-freshness-guard-2026-08-14/report.json",
     "evaluation/learning-export-renderer-security-2026-08-02/report.json",
     "evaluation/hermes-knowledge-review-selected-workbench-2026-08-14/report.json",

@@ -1,0 +1,144 @@
+{
+  "schemaVersion": "safeclaw-live-documents-share-route-perception/v1",
+  "generatedAt": "2026-08-28T23:33:05+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP",
+  "sourceHead": "83c3b1c59a7cae4bcf4d6fa3c42e3330f29026ba",
+  "productionBuild": {
+    "commitSha": "83c3b1c59a7cae4bcf4d6fa3c42e3330f29026ba",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-1s3hrwxt9-seojaehongs-projects.vercel.app"
+  },
+  "measurement": {
+    "tool": "Playwright live_documents_share_route_perception_runner.mjs",
+    "baseUrl": "https://www.safeclaw.kr",
+    "cacheBust": "21f4d40f",
+    "documents": [
+      {
+        "route": "/documents?theme=day",
+        "viewport": { "width": 1440, "height": 723 },
+        "documentHeight": 723,
+        "bodyHeight": 723,
+        "bodyViewportRatio": 1.0,
+        "workbench": { "left": 252, "top": 205, "right": 1424, "bottom": 653, "width": 1172, "height": 448 },
+        "editor": { "left": 512, "top": 205, "right": 1424, "bottom": 653, "width": 912, "height": 448, "clientHeight": 448, "scrollHeight": 786, "overflowY": "auto" },
+        "uniqueDocumentKeyCount": 12,
+        "frontVisibleCoreLauncherCount": 3,
+        "frontVisibleCoreLaunchers": ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"],
+        "frontVisibleSupportingLauncherCount": 0,
+        "supportingDocumentsOpenDefault": false,
+        "stickyOverlapCount": 0,
+        "horizontalOverflow": false,
+        "moduleRail": { "clientHeight": 723, "scrollHeight": 723, "overflowDelta": 0, "overflowY": "auto", "paddingTop": "18px", "paddingBottom": "18px" },
+        "screenshot": "evaluation/live-documents-share-route-perception-2026-08-28/documents-desktop-after-live-1440x723.png",
+        "verdict": "PASS"
+      },
+      {
+        "route": "/documents?theme=day",
+        "viewport": { "width": 390, "height": 723 },
+        "documentHeight": 723,
+        "bodyHeight": 723,
+        "bodyViewportRatio": 1.0,
+        "workbench": { "left": 12, "top": 175, "right": 378, "bottom": 672, "width": 366, "height": 497 },
+        "cockpit": { "left": 36, "top": 179, "right": 354, "bottom": 308, "width": 318, "height": 129 },
+        "editor": { "left": 24, "top": 320, "right": 366, "bottom": 672, "width": 342, "height": 352, "clientHeight": 352, "scrollHeight": 738, "overflowY": "auto" },
+        "uniqueDocumentKeyCount": 12,
+        "frontVisibleCoreLauncherCount": 3,
+        "frontVisibleCoreLaunchers": ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"],
+        "frontVisibleSupportingLauncherCount": 0,
+        "supportingDocumentsOpenDefault": false,
+        "stickyOverlapCount": 0,
+        "horizontalOverflow": false,
+        "containmentNote": "The selected editor uses bounded internal scrolling while the page body remains one viewport; this is not a 2070px body stack.",
+        "moduleRail": { "clientHeight": 64, "scrollHeight": 64, "overflowDelta": 0, "overflowY": "visible", "paddingTop": "8px", "paddingBottom": "8px" },
+        "screenshot": "evaluation/live-documents-share-route-perception-2026-08-28/documents-mobile-after-live-390x723.png",
+        "verdict": "PASS"
+      }
+    ],
+    "workspaceShare": [
+      {
+        "route": "/workspace share stage",
+        "viewport": { "width": 1440, "height": 723 },
+        "documentHeight": 723,
+        "bodyHeight": 723,
+        "root": { "left": 130, "top": 195, "right": 1310, "bottom": 716, "width": 1180, "height": 521, "clientHeight": 519, "scrollHeight": 597, "overflowY": "auto" },
+        "gridTemplateColumns": [515.188, 404.812, 230.0],
+        "configurationWidth": 515.188,
+        "messagePreviewWidth": 404.812,
+        "desktopStatusRailWidth": 230.0,
+        "distinctDesktopRegions": 3,
+        "primaryActionBottom": 389,
+        "channelCardWidths": [161.72, 161.73, 161.73],
+        "horizontalOverflow": false,
+        "screenshot": "evaluation/live-documents-share-route-perception-2026-08-28/workspace-share-desktop-after-live-1440x723.png",
+        "verdict": "PASS_DESKTOP_THREE_ZONE"
+      },
+      {
+        "route": "/workspace share stage",
+        "viewport": { "width": 390, "height": 723 },
+        "documentHeight": 723,
+        "bodyHeight": 723,
+        "root": { "left": 27, "top": 273.25, "right": 363, "bottom": 704.25, "width": 336, "height": 431, "clientHeight": 429, "scrollHeight": 489, "overflowY": "auto" },
+        "gridTemplateColumns": [318.0],
+        "messagePreviewWidth": 318.0,
+        "desktopStatusRailDisplay": "none",
+        "primaryActionBottom": 696.25,
+        "mobileSummaryBottom": 439.25,
+        "mobileConfigToggleHeight": 44,
+        "horizontalOverflow": false,
+        "screenshot": "evaluation/live-documents-share-route-perception-2026-08-28/workspace-share-mobile-after-live-390x723.png",
+        "verdict": "PASS_MOBILE_STACK"
+      }
+    ],
+    "documentsRailRemediation": {
+      "beforeLiveCommit": "21f4d40f20f4f4eb7aa8bbf0dc5b53d0bd78c67f",
+      "beforeLiveViewport": { "width": 1440, "height": 723 },
+      "beforeLiveClientHeight": 723,
+      "beforeLiveScrollHeight": 724,
+      "beforeLiveOverflowDelta": 1,
+      "currentSourceCommit": "83c3b1c59a7cae4bcf4d6fa3c42e3330f29026ba",
+      "afterLocalViewport": { "width": 1440, "height": 723 },
+      "afterLocalClientHeight": 723,
+      "afterLocalScrollHeight": 723,
+      "afterLocalOverflowDelta": 0,
+      "afterLocalOverflowY": "auto",
+      "afterLocalPaddingBlock": "18px",
+      "actualOverflowAccessibilityPreserved": true,
+      "screenshot": "evaluation/live-documents-share-route-perception-2026-08-28/documents-desktop-after-live-1440x723.png",
+      "afterLiveClientHeight": 723,
+      "afterLiveScrollHeight": 723,
+      "afterLiveOverflowDelta": 0,
+      "liveAfterDeploymentRequired": false
+    }
+  },
+  "interpretation": {
+    "reportedDocumentsBodyHeight2070Reproduced": false,
+    "reportedWorkspaceShareDesktopMobileCardReproduced": false,
+    "currentDefaultRoutesAreStaleBundleCandidates": false,
+    "redundantDocumentsRailScrollbarReproduced": true,
+    "redundantDocumentsRailScrollbarFixedCurrentSource": true,
+    "redundantDocumentsRailScrollbarFixedLive": true,
+    "possibleRemainingCauses": [
+      "the user is viewing an older cached bundle",
+      "the user is viewing a different route or expanded state",
+      "the user is viewing a data-dependent exact saved Share session"
+    ],
+    "routeSplitAloneAcceptedAsFix": false,
+    "acceptedStructure": "three-step route shell plus first-viewport cockpit plus bounded selected detail and internal scroll"
+  },
+  "remainingBoundaries": {
+    "exactSavedUserSessionReproduced": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "fixtureOrWorkspaceShareAcceptedAsExactSavedProof": false,
+    "concreteSavedSessionUrlProvided": false,
+    "dbBackedSessionCreationApproved": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  }
+}

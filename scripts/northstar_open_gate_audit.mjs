@@ -80,7 +80,7 @@ const EVIDENCE_PATHS = Object.freeze({
   shareRecipientContactVerification: path.join("evaluation", "share-recipient-contact-verification-2026-08-14", "report.json"),
   shareMcpCurrentSourceCompatibility: path.join("evaluation", "share-mcp-current-source-compatibility-2026-08-28", "report.json"),
   securityAtomicDbRaceApprovalBoundary: path.join("evaluation", "security-atomic-db-race-approval-boundary-2026-08-14", "report.json"),
-  liveDocumentsShareRoutePerception: path.join("evaluation", "live-documents-share-route-perception-2026-08-14", "report.json"),
+  liveDocumentsShareRoutePerception: path.join("evaluation", "live-documents-share-route-perception-2026-08-28", "report.json"),
   deploymentFreshnessGuard: path.join("evaluation", "deployment-freshness-guard-2026-08-14", "report.json"),
   agentChatDurableAdmission: path.join("evaluation", "security-agent-chat-durable-admission-2026-08-14", "report.json"),
   mcpProviderAdmission: path.join("evaluation", "security-mcp-provider-admission-2026-08-14", "report.json"),
@@ -6570,6 +6570,9 @@ function evaluateLiveDocumentsShareRoutePerceptionGate(rootDir) {
   const measurement = isRecord(report.measurement) ? report.measurement : {};
   const documents = Array.isArray(measurement.documents) ? measurement.documents.filter(isRecord) : [];
   const share = Array.isArray(measurement.workspaceShare) ? measurement.workspaceShare.filter(isRecord) : [];
+  const railRemediation = isRecord(measurement.documentsRailRemediation)
+    ? measurement.documentsRailRemediation
+    : {};
   const interpretation = isRecord(report.interpretation) ? report.interpretation : {};
   const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
   const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
@@ -6578,6 +6581,7 @@ function evaluateLiveDocumentsShareRoutePerceptionGate(rootDir) {
   const documentRowPass = (row, width) => {
     const viewport = isRecord(row.viewport) ? row.viewport : {};
     const workbench = isRecord(row.workbench) ? row.workbench : {};
+    const moduleRail = isRecord(row.moduleRail) ? row.moduleRail : {};
     const core = Array.isArray(row.frontVisibleCoreLaunchers) ? row.frontVisibleCoreLaunchers.map(readString) : [];
     return readNumber(viewport.width) === width
       && readNumber(viewport.height) === 723
@@ -6590,6 +6594,7 @@ function evaluateLiveDocumentsShareRoutePerceptionGate(rootDir) {
       && readNumber(row.frontVisibleSupportingLauncherCount) === 0
       && row.horizontalOverflow === false
       && readNumber(row.stickyOverlapCount) === 0
+      && readNumber(moduleRail.overflowDelta) === 0
       && readString(row.verdict) === "PASS"
       && isRegularEvidenceFile(rootDir, row.screenshot);
   };
@@ -6637,6 +6642,15 @@ function evaluateLiveDocumentsShareRoutePerceptionGate(rootDir) {
     && mutation.embeddingOrVectorMutationPerformed === false
     && mutation.wikiPublicationPerformed === false
     && mutation.koshaRegistryMutationPerformed === false;
+  const railRemediationPass = readNumber(railRemediation.beforeLiveClientHeight) === 723
+    && readNumber(railRemediation.beforeLiveScrollHeight) === 724
+    && readNumber(railRemediation.beforeLiveOverflowDelta) === 1
+    && readNumber(railRemediation.afterLiveClientHeight) === 723
+    && readNumber(railRemediation.afterLiveScrollHeight) === 723
+    && readNumber(railRemediation.afterLiveOverflowDelta) === 0
+    && railRemediation.actualOverflowAccessibilityPreserved === true
+    && railRemediation.liveAfterDeploymentRequired === false
+    && isRegularEvidenceFile(rootDir, railRemediation.screenshot);
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SCOPED_DOCUMENTS_AND_WORKSPACE_SHARE_EXACT_SESSION_GAP"
     && sourceHead.length > 0
     && sourceHead === readString(production.commitSha)
@@ -6645,6 +6659,7 @@ function evaluateLiveDocumentsShareRoutePerceptionGate(rootDir) {
     && readString(production.environment) === "production"
     && documentsPass
     && sharePass
+    && railRemediationPass
     && interpretation.reportedDocumentsBodyHeight2070Reproduced === false
     && interpretation.reportedWorkspaceShareDesktopMobileCardReproduced === false
     && interpretation.routeSplitAloneAcceptedAsFix === false
@@ -6661,8 +6676,8 @@ function evaluateLiveDocumentsShareRoutePerceptionGate(rootDir) {
     state: pass ? "proven" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Fresh aligned production geometry proves the default /documents route is one viewport at 1440x723 and 390x723 with the core 3 visible, supporting 9 hidden, and zero sticky overlap; workspace Share is a 1180px three-zone desktop workbench and a separate 390px mobile stack. This scoped route proof does not claim every data-dependent state or exact saved /share/[sessionId], which remains MISSING_EVIDENCE, and route split alone is not accepted as the UX fix."
-      : `Live route perception verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === readString(production.commitSha)}, documents=${documentsPass}, share=${sharePass}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+      ? "Fresh aligned production geometry proves the default /documents route is one viewport at 1440x723 and 390x723 with the core 3 visible, supporting 9 hidden, zero sticky overlap, and the redundant desktop module-rail overflow reduced from 1px to 0 while real overflow remains accessible; workspace Share is a 1180px three-zone desktop workbench and a separate 390px mobile stack. This scoped route proof does not claim every data-dependent state or exact saved /share/[sessionId], which remains MISSING_EVIDENCE, and route split alone is not accepted as the UX fix."
+      : `Live route perception verdict=${readString(report.verdict) || "missing"}, sourceLive=${sourceHead.length > 0 && sourceHead === readString(production.commitSha)}, documents=${documentsPass}, share=${sharePass}, railRemediation=${railRemediationPass}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? ["Obtain a concrete existing production /share/[sessionId]?workerId=... URL for no-mutation exact saved-session geometry; do not substitute workspace Share or fixtures."]
       : ["Restore aligned live 1440x723 and 390x723 route geometry, screenshots, no-mutation boundaries, route-split rejection, and exact saved Share MISSING_EVIDENCE."],
