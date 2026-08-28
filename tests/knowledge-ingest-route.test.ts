@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildKnowledgeIngestRunId,
   knowledgeEventRequiresReviewReset,
@@ -156,6 +156,11 @@ beforeEach(() => {
   mocks.getWorkspaceUser.mockResolvedValue({ id: "user-1", email: "owner@example.com" });
 });
 
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
+
 describe("knowledge ingest tenant binding", () => {
   it("detects changed reviewed content while treating reordered identity arrays as equivalent", () => {
     const stored = {
@@ -217,6 +222,27 @@ describe("knowledge ingest tenant binding", () => {
 
     expect(response.status).toBe(401);
     expect(fake.writes).toEqual([]);
+  });
+
+  it("fails closed before ownership lookup or writes when durable actor admission is unavailable", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const fake = fakeClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { POST } = await import("@/app/api/knowledge/ingest/route");
+
+    const response = await POST(request());
+
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({
+      code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    });
+    expect(response.headers.get("X-SafeClaw-Work-Unit")).toBe("knowledge-ingest-write");
+    expect(fake.calls).toEqual([]);
+    expect(fake.writes).toEqual([]);
+    error.mockRestore();
   });
 
   it("rejects a site whose organization is not owned by the authenticated user", async () => {

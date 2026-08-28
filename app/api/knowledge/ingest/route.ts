@@ -16,6 +16,12 @@ import {
   buildKnowledgeIngestRunId,
   knowledgeEventRequiresReviewReset
 } from "@/lib/knowledge-ingest-idempotency";
+import {
+  applyKnowledgeIngestAdmissionHeaders,
+  checkKnowledgeIngestActorAdmission,
+  checkKnowledgeIngestOrganizationAdmission,
+  knowledgeIngestAdmissionResponse,
+} from "@/lib/knowledge-ingest-admission";
 
 export const dynamic = "force-dynamic";
 
@@ -83,6 +89,10 @@ export async function POST(request: NextRequest) {
       message: "로그인이 필요합니다."
     }, { status: 401 });
   }
+  const actorAdmission = await checkKnowledgeIngestActorAdmission(request, user.id);
+  const actorLimited = knowledgeIngestAdmissionResponse(actorAdmission);
+  if (actorLimited) return actorLimited;
+  let effectiveAdmission = actorAdmission;
   let savedEventId: string | null = null;
   let savedRunId: string | null = null;
   let runCreated = false;
@@ -125,6 +135,14 @@ export async function POST(request: NextRequest) {
           message: "접근할 수 있는 현장을 찾지 못했습니다."
         }, { status: 404 });
       }
+
+      const organizationAdmission = await checkKnowledgeIngestOrganizationAdmission(
+        request,
+        organization.id,
+      );
+      const organizationLimited = knowledgeIngestAdmissionResponse(organizationAdmission);
+      if (organizationLimited) return organizationLimited;
+      effectiveAdmission = organizationAdmission;
 
       const context = { organizationId: organization.id, siteId: site.id };
       const proposedWikiUpdate = {
@@ -317,7 +335,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error("knowledge ingest persistence failed", error);
-    return NextResponse.json(
+    return applyKnowledgeIngestAdmissionHeaders(NextResponse.json(
       {
         ok: false,
         configured: true,
@@ -326,10 +344,10 @@ export async function POST(request: NextRequest) {
         message: `원본 이벤트 검증은 성공했지만 저장에 실패했습니다. 사유: ${message}`
       },
       { status: 500 }
-    );
+    ), effectiveAdmission);
   }
 
-  return NextResponse.json({
+  return applyKnowledgeIngestAdmissionHeaders(NextResponse.json({
     ok: true,
     configured: true,
     storageMode: "persistent",
@@ -346,5 +364,5 @@ export async function POST(request: NextRequest) {
     },
     regenerationBundle,
     message: "원본 이벤트를 knowledge_events에 누적하고 AI 재생성 run 초안을 저장했습니다."
-  });
+  }), effectiveAdmission);
 }
