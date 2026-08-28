@@ -15,6 +15,20 @@ const DEFAULT_OPEN_GATE_PATH = path.join("evaluation", "northstar-open-gates-cur
 const DEFAULT_BUILD_INFO_URL = "https://www.safeclaw.kr/api/build-info";
 
 const APPROVAL_GATE_CONTRACTS = Object.freeze({
+  distributed_admission_activation: Object.freeze({
+    currentSafetyLock: "production_secret_and_ephemeral_redis_mutation_approval_required",
+    approvalNeeded: Object.freeze([
+      "approve both Production-scoped Upstash REST variables as one configuration change",
+      "approve one bounded invalid-payload connectivity probe that creates short-lived Redis counter and lease keys",
+      "rerun bounded runtime readiness and the fresh Standard scan before any security-complete claim",
+    ]),
+    forbiddenUntilApproved: Object.freeze([
+      "write either Production Upstash secret",
+      "create distributed rate or concurrency keys",
+      "enable remote Hermes Upstash ledger mode as part of this activation",
+      "claim distributed admission is operational from syntax readiness alone",
+    ]),
+  }),
   share_recipient_ack_approval: Object.freeze({
     currentSafetyLock: "live_data_mutation_approval_required",
     approvalNeeded: Object.freeze([
@@ -96,6 +110,18 @@ const APPROVAL_GATE_CONTRACTS = Object.freeze({
       "KOSHA exact-trust registry expanded beyond current exact pins",
       "operator checklist completion alone approves exact-trust promotion",
       "exact registry write artifact created before separate approval",
+    ]),
+  }),
+  security_atomic_db_race_remediation: Object.freeze({
+    currentSafetyLock: "no_migration_no_database_mutation_findings_open",
+    approvalNeeded: Object.freeze([
+      "approve transactional migration, RPC, trigger, and concurrency test scope",
+      "approve temporary database rows for integration proof",
+    ]),
+    forbiddenUntilApproved: Object.freeze([
+      "database schema mutation",
+      "MCP token-cap or worker site-binding closure claim",
+      "security-complete claim before deployment and fresh scan",
     ]),
   }),
 });
@@ -310,12 +336,14 @@ export function buildNorthstarApprovalRunway(options) {
     operatorSequence: [
       "Confirm target production/staging project and secret-free evidence boundaries.",
       "Close or explicitly carry launch-control notices before fully automated launch claims.",
+      "Approve or reject distributed admission secret configuration and the bounded ephemeral Redis connectivity probe.",
       "Approve or reject RLS live catalog and tenant A/B read-only probes.",
       "Approve or reject LLM Wiki isolated publication canary.",
       "Approve or reject SIF embedding migration, cost, and upload as a separate gate.",
       "Approve or reject a disposable saved Share session and recipient ACK canary before any production insert.",
       "Approve or reject provider dispatch persistence migration and route-level replay tests.",
       "Approve or reject KOSHA exact promotion only after human review is complete.",
+      "Approve or reject atomic database race remediation migrations and disposable concurrency proof rows.",
       "Only after each gate has post-approval evidence, regenerate northstar-open-gates-current and northstar-live-rollup.",
     ],
     nonApprovalWorkStillAllowed: [

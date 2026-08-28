@@ -70,12 +70,14 @@ describe("northstar approval runway", () => {
     const runway = readJson<ApprovalRunwayReport>("evaluation/northstar-approval-runway-2026-07-21/report.json");
     const openGate = readJson<NorthstarOpenGateReport>("evaluation/northstar-open-gates-current/report.json");
     const approvalGateIds = [
+      "distributed_admission_activation",
       "share_recipient_ack_approval",
       "provider_dispatch_persistence",
       "supabase_rls_launch_isolation",
       "llm_wiki_publication",
       "sif_embedding_runtime",
       "kosha_exact_promotion_review_gate",
+      "security_atomic_db_race_remediation",
     ];
     const noticeGateIds = [
       "final_99_gate",
@@ -118,6 +120,9 @@ describe("northstar approval runway", () => {
     const runway = readJson<ApprovalRunwayReport>("evaluation/northstar-approval-runway-2026-07-21/report.json");
     const byId = new Map(runway.approvalGates.map((gate) => [gate.id, gate]));
 
+    expect(byId.get("distributed_admission_activation")?.currentSafetyLock).toBe("production_secret_and_ephemeral_redis_mutation_approval_required");
+    expect(byId.get("distributed_admission_activation")?.forbiddenUntilApproved.join("\n")).toContain("create distributed rate or concurrency keys");
+
     expect(byId.get("share_recipient_ack_approval")?.currentSafetyLock).toBe("live_data_mutation_approval_required");
     expect(byId.get("share_recipient_ack_approval")?.forbiddenUntilApproved.join("\n")).toContain("production share-session creation");
     expect(byId.get("share_recipient_ack_approval")?.forbiddenUntilApproved.join("\n")).toContain("recipient read-confirmation insertion");
@@ -142,6 +147,9 @@ describe("northstar approval runway", () => {
     expect(byId.get("kosha_exact_promotion_review_gate")?.currentSafetyLock).toBe("human_review_incomplete_no_mutation");
     expect(byId.get("kosha_exact_promotion_review_gate")?.forbiddenUntilApproved.join("\n")).toContain("exact-trust registry expanded");
     expect(byId.get("kosha_exact_promotion_review_gate")?.forbiddenUntilApproved.join("\n")).toContain("checklist completion alone");
+
+    expect(byId.get("security_atomic_db_race_remediation")?.currentSafetyLock).toBe("no_migration_no_database_mutation_findings_open");
+    expect(byId.get("security_atomic_db_race_remediation")?.forbiddenUntilApproved.join("\n")).toContain("database schema mutation");
   });
 
   it("records the documents/share viewport architecture contract separately from route count", () => {
@@ -162,8 +170,10 @@ describe("northstar approval runway", () => {
     const runway = readJson<ApprovalRunwayReport>("evaluation/northstar-approval-runway-2026-07-21/report.json");
 
     expect(runway.operatorSequence.join("\n")).toContain("Approve or reject RLS live catalog");
+    expect(runway.operatorSequence.join("\n")).toContain("distributed admission secret configuration");
     expect(runway.operatorSequence.join("\n")).toContain("recipient ACK canary");
     expect(runway.operatorSequence.join("\n")).toContain("Approve or reject provider dispatch persistence");
+    expect(runway.operatorSequence.join("\n")).toContain("atomic database race remediation");
     expect(runway.nonApprovalWorkStillAllowed).toContain("UI/UX cockpit and drilldown refinements");
     expect(runway.nonApprovalWorkStillAllowed).toContain("KOSHA exact-trust evidence refreshes without DB writes");
     expect(runway.completionBoundary).toContain("not a launch-complete claim");

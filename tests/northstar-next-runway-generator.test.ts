@@ -1747,6 +1747,24 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
   writeJson(root, "evaluation/northstar-approval-runway-2026-07-21/report.json", {
     approvalGates: [
       {
+        id: "distributed_admission_activation",
+        state: "approval_gated",
+        evidencePath: "evaluation/distributed-admission-activation-approval-2026-08-29/report.json",
+        readyForOperatorReview: true,
+        currentSafetyLock: "production_secret_and_ephemeral_redis_mutation_approval_required",
+        approvalNeeded: ["approve both Production-scoped Upstash REST variables"],
+        forbiddenUntilApproved: ["create distributed rate or concurrency keys"],
+      },
+      {
+        id: "share_recipient_ack_approval",
+        state: "approval_gated",
+        evidencePath: "evaluation/share-recipient-ack-approval-preflight-current-2026-07-19/report.json",
+        readyForOperatorReview: true,
+        currentSafetyLock: "live_data_mutation_approval_required",
+        approvalNeeded: ["approve production ACK canary"],
+        forbiddenUntilApproved: ["production recipient read-confirmation insertion"],
+      },
+      {
         id: "provider_dispatch_persistence",
         state: "approval_gated",
         evidencePath: "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json",
@@ -1790,6 +1808,15 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
         currentSafetyLock: "human_review_incomplete_no_mutation",
         approvalNeeded: ["complete every required candidate review checklist"],
         forbiddenUntilApproved: ["KOSHA exact-trust registry expanded beyond current exact pins"],
+      },
+      {
+        id: "security_atomic_db_race_remediation",
+        state: "approval_gated",
+        evidencePath: "evaluation/security-atomic-db-race-approval-boundary-2026-08-14/report.json",
+        readyForOperatorReview: true,
+        currentSafetyLock: "no_migration_no_database_mutation_findings_open",
+        approvalNeeded: ["approve transactional database changes"],
+        forbiddenUntilApproved: ["database schema mutation"],
       },
     ],
   });
@@ -5301,6 +5328,12 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       "share-recipient-ack-approval-preflight-current-2026-07-19",
       "report.json",
     ));
+    const runwayPath = path.join(root, "evaluation", "northstar-approval-runway-2026-07-21", "report.json");
+    const runway = JSON.parse(fs.readFileSync(runwayPath, "utf8")) as {
+      approvalGates: Array<{ id: string }>;
+    };
+    runway.approvalGates = runway.approvalGates.filter((gate) => gate.id !== "share_recipient_ack_approval");
+    fs.writeFileSync(runwayPath, `${JSON.stringify(runway, null, 2)}\n`, "utf8");
 
     const report = buildNorthstarNextRunway({
       rootDir: root,
@@ -5308,7 +5341,7 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       generatedAt: "2026-07-28T00:00:00.000Z",
     });
 
-    expect(report.approvalGated[1]).toMatchObject({
+    expect(report.approvalGated[0]).toMatchObject({
       gate: "share_recipient_ack_approval",
       state: "approval_gated",
       readyForOperatorReview: false,

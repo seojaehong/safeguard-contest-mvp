@@ -266,19 +266,29 @@ function parseArgs(argv) {
  * @param {unknown} approvalRunway
  * @param {unknown} shareRecipientAckApproval
  */
-function approvalGates(approvalRunway, shareRecipientAckApproval) {
+function approvalGates(approvalRunway, shareRecipientAckApproval, distributedAdmissionApproval) {
   if (!isRecord(approvalRunway) || !Array.isArray(approvalRunway.approvalGates)) {
     throw new Error("Approval runway report is missing approvalGates.");
   }
-  const gates = approvalRunway.approvalGates.filter(isRecord).map((gate) => ({
-    gate: asString(gate.id),
-    state: asString(gate.state),
-    evidencePath: asString(gate.evidencePath),
-    readyForOperatorReview: asBoolean(gate.readyForOperatorReview),
-    currentSafetyLock: asString(gate.currentSafetyLock),
-    approvalNeeded: Array.isArray(gate.approvalNeeded) ? gate.approvalNeeded.map(asString).filter(Boolean) : [],
-    forbiddenUntilApproved: Array.isArray(gate.forbiddenUntilApproved) ? gate.forbiddenUntilApproved.map(asString).filter(Boolean) : [],
-  }));
+  const gates = approvalRunway.approvalGates.filter(isRecord).map((gate) => {
+    const gateId = asString(gate.id);
+    const distributedReady = isRecord(distributedAdmissionApproval)
+      && distributedAdmissionApproval.readyForOperatorReview === true;
+    const distributedGate = gateId === "distributed_admission_activation";
+    return {
+      gate: gateId,
+      state: asString(gate.state),
+      evidencePath: asString(gate.evidencePath),
+      readyForOperatorReview: distributedGate
+        ? distributedReady
+        : asBoolean(gate.readyForOperatorReview),
+      currentSafetyLock: distributedGate && !distributedReady
+        ? "approval_packet_missing_or_invalid"
+        : asString(gate.currentSafetyLock),
+      approvalNeeded: Array.isArray(gate.approvalNeeded) ? gate.approvalNeeded.map(asString).filter(Boolean) : [],
+      forbiddenUntilApproved: Array.isArray(gate.forbiddenUntilApproved) ? gate.forbiddenUntilApproved.map(asString).filter(Boolean) : [],
+    };
+  });
   if (gates.some((gate) => gate.gate === "share_recipient_ack_approval")) {
     return gates;
   }
@@ -3879,45 +3889,11 @@ export function buildNorthstarNextRunway(options) {
         reason: "deployed source requires full snapshotted phone or email before worker-attributed confirmation; a real saved-session probe, fresh rescan, and live recipient ACK approval remain open",
       },
     ],
-    approvalGated: [
-      {
-        gate: "distributed_admission_activation",
-        state: "approval_gated",
-        evidencePath: ARTIFACTS.distributedAdmissionActivationApproval,
-        readyForOperatorReview: distributedAdmissionActivationApprovalResult.readyForOperatorReview === true,
-        currentSafetyLock: distributedAdmissionActivationApprovalResult.readyForOperatorReview === true
-          ? "production_secret_and_ephemeral_redis_mutation_approval_required"
-          : "approval_packet_missing_or_invalid",
-        approvalNeeded: [
-          "approve both Production-scoped Upstash REST variables as one configuration change",
-          "approve one bounded invalid-payload connectivity probe that creates short-lived Redis counter and lease keys",
-          "rerun bounded runtime readiness and the fresh Standard scan before any security-complete claim",
-        ],
-        forbiddenUntilApproved: [
-          "write either Production Upstash secret",
-          "create distributed rate or concurrency keys",
-          "enable remote Hermes Upstash ledger mode as part of this activation",
-          "claim distributed admission is operational from syntax readiness alone",
-        ],
-      },
-      ...approvalGates(approvalRunway, shareRecipientAckApproval),
-      {
-        gate: "security_atomic_db_race_remediation",
-        state: "approval_gated",
-        evidencePath: ARTIFACTS.securityAtomicDbRaceApprovalBoundary,
-        readyForOperatorReview: true,
-        currentSafetyLock: "no_migration_no_database_mutation_findings_open",
-        approvalNeeded: [
-          "approve transactional migration, RPC, trigger, and concurrency test scope",
-          "approve temporary database rows for integration proof",
-        ],
-        forbiddenUntilApproved: [
-          "database schema mutation",
-          "MCP token-cap or worker site-binding closure claim",
-          "security-complete claim before deployment and fresh scan",
-        ],
-      },
-    ],
+    approvalGated: approvalGates(
+      approvalRunway,
+      shareRecipientAckApproval,
+      distributedAdmissionActivationApprovalResult,
+    ),
     launchReadiness: launchReadinessSummary(launch),
     final99TwelveDocumentNoMutation: {
       verdict: isRecord(final99TwelveDocumentNoMutation)

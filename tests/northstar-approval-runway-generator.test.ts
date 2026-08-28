@@ -68,12 +68,14 @@ function createFixtureRoot(): { root: string; head: string } {
     gates: [
       { id: "final_99_gate", state: "notice", evidencePath: "evaluation\\final-99-gate-current-2026-07-22\\report.json" },
       { id: "share_exact_saved_session_boundary", state: "notice", evidencePath: "evaluation\\share-exact-session-boundary-2026-07-22\\report.json" },
+      { id: "distributed_admission_activation", state: "approval_gated", evidencePath: "evaluation\\distributed-admission-activation-approval-2026-08-29\\report.json" },
       { id: "share_recipient_ack_approval", state: "approval_gated", evidencePath: "evaluation\\share-recipient-ack-approval-preflight-current-2026-07-19\\report.json" },
       { id: "provider_dispatch_persistence", state: "approval_gated", evidencePath: "evaluation\\provider-dispatch-idempotency-gate-2026-07-19\\report.json" },
       { id: "supabase_rls_launch_isolation", state: "approval_gated", evidencePath: "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json" },
       { id: "llm_wiki_publication", state: "approval_gated", evidencePath: "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json" },
       { id: "sif_embedding_runtime", state: "approval_gated", evidencePath: "evaluation\\sif-embedding-gate\\approval-preflight-report.json" },
       { id: "kosha_exact_promotion_review_gate", state: "approval_gated", evidencePath: "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\report.json" },
+      { id: "security_atomic_db_race_remediation", state: "approval_gated", evidencePath: "evaluation\\security-atomic-db-race-approval-boundary-2026-08-14\\report.json" },
     ],
   });
   execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
@@ -108,13 +110,19 @@ describe("northstar approval runway generator", () => {
     expect(report.viewportArchitectureGate.requiredGeometry.join("\n")).toContain("documents 1440x723 and 390x723");
     expect(report.viewportArchitectureGate.requiredGeometry.join("\n")).toContain("desktop narrow-stack verdict");
     expect(report.approvalGates.map((gate) => gate.id)).toEqual([
+      "distributed_admission_activation",
       "share_recipient_ack_approval",
       "provider_dispatch_persistence",
       "supabase_rls_launch_isolation",
       "llm_wiki_publication",
       "sif_embedding_runtime",
       "kosha_exact_promotion_review_gate",
+      "security_atomic_db_race_remediation",
     ]);
+    expect(report.approvalGates.find((gate) => gate.id === "distributed_admission_activation")?.currentSafetyLock).toBe("production_secret_and_ephemeral_redis_mutation_approval_required");
+    expect(report.approvalGates.find((gate) => gate.id === "distributed_admission_activation")?.forbiddenUntilApproved).toContain(
+      "create distributed rate or concurrency keys",
+    );
     expect(report.approvalGates.find((gate) => gate.id === "share_recipient_ack_approval")?.currentSafetyLock).toBe("live_data_mutation_approval_required");
     expect(report.approvalGates.find((gate) => gate.id === "share_recipient_ack_approval")?.forbiddenUntilApproved).toContain(
       "production recipient read-confirmation insertion",
@@ -126,6 +134,7 @@ describe("northstar approval runway generator", () => {
     expect(report.approvalGates.find((gate) => gate.id === "provider_dispatch_persistence")?.currentSafetyLock).toBe("preview_only");
     expect(report.approvalGates.find((gate) => gate.id === "provider_dispatch_persistence")?.evidencePath).toBe("evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json");
     expect(report.approvalGates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.currentSafetyLock).toBe("human_review_incomplete_no_mutation");
+    expect(report.approvalGates.find((gate) => gate.id === "security_atomic_db_race_remediation")?.currentSafetyLock).toBe("no_migration_no_database_mutation_findings_open");
     expect(report.launchControlNotices.find((gate) => gate.id === "final_99_gate")?.currentSafetyLock).toBe("pass_with_notice_not_clean_launch");
     expect(report.launchControlNotices.find((gate) => gate.id === "share_exact_saved_session_boundary")?.forbiddenUntilProven).toContain(
       "fixture/generated Share proof closes the exact saved /share/[sessionId] complaint",
