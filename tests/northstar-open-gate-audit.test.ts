@@ -1005,6 +1005,48 @@ function createFixtureRoot(): string {
       humanEditorialReviewCompleted: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "ci-supply-chain-pinning-2026-08-29", "report.json"), {
+    verdict: "PASS_GITHUB_CI_PINNED_ACTIONS_MINIMUM_TOKEN_PERMISSIONS_WITH_EXISTING_SUITE_RED",
+    workflow: {
+      defaultPermissions: { contents: "read" },
+      actions: [
+        { name: "actions/checkout", sha: "11bd71901bbe5b1630ceea73d27597364c9af683", officialTagVerifiedByGitLsRemote: true },
+        { name: "actions/setup-node", sha: "49933ea5288caeca8642d1e84afbd3f7d6820020", officialTagVerifiedByGitLsRemote: true },
+      ],
+    },
+    verification: { githubActions: { conclusion: "failure", tests: { passed: 3098, failed: 5 } } },
+    remainingBoundaries: { fullRepositoryCiGreenClaimed: false },
+  });
+  writeJson(rootDir, path.join("evaluation", "ci-full-suite-remediation-2026-08-29", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    remediation: { commit: "fixture-sha" },
+    localVerification: {
+      typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+      fullSuite: { testFilesPassed: 256, testFilesSkipped: 11, testFilesTotal: 267, testsPassed: 3103, testsSkipped: 26, testsTotal: 3129 },
+    },
+    githubActions: {
+      runId: 33202526232,
+      conclusion: "success",
+      pinnedCheckout: "11bd71901bbe5b1630ceea73d27597364c9af683",
+      pinnedSetupNode: "49933ea5288caeca8642d1e84afbd3f7d6820020",
+      typecheck: "success",
+      fullSuite: { status: "success", testFilesPassed: 256, testFilesSkipped: 11, testsPassed: 3103, testsSkipped: 26 },
+      build: "success",
+    },
+    boundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+      approvalGatedBoundariesClosed: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "knowledge-preparation-capability-truth-2026-08-28", "report.json"), {
     verdict: "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD",
     sourceHead: "fixture-sha",
@@ -7172,6 +7214,14 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("landing-human-review-boundary");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "product_capability_truth")?.detail).toContain("Scoped Documents and Workspace/fixture Share viewport IA");
+    expect(audit.gates.find((gate) => gate.id === "ci_supply_chain_full_suite")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "ci-full-suite-remediation-2026-08-29", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "ci_supply_chain_full_suite")?.detail).toContain("3098-pass/5-fail");
+    expect(audit.gates.find((gate) => gate.id === "ci_supply_chain_full_suite")?.detail).toContain("3103/3129 passing");
+    expect(audit.gates.find((gate) => gate.id === "ci_supply_chain_full_suite")?.detail).toContain("does not close other security findings");
+    expect(audit.gates.find((gate) => gate.id === "ci_supply_chain_full_suite")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "knowledge_preparation_capability_truth")).toMatchObject({
       state: "notice",
       evidencePath: path.join("evaluation", "knowledge-preparation-capability-truth-2026-08-28", "report.json"),
@@ -7600,6 +7650,24 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.forbiddenClaims).toContain("KOSHA operator checklist completion alone approves exact-trust promotion.");
     expect(audit.forbiddenClaims).toContain("Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval.");
     expect(audit.safeDemoClaims).toContain("Photo hazard analysis readiness supports up to 10 images and keeps Before/After improvements as reviewed operation memory.");
+  });
+
+  it("fails the CI full-suite gate closed when approval boundaries are claimed closed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "ci-full-suite-remediation-2026-08-29", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      boundaries: { approvalGatedBoundariesClosed: boolean; exactSavedShareVerdict: string };
+    };
+    report.boundaries.approvalGatedBoundariesClosed = true;
+    report.boundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, sourceSha: "fixture-sha" });
+    const gate = audit.gates.find((item) => item.id === "ci_supply_chain_full_suite");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.detail).toContain("exactShare=PASS");
+    expect(gate?.detail).toContain("noMutation=false");
   });
 
   it.each([

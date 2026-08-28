@@ -48,6 +48,8 @@ const EVIDENCE_PATHS = Object.freeze({
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   liveDocumentRainContextIsolation: path.join("evaluation", "live-document-rain-context-isolation-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  ciSupplyChainPinning: path.join("evaluation", "ci-supply-chain-pinning-2026-08-29", "report.json"),
+  ciFullSuiteRemediation: path.join("evaluation", "ci-full-suite-remediation-2026-08-29", "report.json"),
   knowledgePreparationCapabilityTruth: path.join("evaluation", "knowledge-preparation-capability-truth-2026-08-28", "report.json"),
   launchOperationsReadiness: path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"),
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
@@ -1957,6 +1959,107 @@ function evaluateKnowledgePreparationCapabilityTruthGate(rootDir) {
     nextActions: pass
       ? ["Configure approved distributed admission, then run one bounded authenticated preparation probe before claiming enhanced LLM runtime readiness; keep Wiki publication and RLS as separate approvals."]
       : ["Restore source/live ancestry, the distinct configuration and load codes/messages, 117 passing tests, no-mutation boundaries, blocked runtime, approval gates, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateCiSupplyChainFullSuiteGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.ciFullSuiteRemediation;
+  const baselinePath = EVIDENCE_PATHS.ciSupplyChainPinning;
+  const report = readJsonFile(rootDir, evidencePath);
+  const baseline = readJsonFile(rootDir, baselinePath);
+  if (!isRecord(report) || !isRecord(baseline)) {
+    return gateResult({
+      id: "ci_supply_chain_full_suite",
+      label: "Pinned CI supply chain and full suite",
+      state: "missing",
+      evidencePath,
+      detail: "Pinned CI baseline or full-suite remediation evidence is missing or invalid.",
+      nextActions: ["Re-run the pinned GitHub Actions workflow and record the clean full-suite result without changing approval boundaries."],
+    });
+  }
+
+  const workflow = isRecord(baseline.workflow) ? baseline.workflow : {};
+  const actions = Array.isArray(workflow.actions) ? workflow.actions.filter(isRecord) : [];
+  const baselineVerification = isRecord(baseline.verification) ? baseline.verification : {};
+  const baselineGithub = isRecord(baselineVerification.githubActions) ? baselineVerification.githubActions : {};
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const local = isRecord(report.localVerification) ? report.localVerification : {};
+  const localSuite = isRecord(local.fullSuite) ? local.fullSuite : {};
+  const github = isRecord(report.githubActions) ? report.githubActions : {};
+  const githubSuite = isRecord(github.fullSuite) ? github.fullSuite : {};
+  const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
+  const checkout = actions.find((action) => readString(action.name) === "actions/checkout");
+  const setupNode = actions.find((action) => readString(action.name) === "actions/setup-node");
+  const checkoutSha = readString(checkout?.sha);
+  const setupNodeSha = readString(setupNode?.sha);
+  const sourceMatchesProduction = readString(report.sourceHead).length > 0
+    && readString(report.sourceHead) === readString(productionBuild.commitSha)
+    && readString(report.sourceHead) === readString(remediation.commit);
+  const noMutation = boundaries.dbMutationPerformed === false
+    && boundaries.providerDispatchCalled === false
+    && boundaries.shareSessionCreated === false
+    && boundaries.vectorMutationPerformed === false
+    && boundaries.wikiPublicationPerformed === false
+    && boundaries.koshaRegistryMutationPerformed === false
+    && boundaries.approvalGatedBoundariesClosed === false;
+  const pinnedBaselineReady = readString(baseline.verdict)
+      === "PASS_GITHUB_CI_PINNED_ACTIONS_MINIMUM_TOKEN_PERMISSIONS_WITH_EXISTING_SUITE_RED"
+    && readString(workflow.defaultPermissions?.contents) === "read"
+    && checkoutSha === "11bd71901bbe5b1630ceea73d27597364c9af683"
+    && setupNodeSha === "49933ea5288caeca8642d1e84afbd3f7d6820020"
+    && checkout?.officialTagVerifiedByGitLsRemote === true
+    && setupNode?.officialTagVerifiedByGitLsRemote === true
+    && readString(baselineGithub.conclusion) === "failure"
+    && readNumber(baselineGithub.tests?.passed) === 3098
+    && readNumber(baselineGithub.tests?.failed) === 5
+    && baseline.remainingBoundaries?.fullRepositoryCiGreenClaimed === false;
+  const fullSuiteReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED"
+    && sourceMatchesProduction
+    && readString(productionBuild.branch) === "master"
+    && readString(productionBuild.environment) === "production"
+    && readString(local.typecheck) === "PASS"
+    && readString(local.build?.status) === "PASS"
+    && readNumber(local.build?.staticPages) === 28
+    && readNumber(localSuite.testFilesPassed) === 256
+    && readNumber(localSuite.testFilesSkipped) === 11
+    && readNumber(localSuite.testFilesTotal) === 267
+    && readNumber(localSuite.testsPassed) === 3103
+    && readNumber(localSuite.testsSkipped) === 26
+    && readNumber(localSuite.testsTotal) === 3129
+    && readString(github.conclusion) === "success"
+    && readString(github.pinnedCheckout) === checkoutSha
+    && readString(github.pinnedSetupNode) === setupNodeSha
+    && readString(github.typecheck) === "success"
+    && readString(githubSuite.status) === "success"
+    && readNumber(githubSuite.testsPassed) === 3103
+    && readNumber(githubSuite.testsSkipped) === 26
+    && readString(github.build) === "success"
+    && readString(boundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && noMutation;
+
+  if (pinnedBaselineReady && fullSuiteReady) {
+    return gateResult({
+      id: "ci_supply_chain_full_suite",
+      label: "Pinned CI supply chain and full suite",
+      state: "proven",
+      evidencePath,
+      detail: `GitHub CI preserves contents:read and immutable checkout/setup-node SHAs, then closes the recorded 3098-pass/5-fail baseline with 3103/3129 passing and 26 skipped tests plus successful typecheck/build on production-aligned ${readString(report.sourceHead).slice(0, 8)}. This is CI and deployment evidence only: it does not close other security findings or approval-gated work, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`,
+      nextActions: ["Keep action SHAs and the full-suite contract fail-closed when updating CI dependencies."],
+    });
+  }
+
+  return gateResult({
+    id: "ci_supply_chain_full_suite",
+    label: "Pinned CI supply chain and full suite",
+    state: "contradicted",
+    evidencePath,
+    detail: `PinnedBaselineReady=${pinnedBaselineReady}, fullSuiteReady=${fullSuiteReady}, sourceMatchesProduction=${sourceMatchesProduction}, checkout=${checkoutSha || "missing"}, setupNode=${setupNodeSha || "missing"}, GitHub=${readString(github.conclusion) || "missing"}, tests=${readNumber(githubSuite.testsPassed)}/${readNumber(localSuite.testsTotal)}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: ["Repair the pinned CI or full-suite evidence and rerun the unchanged fail-closed gate."],
   });
 }
 
@@ -12344,6 +12447,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateDocumentEditorialReviewCockpitGate(rootDir),
     evaluateCurrentLiveDocumentEditorialRuntimeGate(rootDir),
     evaluateProductCapabilityTruthGate(rootDir),
+    evaluateCiSupplyChainFullSuiteGate(rootDir),
     evaluateKnowledgePreparationCapabilityTruthGate(rootDir),
     evaluateLaunchOperationsReadinessGate(rootDir),
     evaluateDocumentExportCapabilityTruthGate(rootDir),

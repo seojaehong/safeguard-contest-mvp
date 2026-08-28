@@ -34,6 +34,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  ciSupplyChainFullSuite: path.join("evaluation", "ci-full-suite-remediation-2026-08-29", "report.json"),
   knowledgePreparationCapabilityTruth: path.join("evaluation", "knowledge-preparation-capability-truth-2026-08-28", "report.json"),
   launchOperationsReadiness: path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"),
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
@@ -700,6 +701,38 @@ function productCapabilityTruthSummary(report) {
     photoAnalysisPostCalled: asBoolean(mutationBoundary.photoAnalysisPostCalled),
     exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
     documentsShareIaVerdict: asString(remainingBoundaries.documentsShareIaVerdict),
+  };
+}
+
+/**
+ * @param {unknown} report
+ */
+function ciSupplyChainFullSuiteSummary(report) {
+  if (!isRecord(report)) return {};
+  const production = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const github = isRecord(report.githubActions) ? report.githubActions : {};
+  const suite = isRecord(github.fullSuite) ? github.fullSuite : {};
+  const localVerification = isRecord(report.localVerification) ? report.localVerification : {};
+  const localSuite = isRecord(localVerification.fullSuite) ? localVerification.fullSuite : {};
+  const localBuild = isRecord(localVerification.build) ? localVerification.build : {};
+  const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(production.commitSha),
+    githubRunId: typeof github.runId === "number" ? github.runId : null,
+    githubConclusion: asString(github.conclusion),
+    pinnedCheckout: asString(github.pinnedCheckout),
+    pinnedSetupNode: asString(github.pinnedSetupNode),
+    testsPassed: typeof suite.testsPassed === "number" ? suite.testsPassed : null,
+    testsSkipped: typeof suite.testsSkipped === "number" ? suite.testsSkipped : null,
+    testsTotal: typeof localSuite.testsTotal === "number" ? localSuite.testsTotal : null,
+    testFilesPassed: typeof suite.testFilesPassed === "number" ? suite.testFilesPassed : null,
+    testFilesSkipped: typeof suite.testFilesSkipped === "number" ? suite.testFilesSkipped : null,
+    staticPages: typeof localBuild.staticPages === "number" ? localBuild.staticPages : null,
+    build: asString(github.build),
+    exactSavedShareVerdict: asString(boundaries.exactSavedShareVerdict),
+    approvalGatedBoundariesClosed: asBoolean(boundaries.approvalGatedBoundariesClosed),
   };
 }
 
@@ -3344,6 +3377,8 @@ export function buildNorthstarNextRunway(options) {
     ARTIFACTS.liveDocumentEditorialNearClassification,
   );
   const productCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.productCapabilityTruth);
+  const ciSupplyChainFullSuite = readOptionalJson(options.rootDir, ARTIFACTS.ciSupplyChainFullSuite);
+  const ciSupplyChainFullSuiteResult = ciSupplyChainFullSuiteSummary(ciSupplyChainFullSuite);
   const knowledgePreparationCapabilityTruth = readOptionalJson(options.rootDir, ARTIFACTS.knowledgePreparationCapabilityTruth);
   const knowledgePreparationCapabilityTruthResult = knowledgePreparationCapabilityTruthSummary(
     knowledgePreparationCapabilityTruth,
@@ -3601,6 +3636,16 @@ export function buildNorthstarNextRunway(options) {
       "current_live_document_editorial_runtime",
       "document_editorial_review_cockpit",
       "product_capability_truth",
+      ...(ciSupplyChainFullSuiteResult.verdict === "PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED"
+        && ciSupplyChainFullSuiteResult.sourceHead === ciSupplyChainFullSuiteResult.productionCommit
+        && ciSupplyChainFullSuiteResult.githubConclusion === "success"
+        && ciSupplyChainFullSuiteResult.testsPassed === 3103
+        && ciSupplyChainFullSuiteResult.testsSkipped === 26
+        && ciSupplyChainFullSuiteResult.build === "success"
+        && ciSupplyChainFullSuiteResult.exactSavedShareVerdict === "MISSING_EVIDENCE"
+        && ciSupplyChainFullSuiteResult.approvalGatedBoundariesClosed === false
+        ? ["ci_supply_chain_full_suite"]
+        : []),
       ...(launchOperationsReadinessProven(launchOperationsReadinessResult)
         ? ["launch_operations_readiness_cockpit"]
         : []),
@@ -3873,6 +3918,7 @@ export function buildNorthstarNextRunway(options) {
       liveDocumentEditorialNearClassification,
     ),
     productCapabilityTruth: productCapabilityTruthSummary(productCapabilityTruth),
+    ciSupplyChainFullSuite: ciSupplyChainFullSuiteResult,
     knowledgePreparationCapabilityTruth: knowledgePreparationCapabilityTruthResult,
     launchOperationsReadiness: launchOperationsReadinessResult,
     documentExportCapabilityTruth: documentExportCapabilityTruthSummary(documentExportCapabilityTruth),
@@ -4050,6 +4096,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Live editorial duplicate classification is measured separately: \`${report.liveDocumentEditorialDuplicateClassification.verdict || "missing"}\`, generic template overuse \`${report.liveDocumentEditorialDuplicateClassification.beforeGenericTemplateOveruseCount ?? 0}->${report.liveDocumentEditorialDuplicateClassification.liveGenericTemplateOveruseCount ?? 0}\`, retained reviewer findings exact/near \`${report.liveDocumentEditorialDuplicateClassification.exactLineOveruseCount ?? 0}/${report.liveDocumentEditorialDuplicateClassification.nearDuplicateLineOveruseCount ?? 0}\`, and humanReviewCompleted=\`${report.liveDocumentEditorialDuplicateClassification.humanReviewCompleted === true}\`. Only generic template overuse fails automatically; safety-control and legal-reference repetition remains visible, and exact saved Share remains \`${report.liveDocumentEditorialDuplicateClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live editorial near-duplicate classification preserves \`${report.liveDocumentEditorialNearClassification.beforeNearDuplicateLineOveruseCount ?? 0}->${report.liveDocumentEditorialNearClassification.liveNearDuplicateLineOveruseCount ?? 0}\` findings while reducing unclassified human-review-required \`${report.liveDocumentEditorialNearClassification.beforeHumanReviewRequiredCount ?? 0}->${report.liveDocumentEditorialNearClassification.liveHumanReviewRequiredCount ?? 0}\`. The retained role-prefix/context/hazard/control categories are \`${report.liveDocumentEditorialNearClassification.rolePrefixVariantCount ?? 0}/${report.liveDocumentEditorialNearClassification.independentContextCount ?? 0}/${report.liveDocumentEditorialNearClassification.hazardConsistencyCount ?? 0}/${report.liveDocumentEditorialNearClassification.controlConsistencyCount ?? 0}\`; humanReviewCompleted=\`${report.liveDocumentEditorialNearClassification.humanReviewCompleted === true}\` and exact saved Share remains \`${report.liveDocumentEditorialNearClassification.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live product capability truth is measured separately: \`${report.productCapabilityTruth.verdict || "missing"}\`; manual/provider dispatch is \`${report.productCapabilityTruth.dispatchMode || "unknown"}\` with reason \`${report.productCapabilityTruth.dispatchReason || "unknown"}\`, scheduled briefing email ready=\`${report.productCapabilityTruth.briefingEmailReady === true}\`, photo Vision/OCR ready/accepted-only=\`${report.productCapabilityTruth.photoVisionReady === true}/${report.productCapabilityTruth.photoAcceptedOnly === true}\`, and AI modes are \`${report.productCapabilityTruth.aiModes?.join(", ") || "missing"}\`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains \`${report.productCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\` and Documents/Share IA remains \`${report.productCapabilityTruth.documentsShareIaVerdict || "OPEN_SEPARATE_VIEWPORT_IA_WAVE"}\`.
+- Pinned CI supply-chain/full-suite proof is \`${report.ciSupplyChainFullSuite.verdict || "missing"}\`: GitHub run \`${report.ciSupplyChainFullSuite.githubRunId ?? "missing"}\` concluded \`${report.ciSupplyChainFullSuite.githubConclusion || "missing"}\` with \`${report.ciSupplyChainFullSuite.testsPassed ?? "unknown"}\` tests passed, \`${report.ciSupplyChainFullSuite.testsSkipped ?? "unknown"}\` skipped, and build \`${report.ciSupplyChainFullSuite.build || "missing"}\`. Checkout/setup-node remain immutable SHAs. This does not close unrelated security findings or approval-gated runtime work; exact saved Share remains \`${report.ciSupplyChainFullSuite.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Knowledge preparation capability truth is a separate notice: \`${report.knowledgePreparationCapabilityTruth.verdict || "missing"}\`; distributed configuration failures use \`${report.knowledgePreparationCapabilityTruth.distributedAdmissionCode || "missing"}\`, temporary load uses \`${report.knowledgePreparationCapabilityTruth.temporaryConcurrencyCode || "missing"}\`, and the UI distinction is \`${report.knowledgePreparationCapabilityTruth.configurationLockDistinguishedFromLoad === true}\`. Live evidence is \`${report.knowledgePreparationCapabilityTruth.liveStatus || "missing"}\` with behavioral probe=\`${report.knowledgePreparationCapabilityTruth.behavioralProbeExecuted === true}\`. Enhanced runtime remains \`${report.knowledgePreparationCapabilityTruth.enhancedLlmRuntime || "missing"}\`, authenticated preparation/Wiki/RLS remain \`${report.knowledgePreparationCapabilityTruth.authenticatedLivePreparationProbe || "APPROVAL_GATED"}/${report.knowledgePreparationCapabilityTruth.llmWikiPublication || "APPROVAL_GATED"}/${report.knowledgePreparationCapabilityTruth.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}\`, security-complete remains \`${report.knowledgePreparationCapabilityTruth.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.knowledgePreparationCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live launch operations readiness is measured separately: \`${report.launchOperationsReadiness.verdict || "missing"}\`; first-viewport receipts \`${report.launchOperationsReadiness.firstViewportCount ?? 0}/${report.launchOperationsReadiness.rowCount ?? 0}\`, desktop four-column \`${report.launchOperationsReadiness.desktopFourColumnCount ?? 0}/2\`, mobile local-scroll \`${report.launchOperationsReadiness.mobileLocalScrollCount ?? 0}/2\`, and console errors \`${report.launchOperationsReadiness.browserConsoleErrorCount ?? 0}\`. Runtime truth remains admission \`${report.launchOperationsReadiness.publicAdmission || "unknown"}\`, dispatch \`${report.launchOperationsReadiness.providerDispatch || "unknown"}\`, and photo Vision \`${report.launchOperationsReadiness.photoVision || "unknown"}\`; distributed configured/provider ready/fully automated remain \`${report.launchOperationsReadiness.distributedAdmissionConfigured === true}/${report.launchOperationsReadiness.providerDispatchReady === true}/${report.launchOperationsReadiness.fullyAutomatedLaunchClaimAllowed === true}\`, and exact saved Share remains \`${report.launchOperationsReadiness.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live document export capability truth is measured separately: \`${report.documentExportCapabilityTruth.verdict || "missing"}\`; admission is \`${report.documentExportCapabilityTruth.admissionMode || "unknown"}/${report.documentExportCapabilityTruth.admissionReason || "unknown"}\` with ready=\`${report.documentExportCapabilityTruth.admissionReady === true}\`. Desktop panel/beta width is \`${report.documentExportCapabilityTruth.desktopPanelWidth ?? 0}/${report.documentExportCapabilityTruth.desktopBetaButtonWidth ?? 0}px\`; mobile is \`${report.documentExportCapabilityTruth.mobilePanelWidth ?? 0}/${report.documentExportCapabilityTruth.mobileBetaButtonWidth ?? 0}px\`. This proves fail-closed export truth and browser fallbacks, not distributed activation; activation remains \`${report.documentExportCapabilityTruth.distributedAdmissionActivation || "OPERATOR_CONFIGURATION_REQUIRED"}\`, fully automated launch remains \`${report.documentExportCapabilityTruth.fullyAutomatedLaunchClaimAllowed === true}\`, and exact saved Share remains \`${report.documentExportCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.

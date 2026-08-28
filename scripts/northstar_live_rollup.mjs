@@ -31,6 +31,7 @@ const ARTIFACTS = Object.freeze({
   liveDocumentEditorialDuplicateClassification: path.join("evaluation", "live-document-editorial-duplicate-classification-2026-07-25", "report.json"),
   liveDocumentEditorialNearClassification: path.join("evaluation", "live-document-editorial-near-classification-2026-07-25", "report.json"),
   productCapabilityTruth: path.join("evaluation", "product-capability-truth-2026-07-25", "report.json"),
+  ciSupplyChainFullSuite: path.join("evaluation", "ci-full-suite-remediation-2026-08-29", "report.json"),
   knowledgePreparationCapabilityTruth: path.join("evaluation", "knowledge-preparation-capability-truth-2026-08-28", "report.json"),
   launchOperationsReadiness: path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"),
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
@@ -554,6 +555,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const liveDocumentEditorialDuplicateClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialDuplicateClassification);
   const liveDocumentEditorialNearClassification = tryReadJson(rootDir, ARTIFACTS.liveDocumentEditorialNearClassification);
   const productCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.productCapabilityTruth);
+  const ciSupplyChainFullSuite = tryReadJson(rootDir, ARTIFACTS.ciSupplyChainFullSuite);
   const knowledgePreparationCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.knowledgePreparationCapabilityTruth);
   const launchOperationsReadiness = tryReadJson(rootDir, ARTIFACTS.launchOperationsReadiness);
   const documentExportCapabilityTruth = tryReadJson(rootDir, ARTIFACTS.documentExportCapabilityTruth);
@@ -696,6 +698,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_duplicate_classification", ARTIFACTS.liveDocumentEditorialDuplicateClassification, liveDocumentEditorialDuplicateClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "live_document_editorial_near_classification", ARTIFACTS.liveDocumentEditorialNearClassification, liveDocumentEditorialNearClassification),
     evidenceStatus(rootDir, currentHead, liveCommit, "product_capability_truth", ARTIFACTS.productCapabilityTruth, productCapabilityTruth),
+    evidenceStatus(rootDir, currentHead, liveCommit, "ci_supply_chain_full_suite", ARTIFACTS.ciSupplyChainFullSuite, ciSupplyChainFullSuite),
     evidenceStatus(rootDir, currentHead, liveCommit, "knowledge_preparation_capability_truth", ARTIFACTS.knowledgePreparationCapabilityTruth, knowledgePreparationCapabilityTruth),
     evidenceStatus(rootDir, currentHead, liveCommit, "launch_operations_readiness_cockpit", ARTIFACTS.launchOperationsReadiness, launchOperationsReadiness),
     evidenceStatus(rootDir, currentHead, liveCommit, "document_export_capability_truth", ARTIFACTS.documentExportCapabilityTruth, documentExportCapabilityTruth),
@@ -1601,6 +1604,25 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       exactSavedShareVerdict: asString(recordAt(productCapabilityTruth, "remainingBoundaries")?.exactSavedShareVerdict),
       documentsShareIaVerdict: asString(recordAt(productCapabilityTruth, "remainingBoundaries")?.documentsShareIaVerdict),
     },
+    ciSupplyChainFullSuite: {
+      artifact: ARTIFACTS.ciSupplyChainFullSuite,
+      verdict: isRecord(ciSupplyChainFullSuite) ? asString(ciSupplyChainFullSuite.verdict) : "missing",
+      sourceHead: isRecord(ciSupplyChainFullSuite) ? asString(ciSupplyChainFullSuite.sourceHead) : "",
+      productionCommit: extractProductionCommit(ciSupplyChainFullSuite),
+      githubRunId: asNumber(recordAt(ciSupplyChainFullSuite, "githubActions")?.runId),
+      githubConclusion: asString(recordAt(ciSupplyChainFullSuite, "githubActions")?.conclusion),
+      pinnedCheckout: asString(recordAt(ciSupplyChainFullSuite, "githubActions")?.pinnedCheckout),
+      pinnedSetupNode: asString(recordAt(ciSupplyChainFullSuite, "githubActions")?.pinnedSetupNode),
+      testsPassed: asNumber(recordAt(recordAt(ciSupplyChainFullSuite, "githubActions"), "fullSuite")?.testsPassed),
+      testsSkipped: asNumber(recordAt(recordAt(ciSupplyChainFullSuite, "githubActions"), "fullSuite")?.testsSkipped),
+      testsTotal: asNumber(recordAt(recordAt(ciSupplyChainFullSuite, "localVerification"), "fullSuite")?.testsTotal),
+      testFilesPassed: asNumber(recordAt(recordAt(ciSupplyChainFullSuite, "githubActions"), "fullSuite")?.testFilesPassed),
+      testFilesSkipped: asNumber(recordAt(recordAt(ciSupplyChainFullSuite, "githubActions"), "fullSuite")?.testFilesSkipped),
+      staticPages: asNumber(recordAt(recordAt(ciSupplyChainFullSuite, "localVerification"), "build")?.staticPages),
+      build: asString(recordAt(ciSupplyChainFullSuite, "githubActions")?.build),
+      exactSavedShareVerdict: asString(recordAt(ciSupplyChainFullSuite, "boundaries")?.exactSavedShareVerdict),
+      approvalGatedBoundariesClosed: recordAt(ciSupplyChainFullSuite, "boundaries")?.approvalGatedBoundariesClosed === true,
+    },
     knowledgePreparationCapabilityTruth: {
       artifact: ARTIFACTS.knowledgePreparationCapabilityTruth,
       verdict: isRecord(knowledgePreparationCapabilityTruth) ? asString(knowledgePreparationCapabilityTruth.verdict) : "missing",
@@ -2470,6 +2492,14 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- AI generation modes: ${rollup.productCapabilityTruth.aiModes.join(", ") || "missing"}`,
     `- Exact saved Share: ${rollup.productCapabilityTruth.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     `- Documents/Share IA: ${rollup.productCapabilityTruth.documentsShareIaVerdict || "OPEN_SEPARATE_VIEWPORT_IA_WAVE"}`,
+    "",
+    "## Pinned CI Supply Chain And Full Suite",
+    "",
+    `- Verdict: \`${rollup.ciSupplyChainFullSuite.verdict}\``,
+    `- GitHub run: ${rollup.ciSupplyChainFullSuite.githubRunId ?? "missing"}; conclusion=${rollup.ciSupplyChainFullSuite.githubConclusion || "missing"}; tests=${rollup.ciSupplyChainFullSuite.testsPassed ?? "unknown"} passed/${rollup.ciSupplyChainFullSuite.testsSkipped ?? "unknown"} skipped; files=${rollup.ciSupplyChainFullSuite.testFilesPassed ?? "unknown"} passed/${rollup.ciSupplyChainFullSuite.testFilesSkipped ?? "unknown"} skipped; build=${rollup.ciSupplyChainFullSuite.build || "missing"}`,
+    `- Immutable actions: checkout=${rollup.ciSupplyChainFullSuite.pinnedCheckout || "missing"}; setup-node=${rollup.ciSupplyChainFullSuite.pinnedSetupNode || "missing"}`,
+    `- Exact saved Share: ${rollup.ciSupplyChainFullSuite.exactSavedShareVerdict || "MISSING_EVIDENCE"}; approval-gated boundaries closed=${rollup.ciSupplyChainFullSuite.approvalGatedBoundariesClosed}`,
+    "- Boundary: CI and deployment proof does not close unrelated security findings or approval-gated runtime work.",
     "",
     "## Knowledge Preparation Capability Truth",
     "",

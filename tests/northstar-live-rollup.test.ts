@@ -152,6 +152,21 @@ type RollupReport = {
     exactSavedShareVerdict: string;
     documentsShareIaVerdict: string;
   };
+  ciSupplyChainFullSuite: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    githubRunId: number;
+    githubConclusion: string;
+    pinnedCheckout: string;
+    pinnedSetupNode: string;
+    testsPassed: number;
+    testsSkipped: number;
+    testsTotal: number;
+    staticPages: number;
+    exactSavedShareVerdict: string;
+    approvalGatedBoundariesClosed: boolean;
+  };
   knowledgePreparationCapabilityTruth: {
     verdict: string;
     productionIncludesProductCommit: boolean;
@@ -1276,6 +1291,7 @@ function createFixtureRoot(): { root: string; head: string } {
       { id: "live_document_editorial_review", state: "proven", evidencePath: "evaluation/live-document-editorial-review-2026-07-25/report.json", detail: "all 60 editorial surfaces passed automated contract" },
       { id: "document_editorial_review_cockpit", state: "proven", evidencePath: "evaluation/document-editorial-review-cockpit-2026-08-16/report.json", detail: "live 4/4 cockpit preserves human review and exact Share boundaries" },
       { id: "product_capability_truth", state: "proven", evidencePath: "evaluation/product-capability-truth-2026-07-25/report.json", detail: "live capability truth passed without unlocking provider dispatch" },
+      { id: "ci_supply_chain_full_suite", state: "proven", evidencePath: "evaluation/ci-full-suite-remediation-2026-08-29/report.json", detail: "pinned CI and 3103-test full suite pass without closing approval boundaries" },
       { id: "knowledge_preparation_capability_truth", state: "notice", evidencePath: "evaluation/knowledge-preparation-capability-truth-2026-08-28/report.json", detail: "deployed-source lock truth passed while enhanced runtime remains blocked" },
       { id: "document_export_capability_truth", state: "proven", evidencePath: "evaluation/document-export-capability-truth-2026-08-17/report.json", detail: "live export truth passed while distributed admission remains locked" },
       { id: "ontology_viewport_workbench", state: "proven", evidencePath: "evaluation/ontology-viewport-workbench-2026-08-17/report.json", detail: "live ontology viewport workbench passed with exact Share boundary retained" },
@@ -1628,6 +1644,36 @@ function createFixtureRoot(): { root: string; head: string } {
     remainingBoundaries: {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
+    },
+  });
+  writeJson(root, "evaluation/ci-full-suite-remediation-2026-08-29/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED",
+    sourceHead: "TO_FILL",
+    productionBuild: { commitSha: "TO_FILL", branch: "master", environment: "production" },
+    remediation: { commit: "TO_FILL" },
+    localVerification: {
+      typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+      fullSuite: { testFilesPassed: 256, testFilesSkipped: 11, testFilesTotal: 267, testsPassed: 3103, testsSkipped: 26, testsTotal: 3129 },
+    },
+    githubActions: {
+      runId: 33202526232,
+      conclusion: "success",
+      pinnedCheckout: "11bd71901bbe5b1630ceea73d27597364c9af683",
+      pinnedSetupNode: "49933ea5288caeca8642d1e84afbd3f7d6820020",
+      typecheck: "success",
+      fullSuite: { status: "success", testFilesPassed: 256, testFilesSkipped: 11, testsPassed: 3103, testsSkipped: 26 },
+      build: "success",
+    },
+    boundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+      approvalGatedBoundariesClosed: false,
     },
   });
   writeJson(root, "evaluation/knowledge-preparation-capability-truth-2026-08-28/report.json", {
@@ -2746,6 +2792,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-document-editorial-duplicate-classification-2026-07-25/report.json",
     "evaluation/live-document-editorial-near-classification-2026-07-25/report.json",
     "evaluation/product-capability-truth-2026-07-25/report.json",
+    "evaluation/ci-full-suite-remediation-2026-08-29/report.json",
     "evaluation/knowledge-preparation-capability-truth-2026-08-28/report.json",
     "evaluation/launch-operations-readiness-2026-08-26/report.json",
     "evaluation/document-export-capability-truth-2026-08-17/report.json",
@@ -2991,6 +3038,20 @@ describe("northstar live rollup", () => {
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
     });
     expect(report.evidence.find((item) => item.id === "product_capability_truth")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.ciSupplyChainFullSuite).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED",
+      githubRunId: 33202526232,
+      githubConclusion: "success",
+      pinnedCheckout: "11bd71901bbe5b1630ceea73d27597364c9af683",
+      pinnedSetupNode: "49933ea5288caeca8642d1e84afbd3f7d6820020",
+      testsPassed: 3103,
+      testsSkipped: 26,
+      testsTotal: 3129,
+      staticPages: 28,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      approvalGatedBoundariesClosed: false,
+    });
+    expect(report.evidence.find((item) => item.id === "ci_supply_chain_full_suite")?.productionStatus).toBe("ancestor_of_head");
     expect(report.knowledgePreparationCapabilityTruth).toMatchObject({
       verdict: "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD",
       productionIncludesProductCommit: true,

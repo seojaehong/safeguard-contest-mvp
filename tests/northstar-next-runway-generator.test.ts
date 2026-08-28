@@ -213,6 +213,21 @@ type NextRunwayReport = {
     exactSavedShareVerdict: string;
     documentsShareIaVerdict: string;
   };
+  ciSupplyChainFullSuite: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    githubRunId: number;
+    githubConclusion: string;
+    pinnedCheckout: string;
+    pinnedSetupNode: string;
+    testsPassed: number;
+    testsSkipped: number;
+    testsTotal: number;
+    staticPages: number;
+    exactSavedShareVerdict: string;
+    approvalGatedBoundariesClosed: boolean;
+  };
   knowledgePreparationCapabilityTruth: {
     verdict: string;
     productionIncludesProductCommit: boolean;
@@ -2109,6 +2124,36 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
     },
   });
+  writeJson(root, "evaluation/ci-full-suite-remediation-2026-08-29/report.json", {
+    verdict: "PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    remediation: { commit: "fixture-sha" },
+    localVerification: {
+      typecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+      fullSuite: { testFilesPassed: 256, testFilesSkipped: 11, testFilesTotal: 267, testsPassed: 3103, testsSkipped: 26, testsTotal: 3129 },
+    },
+    githubActions: {
+      runId: 33202526232,
+      conclusion: "success",
+      pinnedCheckout: "11bd71901bbe5b1630ceea73d27597364c9af683",
+      pinnedSetupNode: "49933ea5288caeca8642d1e84afbd3f7d6820020",
+      typecheck: "success",
+      fullSuite: { status: "success", testFilesPassed: 256, testFilesSkipped: 11, testsPassed: 3103, testsSkipped: 26 },
+      build: "success",
+    },
+    boundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+      approvalGatedBoundariesClosed: false,
+    },
+  });
   writeJson(root, "evaluation/knowledge-preparation-capability-truth-2026-08-28/report.json", {
     verdict: "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD",
     sourceHead: "fixture-sha",
@@ -3929,6 +3974,20 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       documentsShareIaVerdict: "PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP",
     });
     expect(report.provenCurrentState).toContain("product_capability_truth");
+    expect(report.ciSupplyChainFullSuite).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED",
+      githubRunId: 33202526232,
+      githubConclusion: "success",
+      pinnedCheckout: "11bd71901bbe5b1630ceea73d27597364c9af683",
+      pinnedSetupNode: "49933ea5288caeca8642d1e84afbd3f7d6820020",
+      testsPassed: 3103,
+      testsSkipped: 26,
+      testsTotal: 3129,
+      staticPages: 28,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      approvalGatedBoundariesClosed: false,
+    });
+    expect(report.provenCurrentState).toContain("ci_supply_chain_full_suite");
     expect(report.knowledgePreparationCapabilityTruth).toMatchObject({
       verdict: "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD",
       productionIncludesProductCommit: true,
