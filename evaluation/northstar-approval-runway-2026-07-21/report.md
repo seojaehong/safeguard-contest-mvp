@@ -1,10 +1,10 @@
 # SafeClaw North Star Approval Runway
 
-Generated at: 2026-07-28T02:14:24.301Z
+Generated at: 2026-08-28T21:48:25.039Z
 
-Source HEAD at draft: `f160020db6a66a08f5e0ea174aa799432383101e`
+Source HEAD at draft: `da2c1b952a6e84ddd7d5bab58accf6e37d84ddc2`
 
-Live commit at draft: `dc894462967cf293b73b5014bfed258b17a170fe`
+Live commit at draft: `da2c1b952a6e84ddd7d5bab58accf6e37d84ddc2`
 
 Overall: `approval_runway_ready_open`
 
@@ -41,12 +41,14 @@ Required geometry:
 
 | Gate | State | Evidence | Current Lock | Approval Needed |
 | --- | --- | --- | --- | --- |
+| `distributed_admission_activation` | `approval_gated` | `evaluation/distributed-admission-activation-approval-2026-08-29/report.json` | `production_secret_and_ephemeral_redis_mutation_approval_required` | approve both Production-scoped Upstash REST variables as one configuration change; approve one bounded invalid-payload connectivity probe that creates short-lived Redis counter and lease keys; rerun bounded runtime readiness and the fresh Standard scan before any security-complete claim |
 | `share_recipient_ack_approval` | `approval_gated` | `evaluation/share-recipient-ack-approval-preflight-current-2026-07-19/report.json` | `live_data_mutation_approval_required` | approve a disposable production workpack and invited worker pair; approve workpack_share_sessions and workpack_read_confirmations inserts; measure invited-recipient ACK readback without provider dispatch |
 | `provider_dispatch_persistence` | `approval_gated` | `evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json` | `preview_only` | approve persistent idempotency migration scope; choose per-channel child table or canonical provider_result JSONB ledger; add updated_at trigger or route-owned timestamp contract; test reservation-before-provider-call, duplicate replay, and per-channel result retention |
 | `supabase_rls_launch_isolation` | `approval_gated` | `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json` | `read_only_preflight` | approve authoritative Supabase project and credential provenance; run read-only live catalog capture; run disposable tenant A/B negative matrix; verify Storage object isolation and service-role route invariants |
 | `llm_wiki_publication` | `approval_gated` | `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json` | `candidate_unpublished` | approve final DDL, RPC, grants, and append-only ledger; approve graph pointer and publication threat model; run isolated publication canary with atomicity, idempotency, rollback, and leak tests |
 | `sif_embedding_runtime` | `approval_gated` | `evaluation/sif-embedding-gate/approval-preflight-report.json` | `approval_held_no_vectors` | approve SIF-only embedding migration; approve embedding cost and upload; run post-upload vector runtime verification; keep SAFETY_REFERENCE_VECTOR_SEARCH disabled until upload is verified |
 | `kosha_exact_promotion_review_gate` | `approval_gated` | `evaluation/kosha-exact-promotion-review-gate-2026-07-22/report.json` | `human_review_incomplete_no_mutation` | complete every required candidate review checklist; record reviewer, reviewedAt, and humanConfirmed for each candidate; seek separate explicit approval before exact-trust registry changes |
+| `security_atomic_db_race_remediation` | `approval_gated` | `evaluation/security-atomic-db-race-approval-boundary-2026-08-14/report.json` | `no_migration_no_database_mutation_findings_open` | approve transactional migration, RPC, trigger, and concurrency test scope; approve temporary database rows for integration proof |
 
 ## Launch-Control Notices
 
@@ -57,6 +59,10 @@ Required geometry:
 
 ## Forbidden Until Approved
 
+- write either Production Upstash secret
+- create distributed rate or concurrency keys
+- enable remote Hermes Upstash ledger mode as part of this activation
+- claim distributed admission is operational from syntax readiness alone
 - production share-session creation
 - production recipient read-confirmation insertion
 - real invited-recipient ACK readback claim
@@ -75,6 +81,9 @@ Required geometry:
 - KOSHA exact-trust registry expanded beyond current exact pins
 - operator checklist completion alone approves exact-trust promotion
 - exact registry write artifact created before separate approval
+- database schema mutation
+- MCP token-cap or worker site-binding closure claim
+- security-complete claim before deployment and fresh scan
 - fully automated launch readiness
 - admin server save/reopen completed live
 - Kakao/Band or all-provider dispatch approved and live-complete
@@ -86,13 +95,15 @@ Required geometry:
 
 1. Confirm target production/staging project and secret-free evidence boundaries.
 2. Close or explicitly carry launch-control notices before fully automated launch claims.
-3. Approve or reject RLS live catalog and tenant A/B read-only probes.
-4. Approve or reject LLM Wiki isolated publication canary.
-5. Approve or reject SIF embedding migration, cost, and upload as a separate gate.
-6. Approve or reject a disposable saved Share session and recipient ACK canary before any production insert.
-7. Approve or reject provider dispatch persistence migration and route-level replay tests.
-8. Approve or reject KOSHA exact promotion only after human review is complete.
-9. Only after each gate has post-approval evidence, regenerate northstar-open-gates-current and northstar-live-rollup.
+3. Approve or reject distributed admission secret configuration and the bounded ephemeral Redis connectivity probe.
+4. Approve or reject RLS live catalog and tenant A/B read-only probes.
+5. Approve or reject LLM Wiki isolated publication canary.
+6. Approve or reject SIF embedding migration, cost, and upload as a separate gate.
+7. Approve or reject a disposable saved Share session and recipient ACK canary before any production insert.
+8. Approve or reject provider dispatch persistence migration and route-level replay tests.
+9. Approve or reject KOSHA exact promotion only after human review is complete.
+10. Approve or reject atomic database race remediation migrations and disposable concurrency proof rows.
+11. Only after each gate has post-approval evidence, regenerate northstar-open-gates-current and northstar-live-rollup.
 
 ## Still Safe Without Approval
 
