@@ -283,6 +283,11 @@ describe("knowledge review inbox browser", () => {
     expect(await inbox.getByText(queueItem.candidateText).isVisible()).toBe(false);
     expect(await inbox.getByText("위험 2").isVisible()).toBe(true);
     expect(await inbox.locator('[data-review-content-readiness="revision_required"]').count()).toBe(1);
+    const contentIssues = inbox.locator('[data-review-content-issues="true"]');
+    expect(await contentIssues.count()).toBe(1);
+    expect(await contentIssues.locator('[data-review-content-issue="true"]').count()).toBe(1);
+    expect(await contentIssues.getByText("검수 필요 항목 섹션을 추가하세요.", { exact: true }).isVisible()).toBe(true);
+    expect(await contentIssues.textContent()).not.toContain("missing_section:review_items");
     const incompleteTraceability = inbox.locator('[data-review-traceability="incomplete"]');
     expect(await incompleteTraceability.count()).toBe(1);
     expect(await incompleteTraceability.locator('[data-review-trace="unresolved"]').count()).toBe(1);

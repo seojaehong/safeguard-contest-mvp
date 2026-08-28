@@ -143,6 +143,27 @@ const CANDIDATE_SECTION_LABELS = ["위험요인 요약", "문서 반영 위치",
 const MALFORMED_CANDIDATE_SECTION_PATTERN = /^\s*\d+\s*[).]/u;
 let browserClient: SupabaseClient | null = null;
 
+function readContentSectionLabel(sectionId: string): string | null {
+  if (sectionId === "hazard_summary") return "위험요인 요약";
+  if (sectionId === "document_targets") return "문서 반영 위치";
+  if (sectionId === "controls") return "통제대책";
+  if (sectionId === "review_items") return "검수 필요 항목";
+  return null;
+}
+
+function describeContentReadinessIssue(issue: string): string {
+  const [kind, sectionId = ""] = issue.split(":", 2);
+  const sectionLabel = readContentSectionLabel(sectionId);
+  if (kind === "missing_section" && sectionLabel) return `${sectionLabel} 섹션을 추가하세요.`;
+  if (kind === "empty_section" && sectionLabel) return `${sectionLabel} 섹션 내용을 채우세요.`;
+  if (issue === "placeholder_content") return "임시 문구를 실제 현장 내용으로 바꾸세요.";
+  if (issue === "legal_overclaim") return "법적 의무를 자동 대체하는 표현을 수정하세요.";
+  if (issue === "statutory_claim_without_law_provenance") return "법적 의무 표현에 공식 법령 근거를 연결하세요.";
+  if (issue === "sif_provenance_not_visible") return "SIF 근거가 후보 본문에 보이도록 연결하세요.";
+  if (issue === "hazard_grounding_missing") return "현재 위험요인과 후보 문장의 연결을 보완하세요.";
+  return "추가 검수 항목을 보완하세요.";
+}
+
 function getBrowserSupabaseClient(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -928,6 +949,22 @@ export function KnowledgeReviewInbox() {
                                 {item.contentReadiness.statutoryClaimDetected ? ` · 법령 근거 ${item.contentReadiness.lawProvenancePresent ? "확인" : "누락"}` : ""}
                                 {item.contentReadiness.sifProvenancePresent ? ` · SIF 근거 ${item.contentReadiness.sifEvidenceVisible ? "본문 확인" : "본문 누락"}` : ""}
                               </p>
+                              {item.contentReadiness.unresolvedReviewItems.length > 0 ? (
+                                <section
+                                  className={styles.reviewContentIssues}
+                                  aria-label="보완 필요 항목"
+                                  data-review-content-issues="true"
+                                >
+                                  <strong>보완 필요</strong>
+                                  <ul>
+                                    {item.contentReadiness.unresolvedReviewItems.map((issue, index) => (
+                                      <li key={`${issue}-${index}`} data-review-content-issue="true">
+                                        {describeContentReadinessIssue(issue)}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </section>
+                              ) : null}
                             </section>
                           ) : null}
                           <section

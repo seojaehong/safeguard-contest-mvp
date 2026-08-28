@@ -120,6 +120,14 @@ describe("knowledge governance UI contract", () => {
     expect(inboxSource).toContain('className={styles.reviewInboxMessage} role="status"');
   });
 
+  it("turns revision codes into reviewer-facing remediation guidance", () => {
+    expect(inboxSource).toContain('data-review-content-issues="true"');
+    expect(inboxSource).toContain('data-review-content-issue="true"');
+    expect(inboxSource).toContain('return `${sectionLabel} 섹션을 추가하세요.`');
+    expect(inboxSource).toContain('return "법적 의무 표현에 공식 법령 근거를 연결하세요."');
+    expect(cssSource).toMatch(/\.reviewContentIssues\s*\{[\s\S]*?border-left:\s*3px solid/u);
+  });
+
   it("distinguishes an operator configuration lock from temporary candidate load", () => {
     expect(inboxSource).toContain('code === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"');
     expect(inboxSource).toContain('code === "PUBLIC_ASK_CONCURRENCY_LIMIT"');

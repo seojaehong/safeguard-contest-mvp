@@ -925,6 +925,38 @@
   margin: 0;
 }
 
+.reviewContentIssues {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: var(--space-1);
+  border-left: 3px solid var(--workspace-danger, #b42318);
+  padding: var(--space-2) var(--space-3);
+  background: var(--workspace-surface-2, #f7f8fa);
+}
+
+.reviewContentIssues > strong,
+.reviewContentIssues li {
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+}
+
+.reviewReadiness .reviewContentIssues ul {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0 0 0 18px;
+  background: transparent;
+  list-style: disc;
+}
+
+.reviewReadiness .reviewContentIssues li {
+  display: list-item;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}
+
 @container (max-width: 620px) {
   .reviewReadiness {
     grid-template-columns: minmax(0, 1fr);

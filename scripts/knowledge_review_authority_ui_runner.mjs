@@ -341,18 +341,50 @@ try {
       await candidateTabs.nth(1).click();
       const revisionDecision = await page.evaluate(() => {
         const readiness = document.querySelector('[data-review-content-readiness="revision_required"]');
+        const contentIssues = readiness?.querySelector('[data-review-content-issues="true"]');
+        const issueRows = Array.from(contentIssues?.querySelectorAll('[data-review-content-issue="true"]') ?? []);
         const actionGroup = document.querySelector('[role="group"][aria-label="검토 결정"]');
         const buttons = actionGroup ? [...actionGroup.querySelectorAll("button")] : [];
         const confirmation = actionGroup?.querySelector('input[type="checkbox"]');
         return {
           readinessVisible: readiness instanceof HTMLElement,
+          contentIssuesVisible: contentIssues instanceof HTMLElement,
+          contentIssueCount: issueRows.length,
+          contentIssueLabels: issueRows.map((row) => row.textContent?.trim() || ""),
+          rawIssueCodeExposed: contentIssues?.textContent?.includes("missing_section:") === true,
           approveDisabled: buttons[0]?.disabled === true,
           allDecisionButtonsDisabled: buttons.length === 3 && buttons.every((button) => button.disabled),
           confirmationUnchecked: confirmation instanceof HTMLInputElement && !confirmation.checked,
           confirmationStatus: actionGroup?.getAttribute("data-review-confirmation") || null
         };
       });
+      let revisionGuidanceScreenshot = null;
+      if (candidateReadinessMode) {
+        const contentIssues = inbox.locator('[data-review-content-issues="true"]');
+        await contentIssues.scrollIntoViewIfNeeded();
+        revisionGuidanceScreenshot = `knowledge-review-remediation-guidance-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
+        await page.screenshot({ path: path.join(outputDir, revisionGuidanceScreenshot), fullPage: false });
+      }
+      const revisionConfirmation = inbox.getByRole("checkbox", { name: "후보 문장·근거 확인" });
+      await revisionConfirmation.check();
+      const revisionConfirmedDecision = await page.evaluate(() => {
+        const actionGroup = document.querySelector('[role="group"][aria-label="검토 결정"]');
+        const buttons = actionGroup ? [...actionGroup.querySelectorAll("button")] : [];
+        const confirmation = actionGroup?.querySelector('input[type="checkbox"]');
+        return {
+          approveDisabled: buttons[0]?.disabled === true,
+          keepSiteOnlyEnabled: buttons[1]?.disabled === false,
+          rejectEnabled: buttons[2]?.disabled === false,
+          confirmationChecked: confirmation instanceof HTMLInputElement && confirmation.checked,
+          confirmationStatus: actionGroup?.getAttribute("data-review-confirmation") || null
+        };
+      });
+      await revisionConfirmation.uncheck();
       await candidateTabs.first().click();
+      await page.evaluate(() => {
+        const candidatePane = document.querySelector("[data-review-pane='candidate']");
+        if (candidatePane instanceof HTMLElement) candidatePane.scrollTop = 0;
+      });
       await inbox.scrollIntoViewIfNeeded();
       const screenshot = `knowledge-review-authority-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
       const initialDecisionViewport = await page.evaluate(() => {
@@ -840,10 +872,24 @@ try {
                 && traceScreenshotContextVisible === true))
             && metrics.approveDisabled))
         && revisionDecision.readinessVisible
+        && revisionDecision.contentIssuesVisible
+        && revisionDecision.contentIssueCount === 4
+        && revisionDecision.contentIssueLabels.join("|") === [
+          "위험요인 요약 섹션을 추가하세요.",
+          "문서 반영 위치 섹션을 추가하세요.",
+          "통제대책 섹션을 추가하세요.",
+          "검수 필요 항목 섹션을 추가하세요."
+        ].join("|")
+        && !revisionDecision.rawIssueCodeExposed
         && revisionDecision.approveDisabled
         && revisionDecision.allDecisionButtonsDisabled
         && revisionDecision.confirmationUnchecked
         && revisionDecision.confirmationStatus === "required"
+        && revisionConfirmedDecision.approveDisabled
+        && revisionConfirmedDecision.keepSiteOnlyEnabled
+        && revisionConfirmedDecision.rejectEnabled
+        && revisionConfirmedDecision.confirmationChecked
+        && revisionConfirmedDecision.confirmationStatus === "confirmed"
         && metrics.actionCount === 3
         && metrics.actionContained
         && metrics.confirmationCount === 1
@@ -889,6 +935,7 @@ try {
         viewport,
         screenshot,
         candidateSubjectScreenshot: evidenceInspectorMode || candidateReadinessMode ? candidateSubjectScreenshot : null,
+        revisionGuidanceScreenshot,
         metrics,
         candidateKeyboard: { endState: candidateEndState, homeState: candidateHomeState },
         initialDecisionViewport,
@@ -902,6 +949,7 @@ try {
           passed: decisionPendingContract
         },
         revisionDecision,
+        revisionConfirmedDecision,
         traceMatrixCoverage,
         traceMatrixComplete,
         traceScreenshotContextVisible,
@@ -1105,8 +1153,12 @@ const report = {
     revisionRequiredFixtureCount: 1,
     selectedReadinessPanelCount: 1,
     approvalFailsClosedForRevision: results.every((result) => result.revisionDecision.approveDisabled),
-    keepSiteOnlyAvailableForRevision: results.every((result) => result.revisionDecision.keepSiteOnlyEnabled),
-    rejectAvailableForRevision: results.every((result) => result.revisionDecision.rejectEnabled),
+    revisionGuidanceVisible: results.every((result) => result.revisionDecision.contentIssuesVisible),
+    revisionIssueCount: Math.min(...results.map((result) => result.revisionDecision.contentIssueCount)),
+    revisionIssueCodesExposed: results.some((result) => result.revisionDecision.rawIssueCodeExposed),
+    approvalFailsClosedAfterConfirmation: results.every((result) => result.revisionConfirmedDecision.approveDisabled),
+    keepSiteOnlyAvailableForRevision: results.every((result) => result.revisionConfirmedDecision.keepSiteOnlyEnabled),
+    rejectAvailableForRevision: results.every((result) => result.revisionConfirmedDecision.rejectEnabled),
     humanReviewCompleted: false,
     publicationState: "unpublished",
     publishAllowed: false
@@ -1159,7 +1211,8 @@ ${rows}
 - Desktop mounts the selected candidate and five-item evidence inspector together; mobile mounts one linked pane behind a keyboard-operable segmented tab control.
 - Evidence digests keep at least ${report.workbenchContract.evidenceDigestMinWidth}px width and at most ${report.workbenchContract.evidenceDigestMaxHeight}px height; readiness cells keep at least ${report.workbenchContract.desktopReadinessSectionMinWidth}px on desktop and ${report.workbenchContract.mobileReadinessSectionMinWidth}px on mobile, with labels no taller than ${report.workbenchContract.readinessLabelMaxHeight}px.
 - The first decision action stays inside every measured viewport. All three decisions remain locked until the reviewer confirms the candidate sentence and evidence, then announce pending/busy/settled states around the delayed save fixture.
-- Each selected candidate exposes one server-derived readiness panel with four required sections. A revision-required candidate disables only candidate approval while keeping site-only retention and rejection available.
+- Each selected candidate exposes one server-derived readiness panel with four required sections. A revision-required candidate presents human-readable remediation guidance without exposing internal issue codes.
+- Revision confirmation keeps candidate approval locked while making the explicit site-only retention and rejection paths available.
 - Explicit safe original-event review facts must appear in a distinct reviewer region inside the candidate pane, without duplicating their marker in the candidate body or exposing private event text.
 - Only allowlisted public law, KOSHA, and SIF references expose verified HTTPS links. Organization and site evidence retain generic labels and bounded digests only.
 
