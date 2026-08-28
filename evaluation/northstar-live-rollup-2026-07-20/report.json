@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-28T12:18:03.614Z",
-  "head": "ea9fb620c17be6dd3b21105d8df2accf9bff6994",
+  "generatedAt": "2026-08-28T12:24:28.672Z",
+  "head": "e2d740604b75d524a3bd97187c6b9c3956c9f3f9",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "ea9fb620c17be6dd3b21105d8df2accf9bff6994",
+    "commitSha": "e2d740604b75d524a3bd97187c6b9c3956c9f3f9",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-34nxvg0ct-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-47e8q3dca-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -1939,9 +1939,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "ea9fb620c17be6dd3b21105d8df2accf9bff6994",
+      "sourceCommit": "e2d740604b75d524a3bd97187c6b9c3956c9f3f9",
       "sourceStatus": "exact",
-      "productionCommit": "ea9fb620c17be6dd3b21105d8df2accf9bff6994",
+      "productionCommit": "e2d740604b75d524a3bd97187c6b9c3956c9f3f9",
       "productionStatus": "matches_live"
     },
     {
@@ -2060,9 +2060,9 @@
       "id": "knowledge_preparation_capability_truth",
       "artifact": "evaluation\\knowledge-preparation-capability-truth-2026-08-28\\report.json",
       "sourceCommit": "ea9fb620c17be6dd3b21105d8df2accf9bff6994",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "ea9fb620c17be6dd3b21105d8df2accf9bff6994",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "launch_operations_readiness_cockpit",
@@ -2100,9 +2100,9 @@
       "id": "llm_wiki_candidate_content_readiness",
       "artifact": "evaluation\\llm-wiki-candidate-readiness-2026-08-25\\report.json",
       "sourceCommit": "ea9fb620c17be6dd3b21105d8df2accf9bff6994",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "ea9fb620c17be6dd3b21105d8df2accf9bff6994",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "llm_wiki_candidate_content_matrix",
