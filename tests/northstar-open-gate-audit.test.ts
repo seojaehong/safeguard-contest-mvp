@@ -1692,6 +1692,56 @@ function createFixtureRoot(): string {
       supabaseRlsLaunchIsolation: "APPROVAL_GATED",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "hermes-knowledge-review-structured-sections-2026-08-28", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_HERMES_STRUCTURED_CANDIDATE_REVIEW",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    afterLive: {
+      verdict: "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS",
+      productionCommit: "fixture-sha",
+      productionAligned: true,
+      viewportCount: 8,
+      passedCount: 8,
+      failedCount: 0,
+      selectedCandidateCount: 1,
+      selectedBodyCount: 1,
+      selectedBodyFormat: "structured",
+      candidateSectionCount: 4,
+      candidateSectionsNonEmpty: true,
+      desktopColumns: 2,
+      mobileColumns: 1,
+      candidateBodyInternalScroll: true,
+      firstDecisionActionInViewport: true,
+      horizontalOverflow: false,
+      actualProductionCandidateQueueRead: false,
+      routeControlledBrowserFixture: true,
+    },
+    reviewBoundary: {
+      humanReviewCompleted: false,
+      machineEvidenceReplacesHumanReview: false,
+      publicationState: "unpublished",
+      publishAllowed: false,
+      rawFallbackPreserved: true,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      ontologyPublicationPerformed: false,
+      vectorRuntimeCalled: false,
+      wikiPublished: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      liveAfterDeploymentRequired: false,
+      actualProductionCandidateQueueRead: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      enhancedLlmRuntime: "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION",
+      securityComplete: false,
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "live-document-seed-profile-isolation-2026-07-25", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_SEED_PROFILE_ISOLATION",
     sourceHead: "fixture-sha",
@@ -7282,6 +7332,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       evidencePath: path.join("evaluation", "hermes-knowledge-review-selected-workbench-2026-08-14", "report.json"),
     });
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("8/8");
+    expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("four numbered");
+    expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("actual production candidate queue");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("APPROVAL_GATED");
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "hermes_review_decision_first_viewport")).toMatchObject({
@@ -9294,6 +9346,29 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       state: "contradicted",
     });
     expect(audit.gates.find((gate) => gate.id === "hermes_knowledge_review_ui")?.detail).toContain("humanReview=false");
+  });
+
+  it("fails Hermes reviewer UI closed when structured candidate evidence overclaims the production queue", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "hermes-knowledge-review-structured-sections-2026-08-28", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLive: { candidateSectionCount: number; actualProductionCandidateQueueRead: boolean };
+    };
+    report.afterLive.candidateSectionCount = 3;
+    report.afterLive.actualProductionCandidateQueueRead = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-25T00:00:00.000Z",
+    });
+
+    const gate = audit.gates.find((item) => item.id === "hermes_knowledge_review_ui");
+    expect(gate).toMatchObject({ state: "contradicted" });
+    expect(gate?.detail).toContain("structuredCompanion=false");
+    expect(gate?.detail).toContain("structuredSections=3");
+    expect(gate?.detail).toContain("actualQueueRead=true");
   });
 
   it("fails Hermes evidence inspector closed when saved Share or security boundaries are overclaimed", async () => {

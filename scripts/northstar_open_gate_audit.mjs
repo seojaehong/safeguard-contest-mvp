@@ -102,6 +102,7 @@ const EVIDENCE_PATHS = Object.freeze({
   learningExportRendererSecurity: path.join("evaluation", "learning-export-renderer-security-2026-08-02", "report.json"),
   hermesKnowledgeReviewContract: path.join("evaluation", "hermes-knowledge-review-contract-live-2026-07-25", "report.json"),
   hermesKnowledgeReviewAuthorityUi: path.join("evaluation", "hermes-knowledge-review-selected-workbench-2026-08-14", "report.json"),
+  hermesKnowledgeReviewStructuredSections: path.join("evaluation", "hermes-knowledge-review-structured-sections-2026-08-28", "report.json"),
   hermesReviewDecisionFirstViewport: path.join("evaluation", "hermes-review-decision-first-viewport-2026-08-27", "report.json"),
   hermesReviewCandidatePosition: path.join("evaluation", "hermes-review-candidate-position-2026-08-27", "report.json"),
   hermesKnowledgeReviewEvidenceInspector: path.join("evaluation", "hermes-knowledge-review-evidence-inspector-2026-08-14", "report.json"),
@@ -579,6 +580,7 @@ function evaluateHermesKnowledgeReviewAuthorityGate(rootDir) {
 function evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.hermesKnowledgeReviewAuthorityUi;
   const report = readJsonFile(rootDir, evidencePath);
+  const structuredReport = readJsonFile(rootDir, EVIDENCE_PATHS.hermesKnowledgeReviewStructuredSections);
   if (!isRecord(report)) {
     return gateResult({
       id: "hermes_knowledge_review_ui",
@@ -596,6 +598,10 @@ function evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir) {
   const workbenchContract = isRecord(report.workbenchContract) ? report.workbenchContract : {};
   const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
   const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const structuredAfterLive = isRecord(structuredReport?.afterLive) ? structuredReport.afterLive : {};
+  const structuredReviewBoundary = isRecord(structuredReport?.reviewBoundary) ? structuredReport.reviewBoundary : {};
+  const structuredMutationBoundary = isRecord(structuredReport?.mutationBoundary) ? structuredReport.mutationBoundary : {};
+  const structuredRemainingBoundaries = isRecord(structuredReport?.remainingBoundaries) ? structuredReport.remainingBoundaries : {};
   const sourceOrder = readStringArray(authorityContract.sourceOrder);
   const productCommit = readString(report.productCommit);
   const productionCommit = readString(report.productionCommit);
@@ -611,6 +617,51 @@ function evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir) {
     && mutationBoundary.providerDispatchCalled === false
     && mutationBoundary.shareSessionCreated === false
     && mutationBoundary.ontologyPublicationPerformed === false;
+  const structuredNoMutation = structuredMutationBoundary.dbMutationPerformed === false
+    && structuredMutationBoundary.providerDispatchCalled === false
+    && structuredMutationBoundary.shareSessionCreated === false
+    && structuredMutationBoundary.ontologyPublicationPerformed === false
+    && structuredMutationBoundary.vectorRuntimeCalled === false
+    && structuredMutationBoundary.wikiPublished === false
+    && structuredMutationBoundary.koshaRegistryMutationPerformed === false;
+  const structuredPass = isRecord(structuredReport)
+    && structuredReport.verdict === "PASS_LIVE_PRODUCTION_HERMES_STRUCTURED_CANDIDATE_REVIEW"
+    && readString(structuredReport.sourceHead) !== ""
+    && readString(structuredReport.productCommit) !== ""
+    && isGitAncestor(rootDir, readString(structuredReport.sourceHead))
+    && isGitAncestor(rootDir, readString(structuredReport.productCommit))
+    && structuredAfterLive.verdict === "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS"
+    && readString(structuredAfterLive.productionCommit) !== ""
+    && isGitAncestor(rootDir, readString(structuredAfterLive.productionCommit))
+    && structuredAfterLive.productionAligned === true
+    && structuredAfterLive.viewportCount === 8
+    && structuredAfterLive.passedCount === 8
+    && structuredAfterLive.failedCount === 0
+    && structuredAfterLive.selectedCandidateCount === 1
+    && structuredAfterLive.selectedBodyCount === 1
+    && structuredAfterLive.selectedBodyFormat === "structured"
+    && structuredAfterLive.candidateSectionCount === 4
+    && structuredAfterLive.candidateSectionsNonEmpty === true
+    && structuredAfterLive.desktopColumns === 2
+    && structuredAfterLive.mobileColumns === 1
+    && structuredAfterLive.candidateBodyInternalScroll === true
+    && structuredAfterLive.firstDecisionActionInViewport === true
+    && structuredAfterLive.horizontalOverflow === false
+    && structuredAfterLive.actualProductionCandidateQueueRead === false
+    && structuredAfterLive.routeControlledBrowserFixture === true
+    && structuredReviewBoundary.humanReviewCompleted === false
+    && structuredReviewBoundary.machineEvidenceReplacesHumanReview === false
+    && structuredReviewBoundary.publicationState === "unpublished"
+    && structuredReviewBoundary.publishAllowed === false
+    && structuredReviewBoundary.rawFallbackPreserved === true
+    && structuredNoMutation
+    && structuredRemainingBoundaries.liveAfterDeploymentRequired === false
+    && structuredRemainingBoundaries.actualProductionCandidateQueueRead === false
+    && structuredRemainingBoundaries.exactSavedShareVerdict === "MISSING_EVIDENCE"
+    && structuredRemainingBoundaries.llmWikiPublication === "APPROVAL_GATED"
+    && structuredRemainingBoundaries.supabaseRlsLaunchIsolation === "APPROVAL_GATED"
+    && structuredRemainingBoundaries.enhancedLlmRuntime === "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION"
+    && structuredRemainingBoundaries.securityComplete === false;
   const pass = report.verdict === "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI"
     && productCommit !== ""
     && productionCommit !== ""
@@ -647,6 +698,7 @@ function evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir) {
     && workbenchContract.decisionActionsDisabledDuringSave === true
     && workbenchContract.decisionSettlesAccessibly === true
     && noMutation
+    && structuredPass
     && remainingBoundaries.llmWikiPublication === "APPROVAL_GATED"
     && remainingBoundaries.supabaseRlsLaunchIsolation === "APPROVAL_GATED"
     && remainingBoundaries.exactSavedShareVerdict === "MISSING_EVIDENCE";
@@ -657,7 +709,7 @@ function evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir) {
       label: "Hermes knowledge reviewer UI",
       state: "proven",
       evidencePath,
-      detail: "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases with three navigable candidates, exactly one selected candidate/body, desktop two-column and mobile one-column containment, and internal candidate-body scroll. Candidate tabs keep one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, Arrow/Home/End navigation, and keyboard-operable compact panes. Delayed review decisions announce pending and settled states, expose busy semantics, and disable competing actions during save. It exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, or Share mutation. LLM Wiki/RLS remain APPROVAL_GATED and exact saved Share remains MISSING_EVIDENCE.",
+      detail: "Live authenticated reviewer cockpit passes 8/8 Day/Night desktop and mobile geometry cases with three navigable candidates, exactly one selected candidate/body, desktop two-column and mobile one-column containment, and internal candidate-body scroll. Companion live evidence presents the selected candidate as four numbered, labelled, non-empty reviewer sections while preserving a raw fallback; it is route-controlled and does not read the actual production candidate queue. Candidate tabs keep one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, Arrow/Home/End navigation, and keyboard-operable compact panes. Delayed review decisions announce pending and settled states, expose busy semantics, and disable competing actions during save. It exposes six SIF -> KOSHA -> law -> tenant-memory evidence roles, requires law provenance and site-manager acceptance, and performs no DB, provider, publication, vector, KOSHA registry, or Share mutation. Enhanced LLM runtime remains blocked, LLM Wiki/RLS remain APPROVAL_GATED, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
       nextActions: [],
     });
   }
@@ -667,7 +719,7 @@ function evaluateHermesKnowledgeReviewAuthorityUiGate(rootDir) {
     label: "Hermes knowledge reviewer UI",
     state: "contradicted",
     evidencePath,
-    detail: `Hermes reviewer UI contract failed: local=${readString(local.verdict) || "missing"}, live=${readString(afterLive.verdict) || "missing"}, candidates=${readNumber(workbenchContract.candidateCount)}, selected=${readNumber(workbenchContract.selectedCandidateCount)}, bodies=${readNumber(workbenchContract.selectedBodyCount)}, desktopColumns=${readNumber(workbenchContract.desktopColumns)}, mobileColumns=${readNumber(workbenchContract.mobileColumns)}, internalScroll=${String(workbenchContract.candidateBodyInternalScroll)}, candidateTabs=${String(workbenchContract.candidateTablist)}, rovingTabStop=${String(workbenchContract.candidateRovingTabStop)}, candidateKeyboard=${String(workbenchContract.candidateKeyboardNavigation)}, mobilePaneKeyboard=${String(workbenchContract.mobilePaneKeyboardNavigation)}, humanReview=${String(authorityContract.humanReviewRequired)}, noMutation=${String(noMutation)}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
+    detail: `Hermes reviewer UI contract failed: local=${readString(local.verdict) || "missing"}, live=${readString(afterLive.verdict) || "missing"}, candidates=${readNumber(workbenchContract.candidateCount)}, selected=${readNumber(workbenchContract.selectedCandidateCount)}, bodies=${readNumber(workbenchContract.selectedBodyCount)}, desktopColumns=${readNumber(workbenchContract.desktopColumns)}, mobileColumns=${readNumber(workbenchContract.mobileColumns)}, internalScroll=${String(workbenchContract.candidateBodyInternalScroll)}, candidateTabs=${String(workbenchContract.candidateTablist)}, rovingTabStop=${String(workbenchContract.candidateRovingTabStop)}, candidateKeyboard=${String(workbenchContract.candidateKeyboardNavigation)}, mobilePaneKeyboard=${String(workbenchContract.mobilePaneKeyboardNavigation)}, structuredCompanion=${String(structuredPass)}, structuredVerdict=${readString(structuredReport?.verdict) || "missing"}, structuredSections=${readNumber(structuredAfterLive.candidateSectionCount)}, actualQueueRead=${String(structuredAfterLive.actualProductionCandidateQueueRead)}, humanReview=${String(authorityContract.humanReviewRequired)}, noMutation=${String(noMutation)}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: ["Restore the six-role reviewer cockpit, live geometry, linked roving tabs, keyboard navigation, human-review, tenant-memory, and no-mutation boundaries."],
   });
 }
