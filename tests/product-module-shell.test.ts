@@ -198,12 +198,27 @@ async function readShellMetrics(page: Page) {
     const headingRect = heading.getBoundingClientRect();
     const commandRect = command.getBoundingClientRect();
     const railRect = rail.getBoundingClientRect();
+    const isContainedByHorizontalScroller = (element: HTMLElement) => {
+      let ancestor = element.parentElement;
+      while (ancestor && ancestor !== document.body) {
+        const ancestorStyle = getComputedStyle(ancestor);
+        const ancestorRect = ancestor.getBoundingClientRect();
+        const clipsHorizontally = (ancestorStyle.overflowX === "auto" || ancestorStyle.overflowX === "scroll")
+          && ancestor.scrollWidth > ancestor.clientWidth + 1;
+        const scrollerIsInViewport = ancestorRect.left >= -1 && ancestorRect.right <= window.innerWidth + 1;
+        if (clipsHorizontally && scrollerIsInViewport) return true;
+        ancestor = ancestor.parentElement;
+      }
+      return false;
+    };
     const overflowers = Array.from(document.body.querySelectorAll<HTMLElement>("*"))
       .filter((element) => {
         const style = getComputedStyle(element);
         if (style.display === "none" || style.visibility === "hidden") return false;
         const rect = element.getBoundingClientRect();
-        return rect.width > 0 && (rect.left < -1 || rect.right > window.innerWidth + 1);
+        return rect.width > 0
+          && (rect.left < -1 || rect.right > window.innerWidth + 1)
+          && !isContainedByHorizontalScroller(element);
       })
       .slice(0, 8)
       .map((element) => ({

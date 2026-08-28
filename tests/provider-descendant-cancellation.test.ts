@@ -72,19 +72,24 @@ describe("Work24 response budget", () => {
       { status: 200 },
     ));
     vi.stubGlobal("fetch", fetchMock);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
     const result = await work24.fetchTrainingRecommendations("서울 외국인 안전교육");
 
     expect(result.mode).toBe("fallback");
     expect(result.recommendations).toEqual([]);
-    expect(result.detail).toContain(`exceeded the ${work24.WORK24_RESPONSE_MAX_BYTES}-byte response limit`);
+    expect(result.detail).toBe("고용24 사업주훈련 연결 점검이 필요합니다.");
+    expect(JSON.stringify(result)).not.toContain(`${work24.WORK24_RESPONSE_MAX_BYTES}-byte response limit`);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("work24"));
     expect(fetchMock).toHaveBeenCalledTimes(2);
+    warn.mockRestore();
   });
 
   it("gives each upstream request an independent timeout while preserving fallback", async () => {
     vi.useFakeTimers();
     try {
       vi.stubEnv("WORK24_AUTH_KEY", "test-work24-key");
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
       const signals: AbortSignal[] = [];
       const fetchMock = stalledFetch(signals);
       vi.stubGlobal("fetch", fetchMock);
@@ -103,7 +108,10 @@ describe("Work24 response budget", () => {
         && signal.reason.message === `Work24 request timeout after ${work24.WORK24_REQUEST_TIMEOUT_MS}ms`)).toBe(true);
       expect(result.mode).toBe("fallback");
       expect(result.recommendations).toEqual([]);
-      expect(result.detail).toContain(`Work24 request timeout after ${work24.WORK24_REQUEST_TIMEOUT_MS}ms`);
+      expect(result.detail).toBe("고용24 사업주훈련 연결 점검이 필요합니다.");
+      expect(JSON.stringify(result)).not.toContain(`Work24 request timeout after ${work24.WORK24_REQUEST_TIMEOUT_MS}ms`);
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("work24"));
+      warn.mockRestore();
     } finally {
       vi.useRealTimers();
     }

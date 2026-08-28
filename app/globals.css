@@ -15420,8 +15420,8 @@ body:has(.safeclaw-landing) :is(
     max-width: 520px;
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
+    gap: 8px;
+    padding: 8px;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-status-pill span,
@@ -15465,7 +15465,7 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-form-card {
     align-content: start;
     min-height: 0;
-    gap: 2px;
+    gap: 0;
     padding: 4px;
   }
 
@@ -15514,7 +15514,7 @@ body:has(.safeclaw-landing) :is(
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-content: start;
     align-items: start;
-    gap: 6px;
+    gap: 4px;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card {
@@ -15539,7 +15539,7 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-form-card[data-share-owner="channels"] > .command-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
+    gap: 4px;
   }
 
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-primary-action-row {
