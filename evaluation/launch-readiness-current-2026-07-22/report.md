@@ -1,43 +1,47 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-08-28T21:59:40.379Z
+Generated: 2026-08-28T23:24:34.522Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD at generation: `56a60031738e12e29a32caa02c6f443cd54d8a30`
+Source HEAD at generation: `ae8bd431ac2dc35673fea9dd50134ff0f074cf89`
 
-Production runtime smoke commit: `56a60031738e12e29a32caa02c6f443cd54d8a30`
+Production runtime smoke commit: `ae8bd431ac2dc35673fea9dd50134ff0f074cf89`
 
 Current HEAD is evidence-only pending relative to production: `false`
 
 ## Verdict
 
-`PASS_LIVE_PRODUCTION_WITH_BOUNDARIES`
+`BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH`
 
-Safe launch demo / guided pilot wording is allowed with the recorded boundaries. Fully automated self-serve launch and real provider dispatch readiness are not allowed.
+Current live launch demo generation is not allowed while the measured runtime blocker remains active. Fully automated self-serve launch and real provider dispatch readiness are not allowed.
 
 ## Live Smoke
 
 `scripts/launch_readiness_audit.mjs` was run against production with `SAFETYGUARD_AUDIT_DISPATCH=false`.
 
-- `/api/ask`: 200 OK
-- error code: `none`
-- admission: `unknown` / `unknown`
-- elapsed: 22374 ms
+- raw audit generated: `2026-08-28T23:24:23.555Z`
+- raw audit production commit: `ae8bd431ac2dc35673fea9dd50134ff0f074cf89`
+- raw audit current for this report: `true`
+- raw audit freshness reasons: `none`
+- `/api/ask`: 503 CHECK
+- error code: `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`
+- admission: `distributed` / `unknown`
+- elapsed: 990 ms
 - dispatch call: not run
-- generated documents: 12 / 12
-- connection verdict: `PASS_CONNECTED_NO_DISPATCH` (7 connected, 0 bounded fallback, 0 check-required)
-- scenario: `도시가스공사 열수송관 굴착공사`
+- generated documents: 0 / 12
+- connection verdict: `BLOCKED_BEFORE_CONNECTION_CHECK_NO_DISPATCH` (0 connected, 0 bounded fallback, 7 check-required)
+- scenario: `unknown`
 
 ## Connected Surfaces
 
-- Law.go / korean-law-mcp: 연결됨
-- Gemini: 연결됨
-- 기상청: 연결됨
-- Work24: 연결됨
-- KOSHA 교육: 연결됨
-- KOSHA 공식자료: 연결됨
-- KOSHA 재해사례: 연결됨
+- Law.go / korean-law-mcp: 연결 점검 필요
+- Gemini: 연결 점검 필요
+- 기상청: 연결 점검 필요
+- Work24: 연결 점검 필요
+- KOSHA 교육: 연결 점검 필요
+- KOSHA 공식자료: 연결 점검 필요
+- KOSHA 재해사례: 연결 점검 필요
 - n8n dispatch: 설정 점검만 수행
 
 ## Final-99 Notices
@@ -49,10 +53,10 @@ Final-99 remains `pass_with_notice`; 2 notices are carried. These are approval/a
 
 ## Safe Claims
 
-- Live /api/ask generated the expected 12-document workpack for the audited construction scenario.
-- Live public-data/AI surfaces returned connected statuses for 7 connection surface(s) in this smoke.
-- A safe launch demo or guided pilot can be claimed only with all 8 canonical approval boundaries preserved.
-- Documents selected-only bounded workbench evidence is current in scoped artifacts; route split alone is not accepted as the UX fix.
+- The current live launch smoke fails closed before generation while distributed admission is unavailable.
+- No provider dispatch or database mutation was executed by the current launch smoke.
+- Documents and Share scoped UI evidence remains separate from current live generation availability.
+- Exact saved user Share remains MISSING_EVIDENCE.
 
 ## UI / IA Boundary
 
@@ -72,6 +76,7 @@ Route/page split alone is not accepted as the UX fix. The accepted structure is 
 - Live Supabase RLS tenant isolation is launch-proven.
 - Exact saved/generated user share session has been reproduced unless a concrete session URL/state is measured.
 - n8n/provider dispatch was executed in the latest launch-readiness smoke.
+- Current live /api/ask generation is available for a launch demo.
 
 ## Approval-Gated Boundaries
 
