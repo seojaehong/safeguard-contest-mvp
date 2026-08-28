@@ -41,8 +41,27 @@ function partialAnalysisMessage(counts: {
   ].join(" · ");
 }
 
-export async function GET() {
-  return NextResponse.json(getPhotoVisionReadiness());
+export async function GET(request: NextRequest) {
+  const readiness = getPhotoVisionReadiness();
+  const client = createSupabaseAdminClient();
+  const user = client ? await getWorkspaceUser(client, request.headers) : null;
+  if (user) return NextResponse.json(readiness);
+
+  return NextResponse.json({
+    ok: readiness.ok,
+    status: readiness.ok ? "ready" : "unavailable",
+    maxInputPhotos: readiness.maxInputPhotos,
+    maxBytesPerPhoto: readiness.maxBytesPerPhoto,
+    maxTotalPhotoBytes: readiness.maxTotalPhotoBytes,
+    maxRequestBytes: readiness.maxRequestBytes,
+    allowedMimeTypes: readiness.allowedMimeTypes,
+    acceptedOnly: readiness.acceptedOnly,
+    beforeAfterSupported: readiness.beforeAfterSupported,
+    ocrSupported: readiness.ocrSupported,
+    message: readiness.ok
+      ? "사진 분석/OCR 기능을 사용할 수 있습니다."
+      : "사진 분석/OCR 기능을 현재 사용할 수 없습니다."
+  });
 }
 
 async function handlePost(request: NextRequest) {

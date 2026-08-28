@@ -462,7 +462,16 @@ export function AiConnectPanel() {
   }, [session?.access_token]);
 
   useEffect(() => {
-    fetch("/api/input-photos/hazard-analysis")
+    if (!sessionChecked) return;
+    if (!session?.access_token) {
+      setPhotoVision(null);
+      setPhotoVisionMessage("로그인 후 사진 분석/OCR 운영 진단을 확인할 수 있습니다.");
+      return;
+    }
+
+    fetch("/api/input-photos/hazard-analysis", {
+      headers: { authorization: `Bearer ${session.access_token}` },
+    })
       .then(async (response) => {
         const payload: unknown = await response.json();
         const presentation = readPhotoVisionPresentationPayload(payload);
@@ -478,7 +487,7 @@ export function AiConnectPanel() {
         console.warn("photo vision readiness load failed", error);
         setPhotoVisionMessage("사진 분석/OCR 준비 상태를 불러오지 못했습니다.");
       });
-  }, []);
+  }, [session?.access_token, sessionChecked]);
 
   const commandText = useMemo(() => (
     oneTimeToken ? commandForTab(activeTab, oneTimeToken) : ""

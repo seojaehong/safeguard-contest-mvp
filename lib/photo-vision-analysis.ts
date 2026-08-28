@@ -671,7 +671,15 @@ async function postOpenAiVisionImages(input: {
       label: "OpenAI photo vision response",
       maxBytes: PHOTO_VISION_RESPONSE_MAX_BYTES,
     });
-    if (!response.ok) throw new Error(`OpenAI vision failed: ${response.status} ${raw}`);
+    if (!response.ok) {
+      const correlationId = crypto.randomUUID();
+      log.error("OpenAI photo vision request failed", {
+        correlationId,
+        status: response.status,
+        body: raw.slice(0, 2048)
+      });
+      throw new Error(`Photo vision provider request failed. Reference: ${correlationId}`);
+    }
 
     const data = JSON.parse(raw) as unknown;
     const record = isRecord(data) ? data : {};

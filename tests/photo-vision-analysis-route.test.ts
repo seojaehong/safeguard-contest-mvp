@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { POST } from "@/app/api/input-photos/hazard-analysis/route";
+import { GET, POST } from "@/app/api/input-photos/hazard-analysis/route";
 import {
   analyzeHazardPhotos,
   HAZARD_PHOTO_FILE_VALIDATION,
@@ -142,6 +142,42 @@ describe("photo vision hazard analysis route", () => {
     expect(body.ok).toBe(true);
     expect(body.analysis.status).toBe("partial");
     expect(vi.mocked(analyzeHazardPhotos).mock.calls[0]?.[0].photos).toHaveLength(2);
+  });
+
+  it("returns only coarse capability and upload limits to anonymous callers", async () => {
+    vi.mocked(getWorkspaceUser).mockResolvedValue(null);
+
+    const response = await GET(new NextRequest("http://localhost/api/input-photos/hazard-analysis"));
+    const body = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      status: expect.stringMatching(/^(ready|unavailable)$/u),
+      maxInputPhotos: 10,
+      acceptedOnly: true,
+      ocrSupported: true
+    });
+    expect(body).not.toHaveProperty("provider");
+    expect(body).not.toHaveProperty("model");
+    expect(body).not.toHaveProperty("apiKeyPresent");
+    expect(body).not.toHaveProperty("timeoutMs");
+    expect(body).not.toHaveProperty("fileValidation");
+    expect(body).not.toHaveProperty("hazardAnalysisEndpoint");
+    expect(body).not.toHaveProperty("improvementEndpointPattern");
+  });
+
+  it("returns provider diagnostics only to authenticated operators", async () => {
+    const response = await GET(new NextRequest("http://localhost/api/input-photos/hazard-analysis", {
+      headers: { authorization: "Bearer route-test-token" }
+    }));
+    const body = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(body).toHaveProperty("provider", "openai");
+    expect(body).toHaveProperty("model");
+    expect(body).toHaveProperty("apiKeyPresent");
+    expect(body).toHaveProperty("timeoutMs");
+    expect(body).toHaveProperty("hazardAnalysisEndpoint", "/api/input-photos/hazard-analysis");
   });
 
   it("times out a stalled authenticated multipart upload before parsing or provider work", async () => {
