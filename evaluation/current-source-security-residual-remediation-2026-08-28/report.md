@@ -2,7 +2,7 @@
 
 - Verdict: `PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING`
 - Product source: `c68cc7b7a63c3dfb64ed2be147248ecd186c2098`
-- Production marker: `b1a60eb846f796659a0fcc47da08adce3dfe0ecc` (`master`, production)
+- Production marker: `5b1f246bcf0587b2c0ac66affab2680fb6ff5fd9` (`master`, production)
 - Sealed scan baseline: `3358978a-75d1-454a-9dcd-4b63b52b9768` at `ab30f5c5269430a558fcd8ef5c6331fb3c952a4e`
 - Scope: the three approval-free source residuals only
 

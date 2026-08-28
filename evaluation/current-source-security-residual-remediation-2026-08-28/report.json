@@ -2,7 +2,7 @@
   "schemaVersion": "safeclaw-current-source-security-residual-remediation/v1",
   "verdict": "PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING",
   "sourceHead": "c68cc7b7a63c3dfb64ed2be147248ecd186c2098",
-  "productionCommit": "b1a60eb846f796659a0fcc47da08adce3dfe0ecc",
+  "productionCommit": "5b1f246bcf0587b2c0ac66affab2680fb6ff5fd9",
   "productionIncludesProductCommit": true,
   "baseline": {
     "scanId": "3358978a-75d1-454a-9dcd-4b63b52b9768",
@@ -61,10 +61,10 @@
   },
   "liveVerification": {
     "status": "PASS_DEPLOYED_SOURCE_MARKER_ONLY",
-    "buildInfoCommit": "b1a60eb846f796659a0fcc47da08adce3dfe0ecc",
+    "buildInfoCommit": "5b1f246bcf0587b2c0ac66affab2680fb6ff5fd9",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-1k8g7yuxm-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-pshs506og-seojaehongs-projects.vercel.app",
     "behavioralProbeExecuted": false,
     "reason": "The three controls do not expose a safe deterministic read-only behavioral endpoint; source inclusion plus local contract tests is recorded without overclaiming live behavior."
   },
