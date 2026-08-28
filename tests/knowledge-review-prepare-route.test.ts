@@ -176,6 +176,30 @@ describe("knowledge review prepare route", () => {
     expect(mocks.buildKnowledgeCandidateDraft).not.toHaveBeenCalled();
   });
 
+  it("distinguishes distributed admission failure from temporary provider concurrency", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({ from: vi.fn() });
+    mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: null });
+    mocks.acquirePublicAskWorkLease.mockRejectedValueOnce(
+      new Error("fixture private distributed admission detail")
+    );
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { POST } = await import("@/app/api/knowledge/review/prepare/route");
+
+    const response = await POST(request({ runId: RUN_ID }, { ip: "198.51.100.94" }));
+    const payload = await response.json() as { code: string; message: string };
+
+    expect(response.status).toBe(503);
+    expect(payload).toEqual({
+      ok: false,
+      configured: false,
+      code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      message: "AI 강화 후보 준비는 분산 보호 설정이 완료될 때까지 잠겨 있습니다."
+    });
+    expect(JSON.stringify(payload)).not.toContain("fixture private distributed admission detail");
+    expect(mocks.prepareKnowledgeReviewCandidate).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledOnce();
+  });
+
   it("keeps coalesced preparation alive until the final consumer disconnects", async () => {
     const release = vi.fn(async () => undefined);
     mocks.acquirePublicAskWorkLease.mockResolvedValueOnce({ weight: 2, release });

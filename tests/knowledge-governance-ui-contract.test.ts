@@ -112,6 +112,17 @@ describe("knowledge governance UI contract", () => {
     expect(inboxSource).toContain('className={styles.reviewInboxMessage} role="status"');
   });
 
+  it("distinguishes an operator configuration lock from temporary candidate load", () => {
+    expect(inboxSource).toContain('code === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"');
+    expect(inboxSource).toContain('code === "PUBLIC_ASK_CONCURRENCY_LIMIT"');
+    expect(inboxSource).toContain("분산 보호 설정이 완료될 때까지 잠겨");
+    expect(inboxSource).toContain("AI 후보 준비 작업이 진행 중입니다.");
+    expect(inboxSource).toContain('if (status === 401) return "로그인 상태를 다시 확인해 주세요.";');
+    expect(inboxSource).toContain('if (status === 503) return "검토 저장소 또는 AI 보호 설정을 확인해 주세요.";');
+    expect(inboxSource).toContain("knowledge review candidate preparation rejected");
+    expect(inboxSource).toContain("기존 후보 검토와 미게시 경계는 그대로 유지됩니다.");
+  });
+
   it("makes horizontally contained authority evidence keyboard reachable", () => {
     expect(inboxSource).toContain('className={styles.reviewAuthorityCounts} tabIndex={0} aria-label="근거 구성 수량, 가로로 스크롤 가능" onKeyDown={handleHorizontalScrollKey}');
     expect(inboxSource).toContain('className={styles.reviewBoundary} role="region" tabIndex={0} aria-label="후보 적용 경계, 가로로 스크롤 가능" onKeyDown={handleHorizontalScrollKey}');

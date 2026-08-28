@@ -452,6 +452,19 @@ async function readJson(response: Response): Promise<unknown> {
   return await response.json().catch((): unknown => null);
 }
 
+export function resolveKnowledgePreparationFailureMessage(payload: unknown, status: number): string {
+  const code = isRecord(payload) ? readString(payload.code, 80) : "";
+  if (code === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE") {
+    return "AI 강화 후보 준비는 분산 보호 설정이 완료될 때까지 잠겨 있습니다. 기존 후보 검토와 미게시 경계는 그대로 유지됩니다.";
+  }
+  if (code === "PUBLIC_ASK_CONCURRENCY_LIMIT") {
+    return "AI 후보 준비 작업이 진행 중입니다. 잠시 후 다시 시도해 주세요.";
+  }
+  if (status === 401) return "로그인 상태를 다시 확인해 주세요.";
+  if (status === 503) return "검토 저장소 또는 AI 보호 설정을 확인해 주세요.";
+  return "검토 후보를 준비하지 못했습니다.";
+}
+
 export function KnowledgeReviewInbox() {
   const [items, setItems] = useState<ReviewInboxItem[]>([]);
   const [state, setState] = useState<"loading" | "signed_out" | "ready" | "error">("loading");
@@ -621,7 +634,13 @@ export function KnowledgeReviewInbox() {
       });
       const payload = await readJson(response);
       if (!response.ok || !isRecord(payload) || payload.ok !== true) {
-        throw new Error("Candidate preparation failed");
+        const failureMessage = resolveKnowledgePreparationFailureMessage(payload, response.status);
+        console.warn("knowledge review candidate preparation rejected", {
+          code: isRecord(payload) ? readString(payload.code, 80) : "",
+          status: response.status
+        });
+        setMessage(failureMessage);
+        return;
       }
       setMessage("검토 후보를 준비했습니다.");
       await loadInbox(accessToken);

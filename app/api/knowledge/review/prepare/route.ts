@@ -34,7 +34,7 @@ const PREPARE_RATE_WINDOW_MS = 60_000;
 const limiter = createRateLimiter({ limit: PREPARE_RATE_LIMIT, windowMs: PREPARE_RATE_WINDOW_MS });
 
 type PreparationExecution =
-  | { admitted: false }
+  | { admitted: false; reason: "busy" | "distributed_unavailable" }
   | {
       admitted: true;
       result: Awaited<ReturnType<typeof prepareKnowledgeReviewCandidate>>;
@@ -153,9 +153,9 @@ export async function POST(request: NextRequest) {
           lease = await acquirePublicAskWorkLease("enhanced");
         } catch (error) {
           console.error("knowledge review preparation admission unavailable", error);
-          return { admitted: false };
+          return { admitted: false, reason: "distributed_unavailable" };
         }
-        if (!lease) return { admitted: false };
+        if (!lease) return { admitted: false, reason: "busy" };
 
         try {
           const result = await prepareKnowledgeReviewCandidate(client, user, { runId }, {
@@ -181,6 +181,14 @@ export async function POST(request: NextRequest) {
       }
     );
     if (!execution.admitted) {
+      if (execution.reason === "distributed_unavailable") {
+        return applyPublicRateLimitHeader(NextResponse.json({
+          ok: false,
+          configured: false,
+          code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+          message: "AI 강화 후보 준비는 분산 보호 설정이 완료될 때까지 잠겨 있습니다."
+        }, { status: 503 }), rateLimit);
+      }
       return applyPublicRateLimitHeader(publicAskConcurrencyResponse("enhanced"), rateLimit);
     }
 
