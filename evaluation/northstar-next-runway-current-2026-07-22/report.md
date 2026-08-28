@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `9402a09bbd7aa38667bf257690921c5579958389`
+Source HEAD: `517118717d71286860a6b325ff5cea2fe60cbad3`
 
-Production `/api/build-info`: `9402a09bbd7aa38667bf257690921c5579958389`
+Production `/api/build-info`: `517118717d71286860a6b325ff5cea2fe60cbad3`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `9402a09bbd7aa38667bf257690921c5579958389`
+Live rollup source head: `517118717d71286860a6b325ff5cea2fe60cbad3`
 
 Live rollup matches production: `true`
 
@@ -56,6 +56,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Pinned CI supply-chain/full-suite proof is `PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED`: GitHub run `33202526232` concluded `success` with `3103` tests passed, `26` skipped, and build `success`. Checkout/setup-node remain immutable SHAs. This does not close unrelated security findings or approval-gated runtime work; exact saved Share remains `MISSING_EVIDENCE`.
 - Knowledge preparation capability truth is a separate notice: `PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD`; distributed configuration failures use `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`, temporary load uses `PUBLIC_ASK_CONCURRENCY_LIMIT`, and the UI distinction is `true`. Live evidence is `PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD` with behavioral probe=`false`. Enhanced runtime remains `BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION`, authenticated preparation/Wiki/RLS remain `APPROVAL_GATED/APPROVAL_GATED/APPROVAL_GATED`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live launch operations readiness is measured separately: `PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH`; first-viewport receipts `4/4`, desktop four-column `2/2`, mobile local-scroll `2/2`, and console errors `0`. Runtime truth remains admission `unavailable`, dispatch `preview_only`, and photo Vision `ready`; distributed configured/provider ready/fully automated remain `false/false/false`, and exact saved Share remains `MISSING_EVIDENCE`.
+- Distributed admission activation remains a separate operator decision: `APPROVAL_REQUIRED_DISTRIBUTED_ADMISSION_ACTIVATION_NO_MUTATION`, reviewer-ready `true`, configured/activated/probed `false/false/false`, no mutation `true`, remote Hermes enabled by this change `false`, and exact saved Share `MISSING_EVIDENCE`.
 - Live document export capability truth is measured separately: `PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH`; admission is `unavailable/distributed_limiter_unavailable` with ready=`false`. Desktop panel/beta width is `843/191.25px`; mobile is `262/220px`. This proves fail-closed export truth and browser fallbacks, not distributed activation; activation remains `OPERATOR_CONFIGURATION_REQUIRED`, fully automated launch remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live Ontology viewport workbench is measured separately: `PASS_LIVE_PRODUCTION_ONTOLOGY_VIEWPORT_WORKBENCH`; browser rows `10/10`, maximum body ratio `1`, mobile task switches `4/4`. Route splitting alone is not treated as the fix; long content remains in local-scroll panes. Exact saved Share remains `MISSING_EVIDENCE` and fully automated launch remains `false`.
 - Live Knowledge viewport workbench is measured separately: `PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH`; browser rows `10/10`, maximum body ratio `1.02`, selected exposure `1` visible panel and `6` reachable tasks. Progressive disclosures technical/reference/wiki/governance are `6/7/2/2`, default open `0`, exclusive groups `true`, mobile ratios `4.47/3.68/2.03/2.2`, and first item/review state panel-contained `true/true`. Route splitting alone is not treated as the fix; long content remains in local-scroll panels. Exact saved Share remains `MISSING_EVIDENCE`, Wiki publication remains `APPROVAL_GATED`, and SIF embedding remains `APPROVAL_GATED`.
@@ -105,6 +106,7 @@ These require explicit approval before runtime mutation or live claims:
 
 | Gate | Current state | Safety lock | Why it remains held |
 | --- | --- | --- | --- |
+| distributed_admission_activation | `approval_gated` | `production_secret_and_ephemeral_redis_mutation_approval_required` | approve both Production-scoped Upstash REST variables as one configuration change; approve one bounded invalid-payload connectivity probe that creates short-lived Redis counter and lease keys; rerun bounded runtime readiness and the fresh Standard scan before any security-complete claim |
 | share_recipient_ack_approval | `approval_gated` | `live_data_mutation_approval_required` | approve a disposable production workpack and invited worker pair; approve workpack_share_sessions and workpack_read_confirmations inserts; measure invited-recipient ACK readback without provider dispatch |
 | provider_dispatch_persistence | `approval_gated` | `preview_only` | approve persistent idempotency migration scope; choose per-channel child table or canonical provider_result JSONB ledger; add updated_at trigger or route-owned timestamp contract; test reservation-before-provider-call, duplicate replay, and per-channel result retention |
 | supabase_rls_launch_isolation | `approval_gated` | `read_only_preflight` | approve authoritative Supabase project and credential provenance; run read-only live catalog capture; run disposable tenant A/B negative matrix; verify Storage object isolation and service-role route invariants |
