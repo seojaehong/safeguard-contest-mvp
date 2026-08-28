@@ -1,0 +1,95 @@
+{
+  "generatedAt": "2026-08-28T17:32:06.0670422Z",
+  "verdict": "PASS_GITHUB_CI_PINNED_ACTIONS_MINIMUM_TOKEN_PERMISSIONS_WITH_EXISTING_SUITE_RED",
+  "sourceHead": "61ef347a0dd0e1bc6685d1e85ab557027e8bf0f6",
+  "securityBaseline": {
+    "scanId": "c5175a50-038b-402e-9fd3-6af9eec6582b",
+    "targetRevision": "c9e24f31b7c9e9db5896bd221401bcef3e35ed24",
+    "findingId": "supply-chain.mutable-ci-actions",
+    "immutableOriginalBaselinePreserved": true,
+    "securityCompletionClaimed": false
+  },
+  "workflow": {
+    "path": ".github/workflows/ci.yml",
+    "triggerBranches": [
+      "master"
+    ],
+    "defaultPermissions": {
+      "contents": "read"
+    },
+    "actions": [
+      {
+        "name": "actions/checkout",
+        "release": "v4.2.2",
+        "sha": "11bd71901bbe5b1630ceea73d27597364c9af683",
+        "officialTagVerifiedByGitLsRemote": true,
+        "githubRunnerStepConclusion": "success"
+      },
+      {
+        "name": "actions/setup-node",
+        "release": "v4.4.0",
+        "sha": "49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "officialTagVerifiedByGitLsRemote": true,
+        "githubRunnerStepConclusion": "success"
+      }
+    ]
+  },
+  "verification": {
+    "focusedSecurityContract": {
+      "command": "npm.cmd exec -- vitest run tests/ci-workflow-security.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 1,
+      "testsPassed": 2,
+      "failed": 0
+    },
+    "typecheck": "PASS",
+    "yamlParse": "PASS",
+    "diffCheck": "PASS",
+    "githubActions": {
+      "runId": 33193730452,
+      "jobId": 98925456035,
+      "url": "https://github.com/seojaehong/safeguard-contest-mvp/actions/runs/33193730452",
+      "headSha": "61ef347a0dd0e1bc6685d1e85ab557027e8bf0f6",
+      "status": "completed",
+      "conclusion": "failure",
+      "pinnedCheckoutStep": "success",
+      "pinnedSetupNodeStep": "success",
+      "typecheckStep": "success",
+      "testStep": "failure",
+      "buildStep": "skipped",
+      "testFiles": {
+        "passed": 253,
+        "failed": 3,
+        "skipped": 11,
+        "total": 267
+      },
+      "tests": {
+        "passed": 3098,
+        "failed": 5,
+        "skipped": 26,
+        "total": 3129
+      },
+      "unrelatedFailureGroups": [
+        "frontend browser evidence source digest mismatch",
+        "dispatch module spacing contract residuals",
+        "knowledge and ops API mobile horizontal overflow",
+        "Work24 oversized response fallback message contract",
+        "Work24 timeout fallback message contract"
+      ],
+      "securityPatchCausedObservedFailures": false
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "otherSecurityFindingsRemainSeparate": true,
+    "fullRepositoryCiGreenClaimed": false,
+    "productionRuntimeMarkerRequired": false
+  }
+}
