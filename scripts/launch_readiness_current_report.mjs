@@ -128,39 +128,42 @@ function final99Boundary(final99, noticeCarry, currentRuntimeReady) {
   };
 }
 
-function buildApprovalGatedBoundaries() {
-  return [
-    {
-      gate: "admin_auth_save_reopen",
-      state: "approval_gated",
-      currentSafetyLock: "operator_auth_required",
-      reason: "Final-99 auth-history-reuse notice remains until a secure SAFEGUARD_AUTH_TOKEN operator run proves server save/reopen."
-    },
-    {
-      gate: "provider_dispatch_persistence",
-      state: "approval_gated",
-      currentSafetyLock: "preview_policy_gated",
-      reason: "Provider dispatch remains preview/policy-gated until approved providers and authenticated server-owned workpack/share-session proof exist."
-    },
-    {
-      gate: "supabase_rls_launch_isolation",
-      state: "approval_gated",
-      currentSafetyLock: "read_only_preflight",
-      reason: "Live RLS catalog and disposable tenant A/B isolation are not production-proven."
-    },
-    {
-      gate: "llm_wiki_publication",
-      state: "approval_gated",
-      currentSafetyLock: "candidate_unpublished",
-      reason: "LLM Wiki candidates remain unpublished until approved RPC/RLS/ledger canary evidence exists."
-    },
-    {
-      gate: "sif_embedding_runtime",
-      state: "approval_gated",
-      currentSafetyLock: "approval_held_no_vectors",
-      reason: "SIF vector runtime remains held until migration, embedding cost, upload, and runtime enablement are separately approved."
+function buildApprovalGatedBoundaries(approvalRunway) {
+  if (!isRecord(approvalRunway) || !Array.isArray(approvalRunway.approvalGates)) {
+    throw new Error("Canonical approval runway is missing approvalGates.");
+  }
+
+  return approvalRunway.approvalGates.map((entry, index) => {
+    if (!isRecord(entry)) {
+      throw new Error(`Canonical approval runway gate ${index + 1} is invalid.`);
     }
-  ];
+    const gate = asString(entry.id);
+    const state = asString(entry.state);
+    const currentSafetyLock = asString(entry.currentSafetyLock);
+    const evidencePath = asString(entry.evidencePath);
+    const approvalNeeded = Array.isArray(entry.approvalNeeded)
+      ? entry.approvalNeeded.map(asString).filter(Boolean)
+      : [];
+    const forbiddenUntilApproved = Array.isArray(entry.forbiddenUntilApproved)
+      ? entry.forbiddenUntilApproved.map(asString).filter(Boolean)
+      : [];
+    if (!gate || state !== "approval_gated" || !currentSafetyLock || !evidencePath) {
+      throw new Error(`Canonical approval runway gate ${index + 1} is incomplete or not approval_gated.`);
+    }
+    if (approvalNeeded.length === 0 || forbiddenUntilApproved.length === 0) {
+      throw new Error(`Canonical approval runway gate ${gate} is missing approval or prohibition detail.`);
+    }
+    return {
+      gate,
+      state,
+      evidencePath,
+      readyForOperatorReview: asBoolean(entry.readyForOperatorReview),
+      currentSafetyLock,
+      approvalNeeded,
+      forbiddenUntilApproved,
+      reason: `Approval needed: ${approvalNeeded.join("; ")} Forbidden until approved: ${forbiddenUntilApproved.join("; ")}`
+    };
+  });
 }
 
 function buildUiArchitectureBoundary(nextRunway) {
@@ -195,6 +198,9 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
   const openGates = readJson(rootDir, options.openGatesPath || DEFAULT_OPEN_GATES);
   const liveRollup = readJson(rootDir, options.liveRollupPath || DEFAULT_LIVE_ROLLUP);
   const nextRunway = readJson(rootDir, options.nextRunwayPath || DEFAULT_NEXT_RUNWAY);
+  const approvalRunwayPath = options.approvalRunwayPath || DEFAULT_APPROVAL_RUNWAY;
+  const approvalRunway = readJson(rootDir, approvalRunwayPath);
+  const approvalGatedBoundaries = buildApprovalGatedBoundaries(approvalRunway);
   const sourceHeadAtGeneration = options.sourceHead || gitHead(rootDir);
   const productionBuild = isRecord(options.productionBuild) ? options.productionBuild : {};
   const productionCommit = options.productionCommit || buildInfoCommit(productionBuild);
@@ -274,7 +280,7 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
       providerDispatchReadiness: DEFAULT_PROVIDER_DISPATCH,
       sifEmbeddingPreflight: DEFAULT_SIF_PREFLIGHT,
       rlsWikiPreflight: DEFAULT_RLS_WIKI,
-      approvalRunway: DEFAULT_APPROVAL_RUNWAY
+      approvalRunway: approvalRunwayPath
     },
     final99Boundary: final99Boundary(final99, noticeCarry, liveGenerationPassed),
     northstarOverall: {
@@ -288,12 +294,14 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
         && asString(liveRollup.head) === buildInfoCommit(asRecord(liveRollup.liveBuildInfo))
       )
     },
-    approvalGatedBoundaries: buildApprovalGatedBoundaries(),
+    approvalGatedBoundaryCount: approvalGatedBoundaries.length,
+    approvalGatedBoundaryIds: approvalGatedBoundaries.map((boundary) => boundary.gate),
+    approvalGatedBoundaries,
     safeClaims: liveGenerationPassed
       ? [
           `Live /api/ask generated the expected ${coverage.presentCount}-document workpack for the audited construction scenario.`,
           `Live public-data/AI surfaces returned connected statuses for ${summary.connectedCount} connection surface(s) in this smoke.`,
-          "A safe launch demo or guided pilot can be claimed with explicit provider-dispatch, RLS, LLM Wiki, SIF vector, and admin-auth boundaries.",
+          `A safe launch demo or guided pilot can be claimed only with all ${approvalGatedBoundaries.length} canonical approval boundaries preserved.`,
           "Documents selected-only bounded workbench evidence is current in scoped artifacts; route split alone is not accepted as the UX fix."
         ]
       : [

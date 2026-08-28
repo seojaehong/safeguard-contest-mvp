@@ -6,6 +6,13 @@ import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 
 type LaunchReadinessReport = {
+  approvalGatedBoundaries: Array<{
+    currentSafetyLock: string;
+    gate: string;
+    state: string;
+  }>;
+  approvalGatedBoundaryCount: number;
+  approvalGatedBoundaryIds: string[];
   apiAsk: {
     errorCode: string;
     rateLimit: string;
@@ -53,6 +60,7 @@ type LaunchReadinessReport = {
 
 type LaunchReportModule = {
   buildLaunchReadinessCurrentReport: (options: {
+    approvalRunwayPath?: string;
     generatedAt?: string;
     productionCommit?: string;
     rootDir: string;
@@ -154,6 +162,26 @@ function createFixtureRoot(): { head: string; rootDir: string } {
   });
   writeJson(rootDir, "evaluation/northstar-open-gates-current/report.json", { overall: "open" });
   writeJson(rootDir, "evaluation/northstar-live-rollup-2026-07-20/report.json", {});
+  writeJson(rootDir, "evaluation/northstar-approval-runway-2026-07-21/report.json", {
+    approvalGates: [
+      "distributed_admission_activation",
+      "share_recipient_ack_approval",
+      "provider_dispatch_persistence",
+      "supabase_rls_launch_isolation",
+      "llm_wiki_publication",
+      "sif_embedding_runtime",
+      "kosha_exact_promotion_review_gate",
+      "security_atomic_db_race_remediation",
+    ].map((id) => ({
+      approvalNeeded: [`approve ${id}`],
+      currentSafetyLock: `${id}_locked`,
+      evidencePath: `evaluation/${id}/report.json`,
+      forbiddenUntilApproved: [`do not activate ${id}`],
+      id,
+      readyForOperatorReview: true,
+      state: "approval_gated",
+    })),
+  });
   fs.writeFileSync(path.join(rootDir, "README.md"), "fixture\n", "utf8");
   git(rootDir, ["add", "."]);
   git(rootDir, ["commit", "-qm", "fixture"]);
@@ -195,6 +223,22 @@ describe("launch readiness current report", () => {
       presentCount: 12,
     });
     expect(report.documentCoverage.present).toContain("workPermitDraft");
+    expect(report.approvalGatedBoundaryCount).toBe(8);
+    expect(report.approvalGatedBoundaryIds).toEqual([
+      "distributed_admission_activation",
+      "share_recipient_ack_approval",
+      "provider_dispatch_persistence",
+      "supabase_rls_launch_isolation",
+      "llm_wiki_publication",
+      "sif_embedding_runtime",
+      "kosha_exact_promotion_review_gate",
+      "security_atomic_db_race_remediation",
+    ]);
+    expect(report.approvalGatedBoundaries[0]).toMatchObject({
+      currentSafetyLock: "distributed_admission_activation_locked",
+      gate: "distributed_admission_activation",
+      state: "approval_gated",
+    });
     expect(report.final99Boundary).toMatchObject({
       fullyAutomatedLaunchClaimAllowed: false,
       noticeCount: 2,
@@ -290,5 +334,18 @@ describe("launch readiness current report", () => {
     expect(report.forbiddenClaims).toContain("Current live /api/ask generation is available for a launch demo.");
     expect(markdown).toContain("Current live launch demo generation is not allowed");
     expect(markdown).toContain("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+  });
+
+  it("fails closed when the canonical approval runway is incomplete", async () => {
+    const module = await loadReportModule();
+    const { head, rootDir } = createFixtureRoot();
+    writeJson(rootDir, "evaluation/northstar-approval-runway-2026-07-21/report.json", {
+      approvalGates: [{ id: "distributed_admission_activation", state: "proven" }],
+    });
+
+    expect(() => module.buildLaunchReadinessCurrentReport({
+      productionCommit: head,
+      rootDir,
+    })).toThrow("incomplete or not approval_gated");
   });
 });
