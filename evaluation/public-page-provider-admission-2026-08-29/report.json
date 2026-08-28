@@ -1,14 +1,14 @@
 {
   "schemaVersion": "safeclaw-public-page-provider-admission/v1",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PUBLIC_PAGE_ADMISSION_LIVE_PENDING",
-  "generatedAt": "2026-08-29T01:11:49.0893743+09:00",
-  "sourceHead": "26e2bc3d",
+  "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_PAGE_ADMISSION",
+  "generatedAt": "2026-08-29T01:12:43.9059589+09:00",
+  "sourceHead": "26e2bc3d8be31826d55fec5074c4a61854ae0027",
   "productionBuild": {
-    "commitSha": "c9e24f31b7c9e9db5896bd221401bcef3e35ed24",
+    "commitSha": "26e2bc3d8be31826d55fec5074c4a61854ae0027",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-3ucy2kv93-seojaehongs-projects.vercel.app",
-    "sourceHeadMatchesProduction": false
+    "deploymentUrl": "safeguard-contest-fx1kugcjy-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
   },
   "securityBaseline": {
     "scanId": "c5175a50-038b-402e-9fd3-6af9eec6582b",
@@ -51,7 +51,18 @@
     "strictTypecheck": "PASS",
     "productionBuild": "PASS",
     "staticPages": 28,
-    "gitDiffCheck": "PASS"
+    "gitDiffCheck": "PASS",
+    "liveReadOnly": {
+      "askPageStatus": 200,
+      "askPageAdmissionHoldRendered": true,
+      "askApiOversizedStatus": 413,
+      "askApiCode": "PUBLIC_WORK_BUDGET_EXCEEDED",
+      "searchPageStatus": 200,
+      "searchPageAdmissionHoldRendered": true,
+      "searchApiOversizedStatus": 413,
+      "searchApiCode": "PUBLIC_WORK_BUDGET_EXCEEDED",
+      "providerWorkRequested": false
+    }
   },
   "mutationBoundary": {
     "dbMutationPerformed": false,
@@ -62,7 +73,7 @@
     "koshaRegistryMutationPerformed": false
   },
   "remainingBoundaries": {
-    "liveAfterDeploymentRequired": true,
+    "liveAfterDeploymentRequired": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedWorkOverclaimed": false,
     "securityCompletionClaimed": false,

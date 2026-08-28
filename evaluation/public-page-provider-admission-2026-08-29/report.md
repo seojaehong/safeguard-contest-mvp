@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_LOCAL_PUBLIC_PAGE_ADMISSION_LIVE_PENDING`
+`PASS_LIVE_PRODUCTION_PUBLIC_PAGE_ADMISSION`
 
 Current source `26e2bc3d` removes direct provider orchestration from the public `/ask` and `/search` pages. Both pages and their API routes now use shared admitted operations before `runAsk` or `runSearch` can execute.
 
@@ -21,9 +21,13 @@ Current source `26e2bc3d` removes direct provider orchestration from the public 
 - Next.js 15.5.22 production build: PASS, 28/28 static pages generated.
 - `git diff --check`: PASS.
 
-## Live boundary
+## Live verification
 
-At evidence time production still reported `c9e24f31b7c9e9db5896bd221401bcef3e35ed24`, while the remediation source is `26e2bc3d`. Live after-deployment verification is required before upgrading this verdict.
+Production reported product commit `26e2bc3d8be31826d55fec5074c4a61854ae0027` on `master`. Read-only, no-provider probes confirmed:
+
+- Oversized `/ask` and `/search` page requests rendered their controlled admission-hold states with HTTP 200.
+- Oversized `/api/ask` and `/api/search` requests both returned HTTP 413 with `PUBLIC_WORK_BUDGET_EXCEEDED`.
+- These probes stopped before provider work and performed no data mutation.
 
 ## Preserved boundaries
 
