@@ -1,11 +1,11 @@
 {
   "schemaVersion": "safeclaw-launch-readiness-current/v5",
-  "generatedAt": "2026-08-28T23:24:34.522Z",
+  "generatedAt": "2026-08-28T23:50:40.230Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHeadAtGeneration": "ae8bd431ac2dc35673fea9dd50134ff0f074cf89",
-  "productionCommit": "ae8bd431ac2dc35673fea9dd50134ff0f074cf89",
-  "runtimeSmokeCommit": "ae8bd431ac2dc35673fea9dd50134ff0f074cf89",
-  "evidenceHeadBeforeThisReport": "ae8bd431ac2dc35673fea9dd50134ff0f074cf89",
+  "sourceHeadAtGeneration": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
+  "productionCommit": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
+  "runtimeSmokeCommit": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
+  "evidenceHeadBeforeThisReport": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
   "currentHeadIsEvidenceOnlyPending": false,
   "verdict": "BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH",
   "safeLaunchDemoClaimAllowed": false,
@@ -17,7 +17,7 @@
   "apiAsk": {
     "status": 503,
     "ok": false,
-    "elapsedMs": 990,
+    "elapsedMs": 1222,
     "errorCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
     "error": "요청 보호 서비스를 확인하는 동안 요청을 잠시 처리할 수 없습니다.",
     "retryAfterSeconds": 5,
@@ -26,10 +26,10 @@
   },
   "rawAuditFreshness": {
     "ready": true,
-    "auditGeneratedAt": "2026-08-28T23:24:23.555Z",
-    "auditProductionCommit": "ae8bd431ac2dc35673fea9dd50134ff0f074cf89",
-    "reportGeneratedAt": "2026-08-28T23:24:34.522Z",
-    "ageMs": 10967,
+    "auditGeneratedAt": "2026-08-28T23:50:22.281Z",
+    "auditProductionCommit": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
+    "reportGeneratedAt": "2026-08-28T23:50:40.230Z",
+    "ageMs": 17949,
     "maxAgeMs": 14400000,
     "commitMatchesProduction": true,
     "timestampWithinWindow": true,
@@ -216,8 +216,8 @@
     "verdict": "open"
   },
   "northstarLiveRollupOverall": {
-    "sourceHeadAtGeneration": "56a60031738e12e29a32caa02c6f443cd54d8a30",
-    "liveCommitAtGeneration": "56a60031738e12e29a32caa02c6f443cd54d8a30",
+    "sourceHeadAtGeneration": "ae8bd431ac2dc35673fea9dd50134ff0f074cf89",
+    "liveCommitAtGeneration": "ae8bd431ac2dc35673fea9dd50134ff0f074cf89",
     "liveCommitMatchesSourceHead": true
   },
   "approvalGatedBoundaryCount": 8,
@@ -408,10 +408,10 @@
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "ae8bd431ac2dc35673fea9dd50134ff0f074cf89",
+    "commitSha": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-hzuhmgatw-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-g377fg8ih-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   }
 }

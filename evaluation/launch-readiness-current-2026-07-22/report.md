@@ -1,12 +1,12 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-08-28T23:24:34.522Z
+Generated: 2026-08-28T23:50:40.230Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD at generation: `ae8bd431ac2dc35673fea9dd50134ff0f074cf89`
+Source HEAD at generation: `51cbd8662329c0d13e337e5c9310a435b25e8cb0`
 
-Production runtime smoke commit: `ae8bd431ac2dc35673fea9dd50134ff0f074cf89`
+Production runtime smoke commit: `51cbd8662329c0d13e337e5c9310a435b25e8cb0`
 
 Current HEAD is evidence-only pending relative to production: `false`
 
@@ -20,14 +20,14 @@ Current live launch demo generation is not allowed while the measured runtime bl
 
 `scripts/launch_readiness_audit.mjs` was run against production with `SAFETYGUARD_AUDIT_DISPATCH=false`.
 
-- raw audit generated: `2026-08-28T23:24:23.555Z`
-- raw audit production commit: `ae8bd431ac2dc35673fea9dd50134ff0f074cf89`
+- raw audit generated: `2026-08-28T23:50:22.281Z`
+- raw audit production commit: `51cbd8662329c0d13e337e5c9310a435b25e8cb0`
 - raw audit current for this report: `true`
 - raw audit freshness reasons: `none`
 - `/api/ask`: 503 CHECK
 - error code: `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`
 - admission: `distributed` / `unknown`
-- elapsed: 990 ms
+- elapsed: 1222 ms
 - dispatch call: not run
 - generated documents: 0 / 12
 - connection verdict: `BLOCKED_BEFORE_CONNECTION_CHECK_NO_DISPATCH` (0 connected, 0 bounded fallback, 7 check-required)

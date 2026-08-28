@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-08-28T23:24:23.555Z",
+  "generatedAt": "2026-08-28T23:50:22.281Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "productionCommit": "ae8bd431ac2dc35673fea9dd50134ff0f074cf89",
+  "productionCommit": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "ae8bd431ac2dc35673fea9dd50134ff0f074cf89",
+    "commitSha": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-hzuhmgatw-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-g377fg8ih-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "elapsedMs": 990,
+  "elapsedMs": 1222,
   "apiAskStatus": 503,
   "apiAskOk": false,
   "apiAskErrorCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
