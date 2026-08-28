@@ -161,7 +161,11 @@ describe("knowledge governance UI contract", () => {
 
   it("fails the browser contract closed when the candidate subject loses evidence context", () => {
     expect(browserRunnerSource).toContain("metrics.selectedBodyBeforeReadiness");
-    expect(browserRunnerSource).toContain('metrics.selectedBodyText.startsWith("1) 위험요인 요약:")');
+    expect(browserRunnerSource).toContain('metrics.selectedBodyFormat === "structured"');
+    expect(browserRunnerSource).toContain("metrics.candidateSectionCount === 4");
+    expect(browserRunnerSource).toContain('metrics.candidateSectionLabels.join("|") === "위험요인 요약|문서 반영 위치|통제대책|검수 필요 항목"');
+    expect(browserRunnerSource).toContain("metrics.candidateSectionContents.every(Boolean)");
+    expect(browserRunnerSource).toContain("evidenceInspectorMode || candidateReadinessMode");
     expect(browserRunnerSource).toContain("metrics.selectedBodyTopVisible");
     expect(browserRunnerSource).toContain("metrics.candidatePositionsComplete");
     expect(browserRunnerSource).toContain("candidatePositionLabels: results.every");

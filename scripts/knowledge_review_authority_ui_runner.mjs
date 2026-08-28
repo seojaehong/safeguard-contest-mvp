@@ -429,6 +429,7 @@ try {
         const navigator = workbench?.querySelector("nav[aria-label='지식 후보 목록']");
         const selectedCandidate = workbench?.querySelector("[data-selected-review-candidate='true']");
         const selectedBody = workbench?.querySelector("[data-selected-candidate-body='true']");
+        const candidateSections = Array.from(selectedBody?.querySelectorAll("[data-review-candidate-section]") ?? []);
         const eventFacts = workbench?.querySelector("[data-review-event-facts='true']");
         const traceability = workbench?.querySelector("[data-review-traceability]");
         const boundEventFacts = workbench.querySelectorAll("[data-review-evidence-fact]");
@@ -494,6 +495,11 @@ try {
           selectedCandidatePanelLabelledBy: selectedCandidate.getAttribute("aria-labelledby") === selectedCandidateTab?.id,
           selectedCandidateCount: workbench.querySelectorAll("[data-selected-review-candidate='true']").length,
           selectedBodyCount: workbench.querySelectorAll("[data-selected-candidate-body='true']").length,
+          selectedBodyFormat: selectedBody.getAttribute("data-review-candidate-format"),
+          candidateSectionCount: candidateSections.length,
+          candidateSectionNumbers: candidateSections.map((section) => section.getAttribute("data-review-candidate-section") || ""),
+          candidateSectionLabels: candidateSections.map((section) => section.querySelector("strong")?.textContent?.trim() || ""),
+          candidateSectionContents: candidateSections.map((section) => section.querySelector("p")?.textContent?.trim() || ""),
           selectedBodyOverflowY: getComputedStyle(selectedBody).overflowY,
           selectedBodyBeforeReadiness: Boolean(selectedBody.compareDocumentPosition(readiness) & Node.DOCUMENT_POSITION_FOLLOWING),
           selectedBodyText: selectedBody.textContent?.trim() || "",
@@ -581,7 +587,7 @@ try {
       let mobileEvidence = null;
       let traceScreenshotContextVisible = null;
       const candidateSubjectScreenshot = `knowledge-review-candidate-subject-${theme}-${viewport.name}-${viewport.width}x${viewport.height}.png`;
-      if (evidenceInspectorMode) {
+      if (evidenceInspectorMode || candidateReadinessMode) {
         await inbox.locator("[data-selected-candidate-body='true']").scrollIntoViewIfNeeded();
         await page.screenshot({ path: path.join(outputDir, candidateSubjectScreenshot), fullPage: false });
       }
@@ -770,9 +776,13 @@ try {
         && candidateHomeState.focusedIndex === 0
         && metrics.selectedCandidateCount === 1
         && metrics.selectedBodyCount === 1
+        && metrics.selectedBodyFormat === "structured"
+        && metrics.candidateSectionCount === 4
+        && metrics.candidateSectionNumbers.every((number, index) => number === String(index + 1))
+        && metrics.candidateSectionLabels.join("|") === "위험요인 요약|문서 반영 위치|통제대책|검수 필요 항목"
+        && metrics.candidateSectionContents.every(Boolean)
         && metrics.selectedBodyOverflowY === "auto"
         && metrics.selectedBodyBeforeReadiness
-        && metrics.selectedBodyText.startsWith("1) 위험요인 요약:")
         && metrics.selectedBodyTopVisible
         && (viewport.width > 720
           ? metrics.workbenchColumns === 2 && metrics.navigatorBeforeDetail && metrics.selectedCandidateHeight <= 580
@@ -867,7 +877,7 @@ try {
         theme,
         viewport,
         screenshot,
-        candidateSubjectScreenshot: evidenceInspectorMode ? candidateSubjectScreenshot : null,
+        candidateSubjectScreenshot: evidenceInspectorMode || candidateReadinessMode ? candidateSubjectScreenshot : null,
         metrics,
         candidateKeyboard: { endState: candidateEndState, homeState: candidateHomeState },
         initialDecisionViewport,
@@ -970,6 +980,10 @@ const report = {
     candidateCount: queueItems.length,
     selectedCandidateCount: 1,
     selectedBodyCount: 1,
+    selectedBodyFormat: "structured",
+    candidateSectionCount: 4,
+    candidateSectionLabels: ["위험요인 요약", "문서 반영 위치", "통제대책", "검수 필요 항목"],
+    candidateSectionsNonEmpty: results.every((result) => result.metrics.candidateSectionContents.every(Boolean)),
     desktopColumns: 2,
     mobileColumns: 1,
     candidateBodyInternalScroll: true,
@@ -1127,7 +1141,7 @@ ${rows}
 - Organization and site memory cannot be promoted publicly.
 - Site-manager acceptance is required before workpack use.
 - Machine evidence does not replace human review.
-- The candidate navigator contains three fixtures while exactly one selected candidate body is mounted.
+- The candidate navigator contains three fixtures while exactly one selected candidate body is mounted; its four required sections are presented as numbered, labelled, non-empty reviewer blocks.
 - Candidate tabs expose one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and Arrow/Home/End keyboard navigation.
 - Desktop uses a two-column review workbench; mobile uses one column and keeps the candidate body internally scrollable.
 - Desktop mounts the selected candidate and five-item evidence inspector together; mobile mounts one linked pane behind a keyboard-operable segmented tab control.
