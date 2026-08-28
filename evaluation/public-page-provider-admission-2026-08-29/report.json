@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "safeclaw-public-page-provider-admission/v1",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PUBLIC_PAGE_ADMISSION_LIVE_PENDING",
+  "generatedAt": "2026-08-29T01:11:49.0893743+09:00",
+  "sourceHead": "26e2bc3d",
+  "productionBuild": {
+    "commitSha": "c9e24f31b7c9e9db5896bd221401bcef3e35ed24",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-3ucy2kv93-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": false
+  },
+  "securityBaseline": {
+    "scanId": "c5175a50-038b-402e-9fd3-6af9eec6582b",
+    "targetRevision": "c9e24f31b7c9e9db5896bd221401bcef3e35ed24",
+    "findings": [
+      "resource-exhaustion.public-provider-admission-bypass",
+      "resource-exhaustion.public-search-admission-bypass"
+    ],
+    "immutableOriginalBaselinePreserved": true
+  },
+  "currentSourceContract": {
+    "askPageDirectProviderCall": false,
+    "searchPageDirectProviderCall": false,
+    "sharedAskAdmissionOrder": [
+      "public-family-rate-limit",
+      "question-work-budget",
+      "provider-rate-limit",
+      "weighted-work-lease",
+      "runAsk"
+    ],
+    "sharedSearchAdmissionOrder": [
+      "legal-search-rate-limit",
+      "query-work-budget",
+      "provider-rate-limit",
+      "weighted-work-lease",
+      "runSearch"
+    ],
+    "productionMissingDistributedAdmissionFailsClosed": true,
+    "providerCallExecutedWhenAdmissionUnavailable": false,
+    "requestSignalPropagated": true,
+    "leaseReleasedInFinally": true
+  },
+  "verification": {
+    "focusedVitest": {
+      "files": 5,
+      "tests": 37,
+      "passed": 37,
+      "failed": 0
+    },
+    "strictTypecheck": "PASS",
+    "productionBuild": "PASS",
+    "staticPages": 28,
+    "gitDiffCheck": "PASS"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentRequired": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedWorkOverclaimed": false,
+    "securityCompletionClaimed": false,
+    "coverageNote": "This closes the current-source public Ask/Search page admission bypass only; the remaining sealed scan findings and runtime configuration coverage remain separate."
+  }
+}
