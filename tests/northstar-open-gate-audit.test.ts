@@ -3370,6 +3370,10 @@ function createFixtureRoot(): string {
       revisionRequiredFixtureCount: 1,
       selectedReadinessPanelCount: 1,
       approvalFailsClosedForRevision: true,
+      revisionGuidanceVisible: true,
+      revisionIssueCount: 4,
+      revisionIssueCodesExposed: false,
+      approvalFailsClosedAfterConfirmation: true,
       keepSiteOnlyAvailableForRevision: true,
       rejectAvailableForRevision: true,
       humanReviewCompleted: false,
@@ -10242,6 +10246,12 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       name: "human review is claimed complete",
       mutate: (report: Record<string, unknown>) => {
         (report.contentReadinessContract as Record<string, unknown>).humanReviewCompleted = true;
+      },
+    },
+    {
+      name: "revision guidance exposes internal codes",
+      mutate: (report: Record<string, unknown>) => {
+        (report.contentReadinessContract as Record<string, unknown>).revisionIssueCodesExposed = true;
       },
     },
     {

@@ -2653,6 +2653,10 @@ function evaluateLlmWikiCandidateContentReadinessGate(rootDir) {
     && readNumber(readiness.revisionRequiredFixtureCount) === 1
     && readNumber(readiness.selectedReadinessPanelCount) === 1
     && readiness.approvalFailsClosedForRevision === true
+    && readiness.revisionGuidanceVisible === true
+    && readNumber(readiness.revisionIssueCount) === 4
+    && readiness.revisionIssueCodesExposed === false
+    && readiness.approvalFailsClosedAfterConfirmation === true
     && readiness.keepSiteOnlyAvailableForRevision === true
     && readiness.rejectAvailableForRevision === true
     && readiness.humanReviewCompleted === false
@@ -2676,7 +2680,7 @@ function evaluateLlmWikiCandidateContentReadinessGate(rootDir) {
       label: "Live LLM Wiki candidate content readiness",
       state: "proven",
       evidencePath,
-      detail: "Production LLM Wiki candidate review passes local/live 8/8 viewport rows with four required sections. Revision-required candidates fail closed for approval while site-only and reject remain available. Human review is not complete, publication remains unpublished and disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and LLM Wiki publication plus Supabase RLS remain APPROVAL_GATED.",
+      detail: "Production LLM Wiki candidate review passes local/live 8/8 viewport rows with four required sections. Revision-required candidates expose four human-readable remediation items without internal issue codes; confirmation keeps approval fail-closed while site-only and reject remain available. Human review is not complete, publication remains unpublished and disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and LLM Wiki publication plus Supabase RLS remain APPROVAL_GATED.",
       nextActions: [],
     });
   }
@@ -2686,7 +2690,7 @@ function evaluateLlmWikiCandidateContentReadinessGate(rootDir) {
     label: "Live LLM Wiki candidate content readiness",
     state: "contradicted",
     evidencePath,
-    detail: `Readiness verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, local=${readNumber(local.passedCount)}/${readNumber(local.viewportCount)}, live=${readNumber(afterLive.passedCount)}/${readNumber(afterLive.viewportCount)}, browserErrors=${readNumber(afterLive.browserErrorCount)}, sections=${readNumber(readiness.requiredSectionCount)}, approvalBlocked=${readiness.approvalFailsClosedForRevision === true}, humanReviewCompleted=${readiness.humanReviewCompleted === true}, publishAllowed=${readiness.publishAllowed === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, wiki=${readString(remainingBoundaries.llmWikiPublication) || "missing"}, rls=${readString(remainingBoundaries.supabaseRlsLaunchIsolation) || "missing"}.`,
+    detail: `Readiness verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceMatchesProduction}, local=${readNumber(local.passedCount)}/${readNumber(local.viewportCount)}, live=${readNumber(afterLive.passedCount)}/${readNumber(afterLive.viewportCount)}, browserErrors=${readNumber(afterLive.browserErrorCount)}, sections=${readNumber(readiness.requiredSectionCount)}, approvalBlocked=${readiness.approvalFailsClosedForRevision === true}, guidance=${readiness.revisionGuidanceVisible === true}/${readNumber(readiness.revisionIssueCount)}/${readiness.revisionIssueCodesExposed === false}, confirmedApprovalBlocked=${readiness.approvalFailsClosedAfterConfirmation === true}, humanReviewCompleted=${readiness.humanReviewCompleted === true}, publishAllowed=${readiness.publishAllowed === true}, noMutation=${noMutation}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, wiki=${readString(remainingBoundaries.llmWikiPublication) || "missing"}, rls=${readString(remainingBoundaries.supabaseRlsLaunchIsolation) || "missing"}.`,
     nextActions: ["Restore source/live alignment, four-section readiness, fail-closed approval, no-mutation behavior, and approval boundaries, then rerun the live candidate-readiness contract."],
   });
 }

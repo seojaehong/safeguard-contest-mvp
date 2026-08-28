@@ -1,8 +1,8 @@
 # Knowledge Preparation Capability Truth
 
 - Verdict: `PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD`
-- Product source: `00945d276926470eaf519f2317cdabe98acc2e92`
-- Current production: `5ca7e45dad18e1780248589d2b1b417f0227f3a4`
+- Product source: `ea9fb620c17be6dd3b21105d8df2accf9bff6994`
+- Current production: `ea9fb620c17be6dd3b21105d8df2accf9bff6994`
 - Scope: knowledge-review candidate preparation failure truth only
 
 ## Finding

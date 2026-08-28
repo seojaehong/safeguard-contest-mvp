@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-28T11:19:56.191Z",
-  "sourceSha": "5ca7e45dad18e1780248589d2b1b417f0227f3a4",
+  "generatedAt": "2026-08-28T12:17:53.828Z",
+  "sourceSha": "ea9fb620c17be6dd3b21105d8df2accf9bff6994",
   "overall": "open",
   "gates": [
     {
@@ -191,7 +191,7 @@
       "state": "proven",
       "label": "Live LLM Wiki candidate content readiness",
       "evidencePath": "evaluation\\llm-wiki-candidate-readiness-2026-08-25\\report.json",
-      "detail": "Production LLM Wiki candidate review passes local/live 8/8 viewport rows with four required sections. Revision-required candidates fail closed for approval while site-only and reject remain available. Human review is not complete, publication remains unpublished and disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and LLM Wiki publication plus Supabase RLS remain APPROVAL_GATED.",
+      "detail": "Production LLM Wiki candidate review passes local/live 8/8 viewport rows with four required sections. Revision-required candidates expose four human-readable remediation items without internal issue codes; confirmation keeps approval fail-closed while site-only and reject remain available. Human review is not complete, publication remains unpublished and disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and LLM Wiki publication plus Supabase RLS remain APPROVAL_GATED.",
       "nextActions": []
     },
     {

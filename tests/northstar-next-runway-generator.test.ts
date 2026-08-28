@@ -302,6 +302,10 @@ type NextRunwayReport = {
     readyFixtureCount: number;
     revisionRequiredFixtureCount: number;
     approvalFailsClosedForRevision: boolean;
+    revisionGuidanceVisible: boolean;
+    revisionIssueCount: number;
+    revisionIssueCodesExposed: boolean;
+    approvalFailsClosedAfterConfirmation: boolean;
     keepSiteOnlyAvailableForRevision: boolean;
     rejectAvailableForRevision: boolean;
     humanReviewCompleted: boolean;
@@ -3613,6 +3617,8 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     contentReadinessContract: {
       requiredSectionCount: 4, readyFixtureCount: 2, revisionRequiredFixtureCount: 1,
       selectedReadinessPanelCount: 1, approvalFailsClosedForRevision: true,
+      revisionGuidanceVisible: true, revisionIssueCount: 4,
+      revisionIssueCodesExposed: false, approvalFailsClosedAfterConfirmation: true,
       keepSiteOnlyAvailableForRevision: true, rejectAvailableForRevision: true,
       humanReviewCompleted: false, publicationState: "unpublished", publishAllowed: false,
     },
@@ -4021,6 +4027,10 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       readyFixtureCount: 2,
       revisionRequiredFixtureCount: 1,
       approvalFailsClosedForRevision: true,
+      revisionGuidanceVisible: true,
+      revisionIssueCount: 4,
+      revisionIssueCodesExposed: false,
+      approvalFailsClosedAfterConfirmation: true,
       keepSiteOnlyAvailableForRevision: true,
       rejectAvailableForRevision: true,
       humanReviewCompleted: false,

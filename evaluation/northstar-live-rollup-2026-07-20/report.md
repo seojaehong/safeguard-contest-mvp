@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-28T11:19:57.611Z
-Source HEAD at generation: 5ca7e45dad18e1780248589d2b1b417f0227f3a4
-Live commit at generation: 5ca7e45dad18e1780248589d2b1b417f0227f3a4
+Generated at: 2026-08-28T12:18:03.614Z
+Source HEAD at generation: ea9fb620c17be6dd3b21105d8df2accf9bff6994
+Live commit at generation: ea9fb620c17be6dd3b21105d8df2accf9bff6994
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -290,7 +290,7 @@ Overall: `northstar_open_approval_gated`
 ## LLM Wiki candidate content readiness
 - Verdict: `PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS`
 - Local/live viewport rows: 8/8 and 8/8; browser errors=0.
-- Readiness contract: 4 required sections; ready/revision fixtures=2/1; approval fail-closed=true; site-only/reject available=true/true.
+- Readiness contract: 4 required sections; ready/revision fixtures=2/1; approval fail-closed=true; guidance visible/count/raw codes=true/4/false; confirmed approval fail-closed=true; site-only/reject available=true/true.
 - Boundaries: human review complete=false; publication=unpublished; publish allowed=false; DB/Wiki mutation=false/false; exact saved Share=MISSING_EVIDENCE; Wiki/RLS=APPROVAL_GATED/APPROVAL_GATED.
 
 ## Wiki candidate content matrix
@@ -501,12 +501,12 @@ Overall: `northstar_open_approval_gated`
 | live_document_editorial_duplicate_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
-| knowledge_preparation_capability_truth | ancestor | matches_live_source_mismatch | evaluation\knowledge-preparation-capability-truth-2026-08-28\report.json |
+| knowledge_preparation_capability_truth | exact | matches_live | evaluation\knowledge-preparation-capability-truth-2026-08-28\report.json |
 | launch_operations_readiness_cockpit | ancestor | ancestor_of_head | evaluation\launch-operations-readiness-2026-08-26\report.json |
 | document_export_capability_truth | ancestor | ancestor_of_head | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | ontology_viewport_workbench | ancestor | ancestor_of_head | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
 | knowledge_viewport_workbench | ancestor | ancestor_of_head | evaluation\knowledge-viewport-workbench-2026-08-17\report.json |
-| llm_wiki_candidate_content_readiness | ancestor | ancestor_of_head | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |
+| llm_wiki_candidate_content_readiness | exact | matches_live | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |
 | llm_wiki_candidate_content_matrix | ancestor | ancestor_of_head | evaluation\llm-wiki-candidate-content-matrix-2026-08-25\report.json |
 | llm_wiki_sif_evidence_matrix | ancestor | ancestor_of_head | evaluation\llm-wiki-sif-evidence-matrix-2026-08-26\report.json |
 | tenant_authorization_remediation | ancestor | ancestor_of_head | evaluation\tenant-authorization-boundary-preflight-2026-07-29\report.json |

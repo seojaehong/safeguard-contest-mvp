@@ -1524,7 +1524,7 @@ ${traceMatrixMode
   : evidenceInspectorMode
   ? "The selected-candidate inspector keeps five evidence items bounded, exposes only allowlisted official HTTPS references, and preserves generic tenant-evidence labels."
   : candidateReadinessMode
-    ? "The candidate cockpit derives four required content sections server-side, exposes revision reasons, and blocks approval while keeping site-only and reject decisions available."
+    ? "The candidate cockpit derives four required content sections server-side, exposes human-readable revision guidance without internal issue codes, and keeps approval blocked after confirmation while site-only and reject decisions remain available."
     : "The authenticated review candidate cockpit exposes six evidence-role counts, keeps legal-duty claims bound to law provenance, blocks public promotion of tenant memory, and requires site-manager acceptance before workpack use."}
 The candidate navigator keeps one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and keyboard navigation across candidates and compact review panes. The decision rail stays in the first viewport, requires an explicit candidate-and-evidence confirmation, and preserves live pending, busy, disabled, and settled states around save.
 

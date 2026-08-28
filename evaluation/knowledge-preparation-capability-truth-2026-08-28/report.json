@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-knowledge-preparation-capability-truth/v1",
   "verdict": "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD",
-  "sourceHead": "00945d276926470eaf519f2317cdabe98acc2e92",
-  "productionCommit": "5ca7e45dad18e1780248589d2b1b417f0227f3a4",
+  "sourceHead": "ea9fb620c17be6dd3b21105d8df2accf9bff6994",
+  "productionCommit": "ea9fb620c17be6dd3b21105d8df2accf9bff6994",
   "productionIncludesProductCommit": true,
   "before": {
     "distributedAdmissionFailurePublicCode": "PUBLIC_ASK_CONCURRENCY_LIMIT",
@@ -39,10 +39,10 @@
   },
   "liveVerification": {
     "status": "PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD",
-    "buildInfoCommit": "5ca7e45dad18e1780248589d2b1b417f0227f3a4",
+    "buildInfoCommit": "ea9fb620c17be6dd3b21105d8df2accf9bff6994",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-o0mnjgvto-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-34nxvg0ct-seojaehongs-projects.vercel.app",
     "behavioralProbeExecuted": false,
     "reason": "Production includes the product commit. The evidence is intentionally marker-only because an authenticated candidate preparation probe would create a real review run and is not executed without approval."
   },

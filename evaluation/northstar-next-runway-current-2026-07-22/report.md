@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `5ca7e45dad18e1780248589d2b1b417f0227f3a4`
+Source HEAD: `ea9fb620c17be6dd3b21105d8df2accf9bff6994`
 
-Production `/api/build-info`: `5ca7e45dad18e1780248589d2b1b417f0227f3a4`
+Production `/api/build-info`: `ea9fb620c17be6dd3b21105d8df2accf9bff6994`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `5ca7e45dad18e1780248589d2b1b417f0227f3a4`
+Live rollup source head: `ea9fb620c17be6dd3b21105d8df2accf9bff6994`
 
 Live rollup matches production: `true`
 
@@ -58,7 +58,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live document export capability truth is measured separately: `PASS_LIVE_PRODUCTION_DOCUMENT_EXPORT_CAPABILITY_TRUTH`; admission is `unavailable/distributed_limiter_unavailable` with ready=`false`. Desktop panel/beta width is `843/191.25px`; mobile is `262/220px`. This proves fail-closed export truth and browser fallbacks, not distributed activation; activation remains `OPERATOR_CONFIGURATION_REQUIRED`, fully automated launch remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live Ontology viewport workbench is measured separately: `PASS_LIVE_PRODUCTION_ONTOLOGY_VIEWPORT_WORKBENCH`; browser rows `10/10`, maximum body ratio `1`, mobile task switches `4/4`. Route splitting alone is not treated as the fix; long content remains in local-scroll panes. Exact saved Share remains `MISSING_EVIDENCE` and fully automated launch remains `false`.
 - Live Knowledge viewport workbench is measured separately: `PASS_LIVE_PRODUCTION_KNOWLEDGE_VIEWPORT_WORKBENCH`; browser rows `10/10`, maximum body ratio `1.02`, selected exposure `1` visible panel and `6` reachable tasks. Progressive disclosures technical/reference/wiki/governance are `6/7/2/2`, default open `0`, exclusive groups `true`, mobile ratios `4.47/3.68/2.03/2.2`, and first item/review state panel-contained `true/true`. Route splitting alone is not treated as the fix; long content remains in local-scroll panels. Exact saved Share remains `MISSING_EVIDENCE`, Wiki publication remains `APPROVAL_GATED`, and SIF embedding remains `APPROVAL_GATED`.
-- LLM Wiki candidate content readiness is measured separately: `PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS`; local/live viewport rows `8/8` and `8/8`, required sections `4`, ready/revision fixtures `2/1`, approval fail-closed `true`, and site-only/reject availability `true/true`. Human review remains `false`, publication remains `unpublished` with publishAllowed=`false`; exact saved Share remains `MISSING_EVIDENCE`, while Wiki publication and Supabase RLS remain `APPROVAL_GATED/APPROVAL_GATED`.
+- LLM Wiki candidate content readiness is measured separately: `PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS`; local/live viewport rows `8/8` and `8/8`, required sections `4`, ready/revision fixtures `2/1`, approval fail-closed `true`, human-readable guidance/count/raw-code exposure `true/4/false`, confirmed approval fail-closed `true`, and site-only/reject availability `true/true`. Human review remains `false`, publication remains `unpublished` with publishAllowed=`false`; exact saved Share remains `MISSING_EVIDENCE`, while Wiki publication and Supabase RLS remain `APPROVAL_GATED/APPROVAL_GATED`.
 - Wiki candidate generation content is measured separately from that browser fixture: `PASS_LIVE_PRODUCTION_WIKI_EVENT_SEMANTIC_AND_EVIDENCE_VISIBILITY_LLM_ENHANCED_RUNTIME_BLOCKED`; deterministic fallback local/live scenarios `5/5` and `5/5`. Reviewer-visible evidence traces move `0->5/5`; live KOSHA technical/official-source and current-law candidate boundaries are `5/5` and `5/5`. Explicit safe event semantics move `0->5/5` with private exposure `0`; arbitrary raw payload accepted=`false`. The enhanced provider remains `0/5` with blocker `distributed_rate_limit_unavailable_before_ai_generation`. This does not read the production candidate queue or claim enhanced LLM quality: queueRead=`false`, fixtureAcceptedAsGenerationProof=`false`, enhancedLive=`false`, humanReviewCompleted=`false`, exact saved Share=`MISSING_EVIDENCE`, Wiki/RLS=`APPROVAL_GATED/APPROVAL_GATED`.
 - Reviewer-visible SIF evidence is measured by a separate companion matrix: `PASS_LIVE_PRODUCTION_SIF_KOSHA_LAW_WIKI_CANDIDATE_EVIDENCE`; local/live `5/5` and `5/5`, authority order `sif -> kosha -> law`, live SIF/KOSHA/law boundaries `5/5/5` of 5, event facts `5/5`, and private exposure `0`. This does not read the production candidate queue, complete human review, enable enhanced runtime, publish Wiki content, mutate DB/vector/KOSHA registry state, or close exact saved Share `MISSING_EVIDENCE`.
 - Public generation admission security is measured separately: `PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_DISTRIBUTED_CONFIGURATION_TRUTH`, configuration/readiness/response `absent/unavailable/distributed`, production fail-closed observed=`true`, dependency vulnerabilities `0`, distributed activation pending=`true`, and fresh full-repository scan required=`true`. The response mode header is not proof of configured multi-instance protection. This notice does not close the immutable scan finding, approval-gated operations, or exact saved Share; exact saved Share remains `MISSING_EVIDENCE`.

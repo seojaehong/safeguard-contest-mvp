@@ -1,14 +1,14 @@
 # LLM Wiki Candidate Content Readiness
 
 - Verdict: `PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS`
-- Product commit: `aac729a3c63fad8f0adb82c01d8d24d4f51f3b4d`
-- Production commit: `c7cb6280724239611a95f278c8b1fb2c6191168b`
+- Product commit: `ea9fb620c17be6dd3b21105d8df2accf9bff6994`
+- Production commit: `ea9fb620c17be6dd3b21105d8df2accf9bff6994`
 - Local geometry: 8/8 PASS
 - Live geometry: 8/8 PASS
 
 ## Result
 
-The candidate cockpit derives four required content sections server-side, exposes revision reasons, and blocks approval while keeping site-only and reject decisions available.
+The candidate cockpit derives four required content sections server-side, exposes human-readable revision guidance without internal issue codes, and keeps approval blocked after confirmation while site-only and reject decisions remain available.
 The candidate navigator keeps one roving tab stop, linked tabpanel semantics, breakpoint-aware orientation, and keyboard navigation across candidates and compact review panes. Delayed decision saves expose a live pending message, busy semantics, disabled competing actions, and an accessible settled state.
 
 ## Boundary
