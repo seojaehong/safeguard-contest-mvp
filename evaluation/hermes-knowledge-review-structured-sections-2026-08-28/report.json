@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-hermes-knowledge-review-structured-sections/v1",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_STRUCTURED_CANDIDATE_REVIEW_LIVE_PENDING",
-  "checkedAt": "2026-08-28T09:41:34.566Z",
-  "sourceHead": "8a1d8a70c19f942a289072046f7cbb146476554e",
+  "verdict": "PASS_LIVE_PRODUCTION_HERMES_STRUCTURED_CANDIDATE_REVIEW",
+  "checkedAt": "2026-08-28T09:46:36.426Z",
+  "sourceHead": "2f73bce4f9c160c46022cbb24e8cd42fe32d08df",
   "productCommit": "bf8138fd441b59ca126c650148c4ea2717f48ed5",
   "local": {
     "path": "evaluation/hermes-knowledge-review-structured-sections-2026-08-28/after-local/report.json",
@@ -27,6 +27,29 @@
     "candidateBodyInternalScroll": true,
     "firstDecisionActionInViewport": true,
     "horizontalOverflow": false
+  },
+  "afterLive": {
+    "path": "evaluation/hermes-knowledge-review-structured-sections-2026-08-28/after-live/report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_LLM_WIKI_CANDIDATE_CONTENT_READINESS",
+    "productionCommit": "823415f348eea7be715740d14329c1b4c16dcebd",
+    "deploymentUrl": "safeguard-contest-4m71a7rlp-seojaehongs-projects.vercel.app",
+    "productionAligned": true,
+    "viewportCount": 8,
+    "passedCount": 8,
+    "failedCount": 0,
+    "screenshotCount": 16,
+    "selectedCandidateCount": 1,
+    "selectedBodyCount": 1,
+    "selectedBodyFormat": "structured",
+    "candidateSectionCount": 4,
+    "candidateSectionsNonEmpty": true,
+    "desktopColumns": 2,
+    "mobileColumns": 1,
+    "candidateBodyInternalScroll": true,
+    "firstDecisionActionInViewport": true,
+    "horizontalOverflow": false,
+    "actualProductionCandidateQueueRead": false,
+    "routeControlledBrowserFixture": true
   },
   "verification": {
     "focusedTestFiles": 4,
@@ -53,7 +76,8 @@
     "koshaRegistryMutationPerformed": false
   },
   "remainingBoundaries": {
-    "liveAfterDeploymentRequired": true,
+    "liveAfterDeploymentRequired": false,
+    "actualProductionCandidateQueueRead": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "llmWikiPublication": "APPROVAL_GATED",
     "supabaseRlsLaunchIsolation": "APPROVAL_GATED",

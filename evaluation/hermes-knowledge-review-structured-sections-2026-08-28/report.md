@@ -1,10 +1,13 @@
 # Hermes Knowledge Review Structured Sections
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_HERMES_STRUCTURED_CANDIDATE_REVIEW_LIVE_PENDING`
+- Verdict: `PASS_LIVE_PRODUCTION_HERMES_STRUCTURED_CANDIDATE_REVIEW`
 - Product commit: `bf8138fd441b59ca126c650148c4ea2717f48ed5`
-- Evidence source: `8a1d8a70c19f942a289072046f7cbb146476554e`
+- Evidence source: `2f73bce4f9c160c46022cbb24e8cd42fe32d08df`
+- Production commit: `823415f348eea7be715740d14329c1b4c16dcebd`
+- Deployment: `safeguard-contest-4m71a7rlp-seojaehongs-projects.vercel.app`
 - Local browser geometry: `8/8 PASS`
-- Screenshots: `16`
+- Live browser geometry: `8/8 PASS`
+- Screenshots: `16 local + 16 live`
 
 ## Result
 
@@ -16,7 +19,7 @@ Verification completed with `4 files / 32 tests PASS`, strict typecheck, and a p
 
 ## Boundary
 
-- This is current-source local browser evidence. Live production evidence is still required after deployment.
+- The live run uses a route-controlled reviewer fixture to prove production rendering and interaction. It does not read the actual production candidate queue.
 - Human review is not complete and machine evidence does not replace it.
 - No DB mutation, provider dispatch, Share-session creation, ontology/Wiki publication, vector runtime, or KOSHA registry mutation occurred.
 - LLM Wiki publication and Supabase RLS isolation remain `APPROVAL_GATED`.
