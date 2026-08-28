@@ -3202,6 +3202,38 @@ function createFixtureRoot(): string {
       fullyAutomatedLaunchClaimAllowed: false,
     },
   });
+  writeJson(rootDir, path.join("evaluation", "distributed-admission-activation-approval-2026-08-29", "report.json"), {
+    verdict: "APPROVAL_REQUIRED_DISTRIBUTED_ADMISSION_ACTIVATION_NO_MUTATION",
+    overall: "approval_ready_open",
+    operatorApprovalRequired: true,
+    configurationChangeApproved: false,
+    activationPerformed: false,
+    runtimeBehavioralProbePerformed: false,
+    secretValuesInspected: false,
+    secretValuesRecorded: false,
+    ephemeralRedisMutationPerformed: false,
+    requestedChange: {
+      environment: "Production",
+      requiredVariables: ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"],
+      remoteHermesLedgerModeChangeRequested: false,
+    },
+    sharedCredentialBoundary: {
+      remoteHermesLedgerEnabledByThisChange: false,
+    },
+    checks: Array.from({ length: 7 }, (_, index) => ({ id: `check-${index + 1}`, passed: true, message: "ok" })),
+    failedCheckIds: [],
+    mutationBoundary: {
+      dbSchemaMutationPerformed: false,
+      dbDataMutationPerformed: false,
+      providerCallPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "documents-mobile-review-launch-2026-08-17", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_DOCUMENT_REVIEW_LAUNCH_CONTAINMENT",
     sourceHead: "product-sha",
@@ -7246,6 +7278,13 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "launch_operations_readiness_cockpit")?.detail).toContain("passes 4/4");
     expect(audit.gates.find((gate) => gate.id === "launch_operations_readiness_cockpit")?.detail).toContain("provider dispatch preview-only");
     expect(audit.gates.find((gate) => gate.id === "launch_operations_readiness_cockpit")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "distributed_admission_activation")).toMatchObject({
+      state: "approval_gated",
+      evidencePath: path.join("evaluation", "distributed-admission-activation-approval-2026-08-29", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "distributed_admission_activation")?.detail).toContain("not activated");
+    expect(audit.gates.find((gate) => gate.id === "distributed_admission_activation")?.detail).toContain("remote Hermes mode separate");
+    expect(audit.gates.find((gate) => gate.id === "distributed_admission_activation")?.detail).toContain("exact saved Share as MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "document_export_capability_truth")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
@@ -11867,6 +11906,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
 
     expect(markdown).toContain("| llm_wiki_publication | approval_gated |");
     expect(markdown).toContain("| provider_dispatch_persistence | approval_gated |");
+    expect(markdown).toContain("| distributed_admission_activation | approval_gated |");
     expect(markdown).toContain("| kosha_exact_trust_registry | proven |");
     expect(markdown).toContain("| kosha_exact_promotion_review_gate | approval_gated |");
     expect(markdown).toContain("shallow human-confirmation-only reviews are blocked");

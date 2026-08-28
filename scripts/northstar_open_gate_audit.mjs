@@ -52,6 +52,7 @@ const EVIDENCE_PATHS = Object.freeze({
   ciFullSuiteRemediation: path.join("evaluation", "ci-full-suite-remediation-2026-08-29", "report.json"),
   knowledgePreparationCapabilityTruth: path.join("evaluation", "knowledge-preparation-capability-truth-2026-08-28", "report.json"),
   launchOperationsReadiness: path.join("evaluation", "launch-operations-readiness-2026-08-26", "report.json"),
+  distributedAdmissionActivationApproval: path.join("evaluation", "distributed-admission-activation-approval-2026-08-29", "report.json"),
   documentExportCapabilityTruth: path.join("evaluation", "document-export-capability-truth-2026-08-17", "report.json"),
   ontologyViewportWorkbench: path.join("evaluation", "ontology-viewport-workbench-2026-08-17", "report.json"),
   knowledgeViewportWorkbench: path.join("evaluation", "knowledge-viewport-workbench-2026-08-17", "report.json"),
@@ -2303,6 +2304,73 @@ function evaluateLaunchOperationsReadinessGate(rootDir) {
     nextActions: pass
       ? ["Configure distributed admission and obtain provider persistence approval separately; do not infer automatic launch approval from this cockpit."]
       : ["Restore the four-case viewport contract and preserved approval boundaries, then rerun live evidence without mutation."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateDistributedAdmissionActivationApprovalGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.distributedAdmissionActivationApproval;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "distributed_admission_activation",
+      label: "Distributed admission activation approval",
+      state: "missing",
+      evidencePath,
+      detail: "Distributed admission activation approval packet is missing or invalid.",
+      nextActions: ["Generate the no-mutation activation preflight before requesting production secret configuration."],
+    });
+  }
+
+  const requestedChange = isRecord(report.requestedChange) ? report.requestedChange : {};
+  const sharedBoundary = isRecord(report.sharedCredentialBoundary) ? report.sharedCredentialBoundary : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const variables = readStringArray(requestedChange.requiredVariables);
+  const checks = Array.isArray(report.checks) ? report.checks.filter(isRecord) : [];
+  const exactVariables = variables.length === 2
+    && variables.includes("UPSTASH_REDIS_REST_URL")
+    && variables.includes("UPSTASH_REDIS_REST_TOKEN");
+  const noMutation = report.ephemeralRedisMutationPerformed === false
+    && mutationBoundary.dbSchemaMutationPerformed === false
+    && mutationBoundary.dbDataMutationPerformed === false
+    && mutationBoundary.providerCallPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.vectorOrEmbeddingMutationPerformed === false
+    && mutationBoundary.wikiPublicationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "APPROVAL_REQUIRED_DISTRIBUTED_ADMISSION_ACTIVATION_NO_MUTATION"
+    && readString(report.overall) === "approval_ready_open"
+    && report.operatorApprovalRequired === true
+    && report.configurationChangeApproved === false
+    && report.activationPerformed === false
+    && report.runtimeBehavioralProbePerformed === false
+    && report.secretValuesInspected === false
+    && report.secretValuesRecorded === false
+    && exactVariables
+    && readString(requestedChange.environment) === "Production"
+    && requestedChange.remoteHermesLedgerModeChangeRequested === false
+    && sharedBoundary.remoteHermesLedgerEnabledByThisChange === false
+    && checks.length >= 7
+    && checks.every((item) => item.passed === true)
+    && readStringArray(report.failedCheckIds).length === 0
+    && noMutation
+    && readString(mutationBoundary.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+
+  return gateResult({
+    id: "distributed_admission_activation",
+    label: "Distributed admission activation approval",
+    state: pass ? "approval_gated" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Production distributed admission is approval-ready but not activated: the packet requests exactly the Upstash REST URL/token, records no secret values, performs no Redis/DB/provider/Share/vector/Wiki/KOSHA mutation, keeps remote Hermes mode separate, requires a bounded post-deploy connectivity probe, and preserves exact saved Share as MISSING_EVIDENCE."
+      : `Distributed activation verdict=${readString(report.verdict) || "missing"}, overall=${readString(report.overall) || "missing"}, approval=${report.operatorApprovalRequired === true}, activated=${report.activationPerformed === true}, variables=${variables.join(",") || "missing"}, checks=${checks.length}, noMutation=${noMutation}, exactShare=${readString(mutationBoundary.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Obtain operator approval, configure both Production-scoped variables together, run the bounded readiness/connectivity probes, and rerun the fresh Standard scan before any security-complete claim."]
+      : ["Regenerate the activation packet and restore the no-secret, no-mutation, separate-Hermes, and exact Share boundaries."],
   });
 }
 
@@ -12455,6 +12523,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCiSupplyChainFullSuiteGate(rootDir),
     evaluateKnowledgePreparationCapabilityTruthGate(rootDir),
     evaluateLaunchOperationsReadinessGate(rootDir),
+    evaluateDistributedAdmissionActivationApprovalGate(rootDir),
     evaluateDocumentExportCapabilityTruthGate(rootDir),
     evaluateOntologyViewportWorkbenchGate(rootDir),
     evaluateKnowledgeViewportWorkbenchGate(rootDir),
