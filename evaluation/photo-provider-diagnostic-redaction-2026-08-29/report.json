@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "safeclaw-photo-provider-diagnostic-redaction/v1",
+  "verdict": "PASS_DEPLOYED_SOURCE_PHOTO_DIAGNOSTIC_REDACTION_NO_PROVIDER_CALL",
+  "generatedAt": "2026-08-29T01:55:38.5691472+09:00",
+  "sourceHead": "4ab3648cbae44a55bbdd193fd1af838e6356c8cd",
+  "productionBuild": {
+    "commitSha": "4ab3648cbae44a55bbdd193fd1af838e6356c8cd",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-p06atbvsq-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
+  "securityBaseline": {
+    "scanId": "c5175a50-038b-402e-9fd3-6af9eec6582b",
+    "targetRevision": "c9e24f31b7c9e9db5896bd221401bcef3e35ed24",
+    "findings": [
+      "information-exposure.upstream-errors",
+      "information-exposure.public-provider-readiness"
+    ],
+    "immutableOriginalBaselinePreserved": true
+  },
+  "redactionContract": {
+    "anonymousReadiness": {
+      "status": "ready",
+      "coarseCapabilityOnly": true,
+      "publicUploadLimitsPresent": true,
+      "providerPresent": false,
+      "modelPresent": false,
+      "apiKeyPresenceFieldPresent": false,
+      "timeoutPresent": false,
+      "fileValidationModePresent": false,
+      "hazardAnalysisEndpointPresent": false,
+      "improvementEndpointPatternPresent": false
+    },
+    "authenticatedOperatorDiagnostics": {
+      "requiresBearerUser": true,
+      "providerDiagnosticsAvailableAfterAuthentication": true
+    },
+    "providerFailure": {
+      "publicCode": "provider_error",
+      "genericMessageWithCorrelationReference": true,
+      "rawUpstreamBodyReturned": false,
+      "boundedServerLogBodyBytes": 2048
+    }
+  },
+  "verification": {
+    "focusedVitest": {
+      "filesPassed": 4,
+      "filesSkipped": 1,
+      "testsPassed": 66,
+      "testsSkipped": 2,
+      "testsFailed": 0
+    },
+    "strictTypecheck": "PASS",
+    "productionBuild": "PASS",
+    "staticPages": 28,
+    "gitDiffCheck": "PASS",
+    "liveReadOnly": {
+      "anonymousReadinessStatus": 200,
+      "providerWorkExecuted": false,
+      "photoPostExecuted": false
+    },
+    "separateResidual": {
+      "test": "ai-connect-design-contract",
+      "status": "RED_OUTSIDE_PRODUCT_DIFF",
+      "detail": "Existing /dispatch caption typography tuple finding at app/globals.css:15472; no CSS was changed in this wave."
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerAnalysisCalled": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "authenticatedOperatorReadinessLiveProbe": "NOT_EXECUTED_REQUIRES_USER_TOKEN",
+    "liveProviderFailureProbe": "NOT_EXECUTED_WOULD_CALL_PROVIDER",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedWorkOverclaimed": false,
+    "securityCompletionClaimed": false,
+    "otherScanFindingsRemainOpen": true
+  }
+}
