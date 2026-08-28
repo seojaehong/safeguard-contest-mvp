@@ -1,0 +1,90 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "d908a17fc0b02e535afd38eeeb59594398919eab4b088b36156268121b187424"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "63e3ffb899d71020f83ff84d04be4b7a0d37f8bb70c229b79366a36c362fe22e"
+      }
+    ],
+    "completedAt": "2026-08-28T04:13:48.599110Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "3358978a-75d1-454a-9dcd-4b63b52b9768",
+    "preservedSources": {
+      "checkpoints/41633fd8b9eb80fac01524cd87fd9a32149437a2f0593bd3f69fd0dfe7fc8c5b.json": "102b95fcc193dd7db638579af85b4280adec7a285161f1eeed5304edc596e986",
+      "checkpoints/6a9ffecc5eeefab27ea1e68b086fd61d1c7c6f4d893a5c7563e2be2045382fa4.json": "998afcab4177ed6db548f369b3a4099ced06d3164235d9cf059005509fb7914e",
+      "checkpoints/77a32e0a51168cd796c6fae8c65addf422dd06235180896d63054e8f01a0d563.json": "9d6a021981a088b031273bbcae289b5c7a0ac1067ae94f78761f81fb0317933d",
+      "checkpoints/8ddef23cd0cc0c3de2c516f0eafa6e8f793508c53261038af1384ca64233a01f.json": "39656b4da71bae769bcf09328d923a5ebbbc8ae2a915e5f7a29cc50151e45ac1",
+      "checkpoints/c484c50fdb074bedb89b33379736a8a91ce8762f33f8da7ace89dd5ea7119a40.json": "53d026f097b6d6a3b75456a8cb03eb8da82d4e8b89d8bb834590a5d510d9f5f0",
+      "checkpoints/cba22f1d6f9605b91c9c78f88b7f249d6aa7490e19aeb99731e0ecd1e3f440ec.json": "cba22f1d6f9605b91c9c78f88b7f249d6aa7490e19aeb99731e0ecd1e3f440ec",
+      "checkpoints/da1c2a79974b328db11f901a663a328e515f09d849406a13146fee7f8dfcf02a.json": "fd7f4a5a61728dda332c5f9d2e363dacde0919a8ef421d614158e8a7971437a5",
+      "checkpoints/ebb77a1f93980df8874af0a606ba6113dc52a0d60640b0462c8c83d6d5bfda63.json": "c69555e53fd8e3b9373ad2f50f32440964429f34bcf873eada0c05ab67b9cf1e",
+      "checkpoints/fb1dc98d63ee813cb5abd35bac401cce726e73f776456e757f718bec8c1b3762.json": "3d2243f23e2c785c4d1c209766b655528fbb7dbf93ea829881ee657845fdba97"
+    },
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.22"
+    },
+    "scope": {
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "No live DB grants or mutation."
+      ],
+      "runtimeStatus": "Source/live aligned per supplied context.",
+      "summary": "Full repository Standard scan at ab30f5c5269430a558fcd8ef5c6331fb3c952a4e."
+    },
+    "sealedAt": "2026-08-28T04:13:48.599110Z",
+    "startedAt": "2026-08-28T02:07:56.323403Z",
+    "status": "completed",
+    "target": {
+      "displayName": "safeclaw-northstar-current",
+      "kind": "git_revision",
+      "revision": "ab30f5c5269430a558fcd8ef5c6331fb3c952a4e",
+      "targetId": "target_sha256_59a91dd8129f171a6e0ff82b60460781f1067b1940d76c7a524e5f0e2b7ec5de"
+    },
+    "threatModel": {
+      "assets": [
+        "Tenant data",
+        "Safety documents",
+        "Governance evidence",
+        "Execution budgets"
+      ],
+      "assumptions": [
+        "Original baselines preserved.",
+        "Exact saved Share MISSING_EVIDENCE.",
+        "No approval-gated mutation."
+      ],
+      "attackerCapabilities": [
+        "Public requests",
+        "Tenant account",
+        "Concurrent requests",
+        "Allowlisted-host control"
+      ],
+      "securityObjectives": [
+        "Tenant isolation",
+        "Evidence integrity",
+        "Bounded work",
+        "Safe outbound requests"
+      ],
+      "summary": "Current-source scan of public APIs, Supabase tenant boundaries, Share, MCP/Hermes, providers, documents, and safety authority.",
+      "trustBoundaries": [
+        "Internet/API",
+        "Browser/PostgREST",
+        "Service/Supabase",
+        "Server/providers",
+        "Share/recipient"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

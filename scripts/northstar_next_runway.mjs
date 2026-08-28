@@ -50,7 +50,7 @@ const ARTIFACTS = Object.freeze({
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
-  freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-28", "report.json"),
+  freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-28-complete", "report.json"),
   shareAckPreBodyAdmission: path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
   safetyStatusDisconnectLease: path.join("evaluation", "safety-status-disconnect-lease-2026-08-28", "report.json"),
   weatherFallbackErrorRedaction: path.join("evaluation", "weather-fallback-error-redaction-2026-08-28", "report.json"),
@@ -3617,7 +3617,7 @@ export function buildNorthstarNextRunway(options) {
       {
         gate: "fresh_current_source_security_scan",
         state: "notice",
-        reason: `fresh Standard scan ${freshCurrentSourceSecurityScanResult.scanId || "missing"} records ${freshCurrentSourceSecurityScanResult.reportableFindingCount ?? "unknown"} open findings with partial coverage; ${freshCurrentSourceSecurityScanResult.approvalFreeProductSourceResidualCount ?? "unknown"} approval-free source residuals, ${freshCurrentSourceSecurityScanResult.approvalSensitiveShareCapabilityCount ?? "unknown"} Share capability boundary, and ${freshCurrentSourceSecurityScanResult.approvalGatedDatabaseOrAtomicityCount ?? "unknown"} database/RLS/atomicity findings remain open; security-complete is false and exact saved Share remains ${freshCurrentSourceSecurityScanResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+        reason: `fresh Standard scan ${freshCurrentSourceSecurityScanResult.scanId || "missing"} records ${freshCurrentSourceSecurityScanResult.reportableFindingCount ?? "unknown"} open findings with ${freshCurrentSourceSecurityScanResult.coverageCompleteness || "unknown"} coverage; ${freshCurrentSourceSecurityScanResult.approvalFreeProductSourceResidualCount ?? "unknown"} approval-free source residuals, ${freshCurrentSourceSecurityScanResult.approvalSensitiveShareCapabilityCount ?? "unknown"} separately reportable Share capability findings, and ${freshCurrentSourceSecurityScanResult.approvalGatedDatabaseOrAtomicityCount ?? "unknown"} database/RLS/atomicity findings remain open; security-complete is false and exact saved Share remains ${freshCurrentSourceSecurityScanResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
       },
       {
         gate: "share_ack_prebody_admission_security",

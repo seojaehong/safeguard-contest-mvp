@@ -1472,18 +1472,18 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
 
 function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
   return {
-    verdict: "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE",
-    scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
-    sourceHead: "899951952ee184d527742d541f976f7e72482f2e",
-    deployedProductSource: "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
-    scan: { status: "completed", mode: "standard", targetKind: "git_revision", coverageCompleteness: "partial", reviewedSurfaceCount: 18, deferredCoverageItemCount: 21, reportableFindingCount: 17, severity: { critical: 0, high: 0, medium: 13, low: 4 } },
+    verdict: "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE_RECOVERED_DRAFT_HISTORY",
+    scanId: "3358978a-75d1-454a-9dcd-4b63b52b9768",
+    sourceHead: "ab30f5c5269430a558fcd8ef5c6331fb3c952a4e",
+    deployedProductSource: "ab30f5c5269430a558fcd8ef5c6331fb3c952a4e",
+    scan: { status: "completed", mode: "standard", targetKind: "git_revision", coverageCompleteness: "partial", reviewedSurfaceCount: 12, deferredCoverageItemCount: 66, reportableFindingCount: 17, severity: { critical: 0, high: 0, medium: 2, low: 15 }, draftHistoryRecoveredByFinalizer: true },
     baseline: { immutableOriginalFindingCount: 18, preserved: true, rewritten: false },
-    currentDisposition: { approvalGatedDatabaseOrAtomicityCount: 12, approvalSensitiveShareCapabilityCount: 1, approvalFreeProductSourceResidualCount: 4, fullyClosedBoundedSourceCandidateCount: 2, securityCompleteClaimAllowed: false },
+    currentDisposition: { approvalGatedDatabaseOrAtomicityCount: 14, approvalSensitiveShareCapabilityCount: 0, approvalFreeProductSourceResidualCount: 3, fullyClosedBoundedSourceCandidateCount: 0, securityCompleteClaimAllowed: false },
     canonicalArtifacts: {
-      manifest: "evaluation/current-source-standard-security-scan-2026-08-28/canonical/scan-manifest.json",
-      findings: "evaluation/current-source-standard-security-scan-2026-08-28/canonical/findings.json",
-      coverage: "evaluation/current-source-standard-security-scan-2026-08-28/canonical/coverage.json",
-      markdown: "evaluation/current-source-standard-security-scan-2026-08-28/scan-report.md",
+      manifest: "evaluation/current-source-standard-security-scan-2026-08-28-complete/canonical/scan-manifest.json",
+      findings: "evaluation/current-source-standard-security-scan-2026-08-28-complete/canonical/findings.json",
+      coverage: "evaluation/current-source-standard-security-scan-2026-08-28-complete/canonical/coverage.json",
+      markdown: "evaluation/current-source-standard-security-scan-2026-08-28-complete/scan-report.md",
       findingWriteupCount: 17,
       supportingEvidenceCount: 17,
     },
@@ -2944,12 +2944,12 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       securityCompleteClaimAllowed: false,
     },
   });
-  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-28/report.json", freshCurrentSourceSecurityScanFixture());
-  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-28/canonical/scan-manifest.json", { scan: { status: "completed" } });
-  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-28/canonical/findings.json", { findings: [] });
-  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-28/canonical/coverage.json", { completeness: "partial" });
+  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-28-complete/report.json", freshCurrentSourceSecurityScanFixture());
+  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-28-complete/canonical/scan-manifest.json", { scan: { status: "completed" } });
+  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-28-complete/canonical/findings.json", { findings: [] });
+  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-28-complete/canonical/coverage.json", { completeness: "partial" });
   fs.writeFileSync(
-    path.join(root, "evaluation/current-source-standard-security-scan-2026-08-28/scan-report.md"),
+    path.join(root, "evaluation/current-source-standard-security-scan-2026-08-28-complete/scan-report.md"),
     "# sealed fixture\n",
     "utf8",
   );
@@ -4528,22 +4528,22 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       reason: expect.stringContaining("before archive expansion"),
     }));
     expect(report.freshCurrentSourceSecurityScan).toMatchObject({
-      verdict: "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE",
-      scanId: "1411fb32-5c18-4d6a-b8ba-d52697757d8a",
-      sourceHead: "899951952ee184d527742d541f976f7e72482f2e",
-      deployedProductSource: "607c39b3204fd4e1732890bcc6dbad30e4815ea2",
+      verdict: "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE_RECOVERED_DRAFT_HISTORY",
+      scanId: "3358978a-75d1-454a-9dcd-4b63b52b9768",
+      sourceHead: "ab30f5c5269430a558fcd8ef5c6331fb3c952a4e",
+      deployedProductSource: "ab30f5c5269430a558fcd8ef5c6331fb3c952a4e",
       status: "completed",
       coverageCompleteness: "partial",
-      reviewedSurfaceCount: 18,
-      deferredCoverageItemCount: 21,
+      reviewedSurfaceCount: 12,
+      deferredCoverageItemCount: 66,
       reportableFindingCount: 17,
-      mediumFindingCount: 13,
-      lowFindingCount: 4,
+      mediumFindingCount: 2,
+      lowFindingCount: 15,
       immutableOriginalFindingCount: 18,
-      approvalGatedDatabaseOrAtomicityCount: 12,
-      approvalSensitiveShareCapabilityCount: 1,
-      approvalFreeProductSourceResidualCount: 4,
-      fullyClosedBoundedSourceCandidateCount: 2,
+      approvalGatedDatabaseOrAtomicityCount: 14,
+      approvalSensitiveShareCapabilityCount: 0,
+      approvalFreeProductSourceResidualCount: 3,
+      fullyClosedBoundedSourceCandidateCount: 0,
       freshFullRepositoryScanCompleted: true,
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",

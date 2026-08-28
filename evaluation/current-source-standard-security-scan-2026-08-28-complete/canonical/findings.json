@@ -1,0 +1,4166 @@
+{
+  "documentType": "codex-security.findings",
+  "findings": [
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Document content disclosure or mutation",
+          "sink": "public.documents",
+          "source": "Browser/PostgREST role if granted",
+          "summary": "Input or concurrent action crosses the reviewed boundary into public.documents."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Document content disclosure or mutation"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Browser/PostgREST role if granted",
+          "entrypoint": "supabase/migrations/001_init.sql",
+          "outcome": "Document content disclosure or mutation",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Browser/PostgREST role if granted can reach public.documents; Document content disclosure or mutation."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_b0fb90e82fb6c0bcb18b2d43",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c2ef4478833d274af3379d3d386b2d5e189c6c9fef898c1c149abeae8158e829"
+      },
+      "identity": {
+        "anchor": "documents-no-rls",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 17,
+          "path": "supabase/migrations/001_init.sql",
+          "role": "root_control",
+          "startLine": 8
+        }
+      ],
+      "occurrenceId": "occ_27f116f8cf905d12917d606e",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "documents-no-rls",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 17,
+                "path": "supabase/migrations/001_init.sql",
+                "role": "root_control",
+                "startLine": 8
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Enable RLS and least-privilege grants.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "The canonical documents table contains full document fields but no migration enables RLS or defines policies."
+            },
+            "ruleId": "authorization-bypass.missing-row-level-security",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "medium",
+              "rationale": "Material authorization impact is possible if deployed grants expose the path."
+            },
+            "summary": "The canonical documents table contains full document fields but no migration enables RLS or defines policies.",
+            "taxonomy": {
+              "category": "Authorization bypass",
+              "cwe": [
+                "CWE-862"
+              ]
+            },
+            "title": "Documents table is exposed without row-level security",
+            "validation": {
+              "assertions": [
+                "The canonical documents table contains full document fields but no migration enables RLS or defines policies."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Document content disclosure or mutation",
+                "sink": "public.documents",
+                "source": "Browser/PostgREST role if granted",
+                "summary": "Input or concurrent action crosses the reviewed boundary into public.documents."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Document content disclosure or mutation"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Browser/PostgREST role if granted",
+                "entrypoint": "supabase/migrations/001_init.sql",
+                "outcome": "Document content disclosure or mutation",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Browser/PostgREST role if granted can reach public.documents; Document content disclosure or mutation."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "documents-no-rls",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 17,
+                "path": "supabase/migrations/001_init.sql",
+                "role": "root_control",
+                "startLine": 8
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Enable RLS and least-privilege grants.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "The canonical documents table contains full document fields but no migration enables RLS or defines policies."
+            },
+            "ruleId": "authorization-bypass.missing-row-level-security",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "medium",
+              "rationale": "Material authorization impact is possible if deployed grants expose the path."
+            },
+            "summary": "The canonical documents table contains full document fields but no migration enables RLS or defines policies.",
+            "taxonomy": {
+              "category": "Authorization bypass",
+              "cwe": [
+                "CWE-862"
+              ]
+            },
+            "title": "Documents table is exposed without row-level security",
+            "validation": {
+              "assertions": [
+                "The canonical documents table contains full document fields but no migration enables RLS or defines policies."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Enable RLS and least-privilege grants.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "The canonical documents table contains full document fields but no migration enables RLS or defines policies."
+      },
+      "ruleId": "authorization-bypass.missing-row-level-security",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "medium",
+        "rationale": "Material authorization impact is possible if deployed grants expose the path."
+      },
+      "summary": "The canonical documents table contains full document fields but no migration enables RLS or defines policies.",
+      "taxonomy": {
+        "category": "Authorization bypass",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Documents table is exposed without row-level security",
+      "validation": {
+        "assertions": [
+          "The canonical documents table contains full document fields but no migration enables RLS or defines policies."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/documents-no-rls/documents-no-rls.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Query history disclosure or tampering",
+          "sink": "public.query_logs",
+          "source": "Browser/PostgREST role if granted",
+          "summary": "Input or concurrent action crosses the reviewed boundary into public.query_logs."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Query history disclosure or tampering"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Browser/PostgREST role if granted",
+          "entrypoint": "supabase/migrations/001_init.sql",
+          "outcome": "Query history disclosure or tampering",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Browser/PostgREST role if granted can reach public.query_logs; Query history disclosure or tampering."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_6f5f2a711bab524ddc1c94ae",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:18a5735d923d7701130181aeb5c431a30f2c3490a26afa55ebe5c7dc347e186e"
+      },
+      "identity": {
+        "anchor": "query-logs-no-rls",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 6,
+          "path": "supabase/migrations/001_init.sql",
+          "role": "root_control",
+          "startLine": 1
+        }
+      ],
+      "occurrenceId": "occ_d8a79fb90407452d79839d5f",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "query-logs-no-rls",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 6,
+                "path": "supabase/migrations/001_init.sql",
+                "role": "root_control",
+                "startLine": 1
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Enable RLS and restrict reads and inserts.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "query_logs stores user query text without RLS or access policies."
+            },
+            "ruleId": "authorization-bypass.missing-row-level-security",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "query_logs stores user query text without RLS or access policies.",
+            "taxonomy": {
+              "category": "Authorization bypass",
+              "cwe": [
+                "CWE-862"
+              ]
+            },
+            "title": "Query logs table is exposed without row-level security",
+            "validation": {
+              "assertions": [
+                "query_logs stores user query text without RLS or access policies."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Query history disclosure or tampering",
+                "sink": "public.query_logs",
+                "source": "Browser/PostgREST role if granted",
+                "summary": "Input or concurrent action crosses the reviewed boundary into public.query_logs."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Query history disclosure or tampering"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Browser/PostgREST role if granted",
+                "entrypoint": "supabase/migrations/001_init.sql",
+                "outcome": "Query history disclosure or tampering",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Browser/PostgREST role if granted can reach public.query_logs; Query history disclosure or tampering."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "query-logs-no-rls",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 6,
+                "path": "supabase/migrations/001_init.sql",
+                "role": "root_control",
+                "startLine": 1
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Enable RLS and restrict reads and inserts.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "query_logs stores user query text without RLS or access policies."
+            },
+            "ruleId": "authorization-bypass.missing-row-level-security",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "query_logs stores user query text without RLS or access policies.",
+            "taxonomy": {
+              "category": "Authorization bypass",
+              "cwe": [
+                "CWE-862"
+              ]
+            },
+            "title": "Query logs table is exposed without row-level security",
+            "validation": {
+              "assertions": [
+                "query_logs stores user query text without RLS or access policies."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Enable RLS and restrict reads and inserts.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "query_logs stores user query text without RLS or access policies."
+      },
+      "ruleId": "authorization-bypass.missing-row-level-security",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "low",
+        "rationale": "Real source defect with constrained impact or prerequisites."
+      },
+      "summary": "query_logs stores user query text without RLS or access policies.",
+      "taxonomy": {
+        "category": "Authorization bypass",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Query logs table is exposed without row-level security",
+      "validation": {
+        "assertions": [
+          "query_logs stores user query text without RLS or access policies."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/query-logs-no-rls/query-logs-no-rls.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Unowned audit rows become readable or writable",
+          "sink": "dispatch_logs NULL-tenant policy",
+          "source": "Authenticated tenant role",
+          "summary": "Input or concurrent action crosses the reviewed boundary into dispatch_logs NULL-tenant policy."
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Unowned audit rows become readable or writable"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Authenticated tenant role",
+          "entrypoint": "supabase/migrations/002_workspace_productization.sql",
+          "outcome": "Unowned audit rows become readable or writable",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Authenticated tenant role can reach dispatch_logs NULL-tenant policy; Unowned audit rows become readable or writable."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_4b3c3d27ad405e20d44ac4b5",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:da0a168bdbc9673f10aa8d674c6cbf2aaf1b51bda82ee4b5089f0813864439b7"
+      },
+      "identity": {
+        "anchor": "null-dispatch",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 76
+        },
+        {
+          "endLine": 200,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 183
+        }
+      ],
+      "occurrenceId": "occ_b9eec6ee3c8b298ee876d6b1",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "null-dispatch",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "source",
+                "startLine": 76
+              },
+              {
+                "endLine": 200,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 183
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Disallow unowned tenant rows and isolate service audit records.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "dispatch_logs permits organization_id IS NULL in both USING and WITH CHECK."
+            },
+            "ruleId": "authorization-bypass.null-tenant-rls",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "medium",
+              "rationale": "Material authorization impact is possible if deployed grants expose the path."
+            },
+            "summary": "dispatch_logs permits organization_id IS NULL in both USING and WITH CHECK.",
+            "taxonomy": {
+              "category": "Authorization bypass",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "NULL dispatch-log tenants bypass row-level authorization",
+            "validation": {
+              "assertions": [
+                "dispatch_logs permits organization_id IS NULL in both USING and WITH CHECK."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Unowned audit rows become readable or writable",
+                "sink": "dispatch_logs NULL-tenant policy",
+                "source": "Authenticated tenant role",
+                "summary": "Input or concurrent action crosses the reviewed boundary into dispatch_logs NULL-tenant policy."
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Unowned audit rows become readable or writable"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Authenticated tenant role",
+                "entrypoint": "supabase/migrations/002_workspace_productization.sql",
+                "outcome": "Unowned audit rows become readable or writable",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Authenticated tenant role can reach dispatch_logs NULL-tenant policy; Unowned audit rows become readable or writable."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "null-dispatch",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "source",
+                "startLine": 76
+              },
+              {
+                "endLine": 200,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 183
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Disallow unowned tenant rows and isolate service audit records.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "dispatch_logs permits organization_id IS NULL in both USING and WITH CHECK."
+            },
+            "ruleId": "authorization-bypass.null-tenant-rls",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "medium",
+              "rationale": "Material authorization impact is possible if deployed grants expose the path."
+            },
+            "summary": "dispatch_logs permits organization_id IS NULL in both USING and WITH CHECK.",
+            "taxonomy": {
+              "category": "Authorization bypass",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "NULL dispatch-log tenants bypass row-level authorization",
+            "validation": {
+              "assertions": [
+                "dispatch_logs permits organization_id IS NULL in both USING and WITH CHECK."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Disallow unowned tenant rows and isolate service audit records.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "dispatch_logs permits organization_id IS NULL in both USING and WITH CHECK."
+      },
+      "ruleId": "authorization-bypass.null-tenant-rls",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "medium",
+        "rationale": "Material authorization impact is possible if deployed grants expose the path."
+      },
+      "summary": "dispatch_logs permits organization_id IS NULL in both USING and WITH CHECK.",
+      "taxonomy": {
+        "category": "Authorization bypass",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "NULL dispatch-log tenants bypass row-level authorization",
+      "validation": {
+        "assertions": [
+          "dispatch_logs permits organization_id IS NULL in both USING and WITH CHECK."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/null-dispatch/null-dispatch.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Cross-tenant provenance and relationship integrity corruption",
+          "sink": "Owner-for-all RLS policies",
+          "source": "Authenticated tenant with a foreign UUID",
+          "summary": "Input or concurrent action crosses the reviewed boundary into Owner-for-all RLS policies."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Cross-tenant provenance and relationship integrity corruption"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Authenticated tenant with a foreign UUID",
+          "entrypoint": "supabase/migrations/002_workspace_productization.sql",
+          "outcome": "Cross-tenant provenance and relationship integrity corruption",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Authenticated tenant with a foreign UUID can reach Owner-for-all RLS policies; Cross-tenant provenance and relationship integrity corruption."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_6d82c0e91784deac7d835be8",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:aa28c6dad7cc60f7344a2035da0ddee885446c6665952f32f9f4a80ac13ad8d4"
+      },
+      "identity": {
+        "anchor": "tenant-bindings",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 181,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 132
+        },
+        {
+          "endLine": 126,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "root_control",
+          "startLine": 77
+        },
+        {
+          "endLine": 227,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 161
+        }
+      ],
+      "occurrenceId": "occ_b47e5c78798d4afd634473fe",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "tenant-bindings",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 181,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 132
+              },
+              {
+                "endLine": 126,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "root_control",
+                "startLine": 77
+              },
+              {
+                "endLine": 227,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 161
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Add composite tenant constraints or trusted validation functions.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Owner policies validate organization_id but do not tenant-bind referenced object identifiers."
+            },
+            "ruleId": "tenant-integrity.related-object-binding",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Owner policies validate organization_id but do not tenant-bind referenced object identifiers.",
+            "taxonomy": {
+              "category": "Tenant integrity",
+              "cwe": [
+                "CWE-639"
+              ]
+            },
+            "title": "Tenant-owned rows can forge cross-tenant related-object bindings",
+            "validation": {
+              "assertions": [
+                "Owner policies validate organization_id but do not tenant-bind referenced object identifiers."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Cross-tenant provenance and relationship integrity corruption",
+                "sink": "Owner-for-all RLS policies",
+                "source": "Authenticated tenant with a foreign UUID",
+                "summary": "Input or concurrent action crosses the reviewed boundary into Owner-for-all RLS policies."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Cross-tenant provenance and relationship integrity corruption"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Authenticated tenant with a foreign UUID",
+                "entrypoint": "supabase/migrations/002_workspace_productization.sql",
+                "outcome": "Cross-tenant provenance and relationship integrity corruption",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Authenticated tenant with a foreign UUID can reach Owner-for-all RLS policies; Cross-tenant provenance and relationship integrity corruption."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "tenant-bindings",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 181,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 132
+              },
+              {
+                "endLine": 126,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "root_control",
+                "startLine": 77
+              },
+              {
+                "endLine": 227,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 161
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Add composite tenant constraints or trusted validation functions.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Owner policies validate organization_id but do not tenant-bind referenced object identifiers."
+            },
+            "ruleId": "tenant-integrity.related-object-binding",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Owner policies validate organization_id but do not tenant-bind referenced object identifiers.",
+            "taxonomy": {
+              "category": "Tenant integrity",
+              "cwe": [
+                "CWE-639"
+              ]
+            },
+            "title": "Tenant-owned rows can forge cross-tenant related-object bindings",
+            "validation": {
+              "assertions": [
+                "Owner policies validate organization_id but do not tenant-bind referenced object identifiers."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Add composite tenant constraints or trusted validation functions.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "Owner policies validate organization_id but do not tenant-bind referenced object identifiers."
+      },
+      "ruleId": "tenant-integrity.related-object-binding",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "low",
+        "rationale": "Real source defect with constrained impact or prerequisites."
+      },
+      "summary": "Owner policies validate organization_id but do not tenant-bind referenced object identifiers.",
+      "taxonomy": {
+        "category": "Tenant integrity",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Tenant-owned rows can forge cross-tenant related-object bindings",
+      "validation": {
+        "assertions": [
+          "Owner policies validate organization_id but do not tenant-bind referenced object identifiers."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/tenant-bindings/tenant-bindings.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Unreviewed evidence appears reviewed",
+          "sink": "knowledge_events governance fields",
+          "source": "Authenticated tenant owner",
+          "summary": "Input or concurrent action crosses the reviewed boundary into knowledge_events governance fields."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Unreviewed evidence appears reviewed"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Authenticated tenant owner",
+          "entrypoint": "supabase/migrations/003_knowledge_runtime.sql",
+          "outcome": "Unreviewed evidence appears reviewed",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Authenticated tenant owner can reach knowledge_events governance fields; Unreviewed evidence appears reviewed."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_53fa8428fb7e7fe2f5629e93",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:9583219bf5dc7ba957fca2e00f9f89915f64d7c9a50ed6554fdd8ade535fa14f"
+      },
+      "identity": {
+        "anchor": "knowledge-forgery",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 44,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "endLine": 109,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "root_control",
+          "startLine": 94
+        }
+      ],
+      "occurrenceId": "occ_999788d6940da3a8e5f585ef",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "knowledge-forgery",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 44,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "source",
+                "startLine": 21
+              },
+              {
+                "endLine": 109,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "root_control",
+                "startLine": 94
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Protect governance fields behind a trusted transaction.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Tenant owners can write review_status and proposed_wiki_update directly."
+            },
+            "ruleId": "integrity.knowledge-review-state-forgery",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Tenant owners can write review_status and proposed_wiki_update directly.",
+            "taxonomy": {
+              "category": "Improper authorization",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Direct knowledge-event writes can forge review approval state",
+            "validation": {
+              "assertions": [
+                "Tenant owners can write review_status and proposed_wiki_update directly."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Unreviewed evidence appears reviewed",
+                "sink": "knowledge_events governance fields",
+                "source": "Authenticated tenant owner",
+                "summary": "Input or concurrent action crosses the reviewed boundary into knowledge_events governance fields."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Unreviewed evidence appears reviewed"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Authenticated tenant owner",
+                "entrypoint": "supabase/migrations/003_knowledge_runtime.sql",
+                "outcome": "Unreviewed evidence appears reviewed",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Authenticated tenant owner can reach knowledge_events governance fields; Unreviewed evidence appears reviewed."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "knowledge-forgery",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 44,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "source",
+                "startLine": 21
+              },
+              {
+                "endLine": 109,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "root_control",
+                "startLine": 94
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Protect governance fields behind a trusted transaction.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Tenant owners can write review_status and proposed_wiki_update directly."
+            },
+            "ruleId": "integrity.knowledge-review-state-forgery",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Tenant owners can write review_status and proposed_wiki_update directly.",
+            "taxonomy": {
+              "category": "Improper authorization",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Direct knowledge-event writes can forge review approval state",
+            "validation": {
+              "assertions": [
+                "Tenant owners can write review_status and proposed_wiki_update directly."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Protect governance fields behind a trusted transaction.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "Tenant owners can write review_status and proposed_wiki_update directly."
+      },
+      "ruleId": "integrity.knowledge-review-state-forgery",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "low",
+        "rationale": "Real source defect with constrained impact or prerequisites."
+      },
+      "summary": "Tenant owners can write review_status and proposed_wiki_update directly.",
+      "taxonomy": {
+        "category": "Improper authorization",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "Direct knowledge-event writes can forge review approval state",
+      "validation": {
+        "assertions": [
+          "Tenant owners can write review_status and proposed_wiki_update directly."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/knowledge-forgery/knowledge-forgery.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Unreviewed controls appear approved",
+          "sink": "workpack_improvements approval fields",
+          "source": "Authenticated tenant owner",
+          "summary": "Input or concurrent action crosses the reviewed boundary into workpack_improvements approval fields."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Unreviewed controls appear approved"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Authenticated tenant owner",
+          "entrypoint": "supabase/migrations/010_commercial_operations.sql",
+          "outcome": "Unreviewed controls appear approved",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Authenticated tenant owner can reach workpack_improvements approval fields; Unreviewed controls appear approved."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_f9a637afae5a9d2aa1f2e9ac",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:4dd801b75c6ee6c2ec821499fe8dd34eb8a9f3e8054df6a5cb823ee47d3a2079"
+      },
+      "identity": {
+        "anchor": "improvement-forgery",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 69,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "source",
+          "startLine": 51
+        },
+        {
+          "endLine": 210,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 195
+        }
+      ],
+      "occurrenceId": "occ_35593e74a660d5149b33c1e1",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "improvement-forgery",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 69,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "source",
+                "startLine": 51
+              },
+              {
+                "endLine": 210,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 195
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Make approval fields service-only.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Tenant owners can directly set review_status, approved_by, and approved_at."
+            },
+            "ruleId": "integrity.improvement-approval-forgery",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Tenant owners can directly set review_status, approved_by, and approved_at.",
+            "taxonomy": {
+              "category": "Improper authorization",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Direct improvement writes can forge approval provenance",
+            "validation": {
+              "assertions": [
+                "Tenant owners can directly set review_status, approved_by, and approved_at."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Unreviewed controls appear approved",
+                "sink": "workpack_improvements approval fields",
+                "source": "Authenticated tenant owner",
+                "summary": "Input or concurrent action crosses the reviewed boundary into workpack_improvements approval fields."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Unreviewed controls appear approved"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Authenticated tenant owner",
+                "entrypoint": "supabase/migrations/010_commercial_operations.sql",
+                "outcome": "Unreviewed controls appear approved",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Authenticated tenant owner can reach workpack_improvements approval fields; Unreviewed controls appear approved."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "improvement-forgery",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 69,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "source",
+                "startLine": 51
+              },
+              {
+                "endLine": 210,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 195
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Make approval fields service-only.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Tenant owners can directly set review_status, approved_by, and approved_at."
+            },
+            "ruleId": "integrity.improvement-approval-forgery",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Tenant owners can directly set review_status, approved_by, and approved_at.",
+            "taxonomy": {
+              "category": "Improper authorization",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Direct improvement writes can forge approval provenance",
+            "validation": {
+              "assertions": [
+                "Tenant owners can directly set review_status, approved_by, and approved_at."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Make approval fields service-only.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "Tenant owners can directly set review_status, approved_by, and approved_at."
+      },
+      "ruleId": "integrity.improvement-approval-forgery",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "low",
+        "rationale": "Real source defect with constrained impact or prerequisites."
+      },
+      "summary": "Tenant owners can directly set review_status, approved_by, and approved_at.",
+      "taxonomy": {
+        "category": "Improper authorization",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "Direct improvement writes can forge approval provenance",
+      "validation": {
+        "assertions": [
+          "Tenant owners can directly set review_status, approved_by, and approved_at."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/improvement-forgery/improvement-forgery.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Unsent communications appear delivered",
+          "sink": "dispatch_logs provider fields",
+          "source": "Authenticated tenant owner",
+          "summary": "Input or concurrent action crosses the reviewed boundary into dispatch_logs provider fields."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Unsent communications appear delivered"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Authenticated tenant owner",
+          "entrypoint": "supabase/migrations/002_workspace_productization.sql",
+          "outcome": "Unsent communications appear delivered",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Authenticated tenant owner can reach dispatch_logs provider fields; Unsent communications appear delivered."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_722231256d7ab9b3ddd2f2f9",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:04920fe95165a640a5dcf24df626c0ad12838f2ad219fc877627c6bde2c1a9bd"
+      },
+      "identity": {
+        "anchor": "receipt-forgery",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 76
+        },
+        {
+          "endLine": 200,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 183
+        }
+      ],
+      "occurrenceId": "occ_0458c46ff009f7d676d04369",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "receipt-forgery",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "source",
+                "startLine": 76
+              },
+              {
+                "endLine": 200,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 183
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Make provider receipt fields server-only and idempotent.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Owner writes can populate provider receipt fields without a server receipt invariant."
+            },
+            "ruleId": "integrity.provider-receipt-forgery",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Owner writes can populate provider receipt fields without a server receipt invariant.",
+            "taxonomy": {
+              "category": "Improper authorization",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Direct dispatch-log writes can forge provider delivery receipts",
+            "validation": {
+              "assertions": [
+                "Owner writes can populate provider receipt fields without a server receipt invariant."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Unsent communications appear delivered",
+                "sink": "dispatch_logs provider fields",
+                "source": "Authenticated tenant owner",
+                "summary": "Input or concurrent action crosses the reviewed boundary into dispatch_logs provider fields."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Unsent communications appear delivered"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Authenticated tenant owner",
+                "entrypoint": "supabase/migrations/002_workspace_productization.sql",
+                "outcome": "Unsent communications appear delivered",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Authenticated tenant owner can reach dispatch_logs provider fields; Unsent communications appear delivered."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "receipt-forgery",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "source",
+                "startLine": 76
+              },
+              {
+                "endLine": 200,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 183
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Make provider receipt fields server-only and idempotent.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Owner writes can populate provider receipt fields without a server receipt invariant."
+            },
+            "ruleId": "integrity.provider-receipt-forgery",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Owner writes can populate provider receipt fields without a server receipt invariant.",
+            "taxonomy": {
+              "category": "Improper authorization",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Direct dispatch-log writes can forge provider delivery receipts",
+            "validation": {
+              "assertions": [
+                "Owner writes can populate provider receipt fields without a server receipt invariant."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Make provider receipt fields server-only and idempotent.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "Owner writes can populate provider receipt fields without a server receipt invariant."
+      },
+      "ruleId": "integrity.provider-receipt-forgery",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "low",
+        "rationale": "Real source defect with constrained impact or prerequisites."
+      },
+      "summary": "Owner writes can populate provider receipt fields without a server receipt invariant.",
+      "taxonomy": {
+        "category": "Improper authorization",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "Direct dispatch-log writes can forge provider delivery receipts",
+      "validation": {
+        "assertions": [
+          "Owner writes can populate provider receipt fields without a server receipt invariant."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/receipt-forgery/receipt-forgery.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Unread briefings appear acknowledged",
+          "sink": "workpack_read_confirmations",
+          "source": "Authenticated tenant owner",
+          "summary": "Input or concurrent action crosses the reviewed boundary into workpack_read_confirmations."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Unread briefings appear acknowledged"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Authenticated tenant owner",
+          "entrypoint": "supabase/migrations/010_commercial_operations.sql",
+          "outcome": "Unread briefings appear acknowledged",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Authenticated tenant owner can reach workpack_read_confirmations; Unread briefings appear acknowledged."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_f3204e5168c76d16f7ec9d91",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:97a76bede54a670316d48b724b13e0aa9ef3e0526c872d04467742df5c1c1fed"
+      },
+      "identity": {
+        "anchor": "ack-forgery",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 49,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "source",
+          "startLine": 36
+        },
+        {
+          "endLine": 193,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 178
+        }
+      ],
+      "occurrenceId": "occ_2f4508e661350b50599e01b8",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "ack-forgery",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 49,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "source",
+                "startLine": 36
+              },
+              {
+                "endLine": 193,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 178
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Use a trusted session-bound confirmation function.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Direct writes can set worker snapshot, method, and read_at without recipient proof."
+            },
+            "ruleId": "integrity.read-confirmation-forgery",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Direct writes can set worker snapshot, method, and read_at without recipient proof.",
+            "taxonomy": {
+              "category": "Improper authorization",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Tenant owners can directly forge worker read confirmations",
+            "validation": {
+              "assertions": [
+                "Direct writes can set worker snapshot, method, and read_at without recipient proof."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Unread briefings appear acknowledged",
+                "sink": "workpack_read_confirmations",
+                "source": "Authenticated tenant owner",
+                "summary": "Input or concurrent action crosses the reviewed boundary into workpack_read_confirmations."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Unread briefings appear acknowledged"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Authenticated tenant owner",
+                "entrypoint": "supabase/migrations/010_commercial_operations.sql",
+                "outcome": "Unread briefings appear acknowledged",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Authenticated tenant owner can reach workpack_read_confirmations; Unread briefings appear acknowledged."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "ack-forgery",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 49,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "source",
+                "startLine": 36
+              },
+              {
+                "endLine": 193,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 178
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Use a trusted session-bound confirmation function.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Direct writes can set worker snapshot, method, and read_at without recipient proof."
+            },
+            "ruleId": "integrity.read-confirmation-forgery",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Direct writes can set worker snapshot, method, and read_at without recipient proof.",
+            "taxonomy": {
+              "category": "Improper authorization",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Tenant owners can directly forge worker read confirmations",
+            "validation": {
+              "assertions": [
+                "Direct writes can set worker snapshot, method, and read_at without recipient proof."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use a trusted session-bound confirmation function.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "Direct writes can set worker snapshot, method, and read_at without recipient proof."
+      },
+      "ruleId": "integrity.read-confirmation-forgery",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "low",
+        "rationale": "Real source defect with constrained impact or prerequisites."
+      },
+      "summary": "Direct writes can set worker snapshot, method, and read_at without recipient proof.",
+      "taxonomy": {
+        "category": "Improper authorization",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "Tenant owners can directly forge worker read confirmations",
+      "validation": {
+        "assertions": [
+          "Direct writes can set worker snapshot, method, and read_at without recipient proof."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/ack-forgery/ack-forgery.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Public capability created outside product governance",
+          "sink": "workpack_share_sessions",
+          "source": "Authenticated tenant owner",
+          "summary": "Input or concurrent action crosses the reviewed boundary into workpack_share_sessions."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Public capability created outside product governance"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Authenticated tenant owner",
+          "entrypoint": "supabase/migrations/010_commercial_operations.sql",
+          "outcome": "Public capability created outside product governance",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Authenticated tenant owner can reach workpack_share_sessions; Public capability created outside product governance."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_e7a7d306f352c0fd2f7b619c",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c72473d41ff8bddd89ac99b8bba2f22f35a3a761d7e70ade0ab2c7d979644aa7"
+      },
+      "identity": {
+        "anchor": "share-governance",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 34,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "endLine": 176,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 161
+        }
+      ],
+      "occurrenceId": "occ_c07c47585678cebc0ca41be3",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "share-governance",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 34,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "source",
+                "startLine": 21
+              },
+              {
+                "endLine": 176,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 161
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Create sessions only through a trusted transactional function.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Owner writes can construct recipients, access policy, status, and expiry without readiness checks."
+            },
+            "ruleId": "integrity.share-session-governance-bypass",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Owner writes can construct recipients, access policy, status, and expiry without readiness checks.",
+            "taxonomy": {
+              "category": "Improper authorization",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Direct Share-session writes bypass readiness and recipient governance",
+            "validation": {
+              "assertions": [
+                "Owner writes can construct recipients, access policy, status, and expiry without readiness checks."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Public capability created outside product governance",
+                "sink": "workpack_share_sessions",
+                "source": "Authenticated tenant owner",
+                "summary": "Input or concurrent action crosses the reviewed boundary into workpack_share_sessions."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Public capability created outside product governance"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Authenticated tenant owner",
+                "entrypoint": "supabase/migrations/010_commercial_operations.sql",
+                "outcome": "Public capability created outside product governance",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Authenticated tenant owner can reach workpack_share_sessions; Public capability created outside product governance."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "share-governance",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 34,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "source",
+                "startLine": 21
+              },
+              {
+                "endLine": 176,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 161
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Create sessions only through a trusted transactional function.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Owner writes can construct recipients, access policy, status, and expiry without readiness checks."
+            },
+            "ruleId": "integrity.share-session-governance-bypass",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Owner writes can construct recipients, access policy, status, and expiry without readiness checks.",
+            "taxonomy": {
+              "category": "Improper authorization",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Direct Share-session writes bypass readiness and recipient governance",
+            "validation": {
+              "assertions": [
+                "Owner writes can construct recipients, access policy, status, and expiry without readiness checks."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Create sessions only through a trusted transactional function.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "Owner writes can construct recipients, access policy, status, and expiry without readiness checks."
+      },
+      "ruleId": "integrity.share-session-governance-bypass",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "low",
+        "rationale": "Real source defect with constrained impact or prerequisites."
+      },
+      "summary": "Owner writes can construct recipients, access policy, status, and expiry without readiness checks.",
+      "taxonomy": {
+        "category": "Improper authorization",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "Direct Share-session writes bypass readiness and recipient governance",
+      "validation": {
+        "assertions": [
+          "Owner writes can construct recipients, access policy, status, and expiry without readiness checks."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/share-governance/share-governance.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Internal catalog or ingestion metadata disclosure",
+          "sink": "Raw safety-reference tables",
+          "source": "Anonymous or browser role",
+          "summary": "Input or concurrent action crosses the reviewed boundary into Raw safety-reference tables."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Internal catalog or ingestion metadata disclosure"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Anonymous or browser role",
+          "entrypoint": "supabase/migrations/004_safety_reference_catalog.sql",
+          "outcome": "Internal catalog or ingestion metadata disclosure",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Anonymous or browser role can reach Raw safety-reference tables; Internal catalog or ingestion metadata disclosure."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_342d12a1f32d4b7d85c4db5f",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:4de7886f188de27e0d0db71ba0fde1ca95f86e9858531a35fff722ca9d6a2438"
+      },
+      "identity": {
+        "anchor": "public-corpus",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 75,
+          "path": "supabase/migrations/004_safety_reference_catalog.sql",
+          "role": "root_control",
+          "startLine": 1
+        }
+      ],
+      "occurrenceId": "occ_cf532884b77b4e71df8d91a1",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "public-corpus",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 75,
+                "path": "supabase/migrations/004_safety_reference_catalog.sql",
+                "role": "root_control",
+                "startLine": 1
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Expose a minimal curated public view.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Public read policies target raw catalog and ingestion tables."
+            },
+            "ruleId": "information-exposure.public-safety-corpus",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Public read policies target raw catalog and ingestion tables.",
+            "taxonomy": {
+              "category": "Information exposure",
+              "cwe": [
+                "CWE-200"
+              ]
+            },
+            "title": "Published safety-reference tables expose raw catalog rows publicly",
+            "validation": {
+              "assertions": [
+                "Public read policies target raw catalog and ingestion tables."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Internal catalog or ingestion metadata disclosure",
+                "sink": "Raw safety-reference tables",
+                "source": "Anonymous or browser role",
+                "summary": "Input or concurrent action crosses the reviewed boundary into Raw safety-reference tables."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Internal catalog or ingestion metadata disclosure"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Anonymous or browser role",
+                "entrypoint": "supabase/migrations/004_safety_reference_catalog.sql",
+                "outcome": "Internal catalog or ingestion metadata disclosure",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Anonymous or browser role can reach Raw safety-reference tables; Internal catalog or ingestion metadata disclosure."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "public-corpus",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 75,
+                "path": "supabase/migrations/004_safety_reference_catalog.sql",
+                "role": "root_control",
+                "startLine": 1
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Expose a minimal curated public view.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Public read policies target raw catalog and ingestion tables."
+            },
+            "ruleId": "information-exposure.public-safety-corpus",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Public read policies target raw catalog and ingestion tables.",
+            "taxonomy": {
+              "category": "Information exposure",
+              "cwe": [
+                "CWE-200"
+              ]
+            },
+            "title": "Published safety-reference tables expose raw catalog rows publicly",
+            "validation": {
+              "assertions": [
+                "Public read policies target raw catalog and ingestion tables."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Expose a minimal curated public view.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "Public read policies target raw catalog and ingestion tables."
+      },
+      "ruleId": "information-exposure.public-safety-corpus",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "low",
+        "rationale": "Real source defect with constrained impact or prerequisites."
+      },
+      "summary": "Public read policies target raw catalog and ingestion tables.",
+      "taxonomy": {
+        "category": "Information exposure",
+        "cwe": [
+          "CWE-200"
+        ]
+      },
+      "title": "Published safety-reference tables expose raw catalog rows publicly",
+      "validation": {
+        "assertions": [
+          "Public read policies target raw catalog and ingestion tables."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/public-corpus/public-corpus.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Partially committed governance state",
+          "sink": "Sequential event/run updates",
+          "source": "Authenticated reviewer plus induced mid-flight failure",
+          "summary": "Input or concurrent action crosses the reviewed boundary into Sequential event/run updates."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Partially committed governance state"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Authenticated reviewer plus induced mid-flight failure",
+          "entrypoint": "lib/knowledge-review.ts",
+          "outcome": "Partially committed governance state",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Authenticated reviewer plus induced mid-flight failure can reach Sequential event/run updates; Partially committed governance state."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_250bd0d0bd02aaf6fb418159",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:45577f59f90e0ef5ee40d29fe8a4969dedfb3e9fde08787dd94aac203fd56351"
+      },
+      "identity": {
+        "anchor": "knowledge-atomicity",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 1343,
+          "path": "lib/knowledge-review.ts",
+          "role": "sink",
+          "startLine": 1285
+        },
+        {
+          "endLine": 1415,
+          "path": "lib/knowledge-review.ts",
+          "role": "sink",
+          "startLine": 1392
+        }
+      ],
+      "occurrenceId": "occ_188267890904e450b9c91ae8",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "knowledge-atomicity",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 1343,
+                "path": "lib/knowledge-review.ts",
+                "role": "sink",
+                "startLine": 1285
+              },
+              {
+                "endLine": 1415,
+                "path": "lib/knowledge-review.ts",
+                "role": "sink",
+                "startLine": 1392
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Move the transition into one idempotent database transaction.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "The flow updates events sequentially and later updates the run, allowing partial state."
+            },
+            "ruleId": "atomicity.knowledge-review-transition",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "The flow updates events sequentially and later updates the run, allowing partial state.",
+            "taxonomy": {
+              "category": "Transaction handling",
+              "cwe": [
+                "CWE-703"
+              ]
+            },
+            "title": "Knowledge review commits event and run transitions non-atomically",
+            "validation": {
+              "assertions": [
+                "The flow updates events sequentially and later updates the run, allowing partial state."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Partially committed governance state",
+                "sink": "Sequential event/run updates",
+                "source": "Authenticated reviewer plus induced mid-flight failure",
+                "summary": "Input or concurrent action crosses the reviewed boundary into Sequential event/run updates."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Partially committed governance state"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Authenticated reviewer plus induced mid-flight failure",
+                "entrypoint": "lib/knowledge-review.ts",
+                "outcome": "Partially committed governance state",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Authenticated reviewer plus induced mid-flight failure can reach Sequential event/run updates; Partially committed governance state."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "knowledge-atomicity",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 1343,
+                "path": "lib/knowledge-review.ts",
+                "role": "sink",
+                "startLine": 1285
+              },
+              {
+                "endLine": 1415,
+                "path": "lib/knowledge-review.ts",
+                "role": "sink",
+                "startLine": 1392
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Move the transition into one idempotent database transaction.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "The flow updates events sequentially and later updates the run, allowing partial state."
+            },
+            "ruleId": "atomicity.knowledge-review-transition",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "The flow updates events sequentially and later updates the run, allowing partial state.",
+            "taxonomy": {
+              "category": "Transaction handling",
+              "cwe": [
+                "CWE-703"
+              ]
+            },
+            "title": "Knowledge review commits event and run transitions non-atomically",
+            "validation": {
+              "assertions": [
+                "The flow updates events sequentially and later updates the run, allowing partial state."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Move the transition into one idempotent database transaction.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "The flow updates events sequentially and later updates the run, allowing partial state."
+      },
+      "ruleId": "atomicity.knowledge-review-transition",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "low",
+        "rationale": "Real source defect with constrained impact or prerequisites."
+      },
+      "summary": "The flow updates events sequentially and later updates the run, allowing partial state.",
+      "taxonomy": {
+        "category": "Transaction handling",
+        "cwe": [
+          "CWE-703"
+        ]
+      },
+      "title": "Knowledge review commits event and run transitions non-atomically",
+      "validation": {
+        "assertions": [
+          "The flow updates events sequentially and later updates the run, allowing partial state."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/knowledge-atomicity/knowledge-atomicity.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Per-site token quota exceeded",
+          "sink": "Count then insert",
+          "source": "Authenticated concurrent token requests",
+          "summary": "Input or concurrent action crosses the reviewed boundary into Count then insert."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Per-site token quota exceeded"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Authenticated concurrent token requests",
+          "entrypoint": "app/api/mcp-tokens/route.ts",
+          "outcome": "Per-site token quota exceeded",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Authenticated concurrent token requests can reach Count then insert; Per-site token quota exceeded."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_981bab5a6db1c11bcf3f16d8",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:5d37b4ad69a2bcf3925ffafcd623b96a9c8fe828e16490e66a54ccc1d14216ac"
+      },
+      "identity": {
+        "anchor": "mcp-quota",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 278,
+          "path": "app/api/mcp-tokens/route.ts",
+          "role": "sink",
+          "startLine": 247
+        }
+      ],
+      "occurrenceId": "occ_f4a410bb64af11da5cdb4280",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "mcp-quota",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 278,
+                "path": "app/api/mcp-tokens/route.ts",
+                "role": "sink",
+                "startLine": 247
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Reserve quota atomically.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Active tokens are counted and inserted in separate statements."
+            },
+            "ruleId": "atomicity.mcp-token-quota",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Active tokens are counted and inserted in separate statements.",
+            "taxonomy": {
+              "category": "Race condition",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "MCP token quota uses a check-then-insert race",
+            "validation": {
+              "assertions": [
+                "Active tokens are counted and inserted in separate statements."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Per-site token quota exceeded",
+                "sink": "Count then insert",
+                "source": "Authenticated concurrent token requests",
+                "summary": "Input or concurrent action crosses the reviewed boundary into Count then insert."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Per-site token quota exceeded"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Authenticated concurrent token requests",
+                "entrypoint": "app/api/mcp-tokens/route.ts",
+                "outcome": "Per-site token quota exceeded",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Authenticated concurrent token requests can reach Count then insert; Per-site token quota exceeded."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "mcp-quota",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 278,
+                "path": "app/api/mcp-tokens/route.ts",
+                "role": "sink",
+                "startLine": 247
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Reserve quota atomically.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Active tokens are counted and inserted in separate statements."
+            },
+            "ruleId": "atomicity.mcp-token-quota",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Active tokens are counted and inserted in separate statements.",
+            "taxonomy": {
+              "category": "Race condition",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "MCP token quota uses a check-then-insert race",
+            "validation": {
+              "assertions": [
+                "Active tokens are counted and inserted in separate statements."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Reserve quota atomically.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "Active tokens are counted and inserted in separate statements."
+      },
+      "ruleId": "atomicity.mcp-token-quota",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "low",
+        "rationale": "Real source defect with constrained impact or prerequisites."
+      },
+      "summary": "Active tokens are counted and inserted in separate statements.",
+      "taxonomy": {
+        "category": "Race condition",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "MCP token quota uses a check-then-insert race",
+      "validation": {
+        "assertions": [
+          "Active tokens are counted and inserted in separate statements."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/mcp-quota/mcp-quota.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Worker rebinding bypasses transfer guard",
+          "sink": "Lookup then upsert",
+          "source": "Authenticated concurrent worker updates",
+          "summary": "Input or concurrent action crosses the reviewed boundary into Lookup then upsert."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Worker rebinding bypasses transfer guard"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Authenticated concurrent worker updates",
+          "entrypoint": "app/api/workers/route.ts",
+          "outcome": "Worker rebinding bypasses transfer guard",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Authenticated concurrent worker updates can reach Lookup then upsert; Worker rebinding bypasses transfer guard."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_c9aa9217ab157f7eddf7673d",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:e436216a81155fea9617a3874c0e46626236d342b52bfefeebbfd51bb6565898"
+      },
+      "identity": {
+        "anchor": "worker-upsert",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 120,
+          "path": "app/api/workers/route.ts",
+          "role": "sink",
+          "startLine": 84
+        }
+      ],
+      "occurrenceId": "occ_c2dd6ebd229aea4256aad30f",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "worker-upsert",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 120,
+                "path": "app/api/workers/route.ts",
+                "role": "sink",
+                "startLine": 84
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Enforce binding invariants atomically.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Existing bindings are read and later upserted separately."
+            },
+            "ruleId": "atomicity.worker-site-upsert",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Existing bindings are read and later upserted separately.",
+            "taxonomy": {
+              "category": "Race condition",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "Worker site-binding check races with upsert",
+            "validation": {
+              "assertions": [
+                "Existing bindings are read and later upserted separately."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Worker rebinding bypasses transfer guard",
+                "sink": "Lookup then upsert",
+                "source": "Authenticated concurrent worker updates",
+                "summary": "Input or concurrent action crosses the reviewed boundary into Lookup then upsert."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Worker rebinding bypasses transfer guard"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Authenticated concurrent worker updates",
+                "entrypoint": "app/api/workers/route.ts",
+                "outcome": "Worker rebinding bypasses transfer guard",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Authenticated concurrent worker updates can reach Lookup then upsert; Worker rebinding bypasses transfer guard."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "worker-upsert",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 120,
+                "path": "app/api/workers/route.ts",
+                "role": "sink",
+                "startLine": 84
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Enforce binding invariants atomically.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Existing bindings are read and later upserted separately."
+            },
+            "ruleId": "atomicity.worker-site-upsert",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Existing bindings are read and later upserted separately.",
+            "taxonomy": {
+              "category": "Race condition",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "Worker site-binding check races with upsert",
+            "validation": {
+              "assertions": [
+                "Existing bindings are read and later upserted separately."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Enforce binding invariants atomically.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "Existing bindings are read and later upserted separately."
+      },
+      "ruleId": "atomicity.worker-site-upsert",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "low",
+        "rationale": "Real source defect with constrained impact or prerequisites."
+      },
+      "summary": "Existing bindings are read and later upserted separately.",
+      "taxonomy": {
+        "category": "Race condition",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Worker site-binding check races with upsert",
+      "validation": {
+        "assertions": [
+          "Existing bindings are read and later upserted separately."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/worker-upsert/worker-upsert.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Duplicate tenant roots or sites split state",
+          "sink": "Select then insert provisioning",
+          "source": "Authenticated concurrent first-use requests",
+          "summary": "Input or concurrent action crosses the reviewed boundary into Select then insert provisioning."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Duplicate tenant roots or sites split state"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Authenticated concurrent first-use requests",
+          "entrypoint": "lib/supabase-admin.ts",
+          "outcome": "Duplicate tenant roots or sites split state",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Authenticated concurrent first-use requests can reach Select then insert provisioning; Duplicate tenant roots or sites split state."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_3cd5aa3228c791e923d6392e",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:b9b170434f446ea58a24946c321e9543437c4d147e8d780d77b24ace8d43d927"
+      },
+      "identity": {
+        "anchor": "workspace-provision",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 716,
+          "path": "lib/supabase-admin.ts",
+          "role": "sink",
+          "startLine": 645
+        }
+      ],
+      "occurrenceId": "occ_04b07b41778b06a3a94c39ce",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "workspace-provision",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 716,
+                "path": "lib/supabase-admin.ts",
+                "role": "sink",
+                "startLine": 645
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Add uniqueness constraints and transactional upserts.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Provisioning uses select-then-insert without uniqueness-backed serialization."
+            },
+            "ruleId": "atomicity.workspace-provisioning",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Provisioning uses select-then-insert without uniqueness-backed serialization.",
+            "taxonomy": {
+              "category": "Race condition",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "Workspace provisioning can create duplicate organizations or sites",
+            "validation": {
+              "assertions": [
+                "Provisioning uses select-then-insert without uniqueness-backed serialization."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Duplicate tenant roots or sites split state",
+                "sink": "Select then insert provisioning",
+                "source": "Authenticated concurrent first-use requests",
+                "summary": "Input or concurrent action crosses the reviewed boundary into Select then insert provisioning."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Duplicate tenant roots or sites split state"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Authenticated concurrent first-use requests",
+                "entrypoint": "lib/supabase-admin.ts",
+                "outcome": "Duplicate tenant roots or sites split state",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Authenticated concurrent first-use requests can reach Select then insert provisioning; Duplicate tenant roots or sites split state."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "workspace-provision",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 716,
+                "path": "lib/supabase-admin.ts",
+                "role": "sink",
+                "startLine": 645
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Add uniqueness constraints and transactional upserts.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Provisioning uses select-then-insert without uniqueness-backed serialization."
+            },
+            "ruleId": "atomicity.workspace-provisioning",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Provisioning uses select-then-insert without uniqueness-backed serialization.",
+            "taxonomy": {
+              "category": "Race condition",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "Workspace provisioning can create duplicate organizations or sites",
+            "validation": {
+              "assertions": [
+                "Provisioning uses select-then-insert without uniqueness-backed serialization."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Add uniqueness constraints and transactional upserts.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "Provisioning uses select-then-insert without uniqueness-backed serialization."
+      },
+      "ruleId": "atomicity.workspace-provisioning",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "low",
+        "rationale": "Real source defect with constrained impact or prerequisites."
+      },
+      "summary": "Provisioning uses select-then-insert without uniqueness-backed serialization.",
+      "taxonomy": {
+        "category": "Race condition",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Workspace provisioning can create duplicate organizations or sites",
+      "validation": {
+        "assertions": [
+          "Provisioning uses select-then-insert without uniqueness-backed serialization."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/workspace-provision/workspace-provision.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Upstream behavior and response fragments disclosed",
+          "sink": "Public status.detail",
+          "source": "Unauthenticated public ask caller",
+          "summary": "Input or concurrent action crosses the reviewed boundary into Public status.detail."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Upstream behavior and response fragments disclosed"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Unauthenticated public ask caller",
+          "entrypoint": "lib/search.ts",
+          "outcome": "Upstream behavior and response fragments disclosed",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Unauthenticated public ask caller can reach Public status.detail; Upstream behavior and response fragments disclosed."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_48d3492415a3cd379c02dd9b",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:105325e66756d9f435e23a4ca17405efcd829114c3b332669592448708e0964e"
+      },
+      "identity": {
+        "anchor": "provider-detail",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 3088,
+          "path": "lib/search.ts",
+          "role": "sink",
+          "startLine": 3078
+        },
+        {
+          "endLine": 225,
+          "path": "lib/work24.ts",
+          "role": "source",
+          "startLine": 225
+        },
+        {
+          "endLine": 274,
+          "path": "lib/kosha-openapi.ts",
+          "role": "source",
+          "startLine": 243
+        }
+      ],
+      "occurrenceId": "occ_7fefb2e0f38f46bc5a267c23",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "provider-detail",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 3088,
+                "path": "lib/search.ts",
+                "role": "sink",
+                "startLine": 3078
+              },
+              {
+                "endLine": 225,
+                "path": "lib/work24.ts",
+                "role": "source",
+                "startLine": 225
+              },
+              {
+                "endLine": 274,
+                "path": "lib/kosha-openapi.ts",
+                "role": "source",
+                "startLine": 243
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Return stable public codes and keep diagnostics server-side.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Provider exception or bounded response text reaches public ask status detail."
+            },
+            "ruleId": "information-exposure.provider-diagnostics",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Provider exception or bounded response text reaches public ask status detail.",
+            "taxonomy": {
+              "category": "Information exposure",
+              "cwe": [
+                "CWE-209"
+              ]
+            },
+            "title": "Public provider diagnostics expose bounded upstream failure details",
+            "validation": {
+              "assertions": [
+                "Provider exception or bounded response text reaches public ask status detail."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Upstream behavior and response fragments disclosed",
+                "sink": "Public status.detail",
+                "source": "Unauthenticated public ask caller",
+                "summary": "Input or concurrent action crosses the reviewed boundary into Public status.detail."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Upstream behavior and response fragments disclosed"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Unauthenticated public ask caller",
+                "entrypoint": "lib/search.ts",
+                "outcome": "Upstream behavior and response fragments disclosed",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Unauthenticated public ask caller can reach Public status.detail; Upstream behavior and response fragments disclosed."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "provider-detail",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 3088,
+                "path": "lib/search.ts",
+                "role": "sink",
+                "startLine": 3078
+              },
+              {
+                "endLine": 225,
+                "path": "lib/work24.ts",
+                "role": "source",
+                "startLine": 225
+              },
+              {
+                "endLine": 274,
+                "path": "lib/kosha-openapi.ts",
+                "role": "source",
+                "startLine": 243
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Return stable public codes and keep diagnostics server-side.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "Provider exception or bounded response text reaches public ask status detail."
+            },
+            "ruleId": "information-exposure.provider-diagnostics",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "Provider exception or bounded response text reaches public ask status detail.",
+            "taxonomy": {
+              "category": "Information exposure",
+              "cwe": [
+                "CWE-209"
+              ]
+            },
+            "title": "Public provider diagnostics expose bounded upstream failure details",
+            "validation": {
+              "assertions": [
+                "Provider exception or bounded response text reaches public ask status detail."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Return stable public codes and keep diagnostics server-side.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "Provider exception or bounded response text reaches public ask status detail."
+      },
+      "ruleId": "information-exposure.provider-diagnostics",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "low",
+        "rationale": "Real source defect with constrained impact or prerequisites."
+      },
+      "summary": "Provider exception or bounded response text reaches public ask status detail.",
+      "taxonomy": {
+        "category": "Information exposure",
+        "cwe": [
+          "CWE-209"
+        ]
+      },
+      "title": "Public provider diagnostics expose bounded upstream failure details",
+      "validation": {
+        "assertions": [
+          "Provider exception or bounded response text reaches public ask status detail."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/provider-detail/provider-detail.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Connection may reach a private or local address",
+          "sink": "Validate-then-fetch DNS gap",
+          "source": "Controller of an operator-allowlisted hostname",
+          "summary": "Input or concurrent action crosses the reviewed boundary into Validate-then-fetch DNS gap."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Connection may reach a private or local address"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Controller of an operator-allowlisted hostname",
+          "entrypoint": "lib/server/upstream-http.ts",
+          "outcome": "Connection may reach a private or local address",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Controller of an operator-allowlisted hostname can reach Validate-then-fetch DNS gap; Connection may reach a private or local address."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Broken invariant is directly visible in source."
+      },
+      "findingId": "csf_13cc3cf8a254d00252678b14",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:18a925f0ca218889f958da6929f48a98fbfe07546b4bfa59adb389f08d613ff9"
+      },
+      "identity": {
+        "anchor": "dns-toctou",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 151,
+          "path": "lib/server/upstream-http.ts",
+          "role": "root_control",
+          "startLine": 122
+        }
+      ],
+      "occurrenceId": "occ_d22b254c69884201641ba3f9",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "dns-toctou",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 151,
+                "path": "lib/server/upstream-http.ts",
+                "role": "root_control",
+                "startLine": 122
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Pin the validated address through a safe dispatcher.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "DNS is validated before a later ordinary fetch performs a second resolution."
+            },
+            "ruleId": "ssrf.dns-rebinding-toctou",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "DNS is validated before a later ordinary fetch performs a second resolution.",
+            "taxonomy": {
+              "category": "Server-side request forgery",
+              "cwe": [
+                "CWE-367"
+              ]
+            },
+            "title": "Upstream DNS validation is vulnerable to resolution-time rebinding",
+            "validation": {
+              "assertions": [
+                "DNS is validated before a later ordinary fetch performs a second resolution."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Connection may reach a private or local address",
+                "sink": "Validate-then-fetch DNS gap",
+                "source": "Controller of an operator-allowlisted hostname",
+                "summary": "Input or concurrent action crosses the reviewed boundary into Validate-then-fetch DNS gap."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Connection may reach a private or local address"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Controller of an operator-allowlisted hostname",
+                "entrypoint": "lib/server/upstream-http.ts",
+                "outcome": "Connection may reach a private or local address",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Controller of an operator-allowlisted hostname can reach Validate-then-fetch DNS gap; Connection may reach a private or local address."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Broken invariant is directly visible in source."
+            },
+            "identity": {
+              "anchor": "dns-toctou",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 151,
+                "path": "lib/server/upstream-http.ts",
+                "role": "root_control",
+                "startLine": 122
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Pin the validated address through a safe dispatcher.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "DNS is validated before a later ordinary fetch performs a second resolution."
+            },
+            "ruleId": "ssrf.dns-rebinding-toctou",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "DNS is validated before a later ordinary fetch performs a second resolution.",
+            "taxonomy": {
+              "category": "Server-side request forgery",
+              "cwe": [
+                "CWE-367"
+              ]
+            },
+            "title": "Upstream DNS validation is vulnerable to resolution-time rebinding",
+            "validation": {
+              "assertions": [
+                "DNS is validated before a later ordinary fetch performs a second resolution."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Pin the validated address through a safe dispatcher.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "DNS is validated before a later ordinary fetch performs a second resolution."
+      },
+      "ruleId": "ssrf.dns-rebinding-toctou",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "low",
+        "rationale": "Real source defect with constrained impact or prerequisites."
+      },
+      "summary": "DNS is validated before a later ordinary fetch performs a second resolution.",
+      "taxonomy": {
+        "category": "Server-side request forgery",
+        "cwe": [
+          "CWE-367"
+        ]
+      },
+      "title": "Upstream DNS validation is vulnerable to resolution-time rebinding",
+      "validation": {
+        "assertions": [
+          "DNS is validated before a later ordinary fetch performs a second resolution."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/dns-toctou/dns-toctou.md"
+      }
+    },
+    {
+      "attackPath": {
+        "dataflow": {
+          "outcome": "Caller rotates identities to weaken throttling",
+          "sink": "Rate-limit identity key",
+          "source": "Public caller if edge preserves supplied forwarding header",
+          "summary": "Input or concurrent action crosses the reviewed boundary into Rate-limit identity key."
+        },
+        "impact": {
+          "level": "low",
+          "why": "Caller rotates identities to weaken throttling"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Requires only the listed role or deployment prerequisite."
+        },
+        "limitations": [
+          "Live grants, edge normalization, or approved runtime mutation were not exercised."
+        ],
+        "reachability": {
+          "attacker": "Public caller if edge preserves supplied forwarding header",
+          "entrypoint": "lib/api-guard.ts",
+          "outcome": "Caller rotates identities to weaken throttling",
+          "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+        },
+        "summary": "Public caller if edge preserves supplied forwarding header can reach Rate-limit identity key; Caller rotates identities to weaken throttling."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Edge header canonicalization was not verified."
+      },
+      "findingId": "csf_3227d8eda446b24ebf21e5a9",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:26e2b7b150c080be25971c343f83faf23930de06d4c49be57797e0900574ef71"
+      },
+      "identity": {
+        "anchor": "xff-spoof",
+        "instance": "current-source"
+      },
+      "locations": [
+        {
+          "endLine": 9,
+          "path": "lib/api-guard.ts",
+          "role": "root_control",
+          "startLine": 3
+        }
+      ],
+      "occurrenceId": "occ_6ebd12e44ad0a93881e240e2",
+      "preventiveControls": [
+        "Enforce the invariant at the database, transaction, or trusted edge boundary."
+      ],
+      "provenance": {
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "medium",
+              "rationale": "Edge header canonicalization was not verified."
+            },
+            "identity": {
+              "anchor": "xff-spoof",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 9,
+                "path": "lib/api-guard.ts",
+                "role": "root_control",
+                "startLine": 3
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Use an authenticated edge client-IP source.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "getClientIp trusts the first X-Forwarded-For token without a trusted-proxy boundary."
+            },
+            "ruleId": "rate-limit.forwarded-header-spoofing",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "getClientIp trusts the first X-Forwarded-For token without a trusted-proxy boundary.",
+            "taxonomy": {
+              "category": "Input validation",
+              "cwe": [
+                "CWE-345"
+              ]
+            },
+            "title": "Forwarded-header spoofing can partition public rate-limit identity",
+            "validation": {
+              "assertions": [
+                "getClientIp trusts the first X-Forwarded-For token without a trusted-proxy boundary."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          },
+          {
+            "attackPath": {
+              "dataflow": {
+                "evidenceRefs": [],
+                "outcome": "Caller rotates identities to weaken throttling",
+                "sink": "Rate-limit identity key",
+                "source": "Public caller if edge preserves supplied forwarding header",
+                "summary": "Input or concurrent action crosses the reviewed boundary into Rate-limit identity key."
+              },
+              "impact": {
+                "level": "low",
+                "why": "Caller rotates identities to weaken throttling"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Requires only the listed role or deployment prerequisite."
+              },
+              "limitations": [
+                "Live grants, edge normalization, or approved runtime mutation were not exercised."
+              ],
+              "reachability": {
+                "attacker": "Public caller if edge preserves supplied forwarding header",
+                "entrypoint": "lib/api-guard.ts",
+                "outcome": "Caller rotates identities to weaken throttling",
+                "summary": "The path is source-reachable subject to the stated deployment prerequisites."
+              },
+              "summary": "Public caller if edge preserves supplied forwarding header can reach Rate-limit identity key; Caller rotates identities to weaken throttling."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Edge header canonicalization was not verified."
+            },
+            "identity": {
+              "anchor": "xff-spoof",
+              "instance": "current-source"
+            },
+            "locations": [
+              {
+                "endLine": 9,
+                "path": "lib/api-guard.ts",
+                "role": "root_control",
+                "startLine": 3
+              }
+            ],
+            "preventiveControls": [
+              "Enforce the invariant at the database, transaction, or trusted edge boundary."
+            ],
+            "provenance": {
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Use an authenticated edge client-IP source.",
+            "remediationTests": [
+              "Negative case fails closed and valid path remains functional."
+            ],
+            "rootCause": {
+              "evidenceRefs": [],
+              "summary": "getClientIp trusts the first X-Forwarded-For token without a trusted-proxy boundary."
+            },
+            "ruleId": "rate-limit.forwarded-header-spoofing",
+            "severity": {
+              "changeConditions": "Reassess after live grants and deployment controls are verified.",
+              "level": "low",
+              "rationale": "Real source defect with constrained impact or prerequisites."
+            },
+            "summary": "getClientIp trusts the first X-Forwarded-For token without a trusted-proxy boundary.",
+            "taxonomy": {
+              "category": "Input validation",
+              "cwe": [
+                "CWE-345"
+              ]
+            },
+            "title": "Forwarded-header spoofing can partition public rate-limit identity",
+            "validation": {
+              "assertions": [
+                "getClientIp trusts the first X-Forwarded-For token without a trusted-proxy boundary."
+              ],
+              "evidenceRefs": [],
+              "limitations": [
+                "No approval-gated live mutation was exercised."
+              ],
+              "method": "Static policy and dataflow review",
+              "summary": "Validated by current-source review."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use an authenticated edge client-IP source.",
+      "remediationTests": [
+        "Negative case fails closed and valid path remains functional."
+      ],
+      "rootCause": {
+        "summary": "getClientIp trusts the first X-Forwarded-For token without a trusted-proxy boundary."
+      },
+      "ruleId": "rate-limit.forwarded-header-spoofing",
+      "severity": {
+        "changeConditions": "Reassess after live grants and deployment controls are verified.",
+        "level": "low",
+        "rationale": "Real source defect with constrained impact or prerequisites."
+      },
+      "summary": "getClientIp trusts the first X-Forwarded-For token without a trusted-proxy boundary.",
+      "taxonomy": {
+        "category": "Input validation",
+        "cwe": [
+          "CWE-345"
+        ]
+      },
+      "title": "Forwarded-header spoofing can partition public rate-limit identity",
+      "validation": {
+        "assertions": [
+          "getClientIp trusts the first X-Forwarded-For token without a trusted-proxy boundary."
+        ],
+        "limitations": [
+          "No approval-gated live mutation was exercised."
+        ],
+        "method": "Static policy and dataflow review",
+        "summary": "Validated by current-source review."
+      },
+      "writeup": {
+        "reportPath": "findings/xff-spoof/xff-spoof.md"
+      }
+    }
+  ],
+  "scanId": "3358978a-75d1-454a-9dcd-4b63b52b9768",
+  "schemaVersion": "1.0"
+}

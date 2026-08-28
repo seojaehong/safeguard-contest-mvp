@@ -1,0 +1,542 @@
+{
+  "completeness": "partial",
+  "deferred": [
+    {
+      "candidateId": "share-id-capability",
+      "id": "share-id-capability",
+      "reason": "Rejected after validation; retained here until validation phase closes.",
+      "title": "Share session identifier acts as a capability"
+    },
+    {
+      "candidateId": "db-documents-no-rls",
+      "id": "db-documents-no-rls",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "Documents table lacks row-level security"
+    },
+    {
+      "candidateId": "db-query-logs-no-rls",
+      "id": "db-query-logs-no-rls",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "Query logs table lacks row-level security"
+    },
+    {
+      "candidateId": "db-null-dispatch",
+      "id": "db-null-dispatch",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "NULL dispatch-log tenants bypass row authorization"
+    },
+    {
+      "candidateId": "db-cross-tenant",
+      "id": "db-cross-tenant",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "RLS policies do not consistently enforce composite tenant ownership"
+    },
+    {
+      "candidateId": "db-knowledge-forgery",
+      "id": "db-knowledge-forgery",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "Tenant owners can bypass knowledge review governance"
+    },
+    {
+      "candidateId": "db-improvement-forgery",
+      "id": "db-improvement-forgery",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "Tenant owners can forge approved workpack improvements"
+    },
+    {
+      "candidateId": "db-dispatch-forgery",
+      "id": "db-dispatch-forgery",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "Tenant owners can fabricate provider dispatch receipts"
+    },
+    {
+      "candidateId": "db-read-confirmation-forgery",
+      "id": "db-read-confirmation-forgery",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "Tenant owners can forge recipient read confirmations"
+    },
+    {
+      "candidateId": "db-share-governance",
+      "id": "db-share-governance",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "Direct share-session writes bypass readiness and recipient controls"
+    },
+    {
+      "candidateId": "db-public-corpus",
+      "id": "db-public-corpus",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "Public database policy exposes raw safety-reference bodies and payloads"
+    },
+    {
+      "candidateId": "atomic-knowledge-review",
+      "id": "atomic-knowledge-review",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "Knowledge review transitions are non-atomic"
+    },
+    {
+      "candidateId": "atomic-mcp-token",
+      "id": "atomic-mcp-token",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "MCP token quota enforcement is non-atomic"
+    },
+    {
+      "candidateId": "atomic-worker-upsert",
+      "id": "atomic-worker-upsert",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "Concurrent worker upserts bypass site-transfer checks"
+    },
+    {
+      "candidateId": "atomic-workspace-provision",
+      "id": "atomic-workspace-provision",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "Workspace provisioning can duplicate organizations and sites"
+    },
+    {
+      "candidateId": "public-forwarded-ip",
+      "id": "public-forwarded-ip",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "Public rate limits derive identity from potentially spoofable forwarding headers"
+    },
+    {
+      "candidateId": "public-provider-diagnostics",
+      "id": "public-provider-diagnostics",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "Non-weather provider fallbacks project upstream diagnostics"
+    },
+    {
+      "candidateId": "public-dns-rebinding",
+      "id": "public-dns-rebinding",
+      "reason": "Discovery complete; awaiting validation and attack-path adjudication.",
+      "title": "Allowlisted upstream validation has DNS TOCTOU"
+    },
+    {
+      "candidateId": "cand-db-documents-no-rls",
+      "id": "cand-db-documents-no-rls",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Documents table is exposed without row-level security"
+    },
+    {
+      "candidateId": "cand-db-query-logs-no-rls",
+      "id": "cand-db-query-logs-no-rls",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Query logs table is exposed without row-level security"
+    },
+    {
+      "candidateId": "cand-db-null-dispatch-tenant",
+      "id": "cand-db-null-dispatch-tenant",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "NULL dispatch-log tenants bypass row-level authorization"
+    },
+    {
+      "candidateId": "cand-db-cross-tenant-tuples",
+      "id": "cand-db-cross-tenant-tuples",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Organization-only RLS permits inconsistent cross-tenant relationship tuples"
+    },
+    {
+      "candidateId": "cand-knowledge-review-forgery",
+      "id": "cand-knowledge-review-forgery",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Tenant owners can forge knowledge approval and review-receipt state"
+    },
+    {
+      "candidateId": "cand-improvement-approval-forgery",
+      "id": "cand-improvement-approval-forgery",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Direct improvement approval forgery can poison tenant harness memory"
+    },
+    {
+      "candidateId": "cand-dispatch-receipt-forgery",
+      "id": "cand-dispatch-receipt-forgery",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Owners can forge provider dispatch receipts through direct PostgREST"
+    },
+    {
+      "candidateId": "cand-public-safety-reference-projection",
+      "id": "cand-public-safety-reference-projection",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Public RLS exposes complete safety-reference bodies and payloads"
+    },
+    {
+      "candidateId": "cand-knowledge-review-atomicity",
+      "id": "cand-knowledge-review-atomicity",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Knowledge review transitions are not atomic"
+    },
+    {
+      "candidateId": "cand-mcp-token-quota-race",
+      "id": "cand-mcp-token-quota-race",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "MCP token quota check and issuance are non-atomic"
+    },
+    {
+      "candidateId": "cand-worker-upsert-race",
+      "id": "cand-worker-upsert-race",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Concurrent worker upserts bypass the site-transfer check"
+    },
+    {
+      "candidateId": "cand-workspace-provision-race",
+      "id": "cand-workspace-provision-race",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Workspace provisioning can create duplicate organizations and sites"
+    },
+    {
+      "candidateId": "cand-share-object-id-capability",
+      "id": "cand-share-object-id-capability",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Public Share documents treat tenant object identifiers as recipient credentials"
+    },
+    {
+      "candidateId": "northstar-public-admission-001",
+      "id": "northstar-public-admission-001",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Public rate limits derive identity from potentially spoofable forwarding headers"
+    },
+    {
+      "candidateId": "northstar-public-provider-errors-002",
+      "id": "northstar-public-provider-errors-002",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Non-weather provider fallbacks still project upstream diagnostics into public ask responses"
+    },
+    {
+      "candidateId": "northstar-upstream-dns-003",
+      "id": "northstar-upstream-dns-003",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Upstream SSRF validation is vulnerable to DNS rebinding"
+    },
+    {
+      "candidateId": "db-read-confirmation-authority-bypass-v1",
+      "id": "db-read-confirmation-authority-bypass-v1",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Tenant owners can directly forge recipient read confirmations"
+    },
+    {
+      "candidateId": "db-share-session-governance-bypass-v1",
+      "id": "db-share-session-governance-bypass-v1",
+      "reason": "Awaiting deduplicated parent validation.",
+      "title": "Direct share-session writes bypass readiness and recipient controls"
+    },
+    {
+      "candidateId": "csf_ee41220d108de44c10d9b6fb",
+      "id": "csf_ee41220d108de44c10d9b6fb",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Documents table lacks row-level security"
+    },
+    {
+      "candidateId": "csf_880b3629ed4b64a56e910b0f",
+      "id": "csf_880b3629ed4b64a56e910b0f",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "NULL dispatch-log tenants bypass row authorization"
+    },
+    {
+      "candidateId": "csf_9718d797602acba430a08a2c",
+      "id": "csf_9718d797602acba430a08a2c",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Daily entries accept cross-tenant site or workpack references"
+    },
+    {
+      "candidateId": "csf_37c05b7826908c646c7358fc",
+      "id": "csf_37c05b7826908c646c7358fc",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Education records accept cross-tenant work-object references"
+    },
+    {
+      "candidateId": "csf_859821028dcfe217e2f9c8bb",
+      "id": "csf_859821028dcfe217e2f9c8bb",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Improvement photos accept cross-tenant related objects"
+    },
+    {
+      "candidateId": "csf_a473fbdc192153aa1bfe7e9a",
+      "id": "csf_a473fbdc192153aa1bfe7e9a",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Knowledge events accept cross-tenant provenance links"
+    },
+    {
+      "candidateId": "csf_8afd1df3d2ec190e0d19a49a",
+      "id": "csf_8afd1df3d2ec190e0d19a49a",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Knowledge runs accept cross-tenant relationships"
+    },
+    {
+      "candidateId": "csf_86e7a213323df30741456ca9",
+      "id": "csf_86e7a213323df30741456ca9",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Query logs table lacks row-level security"
+    },
+    {
+      "candidateId": "csf_4acfec1a2b24d40f7eecfbc4",
+      "id": "csf_4acfec1a2b24d40f7eecfbc4",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Read confirmations accept cross-tenant recipient objects"
+    },
+    {
+      "candidateId": "csf_3ee601f8b3e9c94e52a05522",
+      "id": "csf_3ee601f8b3e9c94e52a05522",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Share sessions accept cross-tenant work references"
+    },
+    {
+      "candidateId": "csf_71b78106bcb87a7b3057544a",
+      "id": "csf_71b78106bcb87a7b3057544a",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Worker rows accept another tenant's site"
+    },
+    {
+      "candidateId": "csf_eac496c48e6c6cd8f0871f4a",
+      "id": "csf_eac496c48e6c6cd8f0871f4a",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Improvements accept cross-tenant workpack or site references"
+    },
+    {
+      "candidateId": "csf_f2c907fd607896c985c91ef3",
+      "id": "csf_f2c907fd607896c985c91ef3",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Workpacks accept another tenant's site"
+    },
+    {
+      "candidateId": "csf_393e16d588fcc75c427ba241",
+      "id": "csf_393e16d588fcc75c427ba241",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Tenant owners can forge knowledge review state"
+    },
+    {
+      "candidateId": "csf_ea82f29c8e9761af55fc15f1",
+      "id": "csf_ea82f29c8e9761af55fc15f1",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Direct improvement approval can poison tenant memory"
+    },
+    {
+      "candidateId": "csf_3a7389105c348505c09d1b6b",
+      "id": "csf_3a7389105c348505c09d1b6b",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Tenant owners can forge provider dispatch receipts"
+    },
+    {
+      "candidateId": "csf_5f6a26717450806f76b32ef0",
+      "id": "csf_5f6a26717450806f76b32ef0",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Public RLS exposes raw safety-reference bodies and payloads"
+    },
+    {
+      "candidateId": "csf_e1a64eafc25218ab1a4d8909",
+      "id": "csf_e1a64eafc25218ab1a4d8909",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Knowledge review transitions are non-atomic"
+    },
+    {
+      "candidateId": "csf_490f3ec0bc5623527698a2a5",
+      "id": "csf_490f3ec0bc5623527698a2a5",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "MCP token quota enforcement is non-atomic"
+    },
+    {
+      "candidateId": "csf_13399cd391234fe2a86afb48",
+      "id": "csf_13399cd391234fe2a86afb48",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Concurrent worker upserts bypass site-transfer checks"
+    },
+    {
+      "candidateId": "csf_f75d6f1cd78d8c433440f49c",
+      "id": "csf_f75d6f1cd78d8c433440f49c",
+      "reason": "DB/RLS investigator retained this current-source candidate for parent validation.",
+      "title": "Workspace provisioning can create duplicate organizations and sites"
+    },
+    {
+      "candidateId": "share-id-credential",
+      "confidence": "high",
+      "cwe": "CWE-639/CWE-862",
+      "id": "share-id-credential",
+      "reason": "Retained in discovery checkpoint pending deduplication and focused validation.",
+      "severity": "medium",
+      "title": "Public Share document access treats two object identifiers as the credential"
+    },
+    {
+      "candidateId": "mcp-token-quota-race",
+      "confidence": "high",
+      "cwe": "CWE-362",
+      "id": "mcp-token-quota-race",
+      "reason": "Retained in discovery checkpoint pending deduplication and focused validation.",
+      "severity": "medium",
+      "title": "Concurrent MCP token creation can exceed the per-site token limit"
+    },
+    {
+      "candidateId": "knowledge-review-forgery",
+      "confidence": "high",
+      "cwe": "CWE-345/CWE-862",
+      "id": "knowledge-review-forgery",
+      "reason": "Retained in discovery checkpoint pending deduplication and focused validation.",
+      "severity": "medium",
+      "title": "Tenant owners can bypass knowledge review governance through direct table mutation"
+    },
+    {
+      "candidateId": "knowledge-review-atomicity",
+      "confidence": "high",
+      "cwe": "CWE-362",
+      "id": "knowledge-review-atomicity",
+      "reason": "Retained in discovery checkpoint pending deduplication and focused validation.",
+      "severity": "medium",
+      "title": "Knowledge approval mutates events and run state non-atomically"
+    },
+    {
+      "candidateId": "improvement-review-forgery",
+      "confidence": "high",
+      "cwe": "CWE-345/CWE-862",
+      "id": "improvement-review-forgery",
+      "reason": "Retained in discovery checkpoint pending deduplication and focused validation.",
+      "severity": "medium",
+      "title": "Tenant owners can forge approved workpack improvements"
+    },
+    {
+      "candidateId": "provider-receipt-forgery",
+      "confidence": "high",
+      "cwe": "CWE-345/CWE-862",
+      "id": "provider-receipt-forgery",
+      "reason": "Retained in discovery checkpoint pending deduplication and focused validation.",
+      "severity": "medium",
+      "title": "Tenant owners can directly fabricate provider dispatch receipts"
+    },
+    {
+      "candidateId": "null-dispatch-tenant",
+      "confidence": "medium",
+      "cwe": "CWE-862",
+      "id": "null-dispatch-tenant",
+      "reason": "Retained in discovery checkpoint pending deduplication and focused validation.",
+      "severity": "medium",
+      "title": "Dispatch-log policy admits organization-null records outside tenant ownership"
+    },
+    {
+      "candidateId": "composite-tenant-binding",
+      "confidence": "high",
+      "cwe": "CWE-639/CWE-862",
+      "id": "composite-tenant-binding",
+      "reason": "Retained in discovery checkpoint pending deduplication and focused validation.",
+      "severity": "medium",
+      "title": "RLS policies do not consistently enforce composite organization/site/workpack ownership"
+    },
+    {
+      "candidateId": "raw-safety-corpus",
+      "confidence": "high",
+      "cwe": "CWE-200",
+      "id": "raw-safety-corpus",
+      "reason": "Retained in discovery checkpoint pending deduplication and focused validation.",
+      "severity": "medium",
+      "title": "Public database policy exposes raw safety-reference bodies and payloads"
+    }
+  ],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [
+    {
+      "pattern": "Live DB grants, migrations, and tenant canaries",
+      "reason": "Approval-gated."
+    },
+    {
+      "pattern": "Provider, Share, vector, Wiki, and KOSHA mutations",
+      "reason": "Explicit mutation boundary."
+    },
+    {
+      "pattern": "Exact saved /share/[sessionId]",
+      "reason": "MISSING_EVIDENCE."
+    },
+    {
+      "pattern": "Third-party advisory lookup",
+      "reason": "Offline scan."
+    },
+    {
+      "pattern": "third-party dependency advisory database",
+      "reason": "Offline static scan did not query a live advisory service."
+    },
+    {
+      "pattern": "live database grants migrations and tenant A/B behavior",
+      "reason": "Approval-gated no-mutation boundary."
+    },
+    {
+      "pattern": "exact saved /share/[sessionId]",
+      "reason": "MISSING_EVIDENCE; no approved existing URL or creation flow."
+    }
+  ],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "repository",
+  "mode": "repository",
+  "openQuestions": [],
+  "scanId": "3358978a-75d1-454a-9dcd-4b63b52b9768",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_supabase-schema-rls-and-postgrest",
+      "label": "Supabase schema, RLS, and PostgREST",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_public-routes-providers-parsers-exports-and-admission",
+      "label": "Public routes, providers, parsers, exports, and admission",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_share-mcp-hermes-and-knowledge-governance",
+      "label": "Share, MCP, Hermes, and knowledge governance",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_transactional-integrity-and-concurrency",
+      "label": "Transactional integrity and concurrency",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_repository-wide-dangerous-sink-and-route-inventory",
+      "label": "Repository-wide dangerous sink and route inventory",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_share-session-identifier-as-standalone-capability-finding",
+      "label": "Share session identifier as standalone capability finding",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_architecture-and-trust-boundary-map",
+      "label": "Architecture and trust-boundary map",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_independent-baseline-security-review",
+      "label": "Independent baseline security review",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_public-provider-parser-export-and-admission-review",
+      "label": "Public provider, parser, export, and admission review",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_share-mcp-hermes-knowledge-and-dispatch-review",
+      "label": "Share, MCP, Hermes, knowledge, and dispatch review",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_database-rls-and-atomicity-review",
+      "label": "Database, RLS, and atomicity review",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_repository-wide-dangerous-sink-configuration-and-route-inventory",
+      "label": "Repository-wide dangerous sink, configuration, and route inventory",
+      "receiptRefs": []
+    }
+  ]
+}
