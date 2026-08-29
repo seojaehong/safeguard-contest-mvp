@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `51cbd8662329c0d13e337e5c9310a435b25e8cb0`
+Source HEAD: `167ee395c4ffc8c08126767f7f3a154f2f393497`
 
-Production `/api/build-info`: `51cbd8662329c0d13e337e5c9310a435b25e8cb0`
+Production `/api/build-info`: `5fcbcbec0c77607022239dc1da6ac7393c3cc499`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `evaluation/ci-full-suite-remediation-2026-08-29/report.json`, `evaluation/ci-full-suite-remediation-2026-08-29/report.md`, `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `51cbd8662329c0d13e337e5c9310a435b25e8cb0`
+Live rollup source head: `167ee395c4ffc8c08126767f7f3a154f2f393497`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `167ee395c4ffc8c08126767f7f3a154f2f393497` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `5fcbcbec0c77607022239dc1da6ac7393c3cc499`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -53,7 +53,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Live editorial duplicate classification is measured separately: `PASS_LIVE_PRODUCTION_EDITORIAL_DUPLICATE_CLASSIFICATION_REVIEWER_READY`, generic template overuse `4->0`, retained reviewer findings exact/near `31/100`, and humanReviewCompleted=`false`. Only generic template overuse fails automatically; safety-control and legal-reference repetition remains visible, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live editorial near-duplicate classification preserves `100->100` findings while reducing unclassified human-review-required `54->0`. The retained role-prefix/context/hazard/control categories are `81/9/8/2`; humanReviewCompleted=`false` and exact saved Share remains `MISSING_EVIDENCE`.
 - Live product capability truth is measured separately: `PASS_LIVE_PRODUCTION_PRODUCT_CAPABILITY_TRUTH`; manual/provider dispatch is `preview_only` with reason `persistent_idempotency_unavailable`, scheduled briefing email ready=`false`, photo Vision/OCR ready/accepted-only=`true/true`, and AI modes are `template, enhanced, full`. No provider or photo POST call is claimed. This does not unlock provider persistence; exact saved Share remains `MISSING_EVIDENCE` and Documents/Share IA remains `PASS_SCOPED_LIVE_PRODUCTION_WITH_EXACT_SAVED_SESSION_GAP`.
-- Pinned CI supply-chain/full-suite proof is `PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED`: GitHub run `33202526232` concluded `success` with `3103` tests passed, `26` skipped, and build `success`. Checkout/setup-node remain immutable SHAs. This does not close unrelated security findings or approval-gated runtime work; exact saved Share remains `MISSING_EVIDENCE`.
+- Pinned CI supply-chain/full-suite proof is `PASS_LIVE_PRODUCTION_GITHUB_CI_NODE24_ACTIONS_FULL_SUITE`: GitHub run `33223625501` concluded `success` with `3114` tests passed, `26` skipped, build `success`, action runtime `node24`, package-manager cache `false`, and Node 20 warnings `0`. Checkout/setup-node remain immutable SHAs. This does not close unrelated security findings or approval-gated runtime work; exact saved Share remains `MISSING_EVIDENCE`.
 - Knowledge preparation capability truth is a separate notice: `PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD`; distributed configuration failures use `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`, temporary load uses `PUBLIC_ASK_CONCURRENCY_LIMIT`, and the UI distinction is `true`. Live evidence is `PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD` with behavioral probe=`false`. Enhanced runtime remains `BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION`, authenticated preparation/Wiki/RLS remain `APPROVAL_GATED/APPROVAL_GATED/APPROVAL_GATED`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Live launch operations readiness is measured separately: `PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH`; first-viewport receipts `4/4`, desktop four-column `2/2`, mobile local-scroll `2/2`, and console errors `0`. Runtime truth remains admission `unavailable`, dispatch `preview_only`, and photo Vision `ready`; distributed configured/provider ready/fully automated remain `false/false/false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Distributed admission activation remains a separate operator decision: `APPROVAL_REQUIRED_DISTRIBUTED_ADMISSION_ACTIVATION_NO_MUTATION`, reviewer-ready `true`, configured/activated/probed `false/false/false`, no mutation `true`, remote Hermes enabled by this change `false`, and exact saved Share `MISSING_EVIDENCE`.

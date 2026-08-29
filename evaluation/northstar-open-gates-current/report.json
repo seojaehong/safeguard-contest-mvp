@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-28T23:51:07.564Z",
-  "sourceSha": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
+  "generatedAt": "2026-08-29T01:15:35.625Z",
+  "sourceSha": "167ee395c4ffc8c08126767f7f3a154f2f393497",
   "overall": "open",
   "gates": [
     {
@@ -145,7 +145,7 @@
       "state": "proven",
       "label": "Pinned CI supply chain and full suite",
       "evidencePath": "evaluation\\ci-full-suite-remediation-2026-08-29\\report.json",
-      "detail": "GitHub CI preserves contents:read and immutable checkout/setup-node SHAs, then closes the recorded 3098-pass/5-fail baseline with 3103/3129 passing and 26 skipped tests plus successful typecheck/build on production-aligned a6f25afc. This is CI and deployment evidence only: it does not close other security findings or approval-gated work, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "GitHub CI preserves the immutable 3098-pass/5-fail baseline, upgrades checkout/setup-node to reviewed Node 24 runtime SHAs, disables package-manager caching, and passes 3114/3140 tests with 26 skipped plus typecheck/build on production-aligned 5fcbcbec with zero Node 20 deprecation warnings. This is CI and deployment evidence only: it does not close other security findings or approval-gated work, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Keep action SHAs and the full-suite contract fail-closed when updating CI dependencies."
       ]

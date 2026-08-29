@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-28T23:51:09.750Z
-Source HEAD at generation: 51cbd8662329c0d13e337e5c9310a435b25e8cb0
-Live commit at generation: 51cbd8662329c0d13e337e5c9310a435b25e8cb0
+Generated at: 2026-08-29T01:15:37.756Z
+Source HEAD at generation: 167ee395c4ffc8c08126767f7f3a154f2f393497
+Live commit at generation: 5fcbcbec0c77607022239dc1da6ac7393c3cc499
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -247,9 +247,9 @@ Overall: `northstar_open_approval_gated`
 
 ## Pinned CI Supply Chain And Full Suite
 
-- Verdict: `PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED`
-- GitHub run: 33202526232; conclusion=success; tests=3103 passed/26 skipped; files=256 passed/11 skipped; build=success
-- Immutable actions: checkout=11bd71901bbe5b1630ceea73d27597364c9af683; setup-node=49933ea5288caeca8642d1e84afbd3f7d6820020
+- Verdict: `PASS_LIVE_PRODUCTION_GITHUB_CI_NODE24_ACTIONS_FULL_SUITE`
+- GitHub run: 33223625501; conclusion=success; tests=3114 passed/26 skipped; files=257 passed/11 skipped; build=success
+- Immutable actions: checkout=3d3c42e5aac5ba805825da76410c181273ba90b1; setup-node=820762786026740c76f36085b0efc47a31fe5020; runtime=node24; package-manager cache=false; Node 20 warnings=0
 - Exact saved Share: MISSING_EVIDENCE; approval-gated boundaries closed=false
 - Boundary: CI and deployment proof does not close unrelated security findings or approval-gated runtime work.
 
@@ -496,7 +496,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -511,7 +511,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_editorial_duplicate_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
-| ci_supply_chain_full_suite | ancestor | ancestor_of_head | evaluation\ci-full-suite-remediation-2026-08-29\report.json |
+| ci_supply_chain_full_suite | ancestor | matches_live | evaluation\ci-full-suite-remediation-2026-08-29\report.json |
 | knowledge_preparation_capability_truth | ancestor | ancestor_of_head | evaluation\knowledge-preparation-capability-truth-2026-08-28\report.json |
 | launch_operations_readiness_cockpit | ancestor | ancestor_of_head | evaluation\launch-operations-readiness-2026-08-26\report.json |
 | document_export_capability_truth | ancestor | ancestor_of_head | evaluation\document-export-capability-truth-2026-08-17\report.json |
@@ -575,7 +575,7 @@ Overall: `northstar_open_approval_gated`
 | dispatch_standalone_viewport_companion | ancestor | ancestor_of_head | evaluation\dispatch-standalone-viewport-2026-07-28\report.json |
 | dispatch_first_viewport_containment | ancestor | ancestor_of_head | evaluation\dispatch-first-viewport-containment-2026-08-27\report.json |
 | provider_dispatch_persistence | ancestor | ancestor_of_head | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json |
-| northstar_approval_runway | exact | matches_live | evaluation\northstar-approval-runway-2026-07-21\report.json |
+| northstar_approval_runway | exact | matches_live_source_mismatch | evaluation\northstar-approval-runway-2026-07-21\report.json |
 
 ## Carried Notices
 

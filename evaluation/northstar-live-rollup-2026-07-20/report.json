@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-28T23:51:09.750Z",
-  "head": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
+  "generatedAt": "2026-08-29T01:15:37.756Z",
+  "head": "167ee395c4ffc8c08126767f7f3a154f2f393497",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
+    "commitSha": "5fcbcbec0c77607022239dc1da6ac7393c3cc499",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-g377fg8ih-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-53247k9gi-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -103,7 +103,7 @@
       "id": "ci_supply_chain_full_suite",
       "state": "proven",
       "artifact": "evaluation\\ci-full-suite-remediation-2026-08-29\\report.json",
-      "detail": "GitHub CI preserves contents:read and immutable checkout/setup-node SHAs, then closes the recorded 3098-pass/5-fail baseline with 3103/3129 passing and 26 skipped tests plus successful typecheck/build on production-aligned a6f25afc. This is CI and deployment evidence only: it does not close other security findings or approval-gated work, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "GitHub CI preserves the immutable 3098-pass/5-fail baseline, upgrades checkout/setup-node to reviewed Node 24 runtime SHAs, disables package-manager caching, and passes 3114/3140 tests with 26 skipped plus typecheck/build on production-aligned 5fcbcbec with zero Node 20 deprecation warnings. This is CI and deployment evidence only: it does not close other security findings or approval-gated work, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "knowledge_preparation_capability_truth",
@@ -1371,17 +1371,20 @@
   },
   "ciSupplyChainFullSuite": {
     "artifact": "evaluation\\ci-full-suite-remediation-2026-08-29\\report.json",
-    "verdict": "PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED",
-    "sourceHead": "a6f25afcd367e4f3a1f14a9d2d03a9ddb95a55e7",
-    "productionCommit": "a6f25afcd367e4f3a1f14a9d2d03a9ddb95a55e7",
-    "githubRunId": 33202526232,
+    "verdict": "PASS_LIVE_PRODUCTION_GITHUB_CI_NODE24_ACTIONS_FULL_SUITE",
+    "sourceHead": "5fcbcbec0c77607022239dc1da6ac7393c3cc499",
+    "productionCommit": "5fcbcbec0c77607022239dc1da6ac7393c3cc499",
+    "githubRunId": 33223625501,
     "githubConclusion": "success",
-    "pinnedCheckout": "11bd71901bbe5b1630ceea73d27597364c9af683",
-    "pinnedSetupNode": "49933ea5288caeca8642d1e84afbd3f7d6820020",
-    "testsPassed": 3103,
+    "pinnedCheckout": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+    "pinnedSetupNode": "820762786026740c76f36085b0efc47a31fe5020",
+    "actionRuntime": "node24",
+    "packageManagerCache": false,
+    "node20DeprecationWarningCount": 0,
+    "testsPassed": 3114,
     "testsSkipped": 26,
-    "testsTotal": 3129,
-    "testFilesPassed": 256,
+    "testsTotal": 3140,
+    "testFilesPassed": 257,
     "testFilesSkipped": 11,
     "staticPages": 28,
     "build": "success",
@@ -1970,10 +1973,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
+      "sourceCommit": "167ee395c4ffc8c08126767f7f3a154f2f393497",
       "sourceStatus": "exact",
-      "productionCommit": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
-      "productionStatus": "matches_live"
+      "productionCommit": "167ee395c4ffc8c08126767f7f3a154f2f393497",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -2090,10 +2093,10 @@
     {
       "id": "ci_supply_chain_full_suite",
       "artifact": "evaluation\\ci-full-suite-remediation-2026-08-29\\report.json",
-      "sourceCommit": "a6f25afcd367e4f3a1f14a9d2d03a9ddb95a55e7",
+      "sourceCommit": "5fcbcbec0c77607022239dc1da6ac7393c3cc499",
       "sourceStatus": "ancestor",
-      "productionCommit": "a6f25afcd367e4f3a1f14a9d2d03a9ddb95a55e7",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "5fcbcbec0c77607022239dc1da6ac7393c3cc499",
+      "productionStatus": "matches_live"
     },
     {
       "id": "knowledge_preparation_capability_truth",
@@ -2602,10 +2605,10 @@
     {
       "id": "northstar_approval_runway",
       "artifact": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
-      "sourceCommit": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
+      "sourceCommit": "167ee395c4ffc8c08126767f7f3a154f2f393497",
       "sourceStatus": "exact",
-      "productionCommit": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
-      "productionStatus": "matches_live"
+      "productionCommit": "5fcbcbec0c77607022239dc1da6ac7393c3cc499",
+      "productionStatus": "matches_live_source_mismatch"
     }
   ],
   "contradictions": [],
