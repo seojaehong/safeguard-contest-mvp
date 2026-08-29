@@ -160,6 +160,9 @@ type RollupReport = {
     githubConclusion: string;
     pinnedCheckout: string;
     pinnedSetupNode: string;
+    actionRuntime: string;
+    packageManagerCache: boolean;
+    node20DeprecationWarningCount: number;
     testsPassed: number;
     testsSkipped: number;
     testsTotal: number;
@@ -1647,7 +1650,7 @@ function createFixtureRoot(): { root: string; head: string } {
     },
   });
   writeJson(root, "evaluation/ci-full-suite-remediation-2026-08-29/report.json", {
-    verdict: "PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED",
+    verdict: "PASS_LIVE_PRODUCTION_GITHUB_CI_NODE24_ACTIONS_FULL_SUITE",
     sourceHead: "TO_FILL",
     productionBuild: { commitSha: "TO_FILL", branch: "master", environment: "production" },
     remediation: { commit: "TO_FILL" },
@@ -1656,13 +1659,19 @@ function createFixtureRoot(): { root: string; head: string } {
       build: { status: "PASS", staticPages: 28 },
       fullSuite: { testFilesPassed: 256, testFilesSkipped: 11, testFilesTotal: 267, testsPassed: 3103, testsSkipped: 26, testsTotal: 3129 },
     },
+    actionRuntimeUpgrade: {
+      checkout: { tag: "v7.0.1", sha: "3d3c42e5aac5ba805825da76410c181273ba90b1", runtime: "node24", officialReleaseVerified: true },
+      setupNode: { tag: "v7.0.0", sha: "820762786026740c76f36085b0efc47a31fe5020", runtime: "node24", officialReleaseVerified: true },
+      packageManagerCache: false,
+      node20DeprecationWarningCount: 0,
+    },
     githubActions: {
-      runId: 33202526232,
+      runId: 33223625501,
       conclusion: "success",
-      pinnedCheckout: "11bd71901bbe5b1630ceea73d27597364c9af683",
-      pinnedSetupNode: "49933ea5288caeca8642d1e84afbd3f7d6820020",
+      pinnedCheckout: "3d3c42e5aac5ba805825da76410c181273ba90b1",
+      pinnedSetupNode: "820762786026740c76f36085b0efc47a31fe5020",
       typecheck: "success",
-      fullSuite: { status: "success", testFilesPassed: 256, testFilesSkipped: 11, testsPassed: 3103, testsSkipped: 26 },
+      fullSuite: { status: "success", testFilesPassed: 257, testFilesSkipped: 11, testsPassed: 3114, testsSkipped: 26, testsTotal: 3140 },
       build: "success",
     },
     boundaries: {
@@ -3039,14 +3048,17 @@ describe("northstar live rollup", () => {
     });
     expect(report.evidence.find((item) => item.id === "product_capability_truth")?.productionStatus).toBe("ancestor_of_head");
     expect(report.ciSupplyChainFullSuite).toMatchObject({
-      verdict: "PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED",
-      githubRunId: 33202526232,
+      verdict: "PASS_LIVE_PRODUCTION_GITHUB_CI_NODE24_ACTIONS_FULL_SUITE",
+      githubRunId: 33223625501,
       githubConclusion: "success",
-      pinnedCheckout: "11bd71901bbe5b1630ceea73d27597364c9af683",
-      pinnedSetupNode: "49933ea5288caeca8642d1e84afbd3f7d6820020",
-      testsPassed: 3103,
+      pinnedCheckout: "3d3c42e5aac5ba805825da76410c181273ba90b1",
+      pinnedSetupNode: "820762786026740c76f36085b0efc47a31fe5020",
+      actionRuntime: "node24",
+      packageManagerCache: false,
+      node20DeprecationWarningCount: 0,
+      testsPassed: 3114,
       testsSkipped: 26,
-      testsTotal: 3129,
+      testsTotal: 3140,
       staticPages: 28,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       approvalGatedBoundariesClosed: false,

@@ -1993,6 +1993,9 @@ function evaluateCiSupplyChainFullSuiteGate(rootDir) {
   const localSuite = isRecord(local.fullSuite) ? local.fullSuite : {};
   const github = isRecord(report.githubActions) ? report.githubActions : {};
   const githubSuite = isRecord(github.fullSuite) ? github.fullSuite : {};
+  const runtimeUpgrade = isRecord(report.actionRuntimeUpgrade) ? report.actionRuntimeUpgrade : {};
+  const upgradedCheckout = isRecord(runtimeUpgrade.checkout) ? runtimeUpgrade.checkout : {};
+  const upgradedSetupNode = isRecord(runtimeUpgrade.setupNode) ? runtimeUpgrade.setupNode : {};
   const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
   const checkout = actions.find((action) => readString(action.name) === "actions/checkout");
   const setupNode = actions.find((action) => readString(action.name) === "actions/setup-node");
@@ -2019,7 +2022,17 @@ function evaluateCiSupplyChainFullSuiteGate(rootDir) {
     && readNumber(baselineGithub.tests?.passed) === 3098
     && readNumber(baselineGithub.tests?.failed) === 5
     && baseline.remainingBoundaries?.fullRepositoryCiGreenClaimed === false;
-  const fullSuiteReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED"
+  const node24ActionsReady = readString(upgradedCheckout.tag) === "v7.0.1"
+    && readString(upgradedCheckout.sha) === "3d3c42e5aac5ba805825da76410c181273ba90b1"
+    && readString(upgradedCheckout.runtime) === "node24"
+    && upgradedCheckout.officialReleaseVerified === true
+    && readString(upgradedSetupNode.tag) === "v7.0.0"
+    && readString(upgradedSetupNode.sha) === "820762786026740c76f36085b0efc47a31fe5020"
+    && readString(upgradedSetupNode.runtime) === "node24"
+    && upgradedSetupNode.officialReleaseVerified === true
+    && runtimeUpgrade.packageManagerCache === false
+    && readNumber(runtimeUpgrade.node20DeprecationWarningCount) === 0;
+  const fullSuiteReady = readString(report.verdict) === "PASS_LIVE_PRODUCTION_GITHUB_CI_NODE24_ACTIONS_FULL_SUITE"
     && sourceMatchesProduction
     && readString(productionBuild.branch) === "master"
     && readString(productionBuild.environment) === "production"
@@ -2033,13 +2046,16 @@ function evaluateCiSupplyChainFullSuiteGate(rootDir) {
     && readNumber(localSuite.testsSkipped) === 26
     && readNumber(localSuite.testsTotal) === 3129
     && readString(github.conclusion) === "success"
-    && readString(github.pinnedCheckout) === checkoutSha
-    && readString(github.pinnedSetupNode) === setupNodeSha
+    && readString(github.pinnedCheckout) === readString(upgradedCheckout.sha)
+    && readString(github.pinnedSetupNode) === readString(upgradedSetupNode.sha)
     && readString(github.typecheck) === "success"
     && readString(githubSuite.status) === "success"
-    && readNumber(githubSuite.testsPassed) === 3103
+    && readNumber(githubSuite.testFilesPassed) === 257
+    && readNumber(githubSuite.testFilesSkipped) === 11
+    && readNumber(githubSuite.testsPassed) === 3114
     && readNumber(githubSuite.testsSkipped) === 26
     && readString(github.build) === "success"
+    && node24ActionsReady
     && readString(boundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && noMutation;
 
@@ -2049,7 +2065,7 @@ function evaluateCiSupplyChainFullSuiteGate(rootDir) {
       label: "Pinned CI supply chain and full suite",
       state: "proven",
       evidencePath,
-      detail: `GitHub CI preserves contents:read and immutable checkout/setup-node SHAs, then closes the recorded 3098-pass/5-fail baseline with 3103/3129 passing and 26 skipped tests plus successful typecheck/build on production-aligned ${readString(report.sourceHead).slice(0, 8)}. This is CI and deployment evidence only: it does not close other security findings or approval-gated work, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`,
+      detail: `GitHub CI preserves the immutable 3098-pass/5-fail baseline, upgrades checkout/setup-node to reviewed Node 24 runtime SHAs, disables package-manager caching, and passes 3114/3140 tests with 26 skipped plus typecheck/build on production-aligned ${readString(report.sourceHead).slice(0, 8)} with zero Node 20 deprecation warnings. This is CI and deployment evidence only: it does not close other security findings or approval-gated work, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`,
       nextActions: ["Keep action SHAs and the full-suite contract fail-closed when updating CI dependencies."],
     });
   }
@@ -2059,7 +2075,7 @@ function evaluateCiSupplyChainFullSuiteGate(rootDir) {
     label: "Pinned CI supply chain and full suite",
     state: "contradicted",
     evidencePath,
-    detail: `PinnedBaselineReady=${pinnedBaselineReady}, fullSuiteReady=${fullSuiteReady}, sourceMatchesProduction=${sourceMatchesProduction}, checkout=${checkoutSha || "missing"}, setupNode=${setupNodeSha || "missing"}, GitHub=${readString(github.conclusion) || "missing"}, tests=${readNumber(githubSuite.testsPassed)}/${readNumber(localSuite.testsTotal)}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+    detail: `PinnedBaselineReady=${pinnedBaselineReady}, node24ActionsReady=${node24ActionsReady}, fullSuiteReady=${fullSuiteReady}, sourceMatchesProduction=${sourceMatchesProduction}, baselineCheckout=${checkoutSha || "missing"}, baselineSetupNode=${setupNodeSha || "missing"}, upgradedCheckout=${readString(upgradedCheckout.sha) || "missing"}, upgradedSetupNode=${readString(upgradedSetupNode.sha) || "missing"}, GitHub=${readString(github.conclusion) || "missing"}, tests=${readNumber(githubSuite.testsPassed)}/3140, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: ["Repair the pinned CI or full-suite evidence and rerun the unchanged fail-closed gate."],
   });
 }

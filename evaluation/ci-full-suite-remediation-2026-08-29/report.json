@@ -1,58 +1,37 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-08-29T04:22:26.7052705+09:00",
-  "verdict": "PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED",
-  "sourceHead": "a6f25afcd367e4f3a1f14a9d2d03a9ddb95a55e7",
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-29T10:05:00+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_GITHUB_CI_NODE24_ACTIONS_FULL_SUITE",
+  "sourceHead": "5fcbcbec0c77607022239dc1da6ac7393c3cc499",
   "productionBuild": {
-    "commitSha": "a6f25afcd367e4f3a1f14a9d2d03a9ddb95a55e7",
+    "commitSha": "5fcbcbec0c77607022239dc1da6ac7393c3cc499",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-1bjcac9iw-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-53247k9gi-seojaehongs-projects.vercel.app"
   },
   "remediation": {
-    "commit": "a6f25afcd367e4f3a1f14a9d2d03a9ddb95a55e7",
-    "message": "fix: close CI contract regressions",
+    "commit": "5fcbcbec0c77607022239dc1da6ac7393c3cc499",
+    "message": "chore: upgrade CI actions to Node 24 runtime",
     "changedFiles": [
-      "app/globals.css",
-      "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
-      "tests/product-module-shell.test.ts",
-      "tests/provider-descendant-cancellation.test.ts"
+      ".github/workflows/ci.yml",
+      "tests/ci-workflow-security.test.ts"
     ],
     "summary": [
-      "Uses audit-approved compact spacing values without regressing the standalone dispatch desktop cockpit.",
-      "Treats descendants clipped by an in-viewport local horizontal scroller as contained rather than page overflow.",
-      "Keeps Work24 timeout and response-budget details in server logs while returning a generic public fallback message.",
-      "Refreshes the frontend consistency source identity with zero violations."
+      "Pins actions/checkout v7.0.1 and actions/setup-node v7.0.0 to immutable official release SHAs.",
+      "Both upgraded actions declare the Node 24 JavaScript runtime.",
+      "Disables setup-node package-manager caching explicitly because this workflow does not use an action-managed dependency cache.",
+      "Keeps the prior full-suite remediation baseline immutable while recording a fresh GitHub-hosted full-suite run."
     ]
   },
   "localVerification": {
-    "frontendAudit": {
-      "status": "pass",
-      "pageFiles": 33,
-      "componentFiles": 24,
-      "violationCount": 0
-    },
-    "focusedContracts": {
-      "testFilesPassed": 6,
-      "testsPassed": 91
-    },
-    "reportsProvenance": {
-      "testFilesPassed": 1,
-      "testsPassed": 12
-    },
-    "productModuleShellBrowser": {
-      "testFilesPassed": 1,
-      "testsPassed": 3
-    },
-    "workspaceShareBrowser": {
-      "testFilesPassed": 1,
-      "testsPassed": 4
-    },
+    "baselineSourceHead": "a6f25afcd367e4f3a1f14a9d2d03a9ddb95a55e7",
+    "frontendAudit": { "status": "pass", "pageFiles": 33, "componentFiles": 24, "violationCount": 0 },
+    "focusedContracts": { "testFilesPassed": 6, "testsPassed": 91 },
+    "reportsProvenance": { "testFilesPassed": 1, "testsPassed": 12 },
+    "productModuleShellBrowser": { "testFilesPassed": 1, "testsPassed": 3 },
+    "workspaceShareBrowser": { "testFilesPassed": 1, "testsPassed": 4 },
     "typecheck": "PASS",
-    "build": {
-      "status": "PASS",
-      "staticPages": 28
-    },
+    "build": { "status": "PASS", "staticPages": 28 },
     "fullSuite": {
       "testFilesPassed": 256,
       "testFilesSkipped": 11,
@@ -63,20 +42,43 @@
       "durationSeconds": 2270.21
     }
   },
+  "actionRuntimeUpgrade": {
+    "checkout": {
+      "tag": "v7.0.1",
+      "sha": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "runtime": "node24",
+      "officialReleaseVerified": true,
+      "officialReleaseUrl": "https://github.com/actions/checkout/releases/tag/v7.0.1"
+    },
+    "setupNode": {
+      "tag": "v7.0.0",
+      "sha": "820762786026740c76f36085b0efc47a31fe5020",
+      "runtime": "node24",
+      "officialReleaseVerified": true,
+      "officialReleaseUrl": "https://github.com/actions/setup-node/releases/tag/v7.0.0"
+    },
+    "packageManagerCache": false,
+    "node20DeprecationWarningCount": 0,
+    "checkRunAnnotationCount": 0,
+    "dependencyDeprecationWarningCount": 2,
+    "dependencyDeprecationWarningsAreActionRuntimeWarnings": false
+  },
   "githubActions": {
-    "runId": 33202526232,
-    "url": "https://github.com/seojaehong/safeguard-contest-mvp/actions/runs/33202526232",
+    "runId": 33223625501,
+    "url": "https://github.com/seojaehong/safeguard-contest-mvp/actions/runs/33223625501",
     "conclusion": "success",
-    "pinnedCheckout": "11bd71901bbe5b1630ceea73d27597364c9af683",
-    "pinnedSetupNode": "49933ea5288caeca8642d1e84afbd3f7d6820020",
+    "pinnedCheckout": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+    "pinnedSetupNode": "820762786026740c76f36085b0efc47a31fe5020",
     "typecheck": "success",
     "fullSuite": {
       "status": "success",
-      "testFilesPassed": 256,
+      "testFilesPassed": 257,
       "testFilesSkipped": 11,
-      "testsPassed": 3103,
+      "testFilesTotal": 268,
+      "testsPassed": 3114,
       "testsSkipped": 26,
-      "durationSeconds": 653.19
+      "testsTotal": 3140,
+      "durationSeconds": 857.9
     },
     "build": "success"
   },

@@ -1018,7 +1018,7 @@ function createFixtureRoot(): string {
     remainingBoundaries: { fullRepositoryCiGreenClaimed: false },
   });
   writeJson(rootDir, path.join("evaluation", "ci-full-suite-remediation-2026-08-29", "report.json"), {
-    verdict: "PASS_LIVE_PRODUCTION_GITHUB_CI_FULL_SUITE_REMEDIATED",
+    verdict: "PASS_LIVE_PRODUCTION_GITHUB_CI_NODE24_ACTIONS_FULL_SUITE",
     sourceHead: "fixture-sha",
     productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
     remediation: { commit: "fixture-sha" },
@@ -1027,13 +1027,19 @@ function createFixtureRoot(): string {
       build: { status: "PASS", staticPages: 28 },
       fullSuite: { testFilesPassed: 256, testFilesSkipped: 11, testFilesTotal: 267, testsPassed: 3103, testsSkipped: 26, testsTotal: 3129 },
     },
+    actionRuntimeUpgrade: {
+      checkout: { tag: "v7.0.1", sha: "3d3c42e5aac5ba805825da76410c181273ba90b1", runtime: "node24", officialReleaseVerified: true },
+      setupNode: { tag: "v7.0.0", sha: "820762786026740c76f36085b0efc47a31fe5020", runtime: "node24", officialReleaseVerified: true },
+      packageManagerCache: false,
+      node20DeprecationWarningCount: 0,
+    },
     githubActions: {
-      runId: 33202526232,
+      runId: 33223625501,
       conclusion: "success",
-      pinnedCheckout: "11bd71901bbe5b1630ceea73d27597364c9af683",
-      pinnedSetupNode: "49933ea5288caeca8642d1e84afbd3f7d6820020",
+      pinnedCheckout: "3d3c42e5aac5ba805825da76410c181273ba90b1",
+      pinnedSetupNode: "820762786026740c76f36085b0efc47a31fe5020",
       typecheck: "success",
-      fullSuite: { status: "success", testFilesPassed: 256, testFilesSkipped: 11, testsPassed: 3103, testsSkipped: 26 },
+      fullSuite: { status: "success", testFilesPassed: 257, testFilesSkipped: 11, testsPassed: 3114, testsSkipped: 26, testsTotal: 3140 },
       build: "success",
     },
     boundaries: {
@@ -7261,7 +7267,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       evidencePath: path.join("evaluation", "ci-full-suite-remediation-2026-08-29", "report.json"),
     });
     expect(audit.gates.find((gate) => gate.id === "ci_supply_chain_full_suite")?.detail).toContain("3098-pass/5-fail");
-    expect(audit.gates.find((gate) => gate.id === "ci_supply_chain_full_suite")?.detail).toContain("3103/3129 passing");
+    expect(audit.gates.find((gate) => gate.id === "ci_supply_chain_full_suite")?.detail).toContain("3114/3140 tests");
+    expect(audit.gates.find((gate) => gate.id === "ci_supply_chain_full_suite")?.detail).toContain("zero Node 20 deprecation warnings");
     expect(audit.gates.find((gate) => gate.id === "ci_supply_chain_full_suite")?.detail).toContain("does not close other security findings");
     expect(audit.gates.find((gate) => gate.id === "ci_supply_chain_full_suite")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "knowledge_preparation_capability_truth")).toMatchObject({
@@ -7717,6 +7724,22 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(gate?.state).toBe("contradicted");
     expect(gate?.detail).toContain("exactShare=PASS");
     expect(gate?.detail).toContain("noMutation=false");
+  });
+
+  it("fails the CI full-suite gate closed when the Node 20 deprecation warning returns", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "ci-full-suite-remediation-2026-08-29", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      actionRuntimeUpgrade: { node20DeprecationWarningCount: number };
+    };
+    report.actionRuntimeUpgrade.node20DeprecationWarningCount = 1;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir, sourceSha: "fixture-sha" });
+    const gate = audit.gates.find((item) => item.id === "ci_supply_chain_full_suite");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.detail).toContain("node24ActionsReady=false");
   });
 
   it.each([
