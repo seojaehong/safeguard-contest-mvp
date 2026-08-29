@@ -15,12 +15,16 @@ describe("CI workflow supply-chain contract", () => {
 
     expect(actionReferences).toHaveLength(2);
     expect(actionReferences.map((match) => match[1])).toEqual([
-      "actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
-      "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020"
+      "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020"
     ]);
     for (const match of actionReferences) {
       expect(match[1]).toMatch(/@[0-9a-f]{40}$/u);
       expect(match[2]).toMatch(/^v\d+\.\d+\.\d+$/u);
     }
+  });
+
+  it("keeps setup-node package-manager caching explicitly disabled", () => {
+    expect(workflow).toContain("          package-manager-cache: false");
   });
 });
