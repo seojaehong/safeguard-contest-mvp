@@ -3,7 +3,22 @@ import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+
+const temporaryPaths = new Set<string>();
+
+function createTemporaryDirectory(prefix: string): string {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
+  temporaryPaths.add(directory);
+  return directory;
+}
+
+afterEach(() => {
+  for (const directory of temporaryPaths) {
+    fs.rmSync(directory, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+  }
+  temporaryPaths.clear();
+});
 
 type GateState = "proven" | "approval_gated" | "notice" | "missing" | "contradicted";
 
@@ -49,7 +64,7 @@ type KoshaCurrentGateFixture = {
 
 async function loadAuditModule(): Promise<AuditModule> {
   const sourcePath = path.resolve("scripts", "northstar_open_gate_audit.mjs");
-  const moduleDir = fs.mkdtempSync(path.join(os.tmpdir(), "safeclaw-northstar-module-"));
+  const moduleDir = createTemporaryDirectory("safeclaw-northstar-module-");
   const modulePath = path.join(moduleDir, "northstar_open_gate_audit.mjs");
   const source = fs.readFileSync(sourcePath, "utf8").replace(/^#!.*\r?\n/u, "");
   fs.writeFileSync(modulePath, source, "utf8");
@@ -647,7 +662,7 @@ function createProviderDispatchIdempotencyFixture(): Record<string, unknown> {
 }
 
 function createFixtureRoot(): string {
-  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "safeclaw-northstar-open-gate-"));
+  const rootDir = createTemporaryDirectory("safeclaw-northstar-open-gate-");
   execFileSync("git", ["init"], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["config", "user.email", "test@example.com"], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["config", "user.name", "SafeClaw Test"], { cwd: rootDir, stdio: "ignore" });

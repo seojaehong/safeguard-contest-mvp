@@ -3,7 +3,22 @@ import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+
+const temporaryPaths = new Set<string>();
+
+function createTemporaryDirectory(prefix: string): string {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
+  temporaryPaths.add(directory);
+  return directory;
+}
+
+afterEach(() => {
+  for (const directory of temporaryPaths) {
+    fs.rmSync(directory, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+  }
+  temporaryPaths.clear();
+});
 
 type NextRunwayReport = {
   provenCurrentState: string[];
@@ -1430,7 +1445,7 @@ type NextRunwayModule = {
 
 async function loadNextRunwayModule(): Promise<NextRunwayModule> {
   const sourcePath = path.resolve("scripts", "northstar_next_runway.mjs");
-  const moduleDir = fs.mkdtempSync(path.join(os.tmpdir(), "safeclaw-next-runway-module-"));
+  const moduleDir = createTemporaryDirectory("safeclaw-next-runway-module-");
   const modulePath = path.join(moduleDir, "northstar_next_runway.mjs");
   const source = fs.readFileSync(sourcePath, "utf8").replace(/^#!.*\r?\n/u, "");
   fs.writeFileSync(modulePath, source, "utf8");
@@ -1740,7 +1755,7 @@ function commitAll(root: string, message: string): string {
 }
 
 function createFixtureRoot(): { root: string; firstHead: string; secondHead: string } {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "safeclaw-next-runway-"));
+  const root = createTemporaryDirectory("safeclaw-next-runway-");
   execFileSync("git", ["init"], { cwd: root, stdio: "ignore" });
   execFileSync("git", ["config", "user.email", "test@example.com"], { cwd: root, stdio: "ignore" });
   execFileSync("git", ["config", "user.name", "SafeClaw Test"], { cwd: root, stdio: "ignore" });
