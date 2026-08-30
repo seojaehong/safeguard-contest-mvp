@@ -39,4 +39,15 @@ describe("spreadsheet delimited cell safety", () => {
     expect(source.match(/buildDelimited\(rows, "\\t"\)/gu)).toHaveLength(2);
     expect(source).not.toContain("function escapeCell");
   });
+
+  it("routes orchestration smoke CSV cells through the shared encoder", () => {
+    const source = fs.readFileSync(
+      path.join(process.cwd(), "scripts", "prod_orchestration_download_smoke.mjs"),
+      "utf8"
+    );
+
+    expect(source).toContain('from "../lib/spreadsheet-delimited-cell.ts"');
+    expect(source).toContain("encodeSpreadsheetDelimitedCell(value, delimiter)");
+    expect(source).not.toContain("function escapeCell");
+  });
 });

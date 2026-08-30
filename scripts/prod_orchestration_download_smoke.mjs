@@ -7,6 +7,7 @@ import process from "node:process";
 import { pathToFileURL } from "node:url";
 import { initSync, HwpDocument } from "@rhwp/core";
 import ExcelJS from "exceljs";
+import { encodeSpreadsheetDelimitedCell } from "../lib/spreadsheet-delimited-cell.ts";
 
 const baseUrl = process.env.SAFEGUARD_BASE_URL || "https://safeguard-contest-mvp.vercel.app";
 const outDir = path.resolve(process.env.SAFEGUARD_OUT_DIR || path.join(process.cwd(), "evaluation", "2026-04-29-orchestration-download-smoke"));
@@ -88,16 +89,12 @@ function parseSheetRows(title, body) {
   return rows;
 }
 
-function escapeCell(value) {
-  return `"${value.replace(/"/g, "\"\"")}"`;
-}
-
 function buildDelimited(rows, delimiter) {
   const header = ["문서", "섹션", "항목", "내용"];
   const body = rows.map((row) => [row.document, row.section, row.item, row.content]
-    .map((value) => delimiter === "," ? escapeCell(value) : value.replace(/\t/g, " ").replace(/\r?\n/g, " "))
+    .map((value) => encodeSpreadsheetDelimitedCell(value, delimiter))
     .join(delimiter));
-  return [header.join(delimiter), ...body].join("\n");
+  return [header.map((value) => encodeSpreadsheetDelimitedCell(value, delimiter)).join(delimiter), ...body].join("\n");
 }
 
 function buildHtml(title, body) {
