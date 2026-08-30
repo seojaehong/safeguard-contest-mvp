@@ -43,9 +43,10 @@ async function loadImprovementMemory(
   try {
     let improvementQuery = client
       .from("workpack_improvements")
-      .select("id,task_label,hazard_label,improvement_text,reflected_documents,source_type,analysis_payload,created_at")
+      .select("id,task_label,hazard_label,improvement_text,reflected_documents,review_status,source_type,analysis_payload,created_at")
       .eq("workpack_id", input.workpackId)
-      .eq("organization_id", input.organizationId);
+      .eq("organization_id", input.organizationId)
+      .in("review_status", ["approved", "reflected"]);
     improvementQuery = input.siteId === null
       ? improvementQuery.is("site_id", null)
       : improvementQuery.eq("site_id", input.siteId);

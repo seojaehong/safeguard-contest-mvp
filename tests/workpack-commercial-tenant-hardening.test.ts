@@ -375,6 +375,7 @@ function fixtureRows(siteId: string | null): FixtureTables {
       {
         id: "improvement-match",
         ...tenant,
+        review_status: "approved",
         task_label: "Tenant A Task",
         hazard_label: "fall",
         improvement_text: "Tenant A Improvement",
@@ -384,9 +385,22 @@ function fixtureRows(siteId: string | null): FixtureTables {
         created_at: "2026-07-17T00:00:00.000Z"
       },
       {
+        id: "improvement-candidate",
+        ...tenant,
+        review_status: "candidate",
+        task_label: "Unreviewed Task",
+        hazard_label: "fall",
+        improvement_text: "Unreviewed Improvement",
+        reflected_documents: [],
+        source_type: "manual",
+        analysis_payload: {},
+        created_at: "2026-07-17T00:00:01.000Z"
+      },
+      {
         id: "improvement-wrong-org",
         ...tenant,
         organization_id: "org-b",
+        review_status: "approved",
         task_label: "Foreign Org Task",
         hazard_label: "fall",
         improvement_text: "Foreign Org Improvement",
@@ -399,6 +413,7 @@ function fixtureRows(siteId: string | null): FixtureTables {
         id: "improvement-wrong-site",
         ...tenant,
         site_id: "site-b",
+        review_status: "reflected",
         task_label: "Foreign Site Task",
         hazard_label: "fall",
         improvement_text: "Foreign Site Improvement",
@@ -727,7 +742,10 @@ describe("commercial workpack service-role tenant hardening", () => {
     });
     const body = await response.json() as { improvements: FixtureRow[] };
 
-    expect(body.improvements.map((row) => row.id)).toEqual(["improvement-match"]);
+    expect(body.improvements.map((row) => row.id)).toEqual([
+      "improvement-match",
+      "improvement-candidate"
+    ]);
   });
 
   it("exports only full-tuple improvement and confirmation memory", async () => {
@@ -743,6 +761,7 @@ describe("commercial workpack service-role tenant hardening", () => {
     expect(response.headers.get("x-safeclaw-improvement-count")).toBe("1");
     expect(response.headers.get("x-safeclaw-confirmation-count")).toBe("1");
     expect(body).toContain("Tenant A Improvement");
+    expect(body).not.toContain("Unreviewed Improvement");
     expect(body).not.toContain("Foreign Org Improvement");
     expect(body).not.toContain("Foreign Site Worker");
   });
@@ -760,6 +779,7 @@ describe("commercial workpack service-role tenant hardening", () => {
     const confirmationNames = body.graph.input.confirmations.map((item) => item.displayName);
 
     expect(improvementIds).toEqual(["improvement-match"]);
+    expect(improvementIds).not.toContain("improvement-candidate");
     expect(improvementIds).not.toContain("improvement-wrong-org");
     expect(improvementIds).not.toContain("improvement-wrong-site");
     expect(confirmationNames).toEqual(["Tenant A Worker"]);
@@ -781,6 +801,7 @@ describe("commercial workpack service-role tenant hardening", () => {
     const confirmationNames = body.graph.input.confirmations.map((item) => item.displayName);
 
     expect(improvementIds).toEqual(["improvement-match"]);
+    expect(improvementIds).not.toContain("improvement-candidate");
     expect(improvementIds).not.toContain("improvement-wrong-org");
     expect(improvementIds).not.toContain("improvement-wrong-site");
     expect(confirmationNames).toEqual(["Tenant A Worker"]);
