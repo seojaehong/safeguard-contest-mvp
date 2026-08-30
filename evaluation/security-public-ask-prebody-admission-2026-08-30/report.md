@@ -2,7 +2,7 @@
 
 ## Verdict
 
-PASS_CURRENT_SOURCE_PUBLIC_ASK_PREBODY_ADMISSION_LIVE_AND_RESCAN_PENDING
+PASS_LIVE_PRODUCTION_PUBLIC_ASK_PREBODY_ADMISSION_SOURCE_CONTRACT_RESCAN_PENDING
 
 Product commit ba20344e performs distributed public Ask admission before the
 request body is read or parsed. The admitted rate-limit decision is passed into
@@ -18,12 +18,12 @@ the shared Ask operation so the same request does not consume the quota twice.
 
 ## Live state
 
-The production marker reported aafe5d56a1fc51a629b7de9132f8153e7559abe5
-when checked. Product commit ba20344e is pushed to master but is not yet proven
-live.
+The production marker reports 69ce78c451da37e2670bc973c9e2e41a8b2969ad,
+which contains product commit ba20344e. The pre-body admission source contract
+is therefore deployed.
 
-This artifact does not close the scan finding. A fresh security re-scan after
-deployment is required.
+This artifact does not by itself close the scan finding. A fresh security
+re-scan is required.
 
 ## Preserved boundaries
 

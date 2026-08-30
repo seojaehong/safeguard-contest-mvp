@@ -1,6 +1,6 @@
 {
   "schema": "safeclaw-security-public-ask-prebody-admission/v1",
-  "verdict": "PASS_CURRENT_SOURCE_PUBLIC_ASK_PREBODY_ADMISSION_LIVE_AND_RESCAN_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_ASK_PREBODY_ADMISSION_SOURCE_CONTRACT_RESCAN_PENDING",
   "generatedAt": "2026-08-30T21:54:00+09:00",
   "sourceHead": "ba20344e",
   "productCommit": "ba20344e",
@@ -35,12 +35,12 @@
   },
   "production": {
     "checkedAt": "2026-08-30T21:54:00+09:00",
-    "commitSha": "aafe5d56a1fc51a629b7de9132f8153e7559abe5",
+    "commitSha": "69ce78c451da37e2670bc973c9e2e41a8b2969ad",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-n918m44n4-seojaehongs-projects.vercel.app",
-    "productCommitLive": false,
-    "liveVerificationPending": true
+    "deploymentUrl": "safeguard-contest-1qen5ld7p-seojaehongs-projects.vercel.app",
+    "productCommitLive": true,
+    "liveVerificationPending": false
   },
   "securityScan": {
     "currentFindingRemediatedInSource": true,

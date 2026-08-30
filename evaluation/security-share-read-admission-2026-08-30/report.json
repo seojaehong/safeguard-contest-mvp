@@ -1,0 +1,74 @@
+{
+  "schema": "safeclaw-security-share-read-admission/v1",
+  "verdict": "PASS_CURRENT_SOURCE_SHARE_READ_CALLER_ADMISSION_LIVE_AND_RESCAN_PENDING",
+  "generatedAt": "2026-08-30T21:57:00+09:00",
+  "sourceHead": "b9c41f4f",
+  "productCommit": "b9c41f4f",
+  "baseline": {
+    "scanId": "f19aa0ca-5fa5-4e8e-8482-b63ad854f230",
+    "targetRevision": "fb6763a789591189e03b8efb14a057def7216ef2",
+    "findingRuleId": "rate-limit.share-read-partition",
+    "findingTitle": "Caller-controlled Share identifiers partition the read limiter",
+    "severity": "medium",
+    "immutableOriginalBaselinePreserved": true
+  },
+  "remediation": {
+    "stableCallerQuota": {
+      "namespace": "share-session-read-caller",
+      "limitPerMinute": 60
+    },
+    "capabilityQuota": {
+      "namespace": "share-session-read",
+      "limitPerMinute": 60,
+      "plaintextIdentifiersStoredInRateKey": false
+    },
+    "serviceRoleReadConcurrency": {
+      "namespace": "share-session-read",
+      "capacity": 16,
+      "leaseMs": 10000,
+      "distributedRequiredInProduction": true
+    },
+    "distinctCapabilitySpraySharesCallerBudget": true
+  },
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd exec -- vitest run tests/workpack-share-authority-routes.test.ts tests/workpack-commercial-tenant-hardening.test.ts tests/public-distributed-rate-limit.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 3,
+      "testsPassed": 79,
+      "testsFailed": 0,
+      "durationSeconds": 2.37
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "passed": true
+    },
+    "diffCheckPassed": true
+  },
+  "production": {
+    "checkedAt": "2026-08-30T21:57:00+09:00",
+    "commitSha": "69ce78c451da37e2670bc973c9e2e41a8b2969ad",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-1qen5ld7p-seojaehongs-projects.vercel.app",
+    "productCommitLive": false,
+    "liveVerificationPending": true
+  },
+  "securityScan": {
+    "currentFindingRemediatedInSource": true,
+    "freshSecurityRescanRequired": true,
+    "findingClosureClaimed": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "fixtureOrGeneratedShareUsedAsExactProof": false,
+    "approvalGatedBoundariesPreserved": true
+  }
+}
