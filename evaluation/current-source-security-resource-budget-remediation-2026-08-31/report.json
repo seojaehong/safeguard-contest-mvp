@@ -1,13 +1,21 @@
 {
   "schemaVersion": "safeclaw-security-resource-budget-remediation/v1",
-  "generatedAt": "2026-08-31T03:32:45.9867345+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_APPROVAL_FREE_SECURITY_RESOURCE_BUDGETS_LIVE_PENDING",
+  "generatedAt": "2026-08-31T03:36:09.4499158+09:00",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_APPROVAL_FREE_SECURITY_RESOURCE_BUDGETS_DIRECT_PROBE_ADMISSION_BLOCKED",
+  "sourceHead": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
+  "productionCommit": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
   "source": {
     "baseCommit": "fc438249d75da3b2079c3329eeefab9f4eb7ac02",
     "productCommit": "7addc82eda83ec3668a055d0f6dc2cbc26c5d47c",
-    "productionCommitAtVerification": "fc438249d75da3b2079c3329eeefab9f4eb7ac02",
-    "sourceHeadMatchesProduction": false,
-    "liveAfterDeploymentRequired": true
+    "evidenceCommit": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
+    "productionCommitAtVerification": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
+    "sourceHeadMatchesProduction": true,
+    "liveAfterDeploymentRequired": false,
+    "productionBuild": {
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-16kuc1o88-seojaehongs-projects.vercel.app"
+    }
   },
   "securityBaseline": {
     "scanId": "76e79aa5-1391-4014-8671-ead3c48b6ee9",
@@ -110,6 +118,25 @@
     },
     "gitDiffCheck": "PASS",
     "stagedSecretPatternMatches": 0
+  },
+  "liveChecks": {
+    "ontologyGraph": {
+      "method": "GET",
+      "status": 503,
+      "responseBytes": 169,
+      "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      "providerOrSupabaseGraphReadReached": false,
+      "verdict": "PASS_FAIL_CLOSED_BEFORE_GRAPH_WORK_DURABLE_ADMISSION_NOT_ACTIVATED"
+    },
+    "learningExportUnauthenticated": {
+      "method": "GET",
+      "status": 401,
+      "responseBytes": 82,
+      "verdict": "PASS_AUTH_REQUIRED_BEFORE_EXPORT_COLLECTION_WORK"
+    },
+    "mcpProviderFanoutExecuted": false,
+    "directLiveBudgetExecutionProven": false,
+    "directLiveProbeBoundary": "Durable public admission is not configured for the ontology route, so live graph pagination and output limits were not exercised. Provider-backed MCP tools were not called."
   },
   "remainingApprovalGatedFindings": [
     "Legacy query and document tables lack RLS coverage",

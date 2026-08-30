@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-30T17:30:03.369Z",
+  "generatedAt": "2026-08-30T19:01:36.873Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "5b043bbaf6503bd4345a633d89dacbd4f8a3239c",
-  "productionCommit": "5b043bbaf6503bd4345a633d89dacbd4f8a3239c",
+  "sourceHead": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
+  "productionCommit": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "5b043bbaf6503bd4345a633d89dacbd4f8a3239c",
+    "commitSha": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-4bsy95nlr-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-16kuc1o88-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "5b043bbaf6503bd4345a633d89dacbd4f8a3239c",
-  "liveRollupLiveCommit": "5b043bbaf6503bd4345a633d89dacbd4f8a3239c",
+  "liveExactEvidenceCommit": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
+  "liveRollupLiveCommit": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -67,6 +67,7 @@
     "currentRepositorySecurityRescan": "evaluation\\current-full-repository-security-scan-2026-08-27\\report.json",
     "freshCurrentSourceSecurityScan": "evaluation\\current-source-standard-security-scan-2026-08-31-complete\\report.json",
     "currentSourceApprovalFreeSecurityRemediation": "evaluation\\current-source-security-approval-free-remediation-2026-08-31\\report.json",
+    "currentSourceSecurityResourceBudgetRemediation": "evaluation\\current-source-security-resource-budget-remediation-2026-08-31\\report.json",
     "currentSourceSecurityRemediationFollowup": "evaluation\\current-source-security-remediation-2026-08-30\\report.json",
     "currentSecurityGovernedPathCompatibility": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
     "currentSourceSecurityResidualRemediation": "evaluation\\current-source-security-residual-remediation-2026-08-28\\report.json",
@@ -208,6 +209,11 @@
       "gate": "current_source_approval_free_security_remediation",
       "state": "notice",
       "reason": "current live source records 4/4 bounded approval-free remediations with 0 approval-free source residuals left before rescan; the sealed 9-finding scan is unchanged, 5 database/RLS/atomicity findings remain approval-gated, fresh full rescan required=true, security-complete is false, and exact saved Share remains MISSING_EVIDENCE"
+    },
+    {
+      "gate": "current_source_security_resource_budget_remediation",
+      "state": "proven",
+      "reason": "current live source records 5 bounded resource-budget remediations from canonical scan 76e79aa5-1391-4014-8671-ead3c48b6ee9; canonical findings remain 10, manifest status remains failed, 5 database/RLS/atomicity findings remain approval-gated, direct live provider budget execution proven=false, security-complete is false, and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "current_source_security_remediation_followup",
@@ -1220,6 +1226,19 @@
     "currentSourceOpenApprovalFreeCount": 0,
     "scanFindingReclassificationPerformed": false,
     "freshFullRepositoryRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "currentSourceSecurityResourceBudgetRemediation": {
+    "verdict": "PASS_LIVE_DEPLOYED_SOURCE_APPROVAL_FREE_SECURITY_RESOURCE_BUDGETS_DIRECT_PROBE_ADMISSION_BLOCKED",
+    "sourceHead": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
+    "productionCommit": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
+    "scanId": "76e79aa5-1391-4014-8671-ead3c48b6ee9",
+    "manifestStatus": "failed",
+    "canonicalFindingCount": 10,
+    "remediatedFindingCount": 5,
+    "approvalGatedFindingCount": 5,
+    "directLiveBudgetExecutionProven": false,
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },

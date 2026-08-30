@@ -73,6 +73,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-31-complete", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
+  currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
@@ -8680,6 +8681,110 @@ function evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateCurrentSourceSecurityResourceBudgetRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourceSecurityResourceBudgetRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_source_security_resource_budget_remediation",
+      label: "Current-source security resource-budget remediation",
+      state: "missing",
+      evidencePath,
+      detail: "The current-source resource-budget remediation receipt is missing or invalid.",
+      nextActions: ["Restore the five-finding receipt without closing the failed scan-completion boundary or approval-gated findings."],
+    });
+  }
+
+  const source = isRecord(report.source) ? report.source : {};
+  const baseline = isRecord(report.securityBaseline) ? report.securityBaseline : {};
+  const severity = isRecord(baseline.canonicalSeverityCounts) ? baseline.canonicalSeverityCounts : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const python = isRecord(verification.python) ? verification.python : {};
+  const typescript = isRecord(verification.typescriptResourceRegression) ? verification.typescriptResourceRegression : {};
+  const ui = isRecord(verification.documentsShareUiRegression) ? verification.documentsShareUiRegression : {};
+  const build = isRecord(verification.productionBuild) ? verification.productionBuild : {};
+  const live = isRecord(report.liveChecks) ? report.liveChecks : {};
+  const ontology = isRecord(live.ontologyGraph) ? live.ontologyGraph : {};
+  const learning = isRecord(live.learningExportUnauthenticated) ? live.learningExportUnauthenticated : {};
+  const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
+  const remediated = Array.isArray(report.remediatedFindings) ? report.remediatedFindings.filter(isRecord) : [];
+  const remaining = Array.isArray(report.remainingApprovalGatedFindings) ? report.remainingApprovalGatedFindings : [];
+  const expectedIds = [
+    "csf_189f90e7a24ec6708057ff03",
+    "csf_f026a78c7fde954e6de62b35",
+    "csf_54bf3910ec279d5af8646218",
+    "csf_8f5647dae8aa76ce7a7fb396",
+    "csf_5b39903c1c8d110acb501e38",
+  ];
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = boundaries.dbMutationPerformed === false
+    && boundaries.providerDispatchCalled === false
+    && boundaries.shareSessionCreated === false
+    && boundaries.vectorOrEmbeddingMutationPerformed === false
+    && boundaries.wikiPublicationPerformed === false
+    && boundaries.koshaExactRegistryMutationPerformed === false;
+  const pass = readString(report.schemaVersion) === "safeclaw-security-resource-budget-remediation/v1"
+    && readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_APPROVAL_FREE_SECURITY_RESOURCE_BUDGETS_DIRECT_PROBE_ADMISSION_BLOCKED"
+    && sourceHead !== ""
+    && sourceHead === productionCommit
+    && sourceHead === readString(source.evidenceCommit)
+    && productionCommit === readString(source.productionCommitAtVerification)
+    && source.sourceHeadMatchesProduction === true
+    && source.liveAfterDeploymentRequired === false
+    && isGitAncestor(rootDir, sourceHead)
+    && readString(baseline.scanId) === "76e79aa5-1391-4014-8671-ead3c48b6ee9"
+    && baseline.canonicalArtifactsPresent === true
+    && readNumber(baseline.canonicalFindingCount) === 10
+    && readNumber(severity.medium) === 5
+    && readNumber(severity.low) === 5
+    && readString(baseline.manifestStatus) === "failed"
+    && readNumber(baseline.immutableOriginalFindingBaselineCount) === 18
+    && baseline.originalBaselinePreserved === true
+    && remediated.length === 5
+    && expectedIds.every((id) => remediated.some((finding) => readString(finding.findingId) === id
+      && readString(finding.status) === "current_source_verified"))
+    && readNumber(python.passed) === 159
+    && readNumber(python.failed) === 0
+    && readNumber(typescript.passed) === 174
+    && readNumber(typescript.failed) === 0
+    && readNumber(ui.passed) === 60
+    && readNumber(ui.failed) === 0
+    && readString(verification.typecheck) === "PASS"
+    && readString(build.verdict) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && readNumber(ontology.status) === 503
+    && readString(ontology.code) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+    && ontology.providerOrSupabaseGraphReadReached === false
+    && readNumber(learning.status) === 401
+    && live.mcpProviderFanoutExecuted === false
+    && live.directLiveBudgetExecutionProven === false
+    && remaining.length === 5
+    && noMutation
+    && readString(boundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && boundaries.approvalGatedFindingsClosed === false;
+
+  return gateResult({
+    id: "current_source_security_resource_budget_remediation",
+    label: "Current-source security resource-budget remediation",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Five approval-free resource-budget findings are source-tested and live-deployed: operator parser admission, bounded learning export, shared MCP provider admission with cancellation, paginated ontology graph budgets, and final MCP result ceilings. The canonical 10-finding files exist, but their manifest remains failed because durable scan completion did not synchronize; this is not a successful rescan or a security-complete claim. Direct live graph/provider budget execution was not proven because public durable admission failed closed before graph work and MCP provider fanout was not invoked. Five database/RLS/atomicity findings remain approval-gated, no mutation occurred, the original 18-finding baseline is preserved, and exact saved Share remains MISSING_EVIDENCE."
+      : `Resource-budget verdict=${readString(report.verdict) || "missing"}, source=${sourceHead || "missing"}, production=${productionCommit || "missing"}, scan=${readString(baseline.scanId) || "missing"}/${readString(baseline.manifestStatus) || "missing"}, findings=${readNumber(baseline.canonicalFindingCount)}, remediated=${remediated.length}, remainingApprovalGated=${remaining.length}, live=${readNumber(ontology.status)}/${readNumber(learning.status)}/${live.directLiveBudgetExecutionProven === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Keep the five database/RLS/atomicity findings on their explicit approval path and do not reclassify the failed scan manifest as complete.",
+          "Activate durable admission in an approved environment before claiming direct live ontology or MCP provider budget execution; keep exact saved Share separate.",
+        ]
+      : ["Restore aligned live identity, the exact five remediation receipts, failed-scan boundary, live admission evidence, no-mutation boundary, five approval-gated residuals, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateCurrentSourceSecurityRemediationFollowupGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.currentSourceSecurityRemediationFollowup;
   const report = readJsonFile(rootDir, evidencePath);
@@ -12840,6 +12945,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentRepositorySecurityRescanGate(rootDir),
     evaluateFreshCurrentSourceSecurityScanGate(rootDir),
     evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir),
+    evaluateCurrentSourceSecurityResourceBudgetRemediationGate(rootDir),
     evaluateCurrentSourceSecurityRemediationFollowupGate(rootDir),
     evaluateCurrentSecurityGovernedPathCompatibilityGate(rootDir),
     evaluateCurrentSourceSecurityResidualRemediationGate(rootDir),

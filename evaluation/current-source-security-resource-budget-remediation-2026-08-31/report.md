@@ -1,10 +1,10 @@
 # Current-source security resource budget remediation
 
-Verdict: `PASS_CURRENT_SOURCE_APPROVAL_FREE_SECURITY_RESOURCE_BUDGETS_LIVE_PENDING`
+Verdict: `PASS_LIVE_DEPLOYED_SOURCE_APPROVAL_FREE_SECURITY_RESOURCE_BUDGETS_DIRECT_PROBE_ADMISSION_BLOCKED`
 
 Product commit: `7addc82eda83ec3668a055d0f6dc2cbc26c5d47c`
 
-Production marker at verification: `fc438249d75da3b2079c3329eeefab9f4eb7ac02`
+Evidence and production marker at verification: `8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f`
 
 ## Scope
 
@@ -34,4 +34,9 @@ The immutable original 18-finding baseline is preserved. The source scan's canon
 
 No database, provider dispatch, Share-session, vector/embedding, wiki, or KOSHA exact-registry mutation was performed. The remaining RLS, workflow-write, and atomic MCP-token quota findings require their separate approval path. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
 
-This is current-source proof only. Live verification must wait until production reaches the product commit.
+## Live checks
+
+- Production is aligned to evidence commit `8aaee8f5` and includes product commit `7addc82e`.
+- Public ontology graph GET returned a bounded 169-byte 503 with `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE` before graph work. Durable public admission is not activated, so live pagination and output-limit execution are not claimed.
+- Unauthenticated learning export GET returned a bounded 82-byte 401 before collection work.
+- Provider-backed MCP fanout was not invoked.

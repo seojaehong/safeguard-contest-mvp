@@ -286,6 +286,61 @@ function currentSourceApprovalFreeSecurityRemediationFixture(): Record<string, u
   };
 }
 
+function currentSourceSecurityResourceBudgetRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-security-resource-budget-remediation/v1",
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_APPROVAL_FREE_SECURITY_RESOURCE_BUDGETS_DIRECT_PROBE_ADMISSION_BLOCKED",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    source: {
+      evidenceCommit: "fixture-sha",
+      productionCommitAtVerification: "fixture-sha",
+      sourceHeadMatchesProduction: true,
+      liveAfterDeploymentRequired: false,
+    },
+    securityBaseline: {
+      scanId: "76e79aa5-1391-4014-8671-ead3c48b6ee9",
+      canonicalArtifactsPresent: true,
+      canonicalFindingCount: 10,
+      canonicalSeverityCounts: { medium: 5, low: 5 },
+      manifestStatus: "failed",
+      immutableOriginalFindingBaselineCount: 18,
+      originalBaselinePreserved: true,
+    },
+    remediatedFindings: [
+      "csf_189f90e7a24ec6708057ff03",
+      "csf_f026a78c7fde954e6de62b35",
+      "csf_54bf3910ec279d5af8646218",
+      "csf_8f5647dae8aa76ce7a7fb396",
+      "csf_5b39903c1c8d110acb501e38",
+    ].map((findingId) => ({ findingId, status: "current_source_verified" })),
+    verification: {
+      python: { passed: 159, failed: 0 },
+      typescriptResourceRegression: { passed: 174, failed: 0 },
+      documentsShareUiRegression: { passed: 60, failed: 0 },
+      typecheck: "PASS",
+      productionBuild: { verdict: "PASS", staticPages: 28 },
+    },
+    liveChecks: {
+      ontologyGraph: { status: 503, code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE", providerOrSupabaseGraphReadReached: false },
+      learningExportUnauthenticated: { status: 401 },
+      mcpProviderFanoutExecuted: false,
+      directLiveBudgetExecutionProven: false,
+    },
+    remainingApprovalGatedFindings: Array.from({ length: 5 }, (_, index) => `approval-${index + 1}`),
+    boundaries: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaExactRegistryMutationPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      approvalGatedFindingsClosed: false,
+    },
+  };
+}
+
 function currentSourceSecurityRemediationFollowupFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_PRODUCTION_APPROVAL_FREE_SECURITY_REMEDIATIONS_POST_FIX_RESCAN_PENDING",
@@ -4503,6 +4558,11 @@ function createFixtureRoot(): string {
     rootDir,
     path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
     approvalFreeRemediation,
+  );
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
+    currentSourceSecurityResourceBudgetRemediationFixture(),
   );
   for (const receipt of approvalFreeRemediation.receipts as Array<{ evidencePath: string }>) {
     writeJson(rootDir, receipt.evidencePath, { verdict: "PASS_FIXTURE" });
@@ -8784,6 +8844,34 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "current_source_approval_free_security_remediation")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records deployed resource budgets without closing failed scan or approval boundaries", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-security-resource-budget-remediation-2026-08-31",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_security_resource_budget_remediation");
+    expect(gate?.state).toBe("proven");
+    expect(gate?.detail).toContain("Five approval-free resource-budget findings");
+    expect(gate?.detail).toContain("manifest remains failed");
+    expect(gate?.detail).toContain("Five database/RLS/atomicity findings remain approval-gated");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      boundaries: { exactSavedShareVerdict: string };
+    };
+    report.boundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "current_source_security_resource_budget_remediation")?.state)
       .toBe("contradicted");
   });
 

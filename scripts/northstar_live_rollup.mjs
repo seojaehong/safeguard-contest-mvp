@@ -50,6 +50,7 @@ const ARTIFACTS = Object.freeze({
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-31-complete", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
+  currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
@@ -577,6 +578,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const currentRepositorySecurityRescan = tryReadJson(rootDir, ARTIFACTS.currentRepositorySecurityRescan);
   const freshCurrentSourceSecurityScan = tryReadJson(rootDir, ARTIFACTS.freshCurrentSourceSecurityScan);
   const currentSourceApprovalFreeSecurityRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceApprovalFreeSecurityRemediation);
+  const currentSourceSecurityResourceBudgetRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityResourceBudgetRemediation);
   const currentSourceSecurityRemediationFollowup = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityRemediationFollowup);
   const currentSecurityGovernedPathCompatibility = tryReadJson(rootDir, ARTIFACTS.currentSecurityGovernedPathCompatibility);
   const currentSourceSecurityResidualRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityResidualRemediation);
@@ -723,6 +725,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "current_repository_security_rescan", ARTIFACTS.currentRepositorySecurityRescan, currentRepositorySecurityRescan),
     evidenceStatus(rootDir, currentHead, liveCommit, "fresh_current_source_security_scan", ARTIFACTS.freshCurrentSourceSecurityScan, freshCurrentSourceSecurityScan),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_approval_free_security_remediation", ARTIFACTS.currentSourceApprovalFreeSecurityRemediation, currentSourceApprovalFreeSecurityRemediation),
+    evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_resource_budget_remediation", ARTIFACTS.currentSourceSecurityResourceBudgetRemediation, currentSourceSecurityResourceBudgetRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_remediation_followup", ARTIFACTS.currentSourceSecurityRemediationFollowup, currentSourceSecurityRemediationFollowup),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_security_governed_path_compatibility", ARTIFACTS.currentSecurityGovernedPathCompatibility, currentSecurityGovernedPathCompatibility),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_residual_remediation", ARTIFACTS.currentSourceSecurityResidualRemediation, currentSourceSecurityResidualRemediation),
@@ -1018,6 +1021,30 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       freshFullRepositoryRescanRequired: recordAt(currentSourceApprovalFreeSecurityRemediation, "boundaries")?.freshFullRepositoryRescanRequired === true,
       securityCompleteClaimAllowed: recordAt(currentSourceApprovalFreeSecurityRemediation, "boundaries")?.securityCompleteClaimAllowed === true,
       exactSavedShareVerdict: asString(recordAt(currentSourceApprovalFreeSecurityRemediation, "boundaries")?.exactSavedShareVerdict),
+    },
+    currentSourceSecurityResourceBudgetRemediation: {
+      artifact: ARTIFACTS.currentSourceSecurityResourceBudgetRemediation,
+      verdict: isRecord(currentSourceSecurityResourceBudgetRemediation)
+        ? asString(currentSourceSecurityResourceBudgetRemediation.verdict)
+        : "missing",
+      sourceHead: isRecord(currentSourceSecurityResourceBudgetRemediation)
+        ? asString(currentSourceSecurityResourceBudgetRemediation.sourceHead)
+        : "",
+      productionCommit: isRecord(currentSourceSecurityResourceBudgetRemediation)
+        ? asString(currentSourceSecurityResourceBudgetRemediation.productionCommit)
+        : "",
+      scanId: asString(recordAt(currentSourceSecurityResourceBudgetRemediation, "securityBaseline")?.scanId),
+      manifestStatus: asString(recordAt(currentSourceSecurityResourceBudgetRemediation, "securityBaseline")?.manifestStatus),
+      canonicalFindingCount: asNumber(recordAt(currentSourceSecurityResourceBudgetRemediation, "securityBaseline")?.canonicalFindingCount),
+      remediatedFindingCount: Array.isArray(currentSourceSecurityResourceBudgetRemediation?.remediatedFindings)
+        ? currentSourceSecurityResourceBudgetRemediation.remediatedFindings.length
+        : 0,
+      approvalGatedFindingCount: Array.isArray(currentSourceSecurityResourceBudgetRemediation?.remainingApprovalGatedFindings)
+        ? currentSourceSecurityResourceBudgetRemediation.remainingApprovalGatedFindings.length
+        : 0,
+      directLiveBudgetExecutionProven: recordAt(currentSourceSecurityResourceBudgetRemediation, "liveChecks")?.directLiveBudgetExecutionProven === true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: asString(recordAt(currentSourceSecurityResourceBudgetRemediation, "boundaries")?.exactSavedShareVerdict),
     },
     currentSourceSecurityResidualRemediation: {
       artifact: ARTIFACTS.currentSourceSecurityResidualRemediation,

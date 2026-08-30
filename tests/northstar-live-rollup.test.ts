@@ -514,6 +514,19 @@ type RollupReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceSecurityResourceBudgetRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    scanId: string;
+    manifestStatus: string;
+    canonicalFindingCount: number | null;
+    remediatedFindingCount: number;
+    approvalGatedFindingCount: number;
+    directLiveBudgetExecutionProven: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceSecurityResidualRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1168,6 +1181,23 @@ function currentSourceApprovalFreeSecurityRemediationFixture(): Record<string, u
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
+  };
+}
+
+function currentSourceSecurityResourceBudgetRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_APPROVAL_FREE_SECURITY_RESOURCE_BUDGETS_DIRECT_PROBE_ADMISSION_BLOCKED",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    securityBaseline: {
+      scanId: "76e79aa5-1391-4014-8671-ead3c48b6ee9",
+      manifestStatus: "failed",
+      canonicalFindingCount: 10,
+    },
+    remediatedFindings: Array.from({ length: 5 }, (_, index) => ({ findingId: `finding-${index + 1}` })),
+    remainingApprovalGatedFindings: Array.from({ length: 5 }, (_, index) => `approval-${index + 1}`),
+    liveChecks: { directLiveBudgetExecutionProven: false },
+    boundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
   };
 }
 
@@ -2487,6 +2517,7 @@ function createFixtureRoot(): { root: string; head: string } {
   });
   writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-complete/report.json", freshCurrentSourceSecurityScanFixture());
   writeJson(root, "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json", currentSourceApprovalFreeSecurityRemediationFixture());
+  writeJson(root, "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json", currentSourceSecurityResourceBudgetRemediationFixture());
   writeJson(root, "evaluation/current-source-security-residual-remediation-2026-08-28/report.json", currentSourceSecurityResidualRemediationFixture());
   writeJson(root, "evaluation/share-ack-prebody-admission-2026-08-28/report.json", shareAckPreBodyAdmissionFixture());
   writeJson(root, "evaluation/safety-status-disconnect-lease-2026-08-28/report.json", safetyStatusDisconnectLeaseFixture());
@@ -2885,6 +2916,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/current-full-repository-security-scan-2026-08-27/report.json",
     "evaluation/current-source-standard-security-scan-2026-08-31-complete/report.json",
     "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json",
+    "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-residual-remediation-2026-08-28/report.json",
     "evaluation/share-ack-prebody-admission-2026-08-28/report.json",
     "evaluation/safety-status-disconnect-lease-2026-08-28/report.json",
@@ -3496,6 +3528,22 @@ describe("northstar live rollup", () => {
       currentSourceOpenApprovalFreeCount: 0,
       approvalGatedFindingCount: 5,
       freshFullRepositoryRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "current_source_security_resource_budget_remediation")).toMatchObject({
+      artifact: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
+    });
+    expect(report.currentSourceSecurityResourceBudgetRemediation).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_APPROVAL_FREE_SECURITY_RESOURCE_BUDGETS_DIRECT_PROBE_ADMISSION_BLOCKED",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      scanId: "76e79aa5-1391-4014-8671-ead3c48b6ee9",
+      manifestStatus: "failed",
+      canonicalFindingCount: 10,
+      remediatedFindingCount: 5,
+      approvalGatedFindingCount: 5,
+      directLiveBudgetExecutionProven: false,
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });

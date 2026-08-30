@@ -599,6 +599,19 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceSecurityResourceBudgetRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    scanId: string;
+    manifestStatus: string;
+    canonicalFindingCount: number | null;
+    remediatedFindingCount: number;
+    approvalGatedFindingCount: number;
+    directLiveBudgetExecutionProven: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceSecurityResidualRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1634,6 +1647,23 @@ function currentSourceApprovalFreeSecurityRemediationFixture(): Record<string, u
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
+  };
+}
+
+function currentSourceSecurityResourceBudgetRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_APPROVAL_FREE_SECURITY_RESOURCE_BUDGETS_DIRECT_PROBE_ADMISSION_BLOCKED",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    securityBaseline: {
+      scanId: "76e79aa5-1391-4014-8671-ead3c48b6ee9",
+      manifestStatus: "failed",
+      canonicalFindingCount: 10,
+    },
+    remediatedFindings: Array.from({ length: 5 }, (_, index) => ({ findingId: `finding-${index + 1}` })),
+    remainingApprovalGatedFindings: Array.from({ length: 5 }, (_, index) => `approval-${index + 1}`),
+    liveChecks: { directLiveBudgetExecutionProven: false },
+    boundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
   };
 }
 
@@ -3275,6 +3305,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
   });
   writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-complete/report.json", freshCurrentSourceSecurityScanFixture());
   writeJson(root, "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json", currentSourceApprovalFreeSecurityRemediationFixture());
+  writeJson(root, "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json", currentSourceSecurityResourceBudgetRemediationFixture());
   writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-complete/canonical/scan-manifest.json", { scan: { status: "completed" } });
   writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-complete/canonical/findings.json", { findings: [] });
   writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-complete/canonical/coverage.json", { completeness: "partial" });
@@ -4922,6 +4953,22 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       currentSourceOpenApprovalFreeCount: 0,
       scanFindingReclassificationPerformed: false,
       freshFullRepositoryRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "current_source_security_resource_budget_remediation",
+      state: "proven",
+      reason: expect.stringContaining("5 bounded resource-budget remediations"),
+    }));
+    expect(report.currentSourceSecurityResourceBudgetRemediation).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_APPROVAL_FREE_SECURITY_RESOURCE_BUDGETS_DIRECT_PROBE_ADMISSION_BLOCKED",
+      scanId: "76e79aa5-1391-4014-8671-ead3c48b6ee9",
+      manifestStatus: "failed",
+      canonicalFindingCount: 10,
+      remediatedFindingCount: 5,
+      approvalGatedFindingCount: 5,
+      directLiveBudgetExecutionProven: false,
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
