@@ -1,0 +1,424 @@
+{
+  "completeness": "partial",
+  "deferred": [
+    {
+      "candidate": {
+        "locations": [
+          "supabase/migrations/001_init.sql"
+        ],
+        "ruleId": "authorization-bypass.missing-row-level-security",
+        "severity": "medium",
+        "title": "Legacy document and query tables lack row-level security"
+      },
+      "id": "baseline-001",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "supabase/migrations/002_workspace_productization.sql"
+        ],
+        "ruleId": "authorization-bypass.null-tenant-policy",
+        "severity": "medium",
+        "title": "NULL-tenant dispatch rows bypass owner-scoped RLS"
+      },
+      "id": "baseline-002",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "supabase/migrations/002_workspace_productization.sql",
+          "supabase/migrations/003_knowledge_runtime.sql",
+          "supabase/migrations/010_commercial_operations.sql"
+        ],
+        "ruleId": "authorization-bypass.cross-tenant-reference",
+        "severity": "low",
+        "title": "Related object identifiers are not bound to the same tenant"
+      },
+      "id": "baseline-003",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "supabase/migrations/002_workspace_productization.sql",
+          "supabase/migrations/003_knowledge_runtime.sql",
+          "supabase/migrations/010_commercial_operations.sql"
+        ],
+        "ruleId": "authorization-bypass.client-writable-authoritative-state",
+        "severity": "low",
+        "title": "Tenant-writable rows can forge authoritative workflow evidence"
+      },
+      "id": "baseline-004",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "app/api/mcp-tokens/route.ts",
+          "lib/mcp-token-service.ts",
+          "supabase/migrations/007_mcp_tokens.sql"
+        ],
+        "ruleId": "race-condition.quota-enforcement",
+        "severity": "low",
+        "title": "MCP active-token quota remains non-atomic"
+      },
+      "id": "baseline-005",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "scripts/parser_safety.py",
+          "scripts/prepare_supabase_safety_ingestion.py",
+          "scripts/ingest_safety_reference_catalog.py",
+          "scripts/extract_kogas_risk_standard_models.py",
+          "scripts/parse_download_safety_forms.py"
+        ],
+        "ruleId": "parser-resource-exhaustion",
+        "severity": "medium",
+        "title": "Parser budgets may be enforced after expensive XLSX and PDF expansion"
+      },
+      "id": "baseline-006",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "scripts/scan_industrial_safety_templates.py"
+        ],
+        "ruleId": "resource-exhaustion.unbounded-template-inventory",
+        "severity": "medium",
+        "title": "Template inventory scanner initializes XLSX, PDF, and image parsers without file or aggregate work admission"
+      },
+      "id": "parser-001",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "scripts/audit_kosha_guides.mjs"
+        ],
+        "ruleId": "resource-exhaustion.unbounded-audit-archive-preflight",
+        "severity": "medium",
+        "title": "KOSHA audit performs an unbounded AdmZip inventory before its bounded snapshot helper"
+      },
+      "id": "parser-002",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "scripts/prod_orchestration_download_smoke.mjs",
+          "scripts/final_output_integrity_audit.mjs"
+        ],
+        "ruleId": "resource-exhaustion.unbounded-export-smoke-harness",
+        "severity": "low",
+        "title": "Export smoke chain accepts unbounded remote responses and has no subprocess or Chrome cleanup deadline"
+      },
+      "id": "parser-003",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "lib/public-status-operation.ts",
+          "app/api/safety-reference/status/route.ts",
+          "lib/public-distributed-rate-limit.ts",
+          "app/ontology/page.tsx",
+          "lib/ontology/graph-store.ts"
+        ],
+        "ruleId": "resource-exhaustion.public-status-lifetime",
+        "severity": "medium",
+        "title": "Public status pages can outlive their distributed admission lease"
+      },
+      "id": "public-001",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "lib/ontology-graph.ts",
+          "app/api/ontology/graph/route.ts",
+          "lib/ontology/graph-store.ts",
+          "app/ontology/page.tsx"
+        ],
+        "ruleId": "information-exposure.public-ontology-error-projection",
+        "severity": "medium",
+        "title": "Ontology failure responses bypass the output ceiling and expose upstream bodies"
+      },
+      "id": "public-002",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "app/api/input-photos/hazard-analysis/route.ts",
+          "lib/supabase-admin.ts"
+        ],
+        "ruleId": "resource-exhaustion.photo-readiness-auth-fanout",
+        "severity": "medium",
+        "title": "Photo readiness GET permits admissionless Supabase authentication fanout"
+      },
+      "id": "public-003",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "supabase/migrations/004_safety_reference_catalog.sql",
+          "lib/safety-reference-catalog.ts"
+        ],
+        "ruleId": "information-exposure.raw-corpus",
+        "severity": "medium",
+        "title": "Public catalog RLS exposes raw safety-reference and ingestion data"
+      },
+      "id": "tenant-006",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "app/api/share-sessions/[sessionId]/route.ts",
+          "lib/workpack-commercial-store.ts"
+        ],
+        "ruleId": "authorization-bypass.share-object-id",
+        "severity": "medium",
+        "title": "Public Share uses database object identifiers as bearer credentials"
+      },
+      "id": "tenant-007",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "app/api/workers/route.ts",
+          "supabase/migrations/002_workspace_productization.sql"
+        ],
+        "ruleId": "race-condition.worker-site-binding",
+        "severity": "medium",
+        "title": "Concurrent worker imports can bypass the site-transfer check"
+      },
+      "id": "tenant-008",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "lib/knowledge-review.ts",
+          "app/api/knowledge/review/route.ts"
+        ],
+        "ruleId": "race-condition.review-transition",
+        "severity": "medium",
+        "title": "Knowledge review transitions are not atomic"
+      },
+      "id": "tenant-009",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "lib/supabase-admin.ts",
+          "supabase/migrations/002_workspace_productization.sql"
+        ],
+        "ruleId": "race-condition.workspace-provisioning",
+        "severity": "low",
+        "title": "Workspace provisioning can create duplicate organizations and sites"
+      },
+      "id": "tenant-010",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "lib/mcp-scoped-tool.ts",
+          "app/api/mcp/[transport]/implementation.ts",
+          "lib/mcp-docpack-handler.ts",
+          "lib/search.ts"
+        ],
+        "ruleId": "resource-exhaustion.mcp-generation-cancellation-dropped",
+        "severity": "medium",
+        "title": "MCP document-generation tools drop transport cancellation"
+      },
+      "id": "mcp-006",
+      "reason": "Awaiting parent validation"
+    },
+    {
+      "candidate": {
+        "locations": [
+          "lib/current-workpack.ts",
+          "lib/workspace.ts",
+          "components/FieldOperationsWorkspace.tsx",
+          "components/CurrentWorkpackModules.tsx",
+          "components/AdminLoginPanel.tsx"
+        ],
+        "ruleId": "client-data.persistent-logout-retention",
+        "severity": "medium",
+        "title": "Logout retains raw worker data in persistent browser storage"
+      },
+      "id": "browser-007",
+      "reason": "Awaiting parent validation"
+    }
+  ],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "repository",
+  "mode": "repository",
+  "openQuestions": [
+    {
+      "question": "Effective production grants and migration deployment remain unverified."
+    },
+    {
+      "question": "Exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "question": "No mutation or provider execution was performed."
+    },
+    {
+      "question": "All discovery receipts are complete; nineteen deduplicated candidates require parent validation."
+    },
+    {
+      "question": "Production grants and migration deployment remain unverified."
+    },
+    {
+      "question": "MCP/Hermes/browser receipt remains pending."
+    },
+    {
+      "question": "Tenant/RLS/Share and MCP/Hermes/browser receipts remain pending."
+    },
+    {
+      "question": "Public APIs, tenant/RLS/Share, and MCP/Hermes/browser receipts remain pending."
+    },
+    {
+      "question": "Focused discovery receipts for public APIs, tenant/RLS/Share, parsers/exports, and MCP/Hermes/browser remain pending."
+    }
+  ],
+  "scanId": "f218c713-1a1c-4f4e-9777-8095926be1df",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "reported",
+      "id": "surface_cross-cutting-baseline-review",
+      "label": "Cross-cutting baseline review",
+      "receiptRefs": [],
+      "summary": "Five approval-gated baseline findings remain; the original five-path parser candidate was rejected as source-remediated."
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_parsers-and-exports",
+      "label": "Parsers and exports",
+      "receiptRefs": [],
+      "summary": "Three independent operator resource-exhaustion findings validated."
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_public-apis-and-status-surfaces",
+      "label": "Public APIs and status surfaces",
+      "receiptRefs": [],
+      "summary": "Three public status, error-projection, and authentication-fanout findings validated."
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_tenant-rls-share-and-atomicity",
+      "label": "Tenant, RLS, Share, and atomicity",
+      "receiptRefs": [],
+      "summary": "Five baseline and five additional authorization or atomicity findings validated with deployment limitations preserved."
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_mcp-hermes-openclaw-and-browser-client",
+      "label": "MCP, Hermes, OpenClaw, and browser client",
+      "receiptRefs": [],
+      "summary": "MCP generation cancellation and logout persistence findings validated; reviewed Hermes/OpenClaw/XSS boundaries found no issue."
+    },
+    {
+      "disposition": "rejected",
+      "id": "surface_original-parser-occurrence-at-five-remediated-paths",
+      "label": "Original parser occurrence at five remediated paths",
+      "receiptRefs": [],
+      "summary": "Current source applies ParserBudget and bounded archive admission at the previously cited paths; sibling scanners are reported separately."
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_cross-cutting-baseline-review-2",
+      "label": "Cross-cutting baseline review",
+      "receiptRefs": [],
+      "summary": "25 files fully reviewed; baseline candidates await parent validation."
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_parsers-and-exports-2",
+      "label": "Parsers and exports",
+      "receiptRefs": [],
+      "summary": "20 files fully reviewed; three sibling operator resource candidates await validation; original parser occurrences appear remediated."
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_public-apis-and-status-surfaces-2",
+      "label": "Public APIs and status surfaces",
+      "receiptRefs": [],
+      "summary": "29 files fully reviewed; three public candidates await validation."
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_tenant-rls-share-and-atomicity-2",
+      "label": "Tenant, RLS, Share, and atomicity",
+      "receiptRefs": [],
+      "summary": "25 files fully reviewed; five baseline findings confirmed and five additional candidates await validation."
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_mcp-hermes-openclaw-and-browser-client-2",
+      "label": "MCP, Hermes, OpenClaw, and browser client",
+      "receiptRefs": [],
+      "summary": "29 files fully reviewed; remote Hermes and OpenClaw boundaries held, while MCP cancellation and logout retention candidates await validation."
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_parsers-and-exports-3",
+      "label": "Parsers and exports",
+      "receiptRefs": [],
+      "summary": "20 files fully reviewed; three sibling operator resource candidates await validation; original five parser occurrences appear source-remediated."
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_tenant-rls-share-and-atomicity-3",
+      "label": "Tenant, RLS, Share, and atomicity",
+      "receiptRefs": [],
+      "summary": "25 files fully reviewed; five baseline findings confirmed and five additional authorization or atomicity candidates await validation."
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_cross-cutting-baseline-review-3",
+      "label": "Cross-cutting baseline review",
+      "receiptRefs": [],
+      "summary": "25 files fully reviewed; six candidates await parent validation."
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_parsers-and-exports-4",
+      "label": "Parsers and exports",
+      "receiptRefs": [],
+      "summary": "20 files fully reviewed; three operator resource-exhaustion candidates await parent validation."
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_public-apis-and-status-surfaces-3",
+      "label": "Public APIs and status surfaces",
+      "receiptRefs": [],
+      "summary": "29 files fully reviewed; three public resource or information-exposure candidates await parent validation."
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_parsers-and-exports-5",
+      "label": "Parsers and exports",
+      "receiptRefs": [],
+      "summary": "20 files fully reviewed; three independently reachable operator resource-exhaustion candidates await parent validation. Four prior approval-free occurrences are source-remediated."
+    }
+  ]
+}

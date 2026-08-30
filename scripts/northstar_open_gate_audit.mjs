@@ -71,7 +71,7 @@ const EVIDENCE_PATHS = Object.freeze({
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
-  freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-31-complete", "report.json"),
+  freshCurrentSourceSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-complete", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
@@ -8541,33 +8541,34 @@ function evaluateFreshCurrentSourceSecurityScanGate(rootDir) {
     && mutation.vectorUploadPerformed === false
     && mutation.wikiPublished === false
     && mutation.exactTrustRegistryMutationPerformed === false;
-  const pass = readString(report.verdict) === "NOTICE_CURRENT_SOURCE_STANDARD_SCAN_9_FINDINGS_PARTIAL_COVERAGE"
-    && readString(report.scanId) === "8d7fd844-d4cb-49ab-b984-36ed6ab0beba"
-    && readString(report.sourceHead) === "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c"
-    && readString(report.deployedProductSource) === "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c"
+  const pass = readString(report.verdict) === "NOTICE_CURRENT_HEAD_STANDARD_SCAN_18_FINDINGS_PARTIAL_COVERAGE"
+    && readString(report.scanId) === "f218c713-1a1c-4f4e-9777-8095926be1df"
+    && readString(report.sourceHead) === "b5f145120766cd2ef904fce38ef32ed1a9facf74"
+    && readString(report.deployedProductSource) === "b5f145120766cd2ef904fce38ef32ed1a9facf74"
     && readString(scan.status) === "completed"
     && readString(scan.mode) === "standard"
     && readString(scan.targetKind) === "git_revision"
     && readString(scan.coverageCompleteness) === "partial"
-    && readNumber(scan.trackedFileCount) === 5241
-    && readNumber(scan.reviewedSurfaceCount) === 11
-    && readNumber(scan.deferredCoverageItemCount) === 15
-    && readNumber(scan.reportableFindingCount) === 9
-    && readNumber(scan.uniqueFindingWriteupCount) === 9
+    && readNumber(scan.trackedFileCount) === 6822
+    && readNumber(scan.reviewedSurfaceCount) === 17
+    && readNumber(scan.primaryReviewedSurfaceCount) === 5
+    && readNumber(scan.deferredCoverageItemCount) === 19
+    && readNumber(scan.reportableFindingCount) === 18
+    && readNumber(scan.uniqueFindingWriteupCount) === 18
     && readNumber(severity.critical) === 0
     && readNumber(severity.high) === 0
-    && readNumber(severity.medium) === 6
-    && readNumber(severity.low) === 3
+    && readNumber(severity.medium) === 13
+    && readNumber(severity.low) === 5
     && readNumber(baseline.immutableOriginalFindingCount) === 18
     && baseline.preserved === true
     && baseline.rewritten === false
-    && readNumber(disposition.approvalGatedDatabaseOrAtomicityCount) === 5
-    && readNumber(disposition.approvalSensitiveShareCapabilityCount) === 0
-    && readNumber(disposition.approvalFreeProductSourceResidualCount) === 4
-    && readNumber(disposition.fullyClosedBoundedSourceCandidateCount) === 0
+    && readNumber(disposition.approvalGatedDatabaseOrAtomicityCount) === 9
+    && readNumber(disposition.approvalSensitiveShareCapabilityCount) === 1
+    && readNumber(disposition.approvalFreeProductSourceResidualCount) === 8
+    && readNumber(disposition.fullyClosedBoundedSourceCandidateCount) === 1
     && disposition.securityCompleteClaimAllowed === false
-    && readNumber(canonical.findingWriteupCount) === 9
-    && readNumber(canonical.supportingEvidenceCount) === 9
+    && readNumber(canonical.findingWriteupCount) === 18
+    && readNumber(canonical.supportingEvidenceCount) === 18
     && canonicalFilesPresent
     && noMutation
     && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
@@ -8585,14 +8586,14 @@ function evaluateFreshCurrentSourceSecurityScanGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Current Standard scan 8d7fd844 is sealed at source/live f6835f8d with 9 findings (6 medium, 3 low), 9 finding write-ups, and partial canonical coverage across 11 recorded surface rows with 15 deferred entries in a 5,241-file repository. The immutable original 18-finding baseline and completed prior scan are preserved. Four approval-free source residuals and five database/RLS/atomicity findings remain at the scanned revision. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      ? "Current Standard scan f218c713 is sealed at source/live b5f14512 with 18 findings (13 medium, 5 low), 18 finding write-ups, and partial canonical coverage across 17 recorded surface rows with 19 deferred entries in a 6,822-file repository. The immutable original 18-finding baseline, completed prior scan, and later 9-finding partial scan are preserved. Eight approval-free source findings, nine database/RLS/atomicity findings, and one approval-sensitive Share capability finding remain open. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
       : `Fresh scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(report.scanId) || "missing"}, source=${readString(report.sourceHead) || "missing"}, findings=${readNumber(scan.reportableFindingCount)}, severity=${readNumber(severity.medium)}/${readNumber(severity.low)}, coverage=${readString(scan.coverageCompleteness) || "missing"}/${readNumber(scan.reviewedSurfaceCount)}/${readNumber(scan.deferredCoverageItemCount)}, canonical=${canonicalFilesPresent}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
-          "Remediate the four approval-free source residuals in bounded waves and rerun focused validation.",
-          "Keep the five database/RLS/atomicity findings approval-gated and exact saved Share separate; do not claim security completion from scan completion.",
+          "Remediate the eight approval-free source findings in bounded waves and rerun focused validation.",
+          "Keep the nine database/RLS/atomicity findings approval-gated and the Share capability finding separate; do not claim security completion from scan completion.",
         ]
-      : ["Restore the exact sealed scan identity, 9-finding and 9-write-up counts, canonical files, partial-coverage boundary, no-mutation state, and exact Share MISSING_EVIDENCE."],
+      : ["Restore the exact sealed scan identity, 18-finding and 18-write-up counts, canonical files, partial-coverage boundary, no-mutation state, and exact Share MISSING_EVIDENCE."],
   });
 }
 
@@ -8897,6 +8898,7 @@ function isCurrentSecurityGovernedPathCompatibility(rootDir, gateId, governedPat
   const verification = isRecord(report.verification) ? report.verification : {};
   const vitest = isRecord(verification.vitest) ? verification.vitest : {};
   const baseline = isRecord(report.baselineBoundary) ? report.baselineBoundary : {};
+  const postFixScan = isRecord(report.postFixFullRepositoryScan) ? report.postFixFullRepositoryScan : {};
   const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
   const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
   const sourceHead = readString(report.sourceHead);
@@ -8909,7 +8911,7 @@ function isCurrentSecurityGovernedPathCompatibility(rootDir, gateId, governedPat
     && mutation.vectorOrEmbeddingMutationPerformed === false
     && mutation.wikiPublicationPerformed === false
     && mutation.koshaExactRegistryMutationPerformed === false;
-  return readString(report.verdict) === "PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_PENDING"
+  return readString(report.verdict) === "PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_COMPLETE_FINDINGS_OPEN"
     && sourceHead.length > 0
     && productionCommit.length > 0
     && isGitAncestor(rootDir, sourceHead)
@@ -8929,14 +8931,21 @@ function isCurrentSecurityGovernedPathCompatibility(rootDir, gateId, governedPat
     && readString(verification.typecheck) === "PASS"
     && readString(verification.browserCompatibility) === "PRESERVED_PRIOR_LIVE_EVIDENCE_NOT_REEXECUTED"
     && baseline.immutableOriginalBaselinePreserved === true
-    && baseline.postFixFullRepositoryRescanCompleted === false
+    && baseline.postFixFullRepositoryRescanCompleted === true
     && baseline.securityCompleteClaimAllowed === false
+    && readString(postFixScan.scanId) === "f218c713-1a1c-4f4e-9777-8095926be1df"
+    && readString(postFixScan.sourceHead) === "b5f145120766cd2ef904fce38ef32ed1a9facf74"
+    && readNumber(postFixScan.reportableFindingCount) === 18
+    && readNumber(postFixScan.mediumFindingCount) === 13
+    && readNumber(postFixScan.lowFindingCount) === 5
+    && readString(postFixScan.coverageCompleteness) === "partial"
+    && postFixScan.securityCompleteClaimAllowed === false
     && noMutation
     && readString(remaining.distributedAdmissionActivation) === "OPERATOR_CONFIGURATION_REQUIRED"
     && readString(remaining.publicCatalogRls) === "APPROVAL_GATED_DB_POLICY_CHANGE_NOT_PERFORMED"
     && readString(remaining.recipientAckLiveDataApproval) === "APPROVAL_GATED"
     && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
-    && readString(remaining.postFixFullRepositoryScan) === "PENDING_DESKTOP_SECURITY_SCAN";
+    && readString(remaining.postFixFullRepositoryScan) === "COMPLETE_SEALED_PARTIAL_COVERAGE_18_FINDINGS_OPEN";
 }
 
 /**
@@ -10158,6 +10167,43 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     "security_followup_remediation",
     SECURITY_FOLLOWUP_REMEDIATION_PATHS,
   );
+  const residualReport = readJsonFile(rootDir, EVIDENCE_PATHS.currentSourceSecurityResidualRemediation);
+  const residualReportSourceHead = isRecord(residualReport) ? readString(residualReport.sourceHead) : "";
+  const residualReportApplies = residualReportSourceHead.length > 0
+    && isEvidenceCurrentForPaths(rootDir, residualReportSourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS);
+  const accidentReport = readJsonFile(rootDir, EVIDENCE_PATHS.securityAccidentCaseCompatibility);
+  const accidentCompatibility = isRecord(accidentReport) && isRecord(accidentReport.governedPathCompatibility)
+    ? accidentReport.governedPathCompatibility
+    : {};
+  const accidentReportSourceHead = isRecord(accidentReport) ? readString(accidentReport.productCommit) : "";
+  const accidentCoveredGateIds = Array.isArray(accidentCompatibility.coveredGateIds)
+    ? accidentCompatibility.coveredGateIds.map(readString)
+    : [];
+  const accidentReportApplies = accidentCoveredGateIds.includes("security_followup_remediation")
+    && accidentReportSourceHead.length > 0
+    && isEvidenceCurrentForPaths(rootDir, accidentReportSourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS);
+  const postRemediationReport = readJsonFile(rootDir, EVIDENCE_PATHS.postRemediationSecuritySourceClosure);
+  const postRemediationCompatibility = isRecord(postRemediationReport)
+    && isRecord(postRemediationReport.governedPathCompatibility)
+    ? postRemediationReport.governedPathCompatibility
+    : {};
+  const postRemediationSourceHead = isRecord(postRemediationReport)
+    ? readString(postRemediationReport.sourceHead)
+    : "";
+  const postRemediationCoveredGateIds = Array.isArray(postRemediationCompatibility.coveredGateIds)
+    ? postRemediationCompatibility.coveredGateIds.map(readString)
+    : [];
+  const postRemediationCompatibilityCurrent = isPostRemediationSecuritySourceCompatibilityCurrent(
+    rootDir,
+    "security_followup_remediation",
+    SECURITY_FOLLOWUP_REMEDIATION_PATHS,
+  );
+  const postRemediationReportApplies = postRemediationCoveredGateIds.includes("security_followup_remediation")
+    && postRemediationSourceHead.length > 0
+    && isEvidenceCurrentForPaths(rootDir, postRemediationSourceHead, SECURITY_FOLLOWUP_REMEDIATION_PATHS);
+  const applicableCompanionReceiptsPass = (!residualReportApplies || currentResidualCompatibility)
+    && (!accidentReportApplies || accidentCompatibilityCurrent)
+    && (!postRemediationReportApplies || postRemediationCompatibilityCurrent);
   const exportAdmissionCompatibilityCurrent = isDocumentExportAdmissionCompatibilityCurrent(
     rootDir,
     "security_followup_remediation",
@@ -10171,6 +10217,7 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     && compatibilityPass
     && latestCompatibilityPass
     && currentProductPaths
+    && applicableCompanionReceiptsPass
     && readString(deployment.branch) === "master"
     && readString(deployment.environment) === "production"
     && deployment.liveAfterDeploymentRequired === false
@@ -10204,7 +10251,7 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     evidencePath,
     detail: pass
       ? `The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its ${readNumber(compatibilityFocused.files)}/${readNumber(compatibilityFocused.tests)} compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (${accidentCompatibilityCurrent ? "6 files / 146 tests" : "covered by another current receipt"}). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.`
-      : `Security follow-up verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceHead.length > 0 && sourceHead === readString(deployment.productionCommit)}, compatibilityPass=${compatibilityPass}, latestCompatibilityPass=${latestCompatibilityPass}, latestCompatibilityCurrent=${latestCompatibilityCurrent}, accidentCompatibilityCurrent=${accidentCompatibilityCurrent}, productPathsCurrent=${currentProductPaths}, exportAdmissionCompatibility=${exportAdmissionCompatibilityCurrent}, findings=${readNumber(scan.sealedFindingCount)}, baseline=${readNumber(scan.immutableOriginalBaselineFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, remediations=${remediations.length}, tests=${readNumber(focused.tests)}, compatibilityTests=${readNumber(compatibilityFocused.tests)}, latestCompatibilityTests=${readNumber(latestCompatibilityFocused.tests)}, liveProviderProbe=${deployment.liveProviderCancellationProbeExecuted === true}, baselineRewritten=${boundaries.originalBaselineRewritten === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+      : `Security follow-up verdict=${readString(report.verdict) || "unknown"}, sourceMatchesProduction=${sourceHead.length > 0 && sourceHead === readString(deployment.productionCommit)}, compatibilityPass=${compatibilityPass}, latestCompatibilityPass=${latestCompatibilityPass}, latestCompatibilityCurrent=${latestCompatibilityCurrent}, accidentCompatibilityCurrent=${accidentCompatibilityCurrent}, productPathsCurrent=${currentProductPaths}, applicableCompanionReceiptsPass=${applicableCompanionReceiptsPass}, exportAdmissionCompatibility=${exportAdmissionCompatibilityCurrent}, findings=${readNumber(scan.sealedFindingCount)}, baseline=${readNumber(scan.immutableOriginalBaselineFindingCount)}, deferred=${readNumber(scan.deferredCandidateCount)}, remediations=${remediations.length}, tests=${readNumber(focused.tests)}, compatibilityTests=${readNumber(compatibilityFocused.tests)}, latestCompatibilityTests=${readNumber(latestCompatibilityFocused.tests)}, liveProviderProbe=${deployment.liveProviderCancellationProbeExecuted === true}, baselineRewritten=${boundaries.originalBaselineRewritten === true}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
           "Keep the immutable baseline and two deferred candidates visible in future security review; do not convert this scoped remediation into a security-complete claim.",
@@ -12915,11 +12962,11 @@ function evaluateCurrentSecurityGovernedPathCompatibilityGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? `Current source and production include a shared compatibility receipt for ${coveredGateIds.length} security notices across ${governedPaths.length} governed paths. Contract regression passed ${readNumber(vitest.filesPassed)} files / ${readNumber(vitest.testsPassed)} tests; the opt-in recipient browser file and its ${readNumber(vitest.testsSkipped)} tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. This receipt does not rewrite immutable findings or complete the pending full scan, distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`
+      ? `Current source and production include a shared compatibility receipt for ${coveredGateIds.length} security notices across ${governedPaths.length} governed paths. Contract regression passed ${readNumber(vitest.filesPassed)} files / ${readNumber(vitest.testsPassed)} tests; the opt-in recipient browser file and its ${readNumber(vitest.testsSkipped)} tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. Sealed full scan f218c713 is complete with 18 open findings and partial coverage; this receipt does not rewrite immutable findings or claim security completion. Distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`
       : `Current compatibility verdict=${isRecord(report) ? readString(report.verdict) || "missing" : "missing"}, tests=${readNumber(vitest.filesPassed)}/${readNumber(vitest.testsPassed)}, browserSkipped=${readNumber(vitest.filesSkipped)}/${readNumber(vitest.testsSkipped)}, rescan=${readString(remaining.postFixFullRepositoryScan) || "missing"}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
-      ? ["Keep prior live browser receipts visible, run the pending full Desktop scan, and retain distributed, DB/RLS, recipient ACK, and exact saved Share approval boundaries."]
-      : ["Restore all governed-path receipts, at least the original 20/233 contract coverage, transparent browser skips, no-mutation boundaries, pending full scan, and exact Share MISSING_EVIDENCE."],
+      ? ["Keep prior live browser receipts visible, remediate the eight approval-free findings in bounded waves, and retain distributed, DB/RLS, recipient ACK, and exact saved Share approval boundaries."]
+      : ["Restore all governed-path receipts, at least the original 20/233 contract coverage, transparent browser skips, no-mutation boundaries, the sealed 18-finding scan boundary, and exact Share MISSING_EVIDENCE."],
   });
 }
 

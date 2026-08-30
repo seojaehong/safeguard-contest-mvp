@@ -1587,20 +1587,20 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
 
 function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
   return {
-    verdict: "NOTICE_CURRENT_SOURCE_STANDARD_SCAN_9_FINDINGS_PARTIAL_COVERAGE",
-    scanId: "8d7fd844-d4cb-49ab-b984-36ed6ab0beba",
-    sourceHead: "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c",
-    deployedProductSource: "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c",
-    scan: { status: "completed", mode: "standard", targetKind: "git_revision", coverageCompleteness: "partial", trackedFileCount: 5241, reviewedSurfaceCount: 11, deferredCoverageItemCount: 15, reportableFindingCount: 9, uniqueFindingWriteupCount: 9, severity: { critical: 0, high: 0, medium: 6, low: 3 } },
+    verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_18_FINDINGS_PARTIAL_COVERAGE",
+    scanId: "f218c713-1a1c-4f4e-9777-8095926be1df",
+    sourceHead: "b5f145120766cd2ef904fce38ef32ed1a9facf74",
+    deployedProductSource: "b5f145120766cd2ef904fce38ef32ed1a9facf74",
+    scan: { status: "completed", mode: "standard", targetKind: "git_revision", coverageCompleteness: "partial", trackedFileCount: 6822, reviewedSurfaceCount: 17, primaryReviewedSurfaceCount: 5, deferredCoverageItemCount: 19, reportableFindingCount: 18, uniqueFindingWriteupCount: 18, severity: { critical: 0, high: 0, medium: 13, low: 5 } },
     baseline: { immutableOriginalFindingCount: 18, preserved: true, rewritten: false },
-    currentDisposition: { approvalGatedDatabaseOrAtomicityCount: 5, approvalSensitiveShareCapabilityCount: 0, approvalFreeProductSourceResidualCount: 4, fullyClosedBoundedSourceCandidateCount: 0, securityCompleteClaimAllowed: false },
+    currentDisposition: { approvalGatedDatabaseOrAtomicityCount: 9, approvalSensitiveShareCapabilityCount: 1, approvalFreeProductSourceResidualCount: 8, fullyClosedBoundedSourceCandidateCount: 1, securityCompleteClaimAllowed: false },
     canonicalArtifacts: {
-      manifest: "evaluation/current-source-standard-security-scan-2026-08-31-complete/canonical/scan-manifest.json",
-      findings: "evaluation/current-source-standard-security-scan-2026-08-31-complete/canonical/findings.json",
-      coverage: "evaluation/current-source-standard-security-scan-2026-08-31-complete/canonical/coverage.json",
-      markdown: "evaluation/current-source-standard-security-scan-2026-08-31-complete/scan-report.md",
-      findingWriteupCount: 9,
-      supportingEvidenceCount: 9,
+      manifest: "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/scan-manifest.json",
+      findings: "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/findings.json",
+      coverage: "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/coverage.json",
+      markdown: "evaluation/current-head-standard-security-scan-2026-08-31-complete/scan-report.md",
+      findingWriteupCount: 18,
+      supportingEvidenceCount: 18,
     },
     mutationBoundary: {
       dbMutationPerformed: false,
@@ -3303,14 +3303,14 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       securityCompleteClaimAllowed: false,
     },
   });
-  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-complete/report.json", freshCurrentSourceSecurityScanFixture());
+  writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/report.json", freshCurrentSourceSecurityScanFixture());
   writeJson(root, "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json", currentSourceApprovalFreeSecurityRemediationFixture());
   writeJson(root, "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json", currentSourceSecurityResourceBudgetRemediationFixture());
-  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-complete/canonical/scan-manifest.json", { scan: { status: "completed" } });
-  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-complete/canonical/findings.json", { findings: [] });
-  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-complete/canonical/coverage.json", { completeness: "partial" });
+  writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/scan-manifest.json", { scan: { status: "completed" } });
+  writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/findings.json", { findings: [] });
+  writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/coverage.json", { completeness: "partial" });
   fs.writeFileSync(
-    path.join(root, "evaluation/current-source-standard-security-scan-2026-08-31-complete/scan-report.md"),
+    path.join(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/scan-report.md"),
     "# sealed fixture\n",
     "utf8",
   );
@@ -4936,7 +4936,7 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "fresh_current_source_security_scan",
       state: "notice",
-      reason: expect.stringContaining("9 open findings"),
+      reason: expect.stringContaining("18 open findings"),
     }));
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "current_source_approval_free_security_remediation",
@@ -5011,22 +5011,22 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       reason: expect.stringContaining("before archive expansion"),
     }));
     expect(report.freshCurrentSourceSecurityScan).toMatchObject({
-      verdict: "NOTICE_CURRENT_SOURCE_STANDARD_SCAN_9_FINDINGS_PARTIAL_COVERAGE",
-      scanId: "8d7fd844-d4cb-49ab-b984-36ed6ab0beba",
-      sourceHead: "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c",
-      deployedProductSource: "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c",
+      verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_18_FINDINGS_PARTIAL_COVERAGE",
+      scanId: "f218c713-1a1c-4f4e-9777-8095926be1df",
+      sourceHead: "b5f145120766cd2ef904fce38ef32ed1a9facf74",
+      deployedProductSource: "b5f145120766cd2ef904fce38ef32ed1a9facf74",
       status: "completed",
       coverageCompleteness: "partial",
-      reviewedSurfaceCount: 11,
-      deferredCoverageItemCount: 15,
-      reportableFindingCount: 9,
-      mediumFindingCount: 6,
-      lowFindingCount: 3,
+      reviewedSurfaceCount: 17,
+      deferredCoverageItemCount: 19,
+      reportableFindingCount: 18,
+      mediumFindingCount: 13,
+      lowFindingCount: 5,
       immutableOriginalFindingCount: 18,
-      approvalGatedDatabaseOrAtomicityCount: 5,
-      approvalSensitiveShareCapabilityCount: 0,
-      approvalFreeProductSourceResidualCount: 4,
-      fullyClosedBoundedSourceCandidateCount: 0,
+      approvalGatedDatabaseOrAtomicityCount: 9,
+      approvalSensitiveShareCapabilityCount: 1,
+      approvalFreeProductSourceResidualCount: 8,
+      fullyClosedBoundedSourceCandidateCount: 1,
       freshFullRepositoryScanCompleted: true,
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",

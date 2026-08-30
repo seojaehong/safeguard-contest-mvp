@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-current-security-governed-path-compatibility/v1",
-  "generatedAt": "2026-08-31T04:08:13.5875522+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_PENDING",
+  "generatedAt": "2026-08-31T05:15:00+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_COMPLETE_FINDINGS_OPEN",
   "sourceHead": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
-  "productionCommit": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
+  "productionCommit": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
   "productionIncludesSourceHead": true,
   "coveredGateIds": [
     "share_ack_prebody_admission_security",
@@ -61,7 +61,16 @@
   },
   "baselineBoundary": {
     "immutableOriginalBaselinePreserved": true,
-    "postFixFullRepositoryRescanCompleted": false,
+    "postFixFullRepositoryRescanCompleted": true,
+    "securityCompleteClaimAllowed": false
+  },
+  "postFixFullRepositoryScan": {
+    "scanId": "f218c713-1a1c-4f4e-9777-8095926be1df",
+    "sourceHead": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
+    "reportableFindingCount": 18,
+    "mediumFindingCount": 13,
+    "lowFindingCount": 5,
+    "coverageCompleteness": "partial",
     "securityCompleteClaimAllowed": false
   },
   "mutationBoundary": {
@@ -79,6 +88,6 @@
     "publicCatalogRls": "APPROVAL_GATED_DB_POLICY_CHANGE_NOT_PERFORMED",
     "recipientAckLiveDataApproval": "APPROVAL_GATED",
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
-    "postFixFullRepositoryScan": "PENDING_DESKTOP_SECURITY_SCAN"
+    "postFixFullRepositoryScan": "COMPLETE_SEALED_PARTIAL_COVERAGE_18_FINDINGS_OPEN"
   }
 }

@@ -1,8 +1,8 @@
 # Current Security Governed-Path Compatibility
 
-- Verdict: `PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_PENDING`
+- Verdict: `PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_COMPLETE_FINDINGS_OPEN`
 - Product source: `679bb91711c0afecf12aea8a0b650da8a99c03ff`
-- Observed production marker: `679bb91711c0afecf12aea8a0b650da8a99c03ff`
+- Observed production marker: `b5f145120766cd2ef904fce38ef32ed1a9facf74`
 - Covered notice gates: 10
 - Governed paths: 27
 
@@ -15,7 +15,8 @@
 
 ## Boundary
 
-This receipt proves current source compatibility for the seven listed security notices only. It does not
-replace their immutable scan findings, complete the pending post-fix repository scan, activate distributed
-admission, mutate database policy, create a Share session or read confirmation, or call a provider. Exact
-saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
+This receipt proves current source compatibility for the listed security notices only. Sealed Standard scan
+`f218c713-1a1c-4f4e-9777-8095926be1df` completed with 18 open findings and partial coverage. It does not
+replace immutable scan findings, claim security completion, activate distributed admission, mutate database
+policy, create a Share session or read confirmation, or call a provider. Exact saved `/share/[sessionId]`
+remains `MISSING_EVIDENCE`.

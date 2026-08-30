@@ -1,0 +1,106 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "565926d05803dca29a5ec8c5e09edae13ac46a137e18aedfc012a5633f5f3eed"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "56aa49442dc04159d98c009a6d508e1c5aef91fc1494388e6ced3507c293d87e"
+      }
+    ],
+    "completedAt": "2026-08-30T19:40:21.576760Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "f218c713-1a1c-4f4e-9777-8095926be1df",
+    "preservedSources": {
+      "checkpoints/1dd63b6587010f2f83f5bf5238da0cc4800f683c2084fdac3b631316ae9f8375.json": "0cf302fd245d6ef02aad12572c9e3daa16739a831e7939f6b3949cd5e43c74c0",
+      "checkpoints/2a6d648dbb28e0d555046365f59eb83d710f314c967d61c64e3b1233bdf2f888.json": "f188cf7d16fa6ba54f7db452cbcc4f3337a44bc6a93a28744a88d69e59ecaac0",
+      "checkpoints/378e1d00b5ed0f5417f1d38ced5095e530a55fa80591d9e782e491981f4890d8.json": "ef6bc5ca798e11dab2461915b32b6122a7bd8b6871482a03bcf143efdfd55599",
+      "checkpoints/53381dee1cd2d0f00b226d03dc6a87972ab7f46a98ea92c843ffd256cc0face9.json": "c5eabc9792bdc3ab83786af85d8062cd1d159f8057ec23356e4abbbfb22af3f9",
+      "checkpoints/831f9e2d79cee5397c9ddcc24cf12141b26dab8a71944a850aac6b1d6d5aa63d.json": "252ad59438a6003189383c950538f4e637dc5da7d71e04f3f6888f80069d9ee2",
+      "checkpoints/83947411da2b7080449c3cde86acc54d52474464e88124540362c5734cdb6178.json": "77636f2cbffac227110667cf633fbd4f93fa6e886b5733f947b1dad24e36d8f1",
+      "checkpoints/95368092980d35e619591847d00191984e34542349ed3199812e7488b8094f34.json": "4bece935232e63085b913e1d02728f29a44fe0bdc04060985754eed6fb1faa50",
+      "checkpoints/c6c18ab0a7f824d9475656fd60784bfef75006b3be25509f577d11b724c062e9.json": "c6c18ab0a7f824d9475656fd60784bfef75006b3be25509f577d11b724c062e9",
+      "checkpoints/d8d082e600f49287fde108a22f070538831808f1632527215c58c04c034c3712.json": "15558ade6e07f7bfffab2f3a4a4e043a4d6f55188f2c886b41b4d4462dd62923"
+    },
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.22"
+    },
+    "scope": {
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "No DB, provider, share-session, vector, wiki, or KOSHA registry mutation.",
+        "Live grants and exact saved Share were not verified."
+      ],
+      "runtimeStatus": "Current source b5f14512; supplied production marker 679bb917 until deployment catches up.",
+      "summary": "Standard full-repository scan at b5f145120766cd2ef904fce38ef32ed1a9facf74.",
+      "validationMode": "static source-to-sink validation and attack-path assessment"
+    },
+    "sealedAt": "2026-08-30T19:40:21.576760Z",
+    "startedAt": "2026-08-30T19:23:58.299115Z",
+    "status": "completed",
+    "target": {
+      "displayName": "safeclaw-northstar-current",
+      "kind": "git_revision",
+      "revision": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
+      "targetId": "target_sha256_59a91dd8129f171a6e0ff82b60460781f1067b1940d76c7a524e5f0e2b7ec5de"
+    },
+    "threatModel": {
+      "assets": [
+        "tenant and worker data",
+        "workpacks and generated safety documents",
+        "share sessions and acknowledgements",
+        "safety knowledge and KOSHA provenance",
+        "credentials and provider tokens",
+        "service availability",
+        "approval and launch-gate state"
+      ],
+      "assumptions": [
+        "Production grants and RLS policies were not live-verified.",
+        "Migration 010 remains approval-gated unless independently proven.",
+        "Provider dispatch remains preview-only.",
+        "Exact saved Share remains MISSING_EVIDENCE.",
+        "The b5f14512 revision is evidence-only over the supplied runtime marker lineage."
+      ],
+      "attackerCapabilities": [
+        "unauthenticated HTTP requests",
+        "authenticated tenant user requests",
+        "invited recipient share access",
+        "malicious uploaded or operator-supplied documents",
+        "stolen or scoped MCP token use",
+        "malicious provider or integration payloads"
+      ],
+      "securityObjectives": [
+        "preserve tenant isolation",
+        "prevent unauthorized state transitions and dispatch",
+        "bound parser and API resource consumption",
+        "neutralize active-content injection",
+        "preserve approval gates and evidence truth",
+        "protect credentials and provider boundaries"
+      ],
+      "summary": "SafeClaw current-head review spans public APIs, authenticated tenant boundaries, Supabase/RLS, Share/ACK, parsers and exports, MCP/Hermes/provider integrations, and browser/client surfaces.",
+      "trustBoundaries": [
+        "public browser to Next.js routes",
+        "authenticated browser to Next.js and Supabase",
+        "invited worker to public Share surface",
+        "MCP token and scope enforcement",
+        "service-role access to Supabase",
+        "public and AI provider responses",
+        "Upstash rate limiting",
+        "cron briefing and n8n relay",
+        "local OpenClaw and remote Hermes bridges",
+        "operator-run ingestion and export scripts"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

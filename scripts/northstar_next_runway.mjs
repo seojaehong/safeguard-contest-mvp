@@ -53,7 +53,7 @@ const ARTIFACTS = Object.freeze({
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
-  freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-31-complete", "report.json"),
+  freshCurrentSourceSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-complete", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
@@ -2491,6 +2491,7 @@ function currentSecurityGovernedPathCompatibilitySummary(report) {
   const paths = Array.isArray(report.governedPaths) ? report.governedPaths.map(asString).filter(Boolean) : [];
   const verification = isRecord(report.verification) ? report.verification : {};
   const vitest = isRecord(verification.vitest) ? verification.vitest : {};
+  const postFixScan = isRecord(report.postFixFullRepositoryScan) ? report.postFixFullRepositoryScan : {};
   const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
   return {
     verdict: asString(report.verdict),
@@ -2504,6 +2505,12 @@ function currentSecurityGovernedPathCompatibilitySummary(report) {
     testsSkipped: typeof vitest.testsSkipped === "number" ? vitest.testsSkipped : null,
     browserCompatibility: asString(verification.browserCompatibility),
     postFixFullRepositoryScan: asString(remaining.postFixFullRepositoryScan),
+    postFixScanId: asString(postFixScan.scanId),
+    postFixScanFindingCount: typeof postFixScan.reportableFindingCount === "number"
+      ? postFixScan.reportableFindingCount
+      : null,
+    postFixScanCoverageCompleteness: asString(postFixScan.coverageCompleteness),
+    securityCompleteClaimAllowed: asBoolean(postFixScan.securityCompleteClaimAllowed),
     exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
   };
 }
@@ -3987,7 +3994,7 @@ export function buildNorthstarNextRunway(options) {
       {
         gate: "current_security_governed_path_compatibility",
         state: "notice",
-        reason: `current source compatibility covers ${currentSecurityGovernedPathCompatibilityResult.coveredGateCount ?? "unknown"} security notices across ${currentSecurityGovernedPathCompatibilityResult.governedPathCount ?? "unknown"} paths with ${currentSecurityGovernedPathCompatibilityResult.filesPassed ?? "unknown"} files / ${currentSecurityGovernedPathCompatibilityResult.testsPassed ?? "unknown"} tests passing; ${currentSecurityGovernedPathCompatibilityResult.filesSkipped ?? "unknown"} opt-in browser file / ${currentSecurityGovernedPathCompatibilityResult.testsSkipped ?? "unknown"} tests were skipped and no fresh browser PASS is claimed, the full scan remains ${currentSecurityGovernedPathCompatibilityResult.postFixFullRepositoryScan || "PENDING_DESKTOP_SECURITY_SCAN"}, and exact saved Share remains ${currentSecurityGovernedPathCompatibilityResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+        reason: `current source compatibility covers ${currentSecurityGovernedPathCompatibilityResult.coveredGateCount ?? "unknown"} security notices across ${currentSecurityGovernedPathCompatibilityResult.governedPathCount ?? "unknown"} paths with ${currentSecurityGovernedPathCompatibilityResult.filesPassed ?? "unknown"} files / ${currentSecurityGovernedPathCompatibilityResult.testsPassed ?? "unknown"} tests passing; ${currentSecurityGovernedPathCompatibilityResult.filesSkipped ?? "unknown"} opt-in browser file / ${currentSecurityGovernedPathCompatibilityResult.testsSkipped ?? "unknown"} tests were skipped and no fresh browser PASS is claimed; sealed scan ${currentSecurityGovernedPathCompatibilityResult.postFixScanId || "missing"} records ${currentSecurityGovernedPathCompatibilityResult.postFixScanFindingCount ?? "unknown"} open findings with ${currentSecurityGovernedPathCompatibilityResult.postFixScanCoverageCompleteness || "unknown"} coverage, security-complete=${currentSecurityGovernedPathCompatibilityResult.securityCompleteClaimAllowed === true}, and exact saved Share remains ${currentSecurityGovernedPathCompatibilityResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
       },
       {
         gate: "current_source_security_residual_remediation",
