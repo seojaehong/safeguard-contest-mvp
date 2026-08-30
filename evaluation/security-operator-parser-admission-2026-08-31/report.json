@@ -1,0 +1,82 @@
+{
+  "schema": "safeclaw-security-operator-parser-admission/v1",
+  "generatedAt": "2026-08-31T02:00:53.5336664+09:00",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_OPERATOR_DOCUMENT_PARSER_ADMISSION_RESCAN_PENDING",
+  "productCommit": "6a9001beac5a37ece7903598e752d7addb55ec29",
+  "productionBuild": {
+    "commitSha": "6a9001beac5a37ece7903598e752d7addb55ec29",
+    "deploymentUrl": "safeguard-contest-c3sldpjp6-seojaehongs-projects.vercel.app",
+    "sourceMatchesProduction": true
+  },
+  "remediation": {
+    "finding": "Document ingestion and audit parsers lack uniform expansion and memory limits",
+    "originalFindingSurfaceCount": 5,
+    "alreadyBoundedOnCurrentSource": [
+      "scripts/parse_download_safety_forms.py",
+      "scripts/prepare_supabase_safety_ingestion.py"
+    ],
+    "remediatedCurrentResiduals": [
+      "scripts/extract_kogas_risk_standard_models.py",
+      "scripts/ingest_safety_reference_catalog.py",
+      "scripts/final_output_integrity_audit.mjs"
+    ],
+    "sharedPythonAdmission": "scripts/parser_safety.py",
+    "sharedJavaScriptAdmission": "scripts/final_output_parser_safety.mjs",
+    "controls": {
+      "inputByteLimit": true,
+      "archiveCentralDirectoryPreflight": true,
+      "archiveMemberAndExpansionLimits": true,
+      "archiveCompressionRatioLimit": true,
+      "sheetCountLimit": true,
+      "rowAndCellLimits": true,
+      "extractedTextLimit": true,
+      "elapsedTimeLimit": true,
+      "streamedCsvRows": true,
+      "streamedXlsxRows": true,
+      "kogasArchiveUsesBoundedZipReader": true
+    }
+  },
+  "verification": {
+    "pythonTests": {
+      "commands": [
+        "python scripts/tests/test_parser_safety.py",
+        "python scripts/tests/test_archive_safety.py",
+        "python scripts/tests/test_extract_kogas_parser_budget.py",
+        "python scripts/tests/test_ingest_safety_reference_catalog.py"
+      ],
+      "filesPassed": 4,
+      "testsPassed": 10,
+      "testsFailed": 0
+    },
+    "javascriptTests": {
+      "command": "npm.cmd exec -- vitest run tests/final-output-parser-safety.test.ts tests/anonymize-hwpx-templates.test.ts tests/document-export-localization.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 3,
+      "testsPassed": 20,
+      "testsFailed": 0
+    },
+    "pythonCompile": {
+      "passed": true
+    },
+    "nodeSyntaxChecks": {
+      "filesPassed": 2,
+      "passed": true
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "passed": true
+    }
+  },
+  "boundaries": {
+    "operatorWorkflowOnly": true,
+    "freshFullSecurityRescanRequired": true,
+    "securityCompleteClaimed": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesChanged": false
+  }
+}
