@@ -11,6 +11,7 @@ export const MCP_PROVIDER_ADMISSION_POLICY = {
   leaseMs: 310_000,
   limit: 10,
   namespace: "mcp-provider-generation",
+  sharedLeaseNamespace: "mcp-provider-generation-work",
   windowMs: 60_000,
   weights: {
     template: 0,
@@ -19,9 +20,32 @@ export const MCP_PROVIDER_ADMISSION_POLICY = {
   } satisfies Record<AiMode, number>,
 } as const;
 
-const instanceLimiter = createRateLimiter({
+export const MCP_READ_PROVIDER_ADMISSION_POLICY = {
+  leaseMs: 60_000,
+  limit: 20,
+  namespace: "mcp-provider-read",
+  windowMs: 60_000,
+  weights: {
+    // Conservative work units reflect each tool's provider-capable fanout.
+    run_safeclaw_harness_agent: 3,
+    get_weather_signals: 8,
+    search_accident_cases: 4,
+  },
+} as const;
+
+export type McpReadProviderTool = keyof typeof MCP_READ_PROVIDER_ADMISSION_POLICY.weights;
+
+export function isMcpReadProviderTool(toolName: string): toolName is McpReadProviderTool {
+  return Object.prototype.hasOwnProperty.call(MCP_READ_PROVIDER_ADMISSION_POLICY.weights, toolName);
+}
+
+const generationInstanceLimiter = createRateLimiter({
   limit: MCP_PROVIDER_ADMISSION_POLICY.limit,
   windowMs: MCP_PROVIDER_ADMISSION_POLICY.windowMs,
+});
+const readInstanceLimiter = createRateLimiter({
+  limit: MCP_READ_PROVIDER_ADMISSION_POLICY.limit,
+  windowMs: MCP_READ_PROVIDER_ADMISSION_POLICY.windowMs,
 });
 let activeInstanceWorkUnits = 0;
 
@@ -59,28 +83,36 @@ function acquireInstanceWorkUnits(weight: number): (() => Promise<void>) | null 
   };
 }
 
-export async function withMcpProviderAdmission<T>(
+type ProviderAdmission = {
+  instanceLimiter: ReturnType<typeof createRateLimiter>;
+  leaseMs: number;
+  limit: number;
+  namespace: string;
+  weight: number;
+  windowMs: number;
+};
+
+async function withProviderAdmission<T>(
   authContext: McpAuthContext,
-  mode: AiMode,
+  admission: ProviderAdmission,
   work: () => Promise<T>,
 ): Promise<T> {
-  const weight = MCP_PROVIDER_ADMISSION_POLICY.weights[mode];
-  if (weight === 0) return work();
+  if (admission.weight === 0) return work();
 
   const decision = await checkPublicRateLimit({
     request: new Request("https://safeclaw.invalid/internal/mcp-provider-admission"),
     identifier: admissionIdentifier(authContext),
-    namespace: MCP_PROVIDER_ADMISSION_POLICY.namespace,
-    limit: MCP_PROVIDER_ADMISSION_POLICY.limit,
-    windowMs: MCP_PROVIDER_ADMISSION_POLICY.windowMs,
-    instanceLimiter,
+    namespace: admission.namespace,
+    limit: admission.limit,
+    windowMs: admission.windowMs,
+    instanceLimiter: admission.instanceLimiter,
     requireDistributedInProduction: true,
   });
   if (!decision.allowed) {
     if (decision.reason === "distributed") {
       throw new McpProviderAdmissionError(
         "MCP_PROVIDER_RATE_LIMIT",
-        "MCP provider generation rate limit exceeded",
+        "MCP provider rate limit exceeded",
       );
     }
     throw new McpProviderAdmissionError(
@@ -93,13 +125,14 @@ export async function withMcpProviderAdmission<T>(
   try {
     const distributedRelease = await acquirePublicConcurrencyLease({
       concurrency: MCP_PROVIDER_ADMISSION_POLICY.capacity,
-      leaseMs: MCP_PROVIDER_ADMISSION_POLICY.leaseMs,
-      namespace: `${MCP_PROVIDER_ADMISSION_POLICY.namespace}-work`,
+      keyTtlMs: MCP_PROVIDER_ADMISSION_POLICY.leaseMs,
+      leaseMs: admission.leaseMs,
+      namespace: MCP_PROVIDER_ADMISSION_POLICY.sharedLeaseNamespace,
       requireDistributedInProduction: true,
-      weight,
+      weight: admission.weight,
     });
     release = distributedRelease === undefined
-      ? acquireInstanceWorkUnits(weight)
+      ? acquireInstanceWorkUnits(admission.weight)
       : distributedRelease;
   } catch (error) {
     console.error("[mcp-provider-admission] distributed lease unavailable", {
@@ -113,7 +146,7 @@ export async function withMcpProviderAdmission<T>(
   if (!release) {
     throw new McpProviderAdmissionError(
       "MCP_PROVIDER_CONCURRENCY_LIMIT",
-      "MCP provider generation concurrency limit exceeded",
+      "MCP provider concurrency limit exceeded",
     );
   }
 
@@ -122,4 +155,35 @@ export async function withMcpProviderAdmission<T>(
   } finally {
     await release();
   }
+}
+
+export async function withMcpProviderAdmission<T>(
+  authContext: McpAuthContext,
+  mode: AiMode,
+  work: () => Promise<T>,
+): Promise<T> {
+  const weight = MCP_PROVIDER_ADMISSION_POLICY.weights[mode];
+  return withProviderAdmission(authContext, {
+    instanceLimiter: generationInstanceLimiter,
+    leaseMs: MCP_PROVIDER_ADMISSION_POLICY.leaseMs,
+    limit: MCP_PROVIDER_ADMISSION_POLICY.limit,
+    namespace: MCP_PROVIDER_ADMISSION_POLICY.namespace,
+    windowMs: MCP_PROVIDER_ADMISSION_POLICY.windowMs,
+    weight,
+  }, work);
+}
+
+export async function withMcpReadProviderAdmission<T>(
+  authContext: McpAuthContext,
+  toolName: McpReadProviderTool,
+  work: () => Promise<T>,
+): Promise<T> {
+  return withProviderAdmission(authContext, {
+    instanceLimiter: readInstanceLimiter,
+    leaseMs: MCP_READ_PROVIDER_ADMISSION_POLICY.leaseMs,
+    limit: MCP_READ_PROVIDER_ADMISSION_POLICY.limit,
+    namespace: MCP_READ_PROVIDER_ADMISSION_POLICY.namespace,
+    windowMs: MCP_READ_PROVIDER_ADMISSION_POLICY.windowMs,
+    weight: MCP_READ_PROVIDER_ADMISSION_POLICY.weights[toolName],
+  }, work);
 }

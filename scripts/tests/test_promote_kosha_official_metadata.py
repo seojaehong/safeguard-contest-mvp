@@ -723,7 +723,10 @@ class PromoteKoshaOfficialMetadataTests(unittest.TestCase):
         self.assertEqual(sum(row["duplicate_count"] for row in reconciliations), 0)
         self.assertFalse(manifest["launch_ready"])
         self.assertFalse(manifest["trusted_registry_populated"])
-        self.assertEqual(build_kosha_verified_subset.PRODUCTION_TRUSTED_OFFICIAL_METADATA_SHA256, frozenset())
+        self.assertEqual(
+            build_kosha_verified_subset.PRODUCTION_TRUSTED_OFFICIAL_METADATA_SHA256,
+            frozenset({"1c03af6776158ba21650325ea7b31f2a661d0adea9441d29aacf977e0c815a5f"}),
+        )
 
 
 if __name__ == "__main__":

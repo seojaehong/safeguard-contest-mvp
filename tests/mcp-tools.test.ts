@@ -14,6 +14,7 @@ import {
   buildSanitizeContactsResult,
   buildWeatherResult,
   isSupportedWeatherRegion,
+  MCP_TOOL_RESULT_MAX_BYTES,
   toToolError,
   toToolResult,
   validateCitations,
@@ -693,6 +694,31 @@ describe("tool result helpers", () => {
     const result = toToolResult({ a: 1 });
     expect(result.content[0].type).toBe("text");
     expect(JSON.parse(result.content[0].text)).toEqual({ a: 1 });
+  });
+
+  it("enforces the final tool result ceiling in UTF-8 bytes", () => {
+    const encoder = new TextEncoder();
+    const emptyResultBytes = encoder.encode(JSON.stringify(toToolResult({ value: "" }))).byteLength;
+    const exact = toToolResult({
+      value: "a".repeat(MCP_TOOL_RESULT_MAX_BYTES - emptyResultBytes),
+    });
+    const ascii = toToolResult({ value: "a".repeat(MCP_TOOL_RESULT_MAX_BYTES) });
+    const korean = toToolResult({ value: "가".repeat(Math.ceil(MCP_TOOL_RESULT_MAX_BYTES / 3)) });
+
+    expect(exact.isError).toBeUndefined();
+    expect(encoder.encode(JSON.stringify(exact)).byteLength).toBe(MCP_TOOL_RESULT_MAX_BYTES);
+    expect(ascii.isError).toBe(true);
+    expect(korean.isError).toBe(true);
+    const payload = JSON.parse(korean.content[0].text) as Record<string, unknown>;
+    expect(payload).toMatchObject({
+      code: "MCP_TOOL_RESULT_TOO_LARGE",
+      limit: MCP_TOOL_RESULT_MAX_BYTES,
+    });
+    expect(payload.bytes).toBeGreaterThan(MCP_TOOL_RESULT_MAX_BYTES);
+    expect(encoder.encode(JSON.stringify(korean)).byteLength).toBeLessThanOrEqual(
+      MCP_TOOL_RESULT_MAX_BYTES,
+    );
+    expect(korean.content[0].text).not.toContain("가가가가");
   });
 
   it("toToolError maps Error and non-Error to isError content", () => {

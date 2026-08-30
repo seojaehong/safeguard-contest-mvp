@@ -56,6 +56,11 @@ vi.mock("@/lib/workpack-learning-export", () => ({
   }),
   normalizeLearningVisionPayload: () => ({}),
   normalizeWorkpackLearningFormat: () => "json",
+  WorkpackLearningExportLimitError: class WorkpackLearningExportLimitError extends Error {},
+  WORKPACK_LEARNING_COLLECTION_LIMITS: {
+    improvements: 200,
+    confirmations: 1_000
+  },
   WORKPACK_LEARNING_GOVERNANCE: {
     authority: "fixture",
     promotionStatus: "candidate",
@@ -105,8 +110,8 @@ function createFixtureClient(tables: FixtureTables) {
           limit() {
             return query;
           },
-          async order() {
-            return { data: executeRows(tables[table] || [], filters), error: null };
+          order() {
+            return query;
           },
           async maybeSingle() {
             const rows = executeRows(tables[table] || [], filters);

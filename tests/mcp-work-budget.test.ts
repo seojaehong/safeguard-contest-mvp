@@ -17,7 +17,10 @@ import {
 
 const mocks = vi.hoisted(() => ({
   baseHandler: vi.fn(async (_request: Request) => Response.json({ ok: true })),
+  fetchAccidentCases: vi.fn(),
+  fetchWeatherSignal: vi.fn(),
   resolveMcpAuth: vi.fn(),
+  searchSafetyReferences: vi.fn(),
 }));
 
 vi.mock("mcp-handler", () => ({
@@ -41,6 +44,18 @@ vi.mock("@/lib/mcp-auth", async (importOriginal) => ({
 
 vi.mock("@/lib/supabase-admin", () => ({
   createSupabaseAdminClient: vi.fn(() => null),
+}));
+
+vi.mock("@/lib/accident-cases", () => ({
+  fetchAccidentCases: mocks.fetchAccidentCases,
+}));
+
+vi.mock("@/lib/weather", () => ({
+  fetchWeatherSignal: mocks.fetchWeatherSignal,
+}));
+
+vi.mock("@/lib/safety-reference-catalog-server", () => ({
+  searchSafetyReferences: mocks.searchSafetyReferences,
 }));
 
 import { handler, registerTools } from "@/app/api/mcp/[transport]/implementation";
@@ -82,6 +97,23 @@ function schemaFor(tools: Map<string, ToolConfig>, toolName: string): SafeParseS
 describe("MCP tool work budgets", () => {
   beforeEach(() => {
     mocks.baseHandler.mockClear();
+    mocks.fetchAccidentCases.mockReset();
+    mocks.fetchAccidentCases.mockResolvedValue({
+      source: "kosha-accident",
+      mode: "fallback",
+      detail: "test fallback",
+      cases: [],
+    });
+    mocks.fetchWeatherSignal.mockReset();
+    mocks.fetchWeatherSignal.mockResolvedValue({
+      source: "kma",
+      mode: "fallback",
+      locationLabel: "서울",
+      summary: "test fallback",
+      actions: [],
+      detail: "test fallback",
+      signals: [],
+    });
     mocks.resolveMcpAuth.mockReset();
     mocks.resolveMcpAuth.mockResolvedValue({
       orgId: "org-1",
@@ -90,6 +122,25 @@ describe("MCP tool work budgets", () => {
       source: "db",
       tokenId: "token-1",
     });
+    mocks.searchSafetyReferences.mockReset();
+    mocks.searchSafetyReferences.mockImplementation(async (options: { query: string }) => ({
+      ok: false,
+      configured: false,
+      query: options.query,
+      count: 0,
+      items: [],
+      retrievalMode: "unconfigured",
+      vectorSearch: {
+        enabled: false,
+        attempted: false,
+        ok: false,
+        reason: "disabled",
+        count: 0,
+        model: "text-embedding-3-small",
+        message: "test fallback",
+      },
+      message: "test fallback",
+    }));
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
   });
@@ -197,6 +248,74 @@ describe("MCP tool work budgets", () => {
           admissionIdentity: "b".repeat(64),
           orgId: "org-1",
           scopes: ["tools:write"],
+          siteId: "site-1",
+          source: "db",
+          tokenId: "token-1",
+        },
+      },
+    });
+
+    expect(result.isError).toBe(true);
+    expect(JSON.parse(result.content[0]?.text ?? "{}")).toMatchObject({
+      code: "MCP_PROVIDER_ADMISSION_UNAVAILABLE",
+    });
+    expect(error).toHaveBeenCalled();
+    error.mockRestore();
+  });
+
+  it("threads the MCP SDK AbortSignal into every provider-backed read fanout", async () => {
+    const controller = new AbortController();
+    const tools = captureToolConfigs();
+    const extra = {
+      authInfo: {
+        extra: {
+          admissionIdentity: "d".repeat(64),
+          orgId: "org-1",
+          scopes: ["tools:read"],
+          siteId: "site-1",
+          source: "db",
+          tokenId: "token-1",
+        },
+      },
+      signal: controller.signal,
+    };
+
+    await tools.get("run_safeclaw_harness_agent")?.callback?.({ question: "용접" }, extra);
+    await tools.get("get_weather_signals")?.callback?.({ region: "서울" }, extra);
+    await tools.get("search_accident_cases")?.callback?.({ keyword: "비계 추락" }, extra);
+
+    expect(mocks.searchSafetyReferences).toHaveBeenCalledTimes(3);
+    for (const [options] of mocks.searchSafetyReferences.mock.calls) {
+      expect(options).toMatchObject({ signal: controller.signal });
+    }
+    expect(mocks.fetchWeatherSignal).toHaveBeenCalledWith("서울", controller.signal);
+    expect(mocks.fetchAccidentCases).toHaveBeenCalledWith(
+      "비계 추락",
+      { signal: controller.signal },
+    );
+  });
+
+  it.each([
+    ["run_safeclaw_harness_agent", { question: "용접" }],
+    ["get_weather_signals", { region: "서울" }],
+    ["search_accident_cases", { keyword: "비계 추락" }],
+  ] as const)("fails read-provider tool %s closed before fanout without durable production admission", async (
+    toolName,
+    args,
+  ) => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const callback = captureToolConfigs().get(toolName)?.callback;
+    if (!callback) throw new Error(`Missing ${toolName} callback`);
+
+    const result = await callback(args, {
+      authInfo: {
+        extra: {
+          admissionIdentity: "c".repeat(64),
+          orgId: "org-1",
+          scopes: ["tools:read"],
           siteId: "site-1",
           source: "db",
           tokenId: "token-1",

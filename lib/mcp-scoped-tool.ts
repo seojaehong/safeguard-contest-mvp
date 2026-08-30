@@ -24,13 +24,18 @@ type ScopedToolConfig<InputShape extends z.ZodRawShape> = {
 type ScopedToolHandler<InputShape extends z.ZodRawShape> = (
   args: ToolArgs<InputShape>,
   authContext: McpAuthContext,
+  execution: { signal: AbortSignal },
 ) => McpToolResult | Promise<McpToolResult>;
 
 const SCOPED_TOOL_REGISTRATION = Symbol("safeclaw-scoped-tool-registration");
 
 export type ScopedToolRegistration = {
   readonly toolName: McpToolName;
-  readonly invoke: (args: unknown, authContext: McpAuthContext) => Promise<McpToolResult>;
+  readonly invoke: (
+    args: unknown,
+    authContext: McpAuthContext,
+    signal?: AbortSignal,
+  ) => Promise<McpToolResult>;
   readonly [SCOPED_TOOL_REGISTRATION]: true;
 };
 
@@ -41,6 +46,11 @@ function readAuthContext(extra: unknown): McpAuthContext | null {
 
 function readAuthorizedToolContext(extra: unknown, toolName: McpToolName): McpAuthContext {
   return requireMcpToolScope(readAuthContext(extra), toolName);
+}
+
+function readExecutionSignal(extra: unknown): AbortSignal {
+  const signal = (extra as { signal?: AbortSignal } | undefined)?.signal;
+  return signal ?? new AbortController().signal;
 }
 
 function logToolContext(tool: McpToolName, context: McpAuthContext): void {
@@ -64,8 +74,10 @@ export function registerScopedTool<InputShape extends z.ZodRawShape>(
   const invoke = async (args: ToolArgs<InputShape>, extra: unknown): Promise<McpToolResult> => {
     try {
       const authContext = readAuthorizedToolContext(extra, toolName);
+      const signal = readExecutionSignal(extra);
+      signal.throwIfAborted();
       logToolContext(toolName, authContext);
-      return await handler(args, authContext);
+      return await handler(args, authContext, { signal });
     } catch (error) {
       if (!(error instanceof McpToolScopeError)) {
         log.error("MCP tool execution failed", { tool: toolName, error });
@@ -76,10 +88,10 @@ export function registerScopedTool<InputShape extends z.ZodRawShape>(
   server.registerTool(toolName, { ...config, inputSchema }, invoke);
   return Object.freeze({
     toolName,
-    async invoke(args, authContext): Promise<McpToolResult> {
+    async invoke(args, authContext, signal = new AbortController().signal): Promise<McpToolResult> {
       try {
         const parsed = inputSchema.parse(args);
-        return await invoke(parsed, { authInfo: { extra: authContext } });
+        return await invoke(parsed, { authInfo: { extra: authContext }, signal });
       } catch (error) {
         log.error("MCP tool input validation failed", { tool: toolName, error });
         return toToolError(error);

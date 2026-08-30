@@ -3,22 +3,20 @@
 // assembleGraph가 무출처 노드/엣지를 드롭한다. 캐시 5분 (s-maxage=300).
 
 import { NextRequest, NextResponse } from "next/server";
-import {
-  applyPublicStatusAdmissionHeaders,
-  runPublicOntologyGraphRead,
-} from "@/lib/public-status-operation";
+import { loadPublicOntologyGraph } from "@/lib/ontology-graph";
+import { withPublicStatusAdmission } from "@/lib/server/status-admission";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
-  const graphRead = await runPublicOntologyGraphRead(request);
-  if (!graphRead.ok) return graphRead.response;
-  const result = graphRead.data;
-  const status = result.ok ? 200 : result.configured ? 502 : 503;
-  return applyPublicStatusAdmissionHeaders(NextResponse.json(result, {
-    status,
-    headers: result.ok
-      ? { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60" }
-      : { "Cache-Control": "no-store" }
-  }), graphRead.admissionHeaders);
+  return withPublicStatusAdmission(request, async (signal) => {
+    const result = await loadPublicOntologyGraph(signal);
+    const status = result.ok ? 200 : result.configured ? 502 : 503;
+    return NextResponse.json(result, {
+      status,
+      headers: result.ok
+        ? { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60" }
+        : { "Cache-Control": "no-store" }
+    });
+  });
 }

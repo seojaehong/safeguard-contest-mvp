@@ -25,7 +25,9 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from archive_safety import BoundedZipReader
-from parser_safety import ParserBudget
+from parser_safety import ParserBudget, ParserBudgetError, ParserLimits
+
+DEFAULT_PARSER_LIMITS = ParserLimits()
 
 
 DOCUMENTS_RISK = ["점검결과 요약", "위험성평가표", "작업계획서"]
@@ -172,9 +174,16 @@ def read_csv_dicts(path: Path, budget: ParserBudget | None = None) -> tuple[list
             with path.open("r", encoding=encoding, newline="") as file:
                 reader = csv.DictReader(file)
                 parser_budget.start_sheet()
+                fieldnames = reader.fieldnames or []
+                parser_budget.consume_row(len(fieldnames))
+                for fieldname in fieldnames:
+                    parser_budget.consume_text(fieldname)
                 rows: list[dict[str, str]] = []
                 for row in reader:
                     parser_budget.consume_row(len(row))
+                    for key, value in row.items():
+                        parser_budget.consume_text(str(key or ""))
+                        parser_budget.consume_text(str(value or ""))
                     rows.append(row)
             return rows, encoding
         except UnicodeDecodeError as exc:
@@ -190,6 +199,8 @@ def first_non_empty_header(
     header: list[str] = []
     for row in iterator:
         budget.consume_row(len(row))
+        for cell in row:
+            budget.consume_text(str(cell or ""))
         values = [compact_text(cell, 120) for cell in row]
         if sum(1 for value in values if value) >= 3:
             header = [value or f"column_{index + 1}" for index, value in enumerate(values)]
@@ -207,7 +218,7 @@ def is_repeated_sif_construction_subheader(header: Sequence[str], row: Sequence[
     )
 
 
-def parse_sif_archive(path: Path) -> tuple[ReferenceSource, list[ReferenceItem]]:
+def parse_sif_archive(path: Path, budget: ParserBudget | None = None) -> tuple[ReferenceSource, list[ReferenceItem]]:
     source = ReferenceSource(
         id="kosha-sif-archive-20260401",
         source_group="kosha-reference",
@@ -221,7 +232,7 @@ def parse_sif_archive(path: Path) -> tuple[ReferenceSource, list[ReferenceItem]]
         metadata={"parser": "openpyxl", "fileName": path.name},
     )
     items: list[ReferenceItem] = []
-    parser_budget = ParserBudget()
+    parser_budget = budget or ParserBudget()
     parser_budget.assert_input_file(path)
     workbook = load_workbook(path, read_only=True, data_only=True)
     try:
@@ -232,6 +243,8 @@ def parse_sif_archive(path: Path) -> tuple[ReferenceSource, list[ReferenceItem]]
             header, data_rows = first_non_empty_header(rows_iter, parser_budget)
             for index, row in enumerate(data_rows, start=1):
                 parser_budget.consume_row(len(row))
+                for cell in row:
+                    parser_budget.consume_text(str(cell or ""))
                 if index == 1 and is_repeated_sif_construction_subheader(header, row):
                     LOGGER.info("Skipping repeated SIF construction subheader: sheet=%s data_row_index=%d", sheet_name, index)
                     continue
@@ -265,8 +278,9 @@ def parse_sif_archive(path: Path) -> tuple[ReferenceSource, list[ReferenceItem]]
     return source, items
 
 
-def parse_construction_process(path: Path) -> tuple[ReferenceSource, list[ReferenceItem]]:
-    rows, encoding = read_csv_dicts(path)
+def parse_construction_process(path: Path, budget: ParserBudget | None = None) -> tuple[ReferenceSource, list[ReferenceItem]]:
+    parser_budget = budget or ParserBudget()
+    rows, encoding = read_csv_dicts(path, parser_budget)
     source = ReferenceSource(
         id="kosha-construction-process-20210910",
         source_group="kosha-reference",
@@ -281,6 +295,7 @@ def parse_construction_process(path: Path) -> tuple[ReferenceSource, list[Refere
     )
     items: list[ReferenceItem] = []
     for index, row in enumerate(rows, start=1):
+        parser_budget.check_elapsed()
         construction_type = compact_text(row.get("공사종류", ""), 120)
         work_type = compact_text(row.get("공종명", ""), 120)
         detail = compact_text(row.get("세부공정명", ""), 160)
@@ -304,8 +319,9 @@ def parse_construction_process(path: Path) -> tuple[ReferenceSource, list[Refere
     return source, items
 
 
-def parse_machinery(path: Path) -> tuple[ReferenceSource, list[ReferenceItem]]:
-    rows, encoding = read_csv_dicts(path)
+def parse_machinery(path: Path, budget: ParserBudget | None = None) -> tuple[ReferenceSource, list[ReferenceItem]]:
+    parser_budget = budget or ParserBudget()
+    rows, encoding = read_csv_dicts(path, parser_budget)
     source = ReferenceSource(
         id="kosha-machinery-20210909",
         source_group="kosha-reference",
@@ -320,6 +336,7 @@ def parse_machinery(path: Path) -> tuple[ReferenceSource, list[ReferenceItem]]:
     )
     items: list[ReferenceItem] = []
     for index, row in enumerate(rows, start=1):
+        parser_budget.check_elapsed()
         values = [compact_text(value, 140) for value in row.values() if compact_text(value, 140)]
         title = " · ".join(values[:4]) or f"업종별 기계설비 {index}"
         body = "\n".join(f"{key}: {value}" for key, value in row.items() if compact_text(value, 300))
@@ -341,22 +358,45 @@ def parse_machinery(path: Path) -> tuple[ReferenceSource, list[ReferenceItem]]:
     return source, items
 
 
-def extract_pdf_text_from_bytes(data: bytes, max_pages: int) -> tuple[str, int]:
+def extract_pdf_text_from_bytes(
+    data: bytes,
+    max_pages: int,
+    budget: ParserBudget | None = None,
+) -> tuple[str, int]:
+    parser_budget = budget or ParserBudget()
+    parser_budget.assert_input_bytes(len(data))
     reader = PdfReader(io.BytesIO(data))
+    parser_budget.check_elapsed()
     texts: list[str] = []
     page_count = len(reader.pages)
     for page in reader.pages[:max_pages]:
-        texts.append(page.extract_text() or "")
+        parser_budget.check_elapsed()
+        text = page.extract_text() or ""
+        parser_budget.consume_text(text)
+        texts.append(text)
     return "\n".join(texts).strip(), page_count
 
 
-def extract_pdf_text(path: Path, max_pages: int) -> tuple[str, int]:
+def extract_pdf_text(
+    path: Path,
+    max_pages: int,
+    budget: ParserBudget | None = None,
+) -> tuple[str, int]:
+    parser_budget = budget or ParserBudget()
+    parser_budget.assert_input_file(path)
     with path.open("rb") as file:
-        return extract_pdf_text_from_bytes(file.read(), max_pages)
+        return extract_pdf_text_from_bytes(file.read(), max_pages, parser_budget)
 
 
-def parse_pdf_source(path: Path, source_id: str, title: str, item_type: str, max_pages: int) -> tuple[ReferenceSource, list[ReferenceItem]]:
-    text, page_count = extract_pdf_text(path, max_pages)
+def parse_pdf_source(
+    path: Path,
+    source_id: str,
+    title: str,
+    item_type: str,
+    max_pages: int,
+    budget: ParserBudget | None = None,
+) -> tuple[ReferenceSource, list[ReferenceItem]]:
+    text, page_count = extract_pdf_text(path, max_pages, budget)
     source = ReferenceSource(
         id=source_id,
         source_group="kosha-reference",
@@ -398,7 +438,13 @@ def decode_zip_name(name: str) -> str:
     return name
 
 
-def parse_technical_support_zips(folder: Path, max_pdf_pages: int, priority_only: bool) -> tuple[ReferenceSource, list[ReferenceItem]]:
+def parse_technical_support_zips(
+    folder: Path,
+    max_pdf_pages: int,
+    priority_only: bool,
+    budget: ParserBudget | None = None,
+) -> tuple[ReferenceSource, list[ReferenceItem]]:
+    parser_budget = budget or ParserBudget()
     source = ReferenceSource(
         id="kosha-technical-support-regulations-2025",
         source_group="kosha-reference",
@@ -414,12 +460,15 @@ def parse_technical_support_zips(folder: Path, max_pdf_pages: int, priority_only
     items: list[ReferenceItem] = []
     zip_paths = sorted(folder.glob("*.zip"))
     for zip_index, zip_path in enumerate(zip_paths, start=1):
+        parser_budget.assert_input_file(zip_path)
         with zipfile.ZipFile(zip_path) as archive:
             bounded_archive = BoundedZipReader(archive)
             for file_index, info in enumerate(bounded_archive.infos, start=1):
+                parser_budget.check_elapsed()
                 if info.is_dir():
                     continue
                 decoded_name = decode_zip_name(info.filename)
+                parser_budget.consume_text(decoded_name)
                 if not decoded_name.lower().endswith(".pdf"):
                     continue
                 is_priority = "기술지원규정" in decoded_name
@@ -431,8 +480,10 @@ def parse_technical_support_zips(folder: Path, max_pdf_pages: int, priority_only
                 if is_priority:
                     try:
                         data = bounded_archive.read(info)
-                        text, page_count = extract_pdf_text_from_bytes(data, max_pdf_pages)
+                        text, page_count = extract_pdf_text_from_bytes(data, max_pdf_pages, parser_budget)
                         needs_ocr = len(text) < 500
+                    except ParserBudgetError:
+                        raise
                     except Exception as exc:
                         text = ""
                         needs_ocr = True
@@ -514,9 +565,32 @@ def main() -> int:
     parser.add_argument("--technical-folder", default=r"C:\Users\iceam\Downloads\기술지원규정")
     parser.add_argument("--output-dir", default="evaluation/data-ingestion")
     parser.add_argument("--max-pdf-pages", type=int, default=3)
+    parser.add_argument("--max-input-bytes", type=int, default=DEFAULT_PARSER_LIMITS.max_input_bytes)
+    parser.add_argument("--max-elapsed-seconds", type=float, default=DEFAULT_PARSER_LIMITS.max_elapsed_seconds)
+    parser.add_argument("--max-text-chars", type=int, default=DEFAULT_PARSER_LIMITS.max_text_chars)
+    parser.add_argument("--max-total-cells", type=int, default=DEFAULT_PARSER_LIMITS.max_total_cells)
     parser.add_argument("--include-secondary-technical", action="store_true", help="Include non-priority guideline PDFs from technical ZIPs.")
     parser.add_argument("--upload", action="store_true", help="Upload parsed records to Supabase REST after migration is applied.")
     args = parser.parse_args()
+
+    numeric_limits = {
+        "max-input-bytes": args.max_input_bytes,
+        "max-elapsed-seconds": args.max_elapsed_seconds,
+        "max-text-chars": args.max_text_chars,
+        "max-total-cells": args.max_total_cells,
+    }
+    for name, value in numeric_limits.items():
+        if value <= 0:
+            parser.error(f"--{name} must be greater than zero")
+    parser_limits = ParserLimits(
+        max_input_bytes=args.max_input_bytes,
+        max_elapsed_seconds=args.max_elapsed_seconds,
+        max_text_chars=args.max_text_chars,
+        max_total_cells=args.max_total_cells,
+    )
+
+    def new_budget() -> ParserBudget:
+        return ParserBudget(parser_limits)
 
     started = time.perf_counter()
     read_env_file(Path(".env.local"))
@@ -527,12 +601,12 @@ def main() -> int:
     failures: list[dict[str, str]] = []
 
     jobs = [
-        ("sif", lambda: parse_sif_archive(downloads / "한국산업안전보건공단_산업재해 고위험요인(SIF) 아카이브_20260401.xlsx")),
-        ("construction", lambda: parse_construction_process(downloads / "한국산업안전보건공단_건설업 공종별 세부공정 목록_20210910.csv")),
-        ("machinery", lambda: parse_machinery(downloads / "한국산업안전보건공단_업종별 기계설비 목록_20210909.csv")),
-        ("risk-manual", lambda: parse_pdf_source(downloads / "위험성평가 접근방법 메뉴얼.pdf", "kosha-risk-assessment-approach-manual", "위험성평가 접근방법 메뉴얼", "risk-manual", args.max_pdf_pages)),
-        ("jsa-training", lambda: parse_pdf_source(downloads / "위험성평가 JSA 교육 교안.pdf", "kosha-jsa-training-deck", "위험성평가 JSA 교육 교안", "jsa-training", args.max_pdf_pages)),
-        ("technical-support", lambda: parse_technical_support_zips(Path(args.technical_folder), args.max_pdf_pages, not args.include_secondary_technical)),
+        ("sif", lambda: parse_sif_archive(downloads / "한국산업안전보건공단_산업재해 고위험요인(SIF) 아카이브_20260401.xlsx", new_budget())),
+        ("construction", lambda: parse_construction_process(downloads / "한국산업안전보건공단_건설업 공종별 세부공정 목록_20210910.csv", new_budget())),
+        ("machinery", lambda: parse_machinery(downloads / "한국산업안전보건공단_업종별 기계설비 목록_20210909.csv", new_budget())),
+        ("risk-manual", lambda: parse_pdf_source(downloads / "위험성평가 접근방법 메뉴얼.pdf", "kosha-risk-assessment-approach-manual", "위험성평가 접근방법 메뉴얼", "risk-manual", args.max_pdf_pages, new_budget())),
+        ("jsa-training", lambda: parse_pdf_source(downloads / "위험성평가 JSA 교육 교안.pdf", "kosha-jsa-training-deck", "위험성평가 JSA 교육 교안", "jsa-training", args.max_pdf_pages, new_budget())),
+        ("technical-support", lambda: parse_technical_support_zips(Path(args.technical_folder), args.max_pdf_pages, not args.include_secondary_technical, new_budget())),
     ]
 
     for label, job in jobs:
@@ -574,6 +648,7 @@ def main() -> int:
         "successCount": len(jobs) - len(failures),
         "failureCount": len(failures),
         "failures": failures,
+        "parserLimits": asdict(parser_limits),
         "uploaded": uploaded,
         "uploadError": upload_error,
         "seedPath": str(seed_path),

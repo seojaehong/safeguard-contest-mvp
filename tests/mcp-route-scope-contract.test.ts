@@ -176,6 +176,7 @@ function captureScopedTool(
   handler: (
     args: { region: string },
     authContext: McpAuthContext,
+    execution: { signal: AbortSignal },
   ) => McpToolResult | Promise<McpToolResult>,
 ): CapturedToolCallback {
   let captured: CapturedToolCallback | undefined;
@@ -346,6 +347,33 @@ describe("registerScopedTool behavior", () => {
       tokenId: "token-1",
     });
     expect(result).toEqual({ content: [{ type: "text", text: "authorized" }] });
+  });
+
+  it("threads the MCP SDK request AbortSignal into the authorized handler", async () => {
+    const controller = new AbortController();
+    let receivedSignal: AbortSignal | undefined;
+    const callback = captureScopedTool((_args, _authContext, execution) => {
+      receivedSignal = execution.signal;
+      return { content: [{ type: "text", text: "authorized" }] };
+    });
+
+    await callback(
+      { region: "서울" },
+      {
+        authInfo: {
+          extra: {
+            siteId: "site-1",
+            orgId: "org-1",
+            scopes: ["tools:get_weather_signals"],
+            source: "db",
+            tokenId: "token-1",
+          },
+        },
+        signal: controller.signal,
+      },
+    );
+
+    expect(receivedSignal).toBe(controller.signal);
   });
 });
 

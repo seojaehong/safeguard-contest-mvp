@@ -23,6 +23,19 @@ class ParserBudgetTest(unittest.TestCase):
             with self.assertRaisesRegex(ParserBudgetError, "input bytes exceed limit"):
                 budget.assert_input_file(path)
 
+    def test_rejects_in_memory_input_above_byte_limit(self) -> None:
+        budget = ParserBudget(ParserLimits(max_input_bytes=3))
+
+        with self.assertRaisesRegex(ParserBudgetError, "input bytes exceed limit"):
+            budget.assert_input_bytes(4)
+
+    def test_rejects_extracted_text_above_limit(self) -> None:
+        budget = ParserBudget(ParserLimits(max_text_chars=3))
+        budget.consume_text("abc")
+
+        with self.assertRaisesRegex(ParserBudgetError, "text chars exceed limit"):
+            budget.consume_text("d")
+
     def test_rejects_sheet_row_and_cell_expansion(self) -> None:
         budget = ParserBudget(ParserLimits(
             max_sheet_count=1,

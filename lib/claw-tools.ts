@@ -78,14 +78,15 @@ export async function executeClawTool(
   name: string,
   input: unknown,
   authContext?: McpAuthContext,
+  options: { signal?: AbortSignal } = {},
 ): Promise<unknown> {
   switch (name) {
     case "run_safeclaw_harness_agent": {
       const question = asString(input, "question");
       const [direct, sif, supporting, memory] = await Promise.all([
-        searchSafetyReferences({ query: question, limit: 6, evidenceRole: "direct" }),
-        searchSafetyReferences({ query: question, limit: 6, itemType: "sif-case" }),
-        searchSafetyReferences({ query: question, limit: 6, evidenceRole: "supporting" }),
+        searchSafetyReferences({ query: question, limit: 6, evidenceRole: "direct", signal: options.signal }),
+        searchSafetyReferences({ query: question, limit: 6, itemType: "sif-case", signal: options.signal }),
+        searchSafetyReferences({ query: question, limit: 6, evidenceRole: "supporting", signal: options.signal }),
         loadTenantHarnessMemoryForMcp(authContext, createSupabaseAdminClient),
       ]);
       return buildHarnessAgentResult({
@@ -113,12 +114,12 @@ export async function executeClawTool(
     }
     case "get_weather_signals": {
       const region = asString(input, "region");
-      const signal = await fetchWeatherSignal(region);
-      return buildWeatherResult(region, signal as unknown as WeatherSignalLike);
+      const weather = await fetchWeatherSignal(region, options.signal);
+      return buildWeatherResult(region, weather as unknown as WeatherSignalLike);
     }
     case "search_accident_cases": {
       const keyword = asString(input, "keyword");
-      const result = await fetchAccidentCases(keyword);
+      const result = await fetchAccidentCases(keyword, { signal: options.signal });
       return buildAccidentCasesResult(keyword, result);
     }
     case "validate_safety_citations": {

@@ -13,6 +13,8 @@ import {
   buildWorkpackLearningFile,
   normalizeLearningVisionPayload,
   normalizeWorkpackLearningFormat,
+  WorkpackLearningExportLimitError,
+  WORKPACK_LEARNING_COLLECTION_LIMITS,
   WORKPACK_LEARNING_GOVERNANCE
 } from "@/lib/workpack-learning-export";
 import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-store";
@@ -52,14 +54,27 @@ async function loadImprovementMemory(
     improvementQuery = input.siteId === null
       ? improvementQuery.is("site_id", null)
       : improvementQuery.eq("site_id", input.siteId);
-    const { data, error } = await improvementQuery.order("created_at", { ascending: false });
+    const { data, error } = await improvementQuery
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: true })
+      .limit(WORKPACK_LEARNING_COLLECTION_LIMITS.improvements + 1);
 
     if (error) {
       console.warn("learning export improvement memory unavailable", error);
       return [];
     }
 
-    return (data || []).flatMap((row): HarnessImprovement[] => {
+    const rows = data || [];
+    if (rows.length > WORKPACK_LEARNING_COLLECTION_LIMITS.improvements) {
+      throw new WorkpackLearningExportLimitError({
+        code: "collection_limit",
+        collection: "improvements",
+        limit: WORKPACK_LEARNING_COLLECTION_LIMITS.improvements,
+        actual: rows.length
+      });
+    }
+
+    return rows.flatMap((row): HarnessImprovement[] => {
       const reviewStatus = row.review_status === "approved" || row.review_status === "reflected"
         ? row.review_status
         : null;
@@ -77,6 +92,7 @@ async function loadImprovementMemory(
       }];
     });
   } catch (error) {
+    if (error instanceof WorkpackLearningExportLimitError) throw error;
     console.warn("learning export improvement memory load failed", error);
     return [];
   }
@@ -89,28 +105,57 @@ async function loadReadConfirmations(
   try {
     let confirmationQuery = client
       .from("workpack_read_confirmations")
-      .select("worker_display_name,language_code,read_at")
+      .select("id,worker_display_name,language_code,read_at")
       .eq("workpack_id", input.workpackId)
       .eq("organization_id", input.organizationId);
     confirmationQuery = input.siteId === null
       ? confirmationQuery.is("site_id", null)
       : confirmationQuery.eq("site_id", input.siteId);
-    const { data, error } = await confirmationQuery.order("read_at", { ascending: true });
+    const { data, error } = await confirmationQuery
+      .order("read_at", { ascending: true })
+      .order("id", { ascending: true })
+      .limit(WORKPACK_LEARNING_COLLECTION_LIMITS.confirmations + 1);
 
     if (error) {
       console.warn("learning export read confirmations unavailable", error);
       return [];
     }
 
-    return (data || []).map((row) => ({
+    const rows = data || [];
+    if (rows.length > WORKPACK_LEARNING_COLLECTION_LIMITS.confirmations) {
+      throw new WorkpackLearningExportLimitError({
+        code: "collection_limit",
+        collection: "confirmations",
+        limit: WORKPACK_LEARNING_COLLECTION_LIMITS.confirmations,
+        actual: rows.length
+      });
+    }
+
+    return rows.map((row) => ({
       displayName: row.worker_display_name,
       languageCode: row.language_code,
       readAt: row.read_at
     }));
   } catch (error) {
+    if (error instanceof WorkpackLearningExportLimitError) throw error;
     console.warn("learning export read confirmations load failed", error);
     return [];
   }
+}
+
+function learningExportLimitResponse(error: WorkpackLearningExportLimitError) {
+  return NextResponse.json({
+    ok: false,
+    configured: true,
+    code: error.code === "collection_limit"
+      ? "learning_export_collection_limit_exceeded"
+      : "learning_export_output_too_large",
+    message: error.code === "collection_limit"
+      ? "학습 내보내기 수집 한도를 초과했습니다. 범위를 줄인 뒤 다시 시도해 주세요."
+      : "학습 내보내기 파일 크기 한도를 초과했습니다. 범위를 줄인 뒤 다시 시도해 주세요.",
+    limit: error.limit,
+    ...(error.collection ? { collection: error.collection } : {})
+  }, { status: 413 });
 }
 
 export async function GET(request: NextRequest, context: RouteContext) {
@@ -158,35 +203,48 @@ export async function GET(request: NextRequest, context: RouteContext) {
     siteId: owned.context.siteId,
     workpackId: owned.context.workpackId
   };
-  const [improvements, confirmations] = await Promise.all([
-    loadImprovementMemory(client, childScope),
-    loadReadConfirmations(client, childScope)
-  ]);
-  const references = generationEvidenceReferences(verification.snapshot);
-  const mergedImprovements = mergeGenerationImprovements(verification.snapshot, improvements);
+  let exportPayload: {
+    confirmations: ReadConfirmation[];
+    file: ReturnType<typeof buildWorkpackLearningFile>;
+    mergedImprovements: HarnessImprovement[];
+    references: ReturnType<typeof generationEvidenceReferences>;
+  };
+  try {
+    const [improvements, confirmations] = await Promise.all([
+      loadImprovementMemory(client, childScope),
+      loadReadConfirmations(client, childScope)
+    ]);
+    const references = generationEvidenceReferences(verification.snapshot);
+    const mergedImprovements = mergeGenerationImprovements(verification.snapshot, improvements);
+    const file = buildWorkpackLearningFile({
+      workpackId: owned.context.workpackId,
+      generatedAt: verification.snapshot.generatedAt,
+      question: verification.snapshot.question,
+      taskLabel: verification.snapshot.scenario.workSummary,
+      references,
+      improvements: mergedImprovements,
+      confirmations
+    }, format);
+    exportPayload = { confirmations, file, mergedImprovements, references };
+  } catch (error) {
+    if (error instanceof WorkpackLearningExportLimitError) {
+      return learningExportLimitResponse(error);
+    }
+    throw error;
+  }
 
-  const file = buildWorkpackLearningFile({
-    workpackId: owned.context.workpackId,
-    generatedAt: verification.snapshot.generatedAt,
-    question: verification.snapshot.question,
-    taskLabel: verification.snapshot.scenario.workSummary,
-    references,
-    improvements: mergedImprovements,
-    confirmations
-  }, format);
-
-  return new NextResponse(file.content, {
+  return new NextResponse(exportPayload.file.content, {
     headers: {
-      "content-type": file.contentType,
-      "content-disposition": `attachment; filename*=UTF-8''${encodeURIComponent(file.fileName)}`,
+      "content-type": exportPayload.file.contentType,
+      "content-disposition": `attachment; filename*=UTF-8''${encodeURIComponent(exportPayload.file.fileName)}`,
       "cache-control": "private, no-store",
       "content-security-policy": "sandbox; default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
       "referrer-policy": "no-referrer",
       "x-content-type-options": "nosniff",
-      "x-safeclaw-reference-count": String(references.length),
-      "x-safeclaw-generation-reference-count": String(references.length),
-      "x-safeclaw-improvement-count": String(mergedImprovements.length),
-      "x-safeclaw-confirmation-count": String(confirmations.length),
+      "x-safeclaw-reference-count": String(exportPayload.references.length),
+      "x-safeclaw-generation-reference-count": String(exportPayload.references.length),
+      "x-safeclaw-improvement-count": String(exportPayload.mergedImprovements.length),
+      "x-safeclaw-confirmation-count": String(exportPayload.confirmations.length),
       "x-safeclaw-memory-authority": WORKPACK_LEARNING_GOVERNANCE.authority,
       "x-safeclaw-promotion-status": WORKPACK_LEARNING_GOVERNANCE.promotionStatus,
       "x-safeclaw-runtime-authority": String(WORKPACK_LEARNING_GOVERNANCE.runtimeAuthority)

@@ -45,6 +45,37 @@ export type WorkpackLearningFile = {
   content: string;
 };
 
+export const WORKPACK_LEARNING_COLLECTION_LIMITS = {
+  improvements: 200,
+  confirmations: 1_000
+} as const;
+
+export const WORKPACK_LEARNING_MAX_OUTPUT_BYTES = 1024 * 1024;
+
+export type WorkpackLearningExportLimitCode = "collection_limit" | "output_bytes";
+
+export class WorkpackLearningExportLimitError extends Error {
+  readonly code: WorkpackLearningExportLimitCode;
+  readonly limit: number;
+  readonly actual: number;
+  readonly collection?: keyof typeof WORKPACK_LEARNING_COLLECTION_LIMITS;
+
+  constructor(input: {
+    code: WorkpackLearningExportLimitCode;
+    limit: number;
+    actual: number;
+    collection?: keyof typeof WORKPACK_LEARNING_COLLECTION_LIMITS;
+  }) {
+    const target = input.collection ? `${input.collection} collection` : "learning export output";
+    super(`${target} exceeds its ${input.limit} limit`);
+    this.name = "WorkpackLearningExportLimitError";
+    this.code = input.code;
+    this.limit = input.limit;
+    this.actual = input.actual;
+    this.collection = input.collection;
+  }
+}
+
 export const WORKPACK_LEARNING_GOVERNANCE: WorkpackLearningGovernance = {
   memoryScope: "operation_memory_export",
   authority: "operator_review_corpus",
@@ -508,24 +539,35 @@ export function normalizeWorkpackLearningFormat(value: string | null): WorkpackL
 
 export function buildWorkpackLearningFile(input: WorkpackLearningInput, format: WorkpackLearningFormat): WorkpackLearningFile {
   const baseName = `${slugSegment(input.taskLabel)}-learning`;
+  let file: WorkpackLearningFile;
   if (format === "jsonl") {
-    return {
+    file = {
       fileName: `${baseName}.jsonl`,
       contentType: "application/x-ndjson; charset=utf-8",
       content: `${buildWorkpackLearningJsonl(input)}\n`
     };
-  }
-  if (format === "obsidian") {
-    return {
+  } else if (format === "obsidian") {
+    file = {
       fileName: `${baseName}-obsidian.md`,
       contentType: "text/markdown; charset=utf-8",
       content: buildWorkpackObsidianMarkdown(input)
     };
+  } else {
+    file = {
+      fileName: `${baseName}.md`,
+      contentType: "text/markdown; charset=utf-8",
+      content: buildWorkpackLearningMarkdown(input)
+    };
   }
 
-  return {
-    fileName: `${baseName}.md`,
-    contentType: "text/markdown; charset=utf-8",
-    content: buildWorkpackLearningMarkdown(input)
-  };
+  const outputBytes = new TextEncoder().encode(file.content).byteLength;
+  if (outputBytes > WORKPACK_LEARNING_MAX_OUTPUT_BYTES) {
+    throw new WorkpackLearningExportLimitError({
+      code: "output_bytes",
+      limit: WORKPACK_LEARNING_MAX_OUTPUT_BYTES,
+      actual: outputBytes
+    });
+  }
+
+  return file;
 }

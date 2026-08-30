@@ -22,6 +22,9 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from archive_safety import BoundedZipReader
+from parser_safety import ParserBudget, ParserBudgetError, ParserLimits
+
+DEFAULT_PARSER_LIMITS = ParserLimits()
 
 
 SUPPORTED_EXTENSIONS = {".csv", ".hwp", ".hwpx", ".pdf", ".pptx", ".xls", ".xlsx", ".zip", ".jpg", ".jpeg", ".png"}
@@ -110,11 +113,12 @@ class CandidateFile:
     extension: str
     size_bytes: int
     modified_at: str
-    sha256: str
+    sha256: str | None
     normalized_title: str
     duplicate_of_existing: bool
     duplicate_group: str | None
     duplicate_reason: str | None
+    admission_failure: str | None
 
 
 @dataclass(frozen=True)
@@ -235,12 +239,15 @@ def find_files(downloads_dir: Path, onedrive_dir: Path, downloads_since: datetim
     return sorted(set(files), key=lambda item: (str(item.parent), item.name))
 
 
-def read_pdf_records(path: Path, max_pages: int) -> tuple[list[tuple[str, str, str]], str, str | None]:
+def read_pdf_records(path: Path, max_pages: int, budget: ParserBudget) -> tuple[list[tuple[str, str, str]], str, str | None]:
     try:
         reader = PdfReader(str(path))
         records: list[tuple[str, str, str]] = []
         for index, page in enumerate(reader.pages[:max_pages], start=1):
-            text = compact_text(page.extract_text() or "", 2500)
+            budget.check_elapsed()
+            raw_text = page.extract_text() or ""
+            budget.consume_text(raw_text)
+            text = compact_text(raw_text, 2500)
             if text:
                 records.append((f"page:{index}", infer_section_title(path.stem, text), text))
         if not records:
@@ -250,19 +257,22 @@ def read_pdf_records(path: Path, max_pages: int) -> tuple[list[tuple[str, str, s
         return [], "pypdf", str(exc)
 
 
-def read_hwpx_records(path: Path) -> tuple[list[tuple[str, str, str]], str, str | None]:
+def read_hwpx_records(path: Path, budget: ParserBudget) -> tuple[list[tuple[str, str, str]], str, str | None]:
     try:
         records: list[tuple[str, str, str]] = []
         with zipfile.ZipFile(path) as archive:
             bounded_archive = BoundedZipReader(archive)
             for info in bounded_archive.infos:
+                budget.check_elapsed()
                 name = info.filename
                 lower_name = name.lower()
                 if not lower_name.endswith(".xml") or "/section" not in lower_name:
                     continue
                 root = ElementTree.fromstring(bounded_archive.read(info))
                 texts = [element.text.strip() for element in root.iter() if element.text and element.text.strip()]
-                text = compact_text("\n".join(texts), 2500)
+                raw_text = "\n".join(texts)
+                budget.consume_text(raw_text)
+                text = compact_text(raw_text, 2500)
                 if text:
                     records.append((name, infer_section_title(path.stem, text), text))
         if not records:
@@ -272,35 +282,55 @@ def read_hwpx_records(path: Path) -> tuple[list[tuple[str, str, str]], str, str 
         return [], "zip+xml", str(exc)
 
 
-def read_xlsx_records(path: Path, max_rows: int) -> tuple[list[tuple[str, str, str]], str, str | None]:
+def read_xlsx_records(path: Path, max_rows: int, budget: ParserBudget) -> tuple[list[tuple[str, str, str]], str, str | None]:
     try:
         workbook = load_workbook(path, read_only=True, data_only=True)
-        records: list[tuple[str, str, str]] = []
-        for sheet_name in workbook.sheetnames:
-            lines: list[str] = []
-            sheet = workbook[sheet_name]
-            for index, row in enumerate(sheet.iter_rows(values_only=True), start=1):
-                if index > max_rows:
-                    break
-                values = [compact_text(str(cell), 220) for cell in row if cell is not None and compact_text(str(cell), 220)]
-                if values:
-                    lines.append(" | ".join(values))
-            text = compact_text("\n".join(lines), 2500)
-            if text:
-                records.append((f"sheet:{sheet_name}", sheet_name, text))
-        if not records:
-            return [], "openpyxl", "no non-empty sheets"
-        return records, "openpyxl", None
+        try:
+            records: list[tuple[str, str, str]] = []
+            for sheet_name in workbook.sheetnames:
+                budget.start_sheet()
+                budget.consume_text(sheet_name)
+                lines: list[str] = []
+                sheet = workbook[sheet_name]
+                for index, row in enumerate(sheet.iter_rows(values_only=True), start=1):
+                    if index > max_rows:
+                        break
+                    budget.consume_row(len(row))
+                    values: list[str] = []
+                    for cell in row:
+                        if cell is None:
+                            continue
+                        raw_value = str(cell)
+                        budget.consume_text(raw_value)
+                        value = compact_text(raw_value, 220)
+                        if value:
+                            values.append(value)
+                    if values:
+                        lines.append(" | ".join(values))
+                text = compact_text("\n".join(lines), 2500)
+                if text:
+                    records.append((f"sheet:{sheet_name}", sheet_name, text))
+            if not records:
+                return [], "openpyxl", "no non-empty sheets"
+            return records, "openpyxl", None
+        finally:
+            workbook.close()
     except Exception as exc:
         return [], "openpyxl", str(exc)
 
 
-def read_csv_records(path: Path, max_rows: int) -> tuple[list[tuple[str, str, str]], str, str | None]:
+def read_csv_records(path: Path, max_rows: int, budget: ParserBudget) -> tuple[list[tuple[str, str, str]], str, str | None]:
     encodings = ["utf-8-sig", "cp949", "euc-kr"]
     for encoding in encodings:
         try:
             with path.open("r", encoding=encoding, newline="") as file:
-                rows = [" | ".join(row) for _, row in zip(range(max_rows), csv.reader(file))]
+                budget.start_sheet()
+                rows: list[str] = []
+                for _, row in zip(range(max_rows), csv.reader(file)):
+                    budget.consume_row(len(row))
+                    for value in row:
+                        budget.consume_text(value)
+                    rows.append(" | ".join(row))
             text = compact_text("\n".join(rows), 2500)
             if text:
                 return [("rows:1-60", path.stem, text)], f"csv:{encoding}", None
@@ -312,17 +342,19 @@ def read_csv_records(path: Path, max_rows: int) -> tuple[list[tuple[str, str, st
     return [], "csv", "encoding detection failed"
 
 
-def read_zip_records(path: Path) -> tuple[list[tuple[str, str, str]], str, str | None]:
+def read_zip_records(path: Path, budget: ParserBudget) -> tuple[list[tuple[str, str, str]], str, str | None]:
     try:
         with zipfile.ZipFile(path) as archive:
             names = [info.filename for info in BoundedZipReader(archive).infos]
-        text = compact_text("\n".join(names), 2500)
+        raw_text = "\n".join(names)
+        budget.consume_text(raw_text)
+        text = compact_text(raw_text, 2500)
         return [("zip:listing", path.stem, text)] if text else [], "zip-listing", None if text else "empty zip"
     except Exception as exc:
         return [], "zip-listing", str(exc)
 
 
-def read_pptx_records(path: Path) -> tuple[list[tuple[str, str, str]], str, str | None]:
+def read_pptx_records(path: Path, budget: ParserBudget) -> tuple[list[tuple[str, str, str]], str, str | None]:
     try:
         records: list[tuple[str, str, str]] = []
         with zipfile.ZipFile(path) as archive:
@@ -335,10 +367,12 @@ def read_pptx_records(path: Path) -> tuple[list[tuple[str, str, str]], str, str 
                 key=lambda info: info.filename,
             )
             for index, info in enumerate(slide_infos[:20], start=1):
-                name = info.filename
+                budget.check_elapsed()
                 root = ElementTree.fromstring(bounded_archive.read(info))
                 texts = [element.text.strip() for element in root.iter() if element.text and element.text.strip()]
-                text = compact_text("\n".join(texts), 2200)
+                raw_text = "\n".join(texts)
+                budget.consume_text(raw_text)
+                text = compact_text(raw_text, 2200)
                 if text:
                     records.append((f"slide:{index}", infer_section_title(path.stem, text), text))
         if not records:
@@ -348,22 +382,37 @@ def read_pptx_records(path: Path) -> tuple[list[tuple[str, str, str]], str, str 
         return [], "pptx-zip+xml", str(exc)
 
 
-def extract_records(path: Path, max_pdf_pages: int, max_sheet_rows: int) -> tuple[list[tuple[str, str, str]], str, str | None]:
+def extract_records(
+    path: Path,
+    max_pdf_pages: int,
+    max_sheet_rows: int,
+    limits: ParserLimits | None = None,
+) -> tuple[list[tuple[str, str, str]], str, str | None]:
     extension = path.suffix.lower()
+    budget = ParserBudget(limits)
+    try:
+        budget.assert_input_file(path)
+    except Exception as exc:
+        return [], "metadata-only", str(exc)
     if extension == ".pdf":
-        return read_pdf_records(path, max_pdf_pages)
+        return read_pdf_records(path, max_pdf_pages, budget)
     if extension == ".hwpx":
-        return read_hwpx_records(path)
+        return read_hwpx_records(path, budget)
     if extension == ".xlsx":
-        return read_xlsx_records(path, max_sheet_rows)
+        return read_xlsx_records(path, max_sheet_rows, budget)
     if extension == ".csv":
-        return read_csv_records(path, max_sheet_rows)
+        return read_csv_records(path, max_sheet_rows, budget)
     if extension == ".zip":
-        return read_zip_records(path)
+        return read_zip_records(path, budget)
     if extension == ".pptx":
-        return read_pptx_records(path)
+        return read_pptx_records(path, budget)
     if extension in {".jpg", ".jpeg", ".png"}:
-        return [("image:metadata", path.stem, f"Image evidence file: {path.name}")], "image-metadata", None
+        text = f"Image evidence file: {path.name}"
+        try:
+            budget.consume_text(text)
+        except Exception as exc:
+            return [], "image-metadata", str(exc)
+        return [("image:metadata", path.stem, text)], "image-metadata", None
     if extension in {".hwp", ".xls"}:
         return [], "metadata-only", f"{extension} binary parser not enabled; use HWPX/XLSX/OCR conversion before production load"
     return [], "metadata-only", f"unsupported extension: {extension}"
@@ -501,9 +550,24 @@ def source_root_label(path: Path, downloads_dir: Path, onedrive_dir: Path) -> st
         return "external"
 
 
-def build_candidates(paths: Iterable[Path], downloads_dir: Path, onedrive_dir: Path, existing_hashes: set[str], existing_titles: set[str]) -> list[CandidateFile]:
+def build_candidates(
+    paths: Iterable[Path],
+    downloads_dir: Path,
+    onedrive_dir: Path,
+    existing_hashes: set[str],
+    existing_titles: set[str],
+    limits: ParserLimits | None = None,
+) -> list[CandidateFile]:
     path_list = list(paths)
-    hashes = {path: sha256_file(path) for path in path_list}
+    hashes: dict[Path, str] = {}
+    admission_failures: dict[Path, str] = {}
+    for path in path_list:
+        try:
+            ParserBudget(limits).assert_input_file(path)
+        except ParserBudgetError as exc:
+            admission_failures[path] = str(exc)
+            continue
+        hashes[path] = sha256_file(path)
     hash_groups: dict[str, list[Path]] = {}
     title_groups: dict[str, list[Path]] = {}
     for path, digest in hashes.items():
@@ -512,11 +576,13 @@ def build_candidates(paths: Iterable[Path], downloads_dir: Path, onedrive_dir: P
     candidates: list[CandidateFile] = []
     for path in path_list:
         stat = path.stat()
-        digest = hashes[path]
+        digest = hashes.get(path)
         title = normalize_title(path)
         duplicate_group: str | None = None
         duplicate_reason: str | None = None
-        if digest in existing_hashes:
+        if digest is None:
+            duplicate_reason = "input rejected before hashing by parser byte/time budget"
+        elif digest in existing_hashes:
             duplicate_group = f"existing-sha256:{digest[:12]}"
             duplicate_reason = "same hash as existing download-safety-bundle"
         elif title in existing_titles:
@@ -536,16 +602,31 @@ def build_candidates(paths: Iterable[Path], downloads_dir: Path, onedrive_dir: P
             modified_at=datetime.fromtimestamp(stat.st_mtime).isoformat(),
             sha256=digest,
             normalized_title=title,
-            duplicate_of_existing=digest in existing_hashes or title in existing_titles,
+            duplicate_of_existing=digest is not None and (digest in existing_hashes or title in existing_titles),
             duplicate_group=duplicate_group,
             duplicate_reason=duplicate_reason,
+            admission_failure=admission_failures.get(path),
         ))
     return candidates
 
 
-def build_records(candidate: CandidateFile, max_pdf_pages: int, max_sheet_rows: int) -> tuple[SourcePayload, list[CandidateRecord], list[ItemPayload], bool]:
-    source_id = f"{candidate.source_root}-{slugify(candidate.path.stem)}-{candidate.sha256[:10]}"
-    tuples, parser, failure_reason = extract_records(candidate.path, max_pdf_pages, max_sheet_rows)
+def build_records(
+    candidate: CandidateFile,
+    max_pdf_pages: int,
+    max_sheet_rows: int,
+    limits: ParserLimits | None = None,
+) -> tuple[SourcePayload, list[CandidateRecord], list[ItemPayload], bool]:
+    digest = candidate.sha256
+    if digest is None:
+        identity = f"{candidate.path.resolve()}:{candidate.size_bytes}:{candidate.modified_at}"
+        digest = hashlib.sha256(identity.encode("utf-8", errors="ignore")).hexdigest()
+    source_id = f"{candidate.source_root}-{slugify(candidate.path.stem)}-{digest[:10]}"
+    if candidate.admission_failure is not None:
+        tuples: list[tuple[str, str, str]] = []
+        parser = "metadata-only"
+        failure_reason = candidate.admission_failure
+    else:
+        tuples, parser, failure_reason = extract_records(candidate.path, max_pdf_pages, max_sheet_rows, limits)
     if not tuples:
         tuples = [("file:metadata", candidate.path.stem, "")]
     records: list[CandidateRecord] = []
@@ -802,7 +883,27 @@ def main() -> None:
     parser.add_argument("--downloads-since", default=DOWNLOADS_SINCE_DEFAULT)
     parser.add_argument("--max-pdf-pages", type=int, default=6)
     parser.add_argument("--max-sheet-rows", type=int, default=80)
+    parser.add_argument("--max-input-bytes", type=int, default=DEFAULT_PARSER_LIMITS.max_input_bytes)
+    parser.add_argument("--max-elapsed-seconds", type=float, default=DEFAULT_PARSER_LIMITS.max_elapsed_seconds)
+    parser.add_argument("--max-text-chars", type=int, default=DEFAULT_PARSER_LIMITS.max_text_chars)
+    parser.add_argument("--max-total-cells", type=int, default=DEFAULT_PARSER_LIMITS.max_total_cells)
     args = parser.parse_args()
+
+    numeric_limits = {
+        "max-input-bytes": args.max_input_bytes,
+        "max-elapsed-seconds": args.max_elapsed_seconds,
+        "max-text-chars": args.max_text_chars,
+        "max-total-cells": args.max_total_cells,
+    }
+    for name, value in numeric_limits.items():
+        if value <= 0:
+            parser.error(f"--{name} must be greater than zero")
+    parser_limits = ParserLimits(
+        max_input_bytes=args.max_input_bytes,
+        max_elapsed_seconds=args.max_elapsed_seconds,
+        max_text_chars=args.max_text_chars,
+        max_total_cells=args.max_total_cells,
+    )
 
     started = time.perf_counter()
     downloads_dir = Path(args.downloads_dir)
@@ -812,7 +913,14 @@ def main() -> None:
 
     existing_hashes, existing_titles = load_existing_bundle(Path(args.existing_bundle))
     paths = find_files(downloads_dir, onedrive_dir, datetime.fromisoformat(args.downloads_since))
-    candidates = build_candidates(paths, downloads_dir, onedrive_dir, existing_hashes, existing_titles)
+    candidates = build_candidates(
+        paths,
+        downloads_dir,
+        onedrive_dir,
+        existing_hashes,
+        existing_titles,
+        parser_limits,
+    )
 
     sources: list[SourcePayload] = []
     records: list[CandidateRecord] = []
@@ -821,7 +929,12 @@ def main() -> None:
     failure_count = 0
 
     for candidate in candidates:
-        source, source_records, source_items, success = build_records(candidate, args.max_pdf_pages, args.max_sheet_rows)
+        source, source_records, source_items, success = build_records(
+            candidate,
+            args.max_pdf_pages,
+            args.max_sheet_rows,
+            parser_limits,
+        )
         sources.append(source)
         records.extend(source_records)
         items.extend(source_items)
@@ -856,6 +969,7 @@ def main() -> None:
             "recordCount": len(records),
             "loadCandidateRecordCount": len(load_candidate_records),
             "manualReviewRecordCount": len(review_candidate_records),
+            "parserLimits": asdict(parser_limits),
             "noDbMutation": True,
         },
     }

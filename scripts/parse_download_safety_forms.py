@@ -22,6 +22,9 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from archive_safety import BoundedZipReader
+from parser_safety import ParserBudget, ParserBudgetError, ParserLimits
+
+DEFAULT_PARSER_LIMITS = ParserLimits()
 
 
 SUPPORTED_EXTENSIONS = {
@@ -81,7 +84,7 @@ class InventoryEntry:
     extension: str
     size_bytes: int
     modified_at: str
-    sha256: str
+    sha256: str | None
     duplicate_group: str | None
     duplicate_reason: str | None
 
@@ -164,21 +167,26 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def read_pdf(path: Path, max_pages: int) -> tuple[str, int]:
+def read_pdf(path: Path, max_pages: int, budget: ParserBudget) -> tuple[str, int]:
     reader = PdfReader(str(path))
+    budget.check_elapsed()
     texts: list[str] = []
     for page in reader.pages[:max_pages]:
-        texts.append(page.extract_text() or "")
+        budget.check_elapsed()
+        text = page.extract_text() or ""
+        budget.consume_text(text)
+        texts.append(text)
     return "\n".join(texts), len(reader.pages)
 
 
-def read_hwpx(path: Path) -> tuple[str, int, int]:
+def read_hwpx(path: Path, budget: ParserBudget) -> tuple[str, int, int]:
     texts: list[str] = []
     image_count = 0
     with zipfile.ZipFile(path) as archive:
         bounded_archive = BoundedZipReader(archive)
         names = [info.filename for info in bounded_archive.infos]
         for info in bounded_archive.infos:
+            budget.check_elapsed()
             name = info.filename
             lower_name = name.lower()
             if lower_name.endswith((".png", ".jpg", ".jpeg", ".bmp", ".gif")):
@@ -193,42 +201,66 @@ def read_hwpx(path: Path) -> tuple[str, int, int]:
                 continue
             for element in root.iter():
                 if element.text and element.text.strip():
-                    texts.append(element.text.strip())
+                    text = element.text.strip()
+                    budget.consume_text(text)
+                    texts.append(text)
     return "\n".join(texts), len(names), image_count
 
 
-def read_xlsx(path: Path, max_rows: int) -> tuple[str, int]:
+def read_xlsx(path: Path, max_rows: int, budget: ParserBudget) -> tuple[str, int]:
     workbook = load_workbook(path, read_only=True, data_only=True)
     lines: list[str] = []
-    for sheet_name in workbook.sheetnames:
-        sheet = workbook[sheet_name]
-        lines.append(f"[sheet] {sheet_name}")
-        for index, row in enumerate(sheet.iter_rows(values_only=True), start=1):
-            if index > max_rows:
-                break
-            values = [compact_text(str(cell), 160) for cell in row if cell is not None and compact_text(str(cell), 160)]
-            if values:
-                lines.append(" | ".join(values))
-    return "\n".join(lines), len(workbook.sheetnames)
+    try:
+        for sheet_name in workbook.sheetnames:
+            budget.start_sheet()
+            sheet = workbook[sheet_name]
+            budget.consume_text(sheet_name)
+            lines.append(f"[sheet] {sheet_name}")
+            for index, row in enumerate(sheet.iter_rows(values_only=True), start=1):
+                if index > max_rows:
+                    break
+                budget.consume_row(len(row))
+                values: list[str] = []
+                for cell in row:
+                    if cell is None:
+                        continue
+                    raw_value = str(cell)
+                    budget.consume_text(raw_value)
+                    value = compact_text(raw_value, 160)
+                    if value:
+                        values.append(value)
+                if values:
+                    lines.append(" | ".join(values))
+        return "\n".join(lines), len(workbook.sheetnames)
+    finally:
+        workbook.close()
 
 
-def read_csv_text(path: Path, max_rows: int) -> tuple[str, str]:
+def read_csv_text(path: Path, max_rows: int, budget: ParserBudget) -> tuple[str, str]:
     encodings = ["utf-8-sig", "cp949", "euc-kr"]
     last_error: Exception | None = None
     for encoding in encodings:
         try:
             with path.open("r", encoding=encoding, newline="") as file:
                 reader = csv.reader(file)
-                rows = [" | ".join(row) for _, row in zip(range(max_rows), reader)]
+                budget.start_sheet()
+                rows: list[str] = []
+                for _, row in zip(range(max_rows), reader):
+                    budget.consume_row(len(row))
+                    for value in row:
+                        budget.consume_text(value)
+                    rows.append(" | ".join(row))
             return "\n".join(rows), encoding
         except UnicodeDecodeError as exc:
             last_error = exc
     raise RuntimeError(f"CSV encoding detection failed: {last_error}")
 
 
-def read_zip_listing(path: Path) -> tuple[str, int]:
+def read_zip_listing(path: Path, budget: ParserBudget) -> tuple[str, int]:
     with zipfile.ZipFile(path) as archive:
         names = [info.filename for info in BoundedZipReader(archive).infos]
+    for name in names:
+        budget.consume_text(name)
     return "\n".join(names), len(names)
 
 
@@ -280,7 +312,14 @@ def infer_controls(keywords: list[str], form_type: str) -> list[str]:
     return sorted(set(controls), key=controls.index)
 
 
-def parse_file(path: Path, max_pdf_pages: int, max_sheet_rows: int) -> ParseResult:
+def parse_file(
+    path: Path,
+    max_pdf_pages: int,
+    max_sheet_rows: int,
+    limits: ParserLimits | None = None,
+    file_sha256: str | None = None,
+    admission_failure: str | None = None,
+) -> ParseResult:
     extension = path.suffix.lower()
     parser = "metadata-only"
     text = ""
@@ -288,28 +327,33 @@ def parse_file(path: Path, max_pdf_pages: int, max_sheet_rows: int) -> ParseResu
     sheet_count: int | None = None
     image_count: int | None = None
     zip_entry_count: int | None = None
-    failure_reason: str | None = None
+    failure_reason = admission_failure
+    budget = ParserBudget(limits)
 
     try:
+        if failure_reason is not None:
+            raise ParserBudgetError(failure_reason)
+        budget.assert_input_file(path)
         if extension == ".pdf":
             parser = "pypdf"
-            text, page_count = read_pdf(path, max_pdf_pages)
+            text, page_count = read_pdf(path, max_pdf_pages, budget)
         elif extension == ".hwpx":
             parser = "zip+xml"
-            text, zip_entry_count, image_count = read_hwpx(path)
+            text, zip_entry_count, image_count = read_hwpx(path, budget)
         elif extension == ".xlsx":
             parser = "openpyxl"
-            text, sheet_count = read_xlsx(path, max_sheet_rows)
+            text, sheet_count = read_xlsx(path, max_sheet_rows, budget)
         elif extension == ".csv":
             parser = "csv"
-            text, encoding = read_csv_text(path, max_sheet_rows)
+            text, encoding = read_csv_text(path, max_sheet_rows, budget)
             parser = f"csv:{encoding}"
         elif extension == ".zip":
             parser = "zip-listing"
-            text, zip_entry_count = read_zip_listing(path)
+            text, zip_entry_count = read_zip_listing(path, budget)
         elif extension in {".jpg", ".jpeg", ".png"}:
             parser = "image-metadata"
             text = f"Image evidence file: {path.name}"
+            budget.consume_text(text)
             image_count = 1
         elif extension in {".hwp", ".xls"}:
             failure_reason = f"{extension} binary parser not enabled in this dry-run bundle"
@@ -323,7 +367,14 @@ def parse_file(path: Path, max_pdf_pages: int, max_sheet_rows: int) -> ParseResu
         failure_reason = "no extractable text"
     keywords = infer_keywords(path.name, text)
     form_type = infer_form_type(path.name, text)
-    source_id = f"downloads-{slugify(path.stem)}-{sha256_file(path)[:10]}"
+    digest = file_sha256
+    if digest is None and failure_reason is None:
+        digest = sha256_file(path)
+    if digest is None:
+        stat = path.stat()
+        identity = f"{path.resolve()}:{stat.st_size}:{stat.st_mtime_ns}"
+        digest = hashlib.sha256(identity.encode("utf-8", errors="ignore")).hexdigest()
+    source_id = f"downloads-{slugify(path.stem)}-{digest[:10]}"
     return ParseResult(
         source_id=source_id,
         path=str(path),
@@ -518,16 +569,33 @@ def find_target_files(downloads_dir: Path, since: datetime | None) -> list[Path]
     return sorted(files, key=lambda item: item.stat().st_mtime)
 
 
-def duplicate_maps(paths: Iterable[Path]) -> tuple[dict[Path, str], dict[Path, str | None], dict[Path, str | None]]:
-    hashes = {path: sha256_file(path) for path in paths}
+def duplicate_maps(
+    paths: Iterable[Path],
+    limits: ParserLimits | None = None,
+) -> tuple[
+    dict[Path, str],
+    dict[Path, str | None],
+    dict[Path, str | None],
+    dict[Path, str],
+]:
+    path_list = list(paths)
+    hashes: dict[Path, str] = {}
+    admission_failures: dict[Path, str] = {}
+    for path in path_list:
+        try:
+            ParserBudget(limits).assert_input_file(path)
+        except ParserBudgetError as exc:
+            admission_failures[path] = str(exc)
+            continue
+        hashes[path] = sha256_file(path)
     hash_groups: dict[str, list[Path]] = {}
     stem_groups: dict[str, list[Path]] = {}
     for path, digest in hashes.items():
         hash_groups.setdefault(digest, []).append(path)
         normalized_stem = re.sub(r"\s+", " ", path.stem.replace("_", " ")).strip().lower()
         stem_groups.setdefault(normalized_stem, []).append(path)
-    duplicate_group: dict[Path, str | None] = {path: None for path in hashes}
-    duplicate_reason: dict[Path, str | None] = {path: None for path in hashes}
+    duplicate_group: dict[Path, str | None] = {path: None for path in path_list}
+    duplicate_reason: dict[Path, str | None] = {path: None for path in path_list}
     for digest, group in hash_groups.items():
         if len(group) > 1:
             for path in group:
@@ -539,7 +607,7 @@ def duplicate_maps(paths: Iterable[Path]) -> tuple[dict[Path, str], dict[Path, s
             for path in group:
                 duplicate_group[path] = duplicate_group[path] or f"same-title:{slugify(stem, 60)}"
                 duplicate_reason[path] = duplicate_reason[path] or "same title with different format"
-    return hashes, duplicate_group, duplicate_reason
+    return hashes, duplicate_group, duplicate_reason, admission_failures
 
 
 def main() -> None:
@@ -549,7 +617,27 @@ def main() -> None:
     parser.add_argument("--since", default="2026-05-03T18:45:00", help="Local timestamp lower bound, or empty for all supported files.")
     parser.add_argument("--max-pdf-pages", type=int, default=8)
     parser.add_argument("--max-sheet-rows", type=int, default=60)
+    parser.add_argument("--max-input-bytes", type=int, default=DEFAULT_PARSER_LIMITS.max_input_bytes)
+    parser.add_argument("--max-elapsed-seconds", type=float, default=DEFAULT_PARSER_LIMITS.max_elapsed_seconds)
+    parser.add_argument("--max-text-chars", type=int, default=DEFAULT_PARSER_LIMITS.max_text_chars)
+    parser.add_argument("--max-total-cells", type=int, default=DEFAULT_PARSER_LIMITS.max_total_cells)
     args = parser.parse_args()
+
+    numeric_limits = {
+        "max-input-bytes": args.max_input_bytes,
+        "max-elapsed-seconds": args.max_elapsed_seconds,
+        "max-text-chars": args.max_text_chars,
+        "max-total-cells": args.max_total_cells,
+    }
+    for name, value in numeric_limits.items():
+        if value <= 0:
+            parser.error(f"--{name} must be greater than zero")
+    parser_limits = ParserLimits(
+        max_input_bytes=args.max_input_bytes,
+        max_elapsed_seconds=args.max_elapsed_seconds,
+        max_text_chars=args.max_text_chars,
+        max_total_cells=args.max_total_cells,
+    )
 
     started_at = time.perf_counter()
     downloads_dir = Path(args.downloads_dir)
@@ -557,7 +645,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     since = datetime.fromisoformat(args.since) if args.since else None
     target_files = find_target_files(downloads_dir, since)
-    hashes, duplicate_groups, duplicate_reasons = duplicate_maps(target_files)
+    hashes, duplicate_groups, duplicate_reasons, admission_failures = duplicate_maps(target_files, parser_limits)
 
     inventory: list[InventoryEntry] = []
     results: list[ParseResult] = []
@@ -566,18 +654,31 @@ def main() -> None:
 
     for path in target_files:
         stat = path.stat()
+        digest = hashes.get(path)
+        if digest is None:
+            identity = f"{path.resolve()}:{stat.st_size}:{stat.st_mtime_ns}"
+            inventory_token = hashlib.sha256(identity.encode("utf-8", errors="ignore")).hexdigest()[:12]
+        else:
+            inventory_token = digest[:12]
         entry = InventoryEntry(
-            id=f"file-{hashes[path][:12]}",
+            id=f"file-{inventory_token}",
             path=str(path),
             name=path.name,
             extension=path.suffix.lower(),
             size_bytes=stat.st_size,
             modified_at=datetime.fromtimestamp(stat.st_mtime).isoformat(),
-            sha256=hashes[path],
+            sha256=digest,
             duplicate_group=duplicate_groups[path],
             duplicate_reason=duplicate_reasons[path],
         )
-        result = parse_file(path, args.max_pdf_pages, args.max_sheet_rows)
+        result = parse_file(
+            path,
+            args.max_pdf_pages,
+            args.max_sheet_rows,
+            parser_limits,
+            file_sha256=digest,
+            admission_failure=admission_failures.get(path),
+        )
         source = build_source(path, entry, result)
         item = build_item(result)
         inventory.append(entry)
@@ -602,6 +703,7 @@ def main() -> None:
             "since": args.since,
             "duplicateCount": sum(1 for entry in inventory if entry.duplicate_group),
             "failureNames": [result.name for result in failures],
+            "parserLimits": asdict(parser_limits),
             "noDbMutation": True,
         },
     }

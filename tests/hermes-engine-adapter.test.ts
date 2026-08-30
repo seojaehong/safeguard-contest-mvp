@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ClawChatEvent } from "@/lib/agent-loop";
+import * as accidentCases from "@/lib/accident-cases";
 import * as clawTools from "@/lib/claw-tools";
 import { buildDbHarnessPacket } from "@/lib/db-harness";
 import type { BrokerRequestContext } from "@/lib/engine-adapter";
@@ -11,6 +12,7 @@ import type {
 import { isProductionTrustedKoshaReference } from "@/lib/production-kosha-trust";
 import * as safetyReferenceServer from "@/lib/safety-reference-catalog-server";
 import * as supabaseAdmin from "@/lib/supabase-admin";
+import * as weather from "@/lib/weather";
 import {
   createExperimentalHermesAdapter,
   createRemoteHermesAdapter,
@@ -46,6 +48,28 @@ const boundLocalPocEnv = {
 };
 
 const executeClawTool = clawTools.executeClawTool;
+const runtimeFetch = globalThis.fetch;
+
+beforeEach(() => {
+  vi.stubEnv("VERCEL_ENV", "");
+  vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+  vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "distributed-test-token");
+  vi.stubGlobal("fetch", async (input: string | URL | Request, init?: RequestInit) => {
+    if (String(input).startsWith("https://example.upstash.io")) {
+      const command = JSON.parse(String(init?.body)) as unknown[];
+      const script = String(command[1]);
+      if (script.includes("INCR")) return Response.json({ result: [1, 59_000] });
+      if (script.includes("ZADD")) return Response.json({ result: [1, Number(command[9])] });
+      return Response.json({ result: Number(command[6] ?? 1) });
+    }
+    return runtimeFetch(input, init);
+  });
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
 
 function sifReference(): SafetyReferenceItem {
   return {
@@ -423,6 +447,7 @@ describe("experimental Hermes EngineAdapter", () => {
   });
 
   it("accepts the production executeClawTool Harness packet with controlled grounded searches", async () => {
+    const controller = new AbortController();
     const adminSpy = vi.spyOn(supabaseAdmin, "createSupabaseAdminClient").mockReturnValue(null);
     const searchSpy = vi.spyOn(safetyReferenceServer, "searchSafetyReferences").mockImplementation(
       async (options) => {
@@ -453,6 +478,7 @@ describe("experimental Hermes EngineAdapter", () => {
       await expect(engine.run({
         ...runInput(),
         prompt: "외벽 도장 작업의 추락 위험을 점검해줘",
+        signal: controller.signal,
       })).resolves.toBeUndefined();
       searchCalls = searchSpy.mock.calls.length;
     } finally {
@@ -461,6 +487,9 @@ describe("experimental Hermes EngineAdapter", () => {
     }
 
     expect(searchCalls).toBe(3);
+    for (const [options] of searchSpy.mock.calls) {
+      expect(options.signal).toBe(controller.signal);
+    }
     expect(plannerCalls).toBe(1);
   });
 
@@ -1176,6 +1205,110 @@ describe("experimental Hermes EngineAdapter", () => {
     });
     expect((result as { auth: object }).auth).not.toHaveProperty("userId");
   }, 30_000);
+
+  it("threads the broker AbortSignal through weather and accident provider calls", async () => {
+    const controller = new AbortController();
+    const weatherSpy = vi.spyOn(weather, "fetchWeatherSignal").mockResolvedValue({
+      source: "kma",
+      mode: "fallback",
+      locationLabel: "서울",
+      summary: "test fallback",
+      actions: [],
+      detail: "test fallback",
+      signals: [],
+    });
+    const accidentSpy = vi.spyOn(accidentCases, "fetchAccidentCases").mockResolvedValue({
+      source: "kosha-accident",
+      mode: "fallback",
+      detail: "test fallback",
+      cases: [],
+    });
+    const composition = createSafeClawHermesComposition(async () => undefined);
+
+    try {
+      await composition.readExecutor.execute({
+        context,
+        toolName: "get_weather_signals",
+        input: { region: "서울" },
+        signal: controller.signal,
+      });
+      await composition.readExecutor.execute({
+        context,
+        toolName: "search_accident_cases",
+        input: { keyword: "비계 추락" },
+        signal: controller.signal,
+      });
+
+      expect(weatherSpy).toHaveBeenCalledWith("서울", controller.signal);
+      expect(accidentSpy).toHaveBeenCalledWith("비계 추락", { signal: controller.signal });
+    } finally {
+      weatherSpy.mockRestore();
+      accidentSpy.mockRestore();
+    }
+  });
+
+  it("aborts provider-backed read fanout and releases shared admission work units", async () => {
+    vi.stubEnv("VERCEL_ENV", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const controller = new AbortController();
+    const abortReason = new Error("client cancelled Hermes read");
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockImplementationOnce(
+      async (_toolName, _input, _authContext, options) => new Promise<unknown>((_resolve, reject) => {
+        const signal = options?.signal;
+        if (!signal) throw new Error("missing provider AbortSignal");
+        signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+      }),
+    );
+    const composition = createSafeClawHermesComposition(async () => undefined);
+
+    try {
+      const pending = composition.readExecutor.execute({
+        context,
+        toolName: "get_weather_signals",
+        input: { region: "서울" },
+        signal: controller.signal,
+      });
+      await vi.waitFor(() => expect(executeSpy).toHaveBeenCalledTimes(1));
+      expect(executeSpy.mock.calls[0]?.[3]).toEqual({ signal: controller.signal });
+
+      controller.abort(abortReason);
+      await expect(pending).rejects.toThrow("SafeClaw MCP read tool execution failed");
+
+      executeSpy.mockResolvedValueOnce({ ok: true });
+      await expect(composition.readExecutor.execute({
+        context,
+        toolName: "get_weather_signals",
+        input: { region: "서울" },
+        signal: new AbortController().signal,
+      })).resolves.toEqual({ ok: true });
+      expect(executeSpy).toHaveBeenCalledTimes(2);
+    } finally {
+      executeSpy.mockRestore();
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("keeps non-provider read tools outside provider admission", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({ valid: true });
+    const composition = createSafeClawHermesComposition(async () => undefined);
+
+    try {
+      await expect(composition.readExecutor.execute({
+        context,
+        toolName: "validate_safety_citations",
+        input: { text: "산업안전보건법령" },
+        signal: new AbortController().signal,
+      })).resolves.toEqual({ valid: true });
+      expect(executeSpy).toHaveBeenCalledTimes(1);
+    } finally {
+      executeSpy.mockRestore();
+      vi.unstubAllEnvs();
+    }
+  });
 
   it("reserves the Evidence Harness for the mandatory adapter preload", async () => {
     const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValue(

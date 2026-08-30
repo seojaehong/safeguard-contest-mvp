@@ -10,6 +10,10 @@ import {
   type McpToolName,
 } from "@/lib/mcp-auth";
 import {
+  isMcpReadProviderTool,
+  withMcpReadProviderAdmission,
+} from "@/lib/mcp-provider-admission";
+import {
   registerScopedTool,
   type ScopedToolRegistration,
 } from "@/lib/mcp-scoped-tool";
@@ -44,8 +48,8 @@ function registerReadTool<InputShape extends z.ZodRawShape>(
     registrationServer,
     toolName,
     { inputSchema },
-    async (args, authContext) => toToolResult(
-      await executeClawTool(toolName, args, authContext),
+    async (args, authContext, { signal }) => toToolResult(
+      await executeClawTool(toolName, args, authContext, { signal }),
     ),
   );
 }
@@ -102,10 +106,16 @@ export function createSafeClawScopedMcpReadExecutor(): SafeClawScopedMcpReadExec
       if (!isReadOnlyMcpTool(execution.toolName)) throw new McpToolScopeError();
       const registration = registrations.get(execution.toolName);
       if (!registration) throw new McpToolScopeError();
-      return parseToolResult(await registration.invoke(
+      const authContext = readAuthContext(execution.context);
+      const invoke = () => registration.invoke(
         execution.input,
-        readAuthContext(execution.context),
-      ));
+        authContext,
+        execution.signal,
+      );
+      const result = isMcpReadProviderTool(execution.toolName)
+        ? await withMcpReadProviderAdmission(authContext, execution.toolName, invoke)
+        : await invoke();
+      return parseToolResult(result);
     },
     [SAFECLAW_SCOPED_MCP_READ_EXECUTOR]: true as const,
   });

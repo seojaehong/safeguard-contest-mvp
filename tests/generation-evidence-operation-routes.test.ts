@@ -6,9 +6,15 @@ import { attachGenerationEvidence } from "@/lib/generation-evidence";
 import { buildMockAskResponse } from "@/lib/mock-data";
 import type { SafetyReferenceItem, SafetyReferenceSearchResult } from "@/lib/safety-reference-catalog";
 import type { AskResponse } from "@/lib/types";
+import {
+  WORKPACK_LEARNING_COLLECTION_LIMITS,
+  WORKPACK_LEARNING_MAX_OUTPUT_BYTES
+} from "@/lib/workpack-learning-export";
 
 const SECRET = "operation-route-generation-evidence-secret";
 const mocks = vi.hoisted(() => ({
+  improvementRows: [] as Array<Record<string, unknown>>,
+  queryCalls: [] as Array<{ table: string; method: "limit" | "order"; value: string | number }>,
   searchSafetyReferences: vi.fn(),
   loadOwnedWorkpackOperationContext: vi.fn()
 }));
@@ -90,13 +96,34 @@ function sealedResponse(): AskResponse {
 }
 
 function fakeClient() {
-  const result = { data: [], error: null };
-  const query = {
-    select() { return query; },
-    eq() { return query; },
-    order: async () => result
+  return {
+    from(table: string) {
+      let limit: number | undefined;
+      const query = {
+        select() { return query; },
+        eq() { return query; },
+        in() { return query; },
+        order(column: string) {
+          mocks.queryCalls.push({ table, method: "order", value: column });
+          return query;
+        },
+        limit(value: number) {
+          limit = value;
+          mocks.queryCalls.push({ table, method: "limit", value });
+          return query;
+        },
+        then<TResult1 = { data: Array<Record<string, unknown>>; error: null }, TResult2 = never>(
+          onFulfilled?: ((value: { data: Array<Record<string, unknown>>; error: null }) => TResult1 | PromiseLike<TResult1>) | null,
+          onRejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
+        ) {
+          const rows = table === "workpack_improvements" ? mocks.improvementRows : [];
+          const result = { data: typeof limit === "number" ? rows.slice(0, limit) : rows, error: null as null };
+          return Promise.resolve(result).then(onFulfilled, onRejected);
+        }
+      };
+      return query;
+    }
   };
-  return { from: () => query };
 }
 
 function searchResult(item: SafetyReferenceItem): SafetyReferenceSearchResult {
@@ -140,6 +167,8 @@ function ownedContext() {
 
 describe("saved generation evidence operation routes", () => {
   beforeEach(() => {
+    mocks.improvementRows.length = 0;
+    mocks.queryCalls.length = 0;
     process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET = SECRET;
     mocks.loadOwnedWorkpackOperationContext.mockResolvedValue(ownedContext());
     mocks.searchSafetyReferences.mockResolvedValue(
@@ -223,5 +252,87 @@ describe("saved generation evidence operation routes", () => {
     );
     expect(response.headers.get("referrer-policy")).toBe("no-referrer");
     expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(mocks.queryCalls.filter((call) => call.table === "workpack_read_confirmations")).toEqual([
+      { table: "workpack_read_confirmations", method: "order", value: "read_at" },
+      { table: "workpack_read_confirmations", method: "order", value: "id" },
+      {
+        table: "workpack_read_confirmations",
+        method: "limit",
+        value: WORKPACK_LEARNING_COLLECTION_LIMITS.confirmations + 1
+      }
+    ]);
+  });
+
+  it("collects reviewed memory with stable ordering and rejects collection overflow", async () => {
+    mocks.improvementRows.push(...Array.from(
+      { length: WORKPACK_LEARNING_COLLECTION_LIMITS.improvements + 1 },
+      (_, index) => ({
+        id: `improvement-${String(index).padStart(3, "0")}`,
+        task_label: "외벽 도장",
+        hazard_label: "추락",
+        improvement_text: "난간 보강",
+        reflected_documents: [],
+        review_status: "approved",
+        source_type: "manual",
+        analysis_payload: null,
+        created_at: "2026-07-10T09:30:00.000Z"
+      })
+    ));
+    const { GET } = await import("@/app/api/workpacks/[id]/learning-export/route");
+    const response = await GET(
+      new NextRequest("http://localhost/api/workpacks/workpack-1/learning-export"),
+      { params: Promise.resolve({ id: "workpack-1" }) }
+    );
+
+    expect(response.status).toBe(413);
+    await expect(response.json()).resolves.toMatchObject({
+      code: "learning_export_collection_limit_exceeded",
+      collection: "improvements",
+      limit: WORKPACK_LEARNING_COLLECTION_LIMITS.improvements
+    });
+    expect(mocks.queryCalls.filter((call) => call.table === "workpack_improvements")).toEqual([
+      { table: "workpack_improvements", method: "order", value: "created_at" },
+      { table: "workpack_improvements", method: "order", value: "id" },
+      {
+        table: "workpack_improvements",
+        method: "limit",
+        value: WORKPACK_LEARNING_COLLECTION_LIMITS.improvements + 1
+      }
+    ]);
+  });
+
+  it("returns a bounded error instead of an oversized final export", async () => {
+    const oversized = sealedResponse();
+    oversized.generationEvidence = attachGenerationEvidence({
+      ...oversized,
+      question: "가".repeat(Math.ceil(WORKPACK_LEARNING_MAX_OUTPUT_BYTES / 3))
+    }, {
+      secret: SECRET,
+      generatedAt: "2026-07-10T09:30:00.000Z"
+    }).generationEvidence;
+    oversized.question = "가".repeat(Math.ceil(WORKPACK_LEARNING_MAX_OUTPUT_BYTES / 3));
+    mocks.loadOwnedWorkpackOperationContext.mockResolvedValue({
+      ...ownedContext(),
+      context: {
+        ...ownedContext().context,
+        shareAuthority: {
+          ...ownedContext().context.shareAuthority,
+          workpack: oversized
+        }
+      }
+    });
+    const { GET } = await import("@/app/api/workpacks/[id]/learning-export/route");
+    const response = await GET(
+      new NextRequest("http://localhost/api/workpacks/workpack-1/learning-export?format=jsonl"),
+      { params: Promise.resolve({ id: "workpack-1" }) }
+    );
+
+    expect(response.status).toBe(413);
+    expect(new TextEncoder().encode(await response.clone().text()).byteLength).toBeLessThan(1_024);
+    await expect(response.json()).resolves.toMatchObject({
+      code: "learning_export_output_too_large",
+      limit: WORKPACK_LEARNING_MAX_OUTPUT_BYTES
+    });
+    expect(response.headers.get("content-disposition")).toBeNull();
   });
 });

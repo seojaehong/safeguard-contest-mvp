@@ -8,6 +8,7 @@ from pathlib import Path
 @dataclass(frozen=True)
 class ParserLimits:
     max_input_bytes: int = 512 * 1024 * 1024
+    max_text_chars: int = 8_000_000
     max_sheet_count: int = 128
     max_rows_per_sheet: int = 100_000
     max_total_rows: int = 250_000
@@ -28,6 +29,7 @@ class ParserBudget:
         self.sheet_rows = 0
         self.total_rows = 0
         self.total_cells = 0
+        self.total_text_chars = 0
 
     def check_elapsed(self) -> None:
         elapsed = time.monotonic() - self.started_at
@@ -37,11 +39,25 @@ class ParserBudget:
             )
 
     def assert_input_file(self, path: Path) -> None:
+        self.assert_input_bytes(path.stat().st_size)
+
+    def assert_input_bytes(self, size: int) -> None:
         self.check_elapsed()
-        size = path.stat().st_size
+        if not isinstance(size, int) or size < 0:
+            raise ParserBudgetError(f"invalid parser input byte count: {size}")
         if size > self.limits.max_input_bytes:
             raise ParserBudgetError(
                 f"parser input bytes exceed limit: {size}/{self.limits.max_input_bytes}"
+            )
+
+    def consume_text(self, value: str) -> None:
+        self.check_elapsed()
+        if not isinstance(value, str):
+            raise ParserBudgetError(f"invalid parser text value type: {type(value).__name__}")
+        self.total_text_chars += len(value)
+        if self.total_text_chars > self.limits.max_text_chars:
+            raise ParserBudgetError(
+                f"parser text chars exceed limit: {self.total_text_chars}/{self.limits.max_text_chars}"
             )
 
     def start_sheet(self) -> None:

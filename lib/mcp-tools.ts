@@ -52,9 +52,34 @@ export type McpToolResult = {
   isError?: boolean;
 };
 
-/** 임의의 JSON 직렬화 가능한 페이로드를 텍스트 콘텐츠 도구 응답으로 감싼다. */
+export const MCP_TOOL_RESULT_MAX_BYTES = 256 * 1_024;
+
+function resultTooLarge(bytes: number): McpToolResult {
+  return {
+    content: [{
+      type: "text",
+      text: JSON.stringify({
+        code: "MCP_TOOL_RESULT_TOO_LARGE",
+        error: "도구 결과가 UTF-8 응답 크기 제한을 초과해 반환되지 않았습니다.",
+        bytes,
+        limit: MCP_TOOL_RESULT_MAX_BYTES,
+      }, null, 2),
+    }],
+    isError: true,
+  };
+}
+
+function serializedResultBytes(result: McpToolResult): number {
+  return new TextEncoder().encode(JSON.stringify(result)).byteLength;
+}
+
+/** MCP CallToolResult가 UTF-8 바이트 상한을 넘으면 본문을 생략하고 명시적 오류를 반환한다. */
 export function toToolResult(payload: unknown): McpToolResult {
-  return { content: [{ type: "text", text: JSON.stringify(payload, null, 2) }] };
+  const text = JSON.stringify(payload, null, 2) ?? "null";
+  const result: McpToolResult = { content: [{ type: "text", text }] };
+  const bytes = serializedResultBytes(result);
+  if (bytes > MCP_TOOL_RESULT_MAX_BYTES) return resultTooLarge(bytes);
+  return result;
 }
 
 /** 도구 실행 실패를 MCP 오류 응답(isError)으로 매핑한다. */

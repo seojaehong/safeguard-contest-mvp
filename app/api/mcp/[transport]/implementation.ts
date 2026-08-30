@@ -57,7 +57,10 @@ import {
   isMcpEnabled,
   resolveMcpAuth,
 } from "@/lib/mcp-auth";
-import { withMcpProviderAdmission } from "@/lib/mcp-provider-admission";
+import {
+  withMcpProviderAdmission,
+  withMcpReadProviderAdmission,
+} from "@/lib/mcp-provider-admission";
 import { registerScopedTool } from "@/lib/mcp-scoped-tool";
 import {
   buildAccidentCasesResult,
@@ -128,11 +131,14 @@ export function registerTools(server: McpServer): void {
         question: z.string().max(MCP_GENERATION_QUESTION_MAX_CHARS).describe("현장 작업 상황 설명"),
       },
     },
-    async ({ question }, authContext) => {
+    async ({ question }, authContext, { signal }) => withMcpReadProviderAdmission(
+      authContext,
+      "run_safeclaw_harness_agent",
+      async () => {
         const [direct, sif, supporting] = await Promise.all([
-          searchSafetyReferences({ query: question, limit: 6, evidenceRole: "direct" }),
-          searchSafetyReferences({ query: question, limit: 6, itemType: "sif-case" }),
-          searchSafetyReferences({ query: question, limit: 6, evidenceRole: "supporting" }),
+          searchSafetyReferences({ query: question, limit: 6, evidenceRole: "direct", signal }),
+          searchSafetyReferences({ query: question, limit: 6, itemType: "sif-case", signal }),
+          searchSafetyReferences({ query: question, limit: 6, evidenceRole: "supporting", signal }),
         ]);
 
         const tenantMemory = await loadTenantHarnessMemoryForMcp(
@@ -163,7 +169,8 @@ export function registerTools(server: McpServer): void {
         });
 
         return toToolResult(result);
-    }
+      },
+    )
   );
 
   registerScopedTool(server,
@@ -237,10 +244,14 @@ export function registerTools(server: McpServer): void {
         region: z.string().max(MCP_REGION_MAX_CHARS).describe("현장 지역명 (예: 서울, 인천, 안산, 부산, 광주, 대구, 창원)"),
       },
     },
-    async ({ region }) => {
-      const signal = await fetchWeatherSignal(region);
-      return toToolResult(buildWeatherResult(region, signal));
-    }
+    async ({ region }, authContext, { signal }) => withMcpReadProviderAdmission(
+      authContext,
+      "get_weather_signals",
+      async () => {
+        const weather = await fetchWeatherSignal(region, signal);
+        return toToolResult(buildWeatherResult(region, weather));
+      },
+    )
   );
 
   registerScopedTool(server,
@@ -283,10 +294,14 @@ export function registerTools(server: McpServer): void {
         keyword: z.string().max(MCP_SEARCH_QUERY_MAX_CHARS).describe("검색 키워드 (예: 비계 추락, 밀폐공간 질식, 지게차 충돌)"),
       },
     },
-    async ({ keyword }) => {
-      const result = await fetchAccidentCases(keyword);
-      return toToolResult(buildAccidentCasesResult(keyword, result));
-    }
+    async ({ keyword }, authContext, { signal }) => withMcpReadProviderAdmission(
+      authContext,
+      "search_accident_cases",
+      async () => {
+        const result = await fetchAccidentCases(keyword, { signal });
+        return toToolResult(buildAccidentCasesResult(keyword, result));
+      },
+    )
   );
 
   registerScopedTool(server,

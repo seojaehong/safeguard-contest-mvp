@@ -73,7 +73,9 @@ const CONCURRENCY_ACQUIRE_SCRIPT = [
   "local requested = tonumber(ARGV[6])",
   "if active + requested > tonumber(ARGV[2]) then return {0, active} end",
   "for i = 1, requested do redis.call('ZADD', KEYS[1], ARGV[3], ARGV[4] .. ':' .. i) end",
-  "redis.call('PEXPIRE', KEYS[1], ARGV[5])",
+  "local ttl = redis.call('PTTL', KEYS[1])",
+  "local requested_ttl = tonumber(ARGV[5])",
+  "if ttl < requested_ttl then redis.call('PEXPIRE', KEYS[1], requested_ttl) end",
   "return {1, active + requested}",
 ].join("\n");
 const CONCURRENCY_RELEASE_SCRIPT = [
@@ -343,17 +345,25 @@ async function runUpstashCommand(
 
 export async function acquirePublicConcurrencyLease(input: {
   concurrency: number;
+  keyTtlMs?: number;
   leaseMs: number;
   namespace: string;
   requireDistributedInProduction: boolean;
   weight?: number;
 }): Promise<(() => Promise<void>) | null | undefined> {
   const weight = input.weight ?? 1;
+  const keyTtlMs = input.keyTtlMs ?? input.leaseMs;
   if (!Number.isSafeInteger(input.concurrency) || input.concurrency < 1) {
     throw new Error("distributed concurrency capacity must be a positive safe integer");
   }
   if (!Number.isSafeInteger(weight) || weight < 1 || weight > input.concurrency) {
     throw new Error("distributed concurrency weight must fit within capacity");
+  }
+  if (!Number.isSafeInteger(input.leaseMs) || input.leaseMs < 1) {
+    throw new Error("distributed concurrency lease must be a positive safe integer");
+  }
+  if (!Number.isSafeInteger(keyTtlMs) || keyTtlMs < input.leaseMs) {
+    throw new Error("distributed concurrency key TTL must cover the lease duration");
   }
   const config = readUpstashConfiguration(process.env);
   if (config.state === "absent") {
@@ -375,7 +385,7 @@ export async function acquirePublicConcurrencyLease(input: {
     String(input.concurrency),
     String(now + input.leaseMs),
     owner,
-    String(input.leaseMs),
+    String(keyTtlMs),
     String(weight),
   ]);
   if (!Array.isArray(result) || result.length < 1 || ![0, 1].includes(Number(result[0]))) {

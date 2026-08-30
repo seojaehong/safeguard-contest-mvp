@@ -65,7 +65,12 @@ describe("public status page admission", () => {
     })));
 
     for (const file of files) {
-      expect(file.source, file.relativePath).toMatch(/runPublic(?:SafetyReferenceStats|OntologyGraph)Read/u);
+      if (file.relativePath === "app/api/ontology/graph/route.ts") {
+        expect(file.source).toContain("withPublicStatusAdmission");
+        expect(file.source).toContain("loadPublicOntologyGraph");
+      } else {
+        expect(file.source, file.relativePath).toMatch(/runPublic(?:SafetyReferenceStats|OntologyGraph)Read/u);
+      }
       expect(file.source, file.relativePath).not.toContain("await getSafetyReferenceStats()");
       expect(file.source, file.relativePath).not.toContain('await loadGraph("published")');
     }
