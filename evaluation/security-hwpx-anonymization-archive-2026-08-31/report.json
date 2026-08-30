@@ -1,0 +1,67 @@
+{
+  "schema": "safeclaw-security-hwpx-anonymization-archive/v1",
+  "generatedAt": "2026-08-31T01:50:46.3240075+09:00",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_CURRENT_OPERATOR_HWPX_ARCHIVE_BUDGET_RESCAN_PENDING",
+  "productCommit": "1db914b27a739cdcd036cdefd9def859f01986dd",
+  "productionBuild": {
+    "commitSha": "1db914b27a739cdcd036cdefd9def859f01986dd",
+    "deploymentUrl": "safeguard-contest-o21gjzb9y-seojaehongs-projects.vercel.app",
+    "sourceMatchesProduction": true
+  },
+  "remediation": {
+    "finding": "HWPX anonymization extracts archives with unbounded PATH-selected tools",
+    "externalUnzipRemoved": true,
+    "shellZipRemoved": true,
+    "filesystemArchiveExtractionRemoved": true,
+    "inProcessArchiveReader": "adm-zip",
+    "inputBytesBudget": 8388608,
+    "outputBytesBudget": 8388608,
+    "archiveEntryCountBudget": 64,
+    "archiveTotalUncompressedBytesBudget": 20971520,
+    "archiveEntryUncompressedBytesBudget": 10485760,
+    "elapsedTimeBudgetMs": 10000,
+    "pathTraversalRejected": true,
+    "symlinkIdentityRejected": true,
+    "mimetypeFirstStoredRequired": true,
+    "postWriteArchiveContractVerified": true
+  },
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd exec -- vitest run tests/anonymize-hwpx-templates.test.ts tests/document-export-localization.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 2,
+      "testsPassed": 17,
+      "testsFailed": 0
+    },
+    "nodeSyntaxCheck": {
+      "command": "node --check scripts/anonymize_hwpx_templates.mjs",
+      "passed": true
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "passed": true
+    },
+    "committedTemplateReadOnlyProbe": {
+      "template": "templates/hwpx/risk-assessment.hwpx",
+      "inputBytes": 93770,
+      "outputBytes": 93770,
+      "entryCount": 14,
+      "totalUncompressedBytes": 1143774,
+      "firstEntry": "mimetype",
+      "firstEntryCompressionMethod": 0,
+      "mimetype": "application/hwp+zip",
+      "fileWritePerformed": false
+    }
+  },
+  "boundaries": {
+    "freshFullSecurityRescanRequired": true,
+    "securityCompleteClaimed": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesChanged": false
+  }
+}
