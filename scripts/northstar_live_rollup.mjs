@@ -51,6 +51,7 @@ const ARTIFACTS = Object.freeze({
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-complete", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
+  currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
@@ -579,6 +580,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const freshCurrentSourceSecurityScan = tryReadJson(rootDir, ARTIFACTS.freshCurrentSourceSecurityScan);
   const currentSourceApprovalFreeSecurityRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceApprovalFreeSecurityRemediation);
   const currentSourceSecurityResourceBudgetRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityResourceBudgetRemediation);
+  const currentSourceLogoutStorageRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceLogoutStorageRemediation);
   const currentSourceSecurityRemediationFollowup = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityRemediationFollowup);
   const currentSecurityGovernedPathCompatibility = tryReadJson(rootDir, ARTIFACTS.currentSecurityGovernedPathCompatibility);
   const currentSourceSecurityResidualRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityResidualRemediation);
@@ -726,6 +728,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "fresh_current_source_security_scan", ARTIFACTS.freshCurrentSourceSecurityScan, freshCurrentSourceSecurityScan),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_approval_free_security_remediation", ARTIFACTS.currentSourceApprovalFreeSecurityRemediation, currentSourceApprovalFreeSecurityRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_resource_budget_remediation", ARTIFACTS.currentSourceSecurityResourceBudgetRemediation, currentSourceSecurityResourceBudgetRemediation),
+    evidenceStatus(rootDir, currentHead, liveCommit, "current_source_logout_storage_remediation", ARTIFACTS.currentSourceLogoutStorageRemediation, currentSourceLogoutStorageRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_remediation_followup", ARTIFACTS.currentSourceSecurityRemediationFollowup, currentSourceSecurityRemediationFollowup),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_security_governed_path_compatibility", ARTIFACTS.currentSecurityGovernedPathCompatibility, currentSecurityGovernedPathCompatibility),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_residual_remediation", ARTIFACTS.currentSourceSecurityResidualRemediation, currentSourceSecurityResidualRemediation),
@@ -1045,6 +1048,26 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       directLiveBudgetExecutionProven: recordAt(currentSourceSecurityResourceBudgetRemediation, "liveChecks")?.directLiveBudgetExecutionProven === true,
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: asString(recordAt(currentSourceSecurityResourceBudgetRemediation, "boundaries")?.exactSavedShareVerdict),
+    },
+    currentSourceLogoutStorageRemediation: {
+      artifact: ARTIFACTS.currentSourceLogoutStorageRemediation,
+      verdict: isRecord(currentSourceLogoutStorageRemediation)
+        ? asString(currentSourceLogoutStorageRemediation.verdict)
+        : "missing",
+      sourceHead: isRecord(currentSourceLogoutStorageRemediation)
+        ? asString(currentSourceLogoutStorageRemediation.sourceHead)
+        : "",
+      productionCommit: isRecord(currentSourceLogoutStorageRemediation)
+        ? asString(currentSourceLogoutStorageRemediation.productionCommit)
+        : "",
+      findingId: asString(recordAt(currentSourceLogoutStorageRemediation, "finding")?.findingId),
+      testsPassed: asNumber(recordAt(recordAt(currentSourceLogoutStorageRemediation, "verification"), "focusedAndAdjacentTests")?.testsPassed),
+      buildStatus: asString(recordAt(recordAt(currentSourceLogoutStorageRemediation, "verification"), "productionBuild")?.status),
+      staticViolationCount: asNumber(recordAt(recordAt(currentSourceLogoutStorageRemediation, "verification"), "frontendStaticAudit")?.violationCount),
+      behavioralLogoutExecuted: recordAt(recordAt(currentSourceLogoutStorageRemediation, "verification"), "liveDeployment")?.behavioralLogoutExecuted === true,
+      freshRescanRequired: recordAt(currentSourceLogoutStorageRemediation, "finding")?.freshRescanRequired === true,
+      securityComplete: recordAt(currentSourceLogoutStorageRemediation, "remainingBoundaries")?.securityComplete === true,
+      exactSavedShareVerdict: asString(recordAt(currentSourceLogoutStorageRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     currentSourceSecurityResidualRemediation: {
       artifact: ARTIFACTS.currentSourceSecurityResidualRemediation,

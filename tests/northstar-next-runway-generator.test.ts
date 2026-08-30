@@ -612,6 +612,22 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceLogoutStorageRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    findingId: string;
+    exactKeyCount: number;
+    clearedPrefixCount: number;
+    preservedPreferenceCount: number;
+    testsPassed: number | null;
+    buildStatus: string;
+    staticViolationCount: number | null;
+    behavioralLogoutExecuted: boolean;
+    freshRescanRequired: boolean;
+    securityComplete: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceSecurityResidualRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1664,6 +1680,33 @@ function currentSourceSecurityResourceBudgetRemediationFixture(): Record<string,
     remainingApprovalGatedFindings: Array.from({ length: 5 }, (_, index) => `approval-${index + 1}`),
     liveChecks: { directLiveBudgetExecutionProven: false },
     boundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  };
+}
+
+function currentSourceLogoutStorageRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_LOGOUT_USER_CONTENT_PURGE_CONTRACT",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    finding: {
+      findingId: "csf_939ccf5e3f2f0fa1963be3e5",
+      freshRescanRequired: true,
+    },
+    remediation: {
+      clearedExactKeys: ["one", "two"],
+      clearedPrefixes: ["one:", "two:", "three:"],
+      preservedPreferenceKeys: ["theme", "aiMode"],
+    },
+    verification: {
+      focusedAndAdjacentTests: { testsPassed: 100 },
+      productionBuild: { status: "PASS" },
+      frontendStaticAudit: { violationCount: 0 },
+      liveDeployment: { behavioralLogoutExecuted: false },
+    },
+    remainingBoundaries: {
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
   };
 }
 
@@ -3306,6 +3349,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
   writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/report.json", freshCurrentSourceSecurityScanFixture());
   writeJson(root, "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json", currentSourceApprovalFreeSecurityRemediationFixture());
   writeJson(root, "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json", currentSourceSecurityResourceBudgetRemediationFixture());
+  writeJson(root, "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json", currentSourceLogoutStorageRemediationFixture());
   writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/scan-manifest.json", { scan: { status: "completed" } });
   writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/findings.json", { findings: [] });
   writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/coverage.json", { completeness: "partial" });
@@ -4970,6 +5014,25 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       approvalGatedFindingCount: 5,
       directLiveBudgetExecutionProven: false,
       securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "current_source_logout_storage_remediation",
+      state: "notice",
+      reason: expect.stringContaining("2 exact user-content keys"),
+    }));
+    expect(report.currentSourceLogoutStorageRemediation).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_LOGOUT_USER_CONTENT_PURGE_CONTRACT",
+      findingId: "csf_939ccf5e3f2f0fa1963be3e5",
+      exactKeyCount: 2,
+      clearedPrefixCount: 3,
+      preservedPreferenceCount: 2,
+      testsPassed: 100,
+      buildStatus: "PASS",
+      staticViolationCount: 0,
+      behavioralLogoutExecuted: false,
+      freshRescanRequired: true,
+      securityComplete: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.noticeState).toContainEqual(expect.objectContaining({

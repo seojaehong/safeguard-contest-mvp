@@ -342,6 +342,67 @@ function currentSourceSecurityResourceBudgetRemediationFixture(): Record<string,
   };
 }
 
+function currentSourceLogoutStorageRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-current-source-security-logout-storage-remediation/v1",
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_LOGOUT_USER_CONTENT_PURGE_CONTRACT",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommitAtVerification: "fixture-sha",
+    finding: {
+      findingId: "csf_939ccf5e3f2f0fa1963be3e5",
+      occurrenceId: "occ_26f3ceb91a01b89d9502da8d",
+      ruleId: "client-data.persistent-logout-retention",
+      sealedFindingReclassified: false,
+      freshRescanRequired: true,
+    },
+    remediation: {
+      explicitLogoutPaths: ["components/AdminLoginPanel.tsx", "components/FieldOperationsWorkspace.tsx"],
+      authEvent: "SIGNED_OUT",
+      workspaceAutoSaveRepopulationPreventedBy: "navigate_to_login_after_cleanup",
+      clearedExactKeys: ["safeclaw.currentWorkpack.v1", "safeclaw.operationImprovements.v1"],
+      clearedPrefixes: [
+        "safeclaw-workpack:",
+        "safeclaw.documentEditorialReview.v1:",
+        "safeclaw.documentEditorialReviewReviewer.v1:",
+      ],
+      preservedPreferenceKeys: ["safeclaw.moduleTheme", "safeclaw.aiMode"],
+      cleanupFailureReported: true,
+      supabaseSignOutFailureStillAttemptsLocalCleanup: true,
+    },
+    verification: {
+      focusedAndAdjacentTests: { filesPassed: 5, testsPassed: 100, testsFailed: 0 },
+      typecheck: { status: "PASS" },
+      productionBuild: { status: "PASS", staticPages: 28 },
+      frontendStaticAudit: { status: "pass", pageFiles: 33, componentFiles: 24, coverageIssues: 0, violationCount: 0 },
+      liveDeployment: {
+        vercelStatus: "success",
+        commitSha: "fixture-sha",
+        branch: "master",
+        environment: "production",
+        behavioralLogoutExecuted: false,
+      },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      immutableOriginalBaselinePreserved: true,
+      sealedCurrentHeadScanPreserved: true,
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      approvalGatedFindingsRemainOpen: true,
+      liveAfterDeploymentRequired: false,
+    },
+  };
+}
+
 function currentSourceSecurityRemediationFollowupFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_PRODUCTION_APPROVAL_FREE_SECURITY_REMEDIATIONS_POST_FIX_RESCAN_PENDING",
@@ -4585,6 +4646,11 @@ function createFixtureRoot(): string {
     rootDir,
     path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
     currentSourceSecurityResourceBudgetRemediationFixture(),
+  );
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
+    currentSourceLogoutStorageRemediationFixture(),
   );
   for (const receipt of approvalFreeRemediation.receipts as Array<{ evidencePath: string }>) {
     writeJson(rootDir, receipt.evidencePath, { verdict: "PASS_FIXTURE" });
@@ -8907,6 +8973,37 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "current_source_security_resource_budget_remediation")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records deployed logout cleanup without closing the sealed finding or approval boundaries", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-security-logout-storage-remediation-2026-08-31",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_logout_storage_remediation");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("clears worker/workpack/editorial browser content");
+    expect(gate?.detail).toContain("Five files / 100 tests");
+    expect(gate?.detail).toContain("Behavioral live logout was intentionally not executed");
+    expect(gate?.detail).toContain("sealed finding remains open pending a fresh scan");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      mutationBoundary: { dbMutationPerformed: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.mutationBoundary.dbMutationPerformed = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "current_source_logout_storage_remediation")?.state)
       .toBe("contradicted");
   });
 

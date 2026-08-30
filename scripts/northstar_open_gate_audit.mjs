@@ -74,6 +74,7 @@ const EVIDENCE_PATHS = Object.freeze({
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-complete", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
+  currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
@@ -8950,6 +8951,115 @@ function isCurrentSecurityGovernedPathCompatibility(rootDir, gateId, governedPat
 
 /**
  * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateCurrentSourceLogoutStorageRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourceLogoutStorageRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_source_logout_storage_remediation",
+      label: "Current-source logout storage remediation",
+      state: "missing",
+      evidencePath,
+      detail: "The logout user-content storage remediation receipt is missing or invalid.",
+      nextActions: ["Restore the deployed-source logout receipt without reclassifying the sealed finding or closing approval boundaries."],
+    });
+  }
+
+  const finding = isRecord(report.finding) ? report.finding : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacentTests) ? verification.focusedAndAdjacentTests : {};
+  const typecheck = isRecord(verification.typecheck) ? verification.typecheck : {};
+  const build = isRecord(verification.productionBuild) ? verification.productionBuild : {};
+  const staticAudit = isRecord(verification.frontendStaticAudit) ? verification.frontendStaticAudit : {};
+  const live = isRecord(verification.liveDeployment) ? verification.liveDeployment : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const boundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const exactKeys = Array.isArray(remediation.clearedExactKeys) ? remediation.clearedExactKeys : [];
+  const prefixes = Array.isArray(remediation.clearedPrefixes) ? remediation.clearedPrefixes : [];
+  const preferences = Array.isArray(remediation.preservedPreferenceKeys) ? remediation.preservedPreferenceKeys : [];
+  const explicitLogoutPaths = Array.isArray(remediation.explicitLogoutPaths) ? remediation.explicitLogoutPaths : [];
+  const productCommit = readString(report.productCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.schemaVersion) === "safeclaw-current-source-security-logout-storage-remediation/v1"
+    && readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_LOGOUT_USER_CONTENT_PURGE_CONTRACT"
+    && productCommit !== ""
+    && productCommit === readString(report.sourceHead)
+    && productCommit === readString(report.productionCommit)
+    && productCommit === readString(report.productionCommitAtVerification)
+    && productCommit === readString(live.commitSha)
+    && readString(live.branch) === "master"
+    && readString(live.environment) === "production"
+    && readString(live.vercelStatus) === "success"
+    && isGitAncestor(rootDir, productCommit)
+    && readString(finding.findingId) === "csf_939ccf5e3f2f0fa1963be3e5"
+    && readString(finding.occurrenceId) === "occ_26f3ceb91a01b89d9502da8d"
+    && readString(finding.ruleId) === "client-data.persistent-logout-retention"
+    && finding.sealedFindingReclassified === false
+    && finding.freshRescanRequired === true
+    && explicitLogoutPaths.length === 2
+    && explicitLogoutPaths.includes("components/AdminLoginPanel.tsx")
+    && explicitLogoutPaths.includes("components/FieldOperationsWorkspace.tsx")
+    && readString(remediation.authEvent) === "SIGNED_OUT"
+    && readString(remediation.workspaceAutoSaveRepopulationPreventedBy) === "navigate_to_login_after_cleanup"
+    && exactKeys.length === 2
+    && exactKeys.includes("safeclaw.currentWorkpack.v1")
+    && exactKeys.includes("safeclaw.operationImprovements.v1")
+    && prefixes.length === 3
+    && prefixes.includes("safeclaw-workpack:")
+    && prefixes.includes("safeclaw.documentEditorialReview.v1:")
+    && prefixes.includes("safeclaw.documentEditorialReviewReviewer.v1:")
+    && preferences.length === 2
+    && preferences.includes("safeclaw.moduleTheme")
+    && preferences.includes("safeclaw.aiMode")
+    && remediation.cleanupFailureReported === true
+    && remediation.supabaseSignOutFailureStillAttemptsLocalCleanup === true
+    && readNumber(focused.filesPassed) === 5
+    && readNumber(focused.testsPassed) === 100
+    && readNumber(focused.testsFailed) === 0
+    && readString(typecheck.status) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && readString(staticAudit.status) === "pass"
+    && readNumber(staticAudit.pageFiles) === 33
+    && readNumber(staticAudit.componentFiles) === 24
+    && readNumber(staticAudit.coverageIssues) === 0
+    && readNumber(staticAudit.violationCount) === 0
+    && live.behavioralLogoutExecuted === false
+    && noMutation
+    && boundaries.immutableOriginalBaselinePreserved === true
+    && boundaries.sealedCurrentHeadScanPreserved === true
+    && boundaries.securityComplete === false
+    && readString(boundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && boundaries.approvalGatedFindingsRemainOpen === true
+    && boundaries.liveAfterDeploymentRequired === false;
+
+  return gateResult({
+    id: "current_source_logout_storage_remediation",
+    label: "Current-source logout storage remediation",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Current live source clears worker/workpack/editorial browser content on explicit logout and SIGNED_OUT while preserving only theme and AI-mode preferences; workspace navigation prevents autosave repopulation. Five files / 100 tests, typecheck, 28-page build, and the 33-page/24-component static audit pass. Behavioral live logout was intentionally not executed because it would mutate the signed-in session. The sealed finding remains open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
+      : `Logout-storage verdict=${readString(report.verdict) || "missing"}, product/live=${productCommit || "missing"}/${readString(live.commitSha) || "missing"}, tests=${readNumber(focused.testsPassed)}, keys=${exactKeys.length}/${prefixes.length}, behavioralLogout=${live.behavioralLogoutExecuted === true}, freshRescan=${finding.freshRescanRequired === true}, noMutation=${noMutation}, securityComplete=${boundaries.securityComplete === true}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Include the deployed logout contract in the next full repository scan before reclassifying the sealed finding.",
+          "Keep exact saved Share and all DB/provider/vector/wiki/KOSHA approval boundaries open.",
+        ]
+      : ["Restore exact cleanup keys and prefixes, aligned source/live identity, verification counts, fresh-rescan boundary, no-mutation boundary, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
  * @param {string[]} governedPaths
  */
 function isCurrentSecurityGovernedPathReceiptCurrent(rootDir, governedPaths) {
@@ -13014,6 +13124,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateFreshCurrentSourceSecurityScanGate(rootDir),
     evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir),
     evaluateCurrentSourceSecurityResourceBudgetRemediationGate(rootDir),
+    evaluateCurrentSourceLogoutStorageRemediationGate(rootDir),
     evaluateCurrentSourceSecurityRemediationFollowupGate(rootDir),
     evaluateCurrentSecurityGovernedPathCompatibilityGate(rootDir),
     evaluateCurrentSourceSecurityResidualRemediationGate(rootDir),

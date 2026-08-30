@@ -527,6 +527,19 @@ type RollupReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceLogoutStorageRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    findingId: string;
+    testsPassed: number | null;
+    buildStatus: string;
+    staticViolationCount: number | null;
+    behavioralLogoutExecuted: boolean;
+    freshRescanRequired: boolean;
+    securityComplete: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceSecurityResidualRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1198,6 +1211,28 @@ function currentSourceSecurityResourceBudgetRemediationFixture(): Record<string,
     remainingApprovalGatedFindings: Array.from({ length: 5 }, (_, index) => `approval-${index + 1}`),
     liveChecks: { directLiveBudgetExecutionProven: false },
     boundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  };
+}
+
+function currentSourceLogoutStorageRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_LOGOUT_USER_CONTENT_PURGE_CONTRACT",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    finding: {
+      findingId: "csf_939ccf5e3f2f0fa1963be3e5",
+      freshRescanRequired: true,
+    },
+    verification: {
+      focusedAndAdjacentTests: { testsPassed: 100 },
+      productionBuild: { status: "PASS" },
+      frontendStaticAudit: { violationCount: 0 },
+      liveDeployment: { behavioralLogoutExecuted: false },
+    },
+    remainingBoundaries: {
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
   };
 }
 
@@ -2518,6 +2553,7 @@ function createFixtureRoot(): { root: string; head: string } {
   writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/report.json", freshCurrentSourceSecurityScanFixture());
   writeJson(root, "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json", currentSourceApprovalFreeSecurityRemediationFixture());
   writeJson(root, "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json", currentSourceSecurityResourceBudgetRemediationFixture());
+  writeJson(root, "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json", currentSourceLogoutStorageRemediationFixture());
   writeJson(root, "evaluation/current-source-security-residual-remediation-2026-08-28/report.json", currentSourceSecurityResidualRemediationFixture());
   writeJson(root, "evaluation/share-ack-prebody-admission-2026-08-28/report.json", shareAckPreBodyAdmissionFixture());
   writeJson(root, "evaluation/safety-status-disconnect-lease-2026-08-28/report.json", safetyStatusDisconnectLeaseFixture());
@@ -2917,6 +2953,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/current-head-standard-security-scan-2026-08-31-complete/report.json",
     "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json",
+    "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-residual-remediation-2026-08-28/report.json",
     "evaluation/share-ack-prebody-admission-2026-08-28/report.json",
     "evaluation/safety-status-disconnect-lease-2026-08-28/report.json",
@@ -3545,6 +3582,22 @@ describe("northstar live rollup", () => {
       approvalGatedFindingCount: 5,
       directLiveBudgetExecutionProven: false,
       securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "current_source_logout_storage_remediation")).toMatchObject({
+      artifact: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
+    });
+    expect(report.currentSourceLogoutStorageRemediation).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_LOGOUT_USER_CONTENT_PURGE_CONTRACT",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      findingId: "csf_939ccf5e3f2f0fa1963be3e5",
+      testsPassed: 100,
+      buildStatus: "PASS",
+      staticViolationCount: 0,
+      behavioralLogoutExecuted: false,
+      freshRescanRequired: true,
+      securityComplete: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "current_source_security_residual_remediation")).toMatchObject({
