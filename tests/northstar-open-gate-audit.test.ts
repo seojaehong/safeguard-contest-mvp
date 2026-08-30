@@ -9192,6 +9192,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(gate?.detail).toContain("Two files / 13 tests");
     expect(gate?.detail).toContain("sealed finding stays open pending a fresh scan");
     expect(gate?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((item) => item.id === "improvement_photo_analysis_budget")?.state).toBe("notice");
+    expect(audit.gates.find((item) => item.id === "current_security_governed_path_compatibility")?.state).toBe("notice");
 
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
       remediation: { publicGetCallsSupabaseAuthentication: boolean };

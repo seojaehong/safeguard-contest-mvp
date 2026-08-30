@@ -9265,6 +9265,26 @@ function evaluateCurrentSourcePhotoReadinessAuthFanoutRemediationGate(rootDir) {
  * @param {string} rootDir
  * @param {string[]} governedPaths
  */
+function isCurrentPhotoReadinessAuthFanoutCompatibility(rootDir, governedPaths) {
+  const gate = evaluateCurrentSourcePhotoReadinessAuthFanoutRemediationGate(rootDir);
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.currentSourcePhotoReadinessAuthFanoutRemediation);
+  const productCommit = isRecord(report) ? readString(report.productCommit) : "";
+  if (gate.state !== "notice" || !productCommit) return false;
+  try {
+    execFileSync("git", ["diff", "--quiet", `${productCommit}..HEAD`, "--", ...governedPaths], {
+      cwd: rootDir,
+      stdio: ["ignore", "ignore", "ignore"],
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * @param {string} rootDir
+ * @param {string[]} governedPaths
+ */
 function isCurrentSecurityGovernedPathReceiptCurrent(rootDir, governedPaths) {
   return isCurrentSecurityGovernedPathCompatibility(
     rootDir,
@@ -11047,7 +11067,8 @@ function evaluateImprovementPhotoAnalysisBudgetGate(rootDir) {
     || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
     || isDocumentExportAdmissionCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
     || isPublicAdmissionCurrentSourceCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
-    || isCurrentSecurityGovernedPathCompatibility(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS);
+    || isCurrentSecurityGovernedPathCompatibility(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
+    || isCurrentPhotoReadinessAuthFanoutCompatibility(rootDir, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS);
   const noMutation = mutation.dbSchemaMutation === false
     && mutation.dbDataMutation === false
     && mutation.providerDispatchCalled === false
@@ -13257,7 +13278,8 @@ function evaluateCurrentSecurityGovernedPathCompatibilityGate(rootDir) {
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "share_ack_prebody_admission_security", SHARE_ACK_PREBODY_ADMISSION_PATHS)
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "share_recipient_contact_verification_security", SHARE_RECIPIENT_CONTACT_VERIFICATION_PATHS)
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
-    && isCurrentSecurityGovernedPathCompatibility(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
+    && (isCurrentSecurityGovernedPathCompatibility(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
+      || isCurrentPhotoReadinessAuthFanoutCompatibility(rootDir, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS))
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "public_ask_distributed_admission", PUBLIC_ASK_DISTRIBUTED_ADMISSION_PATHS)
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "learning_export_renderer_security", LEARNING_EXPORT_RENDERER_SECURITY_PATHS)
