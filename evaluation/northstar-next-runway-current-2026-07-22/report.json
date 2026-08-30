@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-30T19:01:36.873Z",
+  "generatedAt": "2026-08-30T19:13:58.196Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
-  "productionCommit": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
+  "sourceHead": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
+  "productionCommit": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
+    "commitSha": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-16kuc1o88-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-r149nkq41-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
-  "liveRollupLiveCommit": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
+  "liveExactEvidenceCommit": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
+  "liveRollupLiveCommit": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -223,7 +223,7 @@
     {
       "gate": "current_security_governed_path_compatibility",
       "state": "notice",
-      "reason": "current source compatibility covers 7 security notices across 18 paths with 20 files / 233 tests passing; 1 opt-in browser file / 7 tests were skipped and no fresh browser PASS is claimed, the full scan remains PENDING_DESKTOP_SECURITY_SCAN, and exact saved Share remains MISSING_EVIDENCE"
+      "reason": "current source compatibility covers 10 security notices across 27 paths with 22 files / 358 tests passing; 1 opt-in browser file / 7 tests were skipped and no fresh browser PASS is claimed, the full scan remains PENDING_DESKTOP_SECURITY_SCAN, and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "current_source_security_residual_remediation",
@@ -1260,13 +1260,13 @@
   },
   "currentSecurityGovernedPathCompatibility": {
     "verdict": "PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_PENDING",
-    "sourceHead": "a1a9da9bd663c05d69f8dbb00823e2761f19ad64",
-    "productionCommit": "1b4d7feeb4469ab4df148615ae22ab3037e70571",
-    "coveredGateCount": 7,
-    "governedPathCount": 18,
-    "filesPassed": 20,
+    "sourceHead": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
+    "productionCommit": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
+    "coveredGateCount": 10,
+    "governedPathCount": 27,
+    "filesPassed": 22,
     "filesSkipped": 1,
-    "testsPassed": 233,
+    "testsPassed": 358,
     "testsSkipped": 7,
     "browserCompatibility": "PRESERVED_PRIOR_LIVE_EVIDENCE_NOT_REEXECUTED",
     "postFixFullRepositoryScan": "PENDING_DESKTOP_SECURITY_SCAN",

@@ -1,23 +1,23 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-30T19:01:07.600Z",
-  "head": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
+  "generatedAt": "2026-08-30T19:13:34.161Z",
+  "head": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
+    "commitSha": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-16kuc1o88-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-r149nkq41-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "overall": "northstar_evidence_missing_or_unknown",
+  "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
   "launchReadiness": false,
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-    "overall": "contradicted",
+    "overall": "open",
     "gateCount": 87
   },
   "provenGates": [
@@ -232,6 +232,12 @@
       "detail": "Production a1a9da9b contains five bounded approval-free remediation receipts covering reviewed-improvement provenance, pre-authentication body admission, KOSHA official PDF redirects/temp identity, and four legacy archive consumers. Focused verification is 79 Vitest plus 11 Python tests, and the official KOSHA PDF audit remains 8/8 with no retained temporary files or exact promotion. The immutable 20-finding partial-coverage baseline is preserved, the post-fix full repository scan remains pending, public-catalog RLS stays approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE. This gate is notice, not security-complete proof."
     },
     {
+      "id": "current_security_governed_path_compatibility",
+      "state": "notice",
+      "artifact": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
+      "detail": "Current source and production include a shared compatibility receipt for 10 security notices across 27 governed paths. Contract regression passed 22 files / 358 tests; the opt-in recipient browser file and its 7 tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. This receipt does not rewrite immutable findings or complete the pending full scan, distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
       "id": "current_source_security_residual_remediation",
       "state": "notice",
       "artifact": "evaluation\\current-source-security-residual-remediation-2026-08-28\\report.json",
@@ -286,6 +292,12 @@
       "detail": "Live source requires a distributed authenticated-user quota and engine-work lease before Agent Chat model or tool execution, with busy, failure, completion, and cancellation release covered by 24 focused and 55 adjacent tests. Production still reports pre-auth instance mode, so authenticated Agent Chat is fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
+      "id": "mcp_provider_admission_security",
+      "state": "notice",
+      "artifact": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
+      "detail": "Live source requires token-and-tenant-bound distributed rate admission plus a weighted durable lease before either provider-generating MCP tool runs, while read-only tools and deterministic template mode remain available. Current compatibility=true records that an invalid non-secret token now fails earlier at distributed admission with 503 before auth, tool dispatch, or provider work. Valid authenticated generation remains unprobed without an MCP token and fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
       "id": "public_json_request_body_budget",
       "state": "proven",
       "artifact": "evaluation\\public-json-request-body-budget-2026-08-11\\report.json",
@@ -310,10 +322,22 @@
       "detail": "Live public safety-reference search, MCP harness packets, and saved-workpack comparison results omit full bodies and arbitrary payload metadata while internal KOSHA grounding retains a bounded prompt excerpt. This wave closes 1 finding for a cumulative 9/20, leaves 11 visible, preserves instance rate limiting as a separate notice, performs no mutation, and keeps exact saved Share as MISSING_EVIDENCE."
     },
     {
+      "id": "improvement_photo_analysis_budget",
+      "state": "notice",
+      "artifact": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
+      "detail": "Improvement and dedicated photo analysis now share pre-provider byte, count, MIME/signature, rate, and concurrency controls with 76 tests plus a current 23 files / 215 tests governed-path companion. Production currently reports instance fallback rather than distributed admission, the immutable 14-finding scan remains unchanged, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
       "id": "public_provider_cancellation",
       "state": "notice",
       "artifact": "evaluation\\public-provider-cancellation-2026-08-11\\report.json",
       "detail": "Weather coalescing cancels upstream work only after the final consumer disconnects, while knowledge regeneration and remediation forward caller cancellation through provider and reference paths. The original deployed receipt remains 9 files / 104 tests, and current source 99c7df72 adds a 6 files / 49 tests cancellation refresh; no live provider cancellation call was executed. The canonical finding remains immutable pending a follow-up scan, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "public_provider_admission",
+      "state": "notice",
+      "artifact": "evaluation\\public-provider-admission-2026-08-11\\report.json",
+      "detail": "Current production enforces mode-weighted provider work units (template 0, enhanced 2, full 12) with completion/cancellation release, 23 files / 215 tests governed-path compatibility, and live no-provider work-budget probes across ask, weather, and knowledge. Production still reports process-instance admission because Upstash is not configured; both canonical medium findings remain immutable, distributed activation and a fresh follow-up scan remain required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "public_ask_distributed_admission",
@@ -338,6 +362,24 @@
       "state": "notice",
       "artifact": "evaluation\\security-public-generation-admission-2026-08-04\\report.json",
       "detail": "Current production 99c7df72 requires distributed admission before body parsing on both public generation routes. The before-live 400/instance behavior is preserved, while local and live after-remediation probes return 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before reference search, AI/provider work, or DB mutation when configurationState=absent. Distributed activation and a fresh scan remain open; the immutable baseline is preserved, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "security_followup_remediation",
+      "state": "proven",
+      "artifact": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
+      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (covered by another current receipt). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "mcp_generation_work_budget_security",
+      "state": "notice",
+      "artifact": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
+      "detail": "Current production 75027ffa proves distributed MCP admission is required but not configured: the readiness endpoint reports configurationState=absent and the pre-auth guard returns 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification preserves the 96 KiB body contract with 3 files / 65 focused tests and 8 files / 126 adjacent MCP tests. Distributed activation, a valid authenticated runtime probe, and a fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "learning_export_renderer_security",
+      "state": "proven",
+      "artifact": "evaluation\\learning-export-renderer-security-2026-08-02\\report.json",
+      "detail": "Live source alignment proves a renderer-independent inert-text contract for downloaded Markdown/Obsidian learning exports: raw HTML, active/local URI schemes, image/link openers, Obsidian embeds, path metacharacters, and frontmatter are bounded; attachment CSP/no-sniff/no-store/no-referrer controls are present; JSONL provenance remains raw. This bounds the deferred candidate in current source but does not rewrite the sealed partial scan, replace a future full rescan, create a stored workpack, or close exact saved Share MISSING_EVIDENCE."
     },
     {
       "id": "hermes_remote_durable_ledger",
@@ -1981,9 +2023,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
+      "sourceCommit": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
       "sourceStatus": "exact",
-      "productionCommit": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
+      "productionCommit": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
       "productionStatus": "matches_live"
     },
     {
@@ -2254,9 +2296,9 @@
       "id": "current_source_security_resource_budget_remediation",
       "artifact": "evaluation\\current-source-security-resource-budget-remediation-2026-08-31\\report.json",
       "sourceCommit": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "current_source_security_remediation_followup",
@@ -2269,10 +2311,10 @@
     {
       "id": "current_security_governed_path_compatibility",
       "artifact": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
-      "sourceCommit": "a1a9da9bd663c05d69f8dbb00823e2761f19ad64",
-      "sourceStatus": "ancestor",
-      "productionCommit": "1b4d7feeb4469ab4df148615ae22ab3037e70571",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
+      "sourceStatus": "exact",
+      "productionCommit": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
+      "productionStatus": "matches_live"
     },
     {
       "id": "current_source_security_residual_remediation",

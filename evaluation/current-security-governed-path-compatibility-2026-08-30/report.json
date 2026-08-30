@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-current-security-governed-path-compatibility/v1",
-  "generatedAt": "2026-08-30T14:43:10.000Z",
+  "generatedAt": "2026-08-31T04:08:13.5875522+09:00",
   "verdict": "PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_PENDING",
-  "sourceHead": "a1a9da9bd663c05d69f8dbb00823e2761f19ad64",
-  "productionCommit": "1b4d7feeb4469ab4df148615ae22ab3037e70571",
+  "sourceHead": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
+  "productionCommit": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
   "productionIncludesSourceHead": true,
   "coveredGateIds": [
     "share_ack_prebody_admission_security",
@@ -12,7 +12,10 @@
     "improvement_photo_analysis_budget",
     "public_provider_admission",
     "public_ask_distributed_admission",
-    "learning_export_renderer_security"
+    "learning_export_renderer_security",
+    "mcp_provider_admission_security",
+    "mcp_generation_work_budget_security",
+    "security_followup_remediation"
   ],
   "governedPaths": [
     "app/api/ask/route.ts",
@@ -32,16 +35,25 @@
     "lib/public-work-budget.ts",
     "lib/workpack-commercial.ts",
     "lib/workpack-learning-export.ts",
+    "app/api/mcp/[transport]/implementation.ts",
+    "app/api/mcp/[transport]/route.ts",
+    "lib/mcp-auth.ts",
+    "lib/mcp-provider-admission.ts",
+    "lib/mcp-tools.ts",
+    "lib/rate-limit.ts",
+    "tests/mcp-auth.test.ts",
+    "tests/mcp-provider-admission.test.ts",
+    "tests/mcp-work-budget.test.ts",
     "tests/workpack-share-authority-routes.test.ts"
   ],
   "verification": {
     "vitest": {
-      "filesPassed": 20,
+      "filesPassed": 22,
       "filesSkipped": 1,
-      "testsPassed": 233,
+      "testsPassed": 358,
       "testsSkipped": 7,
       "status": "PASS_WITH_BROWSER_OPT_IN_SKIPPED",
-      "durationSeconds": 14.56
+      "durationSeconds": 18.09
     },
     "typecheck": "PASS",
     "browserCompatibility": "PRESERVED_PRIOR_LIVE_EVIDENCE_NOT_REEXECUTED",

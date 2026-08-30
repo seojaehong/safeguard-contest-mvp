@@ -1,11 +1,11 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-30T19:01:07.600Z
-Source HEAD at generation: 8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f
-Live commit at generation: 8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f
+Generated at: 2026-08-30T19:13:34.161Z
+Source HEAD at generation: 679bb91711c0afecf12aea8a0b650da8a99c03ff
+Live commit at generation: 679bb91711c0afecf12aea8a0b650da8a99c03ff
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
-Overall: `northstar_evidence_missing_or_unknown`
+Overall: `northstar_open_approval_gated`
 
 ## Current Workspace Mobile Geometry
 
@@ -443,6 +443,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | current_source_approval_free_security_remediation | notice | evaluation\current-source-security-approval-free-remediation-2026-08-31\report.json |
 | current_source_security_resource_budget_remediation | proven | evaluation\current-source-security-resource-budget-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | notice | evaluation\current-source-security-remediation-2026-08-30\report.json |
+| current_security_governed_path_compatibility | notice | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
 | current_source_security_residual_remediation | notice | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | notice | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | notice | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
@@ -452,15 +453,21 @@ Overall: `northstar_evidence_missing_or_unknown`
 | share_session_revocation_security | notice | evaluation\share-session-revocation-remediation-2026-08-14\report.json |
 | share_recipient_contact_verification_security | notice | evaluation\share-recipient-contact-verification-2026-08-14\report.json |
 | agent_chat_durable_admission_security | notice | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
+| mcp_provider_admission_security | notice | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
 | public_json_request_body_budget | proven | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | security_resource_remediation | proven | evaluation\security-resource-remediation-2026-08-11\report.json |
 | security_upstream_transport_remediation | proven | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |
 | security_safety_reference_surface_remediation | proven | evaluation\security-safety-reference-surface-remediation-2026-08-11\report.json |
+| improvement_photo_analysis_budget | notice | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | notice | evaluation\public-provider-cancellation-2026-08-11\report.json |
+| public_provider_admission | notice | evaluation\public-provider-admission-2026-08-11\report.json |
 | public_ask_distributed_admission | proven | evaluation\public-ask-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_admission | proven | evaluation\public-search-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_rate_limit_readiness | notice | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | notice | evaluation\security-public-generation-admission-2026-08-04\report.json |
+| security_followup_remediation | proven | evaluation\codex-security-followup-remediation-2026-08-11\report.json |
+| mcp_generation_work_budget_security | notice | evaluation\security-mcp-generation-work-budget-2026-08-04\report.json |
+| learning_export_renderer_security | proven | evaluation\learning-export-renderer-security-2026-08-02\report.json |
 | hermes_remote_durable_ledger | proven | evaluation\hermes-openclaw-runtime-current-gate-2026-07-20\report.json |
 | hermes_knowledge_review_authority | proven | evaluation\hermes-knowledge-review-contract-live-2026-07-25\report.json |
 | hermes_knowledge_review_ui | proven | evaluation\hermes-knowledge-review-selected-workbench-2026-08-14\report.json |
@@ -527,9 +534,9 @@ Overall: `northstar_evidence_missing_or_unknown`
 | current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | fresh_current_source_security_scan | ancestor | missing | evaluation\current-source-standard-security-scan-2026-08-31-complete\report.json |
 | current_source_approval_free_security_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-approval-free-remediation-2026-08-31\report.json |
-| current_source_security_resource_budget_remediation | exact | matches_live | evaluation\current-source-security-resource-budget-remediation-2026-08-31\report.json |
+| current_source_security_resource_budget_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-resource-budget-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | ancestor | ancestor_of_head | evaluation\current-source-security-remediation-2026-08-30\report.json |
-| current_security_governed_path_compatibility | ancestor | ancestor_of_head | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
+| current_security_governed_path_compatibility | exact | matches_live | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
 | current_source_security_residual_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | ancestor | ancestor_of_head | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | ancestor | ancestor_of_head | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |

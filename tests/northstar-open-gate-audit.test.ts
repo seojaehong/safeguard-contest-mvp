@@ -410,6 +410,9 @@ function currentSecurityGovernedPathCompatibilityFixture(): Record<string, unkno
       "public_provider_admission",
       "public_ask_distributed_admission",
       "learning_export_renderer_security",
+      "mcp_provider_admission_security",
+      "mcp_generation_work_budget_security",
+      "security_followup_remediation",
     ],
     governedPaths: [
       "app/api/ask/route.ts",
@@ -429,13 +432,22 @@ function currentSecurityGovernedPathCompatibilityFixture(): Record<string, unkno
       "lib/public-work-budget.ts",
       "lib/workpack-commercial.ts",
       "lib/workpack-learning-export.ts",
+      "app/api/mcp/[transport]/implementation.ts",
+      "app/api/mcp/[transport]/route.ts",
+      "lib/mcp-auth.ts",
+      "lib/mcp-provider-admission.ts",
+      "lib/mcp-tools.ts",
+      "lib/rate-limit.ts",
+      "tests/mcp-auth.test.ts",
+      "tests/mcp-provider-admission.test.ts",
+      "tests/mcp-work-budget.test.ts",
       "tests/workpack-share-authority-routes.test.ts",
     ],
     verification: {
       vitest: {
-        filesPassed: 20,
+        filesPassed: 22,
         filesSkipped: 1,
-        testsPassed: 233,
+        testsPassed: 358,
         testsSkipped: 7,
         status: "PASS_WITH_BROWSER_OPT_IN_SKIPPED",
       },
@@ -8660,6 +8672,18 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     report.remainingBoundaries.exactSavedShareVerdict = "PASS";
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
 
+    const currentReceiptPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-security-governed-path-compatibility-2026-08-30",
+      "report.json",
+    );
+    const currentReceipt = JSON.parse(fs.readFileSync(currentReceiptPath, "utf8")) as {
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    currentReceipt.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(currentReceiptPath, `${JSON.stringify(currentReceipt, null, 2)}\n`, "utf8");
+
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "mcp_generation_work_budget_security")?.state)
       .toBe("contradicted");
@@ -8934,8 +8958,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const audit = buildNorthstarOpenGateAudit({ rootDir });
     const gate = audit.gates.find((item) => item.id === "current_security_governed_path_compatibility");
     expect(gate?.state).toBe("notice");
-    expect(gate?.detail).toContain("seven security notices across 18 governed paths");
-    expect(gate?.detail).toContain("20 files / 233 tests");
+    expect(gate?.detail).toContain("10 security notices across 27 governed paths");
+    expect(gate?.detail).toContain("22 files / 358 tests");
     expect(gate?.detail).toContain("7 tests were skipped");
     expect(gate?.detail).toContain("no fresh browser PASS is claimed");
     expect(gate?.detail).toContain("MISSING_EVIDENCE");
@@ -8947,6 +8971,9 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       "public_provider_admission",
       "public_ask_distributed_admission",
       "learning_export_renderer_security",
+      "mcp_provider_admission_security",
+      "mcp_generation_work_budget_security",
+      "security_followup_remediation",
     ]) {
       expect(audit.gates.find((item) => item.id === gateId)?.state).not.toBe("contradicted");
     }

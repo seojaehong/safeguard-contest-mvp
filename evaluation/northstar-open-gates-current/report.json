@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-30T19:00:31.866Z",
-  "sourceSha": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
-  "overall": "contradicted",
+  "generatedAt": "2026-08-30T19:13:33.000Z",
+  "sourceSha": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
+  "overall": "open",
   "gates": [
     {
       "id": "final_99_gate",
@@ -370,12 +370,12 @@
     },
     {
       "id": "current_security_governed_path_compatibility",
-      "state": "contradicted",
+      "state": "notice",
       "label": "Current security governed-path compatibility",
       "evidencePath": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
-      "detail": "Current compatibility verdict=PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_PENDING, tests=20/233, browserSkipped=1/7, rescan=PENDING_DESKTOP_SECURITY_SCAN, exactShare=MISSING_EVIDENCE.",
+      "detail": "Current source and production include a shared compatibility receipt for 10 security notices across 27 governed paths. Contract regression passed 22 files / 358 tests; the opt-in recipient browser file and its 7 tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. This receipt does not rewrite immutable findings or complete the pending full scan, distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore all seven governed-path receipts, 20/233 contract PASS, transparent browser skips, no-mutation boundaries, pending full scan, and exact Share MISSING_EVIDENCE."
+        "Keep prior live browser receipts visible, run the pending full Desktop scan, and retain distributed, DB/RLS, recipient ACK, and exact saved Share approval boundaries."
       ]
     },
     {
@@ -481,12 +481,13 @@
     },
     {
       "id": "mcp_provider_admission_security",
-      "state": "contradicted",
+      "state": "notice",
       "label": "MCP provider admission security",
       "evidencePath": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
-      "detail": "MCP provider admission verdict=PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING, sourceLive=true, sourceCurrent=false, distributed=OPEN_OPERATOR_CONFIGURATION, authProbe=NOT_EXECUTED_NO_MCP_TOKEN, noMutation=true, exactShare=MISSING_EVIDENCE.",
+      "detail": "Live source requires token-and-tenant-bound distributed rate admission plus a weighted durable lease before either provider-generating MCP tool runs, while read-only tools and deterministic template mode remain available. Current compatibility=true records that an invalid non-secret token now fails earlier at distributed admission with 503 before auth, tool dispatch, or provider work. Valid authenticated generation remains unprobed without an MCP token and fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore deployed source alignment, token/tenant rate admission, weighted lease, verification receipts, no-mutation boundaries, rescan requirement, and exact Share MISSING_EVIDENCE."
+        "Configure the approved distributed backend and run a bounded authenticated no-provider MCP admission probe.",
+        "Run a fresh Standard scan before reclassifying the immutable finding or claiming security completion."
       ]
     },
     {
@@ -532,12 +533,13 @@
     },
     {
       "id": "improvement_photo_analysis_budget",
-      "state": "contradicted",
+      "state": "notice",
       "label": "Improvement photo analysis budget",
       "evidencePath": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
-      "detail": "Improvement photo verdict=PASS_LIVE_PRODUCTION_IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_WITH_INSTANCE_ADMISSION, sourceCurrent=false, liveCases=2, admission=INSTANCE_FALLBACK_ACTIVE, tests=76, followUp=REQUIRED, noMutation=true, exactShare=MISSING_EVIDENCE.",
+      "detail": "Improvement and dedicated photo analysis now share pre-provider byte, count, MIME/signature, rate, and concurrency controls with 76 tests plus a current 23 files / 215 tests governed-path companion. Production currently reports instance fallback rather than distributed admission, the immutable 14-finding scan remains unchanged, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore deployed source ancestry, file budgets, shared live admission, verification totals, no-mutation boundaries, follow-up scan requirement, and exact Share MISSING_EVIDENCE."
+        "Activate approved distributed photo-analysis admission before treating process-instance fallback as horizontally durable.",
+        "Keep the canonical findings visible until a fresh follow-up security scan revalidates the patched source."
       ]
     },
     {
@@ -552,12 +554,13 @@
     },
     {
       "id": "public_provider_admission",
-      "state": "contradicted",
+      "state": "notice",
       "label": "Public provider admission",
       "evidencePath": "evaluation\\public-provider-admission-2026-08-11\\report.json",
-      "detail": "Public provider admission verdict=PARTIAL_LIVE_PRODUCTION_WEIGHTED_INSTANCE_ADMISSION_DISTRIBUTED_ACTIVATION_PENDING, sourceCurrent=false, findings=2, liveChecks=3, distributed=PENDING_CONFIGURATION, followUp=REQUIRED, noMutation=true, exactShare=MISSING_EVIDENCE.",
+      "detail": "Current production enforces mode-weighted provider work units (template 0, enhanced 2, full 12) with completion/cancellation release, 23 files / 215 tests governed-path compatibility, and live no-provider work-budget probes across ask, weather, and knowledge. Production still reports process-instance admission because Upstash is not configured; both canonical medium findings remain immutable, distributed activation and a fresh follow-up scan remain required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore source/live alignment, weighted contracts, all three no-provider live probes, verification totals, instance/distributed boundary, no-mutation boundary, follow-up scan requirement, and exact Share MISSING_EVIDENCE."
+        "Configure and verify an approved distributed admission backend before claiming horizontal durability.",
+        "Run a fresh full-repository security scan before reclassifying either immutable finding or making a security-complete claim."
       ]
     },
     {
@@ -606,32 +609,34 @@
     },
     {
       "id": "security_followup_remediation",
-      "state": "contradicted",
+      "state": "proven",
       "label": "Security follow-up remediation",
       "evidencePath": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
-      "detail": "Security follow-up verdict=PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP, sourceMatchesProduction=true, compatibilityPass=true, latestCompatibilityPass=true, latestCompatibilityCurrent=false, accidentCompatibilityCurrent=false, productPathsCurrent=false, exportAdmissionCompatibility=false, findings=3, baseline=18, deferred=2, remediations=3, tests=129, compatibilityTests=147, latestCompatibilityTests=245, liveProviderProbe=false, baselineRewritten=false, noMutation=true, exactShare=MISSING_EVIDENCE.",
+      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (covered by another current receipt). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore deployed SHA alignment, all three remediation contracts, verification totals, immutable-baseline preservation, no-mutation boundaries, and exact Share MISSING_EVIDENCE."
+        "Keep the immutable baseline and two deferred candidates visible in future security review; do not convert this scoped remediation into a security-complete claim.",
+        "Retain the separate public generation admission notice and exact saved Share boundary until their own evidence contracts close."
       ]
     },
     {
       "id": "mcp_generation_work_budget_security",
-      "state": "contradicted",
+      "state": "notice",
       "label": "MCP generation work-budget security",
       "evidencePath": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
-      "detail": "MCP budget verdict=PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_MCP_GENERATION_WORK_BUDGET_AUTHENTICATED_RUNTIME_PROBE_AND_RESCAN_PENDING, source/live=5c0e7c27599a49ff2c6c4c023cf937c240c0a101/5c0e7c27599a49ff2c6c4c023cf937c240c0a101, currentRefresh=false, providerCompanion=false, refreshHead=9a4a703b6b1ff370a362bfafee42dfff9141be31, bodyBytes=98304, adjacent=77, liveAuth=401, validProbe=false, rescan=true, noMutation=true, exactShare=MISSING_EVIDENCE.",
+      "detail": "Current production 75027ffa proves distributed MCP admission is required but not configured: the readiness endpoint reports configurationState=absent and the pre-auth guard returns 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification preserves the 96 KiB body contract with 3 files / 65 focused tests and 8 files / 126 adjacent MCP tests. Distributed activation, a valid authenticated runtime probe, and a fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore every deployed-source, body-budget, limiter, verification, no-mutation, rescan, and exact-Share predicate."
+        "Run a valid credential-safe production MCP boundary probe without exposing the token.",
+        "Activate the approved distributed limiter configuration before claiming authenticated MCP availability, then complete a fresh security rescan."
       ]
     },
     {
       "id": "learning_export_renderer_security",
-      "state": "contradicted",
+      "state": "proven",
       "label": "Learning export renderer security",
       "evidencePath": "evaluation\\learning-export-renderer-security-2026-08-02\\report.json",
-      "detail": "Learning export verdict=PASS_LIVE_PRODUCTION_RENDERER_INERT_LEARNING_EXPORT_SOURCE_CONTRACT, sourceMatchesProduction=true, disposition=bounded_renderer_independent_inert_text_contract, tests=87, canonicalDeferred=1, securityComplete=false, noMutation=true, exactShare=MISSING_EVIDENCE.",
+      "detail": "Live source alignment proves a renderer-independent inert-text contract for downloaded Markdown/Obsidian learning exports: raw HTML, active/local URI schemes, image/link openers, Obsidian embeds, path metacharacters, and frontmatter are bounded; attachment CSP/no-sniff/no-store/no-referrer controls are present; JSONL provenance remains raw. This bounds the deferred candidate in current source but does not rewrite the sealed partial scan, replace a future full rescan, create a stored workpack, or close exact saved Share MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore the inert-byte, response-header, provenance, no-mutation, and canonical-rescan boundaries before claiming this current-source remediation."
+        "Re-run the full repository security scan after the remaining findings are remediated so the immutable canonical coverage can reclassify the deferred candidate."
       ]
     },
     {

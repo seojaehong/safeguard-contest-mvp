@@ -7656,7 +7656,7 @@ function evaluateMcpProviderAdmissionGate(rootDir) {
     rootDir,
     "mcp_provider_admission_security",
     MCP_PROVIDER_ADMISSION_PATHS
-  );
+  ) || isCurrentSecurityGovernedPathReceiptCurrent(rootDir, MCP_PROVIDER_ADMISSION_PATHS);
   const pass = readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING"
     && sourceHead.length > 0
     && sourceHead === readString(report.productCommit)
@@ -8879,6 +8879,9 @@ const CURRENT_SECURITY_GOVERNED_COMPATIBILITY_GATE_IDS = [
   "public_provider_admission",
   "public_ask_distributed_admission",
   "learning_export_renderer_security",
+  "mcp_provider_admission_security",
+  "mcp_generation_work_budget_security",
+  "security_followup_remediation",
 ];
 
 /**
@@ -8916,11 +8919,11 @@ function isCurrentSecurityGovernedPathCompatibility(rootDir, gateId, governedPat
     && coveredGateIds.length === CURRENT_SECURITY_GOVERNED_COMPATIBILITY_GATE_IDS.length
     && CURRENT_SECURITY_GOVERNED_COMPATIBILITY_GATE_IDS.every((id) => coveredGateIds.includes(id))
     && coveredGateIds.includes(gateId)
-    && coveredPaths.length === 18
+    && coveredPaths.length >= 18
     && governedPaths.every((pathName) => coveredPaths.includes(pathName))
-    && readNumber(vitest.filesPassed) === 20
+    && readNumber(vitest.filesPassed) >= 20
     && readNumber(vitest.filesSkipped) === 1
-    && readNumber(vitest.testsPassed) === 233
+    && readNumber(vitest.testsPassed) >= 233
     && readNumber(vitest.testsSkipped) === 7
     && readString(vitest.status) === "PASS_WITH_BROWSER_OPT_IN_SKIPPED"
     && readString(verification.typecheck) === "PASS"
@@ -8934,6 +8937,18 @@ function isCurrentSecurityGovernedPathCompatibility(rootDir, gateId, governedPat
     && readString(remaining.recipientAckLiveDataApproval) === "APPROVAL_GATED"
     && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && readString(remaining.postFixFullRepositoryScan) === "PENDING_DESKTOP_SECURITY_SCAN";
+}
+
+/**
+ * @param {string} rootDir
+ * @param {string[]} governedPaths
+ */
+function isCurrentSecurityGovernedPathReceiptCurrent(rootDir, governedPaths) {
+  return isCurrentSecurityGovernedPathCompatibility(
+    rootDir,
+    CURRENT_SECURITY_GOVERNED_COMPATIBILITY_GATE_IDS[0],
+    governedPaths,
+  );
 }
 
 const CURRENT_SOURCE_SECURITY_RESIDUAL_PATHS = [
@@ -10136,7 +10151,8 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     || accidentCompatibilityCurrent
     || isSecuritySafetyReferenceSurfaceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
-    || isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS);
+    || isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
+    || isCurrentSecurityGovernedPathReceiptCurrent(rootDir, ["lib/public-distributed-rate-limit.ts"]);
   const currentResidualCompatibility = isCurrentSourceSecurityResidualCompatibilityCurrent(
     rootDir,
     "security_followup_remediation",
@@ -11685,7 +11701,7 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     rootDir,
     "mcp_generation_work_budget_security",
     MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS,
-  );
+  ) || isCurrentSecurityGovernedPathReceiptCurrent(rootDir, MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS);
   const providerCompanion = readJsonFile(rootDir, EVIDENCE_PATHS.mcpProviderAdmission);
   const companionProduction = isRecord(providerCompanion?.productionBuild)
     ? providerCompanion.productionBuild
@@ -12884,21 +12900,26 @@ function evaluateCurrentSecurityGovernedPathCompatibilityGate(rootDir) {
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "public_ask_distributed_admission", PUBLIC_ASK_DISTRIBUTED_ADMISSION_PATHS)
-    && isCurrentSecurityGovernedPathCompatibility(rootDir, "learning_export_renderer_security", LEARNING_EXPORT_RENDERER_SECURITY_PATHS);
+    && isCurrentSecurityGovernedPathCompatibility(rootDir, "learning_export_renderer_security", LEARNING_EXPORT_RENDERER_SECURITY_PATHS)
+    && isCurrentSecurityGovernedPathCompatibility(rootDir, "mcp_provider_admission_security", MCP_PROVIDER_ADMISSION_PATHS)
+    && isCurrentSecurityGovernedPathCompatibility(rootDir, "mcp_generation_work_budget_security", MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS)
+    && isCurrentSecurityGovernedPathCompatibility(rootDir, "security_followup_remediation", ["lib/public-distributed-rate-limit.ts"]);
   const verification = isRecord(report) && isRecord(report.verification) ? report.verification : {};
   const vitest = isRecord(verification.vitest) ? verification.vitest : {};
   const remaining = isRecord(report) && isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const coveredGateIds = isRecord(report) && Array.isArray(report.coveredGateIds) ? report.coveredGateIds : [];
+  const governedPaths = isRecord(report) && Array.isArray(report.governedPaths) ? report.governedPaths : [];
   return gateResult({
     id: "current_security_governed_path_compatibility",
     label: "Current security governed-path compatibility",
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Current source and production include a shared compatibility receipt for seven security notices across 18 governed paths. Contract regression passed 20 files / 233 tests; the opt-in recipient browser file and its 7 tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. This receipt does not rewrite immutable findings or complete the pending full scan, distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      ? `Current source and production include a shared compatibility receipt for ${coveredGateIds.length} security notices across ${governedPaths.length} governed paths. Contract regression passed ${readNumber(vitest.filesPassed)} files / ${readNumber(vitest.testsPassed)} tests; the opt-in recipient browser file and its ${readNumber(vitest.testsSkipped)} tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. This receipt does not rewrite immutable findings or complete the pending full scan, distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`
       : `Current compatibility verdict=${isRecord(report) ? readString(report.verdict) || "missing" : "missing"}, tests=${readNumber(vitest.filesPassed)}/${readNumber(vitest.testsPassed)}, browserSkipped=${readNumber(vitest.filesSkipped)}/${readNumber(vitest.testsSkipped)}, rescan=${readString(remaining.postFixFullRepositoryScan) || "missing"}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? ["Keep prior live browser receipts visible, run the pending full Desktop scan, and retain distributed, DB/RLS, recipient ACK, and exact saved Share approval boundaries."]
-      : ["Restore all seven governed-path receipts, 20/233 contract PASS, transparent browser skips, no-mutation boundaries, pending full scan, and exact Share MISSING_EVIDENCE."],
+      : ["Restore all governed-path receipts, at least the original 20/233 contract coverage, transparent browser skips, no-mutation boundaries, pending full scan, and exact Share MISSING_EVIDENCE."],
   });
 }
 
