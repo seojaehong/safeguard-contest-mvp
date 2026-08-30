@@ -243,6 +243,132 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
   };
 }
 
+function currentSourceSecurityRemediationFollowupFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_APPROVAL_FREE_SECURITY_REMEDIATIONS_POST_FIX_RESCAN_PENDING",
+    sourceHead: "a1a9da9bd663c05d69f8dbb00823e2761f19ad64",
+    productionBuild: {
+      commitSha: "a1a9da9bd663c05d69f8dbb00823e2761f19ad64",
+      branch: "master",
+      environment: "production",
+    },
+    baseline: {
+      scanId: "f37c3e4a-294c-4ab9-b637-b944f33a2182",
+      targetRevision: "28cc608700445d3f0ea1ad0aeb7004e9cf1b7fb2",
+      reportableFindings: 20,
+      medium: 4,
+      low: 16,
+      coverageCompleteness: "partial",
+      immutableOriginalBaselinePreserved: true,
+      postFixFullRepositoryRescanCompleted: false,
+    },
+    remediations: [
+      "03fad2a499ad10e3a5762640a350a1f3b2f979eb",
+      "165278c7e1596edc22a8e8a8ee532b0309a300ee",
+      "165278c7e1596edc22a8e8a8ee532b0309a300ee",
+      "3a35f1990d83d0c89554cd122379c4159cf84f00",
+      "a1a9da9bd663c05d69f8dbb00823e2761f19ad64",
+    ].map((commit, index) => ({ finding: `finding-${index + 1}`, commit, status: "current_source_and_live" })),
+    koshaOfficialPdfAudit: {
+      verdict: "PASS_OFFICIAL_PDF_AUTHENTICITY_BODY_PAIR_REVIEW_STILL_REQUIRED",
+      candidateCount: 8,
+      machineVerifiedCount: 8,
+      failedCount: 0,
+      temporaryPdfFilesRetained: 0,
+      exactPromotionPerformed: false,
+    },
+    verification: {
+      vitest: { files: 6, tests: 79, status: "PASS" },
+      python: { files: 3, tests: 11, status: "PASS" },
+      typecheck: "PASS",
+      diffCheck: "PASS",
+    },
+    remainingBoundaries: {
+      publicCatalogRls: "APPROVAL_GATED_DB_POLICY_CHANGE_NOT_PERFORMED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      shareSessionMutationPerformed: false,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      vectorMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaExactRegistryMutationPerformed: false,
+      postFixFullRepositoryScan: "PENDING_DESKTOP_SECURITY_SCAN",
+    },
+  };
+}
+
+function currentSecurityGovernedPathCompatibilityFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    productionIncludesSourceHead: true,
+    coveredGateIds: [
+      "share_ack_prebody_admission_security",
+      "share_recipient_contact_verification_security",
+      "public_json_request_body_budget",
+      "improvement_photo_analysis_budget",
+      "public_provider_admission",
+      "public_ask_distributed_admission",
+      "learning_export_renderer_security",
+    ],
+    governedPaths: [
+      "app/api/ask/route.ts",
+      "app/api/ask/stream/route.ts",
+      "app/api/input-photos/hazard-analysis/route.ts",
+      "app/api/knowledge/match/route.ts",
+      "app/api/share-sessions/[sessionId]/route.ts",
+      "app/api/weather/route.ts",
+      "app/api/workpacks/[id]/improvements/route.ts",
+      "app/api/workpacks/[id]/learning-export/route.ts",
+      "app/share/[sessionId]/page.tsx",
+      "components/SafeGuardCommandCenter.tsx",
+      "lib/ask-stream-client.ts",
+      "lib/photo-vision-analysis.ts",
+      "lib/public-ask-admission.ts",
+      "lib/public-distributed-rate-limit.ts",
+      "lib/public-work-budget.ts",
+      "lib/workpack-commercial.ts",
+      "lib/workpack-learning-export.ts",
+      "tests/workpack-share-authority-routes.test.ts",
+    ],
+    verification: {
+      vitest: {
+        filesPassed: 20,
+        filesSkipped: 1,
+        testsPassed: 233,
+        testsSkipped: 7,
+        status: "PASS_WITH_BROWSER_OPT_IN_SKIPPED",
+      },
+      typecheck: "PASS",
+      browserCompatibility: "PRESERVED_PRIOR_LIVE_EVIDENCE_NOT_REEXECUTED",
+    },
+    baselineBoundary: {
+      immutableOriginalBaselinePreserved: true,
+      postFixFullRepositoryRescanCompleted: false,
+      securityCompleteClaimAllowed: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerCallPerformedForEvidence: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      readConfirmationCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaExactRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      publicCatalogRls: "APPROVAL_GATED_DB_POLICY_CHANGE_NOT_PERFORMED",
+      recipientAckLiveDataApproval: "APPROVAL_GATED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      postFixFullRepositoryScan: "PENDING_DESKTOP_SECURITY_SCAN",
+    },
+  };
+}
+
 function currentSourceSecurityResidualRemediationFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING",
@@ -4329,6 +4455,16 @@ function createFixtureRoot(): string {
   });
   const freshScanRoot = path.join("evaluation", "current-source-standard-security-scan-2026-08-30-complete");
   writeJson(rootDir, path.join(freshScanRoot, "report.json"), freshCurrentSourceSecurityScanFixture());
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
+    currentSourceSecurityRemediationFollowupFixture(),
+  );
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
+    currentSecurityGovernedPathCompatibilityFixture(),
+  );
   writeJson(rootDir, path.join(freshScanRoot, "canonical", "scan-manifest.json"), { scan: { status: "completed" } });
   writeJson(rootDir, path.join(freshScanRoot, "canonical", "findings.json"), { findings: [] });
   writeJson(rootDir, path.join(freshScanRoot, "canonical", "coverage.json"), { completeness: "partial" });
@@ -7911,6 +8047,20 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     renderer.productionBuild.commitSha = "self-asserted";
     fs.writeFileSync(rendererPath, `${JSON.stringify(renderer, null, 2)}\n`, "utf8");
 
+    const compatibilityPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-security-governed-path-compatibility-2026-08-30",
+      "report.json",
+    );
+    const compatibility = JSON.parse(fs.readFileSync(compatibilityPath, "utf8")) as {
+      sourceHead: string;
+      productionCommit: string;
+    };
+    compatibility.sourceHead = "self-asserted";
+    compatibility.productionCommit = "self-asserted";
+    fs.writeFileSync(compatibilityPath, `${JSON.stringify(compatibility, null, 2)}\n`, "utf8");
+
     const publicPath = path.join(rootDir, "evaluation", "security-public-generation-admission-2026-08-04", "report.json");
     const publicReport = JSON.parse(fs.readFileSync(publicPath, "utf8")) as { productCommit: string };
     publicReport.productCommit = "self-asserted";
@@ -8551,6 +8701,97 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "fresh_current_source_security_scan")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records live bounded security remediation without closing the post-fix scan or approval boundaries", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-security-remediation-2026-08-30",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_security_remediation_followup");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("five bounded approval-free remediation receipts");
+    expect(gate?.detail).toContain("79 Vitest plus 11 Python tests");
+    expect(gate?.detail).toContain("KOSHA PDF audit remains 8/8");
+    expect(gate?.detail).toContain("post-fix full repository scan remains pending");
+    expect(gate?.detail).toContain("public-catalog RLS stays approval-gated");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+    expect(gate?.detail).toContain("not security-complete proof");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      baseline: { postFixFullRepositoryRescanCompleted: boolean };
+      remainingBoundaries: {
+        dbMutationPerformed: boolean;
+        exactSavedShareVerdict: string;
+        postFixFullRepositoryScan: string;
+      };
+    };
+    const original = JSON.stringify(report, null, 2);
+    const contradictions: Array<(candidate: typeof report) => void> = [
+      (candidate) => { candidate.baseline.postFixFullRepositoryRescanCompleted = true; },
+      (candidate) => { candidate.remainingBoundaries.dbMutationPerformed = true; },
+      (candidate) => { candidate.remainingBoundaries.exactSavedShareVerdict = "PASS"; },
+      (candidate) => { candidate.remainingBoundaries.postFixFullRepositoryScan = "COMPLETE"; },
+    ];
+    for (const contradict of contradictions) {
+      const candidate = JSON.parse(original) as typeof report;
+      contradict(candidate);
+      fs.writeFileSync(reportPath, `${JSON.stringify(candidate, null, 2)}\n`, "utf8");
+      const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+      expect(contradicted.gates.find((item) => item.id === "current_source_security_remediation_followup")?.state)
+        .toBe("contradicted");
+    }
+  });
+
+  it("uses current governed-path compatibility without claiming skipped browser or scan completion", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-security-governed-path-compatibility-2026-08-30",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_security_governed_path_compatibility");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("seven security notices across 18 governed paths");
+    expect(gate?.detail).toContain("20 files / 233 tests");
+    expect(gate?.detail).toContain("7 tests were skipped");
+    expect(gate?.detail).toContain("no fresh browser PASS is claimed");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+    for (const gateId of [
+      "share_ack_prebody_admission_security",
+      "share_recipient_contact_verification_security",
+      "public_json_request_body_budget",
+      "improvement_photo_analysis_budget",
+      "public_provider_admission",
+      "public_ask_distributed_admission",
+      "learning_export_renderer_security",
+    ]) {
+      expect(audit.gates.find((item) => item.id === gateId)?.state).not.toBe("contradicted");
+    }
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      verification: { vitest: { status: string } };
+      mutationBoundary: { dbMutationPerformed: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.verification.vitest.status = "PASS_BROWSER_EXECUTED";
+    report.mutationBoundary.dbMutationPerformed = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "current_security_governed_path_compatibility")?.state)
       .toBe("contradicted");
   });
 

@@ -54,6 +54,8 @@ const ARTIFACTS = Object.freeze({
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-30-complete", "report.json"),
+  currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
+  currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
   shareAckPreBodyAdmission: path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
   safetyStatusDisconnectLease: path.join("evaluation", "safety-status-disconnect-lease-2026-08-28", "report.json"),
@@ -2411,6 +2413,56 @@ function freshCurrentSourceSecurityScanSummary(report) {
 }
 
 /** @param {unknown} report */
+function currentSourceSecurityRemediationFollowupSummary(report) {
+  if (!isRecord(report)) return {};
+  const baseline = isRecord(report.baseline) ? report.baseline : {};
+  const remediations = Array.isArray(report.remediations) ? report.remediations.filter(isRecord) : [];
+  const kosha = isRecord(report.koshaOfficialPdfAudit) ? report.koshaOfficialPdfAudit : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(isRecord(report.productionBuild) ? report.productionBuild.commitSha : ""),
+    baselineScanId: asString(baseline.scanId),
+    baselineFindingCount: typeof baseline.reportableFindings === "number" ? baseline.reportableFindings : null,
+    baselineCoverage: asString(baseline.coverageCompleteness),
+    postFixFullRepositoryRescanCompleted: asBoolean(baseline.postFixFullRepositoryRescanCompleted),
+    remediationCount: remediations.length,
+    allRemediationsLive: remediations.length > 0
+      && remediations.every((item) => asString(item.status) === "current_source_and_live"),
+    koshaMachineVerifiedCount: typeof kosha.machineVerifiedCount === "number" ? kosha.machineVerifiedCount : null,
+    koshaCandidateCount: typeof kosha.candidateCount === "number" ? kosha.candidateCount : null,
+    publicCatalogRls: asString(remaining.publicCatalogRls),
+    postFixFullRepositoryScan: asString(remaining.postFixFullRepositoryScan),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
+function currentSecurityGovernedPathCompatibilitySummary(report) {
+  if (!isRecord(report)) return {};
+  const gates = Array.isArray(report.coveredGateIds) ? report.coveredGateIds.map(asString).filter(Boolean) : [];
+  const paths = Array.isArray(report.governedPaths) ? report.governedPaths.map(asString).filter(Boolean) : [];
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const vitest = isRecord(verification.vitest) ? verification.vitest : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(report.productionCommit),
+    coveredGateCount: gates.length,
+    governedPathCount: paths.length,
+    filesPassed: typeof vitest.filesPassed === "number" ? vitest.filesPassed : null,
+    filesSkipped: typeof vitest.filesSkipped === "number" ? vitest.filesSkipped : null,
+    testsPassed: typeof vitest.testsPassed === "number" ? vitest.testsPassed : null,
+    testsSkipped: typeof vitest.testsSkipped === "number" ? vitest.testsSkipped : null,
+    browserCompatibility: asString(verification.browserCompatibility),
+    postFixFullRepositoryScan: asString(remaining.postFixFullRepositoryScan),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
 function currentSourceSecurityResidualRemediationSummary(report) {
   if (!isRecord(report)) return {};
   const residuals = Array.isArray(report.remediatedSourceResiduals)
@@ -3513,6 +3565,14 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.freshCurrentSourceSecurityScan,
   );
+  const currentSourceSecurityRemediationFollowup = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.currentSourceSecurityRemediationFollowup,
+  );
+  const currentSecurityGovernedPathCompatibility = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.currentSecurityGovernedPathCompatibility,
+  );
   const currentSourceSecurityResidualRemediation = readOptionalJson(
     options.rootDir,
     ARTIFACTS.currentSourceSecurityResidualRemediation,
@@ -3664,6 +3724,12 @@ export function buildNorthstarNextRunway(options) {
   );
   const freshCurrentSourceSecurityScanResult = freshCurrentSourceSecurityScanSummary(
     freshCurrentSourceSecurityScan,
+  );
+  const currentSourceSecurityRemediationFollowupResult = currentSourceSecurityRemediationFollowupSummary(
+    currentSourceSecurityRemediationFollowup,
+  );
+  const currentSecurityGovernedPathCompatibilityResult = currentSecurityGovernedPathCompatibilitySummary(
+    currentSecurityGovernedPathCompatibility,
   );
   const currentSourceSecurityResidualRemediationResult = currentSourceSecurityResidualRemediationSummary(
     currentSourceSecurityResidualRemediation,
@@ -3842,6 +3908,16 @@ export function buildNorthstarNextRunway(options) {
         gate: "fresh_current_source_security_scan",
         state: "notice",
         reason: `fresh Standard scan ${freshCurrentSourceSecurityScanResult.scanId || "missing"} records ${freshCurrentSourceSecurityScanResult.reportableFindingCount ?? "unknown"} open findings with ${freshCurrentSourceSecurityScanResult.coverageCompleteness || "unknown"} coverage; ${freshCurrentSourceSecurityScanResult.approvalFreeProductSourceResidualCount ?? "unknown"} approval-free source residuals, ${freshCurrentSourceSecurityScanResult.approvalSensitiveShareCapabilityCount ?? "unknown"} separately reportable Share capability findings, and ${freshCurrentSourceSecurityScanResult.approvalGatedDatabaseOrAtomicityCount ?? "unknown"} database/RLS/atomicity findings remain open; security-complete is false and exact saved Share remains ${freshCurrentSourceSecurityScanResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+      },
+      {
+        gate: "current_source_security_remediation_followup",
+        state: "notice",
+        reason: `live product ${currentSourceSecurityRemediationFollowupResult.productionCommit?.slice(0, 8) || "missing"} includes ${currentSourceSecurityRemediationFollowupResult.remediationCount ?? "unknown"} bounded approval-free remediation receipts and KOSHA official PDF verification ${currentSourceSecurityRemediationFollowupResult.koshaMachineVerifiedCount ?? "unknown"}/${currentSourceSecurityRemediationFollowupResult.koshaCandidateCount ?? "unknown"}; the immutable ${currentSourceSecurityRemediationFollowupResult.baselineFindingCount ?? "unknown"}-finding ${currentSourceSecurityRemediationFollowupResult.baselineCoverage || "unknown"}-coverage baseline remains visible, post-fix full scan is ${currentSourceSecurityRemediationFollowupResult.postFixFullRepositoryScan || "PENDING_DESKTOP_SECURITY_SCAN"}, public-catalog RLS is ${currentSourceSecurityRemediationFollowupResult.publicCatalogRls || "APPROVAL_GATED"}, and exact saved Share remains ${currentSourceSecurityRemediationFollowupResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+      },
+      {
+        gate: "current_security_governed_path_compatibility",
+        state: "notice",
+        reason: `current source compatibility covers ${currentSecurityGovernedPathCompatibilityResult.coveredGateCount ?? "unknown"} security notices across ${currentSecurityGovernedPathCompatibilityResult.governedPathCount ?? "unknown"} paths with ${currentSecurityGovernedPathCompatibilityResult.filesPassed ?? "unknown"} files / ${currentSecurityGovernedPathCompatibilityResult.testsPassed ?? "unknown"} tests passing; ${currentSecurityGovernedPathCompatibilityResult.filesSkipped ?? "unknown"} opt-in browser file / ${currentSecurityGovernedPathCompatibilityResult.testsSkipped ?? "unknown"} tests were skipped and no fresh browser PASS is claimed, the full scan remains ${currentSecurityGovernedPathCompatibilityResult.postFixFullRepositoryScan || "PENDING_DESKTOP_SECURITY_SCAN"}, and exact saved Share remains ${currentSecurityGovernedPathCompatibilityResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
       },
       {
         gate: "current_source_security_residual_remediation",
@@ -4025,6 +4101,8 @@ export function buildNorthstarNextRunway(options) {
     currentSecurityRemediationLedger: currentSecurityRemediationLedgerResult,
     currentRepositorySecurityRescan: currentRepositorySecurityRescanResult,
     freshCurrentSourceSecurityScan: freshCurrentSourceSecurityScanResult,
+    currentSourceSecurityRemediationFollowup: currentSourceSecurityRemediationFollowupResult,
+    currentSecurityGovernedPathCompatibility: currentSecurityGovernedPathCompatibilityResult,
     currentSourceSecurityResidualRemediation: currentSourceSecurityResidualRemediationResult,
     shareAckPreBodyAdmission: shareAckPreBodyAdmissionResult,
     safetyStatusDisconnectLease: safetyStatusDisconnectLeaseResult,

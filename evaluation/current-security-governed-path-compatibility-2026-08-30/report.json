@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "safeclaw-current-security-governed-path-compatibility/v1",
+  "generatedAt": "2026-08-30T14:43:10.000Z",
+  "verdict": "PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_PENDING",
+  "sourceHead": "a1a9da9bd663c05d69f8dbb00823e2761f19ad64",
+  "productionCommit": "1b4d7feeb4469ab4df148615ae22ab3037e70571",
+  "productionIncludesSourceHead": true,
+  "coveredGateIds": [
+    "share_ack_prebody_admission_security",
+    "share_recipient_contact_verification_security",
+    "public_json_request_body_budget",
+    "improvement_photo_analysis_budget",
+    "public_provider_admission",
+    "public_ask_distributed_admission",
+    "learning_export_renderer_security"
+  ],
+  "governedPaths": [
+    "app/api/ask/route.ts",
+    "app/api/ask/stream/route.ts",
+    "app/api/input-photos/hazard-analysis/route.ts",
+    "app/api/knowledge/match/route.ts",
+    "app/api/share-sessions/[sessionId]/route.ts",
+    "app/api/weather/route.ts",
+    "app/api/workpacks/[id]/improvements/route.ts",
+    "app/api/workpacks/[id]/learning-export/route.ts",
+    "app/share/[sessionId]/page.tsx",
+    "components/SafeGuardCommandCenter.tsx",
+    "lib/ask-stream-client.ts",
+    "lib/photo-vision-analysis.ts",
+    "lib/public-ask-admission.ts",
+    "lib/public-distributed-rate-limit.ts",
+    "lib/public-work-budget.ts",
+    "lib/workpack-commercial.ts",
+    "lib/workpack-learning-export.ts",
+    "tests/workpack-share-authority-routes.test.ts"
+  ],
+  "verification": {
+    "vitest": {
+      "filesPassed": 20,
+      "filesSkipped": 1,
+      "testsPassed": 233,
+      "testsSkipped": 7,
+      "status": "PASS_WITH_BROWSER_OPT_IN_SKIPPED",
+      "durationSeconds": 14.56
+    },
+    "typecheck": "PASS",
+    "browserCompatibility": "PRESERVED_PRIOR_LIVE_EVIDENCE_NOT_REEXECUTED",
+    "browserSkipReason": "The recipient portal browser suite is opt-in in this local contract run; no fresh browser PASS is claimed."
+  },
+  "baselineBoundary": {
+    "immutableOriginalBaselinePreserved": true,
+    "postFixFullRepositoryRescanCompleted": false,
+    "securityCompleteClaimAllowed": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerCallPerformedForEvidence": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "readConfirmationCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaExactRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "distributedAdmissionActivation": "OPERATOR_CONFIGURATION_REQUIRED",
+    "publicCatalogRls": "APPROVAL_GATED_DB_POLICY_CHANGE_NOT_PERFORMED",
+    "recipientAckLiveDataApproval": "APPROVAL_GATED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "postFixFullRepositoryScan": "PENDING_DESKTOP_SECURITY_SCAN"
+  }
+}
