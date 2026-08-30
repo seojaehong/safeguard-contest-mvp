@@ -1,8 +1,8 @@
 # SafeClaw photo readiness authentication fan-out remediation
 
-- Verdict: `PASS_CURRENT_SOURCE_PHOTO_READINESS_AUTH_FANOUT_LIVE_PENDING`
+- Verdict: `PASS_LIVE_DEPLOYED_SOURCE_PHOTO_READINESS_AUTH_FANOUT_CONTRACT`
 - Product commit: `007f1d2b687102bd5020c85adf527ef5907956ad`
-- Production at verification: `37e4071aa9b64a51a14461661d124aae62cbc138`
+- Production at verification: `007f1d2b687102bd5020c85adf527ef5907956ad`
 - Finding: `csf_e70379e4470e7bf7ec2786a4` (`resource-exhaustion.photo-readiness-auth-fanout`, medium)
 
 ## Remediation
@@ -17,7 +17,8 @@ The authenticated photo analysis `POST` is unchanged. It still requires a worksp
 - Negative fan-out coverage: both anonymous and arbitrary-Bearer `GET` calls assert zero Supabase client creation and zero authentication lookup.
 - Strict TypeScript: `npm.cmd run typecheck` PASS.
 - Production build: Next.js `15.5.22`, `28/28` static pages PASS.
-- Production still reports `37e4071a`; product commit `007f1d2b` is pushed but live verification is pending.
+- Production reports product commit `007f1d2b` on `master`.
+- Live anonymous and arbitrary-Bearer readiness probes both returned 200 with identical coarse JSON. Neither response exposed provider diagnostics or API-key presence, and no photo-analysis POST was executed.
 
 ## Boundary
 

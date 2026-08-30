@@ -1,11 +1,11 @@
 {
   "schemaVersion": "safeclaw-current-source-security-photo-readiness-auth-fanout-remediation/v1",
-  "generatedAt": "2026-08-30T22:30:05.0722333Z",
-  "verdict": "PASS_CURRENT_SOURCE_PHOTO_READINESS_AUTH_FANOUT_LIVE_PENDING",
+  "generatedAt": "2026-08-30T22:34:47.0000000Z",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_PHOTO_READINESS_AUTH_FANOUT_CONTRACT",
   "sourceBaseCommit": "37e4071aa9b64a51a14461661d124aae62cbc138",
   "sourceHead": "007f1d2b687102bd5020c85adf527ef5907956ad",
   "productCommit": "007f1d2b687102bd5020c85adf527ef5907956ad",
-  "productionCommit": "37e4071aa9b64a51a14461661d124aae62cbc138",
+  "productionCommit": "007f1d2b687102bd5020c85adf527ef5907956ad",
   "finding": {
     "findingId": "csf_e70379e4470e7bf7ec2786a4",
     "occurrenceId": "occ_cc14cdbca20eb2f3f41aa454",
@@ -47,12 +47,21 @@
       "staticPages": 28
     },
     "liveDeployment": {
-      "status": "PENDING_PRODUCT_COMMIT",
-      "commitSha": "37e4071aa9b64a51a14461661d124aae62cbc138",
+      "status": "PASS_DEPLOYED_SOURCE_AND_PUBLIC_RESPONSE_BOUNDARY",
+      "commitSha": "007f1d2b687102bd5020c85adf527ef5907956ad",
       "branch": "master",
       "environment": "production",
-      "deploymentUrl": "safeguard-contest-ndl79c1yn-seojaehongs-projects.vercel.app",
-      "publicProbeExecuted": false
+      "deploymentUrl": "safeguard-contest-aqwb2frqj-seojaehongs-projects.vercel.app",
+      "publicProbeExecuted": true,
+      "publicProbe": {
+        "path": "/api/input-photos/hazard-analysis",
+        "anonymousStatus": 200,
+        "arbitraryBearerStatus": 200,
+        "responseBodiesEqual": true,
+        "providerDiagnosticsExposed": false,
+        "apiKeyPresenceExposed": false,
+        "photoPostAnalysisExecuted": false
+      }
     }
   },
   "mutationBoundary": {
@@ -70,6 +79,6 @@
     "securityComplete": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedFindingsRemainOpen": true,
-    "liveAfterDeploymentRequired": true
+    "liveAfterDeploymentRequired": false
   }
 }
