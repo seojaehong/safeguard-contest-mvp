@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-photo-readiness-auth-fanout-remediation/v1",
+  "generatedAt": "2026-08-30T22:30:05.0722333Z",
+  "verdict": "PASS_CURRENT_SOURCE_PHOTO_READINESS_AUTH_FANOUT_LIVE_PENDING",
+  "sourceBaseCommit": "37e4071aa9b64a51a14461661d124aae62cbc138",
+  "sourceHead": "007f1d2b687102bd5020c85adf527ef5907956ad",
+  "productCommit": "007f1d2b687102bd5020c85adf527ef5907956ad",
+  "productionCommit": "37e4071aa9b64a51a14461661d124aae62cbc138",
+  "finding": {
+    "findingId": "csf_e70379e4470e7bf7ec2786a4",
+    "occurrenceId": "occ_cc14cdbca20eb2f3f41aa454",
+    "ruleId": "resource-exhaustion.photo-readiness-auth-fanout",
+    "severity": "medium",
+    "title": "Photo readiness GET permits admissionless Supabase authentication fanout",
+    "sealedFindingReclassified": false,
+    "freshRescanRequired": true
+  },
+  "remediation": {
+    "publicGetReturnsCoarseReadinessOnly": true,
+    "publicGetCreatesSupabaseAdminClient": false,
+    "publicGetCallsSupabaseAuthentication": false,
+    "arbitraryBearerChangesPublicGetResponseShape": false,
+    "providerDiagnosticsExposedByPublicGet": false,
+    "postAuthenticationPreserved": true,
+    "postMultipartBudgetPreserved": true,
+    "postProviderExecutionPreserved": true
+  },
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd exec -- vitest run tests/photo-vision-analysis-route.test.ts tests/photo-analysis-admission.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 2,
+      "testsPassed": 13,
+      "testsFailed": 0,
+      "negativeAuthFanoutTests": [
+        "anonymous GET does not create a Supabase admin client or call getWorkspaceUser",
+        "arbitrary Bearer GET does not create a Supabase admin client or call getWorkspaceUser"
+      ]
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "productionBuild": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "liveDeployment": {
+      "status": "PENDING_PRODUCT_COMMIT",
+      "commitSha": "37e4071aa9b64a51a14461661d124aae62cbc138",
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-ndl79c1yn-seojaehongs-projects.vercel.app",
+      "publicProbeExecuted": false
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "photoPostAnalysisExecuted": false
+  },
+  "remainingBoundaries": {
+    "immutableOriginalBaselinePreserved": true,
+    "sealedCurrentHeadScanPreserved": true,
+    "securityComplete": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedFindingsRemainOpen": true,
+    "liveAfterDeploymentRequired": true
+  }
+}
