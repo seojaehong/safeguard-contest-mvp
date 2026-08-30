@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-29T01:15:37.756Z
-Source HEAD at generation: 167ee395c4ffc8c08126767f7f3a154f2f393497
-Live commit at generation: 5fcbcbec0c77607022239dc1da6ac7393c3cc499
+Generated at: 2026-08-30T15:32:42.452Z
+Source HEAD at generation: 4acafa3ba6b9934db4347e4bfe367775fae10be9
+Live commit at generation: 1b4d7feeb4469ab4df148615ae22ab3037e70571
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -439,7 +439,9 @@ Overall: `northstar_open_approval_gated`
 | repository_security_scan_reconciliation | proven | evaluation\repository-security-scan-reconciliation-2026-08-11\report.json |
 | current_security_remediation_ledger | notice | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | notice | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
-| fresh_current_source_security_scan | notice | evaluation\current-source-standard-security-scan-2026-08-28-complete\report.json |
+| fresh_current_source_security_scan | notice | evaluation\current-source-standard-security-scan-2026-08-30-complete\report.json |
+| current_source_security_remediation_followup | notice | evaluation\current-source-security-remediation-2026-08-30\report.json |
+| current_security_governed_path_compatibility | notice | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
 | current_source_security_residual_remediation | notice | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | notice | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | notice | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
@@ -511,7 +513,7 @@ Overall: `northstar_open_approval_gated`
 | live_document_editorial_duplicate_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-duplicate-classification-2026-07-25\report.json |
 | live_document_editorial_near_classification | ancestor | ancestor_of_head | evaluation\live-document-editorial-near-classification-2026-07-25\report.json |
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
-| ci_supply_chain_full_suite | ancestor | matches_live | evaluation\ci-full-suite-remediation-2026-08-29\report.json |
+| ci_supply_chain_full_suite | ancestor | ancestor_of_head | evaluation\ci-full-suite-remediation-2026-08-29\report.json |
 | knowledge_preparation_capability_truth | ancestor | ancestor_of_head | evaluation\knowledge-preparation-capability-truth-2026-08-28\report.json |
 | launch_operations_readiness_cockpit | ancestor | ancestor_of_head | evaluation\launch-operations-readiness-2026-08-26\report.json |
 | document_export_capability_truth | ancestor | ancestor_of_head | evaluation\document-export-capability-truth-2026-08-17\report.json |
@@ -528,7 +530,9 @@ Overall: `northstar_open_approval_gated`
 | repository_security_scan_reconciliation | missing | missing | evaluation\repository-security-scan-reconciliation-2026-08-11\report.json |
 | current_security_remediation_ledger | ancestor | ancestor_of_head | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
-| fresh_current_source_security_scan | ancestor | missing | evaluation\current-source-standard-security-scan-2026-08-28-complete\report.json |
+| fresh_current_source_security_scan | ancestor | missing | evaluation\current-source-standard-security-scan-2026-08-30-complete\report.json |
+| current_source_security_remediation_followup | ancestor | ancestor_of_head | evaluation\current-source-security-remediation-2026-08-30\report.json |
+| current_security_governed_path_compatibility | ancestor | matches_live_source_mismatch | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
 | current_source_security_residual_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | ancestor | ancestor_of_head | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | ancestor | ancestor_of_head | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
@@ -575,7 +579,7 @@ Overall: `northstar_open_approval_gated`
 | dispatch_standalone_viewport_companion | ancestor | ancestor_of_head | evaluation\dispatch-standalone-viewport-2026-07-28\report.json |
 | dispatch_first_viewport_containment | ancestor | ancestor_of_head | evaluation\dispatch-first-viewport-containment-2026-08-27\report.json |
 | provider_dispatch_persistence | ancestor | ancestor_of_head | evaluation\provider-dispatch-idempotency-gate-2026-07-19\report.json |
-| northstar_approval_runway | exact | matches_live_source_mismatch | evaluation\northstar-approval-runway-2026-07-21\report.json |
+| northstar_approval_runway | ancestor | ancestor_of_head | evaluation\northstar-approval-runway-2026-07-21\report.json |
 
 ## Carried Notices
 

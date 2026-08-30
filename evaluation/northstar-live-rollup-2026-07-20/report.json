@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-29T01:15:37.756Z",
-  "head": "167ee395c4ffc8c08126767f7f3a154f2f393497",
+  "generatedAt": "2026-08-30T15:32:42.452Z",
+  "head": "4acafa3ba6b9934db4347e4bfe367775fae10be9",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "5fcbcbec0c77607022239dc1da6ac7393c3cc499",
+    "commitSha": "1b4d7feeb4469ab4df148615ae22ab3037e70571",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-53247k9gi-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-1kdufbdq8-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 83
+    "gateCount": 85
   },
   "provenGates": [
     {
@@ -210,8 +210,20 @@
     {
       "id": "fresh_current_source_security_scan",
       "state": "notice",
-      "artifact": "evaluation\\current-source-standard-security-scan-2026-08-28-complete\\report.json",
-      "detail": "Fresh Standard scan 3358978a is sealed at source/live ab30f5c5 with 17 open findings (2 medium, 15 low), partial canonical coverage across 12 recorded surfaces, and 66 finalizer-recovered deferred draft entries. The immutable original 18-finding baseline and completed prior scan are preserved. Three approval-free source residuals and fourteen database/RLS/atomicity findings remain; the standalone Share identifier candidate was rejected as unproven. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      "artifact": "evaluation\\current-source-standard-security-scan-2026-08-30-complete\\report.json",
+      "detail": "Fresh Standard scan f19aa0ca is sealed at source/live fb6763a7 with 18 occurrences (6 medium, 12 low), 16 unique finding write-ups, and partial canonical coverage across 7 recorded surfaces with 32 deferred entries in a 6,757-file repository. The immutable original 18-finding baseline and completed prior scan are preserved. Three approval-free source residuals and fifteen database/RLS/atomicity findings remain at the scanned revision. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "current_source_security_remediation_followup",
+      "state": "notice",
+      "artifact": "evaluation\\current-source-security-remediation-2026-08-30\\report.json",
+      "detail": "Production a1a9da9b contains five bounded approval-free remediation receipts covering reviewed-improvement provenance, pre-authentication body admission, KOSHA official PDF redirects/temp identity, and four legacy archive consumers. Focused verification is 79 Vitest plus 11 Python tests, and the official KOSHA PDF audit remains 8/8 with no retained temporary files or exact promotion. The immutable 20-finding partial-coverage baseline is preserved, the post-fix full repository scan remains pending, public-catalog RLS stays approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE. This gate is notice, not security-complete proof."
+    },
+    {
+      "id": "current_security_governed_path_compatibility",
+      "state": "notice",
+      "artifact": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
+      "detail": "Current source and production include a shared compatibility receipt for seven security notices across 18 governed paths. Contract regression passed 20 files / 233 tests; the opt-in recipient browser file and its 7 tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. This receipt does not rewrite immutable findings or complete the pending full scan, distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_source_security_residual_remediation",
@@ -774,18 +786,18 @@
     "approvalFreeProductSourceRemediation": "LIVE_SOURCE_INCLUDED_FRESH_RESCAN_REQUIRED"
   },
   "freshCurrentSourceSecurityScan": {
-    "artifact": "evaluation\\current-source-standard-security-scan-2026-08-28-complete\\report.json",
-    "verdict": "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE_RECOVERED_DRAFT_HISTORY",
-    "scanId": "3358978a-75d1-454a-9dcd-4b63b52b9768",
-    "sourceHead": "ab30f5c5269430a558fcd8ef5c6331fb3c952a4e",
-    "deployedProductSource": "ab30f5c5269430a558fcd8ef5c6331fb3c952a4e",
-    "reportableFindingCount": 17,
-    "mediumFindingCount": 2,
-    "lowFindingCount": 15,
+    "artifact": "evaluation\\current-source-standard-security-scan-2026-08-30-complete\\report.json",
+    "verdict": "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_18_OCCURRENCES_16_UNIQUE_FINDINGS_PARTIAL_COVERAGE",
+    "scanId": "f19aa0ca-5fa5-4e8e-8482-b63ad854f230",
+    "sourceHead": "fb6763a789591189e03b8efb14a057def7216ef2",
+    "deployedProductSource": "fb6763a789591189e03b8efb14a057def7216ef2",
+    "reportableFindingCount": 18,
+    "mediumFindingCount": 6,
+    "lowFindingCount": 12,
     "coverageCompleteness": "partial",
-    "reviewedSurfaceCount": 12,
-    "deferredCoverageItemCount": 66,
-    "approvalGatedDatabaseOrAtomicityCount": 14,
+    "reviewedSurfaceCount": 7,
+    "deferredCoverageItemCount": 32,
+    "approvalGatedDatabaseOrAtomicityCount": 15,
     "approvalSensitiveShareCapabilityCount": 0,
     "approvalFreeProductSourceResidualCount": 3,
     "fullyClosedBoundedSourceCandidateCount": 0,
@@ -1973,9 +1985,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "167ee395c4ffc8c08126767f7f3a154f2f393497",
+      "sourceCommit": "4acafa3ba6b9934db4347e4bfe367775fae10be9",
       "sourceStatus": "exact",
-      "productionCommit": "167ee395c4ffc8c08126767f7f3a154f2f393497",
+      "productionCommit": "4acafa3ba6b9934db4347e4bfe367775fae10be9",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -2096,7 +2108,7 @@
       "sourceCommit": "5fcbcbec0c77607022239dc1da6ac7393c3cc499",
       "sourceStatus": "ancestor",
       "productionCommit": "5fcbcbec0c77607022239dc1da6ac7393c3cc499",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "knowledge_preparation_capability_truth",
@@ -2228,11 +2240,27 @@
     },
     {
       "id": "fresh_current_source_security_scan",
-      "artifact": "evaluation\\current-source-standard-security-scan-2026-08-28-complete\\report.json",
-      "sourceCommit": "ab30f5c5269430a558fcd8ef5c6331fb3c952a4e",
+      "artifact": "evaluation\\current-source-standard-security-scan-2026-08-30-complete\\report.json",
+      "sourceCommit": "fb6763a789591189e03b8efb14a057def7216ef2",
       "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
+    },
+    {
+      "id": "current_source_security_remediation_followup",
+      "artifact": "evaluation\\current-source-security-remediation-2026-08-30\\report.json",
+      "sourceCommit": "a1a9da9bd663c05d69f8dbb00823e2761f19ad64",
+      "sourceStatus": "ancestor",
+      "productionCommit": "a1a9da9bd663c05d69f8dbb00823e2761f19ad64",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "current_security_governed_path_compatibility",
+      "artifact": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
+      "sourceCommit": "a1a9da9bd663c05d69f8dbb00823e2761f19ad64",
+      "sourceStatus": "ancestor",
+      "productionCommit": "1b4d7feeb4469ab4df148615ae22ab3037e70571",
+      "productionStatus": "matches_live_source_mismatch"
     },
     {
       "id": "current_source_security_residual_remediation",
@@ -2606,9 +2634,9 @@
       "id": "northstar_approval_runway",
       "artifact": "evaluation\\northstar-approval-runway-2026-07-21\\report.json",
       "sourceCommit": "167ee395c4ffc8c08126767f7f3a154f2f393497",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "5fcbcbec0c77607022239dc1da6ac7393c3cc499",
-      "productionStatus": "matches_live_source_mismatch"
+      "productionStatus": "ancestor_of_head"
     }
   ],
   "contradictions": [],

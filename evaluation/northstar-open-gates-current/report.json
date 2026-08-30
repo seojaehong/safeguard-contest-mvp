@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-29T01:15:35.625Z",
-  "sourceSha": "167ee395c4ffc8c08126767f7f3a154f2f393497",
+  "generatedAt": "2026-08-30T15:32:40.909Z",
+  "sourceSha": "4acafa3ba6b9934db4347e4bfe367775fae10be9",
   "overall": "open",
   "gates": [
     {
@@ -329,11 +329,31 @@
       "id": "fresh_current_source_security_scan",
       "state": "notice",
       "label": "Fresh current-source security scan",
-      "evidencePath": "evaluation\\current-source-standard-security-scan-2026-08-28-complete\\report.json",
-      "detail": "Fresh Standard scan 3358978a is sealed at source/live ab30f5c5 with 17 open findings (2 medium, 15 low), partial canonical coverage across 12 recorded surfaces, and 66 finalizer-recovered deferred draft entries. The immutable original 18-finding baseline and completed prior scan are preserved. Three approval-free source residuals and fourteen database/RLS/atomicity findings remain; the standalone Share identifier candidate was rejected as unproven. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
+      "evidencePath": "evaluation\\current-source-standard-security-scan-2026-08-30-complete\\report.json",
+      "detail": "Fresh Standard scan f19aa0ca is sealed at source/live fb6763a7 with 18 occurrences (6 medium, 12 low), 16 unique finding write-ups, and partial canonical coverage across 7 recorded surfaces with 32 deferred entries in a 6,757-file repository. The immutable original 18-finding baseline and completed prior scan are preserved. Three approval-free source residuals and fifteen database/RLS/atomicity findings remain at the scanned revision. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Remediate the three approval-free source residuals in bounded waves and rerun focused validation.",
-        "Keep the fourteen database/RLS/atomicity findings approval-gated and exact saved Share separate; do not claim security completion from scan completion."
+        "Keep the fifteen database/RLS/atomicity findings approval-gated and exact saved Share separate; do not claim security completion from scan completion."
+      ]
+    },
+    {
+      "id": "current_source_security_remediation_followup",
+      "state": "notice",
+      "label": "Current-source security remediation follow-up",
+      "evidencePath": "evaluation\\current-source-security-remediation-2026-08-30\\report.json",
+      "detail": "Production a1a9da9b contains five bounded approval-free remediation receipts covering reviewed-improvement provenance, pre-authentication body admission, KOSHA official PDF redirects/temp identity, and four legacy archive consumers. Focused verification is 79 Vitest plus 11 Python tests, and the official KOSHA PDF audit remains 8/8 with no retained temporary files or exact promotion. The immutable 20-finding partial-coverage baseline is preserved, the post-fix full repository scan remains pending, public-catalog RLS stays approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE. This gate is notice, not security-complete proof.",
+      "nextActions": [
+        "Run a new full Desktop Standard scan over the current product revision before changing this notice or making any security-complete claim; keep DB/RLS and exact saved Share on their approval paths."
+      ]
+    },
+    {
+      "id": "current_security_governed_path_compatibility",
+      "state": "notice",
+      "label": "Current security governed-path compatibility",
+      "evidencePath": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
+      "detail": "Current source and production include a shared compatibility receipt for seven security notices across 18 governed paths. Contract regression passed 20 files / 233 tests; the opt-in recipient browser file and its 7 tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. This receipt does not rewrite immutable findings or complete the pending full scan, distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Keep prior live browser receipts visible, run the pending full Desktop scan, and retain distributed, DB/RLS, recipient ACK, and exact saved Share approval boundaries."
       ]
     },
     {
