@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-ontology-error-projection-remediation/v1",
+  "generatedAt": "2026-08-30T21:48:58.7398249Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_ONTOLOGY_ERROR_PROJECTION_LIVE_PENDING",
+  "sourceBaseCommit": "4e494d519c68b15541a3f94c21ba3871d2b42c92",
+  "sourceHead": "68a8f9dae349cb03d8c77abedd27040b9679bde0",
+  "productCommit": "68a8f9dae349cb03d8c77abedd27040b9679bde0",
+  "productionCommitAtVerification": "4e494d519c68b15541a3f94c21ba3871d2b42c92",
+  "finding": {
+    "findingId": "csf_74a68abc8d7370ed1b78fad3",
+    "occurrenceId": "occ_51adcb8d80b56ecdf1de9fb2",
+    "ruleId": "information-exposure.public-ontology-error-projection",
+    "severity": "medium",
+    "title": "Ontology failure responses bypass output ceilings and expose upstream bodies",
+    "sealedFindingReclassified": false,
+    "freshRescanRequired": true
+  },
+  "remediation": {
+    "publicErrorCodes": [
+      "ONTOLOGY_GRAPH_BUDGET_EXCEEDED",
+      "ONTOLOGY_GRAPH_UPSTREAM_UNAVAILABLE"
+    ],
+    "correlationIdGenerated": true,
+    "upstreamResponseBodyReturnedPublicly": false,
+    "upstreamResponseBodyLogged": false,
+    "unknownExceptionMessageLogged": false,
+    "diagnosticMessageMaxCharacters": 512,
+    "structuredUpstreamDiagnostics": [
+      "table",
+      "status",
+      "responseBytes"
+    ],
+    "callerAbortPropagationPreserved": true,
+    "successOutputBudgetPreserved": true
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "command": "npm.cmd exec -- vitest run tests\\ontology-graph-budget.test.ts tests\\status-admission-lifecycle.test.ts tests\\public-status-page-admission.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 3,
+      "testsPassed": 12,
+      "testsFailed": 0,
+      "privateBodyProjectionTests": [
+        "non-2xx upstream body is absent from public response and server diagnostics",
+        "malformed successful upstream body is absent from public response and server diagnostics"
+      ]
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "productionBuild": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "liveDeployment": {
+      "status": "PENDING",
+      "commitSha": "4e494d519c68b15541a3f94c21ba3871d2b42c92",
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-9r5nvheg5-seojaehongs-projects.vercel.app",
+      "upstreamFailureInduced": false,
+      "upstreamFailureInductionReason": "A live provider failure was not induced; the bounded local contract and deployed source marker are reported separately."
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "immutableOriginalBaselinePreserved": true,
+    "sealedCurrentHeadScanPreserved": true,
+    "securityComplete": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedFindingsRemainOpen": true,
+    "liveAfterDeploymentRequired": true
+  }
+}
