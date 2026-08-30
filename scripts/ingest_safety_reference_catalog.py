@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import re
+import sys
 import time
 import zipfile
 from dataclasses import asdict, dataclass
@@ -18,6 +19,12 @@ from urllib import error, request
 
 from openpyxl import load_workbook
 from pypdf import PdfReader
+
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from archive_safety import BoundedZipReader
 
 
 DOCUMENTS_RISK = ["점검결과 요약", "위험성평가표", "작업계획서"]
@@ -394,7 +401,8 @@ def parse_technical_support_zips(folder: Path, max_pdf_pages: int, priority_only
     zip_paths = sorted(folder.glob("*.zip"))
     for zip_index, zip_path in enumerate(zip_paths, start=1):
         with zipfile.ZipFile(zip_path) as archive:
-            for file_index, info in enumerate(archive.infolist(), start=1):
+            bounded_archive = BoundedZipReader(archive)
+            for file_index, info in enumerate(bounded_archive.infos, start=1):
                 if info.is_dir():
                     continue
                 decoded_name = decode_zip_name(info.filename)
@@ -408,7 +416,7 @@ def parse_technical_support_zips(folder: Path, max_pdf_pages: int, priority_only
                 needs_ocr = False
                 if is_priority:
                     try:
-                        data = archive.read(info)
+                        data = bounded_archive.read(info)
                         text, page_count = extract_pdf_text_from_bytes(data, max_pdf_pages)
                         needs_ocr = len(text) < 500
                     except Exception as exc:

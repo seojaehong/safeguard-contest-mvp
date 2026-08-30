@@ -5,6 +5,7 @@ import csv
 import hashlib
 import json
 import re
+import sys
 import time
 import zipfile
 from dataclasses import asdict, dataclass
@@ -15,6 +16,12 @@ from xml.etree import ElementTree
 
 from openpyxl import load_workbook
 from pypdf import PdfReader
+
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from archive_safety import BoundedZipReader
 
 
 SUPPORTED_EXTENSIONS = {
@@ -169,8 +176,10 @@ def read_hwpx(path: Path) -> tuple[str, int, int]:
     texts: list[str] = []
     image_count = 0
     with zipfile.ZipFile(path) as archive:
-        names = archive.namelist()
-        for name in names:
+        bounded_archive = BoundedZipReader(archive)
+        names = [info.filename for info in bounded_archive.infos]
+        for info in bounded_archive.infos:
+            name = info.filename
             lower_name = name.lower()
             if lower_name.endswith((".png", ".jpg", ".jpeg", ".bmp", ".gif")):
                 image_count += 1
@@ -179,7 +188,7 @@ def read_hwpx(path: Path) -> tuple[str, int, int]:
             if not ("/section" in lower_name or lower_name.endswith("content.hpf") or "header" in lower_name):
                 continue
             try:
-                root = ElementTree.fromstring(archive.read(name))
+                root = ElementTree.fromstring(bounded_archive.read(info))
             except ElementTree.ParseError:
                 continue
             for element in root.iter():
@@ -219,7 +228,7 @@ def read_csv_text(path: Path, max_rows: int) -> tuple[str, str]:
 
 def read_zip_listing(path: Path) -> tuple[str, int]:
     with zipfile.ZipFile(path) as archive:
-        names = archive.namelist()
+        names = [info.filename for info in BoundedZipReader(archive).infos]
     return "\n".join(names), len(names)
 
 

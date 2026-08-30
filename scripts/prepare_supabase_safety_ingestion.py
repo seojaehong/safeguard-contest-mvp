@@ -5,6 +5,7 @@ import csv
 import hashlib
 import json
 import re
+import sys
 import time
 import zipfile
 from dataclasses import asdict, dataclass
@@ -15,6 +16,12 @@ from xml.etree import ElementTree
 
 from openpyxl import load_workbook
 from pypdf import PdfReader
+
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from archive_safety import BoundedZipReader
 
 
 SUPPORTED_EXTENSIONS = {".csv", ".hwp", ".hwpx", ".pdf", ".pptx", ".xls", ".xlsx", ".zip", ".jpg", ".jpeg", ".png"}
@@ -247,11 +254,13 @@ def read_hwpx_records(path: Path) -> tuple[list[tuple[str, str, str]], str, str 
     try:
         records: list[tuple[str, str, str]] = []
         with zipfile.ZipFile(path) as archive:
-            for name in archive.namelist():
+            bounded_archive = BoundedZipReader(archive)
+            for info in bounded_archive.infos:
+                name = info.filename
                 lower_name = name.lower()
                 if not lower_name.endswith(".xml") or "/section" not in lower_name:
                     continue
-                root = ElementTree.fromstring(archive.read(name))
+                root = ElementTree.fromstring(bounded_archive.read(info))
                 texts = [element.text.strip() for element in root.iter() if element.text and element.text.strip()]
                 text = compact_text("\n".join(texts), 2500)
                 if text:
@@ -306,7 +315,7 @@ def read_csv_records(path: Path, max_rows: int) -> tuple[list[tuple[str, str, st
 def read_zip_records(path: Path) -> tuple[list[tuple[str, str, str]], str, str | None]:
     try:
         with zipfile.ZipFile(path) as archive:
-            names = archive.namelist()
+            names = [info.filename for info in BoundedZipReader(archive).infos]
         text = compact_text("\n".join(names), 2500)
         return [("zip:listing", path.stem, text)] if text else [], "zip-listing", None if text else "empty zip"
     except Exception as exc:
@@ -317,9 +326,17 @@ def read_pptx_records(path: Path) -> tuple[list[tuple[str, str, str]], str, str 
     try:
         records: list[tuple[str, str, str]] = []
         with zipfile.ZipFile(path) as archive:
-            slide_names = sorted(name for name in archive.namelist() if name.startswith("ppt/slides/slide") and name.endswith(".xml"))
-            for index, name in enumerate(slide_names[:20], start=1):
-                root = ElementTree.fromstring(archive.read(name))
+            bounded_archive = BoundedZipReader(archive)
+            slide_infos = sorted(
+                (
+                    info for info in bounded_archive.infos
+                    if info.filename.startswith("ppt/slides/slide") and info.filename.endswith(".xml")
+                ),
+                key=lambda info: info.filename,
+            )
+            for index, info in enumerate(slide_infos[:20], start=1):
+                name = info.filename
+                root = ElementTree.fromstring(bounded_archive.read(info))
                 texts = [element.text.strip() for element in root.iter() if element.text and element.text.strip()]
                 text = compact_text("\n".join(texts), 2200)
                 if text:

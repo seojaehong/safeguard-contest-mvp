@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 import time
 import zipfile
 from collections import Counter, defaultdict
@@ -14,6 +15,12 @@ from xml.etree import ElementTree
 from openpyxl import load_workbook
 from PIL import Image
 from pypdf import PdfReader
+
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from archive_safety import BoundedZipReader
 
 
 KEYWORDS: dict[str, list[str]] = {
@@ -61,11 +68,13 @@ def read_zip_xml_text(path: Path, xml_suffixes: tuple[str, ...]) -> list[str]:
     texts: list[str] = []
     try:
         with zipfile.ZipFile(path) as archive:
-            for name in archive.namelist():
+            bounded_archive = BoundedZipReader(archive)
+            for info in bounded_archive.infos:
+                name = info.filename
                 if not name.lower().endswith(xml_suffixes):
                     continue
                 try:
-                    root = ElementTree.fromstring(archive.read(name))
+                    root = ElementTree.fromstring(bounded_archive.read(info))
                 except ElementTree.ParseError:
                     continue
                 for node in root.iter():
