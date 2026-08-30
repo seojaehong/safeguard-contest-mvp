@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import {
   assembleGraph,
   type GraphLoadResult,
@@ -15,11 +17,41 @@ type SupabaseConfig = {
   url: string;
 };
 
+type PublicOntologyGraphErrorCode =
+  | "ONTOLOGY_GRAPH_BUDGET_EXCEEDED"
+  | "ONTOLOGY_GRAPH_UPSTREAM_UNAVAILABLE";
+
+export type PublicOntologyGraphLoadResult = GraphLoadResult & {
+  code?: PublicOntologyGraphErrorCode;
+  correlationId?: string;
+};
+
 export class PublicOntologyGraphBudgetError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "PublicOntologyGraphBudgetError";
   }
+}
+
+class PublicOntologyGraphUpstreamError extends Error {
+  constructor(
+    readonly table: string,
+    readonly status: number,
+    readonly responseBytes: number,
+  ) {
+    super(`ontology graph upstream ${table} returned status ${status}`);
+    this.name = "PublicOntologyGraphUpstreamError";
+  }
+}
+
+function boundedDiagnosticMessage(error: unknown): string {
+  const message = error instanceof PublicOntologyGraphBudgetError
+    || error instanceof PublicOntologyGraphUpstreamError
+    ? error.message
+    : error instanceof Error
+      ? error.name
+      : "non-error rejection";
+  return message.slice(0, 512);
 }
 
 function getSupabaseConfig(): SupabaseConfig | null {
@@ -105,7 +137,7 @@ async function fetchPublishedRows(
     });
     remainingBytes -= byteLength(body);
     if (!response.ok) {
-      throw new Error(`${table} 조회 실패: ${response.status} ${body}`);
+      throw new PublicOntologyGraphUpstreamError(table, response.status, byteLength(body));
     }
     const parsed = JSON.parse(body) as unknown;
     if (!Array.isArray(parsed)) {
@@ -145,7 +177,7 @@ function enforceOutputBudget(result: GraphLoadResult): GraphLoadResult {
   return result;
 }
 
-export async function loadPublicOntologyGraph(signal: AbortSignal): Promise<GraphLoadResult> {
+export async function loadPublicOntologyGraph(signal: AbortSignal): Promise<PublicOntologyGraphLoadResult> {
   const scope: GraphScope = "published";
   const config = getSupabaseConfig();
   if (!config) {
@@ -179,12 +211,32 @@ export async function loadPublicOntologyGraph(signal: AbortSignal): Promise<Grap
   } catch (error) {
     controller.abort(error);
     if (signal.aborted) throw signal.reason;
+    const correlationId = randomUUID();
+    const code: PublicOntologyGraphErrorCode = error instanceof PublicOntologyGraphBudgetError
+      ? "ONTOLOGY_GRAPH_BUDGET_EXCEEDED"
+      : "ONTOLOGY_GRAPH_UPSTREAM_UNAVAILABLE";
+    console.error("[public-ontology-graph] load failed", {
+      code,
+      correlationId,
+      diagnostic: boundedDiagnosticMessage(error),
+      upstream: error instanceof PublicOntologyGraphUpstreamError
+        ? {
+            responseBytes: error.responseBytes,
+            status: error.status,
+            table: error.table,
+          }
+        : null,
+    });
     return {
       ok: false,
       configured: true,
       scope,
       graph: null,
-      message: error instanceof Error ? error.message : "온톨로지 그래프 조회 중 오류가 발생했습니다.",
+      code,
+      correlationId,
+      message: code === "ONTOLOGY_GRAPH_BUDGET_EXCEEDED"
+        ? "온톨로지 그래프 공개 응답 한도를 초과했습니다."
+        : "온톨로지 그래프를 불러오지 못했습니다.",
     };
   } finally {
     signal.removeEventListener("abort", abortFromCaller);

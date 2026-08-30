@@ -15,6 +15,7 @@ function configureSupabase(): void {
 
 describe("public ontology graph budgets", () => {
   afterEach(() => {
+    vi.restoreAllMocks();
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
   });
@@ -43,18 +44,76 @@ describe("public ontology graph budgets", () => {
 
   it("rejects an upstream body above the byte budget", async () => {
     configureSupabase();
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
     vi.stubGlobal("fetch", vi.fn(async () => new Response("[]", {
       headers: { "Content-Length": String(PUBLIC_ONTOLOGY_GRAPH_UPSTREAM_MAX_BYTES + 1) },
     })));
 
     const result = await loadPublicOntologyGraph(new AbortController().signal);
 
-    expect(result).toMatchObject({ ok: false, configured: true, graph: null });
-    expect(result.message).toContain("response limit");
+    expect(result).toMatchObject({
+      ok: false,
+      configured: true,
+      graph: null,
+      code: "ONTOLOGY_GRAPH_UPSTREAM_UNAVAILABLE",
+      message: "온톨로지 그래프를 불러오지 못했습니다.",
+    });
+    expect(result.correlationId).toMatch(/^[0-9a-f-]{36}$/u);
+  });
+
+  it("keeps upstream failure bodies out of public responses and bounded server diagnostics", async () => {
+    configureSupabase();
+    const privateMarker = "service_role=private-marker tenant=customer-17";
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(privateMarker, {
+      status: 502,
+      headers: { "Content-Range": "*/0" },
+    })));
+
+    const result = await loadPublicOntologyGraph(new AbortController().signal);
+    const publicBody = JSON.stringify(result);
+    const logged = JSON.stringify(errorSpy.mock.calls);
+
+    expect(result).toMatchObject({
+      ok: false,
+      configured: true,
+      graph: null,
+      code: "ONTOLOGY_GRAPH_UPSTREAM_UNAVAILABLE",
+      message: "온톨로지 그래프를 불러오지 못했습니다.",
+    });
+    expect(result.correlationId).toMatch(/^[0-9a-f-]{36}$/u);
+    expect(publicBody).not.toContain(privateMarker);
+    expect(logged).not.toContain(privateMarker);
+    expect(logged).toContain("responseBytes");
+    expect(logged).toContain("502");
+  });
+
+  it("keeps malformed successful response bodies out of public responses and server diagnostics", async () => {
+    configureSupabase();
+    const privateMarker = "private-malformed-payload-customer-42";
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(`{${privateMarker}`, {
+      status: 200,
+      headers: { "Content-Range": "*/0" },
+    })));
+
+    const result = await loadPublicOntologyGraph(new AbortController().signal);
+    const publicBody = JSON.stringify(result);
+    const logged = JSON.stringify(errorSpy.mock.calls);
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: "ONTOLOGY_GRAPH_UPSTREAM_UNAVAILABLE",
+      message: "온톨로지 그래프를 불러오지 못했습니다.",
+    });
+    expect(publicBody).not.toContain(privateMarker);
+    expect(logged).not.toContain(privateMarker);
+    expect(logged).toContain("SyntaxError");
   });
 
   it("rejects rows beyond the public graph budget instead of truncating", async () => {
     configureSupabase();
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
     const serverCappedPage = Array.from(
       { length: PUBLIC_ONTOLOGY_GRAPH_PAGE_SIZE },
       (_, index) => ({ node_id: `Task_${index}` }),
@@ -70,7 +129,10 @@ describe("public ontology graph budgets", () => {
     const result = await loadPublicOntologyGraph(new AbortController().signal);
 
     expect(result.ok).toBe(false);
-    expect(result.message).toContain("row public graph budget");
+    expect(result).toMatchObject({
+      code: "ONTOLOGY_GRAPH_BUDGET_EXCEEDED",
+      message: "온톨로지 그래프 공개 응답 한도를 초과했습니다.",
+    });
     expect(vi.mocked(fetch)).toHaveBeenCalledTimes(2);
   });
 
@@ -119,6 +181,7 @@ describe("public ontology graph budgets", () => {
 
   it("fails on a repeated page range without looping indefinitely", async () => {
     configureSupabase();
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
     const page = Array.from(
       { length: PUBLIC_ONTOLOGY_GRAPH_PAGE_SIZE },
       (_, index) => ({ node_id: `Task_${index}` }),
@@ -132,12 +195,16 @@ describe("public ontology graph budgets", () => {
     const result = await loadPublicOntologyGraph(new AbortController().signal);
 
     expect(result.ok).toBe(false);
-    expect(result.message).toContain("inconsistent Content-Range");
+    expect(result).toMatchObject({
+      code: "ONTOLOGY_GRAPH_UPSTREAM_UNAVAILABLE",
+      message: "온톨로지 그래프를 불러오지 못했습니다.",
+    });
     expect(vi.mocked(fetch).mock.calls.length).toBeLessThanOrEqual(3);
   });
 
   it("rejects oversized serialized output instead of shortening graph fields", async () => {
     configureSupabase();
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
     const marker = "output-tail-must-not-be-truncated";
     const node = {
       node_id: "Task_large",
@@ -157,7 +224,10 @@ describe("public ontology graph budgets", () => {
     const result = await loadPublicOntologyGraph(new AbortController().signal);
 
     expect(result.ok).toBe(false);
-    expect(result.message).toContain("ontology graph output exceeded");
+    expect(result).toMatchObject({
+      code: "ONTOLOGY_GRAPH_BUDGET_EXCEEDED",
+      message: "온톨로지 그래프 공개 응답 한도를 초과했습니다.",
+    });
     expect(JSON.stringify(result)).not.toContain(marker);
   });
 });
