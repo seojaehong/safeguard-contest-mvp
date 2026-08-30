@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "safeclaw-security-orchestration-smoke-csv-neutralization/v1",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_ORCHESTRATION_SMOKE_CSV_NEUTRALIZATION_RESCAN_PENDING",
+  "sourceHead": "f1ac2aa81e98cf0a1d638ea95ae69be93966d545",
+  "productionCommit": "f1ac2aa81e98cf0a1d638ea95ae69be93966d545",
+  "productionBuild": {
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-171q3vywa-seojaehongs-projects.vercel.app"
+  },
+  "scanFinding": {
+    "scanId": "8d7fd844-d4cb-49ab-b984-36ed6ab0beba",
+    "findingId": "csf_91cc499eca7f7c5b2c31b451",
+    "occurrenceId": "occ_5802427678098140dc4d0628",
+    "ruleId": "injection.spreadsheet-formula",
+    "severity": "medium",
+    "status": "SOURCE_REMEDIATED_FRESH_RESCAN_REQUIRED"
+  },
+  "remediation": {
+    "sharedEncoder": "lib/spreadsheet-delimited-cell.ts",
+    "consumer": "scripts/prod_orchestration_download_smoke.mjs",
+    "allHeaderCellsUseSharedEncoder": true,
+    "allBodyCellsUseSharedEncoder": true,
+    "legacyQuoteOnlyEscapeRemoved": true,
+    "formulaPrefixesCovered": ["=", "+", "-", "@", "tab", "carriage-return"]
+  },
+  "verification": {
+    "focused": {
+      "filesPassed": 2,
+      "testsPassed": 12,
+      "failed": 0
+    },
+    "adjacentReportingDownloads": {
+      "filesPassed": 1,
+      "testsPassed": 47,
+      "failed": 0
+    },
+    "nodeSyntaxCheck": "PASS",
+    "typecheck": "PASS"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "freshFollowUpSecurityScan": "REQUIRED",
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseSecurityRemediation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "sifVectorRuntime": "APPROVAL_GATED",
+    "koshaExactRegistryPromotion": "APPROVAL_GATED"
+  }
+}
