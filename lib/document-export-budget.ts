@@ -136,6 +136,64 @@ function countBodyRows(body: Record<string, unknown>): number {
   return rowCount;
 }
 
+const STRUCTURED_XLSX_BASE_RENDERED_CELLS = 256;
+const STRUCTURED_XLSX_TABLE_COLUMNS = 6;
+
+function arrayLength(record: Record<string, unknown>, key: string): number {
+  return Array.isArray(record[key]) ? record[key].length : 0;
+}
+
+function recordValue(record: Record<string, unknown>, key: string): Record<string, unknown> {
+  return isRecord(record[key]) ? record[key] : {};
+}
+
+function projectStructuredXlsxRenderedCells(body: Record<string, unknown>): number {
+  if (!isRecord(body.structured) || body.edited === true) return 0;
+
+  const structured = body.structured;
+  let renderedRows = 0;
+
+  switch (body.mode) {
+    case "workPlanStructured": {
+      renderedRows = arrayLength(structured, "workSteps")
+        + arrayLength(structured, "stopCriteria")
+        + arrayLength(recordValue(structured, "emergencyResponse"), "contacts");
+      break;
+    }
+    case "permitInspectionStructured": {
+      renderedRows = arrayLength(structured, "conditions")
+        + arrayLength(structured, "attachments")
+        + arrayLength(structured, "completionChecks");
+      break;
+    }
+    case "tbmBriefingStructured": {
+      renderedRows = arrayLength(structured, "hazards")
+        + arrayLength(structured, "measures")
+        + arrayLength(structured, "stopCriteria")
+        + arrayLength(structured, "confirmTopics");
+      break;
+    }
+    case "tbmLogStructured": {
+      renderedRows = arrayLength(recordValue(structured, "attendance"), "attendees")
+        + arrayLength(structured, "workerConfirmations")
+        + arrayLength(structured, "hazardsDiscussed")
+        + arrayLength(recordValue(structured, "safetyEducation"), "keyPoints")
+        + arrayLength(structured, "unaddressedItems")
+        + arrayLength(recordValue(structured, "photoEvidence"), "captureLocations");
+      break;
+    }
+    case "educationRecordStructured": {
+      renderedRows = arrayLength(structured, "curriculum");
+      break;
+    }
+    default:
+      return 0;
+  }
+
+  return STRUCTURED_XLSX_BASE_RENDERED_CELLS
+    + renderedRows * STRUCTURED_XLSX_TABLE_COLUMNS;
+}
+
 export function assertDocumentExportInputBudget(body: Record<string, unknown>): void {
   assertFieldAndNestedBudget(body);
 
@@ -150,7 +208,8 @@ export function assertDocumentExportInputBudget(body: Record<string, unknown>): 
     throw new DocumentExportLimitError("rows");
   }
 
-  if (totalRows * 8 > DOCUMENT_EXPORT_BUDGETS.renderedCells) {
+  const projectedRenderedCells = totalRows * 8 + projectStructuredXlsxRenderedCells(body);
+  if (projectedRenderedCells > DOCUMENT_EXPORT_BUDGETS.renderedCells) {
     throw new DocumentExportLimitError("rendered_cells");
   }
 }

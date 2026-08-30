@@ -114,6 +114,20 @@ describe("document export resource budgets", () => {
     await expectDocumentPayloadTooLarge(await exportXlsx(request("xlsx", payload)));
   });
 
+  it.each([
+    ["workPlanStructured", { workSteps: Array.from({ length: 800 }, () => ({})) }],
+    ["permitInspectionStructured", { conditions: Array.from({ length: 800 }, () => ({})) }],
+    ["tbmBriefingStructured", { stopCriteria: Array.from({ length: 800 }, () => "작업중지") }],
+    ["tbmLogStructured", { workerConfirmations: Array.from({ length: 800 }, () => "확인") }],
+    ["educationRecordStructured", { curriculum: Array.from({ length: 800 }, () => ({})) }]
+  ])("rejects XLSX %s projected cells before structured workbook allocation", async (mode, structured) => {
+    await expectDocumentPayloadTooLarge(await exportXlsx(request("xlsx", {
+      mode,
+      scenario,
+      structured
+    })));
+  });
+
   it("rejects XLSX workpacks above the document budget", async () => {
     const documents = Array.from({ length: DOCUMENT_EXPORT_BUDGETS.documents + 1 }, (_, index) => ({
       title: `문서 ${index + 1}`,
