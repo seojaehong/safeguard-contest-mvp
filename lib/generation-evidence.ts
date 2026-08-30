@@ -248,11 +248,18 @@ export function mergeGenerationImprovements(
   snapshot: GenerationEvidenceSnapshot,
   latest: HarnessImprovement[]
 ): HarnessImprovement[] {
+  const reusable = (improvement: HarnessImprovement) => (
+    improvement.memoryAdmission === "user_accepted_input"
+    || (
+      improvement.memoryAdmission === "reviewed_operation"
+      && (improvement.reviewStatus === "approved" || improvement.reviewStatus === "reflected")
+    )
+  );
   const merged = new Map<string, HarnessImprovement>();
-  for (const improvement of snapshot.dbHarnessPacket.improvementMemory) {
+  for (const improvement of snapshot.dbHarnessPacket.improvementMemory.filter(reusable)) {
     merged.set(improvement.id, improvement);
   }
-  for (const improvement of latest) merged.set(improvement.id, improvement);
+  for (const improvement of latest.filter(reusable)) merged.set(improvement.id, improvement);
   return [...merged.values()];
 }
 

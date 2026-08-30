@@ -57,15 +57,23 @@ async function loadImprovementMemory(
       return [];
     }
 
-    return (data || []).map((row) => ({
-      id: row.id,
-      taskLabel: row.task_label,
-      hazardLabel: row.hazard_label,
-      improvementText: row.improvement_text,
-      reflectedDocuments: readStringArray(row.reflected_documents),
-      sourceType: normalizeImprovementSourceType(row.source_type),
-      ...normalizeLearningVisionPayload(row.analysis_payload)
-    }));
+    return (data || []).flatMap((row): HarnessImprovement[] => {
+      const reviewStatus = row.review_status === "approved" || row.review_status === "reflected"
+        ? row.review_status
+        : null;
+      if (!reviewStatus) return [];
+      return [{
+        id: row.id,
+        taskLabel: row.task_label,
+        hazardLabel: row.hazard_label,
+        improvementText: row.improvement_text,
+        reflectedDocuments: readStringArray(row.reflected_documents),
+        sourceType: normalizeImprovementSourceType(row.source_type),
+        memoryAdmission: "reviewed_operation",
+        reviewStatus,
+        ...normalizeLearningVisionPayload(row.analysis_payload)
+      }];
+    });
   } catch (error) {
     console.warn("operation graph improvement memory load failed", error);
     return [];

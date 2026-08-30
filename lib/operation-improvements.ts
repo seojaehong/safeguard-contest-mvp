@@ -828,6 +828,7 @@ export function buildAcceptedHazardPhotoHarnessImprovements(input: {
       improvementText: `사진 위험요인 확인 및 조치 후보: ${detail}`,
       reflectedDocuments,
       sourceType: "photo_analysis",
+      memoryAdmission: "user_accepted_input",
       visionStatus: candidate.source === "vision" ? "analyzed" : "unconfigured",
       analysisMode: candidate.source === "vision" ? "vision_ocr" : "manual_text",
       photoPairAttached: false,

@@ -119,12 +119,15 @@ function sourcePhotosForImprovement(item: OperationImprovement) {
 }
 
 export function canUseOperationImprovementAsHarnessMemory(item: OperationImprovement): boolean {
-  return item.status !== "rejected" && item.status !== "on_hold";
+  return item.status === "approved" || item.status === "reflected";
 }
 
 export function operationImprovementToHarnessImprovement(item: OperationImprovement): HarnessImprovement {
   const sourcePhotoNames = sourcePhotosForImprovement(item);
   const photoCount = item.photoCount || sourcePhotoNames.length || undefined;
+  const reviewStatus = item.status === "approved" || item.status === "reflected"
+    ? item.status
+    : undefined;
 
   return {
     id: item.remoteImprovementId || item.id,
@@ -133,6 +136,8 @@ export function operationImprovementToHarnessImprovement(item: OperationImprovem
     improvementText: item.improvementText,
     reflectedDocuments: item.reflectedDocuments,
     sourceType: item.sourceType || "manual",
+    memoryAdmission: reviewStatus ? "reviewed_operation" : undefined,
+    reviewStatus,
     visionStatus: item.visionStatus,
     analysisMode: item.analysisMode,
     photoPairAttached: item.photoPairAttached ?? Boolean(item.beforePhotoName && item.afterPhotoName),

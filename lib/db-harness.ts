@@ -25,6 +25,8 @@ export type HarnessImprovement = {
   improvementText: string;
   reflectedDocuments: string[];
   sourceType: "manual" | "photo_analysis" | "operator_note";
+  memoryAdmission?: "reviewed_operation" | "user_accepted_input";
+  reviewStatus?: "approved" | "reflected";
   visionStatus?: "analyzed" | "unconfigured" | "failed";
   analysisMode?: "vision_ocr" | "photo_pair_unanalyzed" | "manual_text";
   photoPairAttached?: boolean;

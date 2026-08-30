@@ -219,7 +219,7 @@ describe("parseOperationImprovements", () => {
       .toEqual(parsed[0].photoHazardProvenance);
   });
 
-  it("keeps rejected or held improvements out of the next DB harness memory", () => {
+  it("keeps only approved or reflected improvements in reusable harness memory", () => {
     const base = {
       createdAt: "2026-07-17T09:00:00+09:00",
       siteName: "성수동 현장",
@@ -236,6 +236,7 @@ describe("parseOperationImprovements", () => {
     };
     const parsed = parseOperationImprovements(JSON.stringify([
       { ...base, id: "approved-photo", status: "approved" },
+      { ...base, id: "reflected-photo", status: "reflected" },
       { ...base, id: "candidate-photo", status: "candidate" },
       { ...base, id: "rejected-photo", status: "rejected" },
       { ...base, id: "held-photo", status: "on_hold" }
@@ -243,9 +244,14 @@ describe("parseOperationImprovements", () => {
 
     const harnessMemory = operationImprovementsToHarnessImprovements(parsed);
 
-    expect(harnessMemory.map((item) => item.id)).toEqual(["approved-photo", "candidate-photo"]);
+    expect(harnessMemory.map((item) => item.id)).toEqual(["approved-photo", "reflected-photo"]);
     expect(harnessMemory.every((item) => item.sourceType === "photo_analysis")).toBe(true);
+    expect(harnessMemory).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "approved-photo", memoryAdmission: "reviewed_operation", reviewStatus: "approved" }),
+      expect.objectContaining({ id: "reflected-photo", memoryAdmission: "reviewed_operation", reviewStatus: "reflected" })
+    ]));
     expect(harnessMemory).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "candidate-photo" }),
       expect.objectContaining({ id: "rejected-photo" }),
       expect.objectContaining({ id: "held-photo" })
     ]));

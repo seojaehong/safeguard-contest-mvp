@@ -4,6 +4,7 @@ import { buildDbHarnessPacket } from "@/lib/db-harness";
 import {
   attachGenerationEvidence,
   buildResponseContentDigest,
+  mergeGenerationImprovements,
   sealGenerationEvidence,
   verifyAskResponseGenerationEvidence,
   verifyGenerationEvidence
@@ -90,6 +91,50 @@ function responseWithHarness(): AskResponse {
 }
 
 describe("generation evidence integrity", () => {
+  it("reuses only snapshot improvements with explicit review or user-acceptance provenance", () => {
+    const current = snapshot();
+    current.dbHarnessPacket.improvementMemory = [
+      {
+        id: "legacy-candidate",
+        taskLabel: "legacy",
+        hazardLabel: "추락",
+        improvementText: "후보",
+        reflectedDocuments: [],
+        sourceType: "manual"
+      },
+      {
+        id: "reviewed",
+        taskLabel: "reviewed",
+        hazardLabel: "추락",
+        improvementText: "승인 조치",
+        reflectedDocuments: ["위험성평가표"],
+        sourceType: "manual",
+        memoryAdmission: "reviewed_operation",
+        reviewStatus: "approved"
+      },
+      {
+        id: "accepted-photo",
+        taskLabel: "photo",
+        hazardLabel: "낙하",
+        improvementText: "사용자 채택 사진 조치",
+        reflectedDocuments: ["TBM 브리핑"],
+        sourceType: "photo_analysis",
+        memoryAdmission: "user_accepted_input"
+      }
+    ];
+
+    const merged = mergeGenerationImprovements(current, [{
+      id: "fresh-candidate",
+      taskLabel: "fresh",
+      hazardLabel: "끼임",
+      improvementText: "미검토",
+      reflectedDocuments: [],
+      sourceType: "manual"
+    }]);
+
+    expect(merged.map((item) => item.id)).toEqual(["reviewed", "accepted-photo"]);
+  });
+
   it("seals and verifies the canonical generation snapshot", () => {
     const expected = snapshot();
     const envelope = sealGenerationEvidence(expected, SECRET);
