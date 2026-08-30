@@ -189,36 +189,37 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
 
 function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
   return {
-    verdict: "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE_RECOVERED_DRAFT_HISTORY",
-    scanId: "3358978a-75d1-454a-9dcd-4b63b52b9768",
-    sourceHead: "ab30f5c5269430a558fcd8ef5c6331fb3c952a4e",
-    deployedProductSource: "ab30f5c5269430a558fcd8ef5c6331fb3c952a4e",
+    verdict: "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_18_OCCURRENCES_16_UNIQUE_FINDINGS_PARTIAL_COVERAGE",
+    scanId: "f19aa0ca-5fa5-4e8e-8482-b63ad854f230",
+    sourceHead: "fb6763a789591189e03b8efb14a057def7216ef2",
+    deployedProductSource: "fb6763a789591189e03b8efb14a057def7216ef2",
     scan: {
       status: "completed",
       mode: "standard",
       targetKind: "git_revision",
       coverageCompleteness: "partial",
-      reviewedSurfaceCount: 12,
-      deferredCoverageItemCount: 66,
-      reportableFindingCount: 17,
-      severity: { critical: 0, high: 0, medium: 2, low: 15 },
-      draftHistoryRecoveredByFinalizer: true,
+      trackedFileCount: 6757,
+      reviewedSurfaceCount: 7,
+      deferredCoverageItemCount: 32,
+      reportableFindingCount: 18,
+      uniqueFindingWriteupCount: 16,
+      severity: { critical: 0, high: 0, medium: 6, low: 12 },
     },
     baseline: { immutableOriginalFindingCount: 18, preserved: true, rewritten: false },
     currentDisposition: {
-      approvalGatedDatabaseOrAtomicityCount: 14,
+      approvalGatedDatabaseOrAtomicityCount: 15,
       approvalSensitiveShareCapabilityCount: 0,
       approvalFreeProductSourceResidualCount: 3,
       fullyClosedBoundedSourceCandidateCount: 0,
       securityCompleteClaimAllowed: false,
     },
     canonicalArtifacts: {
-      manifest: "evaluation/current-source-standard-security-scan-2026-08-28-complete/canonical/scan-manifest.json",
-      findings: "evaluation/current-source-standard-security-scan-2026-08-28-complete/canonical/findings.json",
-      coverage: "evaluation/current-source-standard-security-scan-2026-08-28-complete/canonical/coverage.json",
-      markdown: "evaluation/current-source-standard-security-scan-2026-08-28-complete/scan-report.md",
-      findingWriteupCount: 17,
-      supportingEvidenceCount: 17,
+      manifest: "evaluation/current-source-standard-security-scan-2026-08-30-complete/canonical/scan-manifest.json",
+      findings: "evaluation/current-source-standard-security-scan-2026-08-30-complete/canonical/findings.json",
+      coverage: "evaluation/current-source-standard-security-scan-2026-08-30-complete/canonical/coverage.json",
+      markdown: "evaluation/current-source-standard-security-scan-2026-08-30-complete/scan-report.md",
+      findingWriteupCount: 16,
+      supportingEvidenceCount: 16,
     },
     mutationBoundary: {
       dbMutationPerformed: false,
@@ -4326,7 +4327,7 @@ function createFixtureRoot(): string {
       securityCompleteClaimAllowed: false,
     },
   });
-  const freshScanRoot = path.join("evaluation", "current-source-standard-security-scan-2026-08-28-complete");
+  const freshScanRoot = path.join("evaluation", "current-source-standard-security-scan-2026-08-30-complete");
   writeJson(rootDir, path.join(freshScanRoot, "report.json"), freshCurrentSourceSecurityScanFixture());
   writeJson(rootDir, path.join(freshScanRoot, "canonical", "scan-manifest.json"), { scan: { status: "completed" } });
   writeJson(rootDir, path.join(freshScanRoot, "canonical", "findings.json"), { findings: [] });
@@ -8525,19 +8526,19 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const reportPath = path.join(
       rootDir,
       "evaluation",
-      "current-source-standard-security-scan-2026-08-28-complete",
+      "current-source-standard-security-scan-2026-08-30-complete",
       "report.json",
     );
 
     const audit = buildNorthstarOpenGateAudit({ rootDir });
     const gate = audit.gates.find((item) => item.id === "fresh_current_source_security_scan");
     expect(gate?.state).toBe("notice");
-    expect(gate?.detail).toContain("17 open findings (2 medium, 15 low)");
-    expect(gate?.detail).toContain("partial canonical coverage across 12 recorded surfaces");
-    expect(gate?.detail).toContain("66 finalizer-recovered deferred draft entries");
+    expect(gate?.detail).toContain("18 occurrences (6 medium, 12 low)");
+    expect(gate?.detail).toContain("16 unique finding write-ups");
+    expect(gate?.detail).toContain("partial canonical coverage across 7 recorded surfaces");
+    expect(gate?.detail).toContain("32 deferred entries");
     expect(gate?.detail).toContain("Three approval-free source residuals");
-    expect(gate?.detail).toContain("standalone Share identifier candidate was rejected");
-    expect(gate?.detail).toContain("fourteen database/RLS/atomicity findings");
+    expect(gate?.detail).toContain("fifteen database/RLS/atomicity findings");
     expect(gate?.detail).toContain("not security-complete");
     expect(gate?.detail).toContain("MISSING_EVIDENCE");
 

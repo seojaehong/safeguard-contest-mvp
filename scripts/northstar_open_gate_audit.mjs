@@ -71,7 +71,7 @@ const EVIDENCE_PATHS = Object.freeze({
   repositorySecurityScanReconciliation: path.join("evaluation", "repository-security-scan-reconciliation-2026-08-11", "report.json"),
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
-  freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-28-complete", "report.json"),
+  freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-30-complete", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
   shareAckPreBodyAdmission: path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
   safetyStatusDisconnectLease: path.join("evaluation", "safety-status-disconnect-lease-2026-08-28", "report.json"),
@@ -8532,31 +8532,33 @@ function evaluateFreshCurrentSourceSecurityScanGate(rootDir) {
     && mutation.vectorUploadPerformed === false
     && mutation.wikiPublished === false
     && mutation.exactTrustRegistryMutationPerformed === false;
-  const pass = readString(report.verdict) === "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_17_OPEN_FINDINGS_PARTIAL_COVERAGE_RECOVERED_DRAFT_HISTORY"
-    && readString(report.scanId) === "3358978a-75d1-454a-9dcd-4b63b52b9768"
-    && readString(report.sourceHead) === "ab30f5c5269430a558fcd8ef5c6331fb3c952a4e"
-    && readString(report.deployedProductSource) === "ab30f5c5269430a558fcd8ef5c6331fb3c952a4e"
+  const pass = readString(report.verdict) === "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_18_OCCURRENCES_16_UNIQUE_FINDINGS_PARTIAL_COVERAGE"
+    && readString(report.scanId) === "f19aa0ca-5fa5-4e8e-8482-b63ad854f230"
+    && readString(report.sourceHead) === "fb6763a789591189e03b8efb14a057def7216ef2"
+    && readString(report.deployedProductSource) === "fb6763a789591189e03b8efb14a057def7216ef2"
     && readString(scan.status) === "completed"
     && readString(scan.mode) === "standard"
     && readString(scan.targetKind) === "git_revision"
     && readString(scan.coverageCompleteness) === "partial"
-    && readNumber(scan.reviewedSurfaceCount) === 12
-    && readNumber(scan.deferredCoverageItemCount) === 66
-    && readNumber(scan.reportableFindingCount) === 17
+    && readNumber(scan.trackedFileCount) === 6757
+    && readNumber(scan.reviewedSurfaceCount) === 7
+    && readNumber(scan.deferredCoverageItemCount) === 32
+    && readNumber(scan.reportableFindingCount) === 18
+    && readNumber(scan.uniqueFindingWriteupCount) === 16
     && readNumber(severity.critical) === 0
     && readNumber(severity.high) === 0
-    && readNumber(severity.medium) === 2
-    && readNumber(severity.low) === 15
+    && readNumber(severity.medium) === 6
+    && readNumber(severity.low) === 12
     && readNumber(baseline.immutableOriginalFindingCount) === 18
     && baseline.preserved === true
     && baseline.rewritten === false
-    && readNumber(disposition.approvalGatedDatabaseOrAtomicityCount) === 14
+    && readNumber(disposition.approvalGatedDatabaseOrAtomicityCount) === 15
     && readNumber(disposition.approvalSensitiveShareCapabilityCount) === 0
     && readNumber(disposition.approvalFreeProductSourceResidualCount) === 3
     && readNumber(disposition.fullyClosedBoundedSourceCandidateCount) === 0
     && disposition.securityCompleteClaimAllowed === false
-    && readNumber(canonical.findingWriteupCount) === 17
-    && readNumber(canonical.supportingEvidenceCount) === 17
+    && readNumber(canonical.findingWriteupCount) === 16
+    && readNumber(canonical.supportingEvidenceCount) === 16
     && canonicalFilesPresent
     && noMutation
     && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
@@ -8574,14 +8576,14 @@ function evaluateFreshCurrentSourceSecurityScanGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Fresh Standard scan 3358978a is sealed at source/live ab30f5c5 with 17 open findings (2 medium, 15 low), partial canonical coverage across 12 recorded surfaces, and 66 finalizer-recovered deferred draft entries. The immutable original 18-finding baseline and completed prior scan are preserved. Three approval-free source residuals and fourteen database/RLS/atomicity findings remain; the standalone Share identifier candidate was rejected as unproven. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      ? "Fresh Standard scan f19aa0ca is sealed at source/live fb6763a7 with 18 occurrences (6 medium, 12 low), 16 unique finding write-ups, and partial canonical coverage across 7 recorded surfaces with 32 deferred entries in a 6,757-file repository. The immutable original 18-finding baseline and completed prior scan are preserved. Three approval-free source residuals and fifteen database/RLS/atomicity findings remain at the scanned revision. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
       : `Fresh scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(report.scanId) || "missing"}, source=${readString(report.sourceHead) || "missing"}, findings=${readNumber(scan.reportableFindingCount)}, severity=${readNumber(severity.medium)}/${readNumber(severity.low)}, coverage=${readString(scan.coverageCompleteness) || "missing"}/${readNumber(scan.reviewedSurfaceCount)}/${readNumber(scan.deferredCoverageItemCount)}, canonical=${canonicalFilesPresent}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
           "Remediate the three approval-free source residuals in bounded waves and rerun focused validation.",
-          "Keep the fourteen database/RLS/atomicity findings approval-gated and exact saved Share separate; do not claim security completion from scan completion.",
+          "Keep the fifteen database/RLS/atomicity findings approval-gated and exact saved Share separate; do not claim security completion from scan completion.",
         ]
-      : ["Restore the exact sealed scan identity, 17-finding counts, canonical files, recovered partial-coverage boundary, no-mutation state, and exact Share MISSING_EVIDENCE."],
+      : ["Restore the exact sealed scan identity, 18-occurrence and 16-write-up counts, canonical files, partial-coverage boundary, no-mutation state, and exact Share MISSING_EVIDENCE."],
   });
 }
 
