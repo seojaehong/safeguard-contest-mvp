@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-30T15:32:42.452Z
-Source HEAD at generation: 4acafa3ba6b9934db4347e4bfe367775fae10be9
-Live commit at generation: 1b4d7feeb4469ab4df148615ae22ab3037e70571
+Generated at: 2026-08-30T15:36:04.646Z
+Source HEAD at generation: ec770440f61ef6e90d2bcc784509865f81b76c09
+Live commit at generation: ec770440f61ef6e90d2bcc784509865f81b76c09
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -498,7 +498,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -532,7 +532,7 @@ Overall: `northstar_open_approval_gated`
 | current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | fresh_current_source_security_scan | ancestor | missing | evaluation\current-source-standard-security-scan-2026-08-30-complete\report.json |
 | current_source_security_remediation_followup | ancestor | ancestor_of_head | evaluation\current-source-security-remediation-2026-08-30\report.json |
-| current_security_governed_path_compatibility | ancestor | matches_live_source_mismatch | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
+| current_security_governed_path_compatibility | ancestor | ancestor_of_head | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
 | current_source_security_residual_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | ancestor | ancestor_of_head | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | ancestor | ancestor_of_head | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
