@@ -466,6 +466,70 @@ function currentSourceOntologyErrorProjectionRemediationFixture(): Record<string
   };
 }
 
+function currentSourcePhotoReadinessAuthFanoutRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-current-source-security-photo-readiness-auth-fanout-remediation/v1",
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_PHOTO_READINESS_AUTH_FANOUT_CONTRACT",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    finding: {
+      findingId: "csf_e70379e4470e7bf7ec2786a4",
+      occurrenceId: "occ_cc14cdbca20eb2f3f41aa454",
+      ruleId: "resource-exhaustion.photo-readiness-auth-fanout",
+      sealedFindingReclassified: false,
+      freshRescanRequired: true,
+    },
+    remediation: {
+      publicGetReturnsCoarseReadinessOnly: true,
+      publicGetCreatesSupabaseAdminClient: false,
+      publicGetCallsSupabaseAuthentication: false,
+      arbitraryBearerChangesPublicGetResponseShape: false,
+      providerDiagnosticsExposedByPublicGet: false,
+      postAuthenticationPreserved: true,
+      postMultipartBudgetPreserved: true,
+      postProviderExecutionPreserved: true,
+    },
+    verification: {
+      focusedTests: { filesPassed: 2, testsPassed: 13, testsFailed: 0 },
+      typecheck: { status: "PASS" },
+      productionBuild: { status: "PASS", staticPages: 28 },
+      liveDeployment: {
+        status: "PASS_DEPLOYED_SOURCE_AND_PUBLIC_RESPONSE_BOUNDARY",
+        commitSha: "fixture-sha",
+        branch: "master",
+        environment: "production",
+        publicProbe: {
+          path: "/api/input-photos/hazard-analysis",
+          anonymousStatus: 200,
+          arbitraryBearerStatus: 200,
+          responseBodiesEqual: true,
+          providerDiagnosticsExposed: false,
+          apiKeyPresenceExposed: false,
+          photoPostAnalysisExecuted: false,
+        },
+      },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+      photoPostAnalysisExecuted: false,
+    },
+    remainingBoundaries: {
+      immutableOriginalBaselinePreserved: true,
+      sealedCurrentHeadScanPreserved: true,
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      approvalGatedFindingsRemainOpen: true,
+      liveAfterDeploymentRequired: false,
+    },
+  };
+}
+
 function currentSourceSecurityRemediationFollowupFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_PRODUCTION_APPROVAL_FREE_SECURITY_REMEDIATIONS_POST_FIX_RESCAN_PENDING",
@@ -4719,6 +4783,11 @@ function createFixtureRoot(): string {
     rootDir,
     path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
     currentSourceOntologyErrorProjectionRemediationFixture(),
+  );
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31", "report.json"),
+    currentSourcePhotoReadinessAuthFanoutRemediationFixture(),
   );
   for (const receipt of approvalFreeRemediation.receipts as Array<{ evidencePath: string }>) {
     writeJson(rootDir, receipt.evidencePath, { verdict: "PASS_FIXTURE" });
@@ -9103,6 +9172,38 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "current_source_ontology_error_projection_remediation")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records auth-free photo readiness without closing the sealed finding or approval boundaries", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_photo_readiness_auth_fanout_remediation");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("without creating a Supabase admin client or calling authentication");
+    expect(gate?.detail).toContain("Two files / 13 tests");
+    expect(gate?.detail).toContain("sealed finding stays open pending a fresh scan");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remediation: { publicGetCallsSupabaseAuthentication: boolean };
+      mutationBoundary: { dbMutationPerformed: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.remediation.publicGetCallsSupabaseAuthentication = true;
+    report.mutationBoundary.dbMutationPerformed = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "current_source_photo_readiness_auth_fanout_remediation")?.state)
       .toBe("contradicted");
   });
 

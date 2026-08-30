@@ -76,6 +76,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
   currentSourceOntologyErrorProjectionRemediation: path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
+  currentSourcePhotoReadinessAuthFanoutRemediation: path.join("evaluation", "current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
@@ -9164,6 +9165,104 @@ function evaluateCurrentSourceOntologyErrorProjectionRemediationGate(rootDir) {
 
 /**
  * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateCurrentSourcePhotoReadinessAuthFanoutRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourcePhotoReadinessAuthFanoutRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_source_photo_readiness_auth_fanout_remediation",
+      label: "Current-source photo readiness auth fan-out remediation",
+      state: "missing",
+      evidencePath,
+      detail: "The public photo readiness authentication fan-out remediation receipt is missing or invalid.",
+      nextActions: ["Restore the deployed-source receipt without reclassifying the sealed finding or closing approval boundaries."],
+    });
+  }
+
+  const finding = isRecord(report.finding) ? report.finding : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedTests) ? verification.focusedTests : {};
+  const typecheck = isRecord(verification.typecheck) ? verification.typecheck : {};
+  const build = isRecord(verification.productionBuild) ? verification.productionBuild : {};
+  const live = isRecord(verification.liveDeployment) ? verification.liveDeployment : {};
+  const probe = isRecord(live.publicProbe) ? live.publicProbe : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const boundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false
+    && mutation.photoPostAnalysisExecuted === false;
+  const pass = readString(report.schemaVersion) === "safeclaw-current-source-security-photo-readiness-auth-fanout-remediation/v1"
+    && readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_PHOTO_READINESS_AUTH_FANOUT_CONTRACT"
+    && productCommit !== ""
+    && productCommit === readString(report.sourceHead)
+    && productionCommit === productCommit
+    && productionCommit === readString(live.commitSha)
+    && isGitAncestor(rootDir, productCommit)
+    && readString(live.branch) === "master"
+    && readString(live.environment) === "production"
+    && readString(finding.findingId) === "csf_e70379e4470e7bf7ec2786a4"
+    && readString(finding.occurrenceId) === "occ_cc14cdbca20eb2f3f41aa454"
+    && readString(finding.ruleId) === "resource-exhaustion.photo-readiness-auth-fanout"
+    && finding.sealedFindingReclassified === false
+    && finding.freshRescanRequired === true
+    && remediation.publicGetReturnsCoarseReadinessOnly === true
+    && remediation.publicGetCreatesSupabaseAdminClient === false
+    && remediation.publicGetCallsSupabaseAuthentication === false
+    && remediation.arbitraryBearerChangesPublicGetResponseShape === false
+    && remediation.providerDiagnosticsExposedByPublicGet === false
+    && remediation.postAuthenticationPreserved === true
+    && remediation.postMultipartBudgetPreserved === true
+    && remediation.postProviderExecutionPreserved === true
+    && readNumber(focused.filesPassed) === 2
+    && readNumber(focused.testsPassed) === 13
+    && readNumber(focused.testsFailed) === 0
+    && readString(typecheck.status) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && readString(live.status) === "PASS_DEPLOYED_SOURCE_AND_PUBLIC_RESPONSE_BOUNDARY"
+    && readString(probe.path) === "/api/input-photos/hazard-analysis"
+    && readNumber(probe.anonymousStatus) === 200
+    && readNumber(probe.arbitraryBearerStatus) === 200
+    && probe.responseBodiesEqual === true
+    && probe.providerDiagnosticsExposed === false
+    && probe.apiKeyPresenceExposed === false
+    && probe.photoPostAnalysisExecuted === false
+    && noMutation
+    && boundaries.immutableOriginalBaselinePreserved === true
+    && boundaries.sealedCurrentHeadScanPreserved === true
+    && boundaries.securityComplete === false
+    && readString(boundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && boundaries.approvalGatedFindingsRemainOpen === true
+    && boundaries.liveAfterDeploymentRequired === false;
+
+  return gateResult({
+    id: "current_source_photo_readiness_auth_fanout_remediation",
+    label: "Current-source photo readiness auth fan-out remediation",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Current live source returns one coarse photo readiness response for anonymous and arbitrary-Bearer GET requests without creating a Supabase admin client or calling authentication. Two files / 13 tests, typecheck, and the 28-page build pass; live responses are identical and expose no provider or API-key diagnostics. Photo-analysis POST authentication and upload/provider budgets remain intact. The sealed finding stays open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
+      : `Photo-readiness verdict=${readString(report.verdict) || "missing"}, product/live=${productCommit || "missing"}/${productionCommit || "missing"}, tests=${readNumber(focused.testsPassed)}, client=${remediation.publicGetCreatesSupabaseAdminClient === true}, auth=${remediation.publicGetCallsSupabaseAuthentication === true}, probe=${readNumber(probe.anonymousStatus)}/${readNumber(probe.arbitraryBearerStatus)}/${probe.responseBodiesEqual === true}, freshRescan=${finding.freshRescanRequired === true}, noMutation=${noMutation}, securityComplete=${boundaries.securityComplete === true}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Include the deployed photo readiness contract in the next full repository scan before reclassifying the sealed finding.",
+          "Keep exact saved Share and all DB/provider/vector/wiki/KOSHA approval boundaries open.",
+        ]
+      : ["Restore auth-free coarse GET behavior, aligned source/live identity, verification counts, fresh-rescan boundary, no-mutation boundary, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
  * @param {string[]} governedPaths
  */
 function isCurrentSecurityGovernedPathReceiptCurrent(rootDir, governedPaths) {
@@ -13230,6 +13329,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentSourceSecurityResourceBudgetRemediationGate(rootDir),
     evaluateCurrentSourceLogoutStorageRemediationGate(rootDir),
     evaluateCurrentSourceOntologyErrorProjectionRemediationGate(rootDir),
+    evaluateCurrentSourcePhotoReadinessAuthFanoutRemediationGate(rootDir),
     evaluateCurrentSourceSecurityRemediationFollowupGate(rootDir),
     evaluateCurrentSecurityGovernedPathCompatibilityGate(rootDir),
     evaluateCurrentSourceSecurityResidualRemediationGate(rootDir),
