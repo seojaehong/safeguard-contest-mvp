@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-30T21:38:19.446Z",
-  "head": "a4c470a7af91a7f9a5c8318c5d2fa82ffbe088a0",
+  "generatedAt": "2026-08-30T22:20:44.758Z",
+  "head": "60b762aa9eeca478f88a42cd6751296cdae31730",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "a4c470a7af91a7f9a5c8318c5d2fa82ffbe088a0",
+    "commitSha": "4abee6ff0557ab16ccd670a001dd33b8b2fd8b70",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-qyd02sdhe-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ggv89i0ab-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 88
+    "gateCount": 89
   },
   "provenGates": [
     {
@@ -230,6 +230,12 @@
       "state": "notice",
       "artifact": "evaluation\\current-source-security-logout-storage-remediation-2026-08-31\\report.json",
       "detail": "Current live source clears worker/workpack/editorial browser content on explicit logout and SIGNED_OUT while preserving only theme and AI-mode preferences; workspace navigation prevents autosave repopulation. Five files / 100 tests, typecheck, 28-page build, and the 33-page/24-component static audit pass. Behavioral live logout was intentionally not executed because it would mutate the signed-in session. The sealed finding remains open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "current_source_ontology_error_projection_remediation",
+      "state": "notice",
+      "artifact": "evaluation\\current-source-security-ontology-error-projection-remediation-2026-08-31\\report.json",
+      "detail": "Current live source returns two fixed public ontology error codes with correlation IDs while excluding upstream bodies and arbitrary exception messages from public JSON and server diagnostics. Three files / 12 tests, typecheck, and the 28-page build pass; live public admission fails closed before upstream work. No provider failure was induced, the sealed finding remains open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_source_security_remediation_followup",
@@ -859,6 +865,21 @@
     "buildStatus": "PASS",
     "staticViolationCount": 0,
     "behavioralLogoutExecuted": false,
+    "freshRescanRequired": true,
+    "securityComplete": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "currentSourceOntologyErrorProjectionRemediation": {
+    "artifact": "evaluation\\current-source-security-ontology-error-projection-remediation-2026-08-31\\report.json",
+    "verdict": "PASS_LIVE_DEPLOYED_SOURCE_ONTOLOGY_ERROR_PROJECTION_CONTRACT",
+    "sourceHead": "68a8f9dae349cb03d8c77abedd27040b9679bde0",
+    "productionCommit": "05e70640ec305ff651eba1c42654a6a3b8a02f1e",
+    "findingId": "csf_74a68abc8d7370ed1b78fad3",
+    "testsPassed": 12,
+    "buildStatus": "PASS",
+    "publicErrorCodeCount": 2,
+    "upstreamFailureInduced": false,
+    "liveProbeCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
     "freshRescanRequired": true,
     "securityComplete": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
@@ -2043,10 +2064,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "a4c470a7af91a7f9a5c8318c5d2fa82ffbe088a0",
+      "sourceCommit": "60b762aa9eeca478f88a42cd6751296cdae31730",
       "sourceStatus": "exact",
-      "productionCommit": "a4c470a7af91a7f9a5c8318c5d2fa82ffbe088a0",
-      "productionStatus": "matches_live"
+      "productionCommit": "60b762aa9eeca478f88a42cd6751296cdae31730",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -2326,6 +2347,14 @@
       "sourceCommit": "e7533365e3ceb9ceef733587e05709cb59860d4f",
       "sourceStatus": "ancestor",
       "productionCommit": "e7533365e3ceb9ceef733587e05709cb59860d4f",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "current_source_ontology_error_projection_remediation",
+      "artifact": "evaluation\\current-source-security-ontology-error-projection-remediation-2026-08-31\\report.json",
+      "sourceCommit": "68a8f9dae349cb03d8c77abedd27040b9679bde0",
+      "sourceStatus": "ancestor",
+      "productionCommit": "05e70640ec305ff651eba1c42654a6a3b8a02f1e",
       "productionStatus": "ancestor_of_head"
     },
     {

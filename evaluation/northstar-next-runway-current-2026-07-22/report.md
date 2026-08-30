@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `a4c470a7af91a7f9a5c8318c5d2fa82ffbe088a0`
+Source HEAD: `60b762aa9eeca478f88a42cd6751296cdae31730`
 
-Production `/api/build-info`: `a4c470a7af91a7f9a5c8318c5d2fa82ffbe088a0`
+Production `/api/build-info`: `4abee6ff0557ab16ccd670a001dd33b8b2fd8b70`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `a4c470a7af91a7f9a5c8318c5d2fa82ffbe088a0`
+Live rollup source head: `60b762aa9eeca478f88a42cd6751296cdae31730`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `60b762aa9eeca478f88a42cd6751296cdae31730` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `4abee6ff0557ab16ccd670a001dd33b8b2fd8b70`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -79,6 +79,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Current-source approval-free security remediation is `PASS_LIVE_PRODUCTION_FOUR_APPROVAL_FREE_SECURITY_REMEDIATIONS_RESCAN_PENDING`: bounded source remediation `4/4`, open approval-free source residuals `0`, and sealed scan finding reclassification performed `false`. The fresh full scan remains required `true`, database/RLS/atomicity findings remain `5`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source security resource-budget remediation is `PASS_LIVE_DEPLOYED_SOURCE_APPROVAL_FREE_SECURITY_RESOURCE_BUDGETS_DIRECT_PROBE_ADMISSION_BLOCKED`: source/live `8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f/8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f`, remediated `5`, canonical findings `10`, manifest `failed`, and approval-gated findings `5`. Direct live provider budget execution remains `false`; security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source logout storage remediation is `PASS_LIVE_DEPLOYED_SOURCE_LOGOUT_USER_CONTENT_PURGE_CONTRACT`: source/live `e7533365e3ceb9ceef733587e05709cb59860d4f/e7533365e3ceb9ceef733587e05709cb59860d4f`, exact keys/prefixes/preferences `2/3/2`, tests `100`, build `PASS`, and static violations `0`. Behavioral logout remains `false`; fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
+- Current-source ontology error projection remediation is `PASS_LIVE_DEPLOYED_SOURCE_ONTOLOGY_ERROR_PROJECTION_CONTRACT`: product/live `68a8f9dae349cb03d8c77abedd27040b9679bde0/05e70640ec305ff651eba1c42654a6a3b8a02f1e`, fixed public codes `2`, tests `12`, build `PASS`, and live admission `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`. No provider failure was induced `false`; fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source security residual remediation is `PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING`: anchors `dns-toctou, provider-detail, xff-spoof`, tests `174`, live evidence `PASS_DEPLOYED_SOURCE_MARKER_ONLY` with behavioral probe `false`. The immutable scan remains open, follow-up scan required=`true`, security-complete=`false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Share ACK pre-body admission is `PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED`: coarse IP rate/body concurrency ordering `true/true`, recipient-specific post-parse admission `true`, tests `66`, and live `503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE/distributed`. The sealed finding remains rescan-pending `true`; security-complete remains `false`, recipient ACK is `APPROVAL_GATED`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Safety status disconnect lease is `PASS_LIVE_PRODUCTION_SAFETY_STATUS_DISCONNECT_LEASE_SOURCE_REMEDIATED`: work settlement before abort rejection/lease release `true/true`, two-disconnect concurrency proof `true`, tests `16`, and live `503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE/safety-reference-status`. The sealed finding remains rescan-pending `true`; security-complete remains `false`, distributed activation is `OPERATOR_CONFIGURATION_REQUIRED`, and exact saved Share remains `MISSING_EVIDENCE`.

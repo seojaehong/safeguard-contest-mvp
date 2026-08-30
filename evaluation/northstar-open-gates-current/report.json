@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-30T21:38:14.336Z",
-  "sourceSha": "a4c470a7af91a7f9a5c8318c5d2fa82ffbe088a0",
+  "generatedAt": "2026-08-30T22:20:43.668Z",
+  "sourceSha": "60b762aa9eeca478f88a42cd6751296cdae31730",
   "overall": "open",
   "gates": [
     {
@@ -366,6 +366,17 @@
       "detail": "Current live source clears worker/workpack/editorial browser content on explicit logout and SIGNED_OUT while preserving only theme and AI-mode preferences; workspace navigation prevents autosave repopulation. Five files / 100 tests, typecheck, 28-page build, and the 33-page/24-component static audit pass. Behavioral live logout was intentionally not executed because it would mutate the signed-in session. The sealed finding remains open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Include the deployed logout contract in the next full repository scan before reclassifying the sealed finding.",
+        "Keep exact saved Share and all DB/provider/vector/wiki/KOSHA approval boundaries open."
+      ]
+    },
+    {
+      "id": "current_source_ontology_error_projection_remediation",
+      "state": "notice",
+      "label": "Current-source ontology error projection remediation",
+      "evidencePath": "evaluation\\current-source-security-ontology-error-projection-remediation-2026-08-31\\report.json",
+      "detail": "Current live source returns two fixed public ontology error codes with correlation IDs while excluding upstream bodies and arbitrary exception messages from public JSON and server diagnostics. Three files / 12 tests, typecheck, and the 28-page build pass; live public admission fails closed before upstream work. No provider failure was induced, the sealed finding remains open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Include the deployed ontology error contract in the next full repository scan before reclassifying the sealed finding.",
         "Keep exact saved Share and all DB/provider/vector/wiki/KOSHA approval boundaries open."
       ]
     },
