@@ -203,7 +203,7 @@ describe("workpack improvement POST status contract", () => {
     }
   });
 
-  it("rejects oversized JSON requests before authentication, analysis, or persistence", async () => {
+  it("rejects oversized JSON requests after ownership and before analysis or persistence", async () => {
     const { POST } = await import("@/app/api/workpacks/[id]/improvements/route");
     const response = await POST(new NextRequest(
       "http://localhost/api/workpacks/workpack-1/improvements",
@@ -216,7 +216,7 @@ describe("workpack improvement POST status contract", () => {
 
     expect(response.status).toBe(413);
     await expect(response.json()).resolves.toMatchObject({
-      code: "PUBLIC_WORK_BUDGET_EXCEEDED",
+      code: "AUTHENTICATED_JSON_BODY_TOO_LARGE",
       limit: WORKPACK_IMPROVEMENT_JSON_REQUEST_MAX_BYTES
     });
     expect(mocks.analyzeImprovementPhotos).not.toHaveBeenCalled();

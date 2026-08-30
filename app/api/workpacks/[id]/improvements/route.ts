@@ -17,7 +17,7 @@ import { withPublicPhotoAnalysisAdmission } from "@/lib/public-distributed-rate-
 import { buildImprovementDraft, buildImprovementPhotoPath } from "@/lib/workpack-commercial";
 import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-store";
 import {
-  enforcePublicJsonRequestBodyBudget,
+  enforceAuthenticatedJsonRequestBodyBudget,
   enforcePublicMultipartRequestBodyBudget,
   isOverCharBudget,
   WORKPACK_IMPROVEMENT_JSON_REQUEST_MAX_BYTES,
@@ -330,6 +330,15 @@ async function handlePost(request: NextRequest, context: RouteContext) {
     boundedRequest = bodyBudget.request === request
       ? request
       : new NextRequest(bodyBudget.request);
+  } else {
+    const bodyBudget = await enforceAuthenticatedJsonRequestBodyBudget(
+      request,
+      WORKPACK_IMPROVEMENT_JSON_REQUEST_MAX_BYTES,
+    );
+    if (!bodyBudget.ok) return bodyBudget.response;
+    boundedRequest = bodyBudget.request === request
+      ? request
+      : new NextRequest(bodyBudget.request);
   }
 
   let body: ImprovementRequest;
@@ -491,13 +500,7 @@ async function handlePost(request: NextRequest, context: RouteContext) {
 export async function POST(request: NextRequest, context: RouteContext) {
   const contentType = request.headers.get("content-type") || "";
   if (!contentType.includes("multipart/form-data")) {
-    const bodyBudget = await enforcePublicJsonRequestBodyBudget(
-      request,
-      WORKPACK_IMPROVEMENT_JSON_REQUEST_MAX_BYTES,
-      "request body exceeds the workpack improvement JSON byte budget"
-    );
-    if (!bodyBudget.ok) return bodyBudget.response;
-    return handlePost(new NextRequest(bodyBudget.request), context);
+    return handlePost(request, context);
   }
 
   const contentLengthValue = request.headers.get("content-length");

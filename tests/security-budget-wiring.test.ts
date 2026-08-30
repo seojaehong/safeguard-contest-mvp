@@ -12,6 +12,8 @@ describe("security budget wiring", () => {
   it.each([
     "app/api/briefing/settings/route.ts",
     "app/api/education-records/route.ts",
+    "app/api/knowledge/ingest/route.ts",
+    "app/api/knowledge/review/route.ts",
     "app/api/workers/route.ts",
     "app/api/workpacks/route.ts",
     "app/api/workpacks/[id]/share-sessions/route.ts",
@@ -23,6 +25,43 @@ describe("security budget wiring", () => {
     expect(text.indexOf("enforceAuthenticatedJsonRequestBodyBudget(request")).toBeLessThan(
       text.indexOf("bodyBudget.request.json()"),
     );
+  });
+
+  it.each([
+    {
+      relativePath: "app/api/knowledge/ingest/route.ts",
+      startMarker: "export async function POST",
+      admissionMarker: "checkKnowledgeIngestActorAdmission(request, user.id)",
+      parseMarker: "bodyBudget.request.json()",
+    },
+    {
+      relativePath: "app/api/knowledge/review/route.ts",
+      startMarker: "export async function POST",
+      admissionMarker: "getWorkspaceUser(client, request.headers)",
+      parseMarker: "bodyBudget.request.json()",
+    },
+    {
+      relativePath: "app/api/workpacks/[id]/improvements/route.ts",
+      startMarker: "async function handlePost",
+      admissionMarker: "loadOwnedWorkpackOperationContext(client, user, id)",
+      parseMarker: "readImprovementRequest(boundedRequest)",
+    },
+  ])("authenticates and admits callers before reading write bodies in $relativePath", ({
+    relativePath,
+    startMarker,
+    admissionMarker,
+    parseMarker,
+  }) => {
+    const routeSource = source(relativePath);
+    const handlerSource = routeSource.slice(routeSource.indexOf(startMarker));
+    expect(handlerSource.indexOf(admissionMarker)).toBeGreaterThanOrEqual(0);
+    expect(handlerSource.indexOf(admissionMarker)).toBeLessThan(
+      handlerSource.indexOf("enforceAuthenticatedJsonRequestBodyBudget("),
+    );
+    expect(handlerSource.indexOf(admissionMarker)).toBeLessThan(
+      handlerSource.indexOf(parseMarker),
+    );
+    expect(handlerSource).toContain("enforceAuthenticatedJsonRequestBodyBudget(");
   });
 
   it("admits public Ask callers before reading the JSON body", () => {

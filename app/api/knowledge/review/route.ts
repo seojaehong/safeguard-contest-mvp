@@ -17,7 +17,7 @@ import {
   parseOntologyPromotionCommand
 } from "@/lib/ontology-promotion-policy";
 import {
-  enforcePublicJsonRequestBodyBudget,
+  enforceAuthenticatedJsonRequestBodyBudget,
   KNOWLEDGE_WRITE_REQUEST_MAX_BYTES
 } from "@/lib/public-work-budget";
 
@@ -70,10 +70,23 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const bodyBudget = await enforcePublicJsonRequestBodyBudget(
+  const client = createSupabaseAdminClient();
+  if (!client) return unconfiguredResponse();
+
+  const user = await getWorkspaceUser(client, request.headers);
+  if (!user) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      atomic: false,
+      compensationRequired: false,
+      message: "로그인이 필요합니다."
+    }, { status: 401 });
+  }
+
+  const bodyBudget = await enforceAuthenticatedJsonRequestBodyBudget(
     request,
     KNOWLEDGE_WRITE_REQUEST_MAX_BYTES,
-    "request body exceeds the knowledge write byte budget",
   );
   if (!bodyBudget.ok) return bodyBudget.response;
 
@@ -101,20 +114,6 @@ export async function POST(request: NextRequest) {
       compensationRequired: false,
       message: "runId와 허용된 검토 action을 확인해 주세요."
     }, { status: 400 });
-  }
-
-  const client = createSupabaseAdminClient();
-  if (!client) return unconfiguredResponse();
-
-  const user = await getWorkspaceUser(client, request.headers);
-  if (!user) {
-    return NextResponse.json({
-      ok: false,
-      configured: true,
-      atomic: false,
-      compensationRequired: false,
-      message: "로그인이 필요합니다."
-    }, { status: 401 });
   }
 
   if (promotionCommand) {

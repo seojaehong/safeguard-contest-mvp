@@ -9,7 +9,7 @@ import {
   toJson
 } from "@/lib/supabase-admin";
 import {
-  enforcePublicJsonRequestBodyBudget,
+  enforceAuthenticatedJsonRequestBodyBudget,
   KNOWLEDGE_WRITE_REQUEST_MAX_BYTES
 } from "@/lib/public-work-budget";
 import {
@@ -26,10 +26,30 @@ import {
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
-  const bodyBudget = await enforcePublicJsonRequestBodyBudget(
+  const client = createSupabaseAdminClient();
+  if (!client) {
+    return NextResponse.json({
+      ok: false,
+      configured: false,
+      message: "지식 이벤트 저장소가 설정되지 않았습니다."
+    }, { status: 503 });
+  }
+
+  const user = await getWorkspaceUser(client, request.headers);
+  if (!user) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      message: "로그인이 필요합니다."
+    }, { status: 401 });
+  }
+  const actorAdmission = await checkKnowledgeIngestActorAdmission(request, user.id);
+  const actorLimited = knowledgeIngestAdmissionResponse(actorAdmission);
+  if (actorLimited) return actorLimited;
+
+  const bodyBudget = await enforceAuthenticatedJsonRequestBodyBudget(
     request,
     KNOWLEDGE_WRITE_REQUEST_MAX_BYTES,
-    "request body exceeds the knowledge write byte budget",
   );
   if (!bodyBudget.ok) return bodyBudget.response;
 
@@ -72,26 +92,6 @@ export async function POST(request: NextRequest) {
   const title = normalized.event.title;
   const question = `${title} ${normalized.event.reflectedDocuments.join(" ")}`;
   const regenerationBundle = buildKnowledgeRegenerationBundle(question, [normalized.event]);
-  const client = createSupabaseAdminClient();
-  if (!client) {
-    return NextResponse.json({
-      ok: false,
-      configured: false,
-      message: "지식 이벤트 저장소가 설정되지 않았습니다."
-    }, { status: 503 });
-  }
-
-  const user = await getWorkspaceUser(client, request.headers);
-  if (!user) {
-    return NextResponse.json({
-      ok: false,
-      configured: true,
-      message: "로그인이 필요합니다."
-    }, { status: 401 });
-  }
-  const actorAdmission = await checkKnowledgeIngestActorAdmission(request, user.id);
-  const actorLimited = knowledgeIngestAdmissionResponse(actorAdmission);
-  if (actorLimited) return actorLimited;
   let effectiveAdmission = actorAdmission;
   let savedEventId: string | null = null;
   let savedRunId: string | null = null;

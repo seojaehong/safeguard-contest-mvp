@@ -220,7 +220,7 @@ describe("knowledge review route fail-closed setup", () => {
   });
 
   it.each(["run-1", "11111111-1111-1111-8111-111111111111", "{11111111-1111-4111-8111-111111111111}"])(
-    "rejects non-canonical review UUID %s before applying an action",
+    "rejects non-canonical review UUID %s after authentication and before applying an action",
     async (runId) => {
       mocks.createSupabaseAdminClient.mockReturnValue({});
       mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: null });
@@ -234,8 +234,8 @@ describe("knowledge review route fail-closed setup", () => {
       }));
 
       expect(response.status).toBe(400);
-      expect(mocks.createSupabaseAdminClient).not.toHaveBeenCalled();
-      expect(mocks.getWorkspaceUser).not.toHaveBeenCalled();
+      expect(mocks.createSupabaseAdminClient).toHaveBeenCalledTimes(1);
+      expect(mocks.getWorkspaceUser).toHaveBeenCalledTimes(1);
       expect(applySpy).not.toHaveBeenCalled();
       applySpy.mockRestore();
     }
