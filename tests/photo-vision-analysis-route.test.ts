@@ -47,6 +47,7 @@ function fileWithReportedSize(name: string, size: number): File {
 
 describe("photo vision hazard analysis route", () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     vi.mocked(analyzeHazardPhotos).mockReset();
     vi.mocked(createSupabaseAdminClient).mockReturnValue({} as never);
     vi.mocked(getWorkspaceUser).mockResolvedValue({ id: "route-user" } as never);
@@ -145,8 +146,6 @@ describe("photo vision hazard analysis route", () => {
   });
 
   it("returns only coarse capability and upload limits to anonymous callers", async () => {
-    vi.mocked(getWorkspaceUser).mockResolvedValue(null);
-
     const response = await GET(new NextRequest("http://localhost/api/input-photos/hazard-analysis"));
     const body = await response.json() as Record<string, unknown>;
 
@@ -164,20 +163,30 @@ describe("photo vision hazard analysis route", () => {
     expect(body).not.toHaveProperty("fileValidation");
     expect(body).not.toHaveProperty("hazardAnalysisEndpoint");
     expect(body).not.toHaveProperty("improvementEndpointPattern");
+    expect(createSupabaseAdminClient).not.toHaveBeenCalled();
+    expect(getWorkspaceUser).not.toHaveBeenCalled();
   });
 
-  it("returns provider diagnostics only to authenticated operators", async () => {
+  it("does not fan out to authentication or expose diagnostics for arbitrary bearer tokens", async () => {
     const response = await GET(new NextRequest("http://localhost/api/input-photos/hazard-analysis", {
       headers: { authorization: "Bearer route-test-token" }
     }));
     const body = await response.json() as Record<string, unknown>;
 
     expect(response.status).toBe(200);
-    expect(body).toHaveProperty("provider", "openai");
-    expect(body).toHaveProperty("model");
-    expect(body).toHaveProperty("apiKeyPresent");
-    expect(body).toHaveProperty("timeoutMs");
-    expect(body).toHaveProperty("hazardAnalysisEndpoint", "/api/input-photos/hazard-analysis");
+    expect(body).toMatchObject({
+      status: expect.stringMatching(/^(ready|unavailable)$/u),
+      maxInputPhotos: 10,
+      acceptedOnly: true,
+      ocrSupported: true
+    });
+    expect(body).not.toHaveProperty("provider");
+    expect(body).not.toHaveProperty("model");
+    expect(body).not.toHaveProperty("apiKeyPresent");
+    expect(body).not.toHaveProperty("timeoutMs");
+    expect(body).not.toHaveProperty("hazardAnalysisEndpoint");
+    expect(createSupabaseAdminClient).not.toHaveBeenCalled();
+    expect(getWorkspaceUser).not.toHaveBeenCalled();
   });
 
   it("times out a stalled authenticated multipart upload before parsing or provider work", async () => {

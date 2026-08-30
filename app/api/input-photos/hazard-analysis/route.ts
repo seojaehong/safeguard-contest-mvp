@@ -42,11 +42,8 @@ function partialAnalysisMessage(counts: {
 }
 
 export async function GET(request: NextRequest) {
+  void request;
   const readiness = getPhotoVisionReadiness();
-  const client = createSupabaseAdminClient();
-  const user = client ? await getWorkspaceUser(client, request.headers) : null;
-  if (user) return NextResponse.json(readiness);
-
   return NextResponse.json({
     ok: readiness.ok,
     status: readiness.ok ? "ready" : "unavailable",
