@@ -1,0 +1,95 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "5f8d47774cad604898c66657bd18e883bcdac9e679506c3e0438ca5510805a1f"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "eeda9fd88da617b71e0e50fb6b1e50ea2669fbaf4293e2239fbd2761aa683ebc"
+      }
+    ],
+    "completedAt": "2026-08-30T15:54:31.522457Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "8d7fd844-d4cb-49ab-b984-36ed6ab0beba",
+    "preservedSources": {
+      "checkpoints/223f7b719826e043b17e77f6ac450ffa629e87695696914e58f62b11e0be33a8.json": "d97a1085730b5e434ddc43439b748ad70baa680f72001186091db84ce74e387a",
+      "checkpoints/32c9ed67c08f420674df35dab95978c0e2100bd6f9f08f653af74213c8ddb154.json": "6eaa89a8258153ebdaf42e13ed535539100a7f8dac10a54ba1563c1f01255ac6",
+      "checkpoints/3e15cdcdf6e753c8b095a080c4afd3c8f53cd318c174a9bbfce152d5de6cf5af.json": "71b01181c8aff61c483cb74b84da47d63c54d97620e13bc9a478a8264370eb7e",
+      "checkpoints/88544424f2e1e6e8140002dbd60e1acc787870409884fe843d943f783ba965c8.json": "42e5f15660d036943798f90cae6bed4eb188c5ddce071fd21fc171ce4b45f2b3",
+      "checkpoints/8fd5f2a35128781f8acf90f4f99d974b209322d8c372c53b56ee89c81cba9d4c.json": "f5c03c77559308b180cfa0cf5b0d18582ea346eef1b950440d5bcb004fa5458e",
+      "checkpoints/b969c6668c19784d2dbf0d0549d92c3a53a0071ae6f7aad9bc2ba80b712dfa19.json": "1b3b5dee33838435eee0143e14b464cca6af571d083a1baf2a7b912949313a15",
+      "checkpoints/c85f18afe6baa2484d15b5228d176ab1c22ad714ccb5279cbd54015c9aacb708.json": "c85f18afe6baa2484d15b5228d176ab1c22ad714ccb5279cbd54015c9aacb708",
+      "checkpoints/d43b6de456863566385a28314e4bba168aa208da2e0f2d44cf1a675d6346ef0a.json": "65a56245be92c27219baadc9af1eb330b8f398549d42d95a38c0f172f9429e49",
+      "checkpoints/ed4615e546849284226307e6f532d39b7834e5c5dd2de05c7bb6f8b692960c99.json": "62f0f2bb36d0ef0fbfe7d55b53087ae3fe15ef898ff79539fb9ccb083275210a"
+    },
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.22"
+    },
+    "scope": {
+      "context": "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "No production mutation.",
+        "Effective grants unverified.",
+        "Exact saved Share MISSING_EVIDENCE."
+      ],
+      "runtimeStatus": "source-only validation",
+      "summary": "Standard full repository review at immutable f6835f8d.",
+      "validationMode": "static source-to-sink"
+    },
+    "sealedAt": "2026-08-30T15:54:31.522457Z",
+    "startedAt": "2026-08-30T15:37:31.882028Z",
+    "status": "completed",
+    "target": {
+      "displayName": "safeclaw-northstar-current",
+      "kind": "git_revision",
+      "revision": "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c",
+      "targetId": "target_sha256_59a91dd8129f171a6e0ff82b60460781f1067b1940d76c7a524e5f0e2b7ec5de"
+    },
+    "threatModel": {
+      "assets": [
+        "tenant data",
+        "workflow evidence",
+        "credentials",
+        "documents",
+        "availability"
+      ],
+      "assumptions": [
+        "Direct-table findings require applicable grants.",
+        "Operator findings require script execution."
+      ],
+      "attackerCapabilities": [
+        "public HTTP",
+        "authenticated direct Data API",
+        "malicious archive supply",
+        "malformed generated content"
+      ],
+      "securityObjectives": [
+        "tenant isolation",
+        "state integrity",
+        "bounded work",
+        "safe export",
+        "approval preservation"
+      ],
+      "summary": "SafeClaw crosses public, tenant, provider, process, parser, and Supabase boundaries.",
+      "trustBoundaries": [
+        "browser to Next.js",
+        "Next.js to Supabase",
+        "Next.js to providers",
+        "runtime process",
+        "archive parser"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

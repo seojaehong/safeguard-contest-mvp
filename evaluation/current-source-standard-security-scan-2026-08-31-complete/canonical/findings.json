@@ -1,0 +1,1336 @@
+{
+  "documentType": "codex-security.findings",
+  "findings": [
+    {
+      "attackPath": {
+        "impact": {
+          "level": "high",
+          "why": "Canonical migration 001 creates documents and query_logs without enabling RLS or revoking direct Data API privileges. Under applicable public-schema grants, direct PostgREST clients can read or mutate stored document bodies and query history."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "Effective production grants and live table use were not inspected."
+        },
+        "limitations": [
+          "Effective production grants and live table use were not inspected."
+        ],
+        "summary": "Canonical migration 001 creates documents and query_logs without enabling RLS or revoking direct Data API privileges. Under applicable public-schema grants, direct PostgREST clients can read or mutate stored document bodies and query history."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Effective production grants and live table use were not inspected."
+      },
+      "findingId": "csf_d31a528eb6e500b89f82e0fe",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:4b69ea8a5613550aa39ead853f5fe43a11b1af6844229f67ecf691e1c664f2dc"
+      },
+      "identity": {
+        "anchor": "legacy-document-and-query-tables-lack-row-level-security"
+      },
+      "locations": [
+        {
+          "endLine": 17,
+          "path": "supabase/migrations/001_init.sql",
+          "role": "root_control",
+          "startLine": 1
+        }
+      ],
+      "occurrenceId": "occ_87b49822d989a6f67c0c5b5a",
+      "provenance": {
+        "candidateId": "cand_legacy_tables_rls",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "high",
+                "why": "Canonical migration 001 creates documents and query_logs without enabling RLS or revoking direct Data API privileges. Under applicable public-schema grants, direct PostgREST clients can read or mutate stored document bodies and query history."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "Effective production grants and live table use were not inspected."
+              },
+              "limitations": [
+                "Effective production grants and live table use were not inspected."
+              ],
+              "summary": "Canonical migration 001 creates documents and query_logs without enabling RLS or revoking direct Data API privileges. Under applicable public-schema grants, direct PostgREST clients can read or mutate stored document bodies and query history."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Effective production grants and live table use were not inspected."
+            },
+            "locations": [
+              {
+                "endLine": 17,
+                "path": "supabase/migrations/001_init.sql",
+                "role": "root_control",
+                "startLine": 1
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_legacy_tables_rls",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Enable RLS on both tables, revoke unnecessary grants, add tenant ownership where retained, and add direct-role denial tests.",
+            "rootCause": {
+              "summary": "Canonical migration 001 creates documents and query_logs without enabling RLS or revoking direct Data API privileges. Under applicable public-schema grants, direct PostgREST clients can read or mutate stored document bodies and query history."
+            },
+            "ruleId": "authorization-bypass.missing-row-level-security",
+            "severity": {
+              "level": "medium",
+              "rationale": "Canonical migration 001 creates documents and query_logs without enabling RLS or revoking direct Data API privileges. Under applicable public-schema grants, direct PostgREST clients can read or mutate stored document bodies and query history."
+            },
+            "summary": "Canonical migration 001 creates documents and query_logs without enabling RLS or revoking direct Data API privileges. Under applicable public-schema grants, direct PostgREST clients can read or mutate stored document bodies and query history.",
+            "taxonomy": {
+              "category": "authorization-bypass.missing-row-level-security",
+              "cwe": [
+                "CWE-862"
+              ]
+            },
+            "title": "Legacy document and query tables lack row-level security",
+            "validation": {
+              "limitations": [
+                "Effective production grants and live table use were not inspected."
+              ],
+              "method": "Static source-to-sink review",
+              "summary": "Effective production grants and live table use were not inspected."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Enable RLS on both tables, revoke unnecessary grants, add tenant ownership where retained, and add direct-role denial tests.",
+      "rootCause": {
+        "summary": "Canonical migration 001 creates documents and query_logs without enabling RLS or revoking direct Data API privileges. Under applicable public-schema grants, direct PostgREST clients can read or mutate stored document bodies and query history."
+      },
+      "ruleId": "authorization-bypass.missing-row-level-security",
+      "severity": {
+        "level": "medium",
+        "rationale": "Canonical migration 001 creates documents and query_logs without enabling RLS or revoking direct Data API privileges. Under applicable public-schema grants, direct PostgREST clients can read or mutate stored document bodies and query history."
+      },
+      "summary": "Canonical migration 001 creates documents and query_logs without enabling RLS or revoking direct Data API privileges. Under applicable public-schema grants, direct PostgREST clients can read or mutate stored document bodies and query history.",
+      "taxonomy": {
+        "category": "authorization-bypass.missing-row-level-security",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Legacy document and query tables lack row-level security",
+      "validation": {
+        "limitations": [
+          "Effective production grants and live table use were not inspected."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Effective production grants and live table use were not inspected."
+      },
+      "writeup": {
+        "reportPath": "findings/legacy-tables-missing-rls/legacy-tables-missing-rls.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "high",
+          "why": "The dispatch_logs FOR ALL policy accepts organization_id IS NULL in USING and WITH CHECK, allowing roles with table access to manage unassigned rows without ownership."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "The source policy defect is explicit; affected row count and grants remain unverified."
+        },
+        "limitations": [
+          "The source policy defect is explicit; affected row count and grants remain unverified."
+        ],
+        "summary": "The dispatch_logs FOR ALL policy accepts organization_id IS NULL in USING and WITH CHECK, allowing roles with table access to manage unassigned rows without ownership."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "The source policy defect is explicit; affected row count and grants remain unverified."
+      },
+      "findingId": "csf_d6d2ac1f6b8952a038280ca8",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:e8541ecdcd68f653e8ded6f56616eb9e4848ed81c5cda2da4064761c50014f58"
+      },
+      "identity": {
+        "anchor": "null-tenant-dispatch-rows-bypass-owner-scoped-rls"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 76
+        },
+        {
+          "endLine": 200,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 183
+        }
+      ],
+      "occurrenceId": "occ_669c7fa8160091e8b0e3c8c2",
+      "provenance": {
+        "candidateId": "cand_dispatch_null_tenant",
+        "originalCandidates": [
+          {
+            "candidateId": "cand_dispatch_null_tenant"
+          }
+        ],
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "high",
+                "why": "The dispatch_logs FOR ALL policy accepts organization_id IS NULL in USING and WITH CHECK, allowing roles with table access to manage unassigned rows without ownership."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "The source policy defect is explicit; affected row count and grants remain unverified."
+              },
+              "limitations": [
+                "The source policy defect is explicit; affected row count and grants remain unverified."
+              ],
+              "summary": "The dispatch_logs FOR ALL policy accepts organization_id IS NULL in USING and WITH CHECK, allowing roles with table access to manage unassigned rows without ownership."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "The source policy defect is explicit; affected row count and grants remain unverified."
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 76
+              },
+              {
+                "endLine": 200,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 183
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_dispatch_null_tenant",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Backfill NULL rows, make organization_id non-null, remove the NULL branch, and test direct access.",
+            "rootCause": {
+              "summary": "The dispatch_logs FOR ALL policy accepts organization_id IS NULL in USING and WITH CHECK, allowing roles with table access to manage unassigned rows without ownership."
+            },
+            "ruleId": "authorization-bypass.null-tenant-policy",
+            "severity": {
+              "level": "medium",
+              "rationale": "The dispatch_logs FOR ALL policy accepts organization_id IS NULL in USING and WITH CHECK, allowing roles with table access to manage unassigned rows without ownership."
+            },
+            "summary": "The dispatch_logs FOR ALL policy accepts organization_id IS NULL in USING and WITH CHECK, allowing roles with table access to manage unassigned rows without ownership.",
+            "taxonomy": {
+              "category": "authorization-bypass.null-tenant-policy",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "NULL-tenant dispatch rows bypass owner-scoped RLS",
+            "validation": {
+              "limitations": [
+                "The source policy defect is explicit; affected row count and grants remain unverified."
+              ],
+              "method": "Static source-to-sink review",
+              "summary": "The source policy defect is explicit; affected row count and grants remain unverified."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Backfill NULL rows, make organization_id non-null, remove the NULL branch, and test direct access.",
+      "rootCause": {
+        "summary": "The dispatch_logs FOR ALL policy accepts organization_id IS NULL in USING and WITH CHECK, allowing roles with table access to manage unassigned rows without ownership."
+      },
+      "ruleId": "authorization-bypass.null-tenant-policy",
+      "severity": {
+        "level": "medium",
+        "rationale": "The dispatch_logs FOR ALL policy accepts organization_id IS NULL in USING and WITH CHECK, allowing roles with table access to manage unassigned rows without ownership."
+      },
+      "summary": "The dispatch_logs FOR ALL policy accepts organization_id IS NULL in USING and WITH CHECK, allowing roles with table access to manage unassigned rows without ownership.",
+      "taxonomy": {
+        "category": "authorization-bypass.null-tenant-policy",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "NULL-tenant dispatch rows bypass owner-scoped RLS",
+      "validation": {
+        "limitations": [
+          "The source policy defect is explicit; affected row count and grants remain unverified."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "The source policy defect is explicit; affected row count and grants remain unverified."
+      },
+      "writeup": {
+        "reportPath": "findings/null-tenant-dispatch-rls/null-tenant-dispatch-rls.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Owner policies authorize by organization_id while related UUIDs use independent foreign keys, allowing direct clients to combine an owned organization with a known foreign object identifier."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Normal routes add tuple checks; direct reachability depends on effective grants."
+        },
+        "limitations": [
+          "Normal routes add tuple checks; direct reachability depends on effective grants."
+        ],
+        "summary": "Owner policies authorize by organization_id while related UUIDs use independent foreign keys, allowing direct clients to combine an owned organization with a known foreign object identifier."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Normal routes add tuple checks; direct reachability depends on effective grants."
+      },
+      "findingId": "csf_7a36b42630afc2d00b9c3009",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:802c3269d7a60dcb8ee5180e26e65fc2d1039a55be403ffba31aebc54d3acd3f"
+      },
+      "identity": {
+        "anchor": "tenant-policies-do-not-bind-related-object-identifiers-to-the-same-tenant"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 21
+        },
+        {
+          "endLine": 200,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 115
+        },
+        {
+          "endLine": 86,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 21
+        },
+        {
+          "endLine": 227,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 161
+        }
+      ],
+      "occurrenceId": "occ_1a95cbe7e28841bb63d1db5b",
+      "provenance": {
+        "candidateId": "cand_related_object_tenant_binding",
+        "originalCandidates": [
+          {
+            "candidateId": "cand_related_object_tenant_binding"
+          }
+        ],
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "Owner policies authorize by organization_id while related UUIDs use independent foreign keys, allowing direct clients to combine an owned organization with a known foreign object identifier."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Normal routes add tuple checks; direct reachability depends on effective grants."
+              },
+              "limitations": [
+                "Normal routes add tuple checks; direct reachability depends on effective grants."
+              ],
+              "summary": "Owner policies authorize by organization_id while related UUIDs use independent foreign keys, allowing direct clients to combine an owned organization with a known foreign object identifier."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Normal routes add tuple checks; direct reachability depends on effective grants."
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 21
+              },
+              {
+                "endLine": 200,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 115
+              },
+              {
+                "endLine": 86,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 21
+              },
+              {
+                "endLine": 227,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 161
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_related_object_tenant_binding",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Add composite tenant foreign keys or validation triggers and enforce ownership in WITH CHECK.",
+            "rootCause": {
+              "summary": "Owner policies authorize by organization_id while related UUIDs use independent foreign keys, allowing direct clients to combine an owned organization with a known foreign object identifier."
+            },
+            "ruleId": "authorization-bypass.cross-tenant-reference",
+            "severity": {
+              "level": "low",
+              "rationale": "Owner policies authorize by organization_id while related UUIDs use independent foreign keys, allowing direct clients to combine an owned organization with a known foreign object identifier."
+            },
+            "summary": "Owner policies authorize by organization_id while related UUIDs use independent foreign keys, allowing direct clients to combine an owned organization with a known foreign object identifier.",
+            "taxonomy": {
+              "category": "authorization-bypass.cross-tenant-reference",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Tenant policies do not bind related object identifiers to the same tenant",
+            "validation": {
+              "limitations": [
+                "Normal routes add tuple checks; direct reachability depends on effective grants."
+              ],
+              "method": "Static source-to-sink review",
+              "summary": "Normal routes add tuple checks; direct reachability depends on effective grants."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Add composite tenant foreign keys or validation triggers and enforce ownership in WITH CHECK.",
+      "rootCause": {
+        "summary": "Owner policies authorize by organization_id while related UUIDs use independent foreign keys, allowing direct clients to combine an owned organization with a known foreign object identifier."
+      },
+      "ruleId": "authorization-bypass.cross-tenant-reference",
+      "severity": {
+        "level": "low",
+        "rationale": "Owner policies authorize by organization_id while related UUIDs use independent foreign keys, allowing direct clients to combine an owned organization with a known foreign object identifier."
+      },
+      "summary": "Owner policies authorize by organization_id while related UUIDs use independent foreign keys, allowing direct clients to combine an owned organization with a known foreign object identifier.",
+      "taxonomy": {
+        "category": "authorization-bypass.cross-tenant-reference",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "Tenant policies do not bind related object identifiers to the same tenant",
+      "validation": {
+        "limitations": [
+          "Normal routes add tuple checks; direct reachability depends on effective grants."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Normal routes add tuple checks; direct reachability depends on effective grants."
+      },
+      "writeup": {
+        "reportPath": "findings/cross-tenant-related-object-binding/cross-tenant-related-object-binding.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Broad owner FOR ALL policies allow direct setting of Share-session, acknowledgement, provider receipt, improvement approval, and knowledge review fields treated as authoritative by application workflows."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Application routes are fail-closed; direct exploitation requires table DML grants and does not prove exact saved Share."
+        },
+        "limitations": [
+          "Application routes are fail-closed; direct exploitation requires table DML grants and does not prove exact saved Share."
+        ],
+        "summary": "Broad owner FOR ALL policies allow direct setting of Share-session, acknowledgement, provider receipt, improvement approval, and knowledge review fields treated as authoritative by application workflows."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Application routes are fail-closed; direct exploitation requires table DML grants and does not prove exact saved Share."
+      },
+      "findingId": "csf_4e273fd457ad373bab92b5a2",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:5db396cc4759bc021d807c1071a143b6c26659b12341ac55efbd0a0951018667"
+      },
+      "identity": {
+        "anchor": "tenant-writable-rows-can-forge-authoritative-workflow-evidence"
+      },
+      "locations": [
+        {
+          "endLine": 200,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 183
+        },
+        {
+          "endLine": 126,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "root_control",
+          "startLine": 94
+        },
+        {
+          "endLine": 227,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 161
+        }
+      ],
+      "occurrenceId": "occ_71124c2acf171eac8f3bf12a",
+      "provenance": {
+        "candidateId": "cand_authoritative_state_direct_write",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "Broad owner FOR ALL policies allow direct setting of Share-session, acknowledgement, provider receipt, improvement approval, and knowledge review fields treated as authoritative by application workflows."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Application routes are fail-closed; direct exploitation requires table DML grants and does not prove exact saved Share."
+              },
+              "limitations": [
+                "Application routes are fail-closed; direct exploitation requires table DML grants and does not prove exact saved Share."
+              ],
+              "summary": "Broad owner FOR ALL policies allow direct setting of Share-session, acknowledgement, provider receipt, improvement approval, and knowledge review fields treated as authoritative by application workflows."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Application routes are fail-closed; direct exploitation requires table DML grants and does not prove exact saved Share."
+            },
+            "locations": [
+              {
+                "endLine": 200,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 183
+              },
+              {
+                "endLine": 126,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "root_control",
+                "startLine": 94
+              },
+              {
+                "endLine": 227,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 161
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_authoritative_state_direct_write",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Revoke client mutation of authoritative fields and expose narrow server-only transactional transitions with immutable provenance.",
+            "rootCause": {
+              "summary": "Broad owner FOR ALL policies allow direct setting of Share-session, acknowledgement, provider receipt, improvement approval, and knowledge review fields treated as authoritative by application workflows."
+            },
+            "ruleId": "authorization-bypass.client-writable-authoritative-state",
+            "severity": {
+              "level": "low",
+              "rationale": "Broad owner FOR ALL policies allow direct setting of Share-session, acknowledgement, provider receipt, improvement approval, and knowledge review fields treated as authoritative by application workflows."
+            },
+            "summary": "Broad owner FOR ALL policies allow direct setting of Share-session, acknowledgement, provider receipt, improvement approval, and knowledge review fields treated as authoritative by application workflows.",
+            "taxonomy": {
+              "category": "authorization-bypass.client-writable-authoritative-state",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Tenant-writable rows can forge authoritative workflow evidence",
+            "validation": {
+              "limitations": [
+                "Application routes are fail-closed; direct exploitation requires table DML grants and does not prove exact saved Share."
+              ],
+              "method": "Static source-to-sink review",
+              "summary": "Application routes are fail-closed; direct exploitation requires table DML grants and does not prove exact saved Share."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Revoke client mutation of authoritative fields and expose narrow server-only transactional transitions with immutable provenance.",
+      "rootCause": {
+        "summary": "Broad owner FOR ALL policies allow direct setting of Share-session, acknowledgement, provider receipt, improvement approval, and knowledge review fields treated as authoritative by application workflows."
+      },
+      "ruleId": "authorization-bypass.client-writable-authoritative-state",
+      "severity": {
+        "level": "low",
+        "rationale": "Broad owner FOR ALL policies allow direct setting of Share-session, acknowledgement, provider receipt, improvement approval, and knowledge review fields treated as authoritative by application workflows."
+      },
+      "summary": "Broad owner FOR ALL policies allow direct setting of Share-session, acknowledgement, provider receipt, improvement approval, and knowledge review fields treated as authoritative by application workflows.",
+      "taxonomy": {
+        "category": "authorization-bypass.client-writable-authoritative-state",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "Tenant-writable rows can forge authoritative workflow evidence",
+      "validation": {
+        "limitations": [
+          "Application routes are fail-closed; direct exploitation requires table DML grants and does not prove exact saved Share."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Application routes are fail-closed; direct exploitation requires table DML grants and does not prove exact saved Share."
+      },
+      "writeup": {
+        "reportPath": "findings/client-writable-authoritative-state/client-writable-authoritative-state.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Concurrent authenticated token-creation requests can each pass the active-count check and independently insert credentials without a transaction or quota constraint."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Token entropy, hashing, expiry, and tenant binding limit impact but do not make quota atomic."
+        },
+        "limitations": [
+          "Token entropy, hashing, expiry, and tenant binding limit impact but do not make quota atomic."
+        ],
+        "summary": "Concurrent authenticated token-creation requests can each pass the active-count check and independently insert credentials without a transaction or quota constraint."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Token entropy, hashing, expiry, and tenant binding limit impact but do not make quota atomic."
+      },
+      "findingId": "csf_78becf5f60834c82544c7692",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:f825e391a64a4711ed719168c9c19006b06e64fdc64d8fcbe668e112e85641b9"
+      },
+      "identity": {
+        "anchor": "mcp-active-token-quota-is-enforced-with-a-check-then-insert-race"
+      },
+      "locations": [
+        {
+          "endLine": 278,
+          "path": "app/api/mcp-tokens/route.ts",
+          "role": "root_control",
+          "startLine": 247
+        }
+      ],
+      "occurrenceId": "occ_a28628bfc01cede84fa26acc",
+      "provenance": {
+        "candidateId": "cand_mcp_token_quota_race",
+        "originalCandidates": [
+          {
+            "candidateId": "cand_mcp_token_quota_race"
+          }
+        ],
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "Concurrent authenticated token-creation requests can each pass the active-count check and independently insert credentials without a transaction or quota constraint."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Token entropy, hashing, expiry, and tenant binding limit impact but do not make quota atomic."
+              },
+              "limitations": [
+                "Token entropy, hashing, expiry, and tenant binding limit impact but do not make quota atomic."
+              ],
+              "summary": "Concurrent authenticated token-creation requests can each pass the active-count check and independently insert credentials without a transaction or quota constraint."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Token entropy, hashing, expiry, and tenant binding limit impact but do not make quota atomic."
+            },
+            "locations": [
+              {
+                "endLine": 278,
+                "path": "app/api/mcp-tokens/route.ts",
+                "role": "root_control",
+                "startLine": 247
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_mcp_token_quota_race",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Enforce count and insert in one transaction or lock-protected RPC.",
+            "rootCause": {
+              "summary": "Concurrent authenticated token-creation requests can each pass the active-count check and independently insert credentials without a transaction or quota constraint."
+            },
+            "ruleId": "race-condition.quota-enforcement",
+            "severity": {
+              "level": "low",
+              "rationale": "Concurrent authenticated token-creation requests can each pass the active-count check and independently insert credentials without a transaction or quota constraint."
+            },
+            "summary": "Concurrent authenticated token-creation requests can each pass the active-count check and independently insert credentials without a transaction or quota constraint.",
+            "taxonomy": {
+              "category": "race-condition.quota-enforcement",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "MCP active-token quota is enforced with a check-then-insert race",
+            "validation": {
+              "limitations": [
+                "Token entropy, hashing, expiry, and tenant binding limit impact but do not make quota atomic."
+              ],
+              "method": "Static source-to-sink review",
+              "summary": "Token entropy, hashing, expiry, and tenant binding limit impact but do not make quota atomic."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Enforce count and insert in one transaction or lock-protected RPC.",
+      "rootCause": {
+        "summary": "Concurrent authenticated token-creation requests can each pass the active-count check and independently insert credentials without a transaction or quota constraint."
+      },
+      "ruleId": "race-condition.quota-enforcement",
+      "severity": {
+        "level": "low",
+        "rationale": "Concurrent authenticated token-creation requests can each pass the active-count check and independently insert credentials without a transaction or quota constraint."
+      },
+      "summary": "Concurrent authenticated token-creation requests can each pass the active-count check and independently insert credentials without a transaction or quota constraint.",
+      "taxonomy": {
+        "category": "race-condition.quota-enforcement",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "MCP active-token quota is enforced with a check-then-insert race",
+      "validation": {
+        "limitations": [
+          "Token entropy, hashing, expiry, and tenant binding limit impact but do not make quota atomic."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Token entropy, hashing, expiry, and tenant binding limit impact but do not make quota atomic."
+      },
+      "writeup": {
+        "reportPath": "findings/mcp-token-quota-race/mcp-token-quota-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "high",
+          "why": "The public XLSX budget omits several structured arrays that builders retain and render into styled cells before the final output-size check."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Request bytes, nested entries, frequency, and final bytes are bounded, but pre-render work is not fully counted."
+        },
+        "limitations": [
+          "Request bytes, nested entries, frequency, and final bytes are bounded, but pre-render work is not fully counted."
+        ],
+        "summary": "The public XLSX budget omits several structured arrays that builders retain and render into styled cells before the final output-size check."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Request bytes, nested entries, frequency, and final bytes are bounded, but pre-render work is not fully counted."
+      },
+      "findingId": "csf_dd68d761a546a7779ef23f7b",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:38e4a47d9ba3fd8085b900417b9c9464bc6b61ef2d4c23d7a89834d7304b9626"
+      },
+      "identity": {
+        "anchor": "structured-xlsx-arrays-bypass-the-rendered-cell-budget"
+      },
+      "locations": [
+        {
+          "endLine": 155,
+          "path": "lib/document-export-budget.ts",
+          "role": "root_control",
+          "startLine": 101
+        },
+        {
+          "endLine": 213,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "root_control",
+          "startLine": 173
+        },
+        {
+          "endLine": 700,
+          "path": "lib/xlsx-builder.ts",
+          "role": "root_control",
+          "startLine": 619
+        },
+        {
+          "endLine": 1108,
+          "path": "lib/xlsx-builder.ts",
+          "role": "root_control",
+          "startLine": 1097
+        }
+      ],
+      "occurrenceId": "occ_3c10c9d3e35e4c15b670134e",
+      "provenance": {
+        "candidateId": "cand_xlsx_structured_budget",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "high",
+                "why": "The public XLSX budget omits several structured arrays that builders retain and render into styled cells before the final output-size check."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Request bytes, nested entries, frequency, and final bytes are bounded, but pre-render work is not fully counted."
+              },
+              "limitations": [
+                "Request bytes, nested entries, frequency, and final bytes are bounded, but pre-render work is not fully counted."
+              ],
+              "summary": "The public XLSX budget omits several structured arrays that builders retain and render into styled cells before the final output-size check."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Request bytes, nested entries, frequency, and final bytes are bounded, but pre-render work is not fully counted."
+            },
+            "locations": [
+              {
+                "endLine": 155,
+                "path": "lib/document-export-budget.ts",
+                "role": "root_control",
+                "startLine": 101
+              },
+              {
+                "endLine": 213,
+                "path": "app/api/export/xlsx/route.ts",
+                "role": "root_control",
+                "startLine": 173
+              },
+              {
+                "endLine": 700,
+                "path": "lib/xlsx-builder.ts",
+                "role": "root_control",
+                "startLine": 619
+              },
+              {
+                "endLine": 1108,
+                "path": "lib/xlsx-builder.ts",
+                "role": "root_control",
+                "startLine": 1097
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_xlsx_structured_budget",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Define per-mode schemas and projected row/cell budgets before workbook construction; add a generation deadline.",
+            "rootCause": {
+              "summary": "The public XLSX budget omits several structured arrays that builders retain and render into styled cells before the final output-size check."
+            },
+            "ruleId": "resource-exhaustion.incomplete-export-budget",
+            "severity": {
+              "level": "medium",
+              "rationale": "The public XLSX budget omits several structured arrays that builders retain and render into styled cells before the final output-size check."
+            },
+            "summary": "The public XLSX budget omits several structured arrays that builders retain and render into styled cells before the final output-size check.",
+            "taxonomy": {
+              "category": "resource-exhaustion.incomplete-export-budget",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "Structured XLSX arrays bypass the rendered-cell budget",
+            "validation": {
+              "limitations": [
+                "Request bytes, nested entries, frequency, and final bytes are bounded, but pre-render work is not fully counted."
+              ],
+              "method": "Static source-to-sink review",
+              "summary": "Request bytes, nested entries, frequency, and final bytes are bounded, but pre-render work is not fully counted."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Define per-mode schemas and projected row/cell budgets before workbook construction; add a generation deadline.",
+      "rootCause": {
+        "summary": "The public XLSX budget omits several structured arrays that builders retain and render into styled cells before the final output-size check."
+      },
+      "ruleId": "resource-exhaustion.incomplete-export-budget",
+      "severity": {
+        "level": "medium",
+        "rationale": "The public XLSX budget omits several structured arrays that builders retain and render into styled cells before the final output-size check."
+      },
+      "summary": "The public XLSX budget omits several structured arrays that builders retain and render into styled cells before the final output-size check.",
+      "taxonomy": {
+        "category": "resource-exhaustion.incomplete-export-budget",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Structured XLSX arrays bypass the rendered-cell budget",
+      "validation": {
+        "limitations": [
+          "Request bytes, nested entries, frequency, and final bytes are bounded, but pre-render work is not fully counted."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Request bytes, nested entries, frequency, and final bytes are bounded, but pre-render work is not fully counted."
+      },
+      "writeup": {
+        "reportPath": "findings/structured-xlsx-budget-gap/structured-xlsx-budget-gap.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "high",
+          "why": "Operator ingestion, inventory, and audit scripts initialize XLSX, CSV, HWPX, and ZIP parsers without the shared expansion, member, row/cell, memory, and elapsed-time admission layer."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "These are operator workflows, not public runtime routes; protected sibling paths show the intended control."
+        },
+        "limitations": [
+          "These are operator workflows, not public runtime routes; protected sibling paths show the intended control."
+        ],
+        "summary": "Operator ingestion, inventory, and audit scripts initialize XLSX, CSV, HWPX, and ZIP parsers without the shared expansion, member, row/cell, memory, and elapsed-time admission layer."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "These are operator workflows, not public runtime routes; protected sibling paths show the intended control."
+      },
+      "findingId": "csf_e102b566a681d005b8221913",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:fa611d5ce07b592a7ed5520f3f377f3d010528b203ee5d04fe51af83be5507ca"
+      },
+      "identity": {
+        "anchor": "document-ingestion-and-audit-parsers-lack-uniform-expansion-and-memory-limits"
+      },
+      "locations": [
+        {
+          "endLine": 996,
+          "path": "scripts/extract_kogas_risk_standard_models.py",
+          "role": "root_control",
+          "startLine": 916
+        },
+        {
+          "endLine": 225,
+          "path": "scripts/parse_download_safety_forms.py",
+          "role": "root_control",
+          "startLine": 200
+        },
+        {
+          "endLine": 310,
+          "path": "scripts/prepare_supabase_safety_ingestion.py",
+          "role": "root_control",
+          "startLine": 275
+        },
+        {
+          "endLine": 220,
+          "path": "scripts/ingest_safety_reference_catalog.py",
+          "role": "root_control",
+          "startLine": 164
+        },
+        {
+          "endLine": 235,
+          "path": "scripts/final_output_integrity_audit.mjs",
+          "role": "root_control",
+          "startLine": 214
+        }
+      ],
+      "occurrenceId": "occ_283f23cc2c64456273c35250",
+      "provenance": {
+        "candidateId": "cand_sibling_parser_limits",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "high",
+                "why": "Operator ingestion, inventory, and audit scripts initialize XLSX, CSV, HWPX, and ZIP parsers without the shared expansion, member, row/cell, memory, and elapsed-time admission layer."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "These are operator workflows, not public runtime routes; protected sibling paths show the intended control."
+              },
+              "limitations": [
+                "These are operator workflows, not public runtime routes; protected sibling paths show the intended control."
+              ],
+              "summary": "Operator ingestion, inventory, and audit scripts initialize XLSX, CSV, HWPX, and ZIP parsers without the shared expansion, member, row/cell, memory, and elapsed-time admission layer."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "These are operator workflows, not public runtime routes; protected sibling paths show the intended control."
+            },
+            "locations": [
+              {
+                "endLine": 996,
+                "path": "scripts/extract_kogas_risk_standard_models.py",
+                "role": "root_control",
+                "startLine": 916
+              },
+              {
+                "endLine": 225,
+                "path": "scripts/parse_download_safety_forms.py",
+                "role": "root_control",
+                "startLine": 200
+              },
+              {
+                "endLine": 310,
+                "path": "scripts/prepare_supabase_safety_ingestion.py",
+                "role": "root_control",
+                "startLine": 275
+              },
+              {
+                "endLine": 220,
+                "path": "scripts/ingest_safety_reference_catalog.py",
+                "role": "root_control",
+                "startLine": 164
+              },
+              {
+                "endLine": 235,
+                "path": "scripts/final_output_integrity_audit.mjs",
+                "role": "root_control",
+                "startLine": 214
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_sibling_parser_limits",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Apply bounded admission before parser initialization and isolate complex parsing with memory and wall-clock limits.",
+            "rootCause": {
+              "summary": "Operator ingestion, inventory, and audit scripts initialize XLSX, CSV, HWPX, and ZIP parsers without the shared expansion, member, row/cell, memory, and elapsed-time admission layer."
+            },
+            "ruleId": "resource-exhaustion.unbounded-document-parser",
+            "severity": {
+              "level": "medium",
+              "rationale": "Operator ingestion, inventory, and audit scripts initialize XLSX, CSV, HWPX, and ZIP parsers without the shared expansion, member, row/cell, memory, and elapsed-time admission layer."
+            },
+            "summary": "Operator ingestion, inventory, and audit scripts initialize XLSX, CSV, HWPX, and ZIP parsers without the shared expansion, member, row/cell, memory, and elapsed-time admission layer.",
+            "taxonomy": {
+              "category": "resource-exhaustion.unbounded-document-parser",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "Document ingestion and audit parsers lack uniform expansion and memory limits",
+            "validation": {
+              "limitations": [
+                "These are operator workflows, not public runtime routes; protected sibling paths show the intended control."
+              ],
+              "method": "Static source-to-sink review",
+              "summary": "These are operator workflows, not public runtime routes; protected sibling paths show the intended control."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Apply bounded admission before parser initialization and isolate complex parsing with memory and wall-clock limits.",
+      "rootCause": {
+        "summary": "Operator ingestion, inventory, and audit scripts initialize XLSX, CSV, HWPX, and ZIP parsers without the shared expansion, member, row/cell, memory, and elapsed-time admission layer."
+      },
+      "ruleId": "resource-exhaustion.unbounded-document-parser",
+      "severity": {
+        "level": "medium",
+        "rationale": "Operator ingestion, inventory, and audit scripts initialize XLSX, CSV, HWPX, and ZIP parsers without the shared expansion, member, row/cell, memory, and elapsed-time admission layer."
+      },
+      "summary": "Operator ingestion, inventory, and audit scripts initialize XLSX, CSV, HWPX, and ZIP parsers without the shared expansion, member, row/cell, memory, and elapsed-time admission layer.",
+      "taxonomy": {
+        "category": "resource-exhaustion.unbounded-document-parser",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Document ingestion and audit parsers lack uniform expansion and memory limits",
+      "validation": {
+        "limitations": [
+          "These are operator workflows, not public runtime routes; protected sibling paths show the intended control."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "These are operator workflows, not public runtime routes; protected sibling paths show the intended control."
+      },
+      "writeup": {
+        "reportPath": "findings/unbounded-document-parser-siblings/unbounded-document-parser-siblings.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "high",
+          "why": "Generated deliverable lines are written to smoke CSV artifacts with quote escaping only, leaving formula-capable prefixes active when opened in spreadsheet software."
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "Product-facing exports use the shared safe encoder; exposure is limited to smoke artifacts."
+        },
+        "limitations": [
+          "Product-facing exports use the shared safe encoder; exposure is limited to smoke artifacts."
+        ],
+        "summary": "Generated deliverable lines are written to smoke CSV artifacts with quote escaping only, leaving formula-capable prefixes active when opened in spreadsheet software."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Product-facing exports use the shared safe encoder; exposure is limited to smoke artifacts."
+      },
+      "findingId": "csf_91cc499eca7f7c5b2c31b451",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:49780256fbfb29af13aba101e4973410ffc4ed06b16b19431c92af8eb01e068f"
+      },
+      "identity": {
+        "anchor": "orchestration-smoke-csv-export-does-not-neutralize-spreadsheet-formulas"
+      },
+      "locations": [
+        {
+          "endLine": 100,
+          "path": "scripts/prod_orchestration_download_smoke.mjs",
+          "role": "root_control",
+          "startLine": 91
+        },
+        {
+          "endLine": 560,
+          "path": "scripts/prod_orchestration_download_smoke.mjs",
+          "role": "root_control",
+          "startLine": 517
+        },
+        {
+          "endLine": 639,
+          "path": "scripts/prod_orchestration_download_smoke.mjs",
+          "role": "root_control",
+          "startLine": 625
+        }
+      ],
+      "occurrenceId": "occ_5802427678098140dc4d0628",
+      "provenance": {
+        "candidateId": "cand_smoke_csv_formula",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "high",
+                "why": "Generated deliverable lines are written to smoke CSV artifacts with quote escaping only, leaving formula-capable prefixes active when opened in spreadsheet software."
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "Product-facing exports use the shared safe encoder; exposure is limited to smoke artifacts."
+              },
+              "limitations": [
+                "Product-facing exports use the shared safe encoder; exposure is limited to smoke artifacts."
+              ],
+              "summary": "Generated deliverable lines are written to smoke CSV artifacts with quote escaping only, leaving formula-capable prefixes active when opened in spreadsheet software."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Product-facing exports use the shared safe encoder; exposure is limited to smoke artifacts."
+            },
+            "locations": [
+              {
+                "endLine": 100,
+                "path": "scripts/prod_orchestration_download_smoke.mjs",
+                "role": "root_control",
+                "startLine": 91
+              },
+              {
+                "endLine": 560,
+                "path": "scripts/prod_orchestration_download_smoke.mjs",
+                "role": "root_control",
+                "startLine": 517
+              },
+              {
+                "endLine": 639,
+                "path": "scripts/prod_orchestration_download_smoke.mjs",
+                "role": "root_control",
+                "startLine": 625
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_smoke_csv_formula",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Use encodeSpreadsheetDelimitedCell for every CSV and TSV cell and add prefix regressions.",
+            "rootCause": {
+              "summary": "Generated deliverable lines are written to smoke CSV artifacts with quote escaping only, leaving formula-capable prefixes active when opened in spreadsheet software."
+            },
+            "ruleId": "injection.spreadsheet-formula",
+            "severity": {
+              "level": "medium",
+              "rationale": "Generated deliverable lines are written to smoke CSV artifacts with quote escaping only, leaving formula-capable prefixes active when opened in spreadsheet software."
+            },
+            "summary": "Generated deliverable lines are written to smoke CSV artifacts with quote escaping only, leaving formula-capable prefixes active when opened in spreadsheet software.",
+            "taxonomy": {
+              "category": "injection.spreadsheet-formula",
+              "cwe": [
+                "CWE-1236"
+              ]
+            },
+            "title": "Orchestration smoke CSV export does not neutralize spreadsheet formulas",
+            "validation": {
+              "limitations": [
+                "Product-facing exports use the shared safe encoder; exposure is limited to smoke artifacts."
+              ],
+              "method": "Static source-to-sink review",
+              "summary": "Product-facing exports use the shared safe encoder; exposure is limited to smoke artifacts."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use encodeSpreadsheetDelimitedCell for every CSV and TSV cell and add prefix regressions.",
+      "rootCause": {
+        "summary": "Generated deliverable lines are written to smoke CSV artifacts with quote escaping only, leaving formula-capable prefixes active when opened in spreadsheet software."
+      },
+      "ruleId": "injection.spreadsheet-formula",
+      "severity": {
+        "level": "medium",
+        "rationale": "Generated deliverable lines are written to smoke CSV artifacts with quote escaping only, leaving formula-capable prefixes active when opened in spreadsheet software."
+      },
+      "summary": "Generated deliverable lines are written to smoke CSV artifacts with quote escaping only, leaving formula-capable prefixes active when opened in spreadsheet software.",
+      "taxonomy": {
+        "category": "injection.spreadsheet-formula",
+        "cwe": [
+          "CWE-1236"
+        ]
+      },
+      "title": "Orchestration smoke CSV export does not neutralize spreadsheet formulas",
+      "validation": {
+        "limitations": [
+          "Product-facing exports use the shared safe encoder; exposure is limited to smoke artifacts."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Product-facing exports use the shared safe encoder; exposure is limited to smoke artifacts."
+      },
+      "writeup": {
+        "reportPath": "findings/smoke-csv-formula-injection/smoke-csv-formula-injection.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "high",
+          "why": "The anonymization script passes HWPX directly to PATH-resolved unzip and shell-based zip, then recursively reads extracted paths without traversal, symlink, expansion, executable-path, or timeout validation."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "Fixed repository input paths and randomized temp directories reduce likelihood; malicious template supply plus operator execution is required."
+        },
+        "limitations": [
+          "Fixed repository input paths and randomized temp directories reduce likelihood; malicious template supply plus operator execution is required."
+        ],
+        "summary": "The anonymization script passes HWPX directly to PATH-resolved unzip and shell-based zip, then recursively reads extracted paths without traversal, symlink, expansion, executable-path, or timeout validation."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Fixed repository input paths and randomized temp directories reduce likelihood; malicious template supply plus operator execution is required."
+      },
+      "findingId": "csf_0ba9e41cb7df7b9efbfed80e",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:e89adcb7beba70f69ef88d0ff935dbcf290c5e342228a2947d13bf792039ed74"
+      },
+      "identity": {
+        "anchor": "hwpx-anonymization-extracts-archives-with-unbounded-path-selected-tools"
+      },
+      "locations": [
+        {
+          "endLine": 152,
+          "path": "scripts/anonymize_hwpx_templates.mjs",
+          "role": "root_control",
+          "startLine": 106
+        }
+      ],
+      "occurrenceId": "occ_142f10fe8d748702d7656266",
+      "provenance": {
+        "candidateId": "cand_hwpx_external_unzip",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "high",
+                "why": "The anonymization script passes HWPX directly to PATH-resolved unzip and shell-based zip, then recursively reads extracted paths without traversal, symlink, expansion, executable-path, or timeout validation."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "Fixed repository input paths and randomized temp directories reduce likelihood; malicious template supply plus operator execution is required."
+              },
+              "limitations": [
+                "Fixed repository input paths and randomized temp directories reduce likelihood; malicious template supply plus operator execution is required."
+              ],
+              "summary": "The anonymization script passes HWPX directly to PATH-resolved unzip and shell-based zip, then recursively reads extracted paths without traversal, symlink, expansion, executable-path, or timeout validation."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Fixed repository input paths and randomized temp directories reduce likelihood; malicious template supply plus operator execution is required."
+            },
+            "locations": [
+              {
+                "endLine": 152,
+                "path": "scripts/anonymize_hwpx_templates.mjs",
+                "role": "root_control",
+                "startLine": 106
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_hwpx_external_unzip",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Use the bounded in-process ZIP reader, canonical containment, expansion limits, and no shell commands.",
+            "rootCause": {
+              "summary": "The anonymization script passes HWPX directly to PATH-resolved unzip and shell-based zip, then recursively reads extracted paths without traversal, symlink, expansion, executable-path, or timeout validation."
+            },
+            "ruleId": "archive-extraction.unbounded-external-tool",
+            "severity": {
+              "level": "medium",
+              "rationale": "The anonymization script passes HWPX directly to PATH-resolved unzip and shell-based zip, then recursively reads extracted paths without traversal, symlink, expansion, executable-path, or timeout validation."
+            },
+            "summary": "The anonymization script passes HWPX directly to PATH-resolved unzip and shell-based zip, then recursively reads extracted paths without traversal, symlink, expansion, executable-path, or timeout validation.",
+            "taxonomy": {
+              "category": "archive-extraction.unbounded-external-tool",
+              "cwe": [
+                "CWE-22"
+              ]
+            },
+            "title": "HWPX anonymization extracts archives with unbounded PATH-selected tools",
+            "validation": {
+              "limitations": [
+                "Fixed repository input paths and randomized temp directories reduce likelihood; malicious template supply plus operator execution is required."
+              ],
+              "method": "Static source-to-sink review",
+              "summary": "Fixed repository input paths and randomized temp directories reduce likelihood; malicious template supply plus operator execution is required."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use the bounded in-process ZIP reader, canonical containment, expansion limits, and no shell commands.",
+      "rootCause": {
+        "summary": "The anonymization script passes HWPX directly to PATH-resolved unzip and shell-based zip, then recursively reads extracted paths without traversal, symlink, expansion, executable-path, or timeout validation."
+      },
+      "ruleId": "archive-extraction.unbounded-external-tool",
+      "severity": {
+        "level": "medium",
+        "rationale": "The anonymization script passes HWPX directly to PATH-resolved unzip and shell-based zip, then recursively reads extracted paths without traversal, symlink, expansion, executable-path, or timeout validation."
+      },
+      "summary": "The anonymization script passes HWPX directly to PATH-resolved unzip and shell-based zip, then recursively reads extracted paths without traversal, symlink, expansion, executable-path, or timeout validation.",
+      "taxonomy": {
+        "category": "archive-extraction.unbounded-external-tool",
+        "cwe": [
+          "CWE-22"
+        ]
+      },
+      "title": "HWPX anonymization extracts archives with unbounded PATH-selected tools",
+      "validation": {
+        "limitations": [
+          "Fixed repository input paths and randomized temp directories reduce likelihood; malicious template supply plus operator execution is required."
+        ],
+        "method": "Static source-to-sink review",
+        "summary": "Fixed repository input paths and randomized temp directories reduce likelihood; malicious template supply plus operator execution is required."
+      },
+      "writeup": {
+        "reportPath": "findings/unbounded-hwpx-external-extraction/unbounded-hwpx-external-extraction.md"
+      }
+    }
+  ],
+  "scanId": "8d7fd844-d4cb-49ab-b984-36ed6ab0beba",
+  "schemaVersion": "1.0"
+}

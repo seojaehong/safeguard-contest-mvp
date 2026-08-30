@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-30T15:36:03.297Z",
-  "sourceSha": "ec770440f61ef6e90d2bcc784509865f81b76c09",
+  "generatedAt": "2026-08-30T16:24:22.384Z",
+  "sourceSha": "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c",
   "overall": "open",
   "gates": [
     {
@@ -329,11 +329,11 @@
       "id": "fresh_current_source_security_scan",
       "state": "notice",
       "label": "Fresh current-source security scan",
-      "evidencePath": "evaluation\\current-source-standard-security-scan-2026-08-30-complete\\report.json",
-      "detail": "Fresh Standard scan f19aa0ca is sealed at source/live fb6763a7 with 18 occurrences (6 medium, 12 low), 16 unique finding write-ups, and partial canonical coverage across 7 recorded surfaces with 32 deferred entries in a 6,757-file repository. The immutable original 18-finding baseline and completed prior scan are preserved. Three approval-free source residuals and fifteen database/RLS/atomicity findings remain at the scanned revision. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
+      "evidencePath": "evaluation\\current-source-standard-security-scan-2026-08-31-complete\\report.json",
+      "detail": "Current Standard scan 8d7fd844 is sealed at source/live f6835f8d with 9 findings (6 medium, 3 low), 9 finding write-ups, and partial canonical coverage across 11 recorded surface rows with 15 deferred entries in a 5,241-file repository. The immutable original 18-finding baseline and completed prior scan are preserved. Four approval-free source residuals and five database/RLS/atomicity findings remain at the scanned revision. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Remediate the three approval-free source residuals in bounded waves and rerun focused validation.",
-        "Keep the fifteen database/RLS/atomicity findings approval-gated and exact saved Share separate; do not claim security completion from scan completion."
+        "Remediate the four approval-free source residuals in bounded waves and rerun focused validation.",
+        "Keep the five database/RLS/atomicity findings approval-gated and exact saved Share separate; do not claim security completion from scan completion."
       ]
     },
     {

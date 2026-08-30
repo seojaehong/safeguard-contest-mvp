@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "safeclaw-current-source-standard-security-scan/v4",
+  "verdict": "NOTICE_CURRENT_SOURCE_STANDARD_SCAN_9_FINDINGS_PARTIAL_COVERAGE",
+  "scanId": "8d7fd844-d4cb-49ab-b984-36ed6ab0beba",
+  "sourceHead": "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c",
+  "deployedProductSource": "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c",
+  "userContext": "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
+  "scan": {
+    "status": "completed",
+    "mode": "standard",
+    "targetKind": "git_revision",
+    "coverageCompleteness": "partial",
+    "trackedFileCount": 5241,
+    "reviewedSurfaceCount": 11,
+    "deferredCoverageItemCount": 15,
+    "reportableFindingCount": 9,
+    "uniqueFindingWriteupCount": 9,
+    "severity": {
+      "critical": 0,
+      "high": 0,
+      "medium": 6,
+      "low": 3
+    },
+    "sealedAt": "2026-08-30T15:54:31.522457Z"
+  },
+  "baseline": {
+    "immutableOriginalFindingCount": 18,
+    "preserved": true,
+    "rewritten": false,
+    "completedPriorScanId": "8fe9c06a-018c-446f-aa98-1b37df95287a"
+  },
+  "currentDisposition": {
+    "approvalGatedDatabaseOrAtomicityCount": 5,
+    "approvalSensitiveShareCapabilityCount": 0,
+    "approvalFreeProductSourceResidualCount": 4,
+    "fullyClosedBoundedSourceCandidateCount": 0,
+    "securityCompleteClaimAllowed": false,
+    "approvalGatedFindingRules": [
+      "authorization-bypass.missing-row-level-security",
+      "authorization-bypass.null-tenant-policy",
+      "authorization-bypass.cross-tenant-reference",
+      "authorization-bypass.client-writable-authoritative-state",
+      "race-condition.quota-enforcement"
+    ],
+    "approvalFreeResidualFindingRules": [
+      "resource-exhaustion.incomplete-export-budget",
+      "resource-exhaustion.unbounded-document-parser",
+      "injection.spreadsheet-formula",
+      "archive-extraction.unbounded-external-tool"
+    ]
+  },
+  "canonicalArtifacts": {
+    "manifest": "evaluation/current-source-standard-security-scan-2026-08-31-complete/canonical/scan-manifest.json",
+    "findings": "evaluation/current-source-standard-security-scan-2026-08-31-complete/canonical/findings.json",
+    "coverage": "evaluation/current-source-standard-security-scan-2026-08-31-complete/canonical/coverage.json",
+    "markdown": "evaluation/current-source-standard-security-scan-2026-08-31-complete/scan-report.md",
+    "findingWriteupCount": 9,
+    "supportingEvidenceCount": 9,
+    "sha256": {
+      "manifest": "4837253db031a991a1f45c7220b667d556d3fe112ad036687c10d8d69b4e7aa9",
+      "findings": "5f8d47774cad604898c66657bd18e883bcdac9e679506c3e0438ca5510805a1f",
+      "coverage": "eeda9fd88da617b71e0e50fb6b1e50ea2669fbaf4293e2239fbd2761aa683ebc",
+      "markdown": "c5e72c98e8a3bbe0f652293efb118fd21262effa5f8c30169d1b2368f16ab73a"
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseSecurityRemediation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "sifVectorRuntime": "APPROVAL_GATED",
+    "koshaExactRegistryPromotion": "APPROVAL_GATED",
+    "freshFullRepositoryScanCompleted": true,
+    "postRemediationRescanCompleted": false,
+    "coverageClosureCompleted": false,
+    "securityCompleteClaimAllowed": false
+  }
+}

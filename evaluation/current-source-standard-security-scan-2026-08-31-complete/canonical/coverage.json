@@ -1,0 +1,237 @@
+{
+  "completeness": "partial",
+  "deferred": [
+    {
+      "candidate": {
+        "candidateId": "cand_documents_rls"
+      },
+      "candidateId": "cand_documents_rls",
+      "disposition": "needs_follow_up",
+      "id": "cand_documents_rls",
+      "reason": "Source-backed discovery candidate awaiting independent parent validation; deployment or operator prerequisites remain explicit where applicable.",
+      "title": "Legacy documents table lacks RLS"
+    },
+    {
+      "candidate": {
+        "candidateId": "cand_query_logs_rls"
+      },
+      "candidateId": "cand_query_logs_rls",
+      "disposition": "needs_follow_up",
+      "id": "cand_query_logs_rls",
+      "reason": "Source-backed discovery candidate awaiting independent parent validation; deployment or operator prerequisites remain explicit where applicable.",
+      "title": "Legacy query_logs table lacks RLS"
+    },
+    {
+      "candidate": {
+        "candidateId": "cand_share_direct_write"
+      },
+      "candidateId": "cand_share_direct_write",
+      "disposition": "needs_follow_up",
+      "id": "cand_share_direct_write",
+      "reason": "Source-backed discovery candidate awaiting independent parent validation; deployment or operator prerequisites remain explicit where applicable.",
+      "title": "Direct share-session writes may bypass readiness and recipient governance"
+    },
+    {
+      "candidate": {
+        "candidateId": "cand_workspace_provision_race"
+      },
+      "candidateId": "cand_workspace_provision_race",
+      "disposition": "needs_follow_up",
+      "id": "cand_workspace_provision_race",
+      "reason": "Source-backed discovery candidate awaiting independent parent validation; deployment or operator prerequisites remain explicit where applicable.",
+      "title": "Workspace provisioning check-then-insert race"
+    },
+    {
+      "candidate": {
+        "candidateId": "cand_knowledge_review_direct_write"
+      },
+      "candidateId": "cand_knowledge_review_direct_write",
+      "disposition": "needs_follow_up",
+      "id": "cand_knowledge_review_direct_write",
+      "reason": "Source-backed discovery candidate awaiting independent parent validation; deployment or operator prerequisites remain explicit where applicable.",
+      "title": "Direct knowledge-event writes may forge approval state"
+    },
+    {
+      "candidate": {
+        "candidateId": "cand_improvement_approval_direct_write"
+      },
+      "candidateId": "cand_improvement_approval_direct_write",
+      "disposition": "needs_follow_up",
+      "id": "cand_improvement_approval_direct_write",
+      "reason": "Source-backed discovery candidate awaiting independent parent validation; deployment or operator prerequisites remain explicit where applicable.",
+      "title": "Direct improvement writes may forge approval state"
+    },
+    {
+      "candidate": {
+        "candidateId": "cand_dispatch_receipt_direct_write"
+      },
+      "candidateId": "cand_dispatch_receipt_direct_write",
+      "disposition": "needs_follow_up",
+      "id": "cand_dispatch_receipt_direct_write",
+      "reason": "Source-backed discovery candidate awaiting independent parent validation; deployment or operator prerequisites remain explicit where applicable.",
+      "title": "Direct dispatch-log writes may forge provider receipts"
+    },
+    {
+      "candidate": {
+        "candidateId": "cand_worker_site_binding_race"
+      },
+      "candidateId": "cand_worker_site_binding_race",
+      "disposition": "needs_follow_up",
+      "id": "cand_worker_site_binding_race",
+      "reason": "Source-backed discovery candidate awaiting independent parent validation; deployment or operator prerequisites remain explicit where applicable.",
+      "title": "Worker site-binding update race"
+    },
+    {
+      "candidate": {
+        "candidateId": "cand_knowledge_review_non_atomic"
+      },
+      "candidateId": "cand_knowledge_review_non_atomic",
+      "disposition": "needs_follow_up",
+      "id": "cand_knowledge_review_non_atomic",
+      "reason": "Source-backed discovery candidate awaiting independent parent validation; deployment or operator prerequisites remain explicit where applicable.",
+      "title": "Knowledge review transitions are non-atomic"
+    },
+    {
+      "candidate": {
+        "candidateId": "cand_read_confirmation_direct_write"
+      },
+      "candidateId": "cand_read_confirmation_direct_write",
+      "disposition": "needs_follow_up",
+      "id": "cand_read_confirmation_direct_write",
+      "reason": "Source-backed discovery candidate awaiting independent parent validation; deployment or operator prerequisites remain explicit where applicable.",
+      "title": "Direct read-confirmation writes may forge recipient acknowledgement"
+    },
+    {
+      "id": "surface_document_export_archive",
+      "reason": "Focused investigator running."
+    },
+    {
+      "id": "surface_browser_rendering_client_data",
+      "reason": "Pending discovery review."
+    },
+    {
+      "id": "surface_mcp_agent_provider_transport",
+      "reason": "Pending discovery review."
+    },
+    {
+      "id": "surface_canonical_supabase_rls",
+      "reason": "Pending parent discovery review and validation of baseline candidates."
+    },
+    {
+      "id": "surface_authenticated_tenant_api",
+      "reason": "Pending discovery review."
+    }
+  ],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [
+    {
+      "pattern": "/share/[sessionId]",
+      "reason": "Exact saved session remains MISSING_EVIDENCE."
+    },
+    {
+      "pattern": "live mutation-backed validation",
+      "reason": "DB/provider/share/vector/wiki/KOSHA mutations excluded."
+    },
+    {
+      "pattern": "/share/[sessionId]",
+      "reason": "MISSING_EVIDENCE; no approved DB-backed creation flow or concrete existing URL."
+    },
+    {
+      "pattern": "live mutation-backed validation",
+      "reason": "User context forbids DB, provider, share-session, vector, wiki, and KOSHA registry mutation."
+    }
+  ],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "repository",
+  "mode": "repository",
+  "openQuestions": [
+    {
+      "followUpPrompt": "With explicit approval, inspect grants and perform tenant A/B denial probes without schema changes.",
+      "question": "Do production grants expose the direct-table paths?"
+    }
+  ],
+  "scanId": "8d7fd844-d4cb-49ab-b984-36ed6ab0beba",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_public_generation",
+      "label": "Public generation, search, and status routes",
+      "notes": "Admission, cancellation, bounded reads, and response projection reviewed.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_tenant_api",
+      "label": "Authenticated tenant and commercial API",
+      "notes": "MCP quota and authoritative-state assumptions validated.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_supabase_rls",
+      "label": "Canonical Supabase schema and RLS",
+      "notes": "Four database-control root causes reported with grant limitations.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_export_archive",
+      "label": "Document export and archive parsers",
+      "notes": "Four export and parser findings validated.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_mcp_transport",
+      "label": "MCP, OpenClaw, Hermes, and provider transport",
+      "notes": "No transport or command-execution issue survived.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_browser_client",
+      "label": "Browser rendering and client-side data handling",
+      "notes": "No client exploit survived.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "rejected",
+      "id": "surface_operational_races",
+      "label": "Workspace, worker, and review transition races",
+      "notes": "Same-tenant operational integrity or fail-closed compensated transitions.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_public_generation_search_status",
+      "label": "Public generation, search, weather, photo readiness, ontology, and safety-reference status",
+      "notes": "Current source budgets and admission controls close the reviewed public paths.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_authenticated_tenant_api",
+      "label": "Authenticated tenant and commercial API routes",
+      "notes": "Normal route ownership is explicit; concurrency and direct-policy candidates await validation.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_canonical_supabase_rls",
+      "label": "Canonical Supabase schema, RLS, and guarded state transitions",
+      "notes": "Tracked migrations through 010 confirm several policy and transition candidates; live grants and pg_policy remain unverified.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_mcp_agent_provider_transport",
+      "label": "MCP, OpenClaw, local agent process, and remote Hermes transport",
+      "notes": "MCP authentication fails closed on database errors and disabled or expired rows; production legacy tokens require bounded expiry, scopes are allowlisted, provider-generating tools require durable admission, request bodies and tool inputs are bounded, local OpenClaw execution uses shell:false with fixed argument arrays, an allowlisted child environment, private prompt files, output and timeout limits, and a tool-free attestation; remote Hermes requires exact HTTPS origin, public DNS results, socket-address pinning, TLS hostname verification, no redirects, bounded request and response bodies, cancellation, and durable-attempt readiness. No separate reportable transport or command-execution path survived.",
+      "receiptRefs": []
+    }
+  ]
+}
