@@ -666,6 +666,8 @@ function createFixtureRoot(): string {
   execFileSync("git", ["init"], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["config", "user.email", "test@example.com"], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["config", "user.name", "SafeClaw Test"], { cwd: rootDir, stdio: "ignore" });
+  execFileSync("git", ["config", "gc.auto", "0"], { cwd: rootDir, stdio: "ignore" });
+  execFileSync("git", ["config", "maintenance.auto", "false"], { cwd: rootDir, stdio: "ignore" });
   writeText(rootDir, "app/api/knowledge/review/prepare/route.ts", "export const fixture = true;\n");
   writeText(rootDir, "app/knowledge/KnowledgeReviewInbox.tsx", "export const fixture = true;\n");
 

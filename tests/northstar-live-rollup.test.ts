@@ -1293,6 +1293,8 @@ function createFixtureRoot(): { root: string; head: string } {
   execFileSync("git", ["init"], { cwd: root, stdio: "ignore" });
   execFileSync("git", ["config", "user.email", "test@example.com"], { cwd: root, stdio: "ignore" });
   execFileSync("git", ["config", "user.name", "SafeClaw Test"], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["config", "gc.auto", "0"], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["config", "maintenance.auto", "false"], { cwd: root, stdio: "ignore" });
 
   writeJson(root, "evaluation/northstar-open-gates-current/report.json", {
     sourceSha: "OPEN_GATE_SOURCE_SHA",
