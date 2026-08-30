@@ -1,31 +1,31 @@
 {
-  "schema": "safeclaw-security-reviewed-improvement-memory/v1",
-  "verdict": "PASS_LIVE_PRODUCTION_REVIEWED_IMPROVEMENT_MEMORY_SOURCE_CONTRACT_RESCAN_PENDING",
-  "generatedAt": "2026-08-30T21:50:00+09:00",
-  "sourceHead": "042c5f2a",
-  "productCommit": "042c5f2a",
+  "schema": "safeclaw-security-public-ask-prebody-admission/v1",
+  "verdict": "PASS_CURRENT_SOURCE_PUBLIC_ASK_PREBODY_ADMISSION_LIVE_AND_RESCAN_PENDING",
+  "generatedAt": "2026-08-30T21:54:00+09:00",
+  "sourceHead": "ba20344e",
+  "productCommit": "ba20344e",
   "baseline": {
     "scanId": "f19aa0ca-5fa5-4e8e-8482-b63ad854f230",
     "targetRevision": "fb6763a789591189e03b8efb14a057def7216ef2",
-    "findingRuleId": "integrity.unreviewed-improvement-consumption",
-    "findingTitle": "Unreviewed improvement candidates enter learning exports and operation graphs",
+    "findingRuleId": "resource-exhaustion.public-ask-prebody-admission",
+    "findingTitle": "Public ask buffers bodies before distributed admission",
     "severity": "medium",
     "immutableOriginalBaselinePreserved": true
   },
   "remediation": {
-    "learningExportRequiresReviewStatus": ["approved", "reflected"],
-    "operationGraphRequiresReviewStatus": ["approved", "reflected"],
-    "candidateRowsRemainVisibleInReviewList": true,
-    "candidateRowsEnterOperationalMemory": false,
-    "databaseMigrationPerformed": false
+    "admissionBeforeBodyBudget": true,
+    "admissionBeforeJsonParse": true,
+    "existingAdmissionDecisionReused": true,
+    "duplicateQuotaConsumptionPrevented": true,
+    "bodyBudgetResponsesCarryRateLimitHeaders": true
   },
   "verification": {
     "focusedTests": {
-      "command": "npm.cmd exec -- vitest run tests/workpack-commercial-tenant-hardening.test.ts tests/generation-evidence-operation-routes.test.ts tests/tenant-harness-memory.test.ts --maxWorkers=1 --fileParallelism=false",
+      "command": "npm.cmd exec -- vitest run tests/ask-generation-evidence-routes.test.ts tests/security-budget-wiring.test.ts tests/public-page-provider-admission.test.ts --maxWorkers=1 --fileParallelism=false",
       "filesPassed": 3,
-      "testsPassed": 31,
+      "testsPassed": 32,
       "testsFailed": 0,
-      "durationSeconds": 2.72
+      "durationSeconds": 1.72
     },
     "typecheck": {
       "command": "npm.cmd run typecheck",
@@ -39,8 +39,8 @@
     "branch": "master",
     "environment": "production",
     "deploymentUrl": "safeguard-contest-n918m44n4-seojaehongs-projects.vercel.app",
-    "productCommitLive": true,
-    "liveVerificationPending": false
+    "productCommitLive": false,
+    "liveVerificationPending": true
   },
   "securityScan": {
     "currentFindingRemediatedInSource": true,

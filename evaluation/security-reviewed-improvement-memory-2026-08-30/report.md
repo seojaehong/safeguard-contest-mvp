@@ -2,7 +2,7 @@
 
 ## Verdict
 
-PASS_CURRENT_SOURCE_REVIEWED_IMPROVEMENT_MEMORY_LIVE_AND_RESCAN_PENDING
+PASS_LIVE_PRODUCTION_REVIEWED_IMPROVEMENT_MEMORY_SOURCE_CONTRACT_RESCAN_PENDING
 
 The current-source remediation at product commit 042c5f2a prevents unreviewed
 candidate improvements from entering learning exports or operation-memory
@@ -25,12 +25,12 @@ and approve candidate rows.
 
 ## Live state
 
-The production marker still reported
-fb6763a789591189e03b8efb14a057def7216ef2 when checked. Product commit
-042c5f2a is pushed to master but has not yet been proven live.
+The production marker reports aafe5d56a1fc51a629b7de9132f8153e7559abe5,
+which contains product commit 042c5f2a. The reviewed-improvement source
+contract is therefore deployed.
 
-This artifact does not close the scan finding. A fresh security re-scan after
-deployment is still required.
+This artifact does not by itself close the scan finding. A fresh security
+re-scan is still required.
 
 ## Preserved boundaries
 
