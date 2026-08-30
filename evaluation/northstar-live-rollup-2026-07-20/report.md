@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-30T16:24:23.405Z
-Source HEAD at generation: f6835f8dd772c032cf9f548b8dbacbabb43cdb0c
-Live commit at generation: f6835f8dd772c032cf9f548b8dbacbabb43cdb0c
+Generated at: 2026-08-30T17:29:32.229Z
+Source HEAD at generation: 5b043bbaf6503bd4345a633d89dacbd4f8a3239c
+Live commit at generation: 5b043bbaf6503bd4345a633d89dacbd4f8a3239c
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -440,6 +440,7 @@ Overall: `northstar_open_approval_gated`
 | current_security_remediation_ledger | notice | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | notice | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | fresh_current_source_security_scan | notice | evaluation\current-source-standard-security-scan-2026-08-31-complete\report.json |
+| current_source_approval_free_security_remediation | notice | evaluation\current-source-security-approval-free-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | notice | evaluation\current-source-security-remediation-2026-08-30\report.json |
 | current_security_governed_path_compatibility | notice | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
 | current_source_security_residual_remediation | notice | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
@@ -530,7 +531,8 @@ Overall: `northstar_open_approval_gated`
 | repository_security_scan_reconciliation | missing | missing | evaluation\repository-security-scan-reconciliation-2026-08-11\report.json |
 | current_security_remediation_ledger | ancestor | ancestor_of_head | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
-| fresh_current_source_security_scan | exact | missing | evaluation\current-source-standard-security-scan-2026-08-31-complete\report.json |
+| fresh_current_source_security_scan | ancestor | missing | evaluation\current-source-standard-security-scan-2026-08-31-complete\report.json |
+| current_source_approval_free_security_remediation | exact | matches_live | evaluation\current-source-security-approval-free-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | ancestor | ancestor_of_head | evaluation\current-source-security-remediation-2026-08-30\report.json |
 | current_security_governed_path_compatibility | ancestor | ancestor_of_head | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
 | current_source_security_residual_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |

@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-approval-free-remediation/v1",
+  "generatedAt": "2026-08-31T02:28:33.3613605+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_FOUR_APPROVAL_FREE_SECURITY_REMEDIATIONS_RESCAN_PENDING",
+  "sourceHead": "5b043bbaf6503bd4345a633d89dacbd4f8a3239c",
+  "productionCommit": "5b043bbaf6503bd4345a633d89dacbd4f8a3239c",
+  "productionBuild": {
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-4bsy95nlr-seojaehongs-projects.vercel.app",
+    "sourceMatchesProduction": true
+  },
+  "scannedBaseline": {
+    "scanId": "8d7fd844-d4cb-49ab-b984-36ed6ab0beba",
+    "sourceHead": "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c",
+    "verdict": "NOTICE_CURRENT_SOURCE_STANDARD_SCAN_9_FINDINGS_PARTIAL_COVERAGE",
+    "reportableFindingCount": 9,
+    "approvalFreeFindingCount": 4,
+    "approvalGatedFindingCount": 5,
+    "coverageCompleteness": "partial",
+    "immutableOriginalFindingCount": 18,
+    "immutableOriginalBaselinePreserved": true
+  },
+  "remediation": {
+    "currentSourceRemediatedCount": 4,
+    "currentSourceOpenApprovalFreeCount": 0,
+    "scanFindingReclassificationPerformed": false,
+    "postRemediationFullRepositoryScanCompleted": false
+  },
+  "receipts": [
+    {
+      "id": "structured-xlsx-render-budget",
+      "findingRule": "resource-exhaustion.incomplete-export-budget",
+      "evidencePath": "evaluation/security-structured-xlsx-render-budget-2026-08-31/report.json",
+      "verdict": "PASS_LIVE_DEPLOYED_SOURCE_LOCAL_PRODUCTION_STRUCTURED_XLSX_RENDER_BUDGET_DIRECT_LIVE_PROBE_ADMISSION_BLOCKED",
+      "productCommit": "b0d3529a6f34d5f9cca0a71bac61f2f15fdbb040"
+    },
+    {
+      "id": "operator-document-parser-admission",
+      "findingRule": "resource-exhaustion.unbounded-document-parser",
+      "evidencePath": "evaluation/security-operator-parser-admission-2026-08-31/report.json",
+      "verdict": "PASS_LIVE_DEPLOYED_SOURCE_OPERATOR_DOCUMENT_PARSER_ADMISSION_RESCAN_PENDING",
+      "productCommit": "6a9001beac5a37ece7903598e752d7addb55ec29"
+    },
+    {
+      "id": "orchestration-smoke-csv-neutralization",
+      "findingRule": "injection.spreadsheet-formula",
+      "evidencePath": "evaluation/security-orchestration-smoke-csv-neutralization-2026-08-31/report.json",
+      "verdict": "PASS_LIVE_DEPLOYED_SOURCE_ORCHESTRATION_SMOKE_CSV_NEUTRALIZATION_RESCAN_PENDING",
+      "productCommit": "f1ac2aa81e98cf0a1d638ea95ae69be93966d545"
+    },
+    {
+      "id": "hwpx-anonymization-archive-budget",
+      "findingRule": "archive-extraction.unbounded-external-tool",
+      "evidencePath": "evaluation/security-hwpx-anonymization-archive-2026-08-31/report.json",
+      "verdict": "PASS_LIVE_DEPLOYED_SOURCE_CURRENT_OPERATOR_HWPX_ARCHIVE_BUDGET_RESCAN_PENDING",
+      "productCommit": "1db914b27a739cdcd036cdefd9def859f01986dd"
+    }
+  ],
+  "verification": {
+    "focusedNorthstar": {
+      "openGate": "PASS_1_OF_1",
+      "liveRollup": "PASS_1_OF_1",
+      "nextRunway": "PASS_1_OF_1"
+    },
+    "typecheck": "PASS",
+    "productionMarkerAligned": true
+  },
+  "boundaries": {
+    "freshFullRepositoryRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseSecurityRemediation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "sifVectorRuntime": "APPROVAL_GATED",
+    "koshaExactRegistryPromotion": "APPROVAL_GATED"
+  }
+}

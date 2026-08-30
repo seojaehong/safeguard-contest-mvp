@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `f6835f8dd772c032cf9f548b8dbacbabb43cdb0c`
+Source HEAD: `5b043bbaf6503bd4345a633d89dacbd4f8a3239c`
 
-Production `/api/build-info`: `f6835f8dd772c032cf9f548b8dbacbabb43cdb0c`
+Production `/api/build-info`: `5b043bbaf6503bd4345a633d89dacbd4f8a3239c`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `f6835f8dd772c032cf9f548b8dbacbabb43cdb0c`
+Live rollup source head: `5b043bbaf6503bd4345a633d89dacbd4f8a3239c`
 
 Live rollup matches production: `true`
 
@@ -76,6 +76,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Repository security scan reconciliation is `PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS`. The immutable same-target scans and `2` fail-open contradictions remain preserved; zero-finding accepted=`false`. Corrected scan completed=`true`, id=`c4e9e2f1-7ce4-4313-a651-32205fca401f`, reportable=`14`, deferred=`9`, coverage=`partial`, security-complete=`false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current security remediation ledger is `NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES`: deployed-source receipts `17/23`, unresolved `6`, approval-gated `3`, distributed-runtime open `3`, security-complete=`false`, exact saved Share `MISSING_EVIDENCE`.
 - Fresh current-source Standard security scan is `NOTICE_CURRENT_SOURCE_STANDARD_SCAN_9_FINDINGS_PARTIAL_COVERAGE`: scan `8d7fd844-d4cb-49ab-b984-36ed6ab0beba`, findings `9` (medium/low `6/3`), coverage `partial` with `11` recorded surfaces and `15` deferred items. Bounded closures/residuals are `0/4`; database/atomicity and Share capability boundaries remain `5/0`. Scan completion is not security-complete `false`, and exact saved Share remains `MISSING_EVIDENCE`.
+- Current-source approval-free security remediation is `PASS_LIVE_PRODUCTION_FOUR_APPROVAL_FREE_SECURITY_REMEDIATIONS_RESCAN_PENDING`: bounded source remediation `4/4`, open approval-free source residuals `0`, and sealed scan finding reclassification performed `false`. The fresh full scan remains required `true`, database/RLS/atomicity findings remain `5`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source security residual remediation is `PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING`: anchors `dns-toctou, provider-detail, xff-spoof`, tests `174`, live evidence `PASS_DEPLOYED_SOURCE_MARKER_ONLY` with behavioral probe `false`. The immutable scan remains open, follow-up scan required=`true`, security-complete=`false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Share ACK pre-body admission is `PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED`: coarse IP rate/body concurrency ordering `true/true`, recipient-specific post-parse admission `true`, tests `66`, and live `503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE/distributed`. The sealed finding remains rescan-pending `true`; security-complete remains `false`, recipient ACK is `APPROVAL_GATED`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Safety status disconnect lease is `PASS_LIVE_PRODUCTION_SAFETY_STATUS_DISCONNECT_LEASE_SOURCE_REMEDIATED`: work settlement before abort rejection/lease release `true/true`, two-disconnect concurrency proof `true`, tests `16`, and live `503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE/safety-reference-status`. The sealed finding remains rescan-pending `true`; security-complete remains `false`, distributed activation is `OPERATOR_CONFIGURATION_REQUIRED`, and exact saved Share remains `MISSING_EVIDENCE`.
