@@ -628,6 +628,20 @@ type NextRunwayReport = {
     securityComplete: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceOntologyErrorProjectionRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    findingId: string;
+    publicErrorCodeCount: number;
+    testsPassed: number | null;
+    buildStatus: string;
+    liveProbeCode: string;
+    upstreamFailureInduced: boolean;
+    freshRescanRequired: boolean;
+    securityComplete: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceSecurityResidualRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1702,6 +1716,33 @@ function currentSourceLogoutStorageRemediationFixture(): Record<string, unknown>
       productionBuild: { status: "PASS" },
       frontendStaticAudit: { violationCount: 0 },
       liveDeployment: { behavioralLogoutExecuted: false },
+    },
+    remainingBoundaries: {
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  };
+}
+
+function currentSourceOntologyErrorProjectionRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_ONTOLOGY_ERROR_PROJECTION_CONTRACT",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    finding: {
+      findingId: "csf_74a68abc8d7370ed1b78fad3",
+      freshRescanRequired: true,
+    },
+    remediation: {
+      publicErrorCodes: ["ONTOLOGY_GRAPH_BUDGET_EXCEEDED", "ONTOLOGY_GRAPH_UPSTREAM_UNAVAILABLE"],
+    },
+    verification: {
+      focusedAndAdjacentTests: { testsPassed: 12 },
+      productionBuild: { status: "PASS" },
+      liveDeployment: {
+        upstreamFailureInduced: false,
+        publicProbe: { code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE" },
+      },
     },
     remainingBoundaries: {
       securityComplete: false,
@@ -3350,6 +3391,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
   writeJson(root, "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json", currentSourceApprovalFreeSecurityRemediationFixture());
   writeJson(root, "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json", currentSourceSecurityResourceBudgetRemediationFixture());
   writeJson(root, "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json", currentSourceLogoutStorageRemediationFixture());
+  writeJson(root, "evaluation/current-source-security-ontology-error-projection-remediation-2026-08-31/report.json", currentSourceOntologyErrorProjectionRemediationFixture());
   writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/scan-manifest.json", { scan: { status: "completed" } });
   writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/findings.json", { findings: [] });
   writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/coverage.json", { completeness: "partial" });
@@ -5031,6 +5073,23 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       buildStatus: "PASS",
       staticViolationCount: 0,
       behavioralLogoutExecuted: false,
+      freshRescanRequired: true,
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "current_source_ontology_error_projection_remediation",
+      state: "notice",
+      reason: expect.stringContaining("2 fixed ontology error codes"),
+    }));
+    expect(report.currentSourceOntologyErrorProjectionRemediation).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_ONTOLOGY_ERROR_PROJECTION_CONTRACT",
+      findingId: "csf_74a68abc8d7370ed1b78fad3",
+      publicErrorCodeCount: 2,
+      testsPassed: 12,
+      buildStatus: "PASS",
+      liveProbeCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      upstreamFailureInduced: false,
       freshRescanRequired: true,
       securityComplete: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",

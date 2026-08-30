@@ -540,6 +540,20 @@ type RollupReport = {
     securityComplete: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceOntologyErrorProjectionRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    findingId: string;
+    testsPassed: number | null;
+    buildStatus: string;
+    publicErrorCodeCount: number;
+    upstreamFailureInduced: boolean;
+    liveProbeCode: string;
+    freshRescanRequired: boolean;
+    securityComplete: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceSecurityResidualRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1228,6 +1242,33 @@ function currentSourceLogoutStorageRemediationFixture(): Record<string, unknown>
       productionBuild: { status: "PASS" },
       frontendStaticAudit: { violationCount: 0 },
       liveDeployment: { behavioralLogoutExecuted: false },
+    },
+    remainingBoundaries: {
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  };
+}
+
+function currentSourceOntologyErrorProjectionRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_ONTOLOGY_ERROR_PROJECTION_CONTRACT",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    finding: {
+      findingId: "csf_74a68abc8d7370ed1b78fad3",
+      freshRescanRequired: true,
+    },
+    remediation: {
+      publicErrorCodes: ["ONTOLOGY_GRAPH_BUDGET_EXCEEDED", "ONTOLOGY_GRAPH_UPSTREAM_UNAVAILABLE"],
+    },
+    verification: {
+      focusedAndAdjacentTests: { testsPassed: 12 },
+      productionBuild: { status: "PASS" },
+      liveDeployment: {
+        upstreamFailureInduced: false,
+        publicProbe: { code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE" },
+      },
     },
     remainingBoundaries: {
       securityComplete: false,
@@ -2554,6 +2595,7 @@ function createFixtureRoot(): { root: string; head: string } {
   writeJson(root, "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json", currentSourceApprovalFreeSecurityRemediationFixture());
   writeJson(root, "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json", currentSourceSecurityResourceBudgetRemediationFixture());
   writeJson(root, "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json", currentSourceLogoutStorageRemediationFixture());
+  writeJson(root, "evaluation/current-source-security-ontology-error-projection-remediation-2026-08-31/report.json", currentSourceOntologyErrorProjectionRemediationFixture());
   writeJson(root, "evaluation/current-source-security-residual-remediation-2026-08-28/report.json", currentSourceSecurityResidualRemediationFixture());
   writeJson(root, "evaluation/share-ack-prebody-admission-2026-08-28/report.json", shareAckPreBodyAdmissionFixture());
   writeJson(root, "evaluation/safety-status-disconnect-lease-2026-08-28/report.json", safetyStatusDisconnectLeaseFixture());
@@ -2954,6 +2996,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json",
+    "evaluation/current-source-security-ontology-error-projection-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-residual-remediation-2026-08-28/report.json",
     "evaluation/share-ack-prebody-admission-2026-08-28/report.json",
     "evaluation/safety-status-disconnect-lease-2026-08-28/report.json",
@@ -3596,6 +3639,23 @@ describe("northstar live rollup", () => {
       buildStatus: "PASS",
       staticViolationCount: 0,
       behavioralLogoutExecuted: false,
+      freshRescanRequired: true,
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "current_source_ontology_error_projection_remediation")).toMatchObject({
+      artifact: path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
+    });
+    expect(report.currentSourceOntologyErrorProjectionRemediation).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_ONTOLOGY_ERROR_PROJECTION_CONTRACT",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      findingId: "csf_74a68abc8d7370ed1b78fad3",
+      testsPassed: 12,
+      buildStatus: "PASS",
+      publicErrorCodeCount: 2,
+      upstreamFailureInduced: false,
+      liveProbeCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
       freshRescanRequired: true,
       securityComplete: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",

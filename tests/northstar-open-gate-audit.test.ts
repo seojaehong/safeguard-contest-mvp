@@ -403,6 +403,69 @@ function currentSourceLogoutStorageRemediationFixture(): Record<string, unknown>
   };
 }
 
+function currentSourceOntologyErrorProjectionRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-current-source-security-ontology-error-projection-remediation/v1",
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_ONTOLOGY_ERROR_PROJECTION_CONTRACT",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    productionCommitAtVerification: "fixture-sha",
+    finding: {
+      findingId: "csf_74a68abc8d7370ed1b78fad3",
+      occurrenceId: "occ_51adcb8d80b56ecdf1de9fb2",
+      ruleId: "information-exposure.public-ontology-error-projection",
+      sealedFindingReclassified: false,
+      freshRescanRequired: true,
+    },
+    remediation: {
+      publicErrorCodes: ["ONTOLOGY_GRAPH_BUDGET_EXCEEDED", "ONTOLOGY_GRAPH_UPSTREAM_UNAVAILABLE"],
+      correlationIdGenerated: true,
+      upstreamResponseBodyReturnedPublicly: false,
+      upstreamResponseBodyLogged: false,
+      unknownExceptionMessageLogged: false,
+      diagnosticMessageMaxCharacters: 512,
+      callerAbortPropagationPreserved: true,
+      successOutputBudgetPreserved: true,
+    },
+    verification: {
+      focusedAndAdjacentTests: { filesPassed: 3, testsPassed: 12, testsFailed: 0 },
+      typecheck: { status: "PASS" },
+      productionBuild: { status: "PASS", staticPages: 28 },
+      liveDeployment: {
+        status: "PASS_DEPLOYED_SOURCE_AND_PUBLIC_ADMISSION_BOUNDARY",
+        commitSha: "fixture-sha",
+        branch: "master",
+        environment: "production",
+        publicProbe: {
+          path: "/api/ontology/graph",
+          status: 503,
+          code: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+          upstreamReadReached: false,
+          internalBodyExposed: false,
+        },
+        upstreamFailureInduced: false,
+      },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      immutableOriginalBaselinePreserved: true,
+      sealedCurrentHeadScanPreserved: true,
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      approvalGatedFindingsRemainOpen: true,
+      liveAfterDeploymentRequired: false,
+    },
+  };
+}
+
 function currentSourceSecurityRemediationFollowupFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_PRODUCTION_APPROVAL_FREE_SECURITY_REMEDIATIONS_POST_FIX_RESCAN_PENDING",
@@ -4651,6 +4714,11 @@ function createFixtureRoot(): string {
     rootDir,
     path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
     currentSourceLogoutStorageRemediationFixture(),
+  );
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
+    currentSourceOntologyErrorProjectionRemediationFixture(),
   );
   for (const receipt of approvalFreeRemediation.receipts as Array<{ evidencePath: string }>) {
     writeJson(rootDir, receipt.evidencePath, { verdict: "PASS_FIXTURE" });
@@ -9004,6 +9072,37 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "current_source_logout_storage_remediation")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records deployed ontology error redaction without closing the sealed finding or approval boundaries", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-security-ontology-error-projection-remediation-2026-08-31",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_ontology_error_projection_remediation");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("two fixed public ontology error codes");
+    expect(gate?.detail).toContain("Three files / 12 tests");
+    expect(gate?.detail).toContain("No provider failure was induced");
+    expect(gate?.detail).toContain("sealed finding remains open pending a fresh scan");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      mutationBoundary: { dbMutationPerformed: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.mutationBoundary.dbMutationPerformed = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "current_source_ontology_error_projection_remediation")?.state)
       .toBe("contradicted");
   });
 

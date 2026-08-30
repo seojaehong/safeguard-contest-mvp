@@ -52,6 +52,7 @@ const ARTIFACTS = Object.freeze({
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
+  currentSourceOntologyErrorProjectionRemediation: path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
@@ -581,6 +582,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const currentSourceApprovalFreeSecurityRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceApprovalFreeSecurityRemediation);
   const currentSourceSecurityResourceBudgetRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityResourceBudgetRemediation);
   const currentSourceLogoutStorageRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceLogoutStorageRemediation);
+  const currentSourceOntologyErrorProjectionRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceOntologyErrorProjectionRemediation);
   const currentSourceSecurityRemediationFollowup = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityRemediationFollowup);
   const currentSecurityGovernedPathCompatibility = tryReadJson(rootDir, ARTIFACTS.currentSecurityGovernedPathCompatibility);
   const currentSourceSecurityResidualRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityResidualRemediation);
@@ -729,6 +731,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_approval_free_security_remediation", ARTIFACTS.currentSourceApprovalFreeSecurityRemediation, currentSourceApprovalFreeSecurityRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_resource_budget_remediation", ARTIFACTS.currentSourceSecurityResourceBudgetRemediation, currentSourceSecurityResourceBudgetRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_logout_storage_remediation", ARTIFACTS.currentSourceLogoutStorageRemediation, currentSourceLogoutStorageRemediation),
+    evidenceStatus(rootDir, currentHead, liveCommit, "current_source_ontology_error_projection_remediation", ARTIFACTS.currentSourceOntologyErrorProjectionRemediation, currentSourceOntologyErrorProjectionRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_remediation_followup", ARTIFACTS.currentSourceSecurityRemediationFollowup, currentSourceSecurityRemediationFollowup),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_security_governed_path_compatibility", ARTIFACTS.currentSecurityGovernedPathCompatibility, currentSecurityGovernedPathCompatibility),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_residual_remediation", ARTIFACTS.currentSourceSecurityResidualRemediation, currentSourceSecurityResidualRemediation),
@@ -1068,6 +1071,29 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       freshRescanRequired: recordAt(currentSourceLogoutStorageRemediation, "finding")?.freshRescanRequired === true,
       securityComplete: recordAt(currentSourceLogoutStorageRemediation, "remainingBoundaries")?.securityComplete === true,
       exactSavedShareVerdict: asString(recordAt(currentSourceLogoutStorageRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    currentSourceOntologyErrorProjectionRemediation: {
+      artifact: ARTIFACTS.currentSourceOntologyErrorProjectionRemediation,
+      verdict: isRecord(currentSourceOntologyErrorProjectionRemediation)
+        ? asString(currentSourceOntologyErrorProjectionRemediation.verdict)
+        : "missing",
+      sourceHead: isRecord(currentSourceOntologyErrorProjectionRemediation)
+        ? asString(currentSourceOntologyErrorProjectionRemediation.sourceHead)
+        : "",
+      productionCommit: isRecord(currentSourceOntologyErrorProjectionRemediation)
+        ? asString(currentSourceOntologyErrorProjectionRemediation.productionCommit)
+        : "",
+      findingId: asString(recordAt(currentSourceOntologyErrorProjectionRemediation, "finding")?.findingId),
+      testsPassed: asNumber(recordAt(recordAt(currentSourceOntologyErrorProjectionRemediation, "verification"), "focusedAndAdjacentTests")?.testsPassed),
+      buildStatus: asString(recordAt(recordAt(currentSourceOntologyErrorProjectionRemediation, "verification"), "productionBuild")?.status),
+      publicErrorCodeCount: Array.isArray(recordAt(currentSourceOntologyErrorProjectionRemediation, "remediation")?.publicErrorCodes)
+        ? recordAt(currentSourceOntologyErrorProjectionRemediation, "remediation").publicErrorCodes.length
+        : 0,
+      upstreamFailureInduced: recordAt(recordAt(currentSourceOntologyErrorProjectionRemediation, "verification"), "liveDeployment")?.upstreamFailureInduced === true,
+      liveProbeCode: asString(recordAt(recordAt(recordAt(currentSourceOntologyErrorProjectionRemediation, "verification"), "liveDeployment"), "publicProbe")?.code),
+      freshRescanRequired: recordAt(currentSourceOntologyErrorProjectionRemediation, "finding")?.freshRescanRequired === true,
+      securityComplete: recordAt(currentSourceOntologyErrorProjectionRemediation, "remainingBoundaries")?.securityComplete === true,
+      exactSavedShareVerdict: asString(recordAt(currentSourceOntologyErrorProjectionRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     currentSourceSecurityResidualRemediation: {
       artifact: ARTIFACTS.currentSourceSecurityResidualRemediation,

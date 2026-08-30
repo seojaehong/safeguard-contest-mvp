@@ -75,6 +75,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
+  currentSourceOntologyErrorProjectionRemediation: path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
@@ -9060,6 +9061,109 @@ function evaluateCurrentSourceLogoutStorageRemediationGate(rootDir) {
 
 /**
  * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateCurrentSourceOntologyErrorProjectionRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourceOntologyErrorProjectionRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_source_ontology_error_projection_remediation",
+      label: "Current-source ontology error projection remediation",
+      state: "missing",
+      evidencePath,
+      detail: "The public ontology error-projection remediation receipt is missing or invalid.",
+      nextActions: ["Restore the deployed-source ontology receipt without reclassifying the sealed finding or closing approval boundaries."],
+    });
+  }
+
+  const finding = isRecord(report.finding) ? report.finding : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacentTests) ? verification.focusedAndAdjacentTests : {};
+  const typecheck = isRecord(verification.typecheck) ? verification.typecheck : {};
+  const build = isRecord(verification.productionBuild) ? verification.productionBuild : {};
+  const live = isRecord(verification.liveDeployment) ? verification.liveDeployment : {};
+  const probe = isRecord(live.publicProbe) ? live.publicProbe : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const boundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const publicErrorCodes = Array.isArray(remediation.publicErrorCodes)
+    ? remediation.publicErrorCodes.map(readString).filter(Boolean)
+    : [];
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.schemaVersion) === "safeclaw-current-source-security-ontology-error-projection-remediation/v1"
+    && readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_ONTOLOGY_ERROR_PROJECTION_CONTRACT"
+    && productCommit !== ""
+    && productCommit === readString(report.sourceHead)
+    && productionCommit !== ""
+    && productionCommit === readString(report.productionCommitAtVerification)
+    && productionCommit === readString(live.commitSha)
+    && isGitAncestor(rootDir, productCommit)
+    && isGitAncestor(rootDir, productionCommit)
+    && readString(live.branch) === "master"
+    && readString(live.environment) === "production"
+    && readString(finding.findingId) === "csf_74a68abc8d7370ed1b78fad3"
+    && readString(finding.occurrenceId) === "occ_51adcb8d80b56ecdf1de9fb2"
+    && readString(finding.ruleId) === "information-exposure.public-ontology-error-projection"
+    && finding.sealedFindingReclassified === false
+    && finding.freshRescanRequired === true
+    && publicErrorCodes.length === 2
+    && publicErrorCodes.includes("ONTOLOGY_GRAPH_BUDGET_EXCEEDED")
+    && publicErrorCodes.includes("ONTOLOGY_GRAPH_UPSTREAM_UNAVAILABLE")
+    && remediation.correlationIdGenerated === true
+    && remediation.upstreamResponseBodyReturnedPublicly === false
+    && remediation.upstreamResponseBodyLogged === false
+    && remediation.unknownExceptionMessageLogged === false
+    && readNumber(remediation.diagnosticMessageMaxCharacters) === 512
+    && remediation.callerAbortPropagationPreserved === true
+    && remediation.successOutputBudgetPreserved === true
+    && readNumber(focused.filesPassed) === 3
+    && readNumber(focused.testsPassed) === 12
+    && readNumber(focused.testsFailed) === 0
+    && readString(typecheck.status) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && readString(live.status) === "PASS_DEPLOYED_SOURCE_AND_PUBLIC_ADMISSION_BOUNDARY"
+    && readString(probe.path) === "/api/ontology/graph"
+    && readNumber(probe.status) === 503
+    && readString(probe.code) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+    && probe.upstreamReadReached === false
+    && probe.internalBodyExposed === false
+    && live.upstreamFailureInduced === false
+    && noMutation
+    && boundaries.immutableOriginalBaselinePreserved === true
+    && boundaries.sealedCurrentHeadScanPreserved === true
+    && boundaries.securityComplete === false
+    && readString(boundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && boundaries.approvalGatedFindingsRemainOpen === true
+    && boundaries.liveAfterDeploymentRequired === false;
+
+  return gateResult({
+    id: "current_source_ontology_error_projection_remediation",
+    label: "Current-source ontology error projection remediation",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Current live source returns two fixed public ontology error codes with correlation IDs while excluding upstream bodies and arbitrary exception messages from public JSON and server diagnostics. Three files / 12 tests, typecheck, and the 28-page build pass; live public admission fails closed before upstream work. No provider failure was induced, the sealed finding remains open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
+      : `Ontology-error verdict=${readString(report.verdict) || "missing"}, product/live=${productCommit || "missing"}/${productionCommit || "missing"}, tests=${readNumber(focused.testsPassed)}, publicCodes=${publicErrorCodes.length}, probe=${readNumber(probe.status)}/${readString(probe.code) || "missing"}, upstreamFailureInduced=${live.upstreamFailureInduced === true}, freshRescan=${finding.freshRescanRequired === true}, noMutation=${noMutation}, securityComplete=${boundaries.securityComplete === true}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Include the deployed ontology error contract in the next full repository scan before reclassifying the sealed finding.",
+          "Keep exact saved Share and all DB/provider/vector/wiki/KOSHA approval boundaries open.",
+        ]
+      : ["Restore fixed public codes, body-free diagnostics, aligned source/live identity, verification counts, fresh-rescan boundary, no-mutation boundary, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
  * @param {string[]} governedPaths
  */
 function isCurrentSecurityGovernedPathReceiptCurrent(rootDir, governedPaths) {
@@ -13125,6 +13229,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir),
     evaluateCurrentSourceSecurityResourceBudgetRemediationGate(rootDir),
     evaluateCurrentSourceLogoutStorageRemediationGate(rootDir),
+    evaluateCurrentSourceOntologyErrorProjectionRemediationGate(rootDir),
     evaluateCurrentSourceSecurityRemediationFollowupGate(rootDir),
     evaluateCurrentSecurityGovernedPathCompatibilityGate(rootDir),
     evaluateCurrentSourceSecurityResidualRemediationGate(rootDir),
