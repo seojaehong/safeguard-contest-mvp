@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-30T19:13:33.000Z",
-  "sourceSha": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
+  "generatedAt": "2026-08-30T20:40:59.650Z",
+  "sourceSha": "2ca17434130f006d9471dc7061cb38c977c5e908",
   "overall": "open",
   "gates": [
     {
@@ -329,11 +329,11 @@
       "id": "fresh_current_source_security_scan",
       "state": "notice",
       "label": "Fresh current-source security scan",
-      "evidencePath": "evaluation\\current-source-standard-security-scan-2026-08-31-complete\\report.json",
-      "detail": "Current Standard scan 8d7fd844 is sealed at source/live f6835f8d with 9 findings (6 medium, 3 low), 9 finding write-ups, and partial canonical coverage across 11 recorded surface rows with 15 deferred entries in a 5,241-file repository. The immutable original 18-finding baseline and completed prior scan are preserved. Four approval-free source residuals and five database/RLS/atomicity findings remain at the scanned revision. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
+      "evidencePath": "evaluation\\current-head-standard-security-scan-2026-08-31-complete\\report.json",
+      "detail": "Current Standard scan f218c713 is sealed at source/live b5f14512 with 18 findings (13 medium, 5 low), 18 finding write-ups, and partial canonical coverage across 17 recorded surface rows with 19 deferred entries in a 6,822-file repository. The immutable original 18-finding baseline, completed prior scan, and later 9-finding partial scan are preserved. Eight approval-free source findings, nine database/RLS/atomicity findings, and one approval-sensitive Share capability finding remain open. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Remediate the four approval-free source residuals in bounded waves and rerun focused validation.",
-        "Keep the five database/RLS/atomicity findings approval-gated and exact saved Share separate; do not claim security completion from scan completion."
+        "Remediate the eight approval-free source findings in bounded waves and rerun focused validation.",
+        "Keep the nine database/RLS/atomicity findings approval-gated and the Share capability finding separate; do not claim security completion from scan completion."
       ]
     },
     {
@@ -373,9 +373,9 @@
       "state": "notice",
       "label": "Current security governed-path compatibility",
       "evidencePath": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
-      "detail": "Current source and production include a shared compatibility receipt for 10 security notices across 27 governed paths. Contract regression passed 22 files / 358 tests; the opt-in recipient browser file and its 7 tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. This receipt does not rewrite immutable findings or complete the pending full scan, distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Current source and production include a shared compatibility receipt for 10 security notices across 27 governed paths. Contract regression passed 22 files / 358 tests; the opt-in recipient browser file and its 7 tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. Sealed full scan f218c713 is complete with 18 open findings and partial coverage; this receipt does not rewrite immutable findings or claim security completion. Distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Keep prior live browser receipts visible, run the pending full Desktop scan, and retain distributed, DB/RLS, recipient ACK, and exact saved Share approval boundaries."
+        "Keep prior live browser receipts visible, remediate the eight approval-free findings in bounded waves, and retain distributed, DB/RLS, recipient ACK, and exact saved Share approval boundaries."
       ]
     },
     {

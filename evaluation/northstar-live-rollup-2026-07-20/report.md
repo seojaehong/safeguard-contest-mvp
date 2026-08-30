@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-30T19:13:34.161Z
-Source HEAD at generation: 679bb91711c0afecf12aea8a0b650da8a99c03ff
-Live commit at generation: 679bb91711c0afecf12aea8a0b650da8a99c03ff
+Generated at: 2026-08-30T20:41:00.643Z
+Source HEAD at generation: 2ca17434130f006d9471dc7061cb38c977c5e908
+Live commit at generation: b5f145120766cd2ef904fce38ef32ed1a9facf74
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -439,7 +439,7 @@ Overall: `northstar_open_approval_gated`
 | repository_security_scan_reconciliation | proven | evaluation\repository-security-scan-reconciliation-2026-08-11\report.json |
 | current_security_remediation_ledger | notice | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | notice | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
-| fresh_current_source_security_scan | notice | evaluation\current-source-standard-security-scan-2026-08-31-complete\report.json |
+| fresh_current_source_security_scan | notice | evaluation\current-head-standard-security-scan-2026-08-31-complete\report.json |
 | current_source_approval_free_security_remediation | notice | evaluation\current-source-security-approval-free-remediation-2026-08-31\report.json |
 | current_source_security_resource_budget_remediation | proven | evaluation\current-source-security-resource-budget-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | notice | evaluation\current-source-security-remediation-2026-08-30\report.json |
@@ -500,7 +500,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -532,11 +532,11 @@ Overall: `northstar_open_approval_gated`
 | repository_security_scan_reconciliation | missing | missing | evaluation\repository-security-scan-reconciliation-2026-08-11\report.json |
 | current_security_remediation_ledger | ancestor | ancestor_of_head | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
-| fresh_current_source_security_scan | ancestor | missing | evaluation\current-source-standard-security-scan-2026-08-31-complete\report.json |
+| fresh_current_source_security_scan | ancestor | missing | evaluation\current-head-standard-security-scan-2026-08-31-complete\report.json |
 | current_source_approval_free_security_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-approval-free-remediation-2026-08-31\report.json |
 | current_source_security_resource_budget_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-resource-budget-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | ancestor | ancestor_of_head | evaluation\current-source-security-remediation-2026-08-30\report.json |
-| current_security_governed_path_compatibility | exact | matches_live | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
+| current_security_governed_path_compatibility | ancestor | matches_live_source_mismatch | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
 | current_source_security_residual_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | ancestor | ancestor_of_head | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | ancestor | ancestor_of_head | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |

@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-30T19:13:34.161Z",
-  "head": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
+  "generatedAt": "2026-08-30T20:41:00.643Z",
+  "head": "2ca17434130f006d9471dc7061cb38c977c5e908",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
+    "commitSha": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-r149nkq41-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-a0bb48gkt-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -210,8 +210,8 @@
     {
       "id": "fresh_current_source_security_scan",
       "state": "notice",
-      "artifact": "evaluation\\current-source-standard-security-scan-2026-08-31-complete\\report.json",
-      "detail": "Current Standard scan 8d7fd844 is sealed at source/live f6835f8d with 9 findings (6 medium, 3 low), 9 finding write-ups, and partial canonical coverage across 11 recorded surface rows with 15 deferred entries in a 5,241-file repository. The immutable original 18-finding baseline and completed prior scan are preserved. Four approval-free source residuals and five database/RLS/atomicity findings remain at the scanned revision. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      "artifact": "evaluation\\current-head-standard-security-scan-2026-08-31-complete\\report.json",
+      "detail": "Current Standard scan f218c713 is sealed at source/live b5f14512 with 18 findings (13 medium, 5 low), 18 finding write-ups, and partial canonical coverage across 17 recorded surface rows with 19 deferred entries in a 6,822-file repository. The immutable original 18-finding baseline, completed prior scan, and later 9-finding partial scan are preserved. Eight approval-free source findings, nine database/RLS/atomicity findings, and one approval-sensitive Share capability finding remain open. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_source_approval_free_security_remediation",
@@ -235,7 +235,7 @@
       "id": "current_security_governed_path_compatibility",
       "state": "notice",
       "artifact": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
-      "detail": "Current source and production include a shared compatibility receipt for 10 security notices across 27 governed paths. Contract regression passed 22 files / 358 tests; the opt-in recipient browser file and its 7 tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. This receipt does not rewrite immutable findings or complete the pending full scan, distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Current source and production include a shared compatibility receipt for 10 security notices across 27 governed paths. Contract regression passed 22 files / 358 tests; the opt-in recipient browser file and its 7 tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. Sealed full scan f218c713 is complete with 18 open findings and partial coverage; this receipt does not rewrite immutable findings or claim security completion. Distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_source_security_residual_remediation",
@@ -798,21 +798,21 @@
     "approvalFreeProductSourceRemediation": "LIVE_SOURCE_INCLUDED_FRESH_RESCAN_REQUIRED"
   },
   "freshCurrentSourceSecurityScan": {
-    "artifact": "evaluation\\current-source-standard-security-scan-2026-08-31-complete\\report.json",
-    "verdict": "NOTICE_CURRENT_SOURCE_STANDARD_SCAN_9_FINDINGS_PARTIAL_COVERAGE",
-    "scanId": "8d7fd844-d4cb-49ab-b984-36ed6ab0beba",
-    "sourceHead": "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c",
-    "deployedProductSource": "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c",
-    "reportableFindingCount": 9,
-    "mediumFindingCount": 6,
-    "lowFindingCount": 3,
+    "artifact": "evaluation\\current-head-standard-security-scan-2026-08-31-complete\\report.json",
+    "verdict": "NOTICE_CURRENT_HEAD_STANDARD_SCAN_18_FINDINGS_PARTIAL_COVERAGE",
+    "scanId": "f218c713-1a1c-4f4e-9777-8095926be1df",
+    "sourceHead": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
+    "deployedProductSource": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
+    "reportableFindingCount": 18,
+    "mediumFindingCount": 13,
+    "lowFindingCount": 5,
     "coverageCompleteness": "partial",
-    "reviewedSurfaceCount": 11,
-    "deferredCoverageItemCount": 15,
-    "approvalGatedDatabaseOrAtomicityCount": 5,
-    "approvalSensitiveShareCapabilityCount": 0,
-    "approvalFreeProductSourceResidualCount": 4,
-    "fullyClosedBoundedSourceCandidateCount": 0,
+    "reviewedSurfaceCount": 17,
+    "deferredCoverageItemCount": 19,
+    "approvalGatedDatabaseOrAtomicityCount": 9,
+    "approvalSensitiveShareCapabilityCount": 1,
+    "approvalFreeProductSourceResidualCount": 8,
+    "fullyClosedBoundedSourceCandidateCount": 1,
     "freshFullRepositoryScanCompleted": true,
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
@@ -2023,10 +2023,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
+      "sourceCommit": "2ca17434130f006d9471dc7061cb38c977c5e908",
       "sourceStatus": "exact",
-      "productionCommit": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
-      "productionStatus": "matches_live"
+      "productionCommit": "2ca17434130f006d9471dc7061cb38c977c5e908",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -2278,8 +2278,8 @@
     },
     {
       "id": "fresh_current_source_security_scan",
-      "artifact": "evaluation\\current-source-standard-security-scan-2026-08-31-complete\\report.json",
-      "sourceCommit": "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c",
+      "artifact": "evaluation\\current-head-standard-security-scan-2026-08-31-complete\\report.json",
+      "sourceCommit": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
       "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
@@ -2312,9 +2312,9 @@
       "id": "current_security_governed_path_compatibility",
       "artifact": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
       "sourceCommit": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
-      "sourceStatus": "exact",
-      "productionCommit": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
-      "productionStatus": "matches_live"
+      "sourceStatus": "ancestor",
+      "productionCommit": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
+      "productionStatus": "matches_live_source_mismatch"
     },
     {
       "id": "current_source_security_residual_remediation",
