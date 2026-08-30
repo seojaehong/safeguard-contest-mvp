@@ -1,11 +1,12 @@
 {
   "schemaVersion": "safeclaw-current-source-security-ontology-error-projection-remediation/v1",
-  "generatedAt": "2026-08-30T21:48:58.7398249Z",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_ONTOLOGY_ERROR_PROJECTION_LIVE_PENDING",
+  "generatedAt": "2026-08-30T21:52:08.2471877Z",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_ONTOLOGY_ERROR_PROJECTION_CONTRACT",
   "sourceBaseCommit": "4e494d519c68b15541a3f94c21ba3871d2b42c92",
   "sourceHead": "68a8f9dae349cb03d8c77abedd27040b9679bde0",
   "productCommit": "68a8f9dae349cb03d8c77abedd27040b9679bde0",
-  "productionCommitAtVerification": "4e494d519c68b15541a3f94c21ba3871d2b42c92",
+  "productionCommit": "05e70640ec305ff651eba1c42654a6a3b8a02f1e",
+  "productionCommitAtVerification": "05e70640ec305ff651eba1c42654a6a3b8a02f1e",
   "finding": {
     "findingId": "csf_74a68abc8d7370ed1b78fad3",
     "occurrenceId": "occ_51adcb8d80b56ecdf1de9fb2",
@@ -55,11 +56,18 @@
       "staticPages": 28
     },
     "liveDeployment": {
-      "status": "PENDING",
-      "commitSha": "4e494d519c68b15541a3f94c21ba3871d2b42c92",
+      "status": "PASS_DEPLOYED_SOURCE_AND_PUBLIC_ADMISSION_BOUNDARY",
+      "commitSha": "05e70640ec305ff651eba1c42654a6a3b8a02f1e",
       "branch": "master",
       "environment": "production",
-      "deploymentUrl": "safeguard-contest-9r5nvheg5-seojaehongs-projects.vercel.app",
+      "deploymentUrl": "safeguard-contest-n64icv8ub-seojaehongs-projects.vercel.app",
+      "publicProbe": {
+        "path": "/api/ontology/graph",
+        "status": 503,
+        "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        "upstreamReadReached": false,
+        "internalBodyExposed": false
+      },
       "upstreamFailureInduced": false,
       "upstreamFailureInductionReason": "A live provider failure was not induced; the bounded local contract and deployed source marker are reported separately."
     }
@@ -78,6 +86,6 @@
     "securityComplete": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedFindingsRemainOpen": true,
-    "liveAfterDeploymentRequired": true
+    "liveAfterDeploymentRequired": false
   }
 }

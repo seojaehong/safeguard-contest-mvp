@@ -1,8 +1,8 @@
 # SafeClaw public ontology error projection remediation
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_ONTOLOGY_ERROR_PROJECTION_LIVE_PENDING`
+- Verdict: `PASS_LIVE_DEPLOYED_SOURCE_ONTOLOGY_ERROR_PROJECTION_CONTRACT`
 - Product commit: `68a8f9dae349cb03d8c77abedd27040b9679bde0`
-- Production at verification: `4e494d519c68b15541a3f94c21ba3871d2b42c92`
+- Production at verification: `05e70640ec305ff651eba1c42654a6a3b8a02f1e`
 - Finding: `csf_74a68abc8d7370ed1b78fad3` (`information-exposure.public-ontology-error-projection`, medium)
 
 ## Remediation
@@ -17,9 +17,10 @@ Unknown exception text is not logged. This also covers malformed successful resp
 - Negative body-projection coverage: non-2xx and malformed-JSON private markers are absent from both public JSON and server diagnostics.
 - Strict TypeScript: `npm.cmd run typecheck` PASS.
 - Production build: Next.js `15.5.22`, `28/28` static pages PASS.
-- Production marker is still `4e494d51`; deployment of product commit `68a8f9da` is pending.
+- Production marker `05e70640` contains product commit `68a8f9da`.
+- Live read-only `/api/ontology/graph` returned `503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE` before upstream work, with no internal body exposure.
 
-No live upstream failure was induced. The current receipt proves the local behavior contract; the deployed source marker will be verified separately after production reaches the product commit.
+No live upstream failure was induced. The receipt proves the bounded local failure behavior, deployed source marker, and the live public admission boundary separately; it does not claim an induced provider-failure experiment.
 
 ## Boundary
 
