@@ -25,6 +25,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from archive_safety import BoundedZipReader
+from parser_safety import ParserBudget
 
 
 DOCUMENTS_RISK = ["점검결과 요약", "위험성평가표", "작업계획서"]
@@ -161,30 +162,39 @@ def infer_controls(*values: str) -> list[str]:
     return sorted(set(controls), key=controls.index)
 
 
-def read_csv_dicts(path: Path) -> tuple[list[dict[str, str]], str]:
+def read_csv_dicts(path: Path, budget: ParserBudget | None = None) -> tuple[list[dict[str, str]], str]:
+    parser_budget = budget or ParserBudget()
+    parser_budget.assert_input_file(path)
     encodings = ["utf-8-sig", "cp949", "euc-kr"]
     last_error: Exception | None = None
     for encoding in encodings:
         try:
             with path.open("r", encoding=encoding, newline="") as file:
-                rows = list(csv.DictReader(file))
+                reader = csv.DictReader(file)
+                parser_budget.start_sheet()
+                rows: list[dict[str, str]] = []
+                for row in reader:
+                    parser_budget.consume_row(len(row))
+                    rows.append(row)
             return rows, encoding
         except UnicodeDecodeError as exc:
             last_error = exc
     raise RuntimeError(f"CSV 인코딩을 확인할 수 없습니다: {path} ({last_error})")
 
 
-def first_non_empty_header(rows: Iterable[tuple[object, ...]]) -> tuple[list[str], list[tuple[object, ...]]]:
-    consumed: list[tuple[object, ...]] = []
+def first_non_empty_header(
+    rows: Iterable[tuple[object, ...]],
+    budget: ParserBudget,
+) -> tuple[list[str], Iterable[tuple[object, ...]]]:
+    iterator = iter(rows)
     header: list[str] = []
-    for row in rows:
+    for row in iterator:
+        budget.consume_row(len(row))
         values = [compact_text(cell, 120) for cell in row]
         if sum(1 for value in values if value) >= 3:
             header = [value or f"column_{index + 1}" for index, value in enumerate(values)]
             break
-    for row in rows:
-        consumed.append(row)
-    return header, consumed
+    return header, iterator
 
 
 def is_repeated_sif_construction_subheader(header: Sequence[str], row: Sequence[object]) -> bool:
@@ -211,13 +221,17 @@ def parse_sif_archive(path: Path) -> tuple[ReferenceSource, list[ReferenceItem]]
         metadata={"parser": "openpyxl", "fileName": path.name},
     )
     items: list[ReferenceItem] = []
+    parser_budget = ParserBudget()
+    parser_budget.assert_input_file(path)
     workbook = load_workbook(path, read_only=True, data_only=True)
     try:
         for sheet_name in workbook.sheetnames:
+            parser_budget.start_sheet()
             sheet = workbook[sheet_name]
             rows_iter = sheet.iter_rows(values_only=True)
-            header, data_rows = first_non_empty_header(rows_iter)
+            header, data_rows = first_non_empty_header(rows_iter, parser_budget)
             for index, row in enumerate(data_rows, start=1):
+                parser_budget.consume_row(len(row))
                 if index == 1 and is_repeated_sif_construction_subheader(header, row):
                     LOGGER.info("Skipping repeated SIF construction subheader: sheet=%s data_row_index=%d", sheet_name, index)
                     continue

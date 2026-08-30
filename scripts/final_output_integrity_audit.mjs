@@ -3,8 +3,11 @@ import childProcess from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import AdmZip from "adm-zip";
-import ExcelJS from "exceljs";
+import {
+  assertFinalOutputFileBudget,
+  extractBudgetedHwpxText,
+  extractBudgetedXlsxText
+} from "./final_output_parser_safety.mjs";
 
 const startedAt = Date.now();
 const rootDir = process.cwd();
@@ -211,30 +214,6 @@ function extractTextFromJson(filePath) {
   return JSON.stringify(parsed, null, 2);
 }
 
-function extractTextFromHwpx(filePath) {
-  const zip = new AdmZip(filePath);
-  return zip.getEntries()
-    .filter((entry) => entry.entryName.endsWith(".xml"))
-    .map((entry) => entry.getData().toString("utf8").replace(/<[^>]+>/g, " "))
-    .join("\n")
-    .replace(/\s+/g, " ");
-}
-
-async function extractTextFromXlsx(filePath) {
-  const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.readFile(filePath);
-  const values = [];
-  workbook.eachSheet((sheet) => {
-    sheet.eachRow((row) => {
-      row.eachCell((cell) => {
-        const value = cell.value;
-        if (value !== null && value !== undefined) values.push(String(value));
-      });
-    });
-  });
-  return values.join("\n");
-}
-
 async function auditGeneratedFile(item, scenario) {
   const absolutePath = path.join(rootDir, item.file);
   const extension = path.extname(absolutePath).toLowerCase();
@@ -251,6 +230,7 @@ async function auditGeneratedFile(item, scenario) {
   }
 
   try {
+    assertFinalOutputFileBudget(absolutePath);
     if ([".txt", ".csv", ".html", ".doc", ".xls"].includes(extension)) {
       text = fs.readFileSync(absolutePath, "utf8");
       contentMode = "text";
@@ -258,10 +238,10 @@ async function auditGeneratedFile(item, scenario) {
       text = extractTextFromJson(absolutePath);
       contentMode = "json";
     } else if (extension === ".hwpx") {
-      text = extractTextFromHwpx(absolutePath);
+      text = extractBudgetedHwpxText(absolutePath);
       contentMode = "hwpx-xml";
     } else if (extension === ".xlsx") {
-      text = await extractTextFromXlsx(absolutePath);
+      text = await extractBudgetedXlsxText(absolutePath);
       contentMode = "xlsx-cells";
     } else if (extension === ".pdf") {
       const header = fs.readFileSync(absolutePath).subarray(0, 5).toString("utf8");

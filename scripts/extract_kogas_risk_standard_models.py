@@ -16,6 +16,13 @@ from typing import Iterable, Sequence
 import xlrd
 from openpyxl import load_workbook
 
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from archive_safety import BoundedZipReader
+from parser_safety import ParserBudget
+
 
 ROOT_SOURCE_ID = "kogas-risk-standard-models-20240909"
 PUBLISHED_AT = "2024-09-09"
@@ -135,25 +142,32 @@ def normalize_header_value(value: str) -> str:
     return text.replace("(", "").replace(")", "").lower()
 
 
-def open_workbook_rows(member_name: str, payload: bytes) -> list[tuple[str, list[list[str]]]]:
+def open_workbook_rows(
+    member_name: str,
+    payload: bytes,
+    budget: ParserBudget,
+) -> list[tuple[str, list[list[str]]]]:
     if member_name.lower().endswith(".xlsx"):
         workbook = load_workbook(io.BytesIO(payload), read_only=True, data_only=True)
         sheets: list[tuple[str, list[list[str]]]] = []
         for sheet_name in workbook.sheetnames:
+            budget.start_sheet()
             worksheet = workbook[sheet_name]
-            rows = [
-                [compact_text(cell) for cell in row]
-                for row in worksheet.iter_rows(values_only=True)
-            ]
+            rows: list[list[str]] = []
+            for row in worksheet.iter_rows(values_only=True):
+                budget.consume_row(len(row))
+                rows.append([compact_text(cell) for cell in row])
             sheets.append((sheet_name, rows))
         return sheets
 
     workbook = xlrd.open_workbook(file_contents=payload)
     sheets = []
     for sheet_name in workbook.sheet_names():
+        budget.start_sheet()
         worksheet = workbook.sheet_by_name(sheet_name)
         rows = []
         for row_index in range(worksheet.nrows):
+            budget.consume_row(worksheet.ncols)
             rows.append([
                 compact_text(worksheet.cell_value(row_index, column_index))
                 for column_index in range(worksheet.ncols)
@@ -913,8 +927,11 @@ def generate_package(archive_path: Path, output_dir: Path, sample_limit: int) ->
     file_format_counts = {"xls": 0, "xlsx": 0, "hwp": 0, "zip": 0}
     total_sheet_count = 0
 
+    parser_budget = ParserBudget()
+    parser_budget.assert_input_file(archive_path)
     with zipfile.ZipFile(archive_path) as archive:
-        file_infos = [info for info in archive.infolist() if not info.is_dir()]
+        bounded_archive = BoundedZipReader(archive)
+        file_infos = [info for info in bounded_archive.infos if not info.is_dir()]
         for info in file_infos:
             member_path = normalize_member_path(info.filename)
             suffix = Path(member_path).suffix.lower()
@@ -992,8 +1009,8 @@ def generate_package(archive_path: Path, output_dir: Path, sample_limit: int) ->
                 continue
 
             file_format_counts[suffix.lstrip(".")] += 1
-            payload = archive.read(info)
-            sheets = open_workbook_rows(member_path, payload)
+            payload = bounded_archive.read(info)
+            sheets = open_workbook_rows(member_path, payload, parser_budget)
             total_sheet_count += len(sheets)
             main_sheet_name, main_sheet_rows = detect_main_sheet(sheets)
             process_name = detect_process_name(main_sheet_rows or [])

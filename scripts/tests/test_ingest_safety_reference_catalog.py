@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import importlib.util
 import sys
 import unittest
@@ -9,8 +10,13 @@ from types import ModuleType
 
 from openpyxl import Workbook
 
+SCRIPTS_DIR = Path(__file__).resolve().parents[1]
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
 
-SCRIPT_PATH = Path(__file__).parents[1] / "ingest_safety_reference_catalog.py"
+from parser_safety import ParserBudget, ParserBudgetError, ParserLimits
+
+SCRIPT_PATH = SCRIPTS_DIR / "ingest_safety_reference_catalog.py"
 
 
 def load_ingester() -> ModuleType:
@@ -43,6 +49,19 @@ class ParseSifArchiveTest(unittest.TestCase):
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0].payload["rowIndex"], 2)
         self.assertIn("굴착면에서 발생한 사고", items[0].body)
+
+    def test_rejects_csv_rows_above_the_cell_budget(self) -> None:
+        ingester = load_ingester()
+        with TemporaryDirectory() as temporary_directory:
+            csv_path = Path(temporary_directory) / "catalog.csv"
+            with csv_path.open("w", encoding="utf-8", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow(["공정", "위험", "조치"])
+                writer.writerow(["굴착", "추락", "난간"])
+            budget = ParserBudget(ParserLimits(max_cells_per_row=2))
+
+            with self.assertRaisesRegex(ParserBudgetError, "row cells exceed limit"):
+                ingester.read_csv_dicts(csv_path, budget)
 
 
 if __name__ == "__main__":
