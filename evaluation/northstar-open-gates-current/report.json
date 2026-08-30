@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-30T20:40:59.650Z",
-  "sourceSha": "2ca17434130f006d9471dc7061cb38c977c5e908",
+  "generatedAt": "2026-08-30T21:38:14.336Z",
+  "sourceSha": "a4c470a7af91a7f9a5c8318c5d2fa82ffbe088a0",
   "overall": "open",
   "gates": [
     {
@@ -356,6 +356,17 @@
       "nextActions": [
         "Keep the five database/RLS/atomicity findings on their explicit approval path and do not reclassify the failed scan manifest as complete.",
         "Activate durable admission in an approved environment before claiming direct live ontology or MCP provider budget execution; keep exact saved Share separate."
+      ]
+    },
+    {
+      "id": "current_source_logout_storage_remediation",
+      "state": "notice",
+      "label": "Current-source logout storage remediation",
+      "evidencePath": "evaluation\\current-source-security-logout-storage-remediation-2026-08-31\\report.json",
+      "detail": "Current live source clears worker/workpack/editorial browser content on explicit logout and SIGNED_OUT while preserving only theme and AI-mode preferences; workspace navigation prevents autosave repopulation. Five files / 100 tests, typecheck, 28-page build, and the 33-page/24-component static audit pass. Behavioral live logout was intentionally not executed because it would mutate the signed-in session. The sealed finding remains open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Include the deployed logout contract in the next full repository scan before reclassifying the sealed finding.",
+        "Keep exact saved Share and all DB/provider/vector/wiki/KOSHA approval boundaries open."
       ]
     },
     {

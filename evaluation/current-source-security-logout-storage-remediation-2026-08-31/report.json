@@ -3,6 +3,8 @@
   "generatedAt": "2026-08-30T20:48:00.000Z",
   "verdict": "PASS_LIVE_DEPLOYED_SOURCE_LOGOUT_USER_CONTENT_PURGE_CONTRACT",
   "sourceBaseCommit": "e1669ffbdbe2d9f1a73d2d365f924c9dc674fb98",
+  "sourceHead": "e7533365e3ceb9ceef733587e05709cb59860d4f",
+  "productionCommit": "e7533365e3ceb9ceef733587e05709cb59860d4f",
   "productCommit": "e7533365e3ceb9ceef733587e05709cb59860d4f",
   "productionCommitAtVerification": "e7533365e3ceb9ceef733587e05709cb59860d4f",
   "finding": {

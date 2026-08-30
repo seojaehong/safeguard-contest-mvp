@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-30T20:41:00.643Z",
-  "head": "2ca17434130f006d9471dc7061cb38c977c5e908",
+  "generatedAt": "2026-08-30T21:38:19.446Z",
+  "head": "a4c470a7af91a7f9a5c8318c5d2fa82ffbe088a0",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
+    "commitSha": "a4c470a7af91a7f9a5c8318c5d2fa82ffbe088a0",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-a0bb48gkt-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-qyd02sdhe-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 87
+    "gateCount": 88
   },
   "provenGates": [
     {
@@ -224,6 +224,12 @@
       "state": "proven",
       "artifact": "evaluation\\current-source-security-resource-budget-remediation-2026-08-31\\report.json",
       "detail": "Five approval-free resource-budget findings are source-tested and live-deployed: operator parser admission, bounded learning export, shared MCP provider admission with cancellation, paginated ontology graph budgets, and final MCP result ceilings. The canonical 10-finding files exist, but their manifest remains failed because durable scan completion did not synchronize; this is not a successful rescan or a security-complete claim. Direct live graph/provider budget execution was not proven because public durable admission failed closed before graph work and MCP provider fanout was not invoked. Five database/RLS/atomicity findings remain approval-gated, no mutation occurred, the original 18-finding baseline is preserved, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "current_source_logout_storage_remediation",
+      "state": "notice",
+      "artifact": "evaluation\\current-source-security-logout-storage-remediation-2026-08-31\\report.json",
+      "detail": "Current live source clears worker/workpack/editorial browser content on explicit logout and SIGNED_OUT while preserving only theme and AI-mode preferences; workspace navigation prevents autosave repopulation. Five files / 100 tests, typecheck, 28-page build, and the 33-page/24-component static audit pass. Behavioral live logout was intentionally not executed because it would mutate the signed-in session. The sealed finding remains open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_source_security_remediation_followup",
@@ -841,6 +847,20 @@
     "approvalGatedFindingCount": 5,
     "directLiveBudgetExecutionProven": false,
     "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "currentSourceLogoutStorageRemediation": {
+    "artifact": "evaluation\\current-source-security-logout-storage-remediation-2026-08-31\\report.json",
+    "verdict": "PASS_LIVE_DEPLOYED_SOURCE_LOGOUT_USER_CONTENT_PURGE_CONTRACT",
+    "sourceHead": "e7533365e3ceb9ceef733587e05709cb59860d4f",
+    "productionCommit": "e7533365e3ceb9ceef733587e05709cb59860d4f",
+    "findingId": "csf_939ccf5e3f2f0fa1963be3e5",
+    "testsPassed": 100,
+    "buildStatus": "PASS",
+    "staticViolationCount": 0,
+    "behavioralLogoutExecuted": false,
+    "freshRescanRequired": true,
+    "securityComplete": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "currentSourceSecurityResidualRemediation": {
@@ -2023,10 +2043,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "2ca17434130f006d9471dc7061cb38c977c5e908",
+      "sourceCommit": "a4c470a7af91a7f9a5c8318c5d2fa82ffbe088a0",
       "sourceStatus": "exact",
-      "productionCommit": "2ca17434130f006d9471dc7061cb38c977c5e908",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "a4c470a7af91a7f9a5c8318c5d2fa82ffbe088a0",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -2301,6 +2321,14 @@
       "productionStatus": "ancestor_of_head"
     },
     {
+      "id": "current_source_logout_storage_remediation",
+      "artifact": "evaluation\\current-source-security-logout-storage-remediation-2026-08-31\\report.json",
+      "sourceCommit": "e7533365e3ceb9ceef733587e05709cb59860d4f",
+      "sourceStatus": "ancestor",
+      "productionCommit": "e7533365e3ceb9ceef733587e05709cb59860d4f",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
       "id": "current_source_security_remediation_followup",
       "artifact": "evaluation\\current-source-security-remediation-2026-08-30\\report.json",
       "sourceCommit": "a1a9da9bd663c05d69f8dbb00823e2761f19ad64",
@@ -2314,7 +2342,7 @@
       "sourceCommit": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
       "sourceStatus": "ancestor",
       "productionCommit": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
-      "productionStatus": "matches_live_source_mismatch"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "current_source_security_residual_remediation",
