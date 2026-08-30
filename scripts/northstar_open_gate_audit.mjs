@@ -72,6 +72,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-31-complete", "report.json"),
+  currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
@@ -8598,6 +8599,87 @@ function evaluateFreshCurrentSourceSecurityScanGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourceApprovalFreeSecurityRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_source_approval_free_security_remediation",
+      label: "Current-source approval-free security remediation",
+      state: "missing",
+      evidencePath,
+      detail: "The four-residual current-source remediation receipt is missing or invalid.",
+      nextActions: ["Restore the bounded four-residual receipt without rewriting the sealed scan or changing approval boundaries."],
+    });
+  }
+
+  const scannedBaseline = isRecord(report.scannedBaseline) ? report.scannedBaseline : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
+  const receipts = Array.isArray(report.receipts) ? report.receipts.filter(isRecord) : [];
+  const expectedIds = [
+    "structured-xlsx-render-budget",
+    "operator-document-parser-admission",
+    "orchestration-smoke-csv-neutralization",
+    "hwpx-anonymization-archive-budget",
+  ];
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = boundaries.dbMutationPerformed === false
+    && boundaries.providerDispatchCalled === false
+    && boundaries.shareSessionCreated === false
+    && boundaries.embeddingOrVectorMutationPerformed === false
+    && boundaries.wikiPublicationPerformed === false
+    && boundaries.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.schemaVersion) === "safeclaw-current-source-security-approval-free-remediation/v1"
+    && readString(report.verdict) === "PASS_LIVE_PRODUCTION_FOUR_APPROVAL_FREE_SECURITY_REMEDIATIONS_RESCAN_PENDING"
+    && sourceHead !== ""
+    && sourceHead === productionCommit
+    && isGitAncestor(rootDir, sourceHead)
+    && readString(scannedBaseline.scanId) === "8d7fd844-d4cb-49ab-b984-36ed6ab0beba"
+    && readNumber(scannedBaseline.reportableFindingCount) === 9
+    && readNumber(scannedBaseline.approvalFreeFindingCount) === 4
+    && readNumber(scannedBaseline.approvalGatedFindingCount) === 5
+    && scannedBaseline.immutableOriginalBaselinePreserved === true
+    && readNumber(remediation.currentSourceRemediatedCount) === 4
+    && readNumber(remediation.currentSourceOpenApprovalFreeCount) === 0
+    && remediation.scanFindingReclassificationPerformed === false
+    && receipts.length === 4
+    && expectedIds.every((id) => receipts.some((receipt) => readString(receipt.id) === id
+      && readString(receipt.verdict).startsWith("PASS_")
+      && readString(receipt.evidencePath) !== ""
+      && isRegularEvidenceFile(rootDir, readString(receipt.evidencePath))))
+    && boundaries.freshFullRepositoryRescanRequired === true
+    && boundaries.securityCompleteClaimAllowed === false
+    && noMutation
+    && readString(boundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(boundaries.databaseSecurityRemediation) === "APPROVAL_GATED"
+    && readString(boundaries.providerDispatchPersistence) === "APPROVAL_GATED"
+    && readString(boundaries.llmWikiPublication) === "APPROVAL_GATED"
+    && readString(boundaries.sifVectorRuntime) === "APPROVAL_GATED"
+    && readString(boundaries.koshaExactRegistryPromotion) === "APPROVAL_GATED";
+
+  return gateResult({
+    id: "current_source_approval_free_security_remediation",
+    label: "Current-source approval-free security remediation",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "All four approval-free findings from Standard scan 8d7fd844 now have bounded current-source and aligned-production remediation receipts: structured XLSX render budgeting, operator parser admission, orchestration smoke CSV formula neutralization, and HWPX archive anonymization. The sealed 9-finding scan is unchanged, the five database/RLS/atomicity findings remain approval-gated, a fresh full repository rescan is still required before reclassification, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      : `Current-source security remediation verdict=${readString(report.verdict) || "missing"}, source=${sourceHead || "missing"}, production=${productionCommit || "missing"}, receipts=${receipts.length}, remediated=${readNumber(remediation.currentSourceRemediatedCount)}, openApprovalFree=${readNumber(remediation.currentSourceOpenApprovalFreeCount)}, noMutation=${noMutation}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Start a new Desktop Standard scan over the current repository HEAD before reclassifying the four sealed findings or making any security-complete claim.",
+          "Keep the five database/RLS/atomicity findings and exact saved Share on their existing approval paths.",
+        ]
+      : ["Restore all four bounded receipts, aligned source/production identity, immutable scan baseline, no-mutation boundary, rescan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateCurrentSourceSecurityRemediationFollowupGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.currentSourceSecurityRemediationFollowup;
   const report = readJsonFile(rootDir, evidencePath);
@@ -12757,6 +12839,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentSecurityRemediationLedgerGate(rootDir),
     evaluateCurrentRepositorySecurityRescanGate(rootDir),
     evaluateFreshCurrentSourceSecurityScanGate(rootDir),
+    evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir),
     evaluateCurrentSourceSecurityRemediationFollowupGate(rootDir),
     evaluateCurrentSecurityGovernedPathCompatibilityGate(rootDir),
     evaluateCurrentSourceSecurityResidualRemediationGate(rootDir),

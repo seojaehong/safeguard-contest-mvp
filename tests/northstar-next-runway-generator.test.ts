@@ -584,6 +584,21 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceApprovalFreeSecurityRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    scanId: string;
+    reportableFindingCount: number | null;
+    approvalFreeFindingCount: number | null;
+    approvalGatedFindingCount: number | null;
+    currentSourceRemediatedCount: number | null;
+    currentSourceOpenApprovalFreeCount: number | null;
+    scanFindingReclassificationPerformed: boolean;
+    freshFullRepositoryRescanRequired: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceSecurityResidualRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1592,6 +1607,32 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
       koshaExactRegistryPromotion: "APPROVAL_GATED",
       freshFullRepositoryScanCompleted: true,
       securityCompleteClaimAllowed: false,
+    },
+  };
+}
+
+function currentSourceApprovalFreeSecurityRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-current-source-security-approval-free-remediation/v1",
+    verdict: "PASS_LIVE_PRODUCTION_FOUR_APPROVAL_FREE_SECURITY_REMEDIATIONS_RESCAN_PENDING",
+    sourceHead: "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c",
+    productionCommit: "f6835f8dd772c032cf9f548b8dbacbabb43cdb0c",
+    scannedBaseline: {
+      scanId: "8d7fd844-d4cb-49ab-b984-36ed6ab0beba",
+      reportableFindingCount: 9,
+      approvalFreeFindingCount: 4,
+      approvalGatedFindingCount: 5,
+      immutableOriginalBaselinePreserved: true,
+    },
+    remediation: {
+      currentSourceRemediatedCount: 4,
+      currentSourceOpenApprovalFreeCount: 0,
+      scanFindingReclassificationPerformed: false,
+    },
+    boundaries: {
+      freshFullRepositoryRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   };
 }
@@ -3233,6 +3274,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
   });
   writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-complete/report.json", freshCurrentSourceSecurityScanFixture());
+  writeJson(root, "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json", currentSourceApprovalFreeSecurityRemediationFixture());
   writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-complete/canonical/scan-manifest.json", { scan: { status: "completed" } });
   writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-complete/canonical/findings.json", { findings: [] });
   writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-complete/canonical/coverage.json", { completeness: "partial" });
@@ -4865,6 +4907,24 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       state: "notice",
       reason: expect.stringContaining("9 open findings"),
     }));
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "current_source_approval_free_security_remediation",
+      state: "notice",
+      reason: expect.stringContaining("4/4 bounded approval-free remediations"),
+    }));
+    expect(report.currentSourceApprovalFreeSecurityRemediation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_FOUR_APPROVAL_FREE_SECURITY_REMEDIATIONS_RESCAN_PENDING",
+      scanId: "8d7fd844-d4cb-49ab-b984-36ed6ab0beba",
+      reportableFindingCount: 9,
+      approvalFreeFindingCount: 4,
+      approvalGatedFindingCount: 5,
+      currentSourceRemediatedCount: 4,
+      currentSourceOpenApprovalFreeCount: 0,
+      scanFindingReclassificationPerformed: false,
+      freshFullRepositoryRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "current_source_security_residual_remediation",
       state: "notice",

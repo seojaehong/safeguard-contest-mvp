@@ -54,6 +54,7 @@ const ARTIFACTS = Object.freeze({
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-31-complete", "report.json"),
+  currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
@@ -2413,6 +2414,29 @@ function freshCurrentSourceSecurityScanSummary(report) {
 }
 
 /** @param {unknown} report */
+function currentSourceApprovalFreeSecurityRemediationSummary(report) {
+  if (!isRecord(report)) return {};
+  const baseline = isRecord(report.scannedBaseline) ? report.scannedBaseline : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const boundaries = isRecord(report.boundaries) ? report.boundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(report.productionCommit),
+    scanId: asString(baseline.scanId),
+    reportableFindingCount: typeof baseline.reportableFindingCount === "number" ? baseline.reportableFindingCount : null,
+    approvalFreeFindingCount: typeof baseline.approvalFreeFindingCount === "number" ? baseline.approvalFreeFindingCount : null,
+    approvalGatedFindingCount: typeof baseline.approvalGatedFindingCount === "number" ? baseline.approvalGatedFindingCount : null,
+    currentSourceRemediatedCount: typeof remediation.currentSourceRemediatedCount === "number" ? remediation.currentSourceRemediatedCount : null,
+    currentSourceOpenApprovalFreeCount: typeof remediation.currentSourceOpenApprovalFreeCount === "number" ? remediation.currentSourceOpenApprovalFreeCount : null,
+    scanFindingReclassificationPerformed: asBoolean(remediation.scanFindingReclassificationPerformed),
+    freshFullRepositoryRescanRequired: asBoolean(boundaries.freshFullRepositoryRescanRequired),
+    securityCompleteClaimAllowed: asBoolean(boundaries.securityCompleteClaimAllowed),
+    exactSavedShareVerdict: asString(boundaries.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
 function currentSourceSecurityRemediationFollowupSummary(report) {
   if (!isRecord(report)) return {};
   const baseline = isRecord(report.baseline) ? report.baseline : {};
@@ -3565,6 +3589,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.freshCurrentSourceSecurityScan,
   );
+  const currentSourceApprovalFreeSecurityRemediation = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.currentSourceApprovalFreeSecurityRemediation,
+  );
   const currentSourceSecurityRemediationFollowup = readOptionalJson(
     options.rootDir,
     ARTIFACTS.currentSourceSecurityRemediationFollowup,
@@ -3724,6 +3752,9 @@ export function buildNorthstarNextRunway(options) {
   );
   const freshCurrentSourceSecurityScanResult = freshCurrentSourceSecurityScanSummary(
     freshCurrentSourceSecurityScan,
+  );
+  const currentSourceApprovalFreeSecurityRemediationResult = currentSourceApprovalFreeSecurityRemediationSummary(
+    currentSourceApprovalFreeSecurityRemediation,
   );
   const currentSourceSecurityRemediationFollowupResult = currentSourceSecurityRemediationFollowupSummary(
     currentSourceSecurityRemediationFollowup,
@@ -3908,6 +3939,11 @@ export function buildNorthstarNextRunway(options) {
         gate: "fresh_current_source_security_scan",
         state: "notice",
         reason: `fresh Standard scan ${freshCurrentSourceSecurityScanResult.scanId || "missing"} records ${freshCurrentSourceSecurityScanResult.reportableFindingCount ?? "unknown"} open findings with ${freshCurrentSourceSecurityScanResult.coverageCompleteness || "unknown"} coverage; ${freshCurrentSourceSecurityScanResult.approvalFreeProductSourceResidualCount ?? "unknown"} approval-free source residuals, ${freshCurrentSourceSecurityScanResult.approvalSensitiveShareCapabilityCount ?? "unknown"} separately reportable Share capability findings, and ${freshCurrentSourceSecurityScanResult.approvalGatedDatabaseOrAtomicityCount ?? "unknown"} database/RLS/atomicity findings remain open; security-complete is false and exact saved Share remains ${freshCurrentSourceSecurityScanResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+      },
+      {
+        gate: "current_source_approval_free_security_remediation",
+        state: "notice",
+        reason: `current live source records ${currentSourceApprovalFreeSecurityRemediationResult.currentSourceRemediatedCount ?? "unknown"}/${currentSourceApprovalFreeSecurityRemediationResult.approvalFreeFindingCount ?? "unknown"} bounded approval-free remediations with ${currentSourceApprovalFreeSecurityRemediationResult.currentSourceOpenApprovalFreeCount ?? "unknown"} approval-free source residuals left before rescan; the sealed ${currentSourceApprovalFreeSecurityRemediationResult.reportableFindingCount ?? "unknown"}-finding scan is unchanged, ${currentSourceApprovalFreeSecurityRemediationResult.approvalGatedFindingCount ?? "unknown"} database/RLS/atomicity findings remain approval-gated, fresh full rescan required=${currentSourceApprovalFreeSecurityRemediationResult.freshFullRepositoryRescanRequired === true}, security-complete is false, and exact saved Share remains ${currentSourceApprovalFreeSecurityRemediationResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
       },
       {
         gate: "current_source_security_remediation_followup",
@@ -4101,6 +4137,7 @@ export function buildNorthstarNextRunway(options) {
     currentSecurityRemediationLedger: currentSecurityRemediationLedgerResult,
     currentRepositorySecurityRescan: currentRepositorySecurityRescanResult,
     freshCurrentSourceSecurityScan: freshCurrentSourceSecurityScanResult,
+    currentSourceApprovalFreeSecurityRemediation: currentSourceApprovalFreeSecurityRemediationResult,
     currentSourceSecurityRemediationFollowup: currentSourceSecurityRemediationFollowupResult,
     currentSecurityGovernedPathCompatibility: currentSecurityGovernedPathCompatibilityResult,
     currentSourceSecurityResidualRemediation: currentSourceSecurityResidualRemediationResult,
@@ -4285,6 +4322,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Repository security scan reconciliation is \`${report.repositorySecurityScanReconciliation.verdict || "missing"}\`. The immutable same-target scans and \`${report.repositorySecurityScanReconciliation.receiptContradictionCount ?? "unknown"}\` fail-open contradictions remain preserved; zero-finding accepted=\`${report.repositorySecurityScanReconciliation.zeroFindingClaimAccepted === true}\`. Corrected scan completed=\`${report.repositorySecurityScanReconciliation.correctedFreshScanCompleted === true}\`, id=\`${report.repositorySecurityScanReconciliation.correctedScanId || "missing"}\`, reportable=\`${report.repositorySecurityScanReconciliation.correctedReportableFindingCount ?? "unknown"}\`, deferred=\`${report.repositorySecurityScanReconciliation.correctedDeferredCandidateCount ?? "unknown"}\`, coverage=\`${report.repositorySecurityScanReconciliation.correctedCoverageCompleteness || "unknown"}\`, security-complete=\`${report.repositorySecurityScanReconciliation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.repositorySecurityScanReconciliation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Current security remediation ledger is \`${report.currentSecurityRemediationLedger.verdict || "missing"}\`: deployed-source receipts \`${report.currentSecurityRemediationLedger.deployedSourceRemediationCount ?? "unknown"}/${report.currentSecurityRemediationLedger.totalFindings ?? "unknown"}\`, unresolved \`${report.currentSecurityRemediationLedger.unresolvedCount ?? "unknown"}\`, approval-gated \`${report.currentSecurityRemediationLedger.approvalGatedCount ?? "unknown"}\`, distributed-runtime open \`${report.currentSecurityRemediationLedger.distributedRuntimeOpenCount ?? "unknown"}\`, security-complete=\`${report.currentSecurityRemediationLedger.securityCompleteClaimAllowed === true}\`, exact saved Share \`${report.currentSecurityRemediationLedger.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Fresh current-source Standard security scan is \`${report.freshCurrentSourceSecurityScan.verdict || "missing"}\`: scan \`${report.freshCurrentSourceSecurityScan.scanId || "missing"}\`, findings \`${report.freshCurrentSourceSecurityScan.reportableFindingCount ?? "unknown"}\` (medium/low \`${report.freshCurrentSourceSecurityScan.mediumFindingCount ?? "unknown"}/${report.freshCurrentSourceSecurityScan.lowFindingCount ?? "unknown"}\`), coverage \`${report.freshCurrentSourceSecurityScan.coverageCompleteness || "unknown"}\` with \`${report.freshCurrentSourceSecurityScan.reviewedSurfaceCount ?? "unknown"}\` recorded surfaces and \`${report.freshCurrentSourceSecurityScan.deferredCoverageItemCount ?? "unknown"}\` deferred items. Bounded closures/residuals are \`${report.freshCurrentSourceSecurityScan.fullyClosedBoundedSourceCandidateCount ?? "unknown"}/${report.freshCurrentSourceSecurityScan.approvalFreeProductSourceResidualCount ?? "unknown"}\`; database/atomicity and Share capability boundaries remain \`${report.freshCurrentSourceSecurityScan.approvalGatedDatabaseOrAtomicityCount ?? "unknown"}/${report.freshCurrentSourceSecurityScan.approvalSensitiveShareCapabilityCount ?? "unknown"}\`. Scan completion is not security-complete \`${report.freshCurrentSourceSecurityScan.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.freshCurrentSourceSecurityScan.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Current-source approval-free security remediation is \`${report.currentSourceApprovalFreeSecurityRemediation.verdict || "missing"}\`: bounded source remediation \`${report.currentSourceApprovalFreeSecurityRemediation.currentSourceRemediatedCount ?? "unknown"}/${report.currentSourceApprovalFreeSecurityRemediation.approvalFreeFindingCount ?? "unknown"}\`, open approval-free source residuals \`${report.currentSourceApprovalFreeSecurityRemediation.currentSourceOpenApprovalFreeCount ?? "unknown"}\`, and sealed scan finding reclassification performed \`${report.currentSourceApprovalFreeSecurityRemediation.scanFindingReclassificationPerformed === true}\`. The fresh full scan remains required \`${report.currentSourceApprovalFreeSecurityRemediation.freshFullRepositoryRescanRequired === true}\`, database/RLS/atomicity findings remain \`${report.currentSourceApprovalFreeSecurityRemediation.approvalGatedFindingCount ?? "unknown"}\`, security-complete remains \`${report.currentSourceApprovalFreeSecurityRemediation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.currentSourceApprovalFreeSecurityRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Current-source security residual remediation is \`${report.currentSourceSecurityResidualRemediation.verdict || "missing"}\`: anchors \`${report.currentSourceSecurityResidualRemediation.residualAnchors?.join(", ") || "missing"}\`, tests \`${(report.currentSourceSecurityResidualRemediation.focusedTests ?? 0) + (report.currentSourceSecurityResidualRemediation.adjacentTests ?? 0)}\`, live evidence \`${report.currentSourceSecurityResidualRemediation.liveStatus || "missing"}\` with behavioral probe \`${report.currentSourceSecurityResidualRemediation.behavioralProbeExecuted === true}\`. The immutable scan remains open, follow-up scan required=\`${report.currentSourceSecurityResidualRemediation.followUpSecurityScanRequired === true}\`, security-complete=\`${report.currentSourceSecurityResidualRemediation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.currentSourceSecurityResidualRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Share ACK pre-body admission is \`${report.shareAckPreBodyAdmission.verdict || "missing"}\`: coarse IP rate/body concurrency ordering \`${report.shareAckPreBodyAdmission.coarseIpRateAdmissionBeforeBody === true}/${report.shareAckPreBodyAdmission.coarseBodyConcurrencyLeaseBeforeBody === true}\`, recipient-specific post-parse admission \`${report.shareAckPreBodyAdmission.recipientSpecificAdmissionRetainedAfterParse === true}\`, tests \`${report.shareAckPreBodyAdmission.testsPassed ?? "unknown"}\`, and live \`${report.shareAckPreBodyAdmission.liveStatus ?? "unknown"}/${report.shareAckPreBodyAdmission.liveCode || "missing"}/${report.shareAckPreBodyAdmission.liveRateLimitHeader || "missing"}\`. The sealed finding remains rescan-pending \`${report.shareAckPreBodyAdmission.freshRescanRequired === true}\`; security-complete remains \`${report.shareAckPreBodyAdmission.securityCompleteClaimAllowed === true}\`, recipient ACK is \`${report.shareAckPreBodyAdmission.recipientAckLiveDataApproval || "APPROVAL_GATED"}\`, and exact saved Share remains \`${report.shareAckPreBodyAdmission.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Safety status disconnect lease is \`${report.safetyStatusDisconnectLease.verdict || "missing"}\`: work settlement before abort rejection/lease release \`${report.safetyStatusDisconnectLease.underlyingWorkSettlementPrecedesAbortRejection === true}/${report.safetyStatusDisconnectLease.admissionLeaseHeldUntilUnderlyingSettlement === true}\`, two-disconnect concurrency proof \`${report.safetyStatusDisconnectLease.thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle === true}\`, tests \`${report.safetyStatusDisconnectLease.testsPassed ?? "unknown"}\`, and live \`${report.safetyStatusDisconnectLease.liveStatus ?? "unknown"}/${report.safetyStatusDisconnectLease.liveCode || "missing"}/${report.safetyStatusDisconnectLease.liveWorkUnit || "missing"}\`. The sealed finding remains rescan-pending \`${report.safetyStatusDisconnectLease.freshRescanRequired === true}\`; security-complete remains \`${report.safetyStatusDisconnectLease.securityCompleteClaimAllowed === true}\`, distributed activation is \`${report.safetyStatusDisconnectLease.distributedAdmissionActivation || "OPERATOR_CONFIGURATION_REQUIRED"}\`, and exact saved Share remains \`${report.safetyStatusDisconnectLease.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.

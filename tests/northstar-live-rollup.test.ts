@@ -503,6 +503,17 @@ type RollupReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceApprovalFreeSecurityRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    currentSourceRemediatedCount: number | null;
+    currentSourceOpenApprovalFreeCount: number | null;
+    approvalGatedFindingCount: number | null;
+    freshFullRepositoryRescanRequired: boolean;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceSecurityResidualRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1126,6 +1137,37 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
     baseline: { immutableOriginalFindingCount: 18, preserved: true, rewritten: false },
     currentDisposition: { approvalGatedDatabaseOrAtomicityCount: 5, approvalSensitiveShareCapabilityCount: 0, approvalFreeProductSourceResidualCount: 4, fullyClosedBoundedSourceCandidateCount: 0, securityCompleteClaimAllowed: false },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", freshFullRepositoryScanCompleted: true, coverageClosureCompleted: false, securityCompleteClaimAllowed: false },
+  };
+}
+
+function currentSourceApprovalFreeSecurityRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-current-source-security-approval-free-remediation/v1",
+    verdict: "PASS_LIVE_PRODUCTION_FOUR_APPROVAL_FREE_SECURITY_REMEDIATIONS_RESCAN_PENDING",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    scannedBaseline: {
+      scanId: "8d7fd844-d4cb-49ab-b984-36ed6ab0beba",
+      reportableFindingCount: 9,
+      approvalFreeFindingCount: 4,
+      approvalGatedFindingCount: 5,
+      immutableOriginalBaselinePreserved: true,
+    },
+    remediation: {
+      currentSourceRemediatedCount: 4,
+      currentSourceOpenApprovalFreeCount: 0,
+      scanFindingReclassificationPerformed: false,
+    },
+    receipts: Array.from({ length: 4 }, (_, index) => ({
+      id: `receipt-${index + 1}`,
+      evidencePath: `evaluation/receipt-${index + 1}/report.json`,
+      verdict: "PASS_FIXTURE",
+    })),
+    boundaries: {
+      freshFullRepositoryRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
   };
 }
 
@@ -2444,6 +2486,7 @@ function createFixtureRoot(): { root: string; head: string } {
     },
   });
   writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-complete/report.json", freshCurrentSourceSecurityScanFixture());
+  writeJson(root, "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json", currentSourceApprovalFreeSecurityRemediationFixture());
   writeJson(root, "evaluation/current-source-security-residual-remediation-2026-08-28/report.json", currentSourceSecurityResidualRemediationFixture());
   writeJson(root, "evaluation/share-ack-prebody-admission-2026-08-28/report.json", shareAckPreBodyAdmissionFixture());
   writeJson(root, "evaluation/safety-status-disconnect-lease-2026-08-28/report.json", safetyStatusDisconnectLeaseFixture());
@@ -2841,6 +2884,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/security-current-remediation-ledger-2026-08-13/report.json",
     "evaluation/current-full-repository-security-scan-2026-08-27/report.json",
     "evaluation/current-source-standard-security-scan-2026-08-31-complete/report.json",
+    "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-residual-remediation-2026-08-28/report.json",
     "evaluation/share-ack-prebody-admission-2026-08-28/report.json",
     "evaluation/safety-status-disconnect-lease-2026-08-28/report.json",
@@ -3438,6 +3482,20 @@ describe("northstar live rollup", () => {
       approvalFreeProductSourceResidualCount: 4,
       fullyClosedBoundedSourceCandidateCount: 0,
       freshFullRepositoryScanCompleted: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "current_source_approval_free_security_remediation")).toMatchObject({
+      artifact: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
+    });
+    expect(report.currentSourceApprovalFreeSecurityRemediation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_FOUR_APPROVAL_FREE_SECURITY_REMEDIATIONS_RESCAN_PENDING",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      currentSourceRemediatedCount: 4,
+      currentSourceOpenApprovalFreeCount: 0,
+      approvalGatedFindingCount: 5,
+      freshFullRepositoryRescanRequired: true,
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });

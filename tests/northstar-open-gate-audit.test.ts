@@ -243,6 +243,49 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
   };
 }
 
+function currentSourceApprovalFreeSecurityRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-current-source-security-approval-free-remediation/v1",
+    verdict: "PASS_LIVE_PRODUCTION_FOUR_APPROVAL_FREE_SECURITY_REMEDIATIONS_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    scannedBaseline: {
+      scanId: "8d7fd844-d4cb-49ab-b984-36ed6ab0beba",
+      reportableFindingCount: 9,
+      approvalFreeFindingCount: 4,
+      approvalGatedFindingCount: 5,
+      immutableOriginalBaselinePreserved: true,
+    },
+    remediation: {
+      currentSourceRemediatedCount: 4,
+      currentSourceOpenApprovalFreeCount: 0,
+      scanFindingReclassificationPerformed: false,
+    },
+    receipts: [
+      ["structured-xlsx-render-budget", "evaluation/security-structured-xlsx-render-budget-2026-08-31/report.json"],
+      ["operator-document-parser-admission", "evaluation/security-operator-parser-admission-2026-08-31/report.json"],
+      ["orchestration-smoke-csv-neutralization", "evaluation/security-orchestration-smoke-csv-neutralization-2026-08-31/report.json"],
+      ["hwpx-anonymization-archive-budget", "evaluation/security-hwpx-anonymization-archive-2026-08-31/report.json"],
+    ].map(([id, evidencePath]) => ({ id, evidencePath, verdict: "PASS_FIXTURE" })),
+    boundaries: {
+      freshFullRepositoryRescanRequired: true,
+      securityCompleteClaimAllowed: false,
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingOrVectorMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      databaseSecurityRemediation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      llmWikiPublication: "APPROVAL_GATED",
+      sifVectorRuntime: "APPROVAL_GATED",
+      koshaExactRegistryPromotion: "APPROVAL_GATED",
+    },
+  };
+}
+
 function currentSourceSecurityRemediationFollowupFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_PRODUCTION_APPROVAL_FREE_SECURITY_REMEDIATIONS_POST_FIX_RESCAN_PENDING",
@@ -4455,6 +4498,15 @@ function createFixtureRoot(): string {
   });
   const freshScanRoot = path.join("evaluation", "current-source-standard-security-scan-2026-08-31-complete");
   writeJson(rootDir, path.join(freshScanRoot, "report.json"), freshCurrentSourceSecurityScanFixture());
+  const approvalFreeRemediation = currentSourceApprovalFreeSecurityRemediationFixture();
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
+    approvalFreeRemediation,
+  );
+  for (const receipt of approvalFreeRemediation.receipts as Array<{ evidencePath: string }>) {
+    writeJson(rootDir, receipt.evidencePath, { verdict: "PASS_FIXTURE" });
+  }
   writeJson(
     rootDir,
     path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
@@ -8701,6 +8753,37 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "fresh_current_source_security_scan")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records all four approval-free scan residuals as source-remediated without reclassifying the sealed scan", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-security-approval-free-remediation-2026-08-31",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_approval_free_security_remediation");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("All four approval-free findings");
+    expect(gate?.detail).toContain("sealed 9-finding scan is unchanged");
+    expect(gate?.detail).toContain("five database/RLS/atomicity findings remain approval-gated");
+    expect(gate?.detail).toContain("fresh full repository rescan is still required");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remediation: { currentSourceOpenApprovalFreeCount: number };
+      boundaries: { exactSavedShareVerdict: string };
+    };
+    report.remediation.currentSourceOpenApprovalFreeCount = 1;
+    report.boundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "current_source_approval_free_security_remediation")?.state)
       .toBe("contradicted");
   });
 
