@@ -1,7 +1,7 @@
 {
   "schema": "safeclaw-security-share-read-admission/v1",
-  "verdict": "PASS_CURRENT_SOURCE_SHARE_READ_CALLER_ADMISSION_LIVE_AND_RESCAN_PENDING",
-  "generatedAt": "2026-08-30T21:57:00+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_SHARE_READ_CALLER_ADMISSION_RESCAN_PENDING",
+  "generatedAt": "2026-08-30T22:24:06+09:00",
   "sourceHead": "b9c41f4f",
   "productCommit": "b9c41f4f",
   "baseline": {
@@ -45,13 +45,13 @@
     "diffCheckPassed": true
   },
   "production": {
-    "checkedAt": "2026-08-30T21:57:00+09:00",
-    "commitSha": "69ce78c451da37e2670bc973c9e2e41a8b2969ad",
+    "checkedAt": "2026-08-30T22:24:06+09:00",
+    "commitSha": "904215308c882429c1e21a5ebee06ce6c9ab0d90",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-1qen5ld7p-seojaehongs-projects.vercel.app",
-    "productCommitLive": false,
-    "liveVerificationPending": true
+    "deploymentUrl": "safeguard-contest-mger8vqqg-seojaehongs-projects.vercel.app",
+    "productCommitLive": true,
+    "liveVerificationPending": false
   },
   "securityScan": {
     "currentFindingRemediatedInSource": true,
