@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-mcp-generation-cancellation-remediation/v1",
+  "generatedAt": "2026-08-30T23:12:54.2951799Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_MCP_GENERATION_CANCELLATION_LIVE_PENDING",
+  "sourceBaseCommit": "142aec28d545baa563f416ac4072bbfea9e278d7",
+  "sourceHead": "5ed2558b25a139c32c300163d1386863bbc3589d",
+  "productCommit": "5ed2558b25a139c32c300163d1386863bbc3589d",
+  "productionCommit": "142aec28d545baa563f416ac4072bbfea9e278d7",
+  "finding": {
+    "findingId": "csf_c2f6fb44442dee56c0d5c2ed",
+    "occurrenceId": "occ_89f04a2500ced5cf2d9057fe",
+    "ruleId": "resource-exhaustion.mcp-generation-cancellation-dropped",
+    "severity": "medium",
+    "title": "MCP document-generation tools drop transport cancellation",
+    "sealedFindingReclassified": false,
+    "freshRescanRequired": true
+  },
+  "remediation": {
+    "plainGenerationTransportSignalForwarded": true,
+    "reviewedGenerationTransportSignalForwarded": true,
+    "ontologyNodeFetchSignalForwarded": true,
+    "ontologyEdgeFetchSignalForwarded": true,
+    "runAskSignalForwarded": true,
+    "qaReviewSignalForwarded": true,
+    "abortRemainsExceptionalInsteadOfFallback": true,
+    "persistenceSkippedAfterAbort": true,
+    "providerAdmissionReleasedByRejectedWorkFinally": true,
+    "existingDirectHandlerCallsRemainCompatible": true
+  },
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd test -- tests/mcp-generation-cancellation.test.ts tests/mcp-reviewed-route-task-binding.test.ts tests/mcp-product-materialization-persistence.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-work-budget.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 5,
+      "testsPassed": 54,
+      "testsFailed": 0,
+      "negativeCancellationTests": [
+        "both ontology graph fetches receive one transport signal and reject with the abort reason",
+        "plain generation cancellation stops before repository creation or persistence",
+        "reviewed QA cancellation stops before persistence",
+        "plain and reviewed route registrations forward the MCP SDK transport signal"
+      ]
+    },
+    "adjacentTests": {
+      "command": "npm.cmd test -- tests/phase-a-runtime-evidence-bridge.test.ts tests/mcp-tools.test.ts tests/mcp-provider-admission.test.ts tests/ontology-graph-budget.test.ts tests/hermes-engine-adapter.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 5,
+      "testsPassed": 143,
+      "testsFailed": 0
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "productionBuild": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "liveDeployment": {
+      "status": "PENDING_PRODUCT_COMMIT_DEPLOYMENT",
+      "commitSha": "142aec28d545baa563f416ac4072bbfea9e278d7",
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-7m33pb3nj-seojaehongs-projects.vercel.app",
+      "sourceHeadMatchesProduction": false,
+      "authenticatedMcpCancellationProbeExecuted": false
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "mcpGenerationProviderCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "immutableOriginalBaselinePreserved": true,
+    "sealedCurrentHeadScanPreserved": true,
+    "securityComplete": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedFindingsRemainOpen": true,
+    "liveAfterDeploymentRequired": true,
+    "validAuthenticatedRuntimeCancellationProbeRequired": true
+  }
+}
