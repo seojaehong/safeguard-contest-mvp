@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 
 import snapshot_kosha_guide_corpus
 
@@ -31,6 +31,7 @@ DEFAULT_BODY_CURRENT_PATH = Path("data/safety-knowledge/kosha-guide-corpus/curre
 DEFAULT_BODY_ROOT = Path("data/safety-knowledge/kosha-guide-corpus")
 DEFAULT_OUTPUT_DIR = Path("evaluation/kosha-exact-official-pdf-audit-2026-07-25")
 OFFICIAL_HOST = "portal.kosha.or.kr"
+STABLE_KEY_PATTERN = re.compile(r"^[A-Z0-9]+(?:-[A-Z0-9]+)+$")
 
 
 class AuditError(RuntimeError):
@@ -110,16 +111,67 @@ def _git_head(root_dir: Path) -> str:
 def _official_url_matches(url: str, file_id: str) -> bool:
     parsed = urlsplit(url)
     parts = [part for part in parsed.path.split("/") if part]
+    try:
+        port = parsed.port
+    except ValueError:
+        return False
     return (
         parsed.scheme == "https"
         and parsed.hostname == OFFICIAL_HOST
+        and parsed.username is None
+        and parsed.password is None
+        and port in (None, 443)
+        and not parsed.query
+        and not parsed.fragment
         and len(parts) >= 2
+        and bool(file_id)
         and parts[-2] == file_id
         and parts[-1].isdigit()
     )
 
 
+def _official_file_id(url: str) -> str:
+    parsed = urlsplit(url)
+    parts = [part for part in parsed.path.split("/") if part]
+    file_id = parts[-2] if len(parts) >= 2 else ""
+    if not _official_url_matches(url, file_id):
+        raise AuditError(f"official-url-policy-rejected:{url}")
+    return file_id
+
+
+class _OfficialPdfRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def __init__(self, file_id: str) -> None:
+        super().__init__()
+        self.file_id = file_id
+
+    def redirect_request(
+        self,
+        request: urllib.request.Request,
+        file_pointer: object,
+        code: int,
+        message: str,
+        headers: object,
+        new_url: str,
+    ) -> urllib.request.Request | None:
+        resolved_url = urljoin(request.full_url, new_url)
+        if not _official_url_matches(resolved_url, self.file_id):
+            raise AuditError(f"official-redirect-policy-rejected:{resolved_url}")
+        return super().redirect_request(request, file_pointer, code, message, headers, resolved_url)
+
+
+def _candidate_pdf_path(temp_root: Path, stable_key: str) -> Path:
+    if STABLE_KEY_PATTERN.fullmatch(stable_key) is None:
+        raise AuditError(f"candidate-stable-key-invalid:{stable_key}")
+    resolved_root = temp_root.resolve()
+    destination = (resolved_root / f"{stable_key}.pdf").resolve()
+    if destination.parent != resolved_root:
+        raise AuditError(f"candidate-temp-path-escaped:{stable_key}")
+    return destination
+
+
 def _download_pdf(url: str, destination: Path, timeout_seconds: float, retries: int) -> tuple[int, str, str, int]:
+    official_file_id = _official_file_id(url)
+    opener = urllib.request.build_opener(_OfficialPdfRedirectHandler(official_file_id))
     last_error: Exception | None = None
     for attempt in range(retries + 1):
         request = urllib.request.Request(
@@ -130,12 +182,14 @@ def _download_pdf(url: str, destination: Path, timeout_seconds: float, retries: 
             },
         )
         try:
-            with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
+            with opener.open(request, timeout=timeout_seconds) as response:
                 status = int(response.status)
                 content_type = response.headers.get("Content-Type", "")
                 content_length_header = response.headers.get("Content-Length", "")
                 content_length = int(content_length_header) if content_length_header.isdigit() else 0
                 final_url = response.geturl()
+                if not _official_url_matches(final_url, official_file_id):
+                    raise AuditError(f"official-final-url-policy-rejected:{final_url}")
                 with destination.open("wb") as output:
                     while chunk := response.read(1024 * 1024):
                         output.write(chunk)
@@ -313,15 +367,19 @@ def build_report(
         temp_root = Path(temporary_dir)
         for candidate in candidates:
             stable_key = _text(candidate.get("stableKey"))
+            official_file_id = _text(candidate.get("officialFileId"))
+            official_url = _text(candidate.get("officialUrl"))
+            if not _official_url_matches(official_url, official_file_id):
+                raise AuditError(f"candidate-official-url-invalid:{stable_key}")
             metadata = metadata_by_key.get(stable_key)
             body_item = body_by_key.get(stable_key)
             if metadata is None:
                 raise AuditError(f"metadata-candidate-missing:{stable_key}")
             if body_item is None:
                 raise AuditError(f"body-candidate-missing:{stable_key}")
-            pdf_path = temp_root / f"{stable_key}.pdf"
+            pdf_path = _candidate_pdf_path(temp_root, stable_key)
             status, content_type, final_url, content_length = downloader(
-                _text(candidate.get("officialUrl")),
+                official_url,
                 pdf_path,
                 timeout_seconds,
                 retries,
