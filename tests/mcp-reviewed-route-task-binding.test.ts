@@ -97,6 +97,24 @@ function captureReviewedRouteTool(): RegisteredTool {
   return tool;
 }
 
+function capturePlainRouteTool(): RegisteredTool {
+  const tools = new Map<string, RegisteredTool>();
+  const server = {
+    registerTool(
+      name: string,
+      _config: unknown,
+      invoke: RegisteredTool["invoke"],
+    ): object {
+      tools.set(name, { invoke });
+      return {};
+    },
+  };
+  registerTools(server as unknown as McpServer);
+  const tool = tools.get("generate_safety_docpack");
+  if (!tool) throw new Error("Plain docpack tool was not registered by the Next MCP route.");
+  return tool;
+}
+
 describe("Next MCP route reviewed task binding", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -170,5 +188,78 @@ describe("Next MCP route reviewed task binding", () => {
         },
       },
     });
+  });
+
+  test("threads the transport AbortSignal into reviewed knowledge and generation", async () => {
+    const controller = new AbortController();
+    let generationSignal: AbortSignal | undefined;
+    mocks.runAsk.mockImplementationOnce(async (
+      _question: string,
+      options?: { signal?: AbortSignal },
+    ) => {
+      if (!options?.signal) throw new Error("missing route generation AbortSignal");
+      generationSignal = options.signal;
+      return new Promise((_, reject) => {
+        options.signal?.addEventListener("abort", () => reject(options.signal?.reason), {
+          once: true,
+        });
+      });
+    });
+    const pending = captureReviewedRouteTool().invoke(
+      {
+        question: "외벽 고소작업을 위한 문서팩",
+        task: "고소작업",
+        mode: "full",
+      },
+      {
+        authInfo: { extra: AUTH_CONTEXT },
+        signal: controller.signal,
+      },
+    );
+
+    await vi.waitFor(() => expect(generationSignal).toBe(controller.signal));
+    expect(mocks.querySafetyKnowledge).toHaveBeenCalledWith(
+      "고소작업",
+      controller.signal,
+    );
+    controller.abort(new DOMException("client disconnected", "AbortError"));
+
+    const result = await pending;
+    expect(result.isError).toBe(true);
+    expect(mocks.reviewDocpack).not.toHaveBeenCalled();
+  });
+
+  test("threads the transport AbortSignal into plain knowledge and generation", async () => {
+    const controller = new AbortController();
+    let generationSignal: AbortSignal | undefined;
+    mocks.runAsk.mockImplementationOnce(async (
+      _question: string,
+      options?: { signal?: AbortSignal },
+    ) => {
+      if (!options?.signal) throw new Error("missing plain route generation AbortSignal");
+      generationSignal = options.signal;
+      return new Promise((_, reject) => {
+        options.signal?.addEventListener("abort", () => reject(options.signal?.reason), {
+          once: true,
+        });
+      });
+    });
+    const pending = capturePlainRouteTool().invoke(
+      { question: "외벽 고소작업을 위한 문서팩", mode: "full" },
+      {
+        authInfo: { extra: AUTH_CONTEXT },
+        signal: controller.signal,
+      },
+    );
+
+    await vi.waitFor(() => expect(generationSignal).toBe(controller.signal));
+    expect(mocks.querySafetyKnowledge).toHaveBeenCalledWith(
+      "외벽 고소작업을 위한 문서팩",
+      controller.signal,
+    );
+    controller.abort(new DOMException("client disconnected", "AbortError"));
+
+    expect((await pending).isError).toBe(true);
+    expect(mocks.reviewDocpack).not.toHaveBeenCalled();
   });
 });

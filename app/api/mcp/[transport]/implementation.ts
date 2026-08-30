@@ -75,9 +75,10 @@ import {
 
 const generateSafetyDocpackHandler = createGenerateSafetyDocpackHandler({
   defaultMode: "full",
-  generateResponse: (question, mode, phaseAGrounding) => runAsk(question, {
+  generateResponse: (question, mode, phaseAGrounding, signal) => runAsk(question, {
     aiMode: mode,
     phaseAGrounding,
+    signal,
   }),
   queryKnowledge: querySafetyKnowledge,
   getWorkpackRepository: () => {
@@ -89,9 +90,10 @@ const generateSafetyDocpackHandler = createGenerateSafetyDocpackHandler({
 
 const generateReviewedSafetyDocpackHandler = createGenerateReviewedSafetyDocpackHandler({
   defaultMode: "full",
-  generateResponse: (question, mode, phaseAGrounding) => runAsk(question, {
+  generateResponse: (question, mode, phaseAGrounding, signal) => runAsk(question, {
     aiMode: mode,
     phaseAGrounding,
+    signal,
   }),
   queryKnowledge: querySafetyKnowledge,
   reviewResponse: reviewDocpack,
@@ -195,13 +197,14 @@ export function registerTools(server: McpServer): void {
           .describe("각 문서 전체 본문 포함 여부 (기본 false — 프리뷰만)"),
       },
     },
-    async ({ question, task, mode, includeFull }, authContext) => {
+    async ({ question, task, mode, includeFull }, authContext, { signal }) => {
       return withMcpProviderAdmission(
         authContext,
         mode ?? "full",
         () => generateReviewedSafetyDocpackHandler(
           { question, task, mode, includeFull },
           authContext,
+          { signal },
         ),
       );
     }
@@ -225,11 +228,15 @@ export function registerTools(server: McpServer): void {
           .describe("각 문서 전체 본문 포함 여부 (기본 false — 프리뷰만)"),
       },
     },
-    async ({ question, mode, includeFull }, authContext) => {
+    async ({ question, mode, includeFull }, authContext, { signal }) => {
       return withMcpProviderAdmission(
         authContext,
         mode ?? "full",
-        () => generateSafetyDocpackHandler({ question, mode, includeFull }, authContext),
+        () => generateSafetyDocpackHandler(
+          { question, mode, includeFull },
+          authContext,
+          { signal },
+        ),
       );
     }
   );

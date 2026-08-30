@@ -37,8 +37,13 @@ export function buildPublishedSafetyKnowledge(
  * published 부분그래프만 사용. 그래프 조회 실패(미설정/네트워크)는 예외로 던져 호출부의
  * 도구 오류 처리(toToolError / tool_result is_error)에 위임한다.
  */
-export async function querySafetyKnowledge(query: string): Promise<SafetyKnowledgeResult> {
-  const loaded = await loadGraph("published");
+export async function querySafetyKnowledge(
+  query: string,
+  signal?: AbortSignal,
+): Promise<SafetyKnowledgeResult> {
+  signal?.throwIfAborted();
+  const loaded = await loadGraph("published", signal);
+  signal?.throwIfAborted();
   if (!loaded.ok || !loaded.graph) {
     throw new Error(loaded.message || "안전 온톨로지 그래프를 조회할 수 없습니다.");
   }

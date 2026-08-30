@@ -34,6 +34,7 @@ export type GenerateSafetyDocpackInput = {
 export type GenerateSafetyDocpackHandler = (
   input: GenerateSafetyDocpackInput,
   authContext: McpAuthContext,
+  execution?: { signal: AbortSignal },
 ) => Promise<McpToolResult>;
 
 type GenerateSafetyDocpackHandlerDependencies = {
@@ -42,8 +43,9 @@ type GenerateSafetyDocpackHandlerDependencies = {
     question: string,
     mode: AiMode,
     grounding?: PhaseAGenerationGrounding,
+    signal?: AbortSignal,
   ) => Promise<AskResponse>;
-  queryKnowledge: (query: string) => Promise<SafetyKnowledgeResult>;
+  queryKnowledge: (query: string, signal?: AbortSignal) => Promise<SafetyKnowledgeResult>;
   getWorkpackRepository: () => McpWorkpackRepository | null;
   getGenerationEvidenceSecret: () => string | undefined;
 };
@@ -61,9 +63,12 @@ function canonicalEvidencePackReviewRequiredResult(): McpToolResult {
 export function createGenerateSafetyDocpackHandler(
   dependencies: GenerateSafetyDocpackHandlerDependencies,
 ): GenerateSafetyDocpackHandler {
-  return async ({ question, mode, includeFull }, authContext) => {
+  return async ({ question, mode, includeFull }, authContext, execution) => {
+    const signal = execution?.signal;
+    signal?.throwIfAborted();
     const generationEvidenceSecret = dependencies.getGenerationEvidenceSecret();
-    const knowledge = await dependencies.queryKnowledge(question);
+    const knowledge = await dependencies.queryKnowledge(question, signal);
+    signal?.throwIfAborted();
     const evidenceContract: unknown = knowledge.evidenceContract;
     if (
       evidenceContract !== null
@@ -81,7 +86,9 @@ export function createGenerateSafetyDocpackHandler(
       question,
       mode ?? dependencies.defaultMode,
       grounding,
+      signal,
     );
+    signal?.throwIfAborted();
     const response = grounding?.evidencePack
       ? materializePhaseAProductIntoResponse(
           generatedResponse,
@@ -94,6 +101,7 @@ export function createGenerateSafetyDocpackHandler(
     const result = buildDocpackResult(response, includeFull ?? false) as Record<string, unknown>;
 
     if (authContext.siteId) {
+      signal?.throwIfAborted();
       const repository = dependencies.getWorkpackRepository();
       result.attribution = repository
         ? await saveMcpDocpackWorkpackWithRepository(
@@ -121,6 +129,7 @@ export type GenerateReviewedSafetyDocpackInput = GenerateSafetyDocpackInput & {
 export type GenerateReviewedSafetyDocpackHandler = (
   input: GenerateReviewedSafetyDocpackInput,
   authContext: McpAuthContext,
+  execution?: { signal: AbortSignal },
 ) => Promise<McpToolResult>;
 
 type GenerateReviewedSafetyDocpackHandlerDependencies = {
@@ -129,9 +138,14 @@ type GenerateReviewedSafetyDocpackHandlerDependencies = {
     question: string,
     mode: AiMode,
     grounding?: PhaseAGenerationGrounding,
+    signal?: AbortSignal,
   ) => Promise<AskResponse>;
-  queryKnowledge: (query: string) => Promise<SafetyKnowledgeResult>;
-  reviewResponse: (task: string, documentText: string) => Promise<QaReviewResult>;
+  queryKnowledge: (query: string, signal?: AbortSignal) => Promise<SafetyKnowledgeResult>;
+  reviewResponse: (
+    task: string,
+    documentText: string,
+    signal?: AbortSignal,
+  ) => Promise<QaReviewResult>;
   persistResponse: (
     authContext: McpAuthContext,
     response: AskResponse,
@@ -150,9 +164,12 @@ function selectReviewedQaText(response: AskResponse): string {
 export function createGenerateReviewedSafetyDocpackHandler(
   dependencies: GenerateReviewedSafetyDocpackHandlerDependencies,
 ): GenerateReviewedSafetyDocpackHandler {
-  return async ({ question, task, mode, includeFull }, authContext) => {
+  return async ({ question, task, mode, includeFull }, authContext, execution) => {
+    const signal = execution?.signal;
+    signal?.throwIfAborted();
     const generationEvidenceSecret = dependencies.getGenerationEvidenceSecret();
-    const knowledge = await dependencies.queryKnowledge(task);
+    const knowledge = await dependencies.queryKnowledge(task, signal);
+    signal?.throwIfAborted();
     const evidenceContract: unknown = knowledge.evidenceContract;
     if (
       evidenceContract !== null
@@ -173,7 +190,9 @@ export function createGenerateReviewedSafetyDocpackHandler(
       question,
       mode ?? dependencies.defaultMode,
       grounding,
+      signal,
     );
+    signal?.throwIfAborted();
     const reviewTask = grounding?.evidencePack?.task.label
       ?? resolveReviewTaskLabel(task, question);
     const response = grounding?.evidencePack
@@ -185,7 +204,12 @@ export function createGenerateReviewedSafetyDocpackHandler(
           },
         )
       : generatedResponse;
-    const qa = await dependencies.reviewResponse(reviewTask, selectReviewedQaText(response));
+    const qa = await dependencies.reviewResponse(
+      reviewTask,
+      selectReviewedQaText(response),
+      signal,
+    );
+    signal?.throwIfAborted();
     const result = buildReviewedDocpackResult(
       response,
       qa,
@@ -194,6 +218,7 @@ export function createGenerateReviewedSafetyDocpackHandler(
     ) as Record<string, unknown>;
 
     if (authContext.siteId) {
+      signal?.throwIfAborted();
       const attribution = await dependencies.persistResponse(authContext, response);
       if (attribution) result.attribution = attribution;
     }

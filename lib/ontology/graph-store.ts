@@ -151,7 +151,13 @@ function extractEdgeKey(raw: unknown): string {
   return `${extractId(raw, "src")}|${extractId(raw, "rel")}|${extractId(raw, "dst")}`;
 }
 
-async function fetchRows(config: SupabaseConfig, table: string, scope: GraphScope): Promise<unknown[]> {
+async function fetchRows(
+  config: SupabaseConfig,
+  table: string,
+  scope: GraphScope,
+  signal?: AbortSignal,
+): Promise<unknown[]> {
+  signal?.throwIfAborted();
   const params = new URLSearchParams();
   params.set("select", "*");
   params.set("limit", "10000");
@@ -161,7 +167,8 @@ async function fetchRows(config: SupabaseConfig, table: string, scope: GraphScop
       apikey: config.serviceRoleKey,
       Authorization: `Bearer ${config.serviceRoleKey}`
     },
-    cache: "no-store"
+    cache: "no-store",
+    signal,
   });
   if (!response.ok) {
     const body = await response.text().catch(() => "");
@@ -175,7 +182,11 @@ async function fetchRows(config: SupabaseConfig, table: string, scope: GraphScop
  * Supabase에서 그래프를 읽어 조립한다.
  * scope "published": anon 노출 경로 — published만. "all": 운영/검증용(서비스롤 전제).
  */
-export async function loadGraph(scope: GraphScope = "published"): Promise<GraphLoadResult> {
+export async function loadGraph(
+  scope: GraphScope = "published",
+  signal?: AbortSignal,
+): Promise<GraphLoadResult> {
+  signal?.throwIfAborted();
   const config = getSupabaseConfig();
   if (!config) {
     return {
@@ -188,8 +199,8 @@ export async function loadGraph(scope: GraphScope = "published"): Promise<GraphL
   }
   try {
     const [rawNodes, rawEdges] = await Promise.all([
-      fetchRows(config, "safety_ontology_nodes", scope),
-      fetchRows(config, "safety_ontology_edges", scope)
+      fetchRows(config, "safety_ontology_nodes", scope, signal),
+      fetchRows(config, "safety_ontology_edges", scope, signal)
     ]);
     return {
       ok: true,
@@ -199,6 +210,7 @@ export async function loadGraph(scope: GraphScope = "published"): Promise<GraphL
       message: `안전 온톨로지 그래프 조회 완료 (scope=${scope}).`
     };
   } catch (error) {
+    signal?.throwIfAborted();
     return {
       ok: false,
       configured: true,

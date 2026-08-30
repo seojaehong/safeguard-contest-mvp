@@ -12,8 +12,14 @@ import { reviewDocumentCoverage, type QaReviewResult } from "@/lib/ontology/qa-r
  * 안전 문서 본문을 작업유형의 법정 필수 조치 목록과 대조해 누락을 검출한다.
  * published 부분그래프만 사용. 그래프 조회 실패는 예외로 던져 호출부의 도구 오류 처리에 위임한다.
  */
-export async function reviewDocpack(task: string, documentText: string): Promise<QaReviewResult> {
-  const loaded = await loadGraph("published");
+export async function reviewDocpack(
+  task: string,
+  documentText: string,
+  signal?: AbortSignal,
+): Promise<QaReviewResult> {
+  signal?.throwIfAborted();
+  const loaded = await loadGraph("published", signal);
+  signal?.throwIfAborted();
   if (!loaded.ok || !loaded.graph) {
     throw new Error(loaded.message || "안전 온톨로지 그래프를 조회할 수 없습니다.");
   }
