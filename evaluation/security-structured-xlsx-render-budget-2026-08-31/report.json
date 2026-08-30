@@ -1,0 +1,85 @@
+{
+  "schema": "safeclaw-security-structured-xlsx-render-budget/v1",
+  "generatedAt": "2026-08-31T01:40:56.3129753+09:00",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_LOCAL_PRODUCTION_STRUCTURED_XLSX_RENDER_BUDGET_DIRECT_LIVE_PROBE_ADMISSION_BLOCKED",
+  "productCommit": "b0d3529a6f34d5f9cca0a71bac61f2f15fdbb040",
+  "productionBuild": {
+    "commitSha": "b0d3529a6f34d5f9cca0a71bac61f2f15fdbb040",
+    "deploymentUrl": "safeguard-contest-o6io0fdp3-seojaehongs-projects.vercel.app",
+    "sourceMatchesProduction": true
+  },
+  "remediation": {
+    "finding": "Structured XLSX arrays bypass rendered-cell budget",
+    "structuredModeCount": 5,
+    "structuredModes": [
+      "workPlanStructured",
+      "permitInspectionStructured",
+      "tbmBriefingStructured",
+      "tbmLogStructured",
+      "educationRecordStructured"
+    ],
+    "baseRenderedCells": 256,
+    "tableColumnCount": 6,
+    "renderedCellLimit": 5000,
+    "admissionPoint": "before structured workbook allocation",
+    "coveredRepeatedRowPaths": [
+      "structured.workSteps",
+      "structured.stopCriteria",
+      "structured.emergencyResponse.contacts",
+      "structured.conditions",
+      "structured.attachments",
+      "structured.completionChecks",
+      "structured.hazards",
+      "structured.measures",
+      "structured.confirmTopics",
+      "structured.attendance.attendees",
+      "structured.workerConfirmations",
+      "structured.hazardsDiscussed",
+      "structured.safetyEducation.keyPoints",
+      "structured.unaddressedItems",
+      "structured.photoEvidence.captureLocations",
+      "structured.curriculum"
+    ]
+  },
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd exec -- vitest run tests/document-export-budget.test.ts tests/xlsx-export-route.test.ts tests/document-export-localization.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 3,
+      "testsPassed": 42,
+      "testsFailed": 0
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "passed": true
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "passed": true,
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "liveReadOnlyProbe": {
+      "method": "POST",
+      "path": "/api/export/xlsx",
+      "payloadMode": "tbmLogStructured",
+      "projectedRepeatedRows": 800,
+      "status": 503,
+      "code": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      "failClosed": true,
+      "innerBudgetExecuted": false,
+      "limitation": "The public distributed admission guard rejected the request before the route-level structured XLSX budget executed."
+    }
+  },
+  "boundaries": {
+    "freshFullSecurityRescanRequired": true,
+    "securityCompleteClaimed": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesChanged": false
+  }
+}
