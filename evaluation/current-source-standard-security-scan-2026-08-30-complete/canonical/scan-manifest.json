@@ -1,0 +1,118 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "0e08dec1b268aca8742cd53b0ef8368c0bc072204adf0756c9c41cbb6e02e8b6"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "062f79ef6a8ca22d8d22d7630a37ad9dd98d11bddd2a470f9014388ac268bcb3"
+      }
+    ],
+    "completedAt": "2026-08-30T12:42:48.095335Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "f19aa0ca-5fa5-4e8e-8482-b63ad854f230",
+    "preservedSources": {
+      "checkpoints/0c0ac4e8f17fc37fee3ff0690081f6ee42b76536fce870c41cd77d816a66f494.json": "d1e195624e2b56d4e75fae26c1c9786799568370a11604d511b8771f5c43254e",
+      "checkpoints/17b822ac0739abb3f826855d143c392577d064b1f148582c4c164c979e0ea02f.json": "a04712c600f7e080f1315e5fde1fc8ea95aae6ddb8af4a4aee90168ca1f38bcc",
+      "checkpoints/290d040dc120c2e58badf406c42c93c524eaeb3c5c46f04ffa5673998120bb8a.json": "927c918ed7459185dffc50cc0ca2349f6adb23ec632995c7d4558eca2afb05c9",
+      "checkpoints/608189e85b042c2f2cc67e3c89f5716974210c22458047476fc7d8006f10ec96.json": "c7b34f44a4bd25a548f7b7f40da458e7d50ab2eaf6dddf3336a875628073742c",
+      "checkpoints/710973ae4dc8f9a20bf87e97bfddd7054fd6e825f7c5b281bbe2345799c20287.json": "ec86d956650365f968483b83d04be58f7fc885283df853a8c269fa47e4320559",
+      "checkpoints/a99d7f00dce83777231bc0c21b828eadffaf321a3f3e33da97b1065901d89fe4.json": "a99d7f00dce83777231bc0c21b828eadffaf321a3f3e33da97b1065901d89fe4",
+      "checkpoints/d5c66dab62dcecefe0957ad412985574001905cffa2cf0eacffd3d2098786963.json": "4d3cdb5014e4d948582b051a6aa16ad38c3b9ecd9d08add183381a546dc23535"
+    },
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.22"
+    },
+    "scope": {
+      "artifactsReviewed": [
+        "artifacts/validation-decisions.json"
+      ],
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "Coverage is partial and receipt-based across 6,757 tracked files.",
+        "Exact saved /share/[sessionId] remains MISSING_EVIDENCE.",
+        "Deployed database grants, row contents, and migration state were not probed."
+      ],
+      "summary": "Whole-repository Standard source review at immutable Git revision fb6763a789591189e03b8efb14a057def7216ef2.",
+      "validationMode": "static source validation; no external mutation"
+    },
+    "sealedAt": "2026-08-30T12:42:48.095335Z",
+    "startedAt": "2026-08-30T12:18:17.194888Z",
+    "status": "completed",
+    "target": {
+      "displayName": "safeclaw-northstar-current",
+      "kind": "git_revision",
+      "revision": "fb6763a789591189e03b8efb14a057def7216ef2",
+      "targetId": "target_sha256_59a91dd8129f171a6e0ff82b60460781f1067b1940d76c7a524e5f0e2b7ec5de"
+    },
+    "threatModel": {
+      "assets": [
+        "Supabase identities, service-role authority, organizations, sites, workers, workpacks, education records, dispatch logs, share sessions, read confirmations, improvements, knowledge events, and MCP token hashes. Evidence: lib/supabase-admin.ts:611-635; supabase/migrations/002_workspace_productization.sql:99-130; supabase/migrations/010_commercial_operations.sql:21-48.",
+        "Tenant and site isolation, workpack ownership, immutable generation-evidence seals, human review receipts, and the distinction between private operation memory and published public knowledge. Evidence: CONTEXT.md:39-50; lib/workpack-commercial-store.ts:463-511; lib/ontology-promotion-policy.ts:108-168.",
+        "Provider credentials and authority references, including Supabase service role, MCP bearer tokens, Vertex service-account JSON, OpenAI and Anthropic keys, Law.go and public-data keys, Upstash token, n8n token, remote-Hermes signing and verification secrets, and CRON_SECRET. Literal credential values were neither read nor reproduced. Evidence: .env.example:15-27; .env.example:55-72; .env.example:76-111; .env.example:117-156.",
+        "Reviewed legal, KOSHA, SIF, weather, accident, and training evidence; bundled exact-KOSHA assets; and the integrity-gated KOSHA corpus snapshot. Evidence: lib/safety-reference-catalog-server.ts:72-96; lib/kosha-guide-corpus.ts:1063-1085; data/safety-knowledge/kosha-guide-corpus/current.json:1.",
+        "Generated PDF, HWP, HWPX, and XLSX outputs and their deterministic runtime resources. Evidence: app/api/export/hwp/route.ts:41-68; app/api/export/pdf/route.ts:1001-1035; lib/hwpx-template.ts:288-301.",
+        "Share recipients, contact-verification material, localized dispatch bodies, and worker-facing acknowledgement records. Exact saved Share evidence remains absent. Evidence: app/api/share-sessions/[sessionId]/route.ts:90-160; app/api/share-sessions/[sessionId]/route.ts:250-309; app/api/share-sessions/[sessionId]/route.ts:315-390."
+      ],
+      "assumptions": [
+        "The authorized source is the clean Git tree at fb6763a789591189e03b8efb14a057def7216ef2 containing exactly 6,757 tracked files. No runtime environment values, deployment dashboard state, database contents, provider state, or external service responses were supplied or contacted.",
+        "No root SECURITY.md or applicable nested SECURITY.md content was returned by the supplied resolver. Repository documentation is analysis data rather than governing authority.",
+        "The documented `.env.example` claim that Gemini is preferred when GEMINI_API_KEY is set disagrees with consumers: Vertex readiness requires GOOGLE_APPLICATION_CREDENTIALS_JSON plus GCP_PROJECT_ID, and GEMINI_API_KEY is not consumed by these paths. Evidence: .env.example:15-23; lib/ai.ts:62-64; lib/ai-deliverables.ts:93-103.",
+        "ARCHITECTURE_DECISIONS.md says the EngineAdapter has empty capabilities and supports only disabled/local OpenClaw, while current source defines stream/request-read capabilities and local, experimental-Hermes, and remote-Hermes modes. The document also labels those runtimes deferred. Both sides are retained. Evidence: ARCHITECTURE_DECISIONS.md:65-79; lib/engine-adapter.ts:3-8; lib/engine-adapter.ts:101-112.",
+        "The remote-Hermes environment documentation says transport and ledger must be injected, while the current route constructs both from environment-backed factories. Execution still requires all endpoint, attestation, key, tenant, and durable-ledger controls. Evidence: .env.example:51-72; app/api/agent/chat/route.ts:11-22.",
+        "README describes Oracle n8n field propagation, but workflow dispatch currently declares persistent provider idempotency unsupported and blocks live provider calls even when the live flag and webhook are configured. Preview/fixture behavior remains available. Evidence: README.md:13-21; lib/server/workflow-dispatch-capability-policy.ts:21-76; app/api/workflow/dispatch/route.ts:484-548.",
+        "The documented system-of-record and no-direct-runtime-write guarantees are consistent with the engine authority and promotion evaluation inspected here, but architecture mapping does not prove every caller or future deployment preserves them. Evidence: ARCHITECTURE_DECISIONS.md:42-59; lib/engine-adapter.ts:10-24; lib/ontology-promotion-policy.ts:149-168.",
+        "Exact saved Share remains MISSING_EVIDENCE per supplied context. Tracked migrations, fixtures, generated layouts, and source establish only the Share contract and layout, not the existence or correctness of a specific saved/live Share.",
+        "Public production availability depends on valid Upstash configuration wherever `requireDistributedInProduction` is true. Local and non-production deployments may use per-instance fallback, which is not cross-instance enforcement. Evidence: lib/public-distributed-rate-limit.ts:228-269.",
+        "Authoritative export confirmation and approval-receipt binding remains documented as unimplemented. Evidence: ARCHITECTURE_DECISIONS.md:42-49.",
+        "An independent delegated architecture review was performed in the authorized V1 worker runtime; its material facts are subject to parent source verification."
+      ],
+      "attackerCapabilities": [
+        "A remote unauthenticated caller may control public request bodies, queries, uploaded photos, export content, Share session IDs, worker IDs, and acknowledgement fields, but is not assumed to possess Supabase, MCP, cron, Upstash, provider, or service-role credentials.",
+        "An authenticated tenant owner may control data and workflows inside owned organizations and sites, but is not assumed to own another tenant, hold platform-operator status, or possess publication, migration, or provider-dispatch authority.",
+        "An MCP bearer holder may invoke only the scopes represented by the resolved context. A legacy environment token is materially broader because it resolves to unbound `tools:*`; possession is not assumed for ordinary web attackers.",
+        "A Share-link recipient may know a session and worker UUID and may submit an acknowledgement, but does not automatically gain tenant login or arbitrary workpack access; contact verification and stored recipient snapshots are separately enforced.",
+        "A deployment operator can select environment-driven providers, endpoints, runtime modes, credentials, and corpus roots. Compromise of trusted deployment configuration is not assumed as an initial remote-attacker capability.",
+        "A model or remote planner can influence generated text only within the data sent to it. It is not assigned direct Supabase, publication, migration, dispatch, or approval authority by the inspected engine adapters.",
+        "Failure of a boundary could add another tenant's private operation memory, service-role-backed mutations, provider dispatch, local process execution, or publication authority; those capabilities are distinct and must not be collapsed into one generic agent threat."
+      ],
+      "securityObjectives": [
+        "Authenticate users and bind every service-role-backed tenant read or write to the authenticated owner's organization, site, and target object.",
+        "Keep service-role credentials, provider keys, OAuth material, MCP plaintext tokens, signing secrets, and Upstash tokens server-only and out of generated analysis, client bundles, logs, and exports.",
+        "Require MCP token validity, persisted tenant identity, expiry, and per-tool scope before any MCP handler executes.",
+        "Keep engine runtimes read/naturalize-only, tenant-bound, evidence-bound, bounded in time and concurrency, and unable to mutate, publish, approve, or dispatch directly.",
+        "Require exact preview, authenticated ownership, active Share state, canonical localized payloads, human-approved boundaries, and durable idempotency before an external effect is enabled.",
+        "Keep public and authenticated expensive work behind request-size, response-size, timeout, rate, and concurrency controls; production shared deployments must fail closed when required distributed admission is unavailable.",
+        "Restrict configurable upstreams to credential-free HTTPS allowlisted origins that resolve only to public addresses, and bind remote-Hermes transport to its attested origin and service identity.",
+        "Preserve reviewed public knowledge separately from tenant-private operation memory; no automatic tenant-to-public promotion or ontology publication.",
+        "Treat exact KOSHA corpus and export assets as integrity-sensitive resources resolved from concrete roots with path, archive, size, and format checks.",
+        "Preserve the immutable historical 18-finding baseline and prior scan artifacts, and make no DB, provider, Share-session, vector, wiki, KOSHA registry, or source mutation during this architecture review. Origin: exact user security context."
+      ],
+      "summary": "SafeClaw is a Next.js industrial-safety document service whose browser and public APIs generate evidence-backed workpacks, query legal and safety sources, export documents, manage tenant workspaces in Supabase, and optionally dispatch reviewed content. Normal startup is `next dev`, `next start`, or a Vercel deployment; Vercel also invokes the daily briefing route. Conditional execution modes include MCP tools, local OpenClaw, local experimental Hermes, and remote Hermes. These modes remain behind distinct authentication, tenant-binding, admission, attestation, and effect controls. Architecture mapping was performed at revision fb6763a789591189e03b8efb14a057def7216ef2 over all 6,757 tracked files and is not full security-audit coverage. Evidence: README.md:1-21; package.json:5-10; vercel.json:3-8; app/api/agent/chat/route.ts:7-22.",
+      "trustBoundaries": [
+        "Unauthenticated callers cross into public ask, search, export, knowledge-draft, safety-reference, Share, and status routes. Request budgets, distributed or instance admission, deterministic parsing, and route-specific controls bound work; production routes that require distributed admission fail closed when Upstash is absent or invalid. Evidence: lib/public-distributed-rate-limit.ts:18-48; lib/public-distributed-rate-limit.ts:228-269; lib/public-distributed-rate-limit.ts:495-531.",
+        "Browser users authenticate with a Supabase bearer session. Server routes validate that token through Supabase Auth, then use a service-role client and explicit owner, organization, site, and workpack predicates. Because service role bypasses RLS, these application predicates own the server-side tenant boundary. Evidence: lib/supabase-admin.ts:611-669; lib/workpack-commercial-store.ts:463-511.",
+        "MCP callers present DB-backed or legacy environment bearer tokens. DB tokens are hash-matched, expiry-checked, bound to an existing site and organization, and reduced to known scopes; each tool checks its own scope. Legacy tokens are unbound `tools:*` authority and require bounded expiry in production. Evidence: lib/mcp-auth.ts:23-72; lib/mcp-auth.ts:122-191; lib/mcp-auth.ts:238-340; lib/mcp-scoped-tool.ts:37-76.",
+        "The agent-chat broker validates a Supabase user and resolves a site owned by that user before invoking any engine. Engine authority declares no mutation or publication capability and requires human confirmation. Evidence: lib/openclaw-broker-auth.ts:75-138; lib/engine-adapter.ts:10-24.",
+        "Local OpenClaw is a host process boundary. The broker supplies a temporary prompt file, an allowlisted child environment, fixed profile/agent/model arguments, bounded output and timeout, and no shell. The production local-openclaw adapter currently fails site-binding attestation. Evidence: lib/openclaw-chat.ts:57-97; lib/openclaw-chat.ts:99-170; lib/openclaw-chat.ts:185-220; lib/openclaw-chat.ts:470-585; lib/openclaw-broker-route.ts:126-138.",
+        "Experimental Hermes is independently gated by local mode, explicit organization and site bindings, a tool-free agent policy, and OpenAI OAuth-only runtime verification. It receives an attested claim allowlist for naturalization. Evidence: lib/openclaw-hermes-runtime.ts:47-114; lib/openclaw-hermes-runtime.ts:162-223.",
+        "Remote Hermes is a separate HTTPS and service-auth boundary. It requires an exact HTTPS hostname allowlist, public-address DNS pinning, no redirects, tenant allowlisting, request signing, response verification, policy attestation, and a durable attempt ledger. Evidence: lib/remote-hermes-runtime.ts:116-143; lib/remote-hermes-runtime.ts:196-252; lib/remote-hermes-runtime.ts:363-520; lib/remote-hermes-https-transport.ts:349-418.",
+        "Provider boundaries receive prompts, photos, evidence projections, public-data queries, or dispatch payloads. Credentials are supplied by the server; responses are bounded and generally subject to timeout and retry controls. Evidence: lib/vertex/client.ts:44-91; lib/photo-vision-analysis.ts:634-690; lib/server/upstream-http.ts:321-360; lib/n8n-webhook.ts:61-105.",
+        "Share-session creation is an authenticated owner workflow, while Share reading and acknowledgement are public-link workflows enforced by active status, expiry, invited worker identity, snapshot policy, contact verification, idempotent acknowledgement identity, and production distributed admission. Evidence: app/api/workpacks/[id]/share-sessions/route.ts:92-174; lib/workpack-commercial-store.ts:320-451; app/api/share-sessions/[sessionId]/route.ts:164-230.",
+        "Knowledge ingestion and review use authenticated tenant ownership. Regeneration is only a public draft-candidate path with a blocked mutation gateway; ontology promotion evaluation returns pending persistence and performs no publication or DB mutation. Evidence: app/api/knowledge/ingest/route.ts:28-145; app/api/knowledge/regenerate/route.ts:22-53; app/api/knowledge/review/route.ts:72-185; lib/ontology-promotion-policy.ts:108-168.",
+        "Platform diagnostics for the SIF embedding gate require both a valid Supabase user and membership in SAFECLAW_PLATFORM_OPERATOR_USER_IDS. The exposed routes read status and approval packets; they do not execute migration or upload actions. Evidence: lib/supabase-admin.ts:596-605; app/api/sif-embedding-gate/status/route.ts:7-20; app/api/sif-embedding-gate/approval-packet/route.ts:8-32."
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

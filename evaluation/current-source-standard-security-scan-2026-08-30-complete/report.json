@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "safeclaw-current-source-standard-security-scan/v3",
+  "verdict": "NOTICE_FRESH_CURRENT_SOURCE_STANDARD_SCAN_18_OCCURRENCES_16_UNIQUE_FINDINGS_PARTIAL_COVERAGE",
+  "scanId": "f19aa0ca-5fa5-4e8e-8482-b63ad854f230",
+  "sourceHead": "fb6763a789591189e03b8efb14a057def7216ef2",
+  "deployedProductSource": "fb6763a789591189e03b8efb14a057def7216ef2",
+  "scan": {
+    "status": "completed",
+    "mode": "standard",
+    "targetKind": "git_revision",
+    "coverageCompleteness": "partial",
+    "trackedFileCount": 6757,
+    "reviewedSurfaceCount": 7,
+    "deferredCoverageItemCount": 32,
+    "reportableFindingCount": 18,
+    "uniqueFindingWriteupCount": 16,
+    "severity": {
+      "critical": 0,
+      "high": 0,
+      "medium": 6,
+      "low": 12
+    },
+    "sealedAt": "2026-08-30T12:42:48.095335Z"
+  },
+  "baseline": {
+    "immutableOriginalFindingCount": 18,
+    "preserved": true,
+    "rewritten": false,
+    "completedPriorScanId": "8fe9c06a-018c-446f-aa98-1b37df95287a"
+  },
+  "currentDisposition": {
+    "approvalGatedDatabaseOrAtomicityCount": 15,
+    "approvalSensitiveShareCapabilityCount": 0,
+    "approvalFreeProductSourceResidualCount": 3,
+    "fullyClosedBoundedSourceCandidateCount": 0,
+    "securityCompleteClaimAllowed": false,
+    "approvalFreeResidualFindingRules": [
+      "integrity.unreviewed-improvement-consumption",
+      "resource-exhaustion.public-ask-prebody-admission",
+      "rate-limit.share-read-partition"
+    ]
+  },
+  "postScanRemediation": {
+    "sourceRemediatedCount": 3,
+    "freshRescanRequired": true,
+    "items": [
+      {
+        "ruleId": "integrity.unreviewed-improvement-consumption",
+        "productCommit": "042c5f2a",
+        "evidencePath": "evaluation/security-reviewed-improvement-memory-2026-08-30/report.json",
+        "status": "PASS_LIVE_SOURCE_CONTRACT_RESCAN_PENDING"
+      },
+      {
+        "ruleId": "resource-exhaustion.public-ask-prebody-admission",
+        "productCommit": "ba20344e",
+        "evidencePath": "evaluation/security-public-ask-prebody-admission-2026-08-30/report.json",
+        "status": "PASS_LIVE_SOURCE_CONTRACT_RESCAN_PENDING"
+      },
+      {
+        "ruleId": "rate-limit.share-read-partition",
+        "productCommit": "b9c41f4f",
+        "evidencePath": "evaluation/security-share-read-admission-2026-08-30/report.json",
+        "status": "PASS_CURRENT_SOURCE_LIVE_PENDING_RESCAN_PENDING"
+      }
+    ]
+  },
+  "canonicalArtifacts": {
+    "manifest": "evaluation/current-source-standard-security-scan-2026-08-30-complete/canonical/scan-manifest.json",
+    "findings": "evaluation/current-source-standard-security-scan-2026-08-30-complete/canonical/findings.json",
+    "coverage": "evaluation/current-source-standard-security-scan-2026-08-30-complete/canonical/coverage.json",
+    "markdown": "evaluation/current-source-standard-security-scan-2026-08-30-complete/scan-report.md",
+    "findingWriteupCount": 16,
+    "supportingEvidenceCount": 16,
+    "sha256": {
+      "manifest": "e2b13b4c574485c4bb56eac088ae58d10545ed3f0a71b49a95d335c264327530",
+      "findings": "0e08dec1b268aca8742cd53b0ef8368c0bc072204adf0756c9c41cbb6e02e8b6",
+      "coverage": "062f79ef6a8ca22d8d22d7630a37ad9dd98d11bddd2a470f9014388ac268bcb3",
+      "markdown": "6db5ad258edc2f5fa76bf75c4d217ac4beb21124b77c47a31f57eefd0148c9c3"
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseSecurityRemediation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "sifVectorRuntime": "APPROVAL_GATED",
+    "koshaExactRegistryPromotion": "APPROVAL_GATED",
+    "freshFullRepositoryScanCompleted": true,
+    "postRemediationRescanCompleted": false,
+    "coverageClosureCompleted": false,
+    "securityCompleteClaimAllowed": false
+  }
+}

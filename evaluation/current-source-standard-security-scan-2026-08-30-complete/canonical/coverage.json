@@ -1,0 +1,1545 @@
+{
+  "completeness": "partial",
+  "deferred": [
+    {
+      "id": "repository-long-tail",
+      "paths": [
+        "."
+      ],
+      "reason": "The repository contains 6,757 tracked files. Six receipt-based reviews covered the highest-risk trust boundaries, but low-risk long-tail assets were not individually reviewed.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An anonymous or authenticated Supabase REST client with the default public-schema table grants",
+        "concrete_impact": "An attacker can potentially read document bodies and citations, overwrite existing records, or insert poisoned documents for any legacy or future consumer of this table.",
+        "confidence": "high",
+        "counterevidence": [
+          "No current application source reference to the documents table was found, reducing present application reachability.",
+          "The deployed database grants and migration state were not probed."
+        ],
+        "cwe": "CWE-862",
+        "locations": [
+          {
+            "line_end": 17,
+            "line_start": 8,
+            "path": "supabase/migrations/001_init.sql"
+          }
+        ],
+        "recommended_remediation": "Enable and force RLS, revoke direct anon/authenticated privileges unless required, and add narrowly scoped read/write policies. Remove the table if it is obsolete.",
+        "severity": "medium",
+        "source_to_sink_explanation": "The initial migration creates the documents table but never enables row-level security or defines access policies. In a standard Supabase public schema, direct PostgREST operations can therefore reach the table without the tenant controls applied to later tables.",
+        "supporting_source_evidence": [
+          "The table contains title, summary, body, citation, and source_url fields.",
+          "No later migration enables RLS or creates a policy for documents."
+        ],
+        "title": "Documents table lacks row-level security",
+        "violated_security_invariant": "Stored documents must not be readable or mutable without an explicit authorization policy."
+      },
+      "id": "baseline-01",
+      "paths": [
+        "supabase/migrations/001_init.sql"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "Any authenticated Supabase user",
+        "concrete_impact": "Any authenticated tenant can create, read, alter, or delete globally unowned dispatch records, exposing recipient metadata and corrupting delivery history.",
+        "confidence": "high",
+        "counterevidence": [
+          "The application archive endpoint queries only organization IDs owned by the authenticated user.",
+          "A direct PostgREST client bypasses that application-level filter."
+        ],
+        "cwe": "CWE-863",
+        "locations": [
+          {
+            "line_end": 90,
+            "line_start": 76,
+            "path": "supabase/migrations/002_workspace_productization.sql"
+          },
+          {
+            "line_end": 200,
+            "line_start": 183,
+            "path": "supabase/migrations/002_workspace_productization.sql"
+          }
+        ],
+        "recommended_remediation": "Make organization_id NOT NULL, backfill or quarantine existing NULL rows, and remove the NULL authorization branch from both policy clauses.",
+        "severity": "medium",
+        "source_to_sink_explanation": "dispatch_logs permits a NULL organization_id, and its SELECT, INSERT, UPDATE, and DELETE policy explicitly authorizes rows whenever organization_id is NULL. This condition is independent of auth.uid().",
+        "supporting_source_evidence": [
+          "organization_id is nullable.",
+          "Both USING and WITH CHECK accept organization_id is null."
+        ],
+        "title": "NULL dispatch-log tenants bypass row-level authorization",
+        "violated_security_invariant": "Every dispatch receipt must belong to one authorized tenant and be visible only to that tenant."
+      },
+      "id": "baseline-02",
+      "paths": [
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/002_workspace_productization.sql"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated tenant owner using the public Supabase API",
+        "concrete_impact": "A tenant user can fabricate successful email, SMS, or Kakao delivery evidence and present it through the authenticated archive UI as authoritative history.",
+        "confidence": "high",
+        "counterevidence": [
+          "The application POST endpoint correctly returns dispatch_log_server_receipt_required.",
+          "The authenticated GET endpoint filters rows to owned organization IDs."
+        ],
+        "cwe": "CWE-863",
+        "locations": [
+          {
+            "line_end": 90,
+            "line_start": 76,
+            "path": "supabase/migrations/002_workspace_productization.sql"
+          },
+          {
+            "line_end": 200,
+            "line_start": 183,
+            "path": "supabase/migrations/002_workspace_productization.sql"
+          },
+          {
+            "line_end": 157,
+            "line_start": 139,
+            "path": "app/api/dispatch-logs/route.ts"
+          }
+        ],
+        "recommended_remediation": "Split read and write policies. Permit owners to read their records but revoke client INSERT, UPDATE, and DELETE. Perform receipt writes only through a service-role function that validates provider evidence and tenant bindings.",
+        "severity": "medium",
+        "source_to_sink_explanation": "The application POST endpoint rejects client-supplied dispatch receipts, but the table RLS policy grants tenant owners FOR ALL access to dispatch_logs. A client can write provider, provider_status, workflow_run_id, failure_reason, target contact, and payload fields directly.",
+        "supporting_source_evidence": [
+          "The table exposes all provider-receipt fields to owner-managed writes.",
+          "The server route states that only authoritative server receipt persistence should create such records."
+        ],
+        "title": "Tenant owners can forge provider delivery receipts through direct table writes",
+        "violated_security_invariant": "Provider status, workflow run IDs, failures, and delivery timestamps must originate only from the authoritative server dispatch path."
+      },
+      "id": "baseline-03",
+      "paths": [
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/002_workspace_productization.sql",
+        "app/api/dispatch-logs/route.ts"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated tenant owner who knows another tenant object's UUID",
+        "concrete_impact": "Attackers can create inconsistent cross-tenant records, corrupt ownership graphs, misattribute worker or compliance evidence, and potentially expose foreign-object effects through service-role consumers.",
+        "confidence": "high",
+        "counterevidence": [
+          "Server routes frequently add organization and site filters before mutations.",
+          "Those server filters do not constrain direct authenticated PostgREST writes."
+        ],
+        "cwe": "CWE-639",
+        "locations": [
+          {
+            "line_end": 90,
+            "line_start": 21,
+            "path": "supabase/migrations/002_workspace_productization.sql"
+          },
+          {
+            "line_end": 181,
+            "line_start": 132,
+            "path": "supabase/migrations/002_workspace_productization.sql"
+          },
+          {
+            "line_end": 64,
+            "line_start": 1,
+            "path": "supabase/migrations/003_knowledge_runtime.sql"
+          },
+          {
+            "line_end": 126,
+            "line_start": 77,
+            "path": "supabase/migrations/003_knowledge_runtime.sql"
+          },
+          {
+            "line_end": 95,
+            "line_start": 21,
+            "path": "supabase/migrations/010_commercial_operations.sql"
+          },
+          {
+            "line_end": 227,
+            "line_start": 161,
+            "path": "supabase/migrations/010_commercial_operations.sql"
+          }
+        ],
+        "recommended_remediation": "Add composite unique keys and composite foreign keys containing organization_id and, where applicable, site_id. Add RLS WITH CHECK predicates or security-definer functions that validate every related object.",
+        "severity": "medium",
+        "source_to_sink_explanation": "Policies generally validate only the row's organization_id. Foreign keys independently reference site_id, workpack_id, worker_id, daily_entry_id, share_session_id, or improvement_id without composite tenant constraints. A direct client can assign its own organization_id while binding related IDs from another tenant.",
+        "supporting_source_evidence": [
+          "The schemas use independent foreign keys rather than organization-aware composite keys.",
+          "WITH CHECK clauses prove ownership of organization_id but do not prove that related IDs have the same organization_id and site_id."
+        ],
+        "title": "Tenant-scoped RLS permits cross-tenant related-object bindings",
+        "violated_security_invariant": "Every site, worker, workpack, event, share, confirmation, improvement, and photo relationship must remain inside one organization and site."
+      },
+      "id": "baseline-04",
+      "paths": [
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/003_knowledge_runtime.sql",
+        "supabase/migrations/003_knowledge_runtime.sql",
+        "supabase/migrations/010_commercial_operations.sql",
+        "supabase/migrations/010_commercial_operations.sql"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An unauthenticated Supabase REST client",
+        "concrete_impact": "An unauthenticated caller can bypass application projection controls and download raw catalog bodies, metadata, ingestion diagnostics, and potentially local provenance paths.",
+        "confidence": "high",
+        "counterevidence": [
+          "Application endpoints construct bounded public representations.",
+          "Much of the underlying KOSHA material is itself public, but internal metadata and unreviewed payload fields are not necessarily intended public API output."
+        ],
+        "cwe": "CWE-200",
+        "locations": [
+          {
+            "line_end": 45,
+            "line_start": 1,
+            "path": "supabase/migrations/004_safety_reference_catalog.sql"
+          },
+          {
+            "line_end": 72,
+            "line_start": 58,
+            "path": "supabase/migrations/004_safety_reference_catalog.sql"
+          }
+        ],
+        "recommended_remediation": "Remove public table policies. Expose a security-barrier view or RPC containing only reviewed public columns and rows, and keep ingestion runs and raw payloads service-role-only.",
+        "severity": "medium",
+        "source_to_sink_explanation": "The migration grants unconditional public SELECT access to sources, items, and ingestion runs. The item table includes full body and payload JSON, while source and run rows include source paths, metadata, report paths, and operational details.",
+        "supporting_source_evidence": [
+          "All three SELECT policies use USING (true).",
+          "safety_reference_items contains unrestricted body and payload fields."
+        ],
+        "title": "Public RLS exposes complete safety-reference catalog rows",
+        "violated_security_invariant": "Public consumers should receive only the reviewed, bounded safety-reference projection exposed by application endpoints."
+      },
+      "id": "baseline-05",
+      "paths": [
+        "supabase/migrations/004_safety_reference_catalog.sql",
+        "supabase/migrations/004_safety_reference_catalog.sql"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated tenant owner using direct Supabase access",
+        "concrete_impact": "A tenant user can inject fabricated approved improvements into MCP and document-generation memory, causing future safety outputs to rely on unreviewed operational claims.",
+        "confidence": "high",
+        "counterevidence": [
+          "The normal application route creates candidates and implements review checks.",
+          "The memory projection bounds field lengths and allowed document labels."
+        ],
+        "cwe": "CWE-863",
+        "locations": [
+          {
+            "line_end": 69,
+            "line_start": 51,
+            "path": "supabase/migrations/010_commercial_operations.sql"
+          },
+          {
+            "line_end": 210,
+            "line_start": 195,
+            "path": "supabase/migrations/010_commercial_operations.sql"
+          },
+          {
+            "line_end": 175,
+            "line_start": 151,
+            "path": "lib/tenant-harness-memory.ts"
+          },
+          {
+            "line_end": 316,
+            "line_start": 298,
+            "path": "lib/tenant-harness-memory.ts"
+          }
+        ],
+        "recommended_remediation": "Revoke client updates to approval fields. Move approval transitions to an atomic service-role RPC that records reviewer identity and a verifiable receipt. Require that receipt when loading tenant memory.",
+        "severity": "medium",
+        "source_to_sink_explanation": "The workpack_improvements RLS policy grants owners FOR ALL writes, including review_status, approved_by, approved_at, analysis_payload, and reflected_documents. The tenant memory loader later trusts rows whose review_status is approved or reflected without independently verifying an approval receipt.",
+        "supporting_source_evidence": [
+          "The client policy permits arbitrary approved and reflected states.",
+          "The memory loader treats those state strings as sufficient approval evidence."
+        ],
+        "title": "Direct improvement writes can forge approval provenance and poison tenant memory",
+        "violated_security_invariant": "Only the reviewed server workflow may mark an improvement approved or reflected and supply approval provenance."
+      },
+      "id": "baseline-06",
+      "paths": [
+        "supabase/migrations/010_commercial_operations.sql",
+        "supabase/migrations/010_commercial_operations.sql",
+        "lib/tenant-harness-memory.ts",
+        "lib/tenant-harness-memory.ts"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An unauthenticated person who obtains a Share session ID and invited worker ID",
+        "concrete_impact": "A forwarded, logged, or otherwise leaked recipient URL gives an unauthenticated third party access to risk assessments, TBM material, and worker-targeted messages without proving recipient identity.",
+        "confidence": "high",
+        "counterevidence": [
+          "Both IDs are UUIDs, sessions must be active and unexpired, and worker membership is checked.",
+          "Contact verification protects acknowledgement creation.",
+          "Exact saved Share behavior remains unverified because no Share session was created or queried."
+        ],
+        "cwe": "CWE-639",
+        "locations": [
+          {
+            "line_end": 159,
+            "line_start": 90,
+            "path": "app/api/share-sessions/[sessionId]/route.ts"
+          },
+          {
+            "line_end": 399,
+            "line_start": 320,
+            "path": "lib/workpack-commercial-store.ts"
+          },
+          {
+            "line_end": 449,
+            "line_start": 405,
+            "path": "lib/workpack-commercial-store.ts"
+          },
+          {
+            "line_end": 287,
+            "line_start": 271,
+            "path": "app/api/share-sessions/[sessionId]/route.ts"
+          }
+        ],
+        "recommended_remediation": "Use a separate high-entropy, revocable recipient capability token stored only as a hash, or require contact verification before returning documents. Avoid exposing reusable worker object IDs as authorization material.",
+        "severity": "medium",
+        "source_to_sink_explanation": "The public GET route accepts sessionId and workerId from the URL. The store verifies that the worker UUID appears in recipients_snapshot, then returns the workpack question, document bodies, and recipient message. Contact verification is required only by the POST acknowledgement path, after documents have already been disclosed.",
+        "supporting_source_evidence": [
+          "GET performs no contact or one-time-token verification.",
+          "The response includes complete selected document bodies."
+        ],
+        "title": "Public Share documents rely on object identifiers as recipient credentials",
+        "violated_security_invariant": "An invited Share must verify the recipient before disclosing tenant document contents."
+      },
+      "id": "baseline-07",
+      "paths": [
+        "app/api/share-sessions/[sessionId]/route.ts",
+        "lib/workpack-commercial-store.ts",
+        "lib/workpack-commercial-store.ts",
+        "app/api/share-sessions/[sessionId]/route.ts"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An unauthenticated recipient or link holder with a valid session ID",
+        "concrete_impact": "A link holder can bypass the nominal per-key limit and generate sustained Supabase traffic by rotating random worker UUIDs.",
+        "confidence": "high",
+        "counterevidence": [
+          "Production requires the distributed limiter.",
+          "A valid high-entropy session ID is needed to reach a real session, and individual requests remain bounded."
+        ],
+        "cwe": "CWE-400",
+        "locations": [
+          {
+            "line_end": 114,
+            "line_start": 90,
+            "path": "app/api/share-sessions/[sessionId]/route.ts"
+          },
+          {
+            "line_end": 270,
+            "line_start": 227,
+            "path": "lib/public-distributed-rate-limit.ts"
+          },
+          {
+            "line_end": 395,
+            "line_start": 328,
+            "path": "lib/workpack-commercial-store.ts"
+          }
+        ],
+        "recommended_remediation": "Key Share reads by authenticated edge client IP plus session ID, and validate workerId format before database access. Add a session-wide ceiling that cannot be partitioned by workerId.",
+        "severity": "low",
+        "source_to_sink_explanation": "GET supplies an explicit rate-limit identifier composed only of sessionId and caller-controlled workerId. Supplying a different workerId creates a new distributed key. Each request then performs a service-role share-session query before rejecting unknown recipients.",
+        "supporting_source_evidence": [
+          "An explicit identifier replaces the default client-IP identity.",
+          "workerId is read directly from the query string before admission."
+        ],
+        "title": "Share read rate limits can be bypassed by varying workerId",
+        "violated_security_invariant": "One caller must not create unlimited public Share database work by choosing arbitrary identity-key components."
+      },
+      "id": "baseline-08",
+      "paths": [
+        "app/api/share-sessions/[sessionId]/route.ts",
+        "lib/public-distributed-rate-limit.ts",
+        "lib/workpack-commercial-store.ts"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated tenant owner using direct Supabase access",
+        "concrete_impact": "A tenant owner can fabricate worker-originated button confirmations and use them as false compliance or communication evidence.",
+        "confidence": "high",
+        "counterevidence": [
+          "The public route validates contact information, ownership identity, and idempotency.",
+          "The schema intentionally supports admin_marked confirmations, but does not prevent owners from claiming button instead."
+        ],
+        "cwe": "CWE-863",
+        "locations": [
+          {
+            "line_end": 49,
+            "line_start": 36,
+            "path": "supabase/migrations/010_commercial_operations.sql"
+          },
+          {
+            "line_end": 193,
+            "line_start": 178,
+            "path": "supabase/migrations/010_commercial_operations.sql"
+          },
+          {
+            "line_end": 309,
+            "line_start": 271,
+            "path": "app/api/share-sessions/[sessionId]/route.ts"
+          }
+        ],
+        "recommended_remediation": "Permit owners to read confirmations and, if needed, create only admin_marked records through a constrained RPC. Reserve button confirmations for the verified public server route.",
+        "severity": "low",
+        "source_to_sink_explanation": "The application public route verifies recipient contact and constructs deterministic confirmation identity, but the table policy grants tenant owners unrestricted INSERT and UPDATE access to confirmation_method, worker identity, snapshots, and read timestamps.",
+        "supporting_source_evidence": [
+          "The broad owner policy permits direct creation of confirmation_method='button'.",
+          "The server route treats contact verification as a required control for that operation."
+        ],
+        "title": "Tenant owners can directly forge worker read confirmations",
+        "violated_security_invariant": "A button confirmation must prove that the invited worker passed recipient verification and acknowledged the designated Share."
+      },
+      "id": "baseline-09",
+      "paths": [
+        "supabase/migrations/010_commercial_operations.sql",
+        "supabase/migrations/010_commercial_operations.sql",
+        "app/api/share-sessions/[sessionId]/route.ts"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated tenant owner using direct Supabase access",
+        "concrete_impact": "A client can publish incomplete or unverified documents, enable anonymous access, or construct recipient snapshots that the approved server workflow would reject.",
+        "confidence": "high",
+        "counterevidence": [
+          "The normal authenticated Share endpoint performs ownership and readiness checks.",
+          "Public loading validates active status, expiry, and snapshot structure."
+        ],
+        "cwe": "CWE-863",
+        "locations": [
+          {
+            "line_end": 62,
+            "line_start": 19,
+            "path": "lib/workpack-commercial-store.ts"
+          },
+          {
+            "line_end": 34,
+            "line_start": 21,
+            "path": "supabase/migrations/010_commercial_operations.sql"
+          },
+          {
+            "line_end": 176,
+            "line_start": 161,
+            "path": "supabase/migrations/010_commercial_operations.sql"
+          }
+        ],
+        "recommended_remediation": "Revoke direct client INSERT and UPDATE. Create and revoke sessions through service-role RPCs that atomically validate readiness, recipients, access policy, and tenant relationships.",
+        "severity": "low",
+        "source_to_sink_explanation": "The server checks stored workpack readiness and verifies generation evidence before sharing, but the RLS policy permits owners to directly insert active workpack_share_sessions with arbitrary recipients_snapshot and access_policy values.",
+        "supporting_source_evidence": [
+          "The table policy allows all owner writes.",
+          "Readiness and signature verification exist only in application code."
+        ],
+        "title": "Direct Share-session writes bypass readiness and recipient governance",
+        "violated_security_invariant": "An active Share must be created only after generation-evidence, readiness, recipient, and access-policy validation."
+      },
+      "id": "baseline-10",
+      "paths": [
+        "lib/workpack-commercial-store.ts",
+        "supabase/migrations/010_commercial_operations.sql",
+        "supabase/migrations/010_commercial_operations.sql"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated tenant owner using direct Supabase access",
+        "concrete_impact": "Review queues and approval history can be falsified, creating misleading governance state or denial of service for legitimate review runs.",
+        "confidence": "high",
+        "counterevidence": [
+          "Ontology promotion independently checks stored receipts and source bindings, limiting direct promotion of forged rows.",
+          "The normal review route uses conditional state transitions."
+        ],
+        "cwe": "CWE-863",
+        "locations": [
+          {
+            "line_end": 64,
+            "line_start": 21,
+            "path": "supabase/migrations/003_knowledge_runtime.sql"
+          },
+          {
+            "line_end": 126,
+            "line_start": 94,
+            "path": "supabase/migrations/003_knowledge_runtime.sql"
+          },
+          {
+            "line_end": 1208,
+            "line_start": 1029,
+            "path": "lib/knowledge-review.ts"
+          }
+        ],
+        "recommended_remediation": "Expose read-only policies to tenant clients and move review transitions into an atomic security-definer function that produces signed or otherwise unforgeable receipts.",
+        "severity": "low",
+        "source_to_sink_explanation": "Owners receive FOR ALL access to knowledge_events and knowledge_regeneration_runs, including review_status, status, proposed_wiki_update, generated_output, and raw_event_ids. They can bypass the extensive server review checks and directly set final states.",
+        "supporting_source_evidence": [
+          "Final workflow states are writable under broad tenant policies.",
+          "The server performs source binding, traceability, receipt, and transition checks that direct writes bypass."
+        ],
+        "title": "Direct knowledge writes can forge review states",
+        "violated_security_invariant": "Approved or rejected knowledge state must be produced only by the authenticated review workflow with a valid review receipt."
+      },
+      "id": "baseline-11",
+      "paths": [
+        "supabase/migrations/003_knowledge_runtime.sql",
+        "supabase/migrations/003_knowledge_runtime.sql",
+        "lib/knowledge-review.ts"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated tenant owner sending concurrent worker update requests",
+        "concrete_impact": "Worker records, training history, and site-specific safety assignments can be silently moved to the wrong site.",
+        "confidence": "high",
+        "counterevidence": [
+          "Sequential requests detect conflicting site assignments and return WORKER_SITE_TRANSFER_REQUIRED.",
+          "The route verifies authentication and organization context."
+        ],
+        "cwe": "CWE-362",
+        "locations": [
+          {
+            "line_end": 120,
+            "line_start": 84,
+            "path": "app/api/workers/route.ts"
+          },
+          {
+            "line_end": 42,
+            "line_start": 21,
+            "path": "supabase/migrations/002_workspace_productization.sql"
+          }
+        ],
+        "recommended_remediation": "Perform the check and update in one transaction or RPC using row locking or a conditional UPDATE tied to the expected site. Return a conflict when no row matches.",
+        "severity": "low",
+        "source_to_sink_explanation": "The route first reads existing site bindings and later performs an upsert keyed only by organization_id and external_key. No lock or atomic database predicate connects the check to the update, so concurrent requests for different sites can both pass before one overwrites the other.",
+        "supporting_source_evidence": [
+          "The lookup and upsert are separate database operations.",
+          "The unique key does not encode the expected current site."
+        ],
+        "title": "Concurrent worker upserts bypass the site-transfer check",
+        "violated_security_invariant": "A worker already assigned to another site must not be reassigned without the dedicated transfer procedure."
+      },
+      "id": "baseline-12",
+      "paths": [
+        "app/api/workers/route.ts",
+        "supabase/migrations/002_workspace_productization.sql"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated tenant owner sending concurrent token-issuance requests",
+        "concrete_impact": "A tenant can exceed the active-token cap, increasing credential exposure and administrative and query load.",
+        "confidence": "high",
+        "counterevidence": [
+          "Issuance requires a valid tenant login.",
+          "Tokens are random, hashed at rest, tenant-bound, and expire after a bounded lifetime."
+        ],
+        "cwe": "CWE-362",
+        "locations": [
+          {
+            "line_end": 278,
+            "line_start": 247,
+            "path": "app/api/mcp-tokens/route.ts"
+          },
+          {
+            "line_end": 17,
+            "line_start": 17,
+            "path": "lib/mcp-token-service.ts"
+          },
+          {
+            "line_end": 82,
+            "line_start": 80,
+            "path": "lib/mcp-token-service.ts"
+          },
+          {
+            "line_end": 30,
+            "line_start": 14,
+            "path": "supabase/migrations/007_mcp_tokens.sql"
+          }
+        ],
+        "recommended_remediation": "Issue tokens through a transactional database function that serializes per-site issuance and checks the active quota immediately before insertion.",
+        "severity": "low",
+        "source_to_sink_explanation": "The route counts active tokens, checks the count in application code, then separately inserts a token. Concurrent requests can all observe a count below the limit and insert successfully because the database has no quota-enforcing constraint or atomic function.",
+        "supporting_source_evidence": [
+          "Quota checking and insertion are separate operations.",
+          "The database enforces token hash uniqueness but not a per-site active-token count."
+        ],
+        "title": "MCP token quota enforcement is non-atomic",
+        "violated_security_invariant": "A site must never have more than the configured maximum number of active, unexpired MCP tokens."
+      },
+      "id": "baseline-13",
+      "paths": [
+        "app/api/mcp-tokens/route.ts",
+        "lib/mcp-token-service.ts",
+        "lib/mcp-token-service.ts",
+        "supabase/migrations/007_mcp_tokens.sql"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated user sending concurrent first-use requests",
+        "concrete_impact": "Subsequent requests may select different workspace records, splitting workers, documents, tokens, and operational history across duplicate tenants or sites.",
+        "confidence": "high",
+        "counterevidence": [
+          "Ordinary sequential requests reuse the first matching organization and site.",
+          "The race requires concurrent authenticated calls."
+        ],
+        "cwe": "CWE-362",
+        "locations": [
+          {
+            "line_end": 716,
+            "line_start": 645,
+            "path": "lib/supabase-admin.ts"
+          },
+          {
+            "line_end": 19,
+            "line_start": 3,
+            "path": "supabase/migrations/002_workspace_productization.sql"
+          }
+        ],
+        "recommended_remediation": "Define the intended uniqueness constraints and use INSERT ... ON CONFLICT or a transactional provisioning RPC.",
+        "severity": "low",
+        "source_to_sink_explanation": "ensureWorkspaceContext performs select-then-insert operations for both organizations and sites. The schema has no uniqueness constraint for owner_id or organization_id plus site name, so concurrent requests can create duplicates.",
+        "supporting_source_evidence": [
+          "Both provisioning paths select and then insert without a transaction.",
+          "No unique constraint covers owner_id or organization_id plus name."
+        ],
+        "title": "Workspace provisioning can create duplicate organizations and sites",
+        "violated_security_invariant": "Provisioning must create at most one default organization and one site for the selected owner and site name."
+      },
+      "id": "baseline-14",
+      "paths": [
+        "lib/supabase-admin.ts",
+        "supabase/migrations/002_workspace_productization.sql"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated reviewer able to trigger concurrent or interrupted review operations",
+        "concrete_impact": "Review provenance can enter a partial state that blocks overlapping runs or requires manual or retry-based compensation, enabling workflow denial of service.",
+        "confidence": "medium",
+        "counterevidence": [
+          "Conditional status predicates reduce conflicting transitions.",
+          "Stored receipts and idempotent retry logic are designed to detect and resume partial operations.",
+          "A deterministic way for a remote attacker to force the database failure was not established."
+        ],
+        "cwe": "CWE-703",
+        "locations": [
+          {
+            "line_end": 1343,
+            "line_start": 1285,
+            "path": "lib/knowledge-review.ts"
+          },
+          {
+            "line_end": 1422,
+            "line_start": 1392,
+            "path": "lib/knowledge-review.ts"
+          }
+        ],
+        "recommended_remediation": "Move the complete review transition into one database transaction or security-definer RPC, including receipt creation, all event updates, and the run transition.",
+        "severity": "low",
+        "source_to_sink_explanation": "The implementation updates each knowledge event in a loop and only afterwards updates the regeneration run. An error, interruption, or competing operation between those steps leaves some events finalized while the run remains review_required.",
+        "supporting_source_evidence": [
+          "Event updates and the final run update are separate calls.",
+          "The error objects explicitly report compensationRequired and partial event counts."
+        ],
+        "title": "Knowledge review updates events and runs non-atomically",
+        "violated_security_invariant": "A review action must transition its run and all source events as one indivisible operation."
+      },
+      "id": "baseline-15",
+      "paths": [
+        "lib/knowledge-review.ts",
+        "lib/knowledge-review.ts"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An anonymous or authenticated Supabase REST client with default public-schema grants",
+        "concrete_impact": "If populated, direct clients can potentially read sensitive user queries, insert misleading audit entries, or delete operational history.",
+        "confidence": "high",
+        "counterevidence": [
+          "No current application source reference to query_logs was found.",
+          "The deployed database grants, contents, and migration state were not probed."
+        ],
+        "cwe": "CWE-862",
+        "locations": [
+          {
+            "line_end": 6,
+            "line_start": 1,
+            "path": "supabase/migrations/001_init.sql"
+          }
+        ],
+        "recommended_remediation": "Enable and force RLS, revoke public access, and restrict log insertion and reading to an authoritative server or operator role. Remove the table if obsolete.",
+        "severity": "low",
+        "source_to_sink_explanation": "The initial migration creates query_logs with query_text and mode fields but never enables RLS or defines policies.",
+        "supporting_source_evidence": [
+          "No RLS statement or later policy for query_logs exists."
+        ],
+        "title": "Query logs table lacks row-level security",
+        "violated_security_invariant": "User query text and diagnostic logs must not be publicly readable or writable."
+      },
+      "id": "baseline-16",
+      "paths": [
+        "supabase/migrations/001_init.sql"
+      ],
+      "reason": "Independent baseline candidate awaiting parent source validation and attack-path assessment.",
+      "surfaceIds": [
+        "independent-baseline-audit"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "A Supabase API caller with SELECT privileges on dispatch_logs; the policy does not require a non-null authenticated identity when organization_id is null.",
+        "concrete_impact": "A caller can retrieve recipient contact data, workflow identifiers, failure details, and complete payloads from every dispatch log whose organization_id is null. Runtime table grants were not established from the reviewed source, so this is confirmed as a policy defect but its deployed reachability is not claimed.",
+        "confidence": "medium",
+        "counterevidence": [
+          "GET /api/dispatch-logs filters through organization IDs owned by the authenticated workspace user and therefore does not return null-organization rows.",
+          "The application response omits the payload column.",
+          "These application controls do not restrict direct table access governed by RLS."
+        ],
+        "cwe": "CWE-862",
+        "locations": [
+          {
+            "end_line": 90,
+            "path": "supabase/migrations/002_workspace_productization.sql",
+            "start_line": 76
+          },
+          {
+            "end_line": 200,
+            "path": "supabase/migrations/002_workspace_productization.sql",
+            "start_line": 183
+          }
+        ],
+        "recommended_remediation": "Make organization_id non-null after quarantining or explicitly assigning existing null rows. Replace the FOR ALL policy with operation-specific policies that require auth.uid() to own the organization. Keep tenant-neutral provider receipts in a service-role-only table or deny client roles explicitly. Verify effective anon/authenticated grants after migration.",
+        "rule": "Dispatch records containing recipient and provider data must always be bound to an authorized tenant.",
+        "severity": "medium",
+        "source_to_sink": "The schema permits dispatch_logs.organization_id to be null and stores target_contact and payload. The single FOR ALL policy authorizes rows whenever organization_id is null, independently of auth.uid(). Consequently the policy's SELECT branch admits every caller to every tenant-neutral row.",
+        "supporting_source_evidence": [
+          "organization_id is nullable while target_contact and payload are stored in the same row.",
+          "The policy is declared FOR ALL without a TO restriction.",
+          "Its USING expression succeeds solely because organization_id is null."
+        ],
+        "title": "Tenant-neutral dispatch logs are readable by every database caller covered by the public RLS policy",
+        "violated_security_invariant": "Dispatch history, recipient contact information, provider state, and stored payloads must not be visible outside their owning organization."
+      },
+      "id": "knowledge-dispatch-01",
+      "paths": [
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/002_workspace_productization.sql"
+      ],
+      "reason": "Focused discovery candidate awaiting parent source validation, de-duplication, and attack-path assessment.",
+      "surfaceIds": [
+        "discovery-knowledge-ai-dispatch"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "A Supabase API caller with INSERT, UPDATE, or DELETE privileges on dispatch_logs; no authenticated tenant identity is required by the policy for null-organization rows.",
+        "concrete_impact": "A permitted database caller can fabricate apparent dispatch evidence, rewrite provider outcomes, or erase tenant-neutral audit history. This can corrupt receipt integrity and downstream operational review even though the current application POST endpoint refuses client-supplied receipts.",
+        "confidence": "medium",
+        "counterevidence": [
+          "POST /api/dispatch-logs authenticates the caller and then always returns dispatch_log_server_receipt_required without writing.",
+          "Live workflow and briefing dispatch are currently blocked because persistent provider idempotency support is hard-coded false.",
+          "Those application gates do not revoke direct database operations allowed by RLS."
+        ],
+        "cwe": "CWE-862",
+        "locations": [
+          {
+            "end_line": 90,
+            "path": "supabase/migrations/002_workspace_productization.sql",
+            "start_line": 76
+          },
+          {
+            "end_line": 200,
+            "path": "supabase/migrations/002_workspace_productization.sql",
+            "start_line": 183
+          },
+          {
+            "end_line": 157,
+            "path": "app/api/dispatch-logs/route.ts",
+            "start_line": 139
+          }
+        ],
+        "recommended_remediation": "Remove client INSERT, UPDATE, and DELETE authority over dispatch_logs. Write receipts only through a service-role function that validates the immutable organization/site/workpack tuple and provider receipt. Add append-only protections, operation-specific RLS policies, non-null tenant ownership, and cryptographic or provider-verifiable receipt fields where audit reliance warrants it.",
+        "rule": "Only an authoritative server-side dispatch path may create or modify provider receipts and audit records.",
+        "severity": "medium",
+        "source_to_sink": "The FOR ALL policy's WITH CHECK accepts inserts and updates with organization_id null. Its USING expression also exposes all existing null-organization rows to UPDATE and DELETE. The schema allows caller-selected provider status, workflow run ID, failure reason, contact, and payload values.",
+        "supporting_source_evidence": [
+          "The RLS policy covers all operations and allows null organization_id in both USING and WITH CHECK.",
+          "Provider identity, provider status, workflow run ID, failure reason, and payload are ordinary mutable columns.",
+          "No later migration altering this dispatch_logs policy was found in the authorized source."
+        ],
+        "title": "Tenant-neutral dispatch receipts can be fabricated, altered, or deleted through the RLS policy",
+        "violated_security_invariant": "Dispatch audit records must be immutable evidence produced by the authoritative provider path and scoped to an organization."
+      },
+      "id": "knowledge-dispatch-02",
+      "paths": [
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/002_workspace_productization.sql",
+        "app/api/dispatch-logs/route.ts"
+      ],
+      "reason": "Focused discovery candidate awaiting parent source validation, de-duplication, and attack-path assessment.",
+      "surfaceIds": [
+        "discovery-knowledge-ai-dispatch"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated organization owner able to use the public Supabase client and any PostgREST table privileges granted to the authenticated role.",
+        "concrete_impact": "A tenant owner or stolen tenant session can publish an unreviewed workpack through an anonymously accessible Share URL, bypassing the intended approval boundary and disclosing its safety documents.",
+        "confidence": "medium",
+        "counterevidence": [
+          "The public loader verifies that the referenced workpack has the same organization_id and site_id as the session, preventing this mechanism from reading another tenant's workpack.",
+          "The exact deployed PostgREST grants are not present in the repository and were not queried, so live exploitability through direct REST is not established.",
+          "Exact saved Share remains MISSING_EVIDENCE; this is a current-source authorization defect, not a claim about a saved production Share."
+        ],
+        "cwe": "CWE-862",
+        "locations": [
+          "supabase/migrations/010_commercial_operations.sql:21",
+          "supabase/migrations/010_commercial_operations.sql:161",
+          "app/api/workpacks/[id]/share-sessions/route.ts:103",
+          "app/api/workpacks/[id]/share-sessions/route.ts:108",
+          "app/api/workpacks/[id]/share-sessions/route.ts:136",
+          "lib/workpack-commercial-store.ts:332",
+          "lib/workpack-commercial-store.ts:368",
+          "lib/workpack-commercial-store.ts:401",
+          "app/api/share-sessions/[sessionId]/route.ts:111",
+          "app/api/share-sessions/[sessionId]/route.ts:145"
+        ],
+        "recommended_remediation": "Remove direct owner insert/update privileges for Share authority fields. Expose a SECURITY DEFINER RPC or server-only transaction that validates workpack ownership, signed generation evidence, readiness, recipient membership, creator identity, expiry, and fixed access policy before inserting. Add database constraints or triggers that reject anonymous publication and forged provenance outside that operation.",
+        "severity": "high",
+        "source_to_sink_explanation": "The commercial migration grants owners unrestricted insert and update authority over workpack_share_sessions based only on organization ownership. A direct insert can choose status=active, share_scope=organization, anonymousAllowed=true, arbitrary recipients_snapshot, and arbitrary created_by, bypassing the authenticated API's readiness and recipient checks. The public Share loader trusts those persisted fields and returns workpack documents when the session is active and tenant identifiers match.",
+        "supporting_source_evidence": [
+          "The RLS policy is FOR ALL and checks only organization_id ownership; it does not constrain status, access_policy, recipients_snapshot, created_by, or share_scope.",
+          "The normal creation route calls loadOwnedWorkpackOperationContext, checks readiness.canShare, resolves server-owned recipients, and constructs a restrictive invited-session draft.",
+          "The public route uses a service-role client, so it does not reapply the caller's RLS identity; it authorizes from the stored session fields.",
+          "A browser Supabase client is configured from NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in components/AdminLoginPanel.tsx:17-20."
+        ],
+        "title": "Authenticated PostgREST clients can create active Share sessions without the server readiness gate",
+        "violated_security_invariant": "A workpack may become publicly reachable only after server-side readiness validation and creation of an invited, recipient-bound Share session."
+      },
+      "id": "db-rls-01",
+      "paths": [
+        "supabase/migrations/010_commercial_operations.sql",
+        "supabase/migrations/010_commercial_operations.sql",
+        "app/api/workpacks/[id]/share-sessions/route.ts",
+        "app/api/workpacks/[id]/share-sessions/route.ts",
+        "app/api/workpacks/[id]/share-sessions/route.ts",
+        "lib/workpack-commercial-store.ts",
+        "lib/workpack-commercial-store.ts",
+        "lib/workpack-commercial-store.ts",
+        "app/api/share-sessions/[sessionId]/route.ts",
+        "app/api/share-sessions/[sessionId]/route.ts"
+      ],
+      "reason": "Focused discovery candidate awaiting parent source validation, de-duplication, and attack-path assessment.",
+      "surfaceIds": [
+        "discovery-db-rls-atomicity"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated organization owner with direct PostgREST write access.",
+        "concrete_impact": "An organization owner or compromised owner session can fabricate worker-read evidence that is presented in learning exports and operation graphs as an ordinary acknowledgement.",
+        "confidence": "medium",
+        "counterevidence": [
+          "Application routes use deterministic confirmation IDs and handle concurrent primary-key conflicts safely.",
+          "Tenant-scoped downstream queries prevent cross-tenant confirmations from being mixed when organization_id and site_id are honest.",
+          "Exact deployed authenticated-role grants remain unknown."
+        ],
+        "cwe": "CWE-345",
+        "locations": [
+          "supabase/migrations/010_commercial_operations.sql:36",
+          "supabase/migrations/010_commercial_operations.sql:46",
+          "supabase/migrations/010_commercial_operations.sql:178",
+          "app/api/share-sessions/[sessionId]/route.ts:250",
+          "app/api/share-sessions/[sessionId]/route.ts:271",
+          "app/api/share-sessions/[sessionId]/route.ts:361",
+          "app/api/workpacks/[id]/read-confirmations/route.ts:102",
+          "app/api/workpacks/[id]/read-confirmations/route.ts:118",
+          "app/api/workpacks/[id]/learning-export/route.ts:82",
+          "app/api/workpacks/[id]/learning-export/route.ts:96",
+          "app/api/workpacks/[id]/operation-graph/route.ts:80",
+          "app/api/workpacks/[id]/operation-graph/route.ts:94"
+        ],
+        "recommended_remediation": "Make confirmation inserts server-only or expose separate database functions for worker and administrator acknowledgement. Derive organization, site, workpack, worker, method, and timestamp inside the transaction; validate the active Share session and recipient snapshot; cryptographically or structurally preserve actor provenance; and retain confirmation_method in every export or graph consumer.",
+        "severity": "high",
+        "source_to_sink_explanation": "The owner RLS policy permits unrestricted inserts into workpack_read_confirmations. Database checks restrict confirmation_method to an enum but do not prove worker identity, active-session status, recipient membership, contact verification, or the asserted read_at. Direct writes therefore bypass both the public worker-verification route and the authenticated admin-marking route. Learning export and operation graph consumers then read name, language, and read time without retaining confirmation_method or validating provenance.",
+        "supporting_source_evidence": [
+          "The public POST verifies recipient contact and derives identity fields from the active session snapshot.",
+          "The admin POST requires an active owned Share session and an included recipient.",
+          "The table policy allows the owner to supply all of those fields directly.",
+          "Downstream queries omit confirmation_method, share_session_id, and worker_id before materializing acknowledgement evidence."
+        ],
+        "title": "Direct database writes can forge worker acknowledgement provenance",
+        "violated_security_invariant": "A button acknowledgement must come from an invited worker who passes recipient verification, while an administrator acknowledgement must remain distinguishable and bound to the active Share snapshot."
+      },
+      "id": "db-rls-02",
+      "paths": [
+        "supabase/migrations/010_commercial_operations.sql",
+        "supabase/migrations/010_commercial_operations.sql",
+        "supabase/migrations/010_commercial_operations.sql",
+        "app/api/share-sessions/[sessionId]/route.ts",
+        "app/api/share-sessions/[sessionId]/route.ts",
+        "app/api/share-sessions/[sessionId]/route.ts",
+        "app/api/workpacks/[id]/read-confirmations/route.ts",
+        "app/api/workpacks/[id]/read-confirmations/route.ts",
+        "app/api/workpacks/[id]/learning-export/route.ts",
+        "app/api/workpacks/[id]/learning-export/route.ts",
+        "app/api/workpacks/[id]/operation-graph/route.ts",
+        "app/api/workpacks/[id]/operation-graph/route.ts"
+      ],
+      "reason": "Focused discovery candidate awaiting parent source validation, de-duplication, and attack-path assessment.",
+      "surfaceIds": [
+        "discovery-db-rls-atomicity"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated organization owner with direct PostgREST update privileges.",
+        "concrete_impact": "A tenant owner or stolen owner token can promote arbitrary improvement content into MCP safety memory without a genuine review, causing generated safety work to reuse attacker-approved guidance.",
+        "confidence": "medium",
+        "counterevidence": [
+          "MCP memory remains scoped to the token's verified organization and optional site.",
+          "The repository does not establish current deployed PostgREST grants."
+        ],
+        "cwe": "CWE-863",
+        "locations": [
+          "supabase/migrations/010_commercial_operations.sql:51",
+          "supabase/migrations/010_commercial_operations.sql:60",
+          "supabase/migrations/010_commercial_operations.sql:65",
+          "supabase/migrations/010_commercial_operations.sql:195",
+          "lib/tenant-harness-memory.ts:151",
+          "lib/tenant-harness-memory.ts:157",
+          "lib/tenant-harness-memory.ts:160",
+          "lib/tenant-harness-memory.ts:303",
+          "lib/tenant-harness-memory.ts:305"
+        ],
+        "recommended_remediation": "Revoke direct update access to review_status and approval fields. Implement an atomic approval RPC that derives the reviewer from auth.uid(), checks an allowed transition from candidate, sets approved_by and approved_at itself, and records immutable approval evidence. Require that evidence in every approved-memory consumer.",
+        "severity": "high",
+        "source_to_sink_explanation": "The workpack_improvements policy permits all updates based solely on organization ownership. The schema permits the caller to set review_status, approved_by, and approved_at independently, without a state-transition trigger or reviewer check. Tenant MCP memory trusts review_status=approved or reflected and accepts approved_at, falling back to created_at when it is absent.",
+        "supporting_source_evidence": [
+          "No migration trigger, constrained transition function, or column-level privilege protects approval fields.",
+          "The MCP memory consumer treats approved/reflected status as sufficient approval evidence."
+        ],
+        "title": "Owners can forge improvement approval state through direct PostgREST updates",
+        "violated_security_invariant": "Only the approval operation may change an improvement from candidate to approved or reflected and establish approved_by and approved_at."
+      },
+      "id": "db-rls-04",
+      "paths": [
+        "supabase/migrations/010_commercial_operations.sql",
+        "supabase/migrations/010_commercial_operations.sql",
+        "supabase/migrations/010_commercial_operations.sql",
+        "supabase/migrations/010_commercial_operations.sql",
+        "lib/tenant-harness-memory.ts",
+        "lib/tenant-harness-memory.ts",
+        "lib/tenant-harness-memory.ts",
+        "lib/tenant-harness-memory.ts",
+        "lib/tenant-harness-memory.ts"
+      ],
+      "reason": "Focused discovery candidate awaiting parent source validation, de-duplication, and attack-path assessment.",
+      "surfaceIds": [
+        "discovery-db-rls-atomicity"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated tenant owner able to issue concurrent review requests or induce a database failure during review.",
+        "concrete_impact": "Concurrent review attempts can strand partially approved or rejected source events, block future reviews through receipt or shared-event conflicts, and require manual compensation to restore authoritative knowledge state.",
+        "confidence": "high",
+        "counterevidence": [
+          "Each event update includes tenant, site, and expected review_status predicates.",
+          "The final run update uses status=review_required as an optimistic concurrency check.",
+          "Receipts and source snapshots provide strong detection and retry validation, but do not provide atomicity."
+        ],
+        "cwe": "CWE-362",
+        "locations": [
+          "lib/knowledge-review.ts:1120",
+          "lib/knowledge-review.ts:1148",
+          "lib/knowledge-review.ts:1285",
+          "lib/knowledge-review.ts:1308",
+          "lib/knowledge-review.ts:1327",
+          "lib/knowledge-review.ts:1396",
+          "lib/knowledge-review.ts:1409",
+          "app/api/knowledge/review/route.ts:177",
+          "app/api/knowledge/review/route.ts:186"
+        ],
+        "recommended_remediation": "Move overlap detection, row locking, event transitions, receipt creation, and run transition into one PostgreSQL transaction exposed through a narrowly authorized RPC. Lock the run and referenced events, enforce one active run per event, and return the committed result.",
+        "severity": "medium",
+        "source_to_sink_explanation": "applyKnowledgeReviewAction checks for overlapping runs, then updates each knowledge event sequentially, and updates the regeneration run only after all event writes. The overlap check and writes are not locked or transactional. Concurrent reviews can both pass the precheck; interleaving or a later failure leaves a subset of events finalized while the run remains review_required. The code explicitly returns compensationRequired for these partial states.",
+        "supporting_source_evidence": [
+          "Events are written in a loop with one PostgREST update per event.",
+          "The run transition is a later independent update.",
+          "Failure responses explicitly describe partially stored events and compensationRequired=true."
+        ],
+        "title": "Knowledge review updates multiple records without a transaction",
+        "violated_security_invariant": "A review action must atomically transition the regeneration run and every bound knowledge event to one consistent decision and receipt."
+      },
+      "id": "db-rls-05",
+      "paths": [
+        "lib/knowledge-review.ts",
+        "lib/knowledge-review.ts",
+        "lib/knowledge-review.ts",
+        "lib/knowledge-review.ts",
+        "lib/knowledge-review.ts",
+        "lib/knowledge-review.ts",
+        "lib/knowledge-review.ts",
+        "app/api/knowledge/review/route.ts",
+        "app/api/knowledge/review/route.ts"
+      ],
+      "reason": "Focused discovery candidate awaiting parent source validation, de-duplication, and attack-path assessment.",
+      "surfaceIds": [
+        "discovery-db-rls-atomicity"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated organization owner issuing concurrent worker-import requests for the same external key and different sites.",
+        "concrete_impact": "A worker can be silently moved between sites, changing which workpacks, Share recipient snapshots, training records, and dispatch operations treat that worker as present.",
+        "confidence": "high",
+        "counterevidence": [
+          "Sequential attempts are correctly rejected when the existing site differs.",
+          "The race remains within one organization and does not expose another tenant's worker data."
+        ],
+        "cwe": "CWE-367",
+        "locations": [
+          "app/api/workers/route.ts:84",
+          "app/api/workers/route.ts:101",
+          "app/api/workers/route.ts:106",
+          "app/api/workers/route.ts:117",
+          "supabase/migrations/002_workspace_productization.sql:21",
+          "supabase/migrations/002_workspace_productization.sql:41"
+        ],
+        "recommended_remediation": "Perform worker creation/update in a transaction or RPC that locks the organization/external-key row. Permit site_id changes only through a separate transfer function with an expected-current-site predicate and auditable transfer record.",
+        "severity": "medium",
+        "source_to_sink_explanation": "The worker POST first queries existing site bindings and rejects conflicts. It then independently upserts on organization_id,external_key, including the new site_id. Concurrent requests for the same new external key can both observe no existing row and then upsert different site IDs; the later write wins without either request receiving WORKER_SITE_TRANSFER_REQUIRED.",
+        "supporting_source_evidence": [
+          "The conflict lookup and upsert are separate database statements.",
+          "The unique key serializes the final upsert but does not preserve the site observed by the precheck."
+        ],
+        "title": "Worker site-transfer protection is vulnerable to a check-then-upsert race",
+        "violated_security_invariant": "A worker already associated with one site must not be reassigned to another site without the explicit transfer procedure."
+      },
+      "id": "db-rls-06",
+      "paths": [
+        "app/api/workers/route.ts",
+        "app/api/workers/route.ts",
+        "app/api/workers/route.ts",
+        "app/api/workers/route.ts",
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/002_workspace_productization.sql"
+      ],
+      "reason": "Focused discovery candidate awaiting parent source validation, de-duplication, and attack-path assessment.",
+      "surfaceIds": [
+        "discovery-db-rls-atomicity"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated organization owner issuing parallel MCP-token requests.",
+        "concrete_impact": "A tenant can mint more active MCP bearer capabilities than the admission policy allows, increasing credential sprawl and bypassing the intended per-site issuance bound.",
+        "confidence": "high",
+        "counterevidence": [
+          "Issued tokens are random, hashed at rest, time-bounded, tenant-bound, and checked for site/organization consistency during authentication.",
+          "The race does not grant cross-tenant scope."
+        ],
+        "cwe": "CWE-362",
+        "locations": [
+          "app/api/mcp-tokens/route.ts:247",
+          "app/api/mcp-tokens/route.ts:256",
+          "app/api/mcp-tokens/route.ts:265",
+          "app/api/mcp-tokens/route.ts:274",
+          "lib/mcp-token-service.ts:17",
+          "lib/mcp-token-service.ts:80",
+          "supabase/migrations/007_mcp_tokens.sql:14",
+          "supabase/migrations/009_mcp_token_query_indexes.sql:19"
+        ],
+        "recommended_remediation": "Issue tokens through an atomic database function that takes a per-site advisory lock or locks a quota row, counts active unexpired tokens, inserts only when below the limit, and returns the new row. Apply request-rate admission as defense in depth.",
+        "severity": "medium",
+        "source_to_sink_explanation": "The token route counts active tokens, checks the maximum in application code, and then inserts a new token in a separate statement. Parallel requests can all observe a count below the limit and each receive a distinct valid plaintext token.",
+        "supporting_source_evidence": [
+          "The count and insert are independent PostgREST operations.",
+          "The database has an index for counting active tokens but no constraint or issuance function enforcing the cap."
+        ],
+        "title": "MCP active-token quota can be exceeded by concurrent issuance",
+        "violated_security_invariant": "A site may have no more than the configured maximum number of active, unexpired MCP bearer capabilities."
+      },
+      "id": "db-rls-07",
+      "paths": [
+        "app/api/mcp-tokens/route.ts",
+        "app/api/mcp-tokens/route.ts",
+        "app/api/mcp-tokens/route.ts",
+        "app/api/mcp-tokens/route.ts",
+        "lib/mcp-token-service.ts",
+        "lib/mcp-token-service.ts",
+        "supabase/migrations/007_mcp_tokens.sql",
+        "supabase/migrations/009_mcp_token_query_indexes.sql"
+      ],
+      "reason": "Focused discovery candidate awaiting parent source validation, de-duplication, and attack-path assessment.",
+      "surfaceIds": [
+        "discovery-db-rls-atomicity"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An authenticated user issuing concurrent first-use requests.",
+        "concrete_impact": "Tenant data, workers, workpacks, and MCP tokens can be split across duplicate workspace roots, creating inconsistent authorization scope and operational records.",
+        "confidence": "high",
+        "counterevidence": [
+          "All resulting organizations remain owned by the same authenticated user.",
+          "This does not directly cross a tenant boundary."
+        ],
+        "cwe": "CWE-362",
+        "locations": [
+          "lib/supabase-admin.ts:653",
+          "lib/supabase-admin.ts:663",
+          "lib/supabase-admin.ts:665",
+          "lib/supabase-admin.ts:675",
+          "supabase/migrations/002_workspace_productization.sql:3",
+          "supabase/migrations/002_workspace_productization.sql:11"
+        ],
+        "recommended_remediation": "Define the intended cardinality and enforce it with unique constraints. Use INSERT ... ON CONFLICT or a transactional provisioning RPC, then return the canonical rows.",
+        "severity": "low",
+        "source_to_sink_explanation": "ensureWorkspaceContext selects the first organization owned by the user and inserts one if absent, then separately selects and inserts a site. Neither organizations.owner_id nor sites(organization_id,name) is unique. Concurrent first-use requests can therefore create multiple organizations or duplicate same-name sites and return different workspace contexts.",
+        "supporting_source_evidence": [
+          "Provisioning uses independent select-then-insert statements.",
+          "The schema has no uniqueness constraint for owner_id or organization/site name."
+        ],
+        "title": "Workspace provisioning can create duplicate tenant roots under concurrency",
+        "violated_security_invariant": "A user should be provisioned into one canonical organization and one canonical site for a given organization and site name."
+      },
+      "id": "db-rls-08",
+      "paths": [
+        "lib/supabase-admin.ts",
+        "lib/supabase-admin.ts",
+        "lib/supabase-admin.ts",
+        "lib/supabase-admin.ts",
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/002_workspace_productization.sql"
+      ],
+      "reason": "Focused discovery candidate awaiting parent source validation, de-duplication, and attack-path assessment.",
+      "surfaceIds": [
+        "discovery-db-rls-atomicity"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "Any authenticated PostgREST user if authenticated-role privileges exist on dispatch_logs.",
+        "concrete_impact": "Any authenticated user could read, alter, or delete every null-organization dispatch row, exposing recipient contact information or corrupting dispatch history.",
+        "confidence": "medium",
+        "counterevidence": [
+          "The current dispatch-log API requires authentication and refuses client-supplied provider receipts instead of inserting rows.",
+          "The authenticated archive query filters to the user's owned organization IDs and does not return null-organization rows.",
+          "The repository does not establish that null-organization rows currently exist or that deployed authenticated-role grants permit direct access."
+        ],
+        "cwe": "CWE-862",
+        "locations": [
+          "supabase/migrations/002_workspace_productization.sql:76",
+          "supabase/migrations/002_workspace_productization.sql:78",
+          "supabase/migrations/002_workspace_productization.sql:83",
+          "supabase/migrations/002_workspace_productization.sql:89",
+          "supabase/migrations/002_workspace_productization.sql:183",
+          "supabase/migrations/002_workspace_productization.sql:186",
+          "supabase/migrations/002_workspace_productization.sql:193"
+        ],
+        "recommended_remediation": "Make organization_id NOT NULL for authoritative dispatch records, remove the null branch from RLS, and bind site_id and workpack_id to that organization. Quarantine legacy unbound rows in a server-only table if they must be retained.",
+        "severity": "medium",
+        "source_to_sink_explanation": "dispatch_logs.organization_id is nullable. Its FOR ALL RLS policy explicitly authorizes every row whose organization_id is null, without checking auth.uid(). Such rows may contain target_contact, payload, provider state, workflow IDs, and failure details.",
+        "supporting_source_evidence": [
+          "Both USING and WITH CHECK accept organization_id IS NULL.",
+          "The table schema permits null organization IDs and stores contact and payload fields."
+        ],
+        "title": "Nullable dispatch-log tenant IDs create a globally shared authenticated RLS scope",
+        "violated_security_invariant": "Dispatch targets, contacts, payloads, and provider results must always belong to a specific authorized organization."
+      },
+      "id": "db-rls-09",
+      "paths": [
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/002_workspace_productization.sql"
+      ],
+      "reason": "Focused discovery candidate awaiting parent source validation, de-duplication, and attack-path assessment.",
+      "surfaceIds": [
+        "discovery-db-rls-atomicity"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "An anonymous or authenticated PostgREST caller if inherited deployment grants permit access.",
+        "concrete_impact": "Under permissive inherited grants, a caller could read or modify every legacy document and query-log row because the database has no row-level authorization predicate.",
+        "confidence": "medium",
+        "counterevidence": [
+          "No current app or lib consumer of these exact legacy tables was found.",
+          "The repository does not contain the deployed grants or current row contents, so current direct exposure is not confirmed."
+        ],
+        "cwe": "CWE-862",
+        "locations": [
+          "supabase/migrations/001_init.sql:1",
+          "supabase/migrations/001_init.sql:8",
+          "components/AdminLoginPanel.tsx:17",
+          "components/AdminLoginPanel.tsx:20"
+        ],
+        "recommended_remediation": "If unused, revoke anon/authenticated privileges and migrate or remove the tables through an approved process. If retained, add explicit ownership, enable and force RLS, define least-privilege policies, and add regression tests for anonymous and cross-tenant denial.",
+        "severity": "medium",
+        "source_to_sink_explanation": "The initial migration creates documents and query_logs but never enables RLS, revokes public-schema privileges, or adds tenant ownership columns. No later migration hardens them. The application distributes a browser Supabase URL and anon key, so any inherited PostgREST privileges would reach unscoped tables.",
+        "supporting_source_evidence": [
+          "All later migrations were reviewed and none enables RLS or revokes privileges for these tables.",
+          "Neither table contains organization_id, owner_id, or another tenant-binding column."
+        ],
+        "title": "Legacy documents and query_logs tables have no repository-enforced RLS boundary",
+        "violated_security_invariant": "Document contents and user query logs must be explicitly tenant-scoped or server-only."
+      },
+      "id": "db-rls-10",
+      "paths": [
+        "supabase/migrations/001_init.sql",
+        "supabase/migrations/001_init.sql",
+        "components/AdminLoginPanel.tsx",
+        "components/AdminLoginPanel.tsx"
+      ],
+      "reason": "Focused discovery candidate awaiting parent source validation, de-duplication, and attack-path assessment.",
+      "surfaceIds": [
+        "discovery-db-rls-atomicity"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "Unauthenticated caller rotating sessionId or workerId values in Share acknowledgement requests.",
+        "concrete_impact": "A caller can raise acknowledgement database work from the intended per-capability limit to the coarser pre-body limit, increasing service-role lookups and verification work.",
+        "confidence": "high",
+        "counterevidence": [
+          "Pre-body distributed admission caps requests at 60 per minute and eight concurrent body reads.",
+          "Bodies are limited to 16 KiB.",
+          "Known recipients must provide the complete stored phone number or email before a confirmation is written."
+        ],
+        "cwe": "CWE-770",
+        "id": "SHARE-ACK-001",
+        "locations": [
+          {
+            "lines": "164-205",
+            "path": "app/api/share-sessions/[sessionId]/route.ts"
+          },
+          {
+            "lines": "207-238",
+            "path": "app/api/share-sessions/[sessionId]/route.ts"
+          }
+        ],
+        "recommended_remediation": "Retain the coarse caller identity in the ACK key or enforce both caller and capability quotas. Do not let the worker identifier replace the stable caller dimension.",
+        "severity": "low",
+        "source_to_sink": "POST first applies a stable pre-body quota and concurrency lease, but subsequently keys the 20-request acknowledgement limiter only by caller-controlled sessionId and workerId. Rotating either value bypasses that fine-grained quota before service-role session lookup and contact verification.",
+        "supporting_source_evidence": [
+          "The pre-body namespace uses the default client identity.",
+          "The later share-session-ack namespace replaces it with `${sessionId}:${workerId || \"anonymous\"}`."
+        ],
+        "title": "Share ACK fine-grained quota can be partitioned after coarse admission",
+        "violated_security_invariant": "The operation-specific acknowledgement quota must remain bound to a stable caller identity."
+      },
+      "id": "public-web-03",
+      "paths": [
+        "app/api/share-sessions/[sessionId]/route.ts",
+        "app/api/share-sessions/[sessionId]/route.ts"
+      ],
+      "reason": "Focused discovery candidate awaiting parent source validation, de-duplication, and attack-path assessment.",
+      "surfaceIds": [
+        "discovery-public-web-share"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "Unauthenticated caller sending concurrent or slow POST requests to /api/knowledge/ingest.",
+        "concrete_impact": "Unauthenticated callers can repeatedly consume connection time, memory, and event-normalization CPU without being charged to an actor or organization quota.",
+        "confidence": "high",
+        "counterevidence": [
+          "The body is limited to 64 KiB with a 10-second timeout.",
+          "No database mutation occurs before ownership and organization checks complete."
+        ],
+        "cwe": "CWE-400",
+        "id": "KNOWLEDGE-INGEST-001",
+        "locations": [
+          {
+            "lines": "28-37",
+            "path": "app/api/knowledge/ingest/route.ts"
+          },
+          {
+            "lines": "52-92",
+            "path": "app/api/knowledge/ingest/route.ts"
+          }
+        ],
+        "recommended_remediation": "Create the client, authenticate the bearer token, and apply actor-level admission before reading the body. Perform organization admission immediately after resolving the body-provided site within the authenticated scope.",
+        "severity": "low",
+        "source_to_sink": "The route buffers and parses up to 64 KiB, normalizes the raw event, and builds a regeneration bundle before creating the Supabase client, authenticating the user, or checking actor admission.",
+        "supporting_source_evidence": [
+          "Authentication occurs at lines 84-90 after body buffering and normalization.",
+          "Actor admission begins only after authentication at lines 92-94."
+        ],
+        "title": "Knowledge ingest consumes and normalizes bodies before authentication or actor admission",
+        "violated_security_invariant": "Authenticated write endpoints must authenticate and perform coarse admission before consuming request bodies."
+      },
+      "id": "public-web-04",
+      "paths": [
+        "app/api/knowledge/ingest/route.ts",
+        "app/api/knowledge/ingest/route.ts"
+      ],
+      "reason": "Focused discovery candidate awaiting parent source validation, de-duplication, and attack-path assessment.",
+      "surfaceIds": [
+        "discovery-public-web-share"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "Unauthenticated caller sending concurrent or slow POST requests to /api/knowledge/review.",
+        "concrete_impact": "Unauthenticated callers can consume body-read and parser resources and probe command-envelope validation without entering an authenticated admission boundary.",
+        "confidence": "high",
+        "counterevidence": [
+          "The request is limited to 64 KiB with a 10-second timeout.",
+          "Promotion evaluation and review persistence occur only after authentication.",
+          "Promotion remains pending and does not publish ontology data in this route."
+        ],
+        "cwe": "CWE-400",
+        "id": "KNOWLEDGE-REVIEW-001",
+        "locations": [
+          {
+            "lines": "72-109",
+            "path": "app/api/knowledge/review/route.ts"
+          }
+        ],
+        "recommended_remediation": "Authenticate before calling enforcePublicJsonRequestBodyBudget and use an authenticated body-budget helper. Add a stable per-user admission check before parsing approval commands.",
+        "severity": "low",
+        "source_to_sink": "POST buffers and parses the request, attempts ontology-promotion and review-command parsing, and returns command-specific validation responses before creating the Supabase client or authenticating the user.",
+        "supporting_source_evidence": [
+          "Body parsing and promotion-command classification occur at lines 73-104.",
+          "Authentication begins at lines 106-117."
+        ],
+        "title": "Knowledge review parses approval commands before authentication",
+        "violated_security_invariant": "Approval-gated write routes must authenticate before body consumption and command parsing."
+      },
+      "id": "public-web-05",
+      "paths": [
+        "app/api/knowledge/review/route.ts"
+      ],
+      "reason": "Focused discovery candidate awaiting parent source validation, de-duplication, and attack-path assessment.",
+      "surfaceIds": [
+        "discovery-public-web-share"
+      ]
+    },
+    {
+      "candidate": {
+        "attacker": "Unauthenticated caller sending JSON POST requests to arbitrary /api/workpacks/{id}/improvements paths.",
+        "concrete_impact": "Attackers can select JSON to consume body-read resources without the distributed rate and concurrency controls applied to the multipart representation.",
+        "confidence": "high",
+        "counterevidence": [
+          "The JSON body is capped at 16 KiB with a 10-second timeout.",
+          "Ownership is checked before analysis or persistence.",
+          "Multipart requests require Content-Length and receive distributed admission."
+        ],
+        "cwe": "CWE-400",
+        "id": "WORKPACK-IMPROVEMENT-001",
+        "locations": [
+          {
+            "lines": "305-320",
+            "path": "app/api/workpacks/[id]/improvements/route.ts"
+          },
+          {
+            "lines": "491-524",
+            "path": "app/api/workpacks/[id]/improvements/route.ts"
+          }
+        ],
+        "recommended_remediation": "Authenticate before consuming either representation and apply one coarse pre-body distributed admission wrapper to the exported POST handler. Keep the heavier photo-analysis lease conditional on multipart content after authentication.",
+        "severity": "low",
+        "source_to_sink": "The JSON branch buffers the body in the exported POST handler and then calls handlePost, where authentication occurs. The multipart branch instead applies withPublicPhotoAnalysisAdmission before handlePost.",
+        "supporting_source_evidence": [
+          "JSON body enforcement occurs at lines 493-500 before handlePost authenticates at lines 305-313.",
+          "Only the multipart path reaches withPublicPhotoAnalysisAdmission."
+        ],
+        "title": "JSON improvement requests are buffered before authentication and bypass the multipart pre-body admission",
+        "violated_security_invariant": "All representations of the same authenticated operation must receive equivalent pre-body admission."
+      },
+      "id": "public-web-06",
+      "paths": [
+        "app/api/workpacks/[id]/improvements/route.ts",
+        "app/api/workpacks/[id]/improvements/route.ts"
+      ],
+      "reason": "Focused discovery candidate awaiting parent source validation, de-duplication, and attack-path assessment.",
+      "surfaceIds": [
+        "discovery-public-web-share"
+      ]
+    }
+  ],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [
+    {
+      "pattern": "live DB/schema/data mutation",
+      "reason": "Explicit user boundary; source-only review."
+    },
+    {
+      "pattern": "provider dispatch and Share-session creation",
+      "reason": "Explicit user boundary; no external effects."
+    },
+    {
+      "pattern": "vector, Wiki, and KOSHA registry mutation",
+      "reason": "Explicit user boundary; no publication or registry effects."
+    }
+  ],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "repository",
+  "mode": "repository",
+  "openQuestions": [
+    {
+      "followUpPrompt": "Run the approved read-only live grant and RLS isolation audit before changing severity assumptions.",
+      "question": "What anon/authenticated table grants and migration state are effective in the deployed Supabase project?"
+    },
+    {
+      "followUpPrompt": "Keep MISSING_EVIDENCE until a concrete existing URL is supplied or DB-backed creation is separately approved.",
+      "question": "Can the user provide an existing production /share/[sessionId]?workerId=... URL for no-mutation exact-session review?"
+    },
+    {
+      "question": "Discovery receipts are complete; candidate validation and de-duplication are next."
+    },
+    {
+      "question": "Public web/Share review and parent residual review remain in progress."
+    },
+    {
+      "question": "Focused packet investigations and parent validation remain in progress."
+    }
+  ],
+  "scanId": "f19aa0ca-5fa5-4e8e-8482-b63ad854f230",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "reported",
+      "id": "independent-baseline-audit",
+      "label": "Independent baseline security audit",
+      "notes": "16 source-backed candidates checkpointed for parent validation; 33 files reported fully reviewed.",
+      "receiptRefs": [],
+      "riskArea": "Repository-wide static baseline"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "independent-architecture-review",
+      "label": "Independent architecture and effective-resource review",
+      "notes": "29 effective-resource rows mapped; architecture mapping is not audit coverage.",
+      "receiptRefs": [],
+      "riskArea": "Architecture and trust boundaries"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "discovery-mcp-engine",
+      "label": "MCP, broker, local and remote Hermes review",
+      "notes": "Reviewed 31 files. Token, scope, tenant, budget, broker, process, DNS/TLS, signing, replay and durable-ledger controls were effective in reviewed source; exact saved Share remains outside evidence.",
+      "receiptRefs": [],
+      "riskArea": "MCP authentication, model capabilities, process and remote transport"
+    },
+    {
+      "disposition": "reported",
+      "id": "discovery-knowledge-ai-dispatch",
+      "label": "Knowledge, AI, photo, briefing and dispatch review",
+      "notes": "Reviewed 24 files. Application routes were bounded; two dispatch_logs null-tenant RLS candidates require validation. No live mutation or exact saved Share claim.",
+      "receiptRefs": [],
+      "riskArea": "Knowledge governance, AI inputs, photo transfer and dispatch integrity"
+    },
+    {
+      "disposition": "reported",
+      "id": "discovery-db-rls-atomicity",
+      "label": "Database RLS, provenance and atomicity review",
+      "notes": "Reviewed 19 files. Ten source candidates require validation; deployed grants and exact saved Share were not probed.",
+      "receiptRefs": [],
+      "riskArea": "Supabase schema, RLS, commercial provenance and concurrency"
+    },
+    {
+      "disposition": "reported",
+      "id": "discovery-public-web-share",
+      "label": "Public web, Share, export and upstream review",
+      "notes": "Reviewed 39 files. Six resource-admission candidates require validation; exact saved Share remains MISSING_EVIDENCE and route behavior is not saved-session proof.",
+      "receiptRefs": [],
+      "riskArea": "Unauthenticated APIs, Share capability reads, exports, upstream requests and admission"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "parent-residual-review",
+      "label": "Parent client, redirect, export, configuration and secret residual review",
+      "notes": "Reviewed auth callback state/redirect validation, generated document HTML escaping, static headers/redirects, CI action pinning and tracked secret patterns. No reportable issue established; no CSP is recorded as hardening debt, not a confirmed exploit.",
+      "receiptRefs": [],
+      "riskArea": "Client XSS, auth redirects, exports, security headers, CI and tracked secret residue"
+    }
+  ]
+}
