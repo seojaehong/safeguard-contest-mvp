@@ -23,6 +23,7 @@ import {
 } from "@/components/WorkpackEditor";
 import {
   buildStoredCurrentWorkpack,
+  clearStoredSafeClawUserContent,
   CURRENT_WORKPACK_STORAGE_KEY,
   parseStoredCurrentWorkpack,
   type CurrentDispatchSnapshot,
@@ -282,7 +283,15 @@ function AdminAccessPanel({
       console.warn("supabase session load failed", error);
     });
 
-    const { data: listener } = client.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: listener } = client.auth.onAuthStateChange((event, nextSession) => {
+      if (event === "SIGNED_OUT") {
+        const cleanup = clearStoredSafeClawUserContent(window.localStorage);
+        if (cleanup.failedKeys.length > 0) {
+          console.error("workspace signed-out storage cleanup incomplete", cleanup.failedKeys);
+        }
+        window.location.assign("/login");
+        return;
+      }
       onSessionChange(nextSession);
     });
 
@@ -310,8 +319,25 @@ function AdminAccessPanel({
 
   async function signOut() {
     if (!client) return;
-    await client.auth.signOut();
-    onSessionChange(null);
+    let signOutError: unknown = null;
+    try {
+      const { error } = await client.auth.signOut();
+      if (error) throw error;
+      onSessionChange(null);
+    } catch (error) {
+      signOutError = error;
+      console.error("workspace sign out failed", error);
+    }
+
+    const cleanup = clearStoredSafeClawUserContent(window.localStorage);
+    if (cleanup.failedKeys.length > 0) {
+      setMessage("로그아웃 중 일부 브라우저 임시 데이터를 지우지 못했습니다. 이 브라우저의 사이트 데이터를 삭제해 주세요.");
+      return;
+    }
+    setMessage(signOutError
+      ? "브라우저 임시 데이터는 지웠지만 서버 로그아웃을 확인하지 못했습니다. 다시 시도해 주세요."
+      : "로그아웃하고 이 브라우저의 작업자·문서 임시 데이터를 지웠습니다.");
+    window.location.assign("/login");
   }
 
   if (!client) {
@@ -341,6 +367,7 @@ function AdminAccessPanel({
             <div><span>저장 시각</span><strong>{storageSnapshot.savedAt ? new Date(storageSnapshot.savedAt).toLocaleString("ko-KR") : "대기"}</strong></div>
           </div>
           <p className="muted small">{storageSnapshot.message}</p>
+          {message ? <p className="muted small">{message}</p> : null}
           <button type="button" className="button secondary full-button" onClick={signOut}>로그아웃</button>
         </>
       ) : (

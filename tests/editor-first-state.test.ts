@@ -1,10 +1,69 @@
 import { describe, expect, it } from "vitest";
 
-import { buildStoredCurrentWorkpack, parseStoredCurrentWorkpack } from "@/lib/current-workpack";
+import {
+  buildStoredCurrentWorkpack,
+  clearStoredSafeClawUserContent,
+  CURRENT_WORKPACK_STORAGE_KEY,
+  parseStoredCurrentWorkpack
+} from "@/lib/current-workpack";
+import { OPERATION_IMPROVEMENTS_STORAGE_KEY } from "@/lib/operation-improvement-history";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
 import type { WorkpackRevalidationBasis } from "@/lib/workpack-readiness";
 
 describe("editor-first draft identity", () => {
+  it("clears persisted user content on logout without removing browser preferences", () => {
+    const values = new Map<string, string>([
+      [CURRENT_WORKPACK_STORAGE_KEY, "raw worker profiles"],
+      [OPERATION_IMPROVEMENTS_STORAGE_KEY, "photo and improvement history"],
+      ["safeclaw-workpack:tenant:site:question:fingerprint", "generated document draft"],
+      ["safeclaw.documentEditorialReview.v1:fingerprint", "review state"],
+      ["safeclaw.documentEditorialReviewReviewer.v1:fingerprint", "reviewer name"],
+      ["safeclaw.moduleTheme", "night"],
+      ["safeclaw.aiMode", "enhanced"]
+    ]);
+    const storage = {
+      get length() { return values.size; },
+      key: (index: number) => Array.from(values.keys())[index] ?? null,
+      removeItem: (key: string) => { values.delete(key); }
+    };
+
+    const result = clearStoredSafeClawUserContent(storage);
+
+    expect(result.failedKeys).toEqual([]);
+    expect(result.removedKeys).toEqual(expect.arrayContaining([
+      CURRENT_WORKPACK_STORAGE_KEY,
+      OPERATION_IMPROVEMENTS_STORAGE_KEY,
+      "safeclaw-workpack:tenant:site:question:fingerprint",
+      "safeclaw.documentEditorialReview.v1:fingerprint",
+      "safeclaw.documentEditorialReviewReviewer.v1:fingerprint"
+    ]));
+    expect(values).toEqual(new Map([
+      ["safeclaw.moduleTheme", "night"],
+      ["safeclaw.aiMode", "enhanced"]
+    ]));
+  });
+
+  it("reports per-key cleanup failures without skipping later user content", () => {
+    const values = new Map<string, string>([
+      [CURRENT_WORKPACK_STORAGE_KEY, "raw worker profiles"],
+      ["safeclaw-workpack:tenant:site:question:fingerprint", "generated document draft"]
+    ]);
+    const storage = {
+      get length() { return values.size; },
+      key: (index: number) => Array.from(values.keys())[index] ?? null,
+      removeItem: (key: string) => {
+        if (key === CURRENT_WORKPACK_STORAGE_KEY) throw new Error("storage blocked");
+        values.delete(key);
+      }
+    };
+
+    const result = clearStoredSafeClawUserContent(storage);
+
+    expect(result.failedKeys).toEqual([CURRENT_WORKPACK_STORAGE_KEY]);
+    expect(values.has(CURRENT_WORKPACK_STORAGE_KEY)).toBe(true);
+    expect(values.has("safeclaw-workpack:tenant:site:question:fingerprint")).toBe(false);
+  });
+
   it("round-trips the authoritative revalidation basis with worker and dispatch snapshots", () => {
     const sample = buildSampleWorkpack();
     const revalidationBasis = {

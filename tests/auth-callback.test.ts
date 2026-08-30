@@ -112,4 +112,16 @@ describe("auth callback transaction", () => {
     expect(loginSource.match(/createAuthTransaction\(\)/gu)).toHaveLength(2);
     expect(loginSource.match(/buildAuthCallbackUrl\(window\.location\.origin, nextPath, transaction\.state\)/gu)).toHaveLength(2);
   });
+
+  it("clears persisted user content on explicit and auth-event logout paths", () => {
+    const root = process.cwd();
+    const loginSource = fs.readFileSync(path.join(root, "components", "AdminLoginPanel.tsx"), "utf8");
+    const workspaceSource = fs.readFileSync(path.join(root, "components", "FieldOperationsWorkspace.tsx"), "utf8");
+
+    for (const source of [loginSource, workspaceSource]) {
+      expect(source).toContain('event === "SIGNED_OUT"');
+      expect(source.match(/clearStoredSafeClawUserContent\(window\.localStorage\)/gu)?.length).toBeGreaterThanOrEqual(2);
+    }
+    expect(workspaceSource.match(/window\.location\.assign\("\/login"\)/gu)).toHaveLength(2);
+  });
 });

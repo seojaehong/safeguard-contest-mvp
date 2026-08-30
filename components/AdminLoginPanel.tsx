@@ -9,6 +9,7 @@ import {
   createAuthTransaction,
   resolveSafeNextPath
 } from "@/lib/auth-callback";
+import { clearStoredSafeClawUserContent } from "@/lib/current-workpack";
 
 let browserClient: SupabaseClient | null = null;
 
@@ -44,7 +45,10 @@ export function AdminLoginPanel() {
         setMessage("현재 세션을 확인하지 못했습니다. 다시 로그인해 주세요.");
       });
 
-    const { data: listener } = client.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: listener } = client.auth.onAuthStateChange((event, nextSession) => {
+      if (event === "SIGNED_OUT") {
+        clearStoredSafeClawUserContent(window.localStorage);
+      }
       setSession(nextSession);
     });
 
@@ -100,9 +104,24 @@ export function AdminLoginPanel() {
 
   async function signOut() {
     if (!client) return;
-    await client.auth.signOut();
-    setSession(null);
-    setMessage("로그아웃했습니다. 비회원 임시 저장 모드로 전환됩니다.");
+    let signOutError: unknown = null;
+    try {
+      const { error } = await client.auth.signOut();
+      if (error) throw error;
+      setSession(null);
+    } catch (error) {
+      signOutError = error;
+      console.error("admin sign out failed", error);
+    }
+
+    const cleanup = clearStoredSafeClawUserContent(window.localStorage);
+    if (cleanup.failedKeys.length > 0) {
+      setMessage("로그아웃 중 일부 브라우저 임시 데이터를 지우지 못했습니다. 이 브라우저의 사이트 데이터를 삭제해 주세요.");
+      return;
+    }
+    setMessage(signOutError
+      ? "브라우저 임시 데이터는 지웠지만 서버 로그아웃을 확인하지 못했습니다. 다시 시도해 주세요."
+      : "로그아웃하고 이 브라우저의 작업자·문서 임시 데이터를 지웠습니다.");
   }
 
   if (!client) {

@@ -1,4 +1,5 @@
 import type { AskResponse } from "@/lib/types";
+import { OPERATION_IMPROVEMENTS_STORAGE_KEY } from "@/lib/operation-improvement-history";
 import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 import type { WorkpackRevalidationBasis } from "@/lib/workpack-readiness";
 import type {
@@ -10,6 +11,47 @@ import type {
 } from "@/lib/workspace";
 
 export const CURRENT_WORKPACK_STORAGE_KEY = "safeclaw.currentWorkpack.v1";
+
+const USER_CONTENT_STORAGE_KEYS = [
+  CURRENT_WORKPACK_STORAGE_KEY,
+  OPERATION_IMPROVEMENTS_STORAGE_KEY
+] as const;
+
+const USER_CONTENT_STORAGE_PREFIXES = [
+  "safeclaw-workpack:",
+  "safeclaw.documentEditorialReview.v1:",
+  "safeclaw.documentEditorialReviewReviewer.v1:"
+] as const;
+
+type UserContentStorage = Pick<Storage, "key" | "length" | "removeItem">;
+
+export type UserContentStorageCleanup = {
+  removedKeys: string[];
+  failedKeys: string[];
+};
+
+export function clearStoredSafeClawUserContent(storage: UserContentStorage): UserContentStorageCleanup {
+  const keys = new Set<string>(USER_CONTENT_STORAGE_KEYS);
+  for (let index = 0; index < storage.length; index += 1) {
+    const key = storage.key(index);
+    if (key && USER_CONTENT_STORAGE_PREFIXES.some((prefix) => key.startsWith(prefix))) {
+      keys.add(key);
+    }
+  }
+
+  const removedKeys: string[] = [];
+  const failedKeys: string[] = [];
+  for (const key of keys) {
+    try {
+      storage.removeItem(key);
+      removedKeys.push(key);
+    } catch (error) {
+      console.warn("safeclaw user content storage cleanup failed", { key, error });
+      failedKeys.push(key);
+    }
+  }
+  return { removedKeys, failedKeys };
+}
 
 export type CurrentWorkerSnapshot = {
   savedAt: string;
