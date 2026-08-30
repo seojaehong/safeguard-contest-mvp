@@ -33,15 +33,22 @@ import {
 export const dynamic = "force-dynamic";
 
 const SHARE_READ_LIMIT = 60;
+const SHARE_READ_CONCURRENCY = 16;
+const SHARE_READ_LEASE_MS = 10_000;
 const SHARE_ACK_LIMIT = 20;
 const SHARE_ACK_PREBODY_LIMIT = 60;
 const SHARE_ACK_PREBODY_CONCURRENCY = 8;
 const SHARE_ACK_PREBODY_LEASE_MS = 15_000;
 const SHARE_RATE_WINDOW_MS = 60_000;
-const shareReadLimiter = createRateLimiter({
+const shareReadCallerLimiter = createRateLimiter({
   limit: SHARE_READ_LIMIT,
   windowMs: SHARE_RATE_WINDOW_MS
 });
+const shareReadCapabilityLimiter = createRateLimiter({
+  limit: SHARE_READ_LIMIT,
+  windowMs: SHARE_RATE_WINDOW_MS
+});
+const shareReadConcurrency = createConcurrencyGuard(SHARE_READ_CONCURRENCY);
 const shareAckLimiter = createRateLimiter({
   limit: SHARE_ACK_LIMIT,
   windowMs: SHARE_RATE_WINDOW_MS
@@ -87,7 +94,34 @@ function shareAckPreBodyConcurrencyResponse(decision: PublicRateLimitDecision): 
   return response;
 }
 
+function shareReadConcurrencyResponse(decision: PublicRateLimitDecision): Response {
+  const response = NextResponse.json({
+    ok: false,
+    code: "SHARE_READ_CONCURRENCY_LIMIT",
+    session: null,
+    message: "공유 세션 조회가 많습니다. 잠시 후 다시 시도해 주세요.",
+    retryAfterSeconds: 1
+  }, {
+    status: 503,
+    headers: { "Retry-After": "1" }
+  });
+  applyPublicRateLimitHeader(response, decision);
+  response.headers.set("X-SafeClaw-Work-Unit", "share-session-read");
+  return response;
+}
+
 export async function GET(request: NextRequest, context: RouteContext) {
+  const callerAdmission = await checkPublicRateLimit({
+    request,
+    namespace: "share-session-read-caller",
+    limit: SHARE_READ_LIMIT,
+    windowMs: SHARE_RATE_WINDOW_MS,
+    instanceLimiter: shareReadCallerLimiter,
+    requireDistributedInProduction: true
+  });
+  const callerLimited = publicRateLimitResponse(callerAdmission);
+  if (callerLimited) return callerLimited;
+
   const { sessionId } = await context.params;
   const searchParams = request.nextUrl.searchParams;
   const workerId = searchParams.get("workerId") || undefined;
@@ -97,68 +131,89 @@ export async function GET(request: NextRequest, context: RouteContext) {
     namespace: "share-session-read",
     limit: SHARE_READ_LIMIT,
     windowMs: SHARE_RATE_WINDOW_MS,
-    instanceLimiter: shareReadLimiter,
+    instanceLimiter: shareReadCapabilityLimiter,
     requireDistributedInProduction: true
   });
   const limited = publicRateLimitResponse(admission);
   if (limited) return limited;
 
-  const client = createSupabaseAdminClient();
-  if (!client) {
-    return NextResponse.json({ ok: false, configured: false, session: null, message: "Supabase 저장소가 아직 설정되지 않았습니다." });
+  let releaseRead: (() => void | Promise<void>) | null;
+  try {
+    const distributedRelease = await acquirePublicConcurrencyLease({
+      concurrency: SHARE_READ_CONCURRENCY,
+      leaseMs: SHARE_READ_LEASE_MS,
+      namespace: "share-session-read",
+      requireDistributedInProduction: true
+    });
+    releaseRead = distributedRelease === undefined
+      ? shareReadConcurrency.tryAcquire()
+      : distributedRelease;
+  } catch (error) {
+    console.error("public Share read concurrency admission unavailable", error);
+    return shareReadConcurrencyResponse(callerAdmission);
   }
+  if (!releaseRead) return shareReadConcurrencyResponse(callerAdmission);
 
-  const activeSession = await loadActivePublicShareSession(client, {
-    shareSessionId: sessionId,
-    workerId
-  });
+  try {
+    const client = createSupabaseAdminClient();
+    if (!client) {
+      return NextResponse.json({ ok: false, configured: false, session: null, message: "Supabase 저장소가 아직 설정되지 않았습니다." });
+    }
 
-  if (!activeSession.ok) {
-    return NextResponse.json({ ok: false, configured: true, session: null, message: activeSession.message }, { status: activeSession.status });
-  }
+    const activeSession = await loadActivePublicShareSession(client, {
+      shareSessionId: sessionId,
+      workerId
+    });
 
-  const authorizedRecipient = workerId
-    ? findShareSessionRecipient(activeSession.session.recipients, workerId)
-    : null;
+    if (!activeSession.ok) {
+      return NextResponse.json({ ok: false, configured: true, session: null, message: activeSession.message }, { status: activeSession.status });
+    }
 
-  if (!authorizedRecipient && activeSession.session.accessPolicy.requireKnownWorkerSnapshot) {
+    const authorizedRecipient = workerId
+      ? findShareSessionRecipient(activeSession.session.recipients, workerId)
+      : null;
+
+    if (!authorizedRecipient && activeSession.session.accessPolicy.requireKnownWorkerSnapshot) {
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        session: null,
+        message: "초대된 작업자 링크로 다시 접속해 주세요."
+      }, { status: 403 });
+    }
+    if (!authorizedRecipient && !activeSession.session.accessPolicy.anonymousAllowed) {
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        session: null,
+        message: "초대된 작업자 링크로 다시 접속해 주세요."
+      }, { status: 403 });
+    }
+
+    const recipientHints = authorizedRecipient
+      ? buildPublicRecipientHint([authorizedRecipient]).slice(0, 1)
+      : [];
+
     return NextResponse.json({
-      ok: false,
+      ok: true,
       configured: true,
-      session: null,
-      message: "초대된 작업자 링크로 다시 접속해 주세요."
-    }, { status: 403 });
+      session: {
+        id: activeSession.session.id,
+        workpackId: activeSession.session.workpackId,
+        shareScope: activeSession.session.shareScope,
+        question: activeSession.session.question,
+        status: activeSession.session.status,
+        expiresAt: activeSession.session.expiresAt,
+        accessPolicy: activeSession.session.accessPolicy,
+        recipients: recipientHints,
+        documents: activeSession.session.documents,
+        recipientMessage: activeSession.session.recipientMessage
+      },
+      message: "공유 세션을 조회했습니다."
+    });
+  } finally {
+    await releaseRead();
   }
-  if (!authorizedRecipient && !activeSession.session.accessPolicy.anonymousAllowed) {
-    return NextResponse.json({
-      ok: false,
-      configured: true,
-      session: null,
-      message: "초대된 작업자 링크로 다시 접속해 주세요."
-    }, { status: 403 });
-  }
-
-  const recipientHints = authorizedRecipient
-    ? buildPublicRecipientHint([authorizedRecipient]).slice(0, 1)
-    : [];
-
-  return NextResponse.json({
-    ok: true,
-    configured: true,
-    session: {
-      id: activeSession.session.id,
-      workpackId: activeSession.session.workpackId,
-      shareScope: activeSession.session.shareScope,
-      question: activeSession.session.question,
-      status: activeSession.session.status,
-      expiresAt: activeSession.session.expiresAt,
-      accessPolicy: activeSession.session.accessPolicy,
-      recipients: recipientHints,
-      documents: activeSession.session.documents,
-      recipientMessage: activeSession.session.recipientMessage
-    },
-    message: "공유 세션을 조회했습니다."
-  });
 }
 
 export async function POST(request: NextRequest, context: RouteContext) {

@@ -552,6 +552,36 @@ describe("share session route authority", () => {
     expect(mocks.loadActivePublicShareSession).not.toHaveBeenCalled();
   });
 
+  it("rate limits one caller across distinct Share capability identifiers", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    const { GET } = await import("@/app/api/share-sessions/[sessionId]/route");
+    const requestForAttempt = (attempt: number) => {
+      const prefix = attempt.toString(16).padStart(8, "0");
+      return new NextRequest(
+        `http://localhost/api/share-sessions/${prefix}-cccc-4ccc-8ccc-cccccccccccc?workerId=${WORKER_ID}`,
+        { method: "GET", headers: { "x-forwarded-for": "198.51.100.90" } }
+      );
+    };
+
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      const response = await GET(requestForAttempt(attempt), {
+        params: Promise.resolve({
+          sessionId: `${attempt.toString(16).padStart(8, "0")}-cccc-4ccc-8ccc-cccccccccccc`
+        })
+      });
+      expect(response.status).toBe(200);
+    }
+
+    mocks.loadActivePublicShareSession.mockClear();
+    const limited = await GET(requestForAttempt(60), {
+      params: Promise.resolve({ sessionId: "0000003c-cccc-4ccc-8ccc-cccccccccccc" })
+    });
+
+    expect(limited.status).toBe(429);
+    expect(limited.headers.get("X-SafeClaw-Rate-Limit")).toBe("instance");
+    expect(mocks.loadActivePublicShareSession).not.toHaveBeenCalled();
+  });
+
   it.each([
     ["read", "GET"],
     ["acknowledgement", "POST"]
@@ -592,7 +622,7 @@ describe("share session route authority", () => {
     const fetchMock = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
       const command = JSON.parse(String(init?.body)) as unknown[];
       const key = String(command[3]);
-      expect(key).toMatch(/^safeclaw:public-(?:rate:share-session-(?:read|ack|ack-prebody):[a-f0-9]{32}|concurrency:share-session-ack-prebody-body)$/u);
+      expect(key).toMatch(/^safeclaw:public-(?:rate:share-session-(?:read|read-caller|ack|ack-prebody):[a-f0-9]{32}|concurrency:share-session-(?:read|ack-prebody-body))$/u);
       expect(key).not.toContain(SESSION_ID);
       expect(key).not.toContain(WORKER_ID);
       return Response.json({ result: command[0] === "EVAL" ? [1, 1] : [1, 59_500] });
@@ -614,7 +644,7 @@ describe("share session route authority", () => {
           });
 
       expect(response.status).toBe(200);
-      expect(fetchMock).toHaveBeenCalledTimes(method === "GET" ? 1 : 4);
+      expect(fetchMock).toHaveBeenCalledTimes(4);
     } finally {
       vi.unstubAllGlobals();
       vi.unstubAllEnvs();
