@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "safeclaw-security-resource-budget-remediation/v1",
+  "generatedAt": "2026-08-31T03:32:45.9867345+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_APPROVAL_FREE_SECURITY_RESOURCE_BUDGETS_LIVE_PENDING",
+  "source": {
+    "baseCommit": "fc438249d75da3b2079c3329eeefab9f4eb7ac02",
+    "productCommit": "7addc82eda83ec3668a055d0f6dc2cbc26c5d47c",
+    "productionCommitAtVerification": "fc438249d75da3b2079c3329eeefab9f4eb7ac02",
+    "sourceHeadMatchesProduction": false,
+    "liveAfterDeploymentRequired": true
+  },
+  "securityBaseline": {
+    "scanId": "76e79aa5-1391-4014-8671-ead3c48b6ee9",
+    "targetRevision": "fc438249d75da3b2079c3329eeefab9f4eb7ac02",
+    "canonicalArtifactDirectory": "C:\\Users\\iceam\\AppData\\Local\\Temp\\codex-security-scans-3Gn6yv\\safeclaw-northstar-current\\fc438249d75da3b2079c3329eeefab9f4eb7ac02_20260830T173707Z_a2f_xvt1",
+    "canonicalArtifactsPresent": true,
+    "canonicalFindingCount": 10,
+    "canonicalSeverityCounts": {
+      "medium": 5,
+      "low": 5
+    },
+    "manifestStatus": "failed",
+    "manifestFailureBoundary": "Canonical files were sealed, but the durable workbench completion update failed. Findings remain remediation evidence and are not represented as a successful rescan closure.",
+    "immutableOriginalFindingBaselineCount": 18,
+    "originalBaselinePreserved": true
+  },
+  "remediatedFindings": [
+    {
+      "findingId": "csf_189f90e7a24ec6708057ff03",
+      "title": "Operator document parsers still admit unbounded PDF and workbook workloads",
+      "status": "current_source_verified",
+      "controls": [
+        "input byte admission before hashing or parser allocation",
+        "elapsed time, extracted text, worksheet, row, and cell budgets",
+        "budget rejection produces failure metadata without load items"
+      ]
+    },
+    {
+      "findingId": "csf_f026a78c7fde954e6de62b35",
+      "title": "Learning export materializes unbounded tenant collections",
+      "status": "current_source_verified",
+      "controls": [
+        "stable ordered collection queries with limit plus one overflow detection",
+        "200 improvement and 1000 confirmation collection ceilings",
+        "1 MiB final UTF-8 output ceiling with bounded 413 errors"
+      ]
+    },
+    {
+      "findingId": "csf_54bf3910ec279d5af8646218",
+      "title": "Read-scoped MCP tools bypass shared provider admission",
+      "status": "current_source_verified",
+      "controls": [
+        "weighted durable admission for harness, weather, and accident reads",
+        "shared generation and read concurrency namespace with monotonic key TTL",
+        "SDK cancellation propagated through HTTP and Hermes broker provider fanout"
+      ]
+    },
+    {
+      "findingId": "csf_8f5647dae8aa76ce7a7fb396",
+      "title": "Public ontology graph fetch lacks timeout and body budget",
+      "status": "current_source_verified",
+      "controls": [
+        "15 second admitted operation deadline and caller cancellation",
+        "1000-row exact-count pagination under the PostgREST server cap",
+        "5000 rows per table, 6 MiB upstream body, and 4 MiB output ceilings",
+        "range repetition, omission, and total drift fail closed"
+      ]
+    },
+    {
+      "findingId": "csf_5b39903c1c8d110acb501e38",
+      "title": "MCP results have no final serialized output ceiling",
+      "status": "current_source_verified",
+      "controls": [
+        "256 KiB serialized CallToolResult ceiling",
+        "oversized results return MCP_TOOL_RESULT_TOO_LARGE without leaking the body"
+      ]
+    }
+  ],
+  "integrationDefectsClosed": [
+    "A shorter read lease can no longer shorten the shared Redis concurrency key TTL below the longest lease.",
+    "Ontology pagination no longer treats the PostgREST 1000-row response cap as a complete graph.",
+    "MCP cancellation reaches provider-backed reads in both HTTP and Hermes broker execution.",
+    "The KOSHA Python regression now reflects the previously committed trusted 234-item corpus metadata hash without changing the separate eight-candidate exact-promotion approval gate."
+  ],
+  "verification": {
+    "python": {
+      "command": "python -m unittest discover -s scripts/tests -p test_*.py",
+      "tests": 159,
+      "passed": 159,
+      "failed": 0,
+      "elapsedSeconds": 28.128
+    },
+    "typescriptResourceRegression": {
+      "testFiles": 14,
+      "passed": 174,
+      "failed": 0,
+      "elapsedSeconds": 11.32
+    },
+    "documentsShareUiRegression": {
+      "testFiles": 3,
+      "passed": 60,
+      "failed": 0,
+      "elapsedSeconds": 219.63
+    },
+    "typecheck": "PASS",
+    "productionBuild": {
+      "verdict": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "gitDiffCheck": "PASS",
+    "stagedSecretPatternMatches": 0
+  },
+  "remainingApprovalGatedFindings": [
+    "Legacy query and document tables lack RLS coverage",
+    "Dispatch RLS admits tenantless rows",
+    "Related object identifiers are not uniformly tenant-bound",
+    "Owner RLS permits direct writes to authoritative workflow evidence",
+    "MCP token quota check is non-atomic"
+  ],
+  "boundaries": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaExactRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedFindingsClosed": false,
+    "routeSplitAloneAcceptedAsUxFix": false
+  }
+}
