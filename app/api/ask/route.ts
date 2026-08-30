@@ -11,11 +11,15 @@ import {
   PUBLIC_ASK_REQUEST_MAX_BYTES,
   serializedCharLength
 } from "@/lib/public-work-budget";
-import { applyPublicAskWorkHeaders } from "@/lib/public-ask-admission";
+import {
+  applyPublicAskWorkHeaders,
+  checkPublicAskAdmission,
+} from "@/lib/public-ask-admission";
 import { runPublicAskOperation } from "@/lib/public-ask-operation";
 import { resolveRunAskMode } from "@/lib/run-ask-mode";
 import {
   applyPublicRateLimitHeader,
+  publicRateLimitResponse,
 } from "@/lib/public-distributed-rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -29,17 +33,24 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export async function POST(request: NextRequest) {
+  const rateLimit = await checkPublicAskAdmission(request);
+  const limited = publicRateLimitResponse(rateLimit);
+  if (limited) return limited;
+
   const bodyBudget = await enforcePublicJsonRequestBodyBudget(
     request,
     PUBLIC_ASK_REQUEST_MAX_BYTES,
     "request body exceeds the public ask byte budget",
   );
-  if (!bodyBudget.ok) return bodyBudget.response;
+  if (!bodyBudget.ok) return applyPublicRateLimitHeader(bodyBudget.response, rateLimit);
   const body: unknown = await bodyBudget.request.json().catch(() => ({}));
   const record = isRecord(body) ? body : {};
   const question = typeof record.question === "string" ? record.question : "산업안전 실무 질문";
   if (record.harnessMemory !== undefined && serializedCharLength(record.harnessMemory) > PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS) {
-    return publicWorkBudgetExceeded("harnessMemory exceeds the public ask work budget", PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS);
+    return applyPublicRateLimitHeader(
+      publicWorkBudgetExceeded("harnessMemory exceeds the public ask work budget", PUBLIC_ASK_HARNESS_MEMORY_MAX_CHARS),
+      rateLimit,
+    );
   }
   const requestedMode = typeof record.aiMode === "string" ? (record.aiMode as AiMode) : undefined;
   const aiMode = resolveRunAskMode({
@@ -47,7 +58,13 @@ export async function POST(request: NextRequest) {
     envDefault: process.env.AI_MODE_DEFAULT,
   });
   const harnessMemory = parseHarnessMemoryInput(record.harnessMemory);
-  const operation = await runPublicAskOperation({ request, question, aiMode, harnessMemory });
+  const operation = await runPublicAskOperation({
+    request,
+    question,
+    aiMode,
+    harnessMemory,
+    admission: rateLimit,
+  });
   if (!operation.ok) return operation.response;
   const result = operation.data;
   const sealed = attachGenerationEvidence(result, {

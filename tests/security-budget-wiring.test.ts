@@ -25,6 +25,18 @@ describe("security budget wiring", () => {
     );
   });
 
+  it("admits public Ask callers before reading the JSON body", () => {
+    const text = source("app/api/ask/route.ts");
+    expect(text).toContain("checkPublicAskAdmission(request)");
+    expect(text).toContain("admission: rateLimit");
+    expect(text.indexOf("checkPublicAskAdmission(request)")).toBeLessThan(
+      text.indexOf("enforcePublicJsonRequestBodyBudget("),
+    );
+    expect(text.indexOf("checkPublicAskAdmission(request)")).toBeLessThan(
+      text.indexOf("bodyBudget.request.json()"),
+    );
+  });
+
   it.each([
     "lib/vertex/client.ts",
     "lib/photo-vision-analysis.ts",

@@ -39,8 +39,9 @@ export async function runPublicAskOperation(input: {
   aiMode: AiMode;
   harnessMemory?: HarnessMemoryInput;
   signal?: AbortSignal;
+  admission?: PublicRateLimitDecision;
 }): Promise<PublicAskOperationResult> {
-  const rateLimit = await checkPublicAskAdmission(input.request);
+  const rateLimit = input.admission ?? await checkPublicAskAdmission(input.request);
   const limited = publicRateLimitResponse(rateLimit);
   if (limited) return { ok: false, response: limited };
 
