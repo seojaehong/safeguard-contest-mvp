@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-30T22:20:44.758Z",
-  "head": "60b762aa9eeca478f88a42cd6751296cdae31730",
+  "generatedAt": "2026-08-30T23:02:16.537Z",
+  "head": "7f445c336bea5cde0db8988af43163170062b65c",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "4abee6ff0557ab16ccd670a001dd33b8b2fd8b70",
+    "commitSha": "b1dc9a48e12e314d66e58b489c2103740bc7aa25",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ggv89i0ab-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-dzz5a5g6d-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 89
+    "gateCount": 90
   },
   "provenGates": [
     {
@@ -236,6 +236,12 @@
       "state": "notice",
       "artifact": "evaluation\\current-source-security-ontology-error-projection-remediation-2026-08-31\\report.json",
       "detail": "Current live source returns two fixed public ontology error codes with correlation IDs while excluding upstream bodies and arbitrary exception messages from public JSON and server diagnostics. Three files / 12 tests, typecheck, and the 28-page build pass; live public admission fails closed before upstream work. No provider failure was induced, the sealed finding remains open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "current_source_photo_readiness_auth_fanout_remediation",
+      "state": "notice",
+      "artifact": "evaluation\\current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31\\report.json",
+      "detail": "Current live source returns one coarse photo readiness response for anonymous and arbitrary-Bearer GET requests without creating a Supabase admin client or calling authentication. Two files / 13 tests, typecheck, and the 28-page build pass; live responses are identical and expose no provider or API-key diagnostics. Photo-analysis POST authentication and upload/provider budgets remain intact. The sealed finding stays open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_source_security_remediation_followup",
@@ -880,6 +886,21 @@
     "publicErrorCodeCount": 2,
     "upstreamFailureInduced": false,
     "liveProbeCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "freshRescanRequired": true,
+    "securityComplete": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "currentSourcePhotoReadinessAuthFanoutRemediation": {
+    "artifact": "evaluation\\current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31\\report.json",
+    "verdict": "PASS_LIVE_DEPLOYED_SOURCE_PHOTO_READINESS_AUTH_FANOUT_CONTRACT",
+    "sourceHead": "007f1d2b687102bd5020c85adf527ef5907956ad",
+    "productionCommit": "007f1d2b687102bd5020c85adf527ef5907956ad",
+    "findingId": "csf_e70379e4470e7bf7ec2786a4",
+    "testsPassed": 13,
+    "buildStatus": "PASS",
+    "publicGetCreatesSupabaseAdminClient": false,
+    "publicGetCallsSupabaseAuthentication": false,
+    "responseBodiesEqual": true,
     "freshRescanRequired": true,
     "securityComplete": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
@@ -2064,9 +2085,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "60b762aa9eeca478f88a42cd6751296cdae31730",
+      "sourceCommit": "7f445c336bea5cde0db8988af43163170062b65c",
       "sourceStatus": "exact",
-      "productionCommit": "60b762aa9eeca478f88a42cd6751296cdae31730",
+      "productionCommit": "7f445c336bea5cde0db8988af43163170062b65c",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -2355,6 +2376,14 @@
       "sourceCommit": "68a8f9dae349cb03d8c77abedd27040b9679bde0",
       "sourceStatus": "ancestor",
       "productionCommit": "05e70640ec305ff651eba1c42654a6a3b8a02f1e",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "current_source_photo_readiness_auth_fanout_remediation",
+      "artifact": "evaluation\\current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31\\report.json",
+      "sourceCommit": "007f1d2b687102bd5020c85adf527ef5907956ad",
+      "sourceStatus": "ancestor",
+      "productionCommit": "007f1d2b687102bd5020c85adf527ef5907956ad",
       "productionStatus": "ancestor_of_head"
     },
     {

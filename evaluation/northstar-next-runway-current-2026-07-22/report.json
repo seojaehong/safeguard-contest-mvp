@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-30T22:21:10.782Z",
+  "generatedAt": "2026-08-30T23:02:35.982Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "60b762aa9eeca478f88a42cd6751296cdae31730",
-  "productionCommit": "4abee6ff0557ab16ccd670a001dd33b8b2fd8b70",
+  "sourceHead": "7f445c336bea5cde0db8988af43163170062b65c",
+  "productionCommit": "b1dc9a48e12e314d66e58b489c2103740bc7aa25",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "4abee6ff0557ab16ccd670a001dd33b8b2fd8b70",
+    "commitSha": "b1dc9a48e12e314d66e58b489c2103740bc7aa25",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ggv89i0ab-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-dzz5a5g6d-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -20,17 +20,13 @@
   "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
   "sourcePendingChangedPaths": [
-    "scripts/northstar_live_rollup.mjs",
-    "scripts/northstar_next_runway.mjs",
     "scripts/northstar_open_gate_audit.mjs",
-    "tests/northstar-live-rollup.test.ts",
-    "tests/northstar-next-runway-generator.test.ts",
     "tests/northstar-open-gate-audit.test.ts"
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "60b762aa9eeca478f88a42cd6751296cdae31730",
-  "liveRollupLiveCommit": "4abee6ff0557ab16ccd670a001dd33b8b2fd8b70",
+  "liveExactEvidenceCommit": "7f445c336bea5cde0db8988af43163170062b65c",
+  "liveRollupLiveCommit": "b1dc9a48e12e314d66e58b489c2103740bc7aa25",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -77,6 +73,7 @@
     "currentSourceSecurityResourceBudgetRemediation": "evaluation\\current-source-security-resource-budget-remediation-2026-08-31\\report.json",
     "currentSourceLogoutStorageRemediation": "evaluation\\current-source-security-logout-storage-remediation-2026-08-31\\report.json",
     "currentSourceOntologyErrorProjectionRemediation": "evaluation\\current-source-security-ontology-error-projection-remediation-2026-08-31\\report.json",
+    "currentSourcePhotoReadinessAuthFanoutRemediation": "evaluation\\current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31\\report.json",
     "currentSourceSecurityRemediationFollowup": "evaluation\\current-source-security-remediation-2026-08-30\\report.json",
     "currentSecurityGovernedPathCompatibility": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
     "currentSourceSecurityResidualRemediation": "evaluation\\current-source-security-residual-remediation-2026-08-28\\report.json",
@@ -233,6 +230,11 @@
       "gate": "current_source_ontology_error_projection_remediation",
       "state": "notice",
       "reason": "live source exposes 2 fixed ontology error codes with body-free diagnostics; 12 tests and build=PASS, while the live public probe is DISTRIBUTED_RATE_LIMIT_UNAVAILABLE. Upstream failure induced=false; the sealed finding remains fresh-rescan pending=true, security-complete=false, and exact saved Share remains MISSING_EVIDENCE"
+    },
+    {
+      "gate": "current_source_photo_readiness_auth_fanout_remediation",
+      "state": "notice",
+      "reason": "live source keeps public photo readiness GET auth-free and coarse: Supabase client=false, auth lookup=false, live anonymous/Bearer bodies equal=true, diagnostics exposed=false; 13 tests and build=PASS. The sealed finding remains fresh-rescan pending=true, security-complete=false, and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "current_source_security_remediation_followup",
@@ -1287,6 +1289,21 @@
     "buildStatus": "PASS",
     "liveProbeCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
     "upstreamFailureInduced": false,
+    "freshRescanRequired": true,
+    "securityComplete": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "currentSourcePhotoReadinessAuthFanoutRemediation": {
+    "verdict": "PASS_LIVE_DEPLOYED_SOURCE_PHOTO_READINESS_AUTH_FANOUT_CONTRACT",
+    "sourceHead": "007f1d2b687102bd5020c85adf527ef5907956ad",
+    "productionCommit": "007f1d2b687102bd5020c85adf527ef5907956ad",
+    "findingId": "csf_e70379e4470e7bf7ec2786a4",
+    "testsPassed": 13,
+    "buildStatus": "PASS",
+    "publicGetCreatesSupabaseAdminClient": false,
+    "publicGetCallsSupabaseAuthentication": false,
+    "responseBodiesEqual": true,
+    "providerDiagnosticsExposed": false,
     "freshRescanRequired": true,
     "securityComplete": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-30T22:20:43.668Z",
-  "sourceSha": "60b762aa9eeca478f88a42cd6751296cdae31730",
+  "generatedAt": "2026-08-30T23:02:15.160Z",
+  "sourceSha": "7f445c336bea5cde0db8988af43163170062b65c",
   "overall": "open",
   "gates": [
     {
@@ -377,6 +377,17 @@
       "detail": "Current live source returns two fixed public ontology error codes with correlation IDs while excluding upstream bodies and arbitrary exception messages from public JSON and server diagnostics. Three files / 12 tests, typecheck, and the 28-page build pass; live public admission fails closed before upstream work. No provider failure was induced, the sealed finding remains open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Include the deployed ontology error contract in the next full repository scan before reclassifying the sealed finding.",
+        "Keep exact saved Share and all DB/provider/vector/wiki/KOSHA approval boundaries open."
+      ]
+    },
+    {
+      "id": "current_source_photo_readiness_auth_fanout_remediation",
+      "state": "notice",
+      "label": "Current-source photo readiness auth fan-out remediation",
+      "evidencePath": "evaluation\\current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31\\report.json",
+      "detail": "Current live source returns one coarse photo readiness response for anonymous and arbitrary-Bearer GET requests without creating a Supabase admin client or calling authentication. Two files / 13 tests, typecheck, and the 28-page build pass; live responses are identical and expose no provider or API-key diagnostics. Photo-analysis POST authentication and upload/provider budgets remain intact. The sealed finding stays open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Include the deployed photo readiness contract in the next full repository scan before reclassifying the sealed finding.",
         "Keep exact saved Share and all DB/provider/vector/wiki/KOSHA approval boundaries open."
       ]
     },
