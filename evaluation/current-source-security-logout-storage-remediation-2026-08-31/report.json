@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-logout-storage-remediation/v1",
+  "generatedAt": "2026-08-30T20:48:00.000Z",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_LOGOUT_USER_CONTENT_PURGE_CONTRACT",
+  "sourceBaseCommit": "e1669ffbdbe2d9f1a73d2d365f924c9dc674fb98",
+  "productCommit": "e7533365e3ceb9ceef733587e05709cb59860d4f",
+  "productionCommitAtVerification": "e7533365e3ceb9ceef733587e05709cb59860d4f",
+  "finding": {
+    "findingId": "csf_939ccf5e3f2f0fa1963be3e5",
+    "occurrenceId": "occ_26f3ceb91a01b89d9502da8d",
+    "ruleId": "client-data.persistent-logout-retention",
+    "severity": "medium",
+    "title": "Logout retains raw worker data in persistent browser storage",
+    "sealedFindingReclassified": false,
+    "freshRescanRequired": true
+  },
+  "remediation": {
+    "explicitLogoutPaths": [
+      "components/AdminLoginPanel.tsx",
+      "components/FieldOperationsWorkspace.tsx"
+    ],
+    "authEvent": "SIGNED_OUT",
+    "workspaceAutoSaveRepopulationPreventedBy": "navigate_to_login_after_cleanup",
+    "clearedExactKeys": [
+      "safeclaw.currentWorkpack.v1",
+      "safeclaw.operationImprovements.v1"
+    ],
+    "clearedPrefixes": [
+      "safeclaw-workpack:",
+      "safeclaw.documentEditorialReview.v1:",
+      "safeclaw.documentEditorialReviewReviewer.v1:"
+    ],
+    "preservedPreferenceKeys": [
+      "safeclaw.moduleTheme",
+      "safeclaw.aiMode"
+    ],
+    "cleanupFailureReported": true,
+    "supabaseSignOutFailureStillAttemptsLocalCleanup": true
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "command": "npm.cmd exec -- vitest run tests/editor-first-state.test.ts tests/auth-callback.test.ts tests/frontend-route-coverage.test.ts tests/workflow-share-client.test.ts tests/user-visible-korean-copy.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 5,
+      "testsPassed": 100,
+      "testsFailed": 0
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "productionBuild": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "frontendStaticAudit": {
+      "command": "node ./scripts/frontend_consistency_audit.mjs",
+      "status": "pass",
+      "pageFiles": 33,
+      "componentFiles": 24,
+      "coverageIssues": 0,
+      "violationCount": 0
+    },
+    "liveDeployment": {
+      "vercelStatus": "success",
+      "commitSha": "e7533365e3ceb9ceef733587e05709cb59860d4f",
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-dufnql5pv-seojaehongs-projects.vercel.app",
+      "behavioralLogoutExecuted": false,
+      "behavioralLogoutReason": "Would mutate the signed-in browser session and local user-content storage; local contract plus deployed source marker are reported separately."
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "immutableOriginalBaselinePreserved": true,
+    "sealedCurrentHeadScanPreserved": true,
+    "securityComplete": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedFindingsRemainOpen": true,
+    "liveAfterDeploymentRequired": false
+  }
+}
