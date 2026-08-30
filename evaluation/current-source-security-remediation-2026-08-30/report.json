@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-remediation/v1",
+  "generatedAt": "2026-08-30T14:09:50.7669521Z",
+  "verdict": "PASS_LIVE_PRODUCTION_APPROVAL_FREE_SECURITY_REMEDIATIONS_POST_FIX_RESCAN_PENDING",
+  "sourceHead": "a1a9da9bd663c05d69f8dbb00823e2761f19ad64",
+  "productionBuild": {
+    "commitSha": "a1a9da9bd663c05d69f8dbb00823e2761f19ad64",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-q38thoizl-seojaehongs-projects.vercel.app"
+  },
+  "baseline": {
+    "scanId": "f37c3e4a-294c-4ab9-b637-b944f33a2182",
+    "targetRevision": "28cc608700445d3f0ea1ad0aeb7004e9cf1b7fb2",
+    "reportableFindings": 20,
+    "medium": 4,
+    "low": 16,
+    "coverageCompleteness": "partial",
+    "immutableOriginalBaselinePreserved": true,
+    "postFixFullRepositoryRescanCompleted": false
+  },
+  "remediations": [
+    {
+      "finding": "signed snapshot unreviewed improvement reuse",
+      "commit": "03fad2a499ad10e3a5762640a350a1f3b2f979eb",
+      "status": "current_source_and_live",
+      "control": "Only reviewed operation improvements or explicitly user-accepted photo candidates can enter generation memory."
+    },
+    {
+      "finding": "knowledge ingest and review body work before authentication",
+      "commit": "165278c7e1596edc22a8e8a8ee532b0309a300ee",
+      "status": "current_source_and_live",
+      "control": "Authentication and ingest actor admission now precede authenticated JSON body budgeting and parsing."
+    },
+    {
+      "finding": "workpack improvement JSON body work before ownership",
+      "commit": "165278c7e1596edc22a8e8a8ee532b0309a300ee",
+      "status": "current_source_and_live",
+      "control": "Authentication and owned-workpack resolution now precede authenticated JSON body budgeting and parsing."
+    },
+    {
+      "finding": "KOSHA official PDF redirect and stable-key temp path boundaries",
+      "commit": "3a35f1990d83d0c89554cd122379c4159cf84f00",
+      "status": "current_source_and_live",
+      "control": "Initial, redirect-hop, and final URLs retain the official host/file identity; stable keys are format and temp-root constrained."
+    },
+    {
+      "finding": "legacy archive consumers lack shared expansion budgets",
+      "commit": "a1a9da9bd663c05d69f8dbb00823e2761f19ad64",
+      "status": "current_source_and_live",
+      "control": "Four legacy ZIP/HWPX/PPTX consumers now share member-count, member-byte, total-byte, compression-ratio, encryption, and streaming-read limits."
+    }
+  ],
+  "koshaOfficialPdfAudit": {
+    "path": "evaluation/kosha-exact-official-pdf-audit-2026-07-25/report.json",
+    "verdict": "PASS_OFFICIAL_PDF_AUTHENTICITY_BODY_PAIR_REVIEW_STILL_REQUIRED",
+    "candidateCount": 8,
+    "machineVerifiedCount": 8,
+    "failedCount": 0,
+    "temporaryPdfFilesRetained": 0,
+    "exactPromotionPerformed": false
+  },
+  "verification": {
+    "vitest": {
+      "files": 6,
+      "tests": 79,
+      "status": "PASS"
+    },
+    "python": {
+      "files": 3,
+      "tests": 11,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "diffCheck": "PASS"
+  },
+  "remainingBoundaries": {
+    "publicCatalogRls": "APPROVAL_GATED_DB_POLICY_CHANGE_NOT_PERFORMED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "shareSessionMutationPerformed": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "vectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaExactRegistryMutationPerformed": false,
+    "postFixFullRepositoryScan": "PENDING_DESKTOP_SECURITY_SCAN"
+  }
+}
