@@ -465,7 +465,14 @@ function main() {
   const reportPath = path.join(options.gateDir, "report.json");
   const manifestPath = path.join(options.gateDir, "sif-embedding-batch-manifest.json");
   const corpusPath = path.join(options.gateDir, "sif-embedding-corpus.jsonl");
-  const requiredFiles = [reportPath, manifestPath, corpusPath, options.migrationPath, options.scriptPath];
+  const requiredFiles = [...new Set([
+    reportPath,
+    manifestPath,
+    corpusPath,
+    DEFAULT_MIGRATION,
+    options.migrationPath,
+    options.scriptPath
+  ])];
   const missingFiles = requiredFiles.filter((filePath) => !fileExists(filePath));
 
   if (missingFiles.length) {
@@ -489,16 +496,28 @@ function main() {
   const migrationSql = fs.readFileSync(options.migrationPath, "utf8");
   const scriptSource = fs.readFileSync(options.scriptPath, "utf8");
   const sourceSha = resolveSourceSha();
+  const canonicalMigrationIntegrity = fileIntegrity(DEFAULT_MIGRATION);
+  const selectedMigrationIntegrity = fileIntegrity(options.migrationPath);
   const artifactIntegrity = [
     fileIntegrity(reportPath),
     fileIntegrity(manifestPath),
     fileIntegrity(corpusPath),
-    fileIntegrity(options.migrationPath),
+    selectedMigrationIntegrity,
     fileIntegrity(options.scriptPath)
   ];
   const env = summarizeEnv(options.requireExecutionEnv);
   const checks = [
     ...findChecks(report, manifest, corpusInspection, manifestInspection, vectorsPath, migrationSql, scriptSource, options.migrationPath, options.scriptPath),
+    {
+      id: "migration_digest_matches_canonical_approval_artifact",
+      passed: selectedMigrationIntegrity.sha256 === canonicalMigrationIntegrity.sha256,
+      evidence: {
+        canonicalMigrationPath: DEFAULT_MIGRATION,
+        canonicalMigrationSha256: canonicalMigrationIntegrity.sha256,
+        selectedMigrationPath: options.migrationPath,
+        selectedMigrationSha256: selectedMigrationIntegrity.sha256
+      }
+    },
     {
       id: "preflight_source_sha_recorded",
       passed: /^[0-9a-f]{40}$/u.test(sourceSha),
@@ -541,6 +560,12 @@ function main() {
     manifestPath,
     corpusPath,
     migrationPath: options.migrationPath,
+    migrationDigestBinding: {
+      canonicalMigrationPath: DEFAULT_MIGRATION,
+      canonicalMigrationSha256: canonicalMigrationIntegrity.sha256,
+      selectedMigrationSha256: selectedMigrationIntegrity.sha256,
+      matches: selectedMigrationIntegrity.sha256 === canonicalMigrationIntegrity.sha256
+    },
     scriptPath: options.scriptPath,
     corpusHash: report.corpusHash,
     corpusCount: report.corpusCount,

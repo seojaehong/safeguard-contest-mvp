@@ -317,6 +317,56 @@ describe("SIF embedding approval preflight", () => {
     expect(result.dbMutationPerformed).toBe(false);
   });
 
+  it("fails closed when SIF-only SQL differs from the canonical approval digest", () => {
+    const outDir = mkdtempSync(join(tmpdir(), "safeclaw-sif-preflight-digest-"));
+    const migrationPath = join(outDir, "operator-reviewed.sql");
+    const outPath = join(outDir, "approval-preflight-report.json");
+    writeFileSync(migrationPath, [
+      readFileSync("evaluation/sif-embedding-gate/sif-embedding-only-migration.sql", "utf8"),
+      "-- operator-local annotation changes the reviewed artifact digest"
+    ].join("\n"), "utf8");
+
+    let stdout = "";
+    try {
+      execFileSync(process.execPath, [
+        "scripts/sif_embedding_approval_preflight.mjs",
+        "--migration",
+        migrationPath,
+        "--no-env-file",
+        "--output",
+        outPath
+      ], {
+        cwd: process.cwd(),
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          OPENAI_API_KEY: "",
+          SUPABASE_SERVICE_ROLE_KEY: "",
+          SUPABASE_URL: "",
+          NEXT_PUBLIC_SUPABASE_URL: "",
+          SAFETY_REFERENCE_VECTOR_SEARCH: ""
+        }
+      });
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "stdout" in error) {
+        stdout = String((error as { stdout: unknown }).stdout);
+      } else {
+        throw error;
+      }
+    }
+
+    const result = asRecord(JSON.parse(stdout));
+    const checks = result.checks as Array<Record<string, unknown>>;
+    const scopeCheck = checks.find((check) => check.id === "migration_scope_is_sif_embedding_only");
+    const digestCheck = checks.find((check) => check.id === "migration_digest_matches_canonical_approval_artifact");
+    expect(result.ok).toBe(false);
+    expect(scopeCheck?.passed).toBe(true);
+    expect(digestCheck?.passed).toBe(false);
+    expect(asStringArray(result.failedCheckIds)).toEqual(["migration_digest_matches_canonical_approval_artifact"]);
+    expect(asRecord(result.migrationDigestBinding)).toMatchObject({ matches: false });
+    expect(result.dbMutationPerformed).toBe(false);
+  });
+
   it("keeps the embedding cost approval guard in the corpus script", () => {
     const source = readFileSync("scripts/prepare_sif_embedding_corpus.mjs", "utf8");
 
