@@ -1,14 +1,87 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-official-pdf-audit/v1",
-  "generatedAt": "2026-08-30T14:04:51.375601+00:00",
-  "sourceHead": "3a35f1990d83d0c89554cd122379c4159cf84f00",
+  "generatedAt": "2026-08-31T20:14:36.022623+00:00",
+  "sourceHead": "f012df5b3f2e82de7aa85713d3d01fe38cb95123",
   "verdict": "PASS_OFFICIAL_PDF_AUTHENTICITY_BODY_PAIR_REVIEW_STILL_REQUIRED",
   "scope": "read-only official KOSHA PDF and immutable body-pair verification for the bounded promotion packet",
   "packetPath": "evaluation/kosha-exact-promotion-packet-2026-07-22/report.json",
+  "packetSha256": "f705e6d8d9d90e7a30f3ab9fb9eb43ffbca0065133b7187e5b07de2b547761d9",
+  "corpusBinding": {
+    "schemaVersion": "safeclaw-kosha-corpus-binding/v1",
+    "snapshotId": "e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12",
+    "sourceIdentitySha256": "47891b7f3aa9a609026cbcb19c9d1c0358cfd15e716f0d3b68e03d9bb377b43f",
+    "current": {
+      "path": "data/safety-knowledge/kosha-guide-corpus/current.json",
+      "sha256": "1a506083ed43272e10d70d985b6db4ba9aaf651aba177366a9ed9aae99b6a1cd"
+    },
+    "manifest": {
+      "path": "data/safety-knowledge/kosha-guide-corpus/snapshots/e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12/manifest.json",
+      "sha256": "e234586aa3f217acc701aca743eb70ab89448ac8de71e1eb61960e526cabefa5",
+      "declaredSha256": "e234586aa3f217acc701aca743eb70ab89448ac8de71e1eb61960e526cabefa5"
+    },
+    "items": {
+      "path": "data/safety-knowledge/kosha-guide-corpus/snapshots/e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12/items.jsonl.gz",
+      "gzipSha256": "6b9e455cc57a3c9ad091b7794ae87f6f586b5ab5cbeb9d4b5cbb56d191161a24",
+      "logicalSha256": "253ce7a80b09a62831a39dd12d504f3b46b0cfc0b86db87fca31192d17eedae9",
+      "declaredLogicalSha256": "253ce7a80b09a62831a39dd12d504f3b46b0cfc0b86db87fca31192d17eedae9"
+    },
+    "candidatePairs": [
+      {
+        "stableKey": "A-G-1",
+        "version": "A-G-1-2025",
+        "recomputedBodySha256": "55fa0e40cfd6915873141bd81efe901050f4d221fa0f2e670d893fc12feb1763",
+        "expectedPdfSha256": "adac02929d30d8cae251bc1fd57cacc3df6579d826bf3de85bcfdaf3be1dcd5f"
+      },
+      {
+        "stableKey": "A-G-15",
+        "version": "A-G-15-2026",
+        "recomputedBodySha256": "53b410850420b802021db72975a71647e0eecfc56d94047f2bbe524c1d405f54",
+        "expectedPdfSha256": "71715efb34bf516fecd43414c8d547bb2ccbcbfe1fb256de8ac5804499c66478"
+      },
+      {
+        "stableKey": "B-E-11",
+        "version": "B-E-11-2026",
+        "recomputedBodySha256": "96632acae68db0c28296499905eec09508641debeb6065f10629667690a72acc",
+        "expectedPdfSha256": "4dbdee537beeb6598b834766bb179c2882d954c21ca33ccb56376ad4271e65bf"
+      },
+      {
+        "stableKey": "B-E-9",
+        "version": "B-E-9-2026",
+        "recomputedBodySha256": "df5f9bc7ba40f2467370a50cf41ff5d4c7dedb22bce4d38d88667d785e779576",
+        "expectedPdfSha256": "5a196084490078f1c3e8a03a82aea0bd528b68fcfa4c6bd190ad9c86fe1b59f9"
+      },
+      {
+        "stableKey": "D-C-10",
+        "version": "D-C-10-2026",
+        "recomputedBodySha256": "1068fed72e7bbc449c48183f5c6278287eef51b292100a6cc4f308972cb36777",
+        "expectedPdfSha256": "085961d6b29640b6e89592c96495b1df01b086b582f5aaf4bf941082e8f594dd"
+      },
+      {
+        "stableKey": "D-C-11",
+        "version": "D-C-11-2026",
+        "recomputedBodySha256": "b97b0cf1ac5e43bf98c412e58896f538232402167cfeedc18806ed1eead1245c",
+        "expectedPdfSha256": "266aca072d42bcc5c869218a84ecd189236e6cf0d426bd4a66d06010c0f2e144"
+      },
+      {
+        "stableKey": "D-C-4",
+        "version": "D-C-4-2025",
+        "recomputedBodySha256": "60527e44d909198acd82fa2c95129932b67640eb7e7253ad9883ba267ff262b7",
+        "expectedPdfSha256": "b032b3347a6f1bc107a3e605ef35d116b9917fed047b3d60a2eab75bfeab9252"
+      },
+      {
+        "stableKey": "E-G-4",
+        "version": "E-G-4-2025",
+        "recomputedBodySha256": "2b0478ccea84b4fbe4d6ba32f4d492fc819abdc58ba077a05e2f22aafeaf8678",
+        "expectedPdfSha256": "63b2ec5e7c01e13d0da202accde8fea1596cbed77e33c7a4835c7186467c07b4"
+      }
+    ],
+    "candidatePairsSha256": "137aa8be313663ac2a693361cc2969bc5bb759edc5c656526231c53f75352ab4",
+    "bindingSha256": "236b96114afa53f7313ccea9883b0c1dd9f8553744c06ed56503d90aa6bbb303"
+  },
   "candidateCount": 8,
   "machineVerifiedCount": 8,
   "failedCount": 0,
-  "elapsedMs": 56285,
+  "elapsedMs": 43905,
   "temporaryPdfFilesRetained": 0,
   "results": [
     {
