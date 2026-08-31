@@ -2,13 +2,14 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_RECIPIENT_DOCUMENT_DISCLOSURE_AFFORDANCE_LIVE_PENDING`
+`PASS_LIVE_PRODUCTION_RECIPIENT_DOCUMENT_DISCLOSURE_AFFORDANCE`
 
 ## Scope
 
 - Source commit: `fa9fc6c44e6602a105078c337102d81ed98229dd`
 - Local production URL: `http://127.0.0.1:3083`
 - Existing live product baseline at review start: `44af0108d28eee519e853356830ee70f1117abc7`
+- After-live source and production commit: `1861ae72dcbec17e047d61bc517cc8216453798e`
 - Reviewed surface: route-controlled invited recipient fixture at `/share/[sessionId]?workerId=...`
 - Viewports: `1440x723`, `1440x900`, `390x723`, and `390x844`
 
@@ -27,6 +28,10 @@
 - `recipient-share-mobile-390x844.png`
 - `report.json`
 - `report.md`
+- `after-live/report.json`
+- `after-live/report.md`
+- `after-live/recipient-share-desktop-short-1440x723.png`
+- `after-live/recipient-share-mobile-short-390x723.png`
 
 ## Verification
 
@@ -36,6 +41,6 @@
 
 ## Boundaries
 
-- This is a current-source local-production visual proof. Live production verification remains pending until deployment reaches `fa9fc6c4` or a descendant.
+- Current-source local-production and live-production runs both pass. The live runner observed source and production at `1861ae72`.
 - This route-controlled fixture does not reproduce an exact user-saved `/share/[sessionId]` session. Exact saved Share remains `MISSING_EVIDENCE`.
 - No DB write, Share-session creation, recipient confirmation POST, provider dispatch, vector operation, Wiki publication, or KOSHA registry mutation was performed.
