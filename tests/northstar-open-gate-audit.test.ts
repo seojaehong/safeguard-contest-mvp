@@ -7657,6 +7657,16 @@ function createFixtureRoot(): string {
       { command: "npm.cmd run typecheck", result: "pass" },
     ],
   });
+  const fixtureCorpusBinding = {
+    schemaVersion: "safeclaw-kosha-corpus-binding/v1",
+    bindingSha256: "b".repeat(64),
+  };
+  writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-packet-2026-07-22", "report.json"), {
+    schemaVersion: "safeclaw-kosha-exact-promotion-packet/v1",
+    candidateCount: 8,
+    exactPromotionPerformed: false,
+    corpusBinding: fixtureCorpusBinding,
+  });
   writeJson(rootDir, path.join("evaluation", "kosha-exact-promotion-review-gate-2026-07-22", "report.json"), {
     schemaVersion: "safeclaw-kosha-exact-promotion-review-gate/v1",
     verdict: "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
@@ -7676,6 +7686,12 @@ function createFixtureRoot(): string {
     officialLifecycleTitleVariantFindingCount: 0,
     reviewerSupportMachineVerified: true,
     reviewerSupportHumanReviewCompleted: false,
+    corpusBindingSha256: fixtureCorpusBinding.bindingSha256,
+    approvalEvidenceBinding: {
+      schemaVersion: "safeclaw-approval-evidence-binding/v1",
+      verified: true,
+      failures: [],
+    },
     failures: Array.from({ length: 64 }, (_, index) => `unconfirmed-required-check:${index}`),
   });
   writeText(
@@ -7710,6 +7726,7 @@ function createFixtureRoot(): string {
     temporaryPdfFilesRetained: 0,
     exactPromotionPerformed: false,
     separatePromotionApprovalRequired: true,
+    corpusBinding: fixtureCorpusBinding,
     reviewChecklistImpact: {
       officialUrlExpectedFileMachineSupported: true,
       officialMetadataAndBodyProvenanceMachineSupported: true,
@@ -7737,6 +7754,7 @@ function createFixtureRoot(): string {
     titleVariantFindingCount: 0,
     exactPromotionPerformed: false,
     separatePromotionApprovalRequired: true,
+    corpusBinding: fixtureCorpusBinding,
     reviewChecklistImpact: {
       operatorLifecycleCurrentStatusConfirmed: false,
       humanConfirmationRecorded: false,
@@ -7787,6 +7805,7 @@ function createFixtureRoot(): string {
     exactPromotionPerformed: false,
     exactRegistryWriteArtifactCreated: false,
     separatePromotionApprovalRequired: true,
+    corpusBinding: fixtureCorpusBinding,
     results: Array.from({ length: 8 }, (_, candidateIndex) => ({
       stableKey: `KEY-${candidateIndex}`,
       contentRationaleMachineSupported: true,
@@ -13410,6 +13429,45 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     };
     lifecycleAudit.exactTitleIdentityMatchCount = 7;
     writeJson(rootDir, path.relative(rootDir, auditPath), lifecycleAudit);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("keeps KOSHA human review approval-gated when every companion shares the corpus binding", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    const gate = audit.gates.find((candidate) => candidate.id === "kosha_exact_promotion_review_gate");
+    expect(gate?.state).toBe("approval_gated");
+    expect(gate?.detail).toContain("share corpus binding");
+    expect(gate?.detail).toContain("human-review inputs only");
+  });
+
+  it("fails closed when a KOSHA companion no longer shares the transitive corpus binding", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const supportPath = path.join(
+      rootDir,
+      "evaluation",
+      "kosha-exact-promotion-reviewer-support-2026-07-25",
+      "report.json",
+    );
+    const reviewerSupport = JSON.parse(fs.readFileSync(supportPath, "utf8")) as {
+      corpusBinding: { bindingSha256: string };
+    };
+    reviewerSupport.corpusBinding.bindingSha256 = "9".repeat(64);
+    writeJson(rootDir, path.relative(rootDir, supportPath), reviewerSupport);
 
     const audit = buildNorthstarOpenGateAudit({
       rootDir,

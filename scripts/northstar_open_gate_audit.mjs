@@ -196,6 +196,7 @@ const EVIDENCE_PATHS = Object.freeze({
   koshaCurrentGate: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
   koshaCurrentReconciliation: path.join("evaluation", "kosha-current-master-reconciliation-2026-07-19", "report.json"),
   koshaCurrentLive: path.join("evaluation", "kosha-exact-trust-current-live-2026-07-19", "report.md"),
+  koshaExactPromotionPacket: path.join("evaluation", "kosha-exact-promotion-packet-2026-07-22", "report.json"),
   koshaExactPromotionReviewGate: path.join("evaluation", "kosha-exact-promotion-review-gate-2026-07-22", "report.json"),
   koshaExactPromotionHumanChecklist: path.join("evaluation", "kosha-exact-promotion-review-gate-2026-07-22", "review-template.md"),
   koshaExactOfficialPdfAudit: path.join("evaluation", "kosha-exact-official-pdf-audit-2026-07-25", "report.json"),
@@ -14219,6 +14220,8 @@ function evaluateKoshaExactTrustGate(rootDir) {
 function evaluateKoshaExactPromotionReviewGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.koshaExactPromotionReviewGate;
   const report = readJsonFile(rootDir, evidencePath);
+  const packetPath = EVIDENCE_PATHS.koshaExactPromotionPacket;
+  const packet = readJsonFile(rootDir, packetPath);
   const humanChecklistPath = EVIDENCE_PATHS.koshaExactPromotionHumanChecklist;
   const humanChecklist = readTextFile(rootDir, humanChecklistPath) || "";
   const checklistCandidateCount = humanChecklist.match(/^## \d+\. /gmu)?.length ?? 0;
@@ -14602,6 +14605,50 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
   const failures = Array.isArray(report.failures)
     ? report.failures.map(readString).filter(Boolean)
     : [];
+  const humanReviewFailurePrefixes = [
+    "unconfirmed-required-check:",
+    "missing-human-confirmation:",
+    "missing-reviewer:",
+    "missing-reviewed-at:",
+  ];
+  const nonHumanFailures = failures.filter((failure) => !humanReviewFailurePrefixes.some((prefix) => failure.startsWith(prefix)));
+  const packetCorpusBinding = isRecord(packet) && isRecord(packet.corpusBinding) ? packet.corpusBinding : null;
+  const pdfCorpusBinding = isRecord(officialPdfAudit) && isRecord(officialPdfAudit.corpusBinding)
+    ? officialPdfAudit.corpusBinding
+    : null;
+  const lifecycleCorpusBinding = isRecord(officialLifecycleAudit) && isRecord(officialLifecycleAudit.corpusBinding)
+    ? officialLifecycleAudit.corpusBinding
+    : null;
+  const reviewerCorpusBinding = isRecord(reviewerSupport) && isRecord(reviewerSupport.corpusBinding)
+    ? reviewerSupport.corpusBinding
+    : null;
+  const corpusBindingSha256 = readString(packetCorpusBinding?.bindingSha256);
+  const approvalEvidenceBinding = isRecord(report.approvalEvidenceBinding)
+    ? report.approvalEvidenceBinding
+    : null;
+  const approvalEvidenceFailures = approvalEvidenceBinding && Array.isArray(approvalEvidenceBinding.failures)
+    ? approvalEvidenceBinding.failures
+    : null;
+  const transitiveCorpusBindingProven = isRecord(packet)
+    && readString(packet.schemaVersion) === "safeclaw-kosha-exact-promotion-packet/v1"
+    && readNumber(packet.candidateCount) === 8
+    && packet.exactPromotionPerformed === false
+    && packetCorpusBinding !== null
+    && readString(packetCorpusBinding.schemaVersion) === "safeclaw-kosha-corpus-binding/v1"
+    && /^[0-9a-f]{64}$/u.test(corpusBindingSha256)
+    && [pdfCorpusBinding, lifecycleCorpusBinding, reviewerCorpusBinding].every((binding) => binding !== null
+      && readString(binding.schemaVersion) === "safeclaw-kosha-corpus-binding/v1"
+      && readString(binding.bindingSha256) === corpusBindingSha256)
+    && readString(report.corpusBindingSha256) === corpusBindingSha256
+    && approvalEvidenceBinding !== null
+    && readString(approvalEvidenceBinding.schemaVersion) === "safeclaw-approval-evidence-binding/v1"
+    && approvalEvidenceBinding.verified === true
+    && approvalEvidenceFailures !== null
+    && approvalEvidenceFailures.length === 0
+    && nonHumanFailures.length === 0;
+  const transitiveCorpusBindingDetail = transitiveCorpusBindingProven
+    ? ` Packet ${packetPath}, official PDF, lifecycle, reviewer-support, and final review gate share corpus binding ${corpusBindingSha256}; approval evidence is Git-blob verified and all remaining failures are human-review inputs only.`
+    : "";
   const noMutation = report.mutationPerformed === false
     && report.dbMutationPerformed === false
     && report.embeddingGenerationPerformed === false
@@ -14626,6 +14673,8 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && readNumber(report.officialLifecycleTitleVariantFindingCount) === 0
     && report.reviewerSupportMachineVerified === true
     && report.reviewerSupportHumanReviewCompleted === false
+    && transitiveCorpusBindingProven
+    && failures.length === 64
     && officialPdfAuditProvesBodyPair
     && officialLifecycleAuditProvesCurrentInventory
     && reviewerSupportProvesSemanticCoverage
@@ -14639,7 +14688,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
       label: "KOSHA exact promotion review gate",
       state: "approval_gated",
       evidencePath,
-      detail: `Review template covers ${candidateCount} KOSHA candidates and is blocked by default (${failures.length} checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.${humanChecklistDetail}${officialPdfAuditDetail}${officialLifecycleAuditDetail}${reviewerSupportDetail}${reviewerCockpitDetail}${contractAuditDetail}`,
+      detail: `Review template covers ${candidateCount} KOSHA candidates and is blocked by default (${failures.length} checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval.${transitiveCorpusBindingDetail}${humanChecklistDetail}${officialPdfAuditDetail}${officialLifecycleAuditDetail}${reviewerSupportDetail}${reviewerCockpitDetail}${contractAuditDetail}`,
       nextActions: [
         "Fill the generated KOSHA review template with reviewer, reviewedAt, humanConfirmed, and every required check before promotion.",
         "Re-run scripts\\kosha_exact_promotion_review_gate.mjs on the completed review input, then seek separate explicit approval before writing any exact-trust registry changes.",
@@ -14659,6 +14708,8 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
     && readNumber(report.officialLifecycleTitleVariantFindingCount) === 0
     && report.reviewerSupportMachineVerified === true
     && report.reviewerSupportHumanReviewCompleted === false
+    && transitiveCorpusBindingProven
+    && failures.length === 0
     && officialPdfAuditProvesBodyPair
     && officialLifecycleAuditProvesCurrentInventory
     && reviewerSupportProvesSemanticCoverage
@@ -14672,7 +14723,7 @@ function evaluateKoshaExactPromotionReviewGate(rootDir) {
       label: "KOSHA exact promotion review gate",
       state: "approval_gated",
       evidencePath,
-      detail: `Human checklist is complete for ${candidateCount} KOSHA candidates, but exact-trust promotion remains approval-gated and no mutation has been performed.${humanChecklistDetail}${officialPdfAuditDetail}${officialLifecycleAuditDetail}${reviewerSupportDetail}${reviewerCockpitDetail}${contractAuditDetail}`,
+      detail: `Human checklist is complete for ${candidateCount} KOSHA candidates, but exact-trust promotion remains approval-gated and no mutation has been performed.${transitiveCorpusBindingDetail}${humanChecklistDetail}${officialPdfAuditDetail}${officialLifecycleAuditDetail}${reviewerSupportDetail}${reviewerCockpitDetail}${contractAuditDetail}`,
       nextActions: [
         "Request explicit approval for the bounded exact-trust promotion before writing registry, DB, embedding, or production runtime changes.",
       ],
