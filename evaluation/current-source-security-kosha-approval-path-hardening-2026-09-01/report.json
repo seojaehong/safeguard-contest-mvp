@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-kosha-approval-path-hardening/v1",
+  "generatedAt": "2026-08-31T19:59:51.890Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_APPROVAL_EVIDENCE_PATH_HARDENING_LIVE_PENDING",
+  "sourceHead": "c7535131fa8ff40deebeb0e84afb3ba6d4be5880",
+  "securityScanId": "87e5bcdf-c1d2-4094-8ad9-a670fd1fd521",
+  "immutableOriginalFindingBaselinePreserved": true,
+  "userContext": "Preserve immutable original 18-finding baseline. Verify current 4321140c61ff2c7ffd2eff5b1b8cffc1b5e10017 source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
+  "remediatedFindings": [
+    {
+      "ruleId": "approval-evidence.symlink-follow",
+      "severity": "medium",
+      "status": "current_source_local_verified",
+      "controls": [
+        "Git HEAD tree mode must be 100644 or 100755",
+        "working bytes must match the exact HEAD blob SHA-256",
+        "filesystem path components must not be symbolic links",
+        "resolved files must be regular files inside the repository real path"
+      ]
+    },
+    {
+      "ruleId": "kosha.review-path-symlink",
+      "severity": "medium",
+      "status": "current_source_local_verified",
+      "controls": [
+        "review and companion inputs reject symlinked path components",
+        "input files must be regular files within the repository real path",
+        "output directories reject symlink traversal",
+        "pre-existing report destinations must remain regular files"
+      ]
+    }
+  ],
+  "verification": {
+    "focused": {
+      "command": "npm.cmd exec -- vitest run tests\\approval-evidence-binding.test.ts tests\\kosha-exact-promotion-review-gate.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFiles": 2,
+      "tests": 28,
+      "passed": 28,
+      "failed": 0,
+      "durationMs": 73480
+    },
+    "adjacentApprovalPreflights": {
+      "command": "npm.cmd exec -- vitest run tests\\approval-evidence-binding.test.ts tests\\kosha-exact-promotion-review-gate.test.ts tests\\distributed-admission-activation-preflight.test.ts tests\\share-recipient-ack-approval-preflight.test.ts tests\\rls-llm-wiki-approval-preflight.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFiles": 5,
+      "tests": 50,
+      "passed": 50,
+      "failed": 0,
+      "durationMs": 120280
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "passed": true
+    },
+    "syntaxAndDiff": {
+      "nodeCheckPassed": true,
+      "gitDiffCheckPassed": true
+    }
+  },
+  "itemCount": 2,
+  "successCount": 2,
+  "failureCount": 0,
+  "elapsedTimeMs": 207000,
+  "liveAfterDeploymentRequired": true,
+  "remainingSecurityWork": [
+    {
+      "ruleId": "approval-evidence.stale-source-binding",
+      "status": "open_follow_up",
+      "reason": "Requires a backward-compatible source-plus-evidence contract across four approval workflows."
+    },
+    {
+      "ruleId": "kosha.transitive-corpus-binding",
+      "status": "open_follow_up",
+      "reason": "Requires coordinated corpus digests and regeneration across packet, PDF, lifecycle, reviewer-support, review gate, and Northstar artifacts."
+    }
+  ],
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublicationPerformed": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedClaimsClosed": false,
+    "liveDeploymentVerified": false
+  }
+}
