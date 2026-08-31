@@ -19,6 +19,7 @@ import {
   publicRateLimitResponse,
   type PublicRateLimitDecision,
 } from "@/lib/public-distributed-rate-limit";
+import { projectPublicFailure } from "@/lib/server/public-error";
 
 export const dynamic = "force-dynamic";
 const limiter = createRateLimiter({ limit: 60, windowMs: 60_000 });
@@ -38,6 +39,16 @@ function readLimit(value: string | null) {
   const parsed = Number.parseInt(value, 10);
   if (Number.isNaN(parsed)) return 4;
   return Math.min(Math.max(parsed, 1), 10);
+}
+
+function knowledgeMatchFailure(error: unknown) {
+  const failure = projectPublicFailure({
+    scope: "knowledge-match",
+    code: "KNOWLEDGE_MATCH_FAILED",
+    message: "안전 지식 매칭을 완료하지 못했습니다.",
+    error,
+  });
+  return NextResponse.json({ ok: false, ...failure }, { status: 500 });
 }
 
 export async function GET(request: NextRequest) {
@@ -72,12 +83,7 @@ export async function GET(request: NextRequest) {
       templateCount: getSafetyKnowledgeTemplates().length
     }), rateLimit);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("knowledge match route failed", error);
-    return NextResponse.json(
-      { ok: false, message },
-      { status: 500 }
-    );
+    return knowledgeMatchFailure(error);
   }
 }
 
@@ -116,12 +122,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const matches = matchSafetyKnowledge(question, limit);
-  return applyPublicRateLimitHeader(NextResponse.json({
-    ok: true,
-    source: "safety-knowledge-seed",
-    storageMode: "seed",
-    question,
-    matches
-  }), rateLimit);
+  try {
+    const matches = matchSafetyKnowledge(question, limit);
+    return applyPublicRateLimitHeader(NextResponse.json({
+      ok: true,
+      source: "safety-knowledge-seed",
+      storageMode: "seed",
+      question,
+      matches
+    }), rateLimit);
+  } catch (error) {
+    return knowledgeMatchFailure(error);
+  }
 }

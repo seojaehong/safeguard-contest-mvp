@@ -19,6 +19,7 @@ import {
   PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED,
   resolveProviderDispatchCapability
 } from "@/lib/server/workflow-dispatch-capability-policy";
+import { projectPublicFailure } from "@/lib/server/public-error";
 import {
   loadActiveOwnedShareSession,
   loadOwnedWorkpackOperationContext
@@ -176,7 +177,19 @@ function parseHttpStatus(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
-function normalizeChannelResults(value: unknown, requestedChannels: WorkflowChannel[]): WorkflowChannelResult[] {
+function publicChannelResultMessage(channel: WorkflowChannel, status: WorkflowChannelStatus): string {
+  if (status === "sent") return `${formatChannelLabel(channel)} 전송 요청을 접수했습니다.`;
+  if (status === "partial") return `${formatChannelLabel(channel)} 전송 결과를 일부만 확인했습니다.`;
+  if (status === "failed") return `${formatChannelLabel(channel)} 전송을 완료하지 못했습니다.`;
+  if (status === "unconfigured") return `${formatChannelLabel(channel)} 전송 설정을 확인해야 합니다.`;
+  return `${formatChannelLabel(channel)} 전송 결과를 확인하지 못했습니다.`;
+}
+
+function normalizeChannelResults(
+  value: unknown,
+  requestedChannels: WorkflowChannel[],
+  trustFixtureDetails = false,
+): WorkflowChannelResult[] {
   const byChannel = new Map<WorkflowChannel, WorkflowChannelResult>();
 
   if (Array.isArray(value)) {
@@ -184,11 +197,14 @@ function normalizeChannelResults(value: unknown, requestedChannels: WorkflowChan
       if (!isRecord(item)) continue;
       const channel = item.channel;
       if (typeof channel !== "string" || !ACTIVE_CHANNELS.includes(channel as ActiveWorkflowChannel)) continue;
+      const status = parseChannelStatus(item.status);
       byChannel.set(channel as WorkflowChannel, {
         channel: channel as WorkflowChannel,
-        provider: typeof item.provider === "string" ? item.provider : "n8n",
-        status: parseChannelStatus(item.status),
-        message: typeof item.message === "string" ? item.message : "채널 처리 결과가 반환되었습니다.",
+        provider: trustFixtureDetails && typeof item.provider === "string" ? item.provider : "n8n",
+        status,
+        message: trustFixtureDetails && typeof item.message === "string"
+          ? item.message
+          : publicChannelResultMessage(channel as WorkflowChannel, status),
         httpStatus: parseHttpStatus(item.httpStatus)
       });
     }
@@ -543,11 +559,12 @@ export async function POST(request: NextRequest) {
   const payload = localizedPayload.payload;
 
   try {
-    const workflowResponse = isLiveDispatchEnabled()
+    const liveDispatch = isLiveDispatchEnabled();
+    const workflowResponse = liveDispatch
       ? await postWebhookWithTimeout(webhookConfig.url, webhookConfig.token, payload)
       : buildFixtureDispatchResponse(dispatchChannels, payload.recipients);
     const channelResults = [
-      ...normalizeChannelResults(workflowResponse.channelResults, dispatchChannels),
+      ...normalizeChannelResults(workflowResponse.channelResults, dispatchChannels, !liveDispatch),
       ...preflightChannelResults
     ];
     const summary = summarizeChannelResults(channelResults);
@@ -559,13 +576,21 @@ export async function POST(request: NextRequest) {
       idempotencyKey,
       idempotencySupported: PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED,
       duplicateRisk: false,
-      providerCalled: isLiveDispatchEnabled(),
+      providerCalled: liveDispatch,
       channelResults,
       summary,
-      message: workflowResponse.message || "n8n 웹훅이 전파 요청을 접수했습니다."
+      message: liveDispatch
+        ? "n8n 웹훅이 전파 요청을 접수했습니다."
+        : workflowResponse.message || "안전 fixture 모드로 전파 요청을 검증했습니다."
     });
   } catch (error) {
-    console.error("workflow dispatch failed", error);
+    const failure = projectPublicFailure({
+      scope: "workflow-dispatch",
+      code: "WORKFLOW_PROVIDER_FAILED",
+      message: "전파 제공자의 처리 결과를 확인하지 못했습니다. 중복 전송을 피하고 상태를 다시 확인해 주세요.",
+      error,
+      context: { providerCalled: true },
+    });
     return NextResponse.json({
       ok: false,
       configured: true,
@@ -574,7 +599,7 @@ export async function POST(request: NextRequest) {
       idempotencySupported: PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED,
       duplicateRisk: true,
       providerCalled: true,
-      message: error instanceof Error ? error.message : "n8n 전파 요청에 실패했습니다."
+      ...failure,
     }, { status: 502 });
   }
 }

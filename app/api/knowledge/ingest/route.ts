@@ -22,6 +22,7 @@ import {
   checkKnowledgeIngestOrganizationAdmission,
   knowledgeIngestAdmissionResponse,
 } from "@/lib/knowledge-ingest-admission";
+import { projectPublicFailure } from "@/lib/server/public-error";
 
 export const dynamic = "force-dynamic";
 
@@ -333,15 +334,19 @@ export async function POST(request: NextRequest) {
       }
     }
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("knowledge ingest persistence failed", error);
+    const failure = projectPublicFailure({
+      scope: "knowledge-ingest",
+      code: "KNOWLEDGE_INGEST_PERSISTENCE_FAILED",
+      message: "원본 이벤트 검증은 성공했지만 저장을 완료하지 못했습니다.",
+      error,
+    });
     return applyKnowledgeIngestAdmissionHeaders(NextResponse.json(
       {
         ok: false,
         configured: true,
         storageMode: "persistent-error",
         event: normalized.event,
-        message: `원본 이벤트 검증은 성공했지만 저장에 실패했습니다. 사유: ${message}`
+        ...failure,
       },
       { status: 500 }
     ), effectiveAdmission);

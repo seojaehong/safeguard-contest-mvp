@@ -212,6 +212,31 @@ describe("knowledge ingest tenant binding", () => {
     expect(await response.json()).toMatchObject({ ok: false, configured: false });
   });
 
+  it("does not expose a raw database failure through the persistence response", async () => {
+    const secretMarker = "relation knowledge_events on internal-db-host does not exist";
+    const errorLog = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const fake = fakeClient({
+      site: { data: null, error: { code: "42P01", message: secretMarker } },
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { POST } = await import("@/app/api/knowledge/ingest/route");
+
+    const response = await POST(request());
+    const body = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(500);
+    expect(body).toMatchObject({
+      ok: false,
+      configured: true,
+      storageMode: "persistent-error",
+      code: "KNOWLEDGE_INGEST_PERSISTENCE_FAILED",
+      message: "원본 이벤트 검증은 성공했지만 저장을 완료하지 못했습니다.",
+    });
+    expect(body.correlationId).toMatch(/^[0-9a-f-]{36}$/u);
+    expect(JSON.stringify(body)).not.toContain(secretMarker);
+    expect(JSON.stringify(errorLog.mock.calls)).not.toContain(secretMarker);
+  });
+
   it("rejects an unauthenticated ingest before ownership lookup or writes", async () => {
     const fake = fakeClient();
     mocks.createSupabaseAdminClient.mockReturnValue(fake.client);

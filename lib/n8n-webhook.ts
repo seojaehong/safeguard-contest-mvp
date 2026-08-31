@@ -3,6 +3,8 @@
 // N8N_PUBLIC_BASE(HTTPS relay)만 쓰고, 로컬/오라클 내부망에서는 N8N_INTERNAL_BASE를
 // 우선한다 — N8N_INTERNAL_BASE는 Vercel에 설정하면 안 된다(.env.example 참고).
 
+import { safeServerErrorContext } from "@/lib/server/public-error";
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -20,6 +22,77 @@ export type WebhookResponse = {
   channelResults?: unknown;
   summary?: unknown;
 };
+
+const PUBLIC_PROVIDER_STATUSES = new Set([
+  "accepted",
+  "completed",
+  "failed",
+  "ok",
+  "partial",
+  "queued",
+  "sent",
+  "success",
+]);
+
+const PUBLIC_CHANNELS = new Set(["email", "sms", "kakao", "band"]);
+const PUBLIC_CHANNEL_STATUSES = new Set(["sent", "failed", "unconfigured", "skipped", "partial"]);
+
+class N8nWebhookRequestError extends Error {
+  readonly code = "N8N_WEBHOOK_REQUEST_FAILED";
+  readonly status?: number;
+
+  constructor(status?: number) {
+    super("n8n webhook request failed");
+    this.name = "N8nWebhookRequestError";
+    this.status = status;
+  }
+}
+
+function publicReceiptId(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const receipt = value.trim();
+  return receipt && receipt.length <= 128 && /^[a-z0-9_.:-]+$/iu.test(receipt) ? receipt : undefined;
+}
+
+function publicProviderStatus(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const status = value.trim().toLowerCase();
+  return PUBLIC_PROVIDER_STATUSES.has(status) ? status : "response-received";
+}
+
+function publicChannelResults(value: unknown): unknown[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value.flatMap((item) => {
+    if (!isRecord(item) || !PUBLIC_CHANNELS.has(String(item.channel))) return [];
+    const status = typeof item.status === "string" && PUBLIC_CHANNEL_STATUSES.has(item.status)
+      ? item.status
+      : "skipped";
+    const httpStatus = typeof item.httpStatus === "number"
+      && Number.isInteger(item.httpStatus)
+      && item.httpStatus >= 100
+      && item.httpStatus <= 599
+      ? item.httpStatus
+      : undefined;
+    return [{
+      channel: item.channel,
+      status,
+      ...(httpStatus !== undefined ? { httpStatus } : {}),
+    }];
+  });
+}
+
+function projectWebhookResponse(value: Record<string, unknown>): WebhookResponse {
+  const workflowRunId = publicReceiptId(value.workflowRunId);
+  const providerStatus = publicProviderStatus(value.providerStatus);
+  const channelResults = publicChannelResults(value.channelResults);
+  return {
+    ok: value.ok !== false,
+    ...(workflowRunId ? { workflowRunId } : {}),
+    ...(providerStatus ? { providerStatus } : {}),
+    ...(channelResults ? { channelResults } : {}),
+    message: "n8n 웹훅이 요청을 접수했습니다.",
+  };
+}
 
 export function isLiveDispatchEnabled(): boolean {
   return process.env.SAFEGUARD_RUN_LIVE_DISPATCH === "1";
@@ -78,7 +151,7 @@ export async function postWebhookWithTimeout(url: string, secret: string, payloa
 
       const text = await response.text();
       if (!response.ok) {
-        throw new Error(`n8n webhook returned ${response.status}: ${text.slice(0, 300)}`);
+        throw new N8nWebhookRequestError(response.status);
       }
 
       if (!text) {
@@ -88,19 +161,19 @@ export async function postWebhookWithTimeout(url: string, secret: string, payloa
       try {
         const parsed = JSON.parse(text) as unknown;
         if (isRecord(parsed)) {
-          return parsed as WebhookResponse;
+          return projectWebhookResponse(parsed);
         }
       } catch (error) {
         console.warn("n8n webhook returned non-JSON response", error);
       }
 
-      return { ok: true, message: text.slice(0, 300) };
+      return { ok: true, message: "n8n 웹훅이 요청을 접수했습니다." };
     } catch (error) {
       clearTimeout(timeout);
       lastError = error;
-      console.warn(`n8n webhook attempt ${attempt + 1} failed`, error);
+      console.warn(`n8n webhook attempt ${attempt + 1} failed`, safeServerErrorContext(error));
     }
   }
 
-  throw lastError instanceof Error ? lastError : new Error("n8n webhook request failed");
+  throw lastError instanceof Error ? lastError : new N8nWebhookRequestError();
 }

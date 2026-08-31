@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   analyzeHazardPhotos,
   getPhotoVisionReadiness,
+  type HazardPhotoAnalysisError,
+  type HazardPhotoVisionAnalysis,
+  type HazardPhotoVisionCandidate,
   MAX_HAZARD_PHOTO_FILES,
   MAX_HAZARD_PHOTO_REQUEST_BYTES,
   MAX_HAZARD_PHOTO_TOTAL_BYTES
@@ -9,6 +12,7 @@ import {
 import { withPublicPhotoAnalysisAdmission } from "@/lib/public-distributed-rate-limit";
 import { enforcePublicMultipartRequestBodyBudget } from "@/lib/public-work-budget";
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
+import { projectPublicFailure } from "@/lib/server/public-error";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -39,6 +43,68 @@ function partialAnalysisMessage(counts: {
     `실패 ${counts.failed}장`,
     `미설정 ${counts.unconfigured}장`
   ].join(" · ");
+}
+
+function publicPhotoError(error: HazardPhotoAnalysisError | null): HazardPhotoAnalysisError | null {
+  if (!error) return null;
+  if (
+    error.code === "empty_file"
+    || error.code === "unsupported_mime"
+    || error.code === "file_too_large"
+  ) {
+    return error;
+  }
+  if (error.code === "invalid_signature") {
+    return {
+      code: "invalid_signature",
+      message: "사진 파일 시그니처를 확인하지 못했습니다.",
+      retryable: false,
+    };
+  }
+  if (error.code === "provider_unconfigured") {
+    return { ...error, message: "사진 분석 제공자 설정을 확인해야 합니다." };
+  }
+  if (error.code === "invalid_model_output") {
+    return { ...error, message: "사진 분석 결과 형식을 확인하지 못했습니다." };
+  }
+  return { ...error, message: "사진 분석 제공자 응답을 확인하지 못했습니다." };
+}
+
+function publicCandidate(candidate: HazardPhotoVisionCandidate): HazardPhotoVisionCandidate {
+  return {
+    ...candidate,
+    harness: {
+      ...candidate.harness,
+      errorMessage: candidate.harness.errorMessage
+        ? "근거 하네스가 위험 후보를 확정하지 못했습니다."
+        : null,
+    },
+  };
+}
+
+function publicPhotoAnalysis(analysis: HazardPhotoVisionAnalysis): HazardPhotoVisionAnalysis {
+  return {
+    ...analysis,
+    images: analysis.images.map((image) => ({
+      ...image,
+      candidates: image.candidates.map(publicCandidate),
+      error: publicPhotoError(image.error),
+    })),
+    candidates: analysis.candidates.map(publicCandidate),
+    ...(analysis.harness ? {
+      harness: {
+        ...analysis.harness,
+        errorMessage: analysis.harness.errorMessage
+          ? "근거 하네스가 위험 후보를 확정하지 못했습니다."
+          : null,
+      },
+    } : {}),
+    errorMessage: analysis.status === "unconfigured"
+      ? "사진 분석 제공자 설정을 확인해야 합니다."
+      : analysis.status === "failed"
+        ? "현장 사진 분석을 완료하지 못했습니다."
+        : undefined,
+  };
 }
 
 export async function GET(request: NextRequest) {
@@ -137,17 +203,35 @@ async function handlePost(request: NextRequest) {
     }, { status: 413 });
   }
 
-  const analysis = await analyzeHazardPhotos({ question, photos }, { signal: request.signal });
+  let analysis: HazardPhotoVisionAnalysis;
+  try {
+    analysis = await analyzeHazardPhotos({ question, photos }, { signal: request.signal });
+  } catch (error) {
+    if (request.signal.aborted) throw error;
+    const failure = projectPublicFailure({
+      scope: "photo-hazard-analysis",
+      code: "PHOTO_ANALYSIS_FAILED",
+      message: "현장 사진 분석을 완료하지 못했습니다.",
+      error,
+    });
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      ...failure,
+    }, { status: 502 });
+  }
+  const publicAnalysis = publicPhotoAnalysis(analysis);
   const hasAnalysis = analysis.status === "analyzed" || analysis.status === "partial";
   return NextResponse.json({
     ok: hasAnalysis,
     configured: analysis.providerMode !== "unconfigured",
-    analysis,
+    ...(!hasAnalysis ? { code: "PHOTO_ANALYSIS_FAILED" } : {}),
+    analysis: publicAnalysis,
     message: analysis.status === "analyzed"
       ? "현장 사진에서 위험요인 후보를 도출했습니다."
       : analysis.status === "partial"
         ? `현장 사진 일부 처리: ${partialAnalysisMessage(analysis.counts)}.`
-        : analysis.errorMessage || "현장 사진 분석을 완료하지 못했습니다."
+        : "현장 사진 분석을 완료하지 못했습니다."
   });
 }
 

@@ -21,6 +21,7 @@ import { saveAskResponseAsScheduledWorkpack } from "@/lib/workpack-store";
 import { isLiveDispatchEnabled, postWebhookWithTimeout, resolveWebhookConfig } from "@/lib/n8n-webhook";
 import { createLogger } from "@/lib/logger";
 import { resolveBriefingEmailDispatchStatus } from "@/lib/server/briefing-dispatch-status";
+import { projectPublicFailure } from "@/lib/server/public-error";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // enhanced 모드 N개 사이트 순차 생성 여유
@@ -104,8 +105,17 @@ async function sendBriefingEmail(
     await postWebhookWithTimeout(webhookConfig.url, webhookConfig.token, payload);
     return { sent: true, message: "email: sent" };
   } catch (error) {
-    log.warn("briefing email dispatch failed", error);
-    return { sent: false, message: `email: failed (${error instanceof Error ? error.message : "unknown error"})` };
+    const failure = projectPublicFailure({
+      scope: "briefing-email",
+      code: "WORKFLOW_PROVIDER_FAILED",
+      message: "예약 브리핑 이메일 전파 결과를 확인하지 못했습니다.",
+      error,
+      context: { providerCalled: true },
+    });
+    return {
+      sent: false,
+      message: `email: failed (${failure.code}; reference ${failure.correlationId})`,
+    };
   }
 }
 
@@ -162,8 +172,14 @@ export async function GET(request: NextRequest) {
       emailed = emailResult.sent;
       message += emailResult.message;
     } catch (siteError) {
-      message += `generate: failed (${siteError instanceof Error ? siteError.message : "unknown error"})`;
-      log.error("briefing run: site failed", { site: site.name, error: siteError });
+      const failure = projectPublicFailure({
+        scope: "briefing-run",
+        code: "BRIEFING_GENERATION_FAILED",
+        message: "예약 브리핑 문서 생성을 완료하지 못했습니다.",
+        error: siteError,
+        context: { site: site.name },
+      });
+      message += `generate: failed (${failure.code}; reference ${failure.correlationId})`;
     }
 
     results.push({

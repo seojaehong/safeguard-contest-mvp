@@ -306,4 +306,160 @@ describe("photo vision hazard analysis route", () => {
     expect(body.message).toContain("거부 1장");
     expect(body.message).toContain("실패 1장");
   });
+
+  it("removes nested provider and harness errors from the public analysis projection", async () => {
+    const providerMarker = "provider stack trace with internal request id";
+    const harnessMarker = "database host and private schema leaked by harness";
+    vi.mocked(analyzeHazardPhotos).mockResolvedValue({
+      status: "failed",
+      provider: "contract-stub",
+      providerMode: "mock",
+      model: "vision-contract-v1",
+      summary: "",
+      observations: [],
+      candidates: [{
+        id: "candidate-1",
+        label: "추락",
+        detail: "난간 미설치 후보",
+        severity: "high",
+        evidence: "사진 관찰",
+        reflectedDocuments: ["위험성평가표"],
+        sourcePhotoNames: ["failed.jpg"],
+        observation: "난간 미확인",
+        inference: "추락 후보",
+        modelRole: "hazard_candidate",
+        harness: {
+          authority: "safeclaw-db-mcp",
+          status: "insufficient",
+          evidence: [],
+          confirmedControls: [],
+          confirmedAt: null,
+          errorMessage: harnessMarker,
+        },
+        userDecision: { status: "pending", decidedAt: null },
+      }],
+      ocrText: "",
+      siteSignals: [],
+      photoCount: 1,
+      images: [{
+        id: "photo-1",
+        index: 0,
+        name: "failed.jpg",
+        mimeType: "image/jpeg",
+        sizeBytes: 5,
+        status: "failed",
+        provider: "contract-stub",
+        providerMode: "mock",
+        model: "vision-contract-v1",
+        providerResponse: null,
+        summary: "",
+        observations: [],
+        candidates: [],
+        ocrText: "",
+        siteSignals: [],
+        error: { code: "provider_error", message: providerMarker, retryable: true },
+      }],
+      providerResponses: [],
+      fileValidation: HAZARD_PHOTO_FILE_VALIDATION,
+      counts: {
+        submitted: 1,
+        analyzed: 0,
+        rejected: 0,
+        failed: 1,
+        unconfigured: 0,
+        candidates: 1,
+        harnessConfirmed: 0,
+        harnessInsufficient: 1,
+      },
+      harness: {
+        modelRole: "candidate_only",
+        authority: "safeclaw-db-mcp",
+        status: "insufficient",
+        confirms: ["evidence", "confirmedControls"],
+        confirmedAt: null,
+        errorMessage: harnessMarker,
+      },
+      errorMessage: providerMarker,
+    } as unknown as Awaited<ReturnType<typeof analyzeHazardPhotos>>);
+
+    const response = await POST(multipartRequest([
+      new File(["image"], "failed.jpg", { type: "image/jpeg" }),
+    ]));
+    const body = await response.json() as Record<string, unknown>;
+    const serialized = JSON.stringify(body);
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      ok: false,
+      code: "PHOTO_ANALYSIS_FAILED",
+      message: "현장 사진 분석을 완료하지 못했습니다.",
+    });
+    expect(serialized).not.toContain(providerMarker);
+    expect(serialized).not.toContain(harnessMarker);
+    expect(serialized).toContain("사진 분석 제공자 응답을 확인하지 못했습니다.");
+    expect(serialized).toContain("근거 하네스가 위험 후보를 확정하지 못했습니다.");
+  });
+
+  it("rebuilds invalid signature errors without file I/O details", async () => {
+    const fileMarker = "C:\\private\\uploads\\photo.jpg access denied";
+    vi.mocked(analyzeHazardPhotos).mockResolvedValue({
+      status: "failed",
+      provider: "contract-stub",
+      providerMode: "mock",
+      model: "vision-contract-v1",
+      summary: "",
+      observations: [],
+      candidates: [],
+      ocrText: "",
+      siteSignals: [],
+      photoCount: 1,
+      images: [{
+        id: "photo-1",
+        index: 0,
+        name: "failed.jpg",
+        mimeType: "image/jpeg",
+        sizeBytes: 5,
+        status: "rejected",
+        provider: "contract-stub",
+        providerMode: "mock",
+        model: "vision-contract-v1",
+        providerResponse: null,
+        summary: "",
+        observations: [],
+        candidates: [],
+        ocrText: "",
+        siteSignals: [],
+        error: { code: "invalid_signature", message: fileMarker, retryable: false },
+      }],
+      providerResponses: [],
+      fileValidation: HAZARD_PHOTO_FILE_VALIDATION,
+      counts: {
+        submitted: 1,
+        analyzed: 0,
+        rejected: 1,
+        failed: 0,
+        unconfigured: 0,
+        candidates: 0,
+        harnessConfirmed: 0,
+        harnessInsufficient: 0,
+      },
+      harness: {
+        modelRole: "candidate_only",
+        authority: "safeclaw-db-mcp",
+        status: "pending",
+        confirms: ["evidence", "confirmedControls"],
+        confirmedAt: null,
+        errorMessage: null,
+      },
+      errorMessage: fileMarker,
+    } as unknown as Awaited<ReturnType<typeof analyzeHazardPhotos>>);
+
+    const response = await POST(multipartRequest([
+      new File(["image"], "failed.jpg", { type: "image/jpeg" }),
+    ]));
+    const serialized = JSON.stringify(await response.json());
+
+    expect(serialized).not.toContain(fileMarker);
+    expect(serialized).toContain("사진 파일 시그니처를 확인하지 못했습니다.");
+  });
 });
