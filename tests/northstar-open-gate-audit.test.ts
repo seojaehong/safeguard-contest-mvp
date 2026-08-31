@@ -4,9 +4,15 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, describe, expect, it } from "vitest";
 
 const temporaryPaths = new Set<string>();
+let fixtureTemplateDirectory: string | null = null;
+let fixtureTemplateOverlayPaths: string[] = [];
+let fixtureTemplateRevision: string | null = null;
+const reusableFixtureRoots: string[] = [];
+const reusableFixtureParents: string[] = [];
+let reusableFixtureCursor = 0;
 
 function createTemporaryDirectory(prefix: string): string {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
@@ -19,6 +25,26 @@ afterEach(() => {
     fs.rmSync(directory, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
   }
   temporaryPaths.clear();
+  reusableFixtureCursor = 0;
+  for (const rootDir of reusableFixtureRoots) {
+    execFileSync("git", ["reset", "--hard", fixtureTemplateRevision!], { cwd: rootDir, stdio: "ignore" });
+    execFileSync("git", ["clean", "-fd"], { cwd: rootDir, stdio: "ignore" });
+    restoreFixtureOverlay(rootDir);
+  }
+});
+
+afterAll(() => {
+  for (const directory of reusableFixtureParents) {
+    fs.rmSync(directory, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+  }
+  reusableFixtureParents.length = 0;
+  reusableFixtureRoots.length = 0;
+  if (fixtureTemplateDirectory) {
+    fs.rmSync(fixtureTemplateDirectory, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    fixtureTemplateDirectory = null;
+    fixtureTemplateOverlayPaths = [];
+    fixtureTemplateRevision = null;
+  }
 });
 
 type GateState = "proven" | "approval_gated" | "notice" | "missing" | "contradicted";
@@ -1703,11 +1729,12 @@ function createProviderDispatchIdempotencyFixture(): Record<string, unknown> {
   };
 }
 
-function createFixtureRoot(): string {
-  const rootDir = createTemporaryDirectory("safeclaw-northstar-open-gate-");
+function initializeFixtureRoot(rootDir: string): string {
   execFileSync("git", ["init"], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["config", "user.email", "test@example.com"], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["config", "user.name", "SafeClaw Test"], { cwd: rootDir, stdio: "ignore" });
+  execFileSync("git", ["config", "core.autocrlf", "false"], { cwd: rootDir, stdio: "ignore" });
+  execFileSync("git", ["config", "core.safecrlf", "false"], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["config", "gc.auto", "0"], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["config", "maintenance.auto", "false"], { cwd: rootDir, stdio: "ignore" });
   writeText(rootDir, "app/api/knowledge/review/prepare/route.ts", "export const fixture = true;\n");
@@ -8426,6 +8453,64 @@ function createFixtureRoot(): string {
   }).trim();
   alignFixtureJsonSourceShas(path.join(rootDir, "evaluation"), fixtureSourceSha);
   return rootDir;
+}
+
+function createFixtureRoot(): string {
+  if (!fixtureTemplateDirectory) {
+    fixtureTemplateDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "safeclaw-northstar-template-"));
+    initializeFixtureRoot(fixtureTemplateDirectory);
+    fixtureTemplateOverlayPaths = execFileSync(
+      "git",
+      ["diff", "--name-only", "-z"],
+      { cwd: fixtureTemplateDirectory, encoding: "utf8" },
+    ).split("\0").filter(Boolean);
+    fixtureTemplateRevision = execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: fixtureTemplateDirectory,
+      encoding: "utf8",
+    }).trim();
+  }
+
+  const fixtureIndex = reusableFixtureCursor++;
+  const existingRoot = reusableFixtureRoots[fixtureIndex];
+  if (existingRoot) {
+    return existingRoot;
+  }
+
+  const fixtureParent = fs.mkdtempSync(path.join(os.tmpdir(), "safeclaw-northstar-open-gate-"));
+  const rootDir = path.join(fixtureParent, "repo");
+  execFileSync("git", [
+    "clone",
+    "--quiet",
+    "--local",
+    "--no-tags",
+    "--config",
+    "user.name=SafeClaw Test",
+    "--config",
+    "user.email=test@example.com",
+    "--config",
+    "core.autocrlf=false",
+    "--config",
+    "core.safecrlf=false",
+    "--config",
+    "gc.auto=0",
+    "--config",
+    "maintenance.auto=false",
+    fixtureTemplateDirectory,
+    rootDir,
+  ], { stdio: "ignore" });
+  restoreFixtureOverlay(rootDir);
+  reusableFixtureParents.push(fixtureParent);
+  reusableFixtureRoots.push(rootDir);
+  return rootDir;
+}
+
+function restoreFixtureOverlay(rootDir: string): void {
+  for (const relativePath of fixtureTemplateOverlayPaths) {
+    fs.copyFileSync(
+      path.join(fixtureTemplateDirectory!, relativePath),
+      path.join(rootDir, relativePath),
+    );
+  }
 }
 
 describe("northstar open gate audit", { timeout: 60_000 }, () => {
