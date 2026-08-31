@@ -1,7 +1,81 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-review/v1",
-  "generatedAt": "2026-08-28T13:08:19.218Z",
-  "sourceHead": "eea3e284b35085fa084d362c8f7c050d0879572d",
+  "generatedAt": "2026-08-31T20:15:22.674Z",
+  "sourceHead": "72c32feafdbc01a687d35d8d155a4197374264d3",
+  "productionCommit": "bad17019136999655854cff2e49d0e165909ba74",
+  "approvalEvidence": {
+    "schemaVersion": "safeclaw-approval-evidence-binding/v1",
+    "sourceHead": "72c32feafdbc01a687d35d8d155a4197374264d3",
+    "productionCommit": "bad17019136999655854cff2e49d0e165909ba74",
+    "artifacts": [
+      {
+        "path": "evaluation\\kosha-exact-official-lifecycle-audit-2026-07-25\\report.json",
+        "bytes": 16873,
+        "sha256": "5f242c1226520d5470d37f8b24ecc249f1e382f930f64a08884b6b6503f4d07f",
+        "headSha256": "8dc0d30b9040c33e6a0cbacea5a25634b502ea73f525a9a651364a1b7b6e8603",
+        "gitMode": "100644",
+        "regularFile": true,
+        "symlink": false,
+        "realPathWithinRoot": true,
+        "headBlobSha1": "19bd3473edffab27c667aa00314c514483666fe5",
+        "workingBlobSha1": null,
+        "trackedAtHead": true,
+        "workingTreeMatchesHead": false
+      },
+      {
+        "path": "evaluation\\kosha-exact-official-pdf-audit-2026-07-25\\report.json",
+        "bytes": 26879,
+        "sha256": "99ec318c7d91b07b78783fcf29bb042de2666c6b6eb317c2589fb85164c7c175",
+        "headSha256": "a9e76641ec6a631bddc25558a46c7c1c21006c33724b8f8154f6c66a8a1f5583",
+        "gitMode": "100644",
+        "regularFile": true,
+        "symlink": false,
+        "realPathWithinRoot": true,
+        "headBlobSha1": "96198db022aa9e0baf6ed641cfc521f26931a9dc",
+        "workingBlobSha1": null,
+        "trackedAtHead": true,
+        "workingTreeMatchesHead": false
+      },
+      {
+        "path": "evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json",
+        "bytes": 20582,
+        "sha256": "f705e6d8d9d90e7a30f3ab9fb9eb43ffbca0065133b7187e5b07de2b547761d9",
+        "headSha256": "f705e6d8d9d90e7a30f3ab9fb9eb43ffbca0065133b7187e5b07de2b547761d9",
+        "gitMode": "100644",
+        "regularFile": true,
+        "symlink": false,
+        "realPathWithinRoot": true,
+        "headBlobSha1": "f499f70d56ee048bdd8b38e038d0b57eabba5971",
+        "workingBlobSha1": "f499f70d56ee048bdd8b38e038d0b57eabba5971",
+        "trackedAtHead": true,
+        "workingTreeMatchesHead": true
+      },
+      {
+        "path": "evaluation\\kosha-exact-promotion-reviewer-support-2026-07-25\\report.json",
+        "bytes": 43339,
+        "sha256": "0e7b7f8ae5c60ab4fb96c3aefd0b373f3c26be03d6565dc0b42f6a5f866720df",
+        "headSha256": "a327e1088ee83f6b804cdb18804dbae817fefdb9da000c0660ffdc176a261dd3",
+        "gitMode": "100644",
+        "regularFile": true,
+        "symlink": false,
+        "realPathWithinRoot": true,
+        "headBlobSha1": "2ef38f1e37b3c984c9e2f4af36302b02eae74247",
+        "workingBlobSha1": null,
+        "trackedAtHead": true,
+        "workingTreeMatchesHead": false
+      }
+    ],
+    "evidenceCommits": [
+      "f012df5b3f2e82de7aa85713d3d01fe38cb95123"
+    ],
+    "packetDigest": "f215fe71e080137bef83a638e6c4a96f352dbecb62983f283b2eb5d4a2cfc1ca",
+    "verified": false,
+    "failures": [
+      "input-differs-from-head:evaluation\\kosha-exact-official-lifecycle-audit-2026-07-25\\report.json",
+      "input-differs-from-head:evaluation\\kosha-exact-official-pdf-audit-2026-07-25\\report.json",
+      "input-differs-from-head:evaluation\\kosha-exact-promotion-reviewer-support-2026-07-25\\report.json"
+    ]
+  },
   "packetPath": "evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json",
   "reviewerSupportPath": "evaluation\\kosha-exact-promotion-reviewer-support-2026-07-25\\report.json",
   "reviewTemplateOnly": true,
