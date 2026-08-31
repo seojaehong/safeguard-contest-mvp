@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-public-lifetime-remediation/v1",
+  "generatedAt": "2026-08-31T18:04:52.8319399Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PUBLIC_REQUEST_LIFETIME_REMEDIATION_LIVE_PENDING",
+  "userContext": "Preserve immutable original 18-finding baseline. Verify current 02bc23029eb3dee1ad0027878454fb34d801ffa3 source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
+  "sourceBaseCommit": "02bc23029eb3dee1ad0027878454fb34d801ffa3",
+  "sourceHead": "b983f9f8b7fe9b3aa57b4701bc782fd3799a421c",
+  "productCommit": "b983f9f8b7fe9b3aa57b4701bc782fd3799a421c",
+  "scan": {
+    "scanId": "1e5d68c4-fd86-4df4-bb95-542a9708ffef",
+    "targetRevision": "02bc23029eb3dee1ad0027878454fb34d801ffa3",
+    "findingCount": 19,
+    "immutableOriginalFindingCount": 18,
+    "immutableOriginalBaselinePreserved": true,
+    "sealedScanReclassified": false,
+    "freshRescanRequired": true
+  },
+  "findings": [
+    {
+      "findingId": "csf_f862edc1756bf16c2655d023",
+      "occurrenceId": "occ_f0a313935f6defa3f9827317",
+      "ruleId": "resource-exhaustion.pre-auth-body-admission",
+      "severity": "low",
+      "title": "Knowledge review preparation buffers request bodies before authentication",
+      "currentSourceRemediation": "Authentication now completes before request body buffering or JSON parsing; authenticated byte and timeout budgets remain in force."
+    },
+    {
+      "findingId": "csf_619758dd4106628fbf7e6b3b",
+      "occurrenceId": "occ_73874e828bc8983a6ad6c033",
+      "ruleId": "resource-exhaustion.public-status-lease-overrun",
+      "severity": "medium",
+      "title": "Public ontology page work can outlive cancellation and its admission lease",
+      "currentSourceRemediation": "The browser now calls the bounded ontology API directly, aborts on navigation, and accepts only schema-validated published graphs; the API retains its caller cancellation, aggregate 15-second deadline, admission lease, row budget, and response budget."
+    }
+  ],
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "command": "npm.cmd exec -- vitest run tests/knowledge-review-prepare-route.test.ts tests/knowledge-write-request-budget.test.ts tests/security-budget-wiring.test.ts tests/public-status-page-admission.test.ts tests/status-admission-lifecycle.test.ts tests/ontology-ui-remediation.test.ts tests/ontology-graph-budget.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 7,
+      "testsPassed": 56,
+      "testsFailed": 0
+    },
+    "frontendRouteCoverage": {
+      "command": "npm.cmd exec -- vitest run tests/frontend-route-coverage.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 1,
+      "testsPassed": 39,
+      "testsFailed": 0
+    },
+    "ontologyBrowser": {
+      "command": "$env:ONTOLOGY_BASE_URL='http://127.0.0.1:3084'; npm.cmd exec -- vitest run tests/ontology-ui-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 1,
+      "testsPassed": 2,
+      "testsFailed": 0,
+      "validatedLiveTransition": true,
+      "malformedPayloadFallback": true,
+      "geometryRows": 10,
+      "bodyRatioMaximum": 1,
+      "horizontalOverflowMaximum": 0,
+      "outsideElementCountMaximum": 0,
+      "overlapPairsMaximum": 0,
+      "minimumControlHeight": 44,
+      "artifact": "evaluation/ontology-viewport-workbench-2026-08-17/browser-metrics.json"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "productionBuild": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 29
+    },
+    "independentBypassReview": {
+      "reviewers": 2,
+      "securityBlockers": 0,
+      "reviewerFindingsRemediated": 2
+    },
+    "frontendStaticAudit": {
+      "status": "FAIL_PREEXISTING_UNRELATED_RESIDUALS",
+      "coverageIssues": 0,
+      "violationCount": 2,
+      "residuals": [
+        "safeclaw-share-recipient-documents-summary after pseudo-element line-height tier",
+        "safeclaw-share-recipient-documents-summary after pseudo-element typography tuple"
+      ]
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "securityComplete": false,
+    "liveAfterDeploymentRequired": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedFindingsRemainOpen": true
+  }
+}
