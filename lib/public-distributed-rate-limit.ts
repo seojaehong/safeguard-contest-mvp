@@ -231,7 +231,7 @@ export async function checkPublicRateLimit(
 ): Promise<PublicRateLimitDecision> {
   const environment = options.environment ?? process.env;
   const config = readUpstashConfiguration(environment);
-  const identifier = options.identifier ?? getClientIp(options.request);
+  const identifier = options.identifier ?? getClientIp(options.request, environment);
 
   if (config.state === "invalid") {
     console.error("[public-rate-limit] distributed limiter configuration is incomplete or unsafe", {

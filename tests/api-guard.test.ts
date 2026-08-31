@@ -24,6 +24,9 @@ describe("getClientIp", () => {
   });
 
   test("prefers the Vercel-authenticated client IP over a spoofed forwarded chain", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL", "1");
+    vi.stubEnv("VERCEL_ENV", "production");
     expect(getClientIp(req({
       "x-vercel-forwarded-for": "203.0.113.21",
       "x-forwarded-for": "198.51.100.77, 10.0.0.1",
@@ -33,7 +36,19 @@ describe("getClientIp", () => {
   test("fails closed in production when Vercel client identity is missing", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("VERCEL", "1");
+    vi.stubEnv("VERCEL_ENV", "production");
     expect(getClientIp(req({ "x-forwarded-for": "198.51.100.77" }))).toBe("unknown");
+  });
+
+  test("ignores Vercel forwarding headers outside verified production ingress", () => {
+    const request = req({
+      "x-vercel-forwarded-for": "203.0.113.21",
+      "x-forwarded-for": "198.51.100.77",
+    });
+    expect(getClientIp(request, { NODE_ENV: "production", VERCEL: "1", VERCEL_ENV: "preview" }))
+      .toBe("unknown");
+    expect(getClientIp(request, { NODE_ENV: "production", VERCEL: "", VERCEL_ENV: "production" }))
+      .toBe("unknown");
   });
 
   test("uses a configured trusted proxy chain outside Vercel", () => {

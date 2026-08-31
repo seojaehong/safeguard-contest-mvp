@@ -7,16 +7,21 @@ function singleIp(value: string | null, requireValidIp: boolean): string | undef
   return !requireValidIp || isIP(candidate) !== 0 ? candidate : undefined;
 }
 
-export function getClientIp(request: Request): string {
-  const vercelForwarded = singleIp(request.headers.get("x-vercel-forwarded-for"), true);
-  if (vercelForwarded) return vercelForwarded;
-
-  const production = process.env.NODE_ENV === "production";
-  const trustedProxy = process.env.SAFECLAW_TRUST_PROXY_HEADERS === "true";
-  if (process.env.VERCEL === "1" && production) {
+export function getClientIp(
+  request: Request,
+  environment: Record<string, string | undefined> = process.env,
+): string {
+  const production = environment.NODE_ENV === "production";
+  const trustedVercelIngress = production
+    && environment.VERCEL === "1"
+    && environment.VERCEL_ENV === "production";
+  if (trustedVercelIngress) {
+    const vercelForwarded = singleIp(request.headers.get("x-vercel-forwarded-for"), true);
+    if (vercelForwarded) return vercelForwarded;
     return "unknown";
   }
 
+  const trustedProxy = environment.SAFECLAW_TRUST_PROXY_HEADERS === "true";
   if (trustedProxy || !production) {
     const forwarded = request.headers.get("x-forwarded-for");
     if (forwarded) {

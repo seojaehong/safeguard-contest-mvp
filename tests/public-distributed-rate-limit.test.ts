@@ -62,6 +62,40 @@ describe("public distributed rate limit", () => {
     expect(init?.cache).toBe("no-store");
   });
 
+  it("collapses spoofed Vercel identity outside verified production ingress", async () => {
+    const keys: string[] = [];
+    const fetchImpl = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      const command = JSON.parse(String(init?.body)) as unknown[];
+      keys.push(String(command[3]));
+      return Response.json({ result: [1, 59_500] });
+    });
+    const environment = {
+      NODE_ENV: "production",
+      VERCEL: "1",
+      VERCEL_ENV: "preview",
+      UPSTASH_REDIS_REST_URL: "https://example.upstash.io",
+      UPSTASH_REDIS_REST_TOKEN: "test-token",
+    };
+
+    await checkPublicRateLimit(options({
+      request: new Request("https://www.safeclaw.kr/api/search", {
+        headers: { "x-vercel-forwarded-for": "203.0.113.21" },
+      }),
+      environment,
+      fetchImpl,
+    }));
+    await checkPublicRateLimit(options({
+      request: new Request("https://www.safeclaw.kr/api/search", {
+        headers: { "x-vercel-forwarded-for": "198.51.100.77" },
+      }),
+      environment,
+      fetchImpl,
+    }));
+
+    expect(keys).toHaveLength(2);
+    expect(keys[0]).toBe(keys[1]);
+  });
+
   it("returns a distributed 429 with the Redis TTL after the shared limit", async () => {
     const decision = await checkPublicRateLimit(options({
       environment: {
