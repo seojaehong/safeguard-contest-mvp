@@ -98,10 +98,14 @@ function passCriteria(metrics, kind) {
       && metrics.distinctFirstViewportRegions >= 2
       && metrics.confirmButtonBottom <= Math.min(metrics.viewportHeight, 640)
       && metrics.primaryRightRegionLeft > metrics.primaryLeftRegionRight
+      && metrics.documentsPanelOpen === false
+      && metrics.documentsSummaryAffordance === "+"
       && metrics.horizontalOverflow === false
       && metrics.outsideElements === 0
     : metrics.confirmButtonBottom <= 760
       && metrics.confirmButtonBottom < metrics.documentsTop
+      && metrics.documentsPanelOpen === false
+      && metrics.documentsSummaryAffordance === "+"
       && metrics.horizontalOverflow === false
       && metrics.outsideElements === 0;
 }
@@ -317,6 +321,8 @@ async function measureRecipient(page) {
     const identity = rect(".safeclaw-share-recipient-card-identity");
     const confirm = rect(".safeclaw-share-recipient-card-confirm");
     const docs = cardRect((text) => text.includes("3 tài liệu chính") || text.includes("3 core documents"));
+    const documentsPanel = document.querySelector(".safeclaw-share-recipient-card-documents");
+    const documentsSummary = documentsPanel?.querySelector(".safeclaw-share-recipient-documents-summary");
     const confirmButton = [...document.querySelectorAll("button")].find((item) => item.innerText.trim() === "Tôi đã xem");
     const confirmButtonRect = confirmButton ? (() => {
       const box = confirmButton.getBoundingClientRect();
@@ -366,6 +372,10 @@ async function measureRecipient(page) {
       confirmButton: confirmButtonRect,
       confirmButtonBottom: confirmButtonRect?.bottom ?? 0,
       documentsTop: docs?.top ?? 9999,
+      documentsPanelOpen: documentsPanel instanceof HTMLDetailsElement && documentsPanel.open,
+      documentsSummaryAffordance: documentsSummary
+        ? window.getComputedStyle(documentsSummary, "::after").content.replaceAll('"', "")
+        : "",
       distinctFirstViewportRegions,
       primaryLeftRegionRight,
       primaryRightRegionLeft,
@@ -467,6 +477,7 @@ const report = {
       "root/content width ratio >= 0.78",
       "Workspace Share has at least three visually distinct first-viewport x regions",
       "invited recipient fixture has at least two visually distinct first-viewport x regions",
+      "invited recipient document disclosure is closed by default and exposes a visible + affordance",
       "Workspace Share status/provenance rail is visible inside the first viewport",
       "primary CTA/confirmation inside first viewport",
       "preview/notice/result region inside first viewport",
@@ -474,6 +485,7 @@ const report = {
     ],
     mobile: [
       "primary CTA/confirmation before long details",
+      "invited recipient document disclosure is closed by default and exposes a visible + affordance",
       "horizontal overflow false and outside elements 0",
     ],
   },
