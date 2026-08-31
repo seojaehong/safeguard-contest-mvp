@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `355a2dbd7def9e47054782d89bb35561dc62514f`
+Source HEAD: `346f36e3fb2f97cc3b0adda4b73ee970df05d6a7`
 
-Production `/api/build-info`: `521c1582b1887154e0906e8e8ebe0bbf9282ae00`
+Production `/api/build-info`: `346f36e3fb2f97cc3b0adda4b73ee970df05d6a7`
 
-Latest evidence commit live: `false`
+Latest evidence commit live: `true`
 
-Source head live pending: `true`
+Source head live pending: `false`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `none`
 
-Current head is evidence-only pending: `true`
+Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `355a2dbd7def9e47054782d89bb35561dc62514f`
+Live rollup source head: `346f36e3fb2f97cc3b0adda4b73ee970df05d6a7`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `355a2dbd7def9e47054782d89bb35561dc62514f` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `521c1582b1887154e0906e8e8ebe0bbf9282ae00`, and the live rollup remains exact for that deployed marker.
+Note: source HEAD and production marker match for this artifact.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -76,7 +76,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Repository security scan reconciliation is `PASS_CORRECTED_FRESH_CURRENT_SOURCE_SCAN_SEALED_OPEN_FINDINGS`. The immutable same-target scans and `2` fail-open contradictions remain preserved; zero-finding accepted=`false`. Corrected scan completed=`true`, id=`c4e9e2f1-7ce4-4313-a651-32205fca401f`, reportable=`14`, deferred=`9`, coverage=`partial`, security-complete=`false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current security remediation ledger is `NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES`: deployed-source receipts `17/23`, unresolved `6`, approval-gated `3`, distributed-runtime open `3`, security-complete=`false`, exact saved Share `MISSING_EVIDENCE`.
 - Fresh current-source Standard security scan is `NOTICE_CURRENT_SOURCE_STANDARD_SCAN_14_FINDINGS_PARTIAL_COVERAGE`: scan `a4044172-9b4b-4e36-84be-a8955d9150ac`, findings `14` (medium/low `10/4`), coverage `partial` with `21` recorded surfaces and `22` deferred items. Scan-time/current approval-free residuals are `7/5`; provider-output remediation is `PASS_LIVE_DEPLOYED_SOURCE_PUBLIC_PROVIDER_OUTPUT_BUDGET_RESCAN_PENDING` at production `18a9fc1a`. Database/atomicity and Share capability boundaries remain `7/0`. Scan completion is not security-complete `false`, and exact saved Share remains `MISSING_EVIDENCE`.
-- Stale approval evidence binding remediation is `PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED`: finding `csf_86ec127fb3d5b7d397649611`, bound workflows `3/4`, blocked workflows `4`, and packet digests `4`. No mutation remains `true`, a fresh full-repository rescan remains required `true`, approval-gated mutations remain closed `true`, and exact saved Share remains `MISSING_EVIDENCE`.
+- Stale approval evidence binding remediation is `PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED`: finding `csf_86ec127fb3d5b7d397649611`, bound workflows `4/4`, blocked workflows `4`, and packet digests `4`. No mutation remains `true`, a fresh full-repository rescan remains required `true`, approval-gated mutations remain closed `true`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Completed current-head Standard security scan is `NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE`: scan `f6bef30a-7250-428b-9f66-0bad1e42058c`, source `9504d8db95fcbc9f37f6c5abc638e9ad0813a325`, findings `21` (medium/low `7/14`), coverage `partial` with `25` recorded rows and `36` deferred rows. The immutable `18`-finding baseline remains preserved; approval-free/database/Share residuals remain `11/9/1`. Security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Verified forwarded identity remediation is `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_VERIFIED_DISTRIBUTED_ADMISSION_IDENTITY`: source/live `e0ee11205043a6155fa7d4f2d9ba13f28599172a/3133218f67a2af790c31ab9ecf8617a5a467ae37`, source included `true`, finding `rate-limit-bypass.untrusted-forwarded-identity`, and tests `7/44`. No live identity-key disclosure probe was executed `false`; fresh scan remains `REQUIRED`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Bounded template inventory remediation is `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_BOUNDED_TEMPLATE_INVENTORY_SCAN`: source/live `8a9269a43adf369df3b530d0adad54309f22168a/8a9269a43adf369df3b530d0adad54309f22168a`, source included `true`, finding `resource-exhaustion.unbounded-template-inventory`, and scanner/archive tests `6/5`. No remote operator-script execution was performed `false`; fresh scan remains `REQUIRED`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.

@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-31T21:15:47.827Z",
-  "head": "355a2dbd7def9e47054782d89bb35561dc62514f",
+  "generatedAt": "2026-08-31T21:20:10.081Z",
+  "head": "346f36e3fb2f97cc3b0adda4b73ee970df05d6a7",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "521c1582b1887154e0906e8e8ebe0bbf9282ae00",
+    "commitSha": "346f36e3fb2f97cc3b0adda4b73ee970df05d6a7",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-n69mtbefm-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-e8iikhr8e-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -1112,12 +1112,12 @@
   "staleApprovalEvidenceBindingRemediation": {
     "artifact": "evaluation\\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\\report.json",
     "verdict": "PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED",
-    "sourceHead": "355a2dbd7def9e47054782d89bb35561dc62514f",
+    "sourceHead": "346f36e3fb2f97cc3b0adda4b73ee970df05d6a7",
     "findingId": "csf_86ec127fb3d5b7d397649611",
     "workflowCount": 4,
     "passedCount": 4,
     "failedCount": 0,
-    "bindingVerifiedCount": 3,
+    "bindingVerifiedCount": 4,
     "blockedWorkflowCount": 4,
     "noMutation": true,
     "freshFullRepositorySecurityRescanRequired": true,
@@ -2304,10 +2304,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "355a2dbd7def9e47054782d89bb35561dc62514f",
+      "sourceCommit": "346f36e3fb2f97cc3b0adda4b73ee970df05d6a7",
       "sourceStatus": "exact",
-      "productionCommit": "355a2dbd7def9e47054782d89bb35561dc62514f",
-      "productionStatus": "ancestor_of_head"
+      "productionCommit": "346f36e3fb2f97cc3b0adda4b73ee970df05d6a7",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -2688,7 +2688,7 @@
     {
       "id": "stale_approval_evidence_binding_security",
       "artifact": "evaluation\\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\\report.json",
-      "sourceCommit": "355a2dbd7def9e47054782d89bb35561dc62514f",
+      "sourceCommit": "346f36e3fb2f97cc3b0adda4b73ee970df05d6a7",
       "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"

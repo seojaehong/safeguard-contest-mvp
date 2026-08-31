@@ -1,34 +1,29 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-31T21:16:13.233Z",
+  "generatedAt": "2026-08-31T21:20:32.401Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "355a2dbd7def9e47054782d89bb35561dc62514f",
-  "productionCommit": "521c1582b1887154e0906e8e8ebe0bbf9282ae00",
+  "sourceHead": "346f36e3fb2f97cc3b0adda4b73ee970df05d6a7",
+  "productionCommit": "346f36e3fb2f97cc3b0adda4b73ee970df05d6a7",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "521c1582b1887154e0906e8e8ebe0bbf9282ae00",
+    "commitSha": "346f36e3fb2f97cc3b0adda4b73ee970df05d6a7",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-n69mtbefm-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-e8iikhr8e-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": false,
-  "currentHeadIsEvidenceOnlyPending": true,
-  "sourceHeadLivePending": true,
+  "latestEvidenceCommitLive": true,
+  "currentHeadIsEvidenceOnlyPending": false,
+  "sourceHeadLivePending": false,
   "sourceHeadHasProductChanges": false,
-  "sourcePendingChangedPaths": [
-    "scripts/northstar_next_runway.mjs",
-    "scripts/northstar_open_gate_audit.mjs",
-    "tests/northstar-next-runway-generator.test.ts",
-    "tests/northstar-open-gate-audit.test.ts"
-  ],
+  "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "355a2dbd7def9e47054782d89bb35561dc62514f",
-  "liveRollupLiveCommit": "521c1582b1887154e0906e8e8ebe0bbf9282ae00",
+  "liveExactEvidenceCommit": "346f36e3fb2f97cc3b0adda4b73ee970df05d6a7",
+  "liveRollupLiveCommit": "346f36e3fb2f97cc3b0adda4b73ee970df05d6a7",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -172,6 +167,7 @@
     "security_resource_remediation",
     "security_upstream_transport_remediation",
     "security_safety_reference_surface_remediation",
+    "stale_approval_evidence_binding_security",
     "learning_export_renderer_security",
     "hermes_knowledge_review_authority",
     "hermes_knowledge_review_ui",
@@ -300,7 +296,7 @@
     {
       "gate": "stale_approval_evidence_binding_security",
       "state": "proven",
-      "reason": "current live source binds 3/4 approval workflows to current HEAD, production ancestry, required-input SHA-256 values, and deterministic packet digests; all 4 remain fail-closed, no mutation=true, fresh full rescan required=true, and exact saved Share remains MISSING_EVIDENCE"
+      "reason": "current live source binds 4/4 approval workflows to current HEAD, production ancestry, required-input SHA-256 values, and deterministic packet digests; all 4 remain fail-closed, no mutation=true, fresh full rescan required=true, and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "current_source_security_residual_remediation",
@@ -1535,18 +1531,18 @@
   },
   "staleApprovalEvidenceBindingRemediation": {
     "verdict": "PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED",
-    "sourceHead": "355a2dbd7def9e47054782d89bb35561dc62514f",
+    "sourceHead": "346f36e3fb2f97cc3b0adda4b73ee970df05d6a7",
     "findingId": "csf_86ec127fb3d5b7d397649611",
     "workflowCount": 4,
     "passedCount": 4,
     "failedCount": 0,
-    "bindingVerifiedCount": 3,
+    "bindingVerifiedCount": 4,
     "blockedWorkflowCount": 4,
     "packetDigests": [
-      "b9c6df7033c9b2387bd3efec381eb90f84e2ba561a88a26366bdb015c29b867c",
-      "b632026648e05f8af75ef5dda545f1b69ed2a69f37a1d268243898a38062ee31",
-      "c8a57a996560f6c95d22989223251fd3a312c27162f8f479d75f855aa7d375b7",
-      "b4e65674b71af66bc857c6cca9c1aefb8683fc245de59631fdeaaf37974e6746"
+      "62534c321a77302198d3b33ceac3818745f90a58ef19ac866e025f8d810e65f4",
+      "098275e9ec34d5cd7e6bf3a817e1911b5a9ee4d0586b374746ad76ba7c208634",
+      "a157d6df8c2c1fb66760d373cc691828c65f412470163d9ca592dae6aaa7ab48",
+      "2b1cfdd5842592d0db8f590491276e1928a7c41744d8e2ab356dac059ad2d071"
     ],
     "noMutation": true,
     "freshFullRepositorySecurityRescanRequired": true,
