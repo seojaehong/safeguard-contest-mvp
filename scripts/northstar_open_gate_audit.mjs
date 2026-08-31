@@ -90,6 +90,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSourceKoshaArchivePreflightRemediation: path.join("evaluation", "current-source-security-kosha-archive-preflight-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
+  staleApprovalEvidenceBindingRemediation: path.join("evaluation", "current-source-security-stale-approval-evidence-binding-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
   shareAckPreBodyAdmission: path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
   safetyStatusDisconnectLease: path.join("evaluation", "safety-status-disconnect-lease-2026-08-28", "report.json"),
@@ -14590,6 +14591,89 @@ function evaluateCurrentSecurityGovernedPathCompatibilityGate(rootDir) {
   });
 }
 
+const STALE_APPROVAL_EVIDENCE_BINDING_PATHS = [
+  "scripts/approval_evidence_binding.mjs",
+  "scripts/distributed_admission_activation_preflight.mjs",
+  "scripts/kosha_exact_promotion_review_gate.mjs",
+  "scripts/rls_llm_wiki_approval_preflight.mjs",
+  "scripts/share_recipient_ack_approval_preflight.mjs",
+  "scripts/stale_approval_evidence_binding_remediation.mjs",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateStaleApprovalEvidenceBindingRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.staleApprovalEvidenceBindingRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "stale_approval_evidence_binding_security",
+      label: "Stale approval evidence binding security",
+      state: "missing",
+      evidencePath,
+      detail: "The current-source approval evidence binding remediation report is missing or invalid.",
+      nextActions: ["Restore the four-workflow current-HEAD, production-commit, and input-digest binding receipt without opening any mutation boundary."],
+    });
+  }
+
+  const rows = Array.isArray(report.rows) ? report.rows.filter(isRecord) : [];
+  const contract = isRecord(report.contract) ? report.contract : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundary) ? report.remainingBoundary : {};
+  const sourceHead = readString(report.sourceHead);
+  const expectedIds = ["distributed_admission", "kosha_exact_promotion", "rls_llm_wiki", "share_recipient_ack"];
+  const actualIds = rows.map((row) => readString(row.id)).sort();
+  const rowContractsPass = rows.length === expectedIds.length
+    && actualIds.every((id, index) => id === expectedIds[index])
+    && rows.every((row) => row.contractPassed === true
+      && row.bindingVerified === true
+      && row.blocked === true
+      && readNumber(row.artifactCount) > 0
+      && /^[a-f0-9]{64}$/.test(readString(row.packetDigest)));
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.schemaVersion) === "safeclaw-stale-approval-evidence-binding-remediation/v1"
+    && readString(report.verdict) === "PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED"
+    && readString(isRecord(report.finding) ? report.finding.findingId : null) === "csf_86ec127fb3d5b7d397649611"
+    && readString(isRecord(report.finding) ? report.finding.ruleId : null) === "approval-integrity.stale-evidence-binding"
+    && readNumber(report.workflowCount) === 4
+    && readNumber(report.passedCount) === 4
+    && readNumber(report.failedCount) === 0
+    && sourceHead.length === 40
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, STALE_APPROVAL_EVIDENCE_BINDING_PATHS)
+    && rowContractsPass
+    && contract.currentHeadRequired === true
+    && contract.productionCommitRequired === true
+    && contract.everyRequiredInputSha256Bound === true
+    && contract.currentHeadTrackedBlobMatchRequired === true
+    && contract.mixedSourceLiveEvidenceFailsClosed === true
+    && contract.deterministicPacketDigestRequired === true
+    && contract.mutationApprovalRemainsSeparate === true
+    && noMutation
+    && readString(mutation.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remaining.freshFullRepositorySecurityRescanRequiredForClosure === true
+    && remaining.approvalGatedMutationsRemainClosed === true;
+
+  return gateResult({
+    id: "stale_approval_evidence_binding_security",
+    label: "Stale approval evidence binding security",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Current source binds the RLS/LLM Wiki, distributed admission, Share ACK, and KOSHA promotion approval preflights to current HEAD, production ancestry, tracked input SHA-256 values, and deterministic packet digests. All four workflows remain fail-closed, no mutation occurred, the completed scan's remaining findings stay open, and exact saved Share remains MISSING_EVIDENCE."
+      : `Approval binding verdict=${readString(report.verdict) || "missing"}, sourceCurrent=${sourceHead.length === 40 && isEvidenceCurrentForPaths(rootDir, sourceHead, STALE_APPROVAL_EVIDENCE_BINDING_PATHS)}, rows=${rows.length}/${readNumber(report.passedCount)}, rowContracts=${rowContractsPass}, noMutation=${noMutation}, exactShare=${readString(mutation.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Preserve the immutable security scan findings and require a fresh full-repository rescan before any security-complete claim; keep all DB, provider, Share-session, vector, Wiki, and KOSHA promotion actions approval-gated."]
+      : ["Restore exact current-HEAD, production-commit, tracked-input digest, packet-digest, no-mutation, and exact Share MISSING_EVIDENCE contracts for all four approval workflows."],
+  });
+}
+
 /**
  * @param {{ rootDir?: string, generatedAt?: string, sourceSha?: string }} [options]
  * @returns {NorthstarAudit}
@@ -14649,6 +14733,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentSourceKoshaArchivePreflightRemediationGate(rootDir),
     evaluateCurrentSourceSecurityRemediationFollowupGate(rootDir),
     evaluateCurrentSecurityGovernedPathCompatibilityGate(rootDir),
+    evaluateStaleApprovalEvidenceBindingRemediationGate(rootDir),
     evaluateCurrentSourceSecurityResidualRemediationGate(rootDir),
     evaluateShareAckPreBodyAdmissionGate(rootDir),
     evaluateSafetyStatusDisconnectLeaseGate(rootDir),

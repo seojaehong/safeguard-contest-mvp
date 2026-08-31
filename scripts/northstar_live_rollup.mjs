@@ -63,6 +63,7 @@ const ARTIFACTS = Object.freeze({
   currentSourceKoshaArchivePreflightRemediation: path.join("evaluation", "current-source-security-kosha-archive-preflight-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
+  staleApprovalEvidenceBindingRemediation: path.join("evaluation", "current-source-security-stale-approval-evidence-binding-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
   shareAckPreBodyAdmission: path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
   safetyStatusDisconnectLease: path.join("evaluation", "safety-status-disconnect-lease-2026-08-28", "report.json"),
@@ -601,6 +602,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const currentSourceKoshaArchivePreflightRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceKoshaArchivePreflightRemediation);
   const currentSourceSecurityRemediationFollowup = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityRemediationFollowup);
   const currentSecurityGovernedPathCompatibility = tryReadJson(rootDir, ARTIFACTS.currentSecurityGovernedPathCompatibility);
+  const staleApprovalEvidenceBindingRemediation = tryReadJson(rootDir, ARTIFACTS.staleApprovalEvidenceBindingRemediation);
   const currentSourceSecurityResidualRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityResidualRemediation);
   const shareAckPreBodyAdmission = tryReadJson(rootDir, ARTIFACTS.shareAckPreBodyAdmission);
   const safetyStatusDisconnectLease = tryReadJson(rootDir, ARTIFACTS.safetyStatusDisconnectLease);
@@ -758,6 +760,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_kosha_archive_preflight_remediation", ARTIFACTS.currentSourceKoshaArchivePreflightRemediation, currentSourceKoshaArchivePreflightRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_remediation_followup", ARTIFACTS.currentSourceSecurityRemediationFollowup, currentSourceSecurityRemediationFollowup),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_security_governed_path_compatibility", ARTIFACTS.currentSecurityGovernedPathCompatibility, currentSecurityGovernedPathCompatibility),
+    evidenceStatus(rootDir, currentHead, liveCommit, "stale_approval_evidence_binding_security", ARTIFACTS.staleApprovalEvidenceBindingRemediation, staleApprovalEvidenceBindingRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_residual_remediation", ARTIFACTS.currentSourceSecurityResidualRemediation, currentSourceSecurityResidualRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "share_ack_prebody_admission_security", ARTIFACTS.shareAckPreBodyAdmission, shareAckPreBodyAdmission),
     evidenceStatus(rootDir, currentHead, liveCommit, "safety_status_disconnect_lease_security", ARTIFACTS.safetyStatusDisconnectLease, safetyStatusDisconnectLease),
@@ -1279,6 +1282,34 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       freshRescanRequired: recordAt(currentSourceKoshaArchivePreflightRemediation, "finding")?.freshRescanRequired === true,
       securityComplete: recordAt(currentSourceKoshaArchivePreflightRemediation, "remainingBoundaries")?.securityComplete === true,
       exactSavedShareVerdict: asString(recordAt(currentSourceKoshaArchivePreflightRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    staleApprovalEvidenceBindingRemediation: {
+      artifact: ARTIFACTS.staleApprovalEvidenceBindingRemediation,
+      verdict: isRecord(staleApprovalEvidenceBindingRemediation)
+        ? asString(staleApprovalEvidenceBindingRemediation.verdict)
+        : "missing",
+      sourceHead: isRecord(staleApprovalEvidenceBindingRemediation)
+        ? asString(staleApprovalEvidenceBindingRemediation.sourceHead)
+        : "",
+      findingId: asString(recordAt(staleApprovalEvidenceBindingRemediation, "finding")?.findingId),
+      workflowCount: asNumber(staleApprovalEvidenceBindingRemediation?.workflowCount),
+      passedCount: asNumber(staleApprovalEvidenceBindingRemediation?.passedCount),
+      failedCount: asNumber(staleApprovalEvidenceBindingRemediation?.failedCount),
+      bindingVerifiedCount: Array.isArray(staleApprovalEvidenceBindingRemediation?.rows)
+        ? staleApprovalEvidenceBindingRemediation.rows.filter((row) => isRecord(row) && row.bindingVerified === true).length
+        : 0,
+      blockedWorkflowCount: Array.isArray(staleApprovalEvidenceBindingRemediation?.rows)
+        ? staleApprovalEvidenceBindingRemediation.rows.filter((row) => isRecord(row) && row.blocked === true).length
+        : 0,
+      noMutation: recordAt(staleApprovalEvidenceBindingRemediation, "mutationBoundary")?.dbMutationPerformed === false
+        && recordAt(staleApprovalEvidenceBindingRemediation, "mutationBoundary")?.providerDispatchCalled === false
+        && recordAt(staleApprovalEvidenceBindingRemediation, "mutationBoundary")?.shareSessionCreated === false
+        && recordAt(staleApprovalEvidenceBindingRemediation, "mutationBoundary")?.vectorOrEmbeddingMutationPerformed === false
+        && recordAt(staleApprovalEvidenceBindingRemediation, "mutationBoundary")?.wikiPublicationPerformed === false
+        && recordAt(staleApprovalEvidenceBindingRemediation, "mutationBoundary")?.koshaRegistryMutationPerformed === false,
+      freshFullRepositorySecurityRescanRequired: recordAt(staleApprovalEvidenceBindingRemediation, "remainingBoundary")?.freshFullRepositorySecurityRescanRequiredForClosure === true,
+      approvalGatedMutationsRemainClosed: recordAt(staleApprovalEvidenceBindingRemediation, "remainingBoundary")?.approvalGatedMutationsRemainClosed === true,
+      exactSavedShareVerdict: asString(recordAt(staleApprovalEvidenceBindingRemediation, "mutationBoundary")?.exactSavedShareVerdict),
     },
     currentSourceSecurityResidualRemediation: {
       artifact: ARTIFACTS.currentSourceSecurityResidualRemediation,

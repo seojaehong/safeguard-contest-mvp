@@ -677,6 +677,20 @@ type RollupReport = {
     securityComplete: boolean;
     exactSavedShareVerdict: string;
   };
+  staleApprovalEvidenceBindingRemediation: {
+    verdict: string;
+    sourceHead: string;
+    findingId: string;
+    workflowCount: number | null;
+    passedCount: number | null;
+    failedCount: number | null;
+    bindingVerifiedCount: number;
+    blockedWorkflowCount: number;
+    noMutation: boolean;
+    freshFullRepositorySecurityRescanRequired: boolean;
+    approvalGatedMutationsRemainClosed: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceSecurityResidualRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1629,6 +1643,29 @@ function currentSourceSecurityResidualRemediationFixture(): Record<string, unkno
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
+  };
+}
+
+function staleApprovalEvidenceBindingRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-stale-approval-evidence-binding-remediation/v1",
+    sourceHead: "TO_FILL",
+    verdict: "PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED",
+    finding: { findingId: "csf_86ec127fb3d5b7d397649611", ruleId: "approval-integrity.stale-evidence-binding" },
+    workflowCount: 4,
+    passedCount: 4,
+    failedCount: 0,
+    rows: ["rls_llm_wiki", "distributed_admission", "share_recipient_ack", "kosha_exact_promotion"].map((id, index) => ({
+      id,
+      bindingVerified: true,
+      blocked: true,
+      artifactCount: index + 4,
+      packetDigest: String(index + 1).repeat(64),
+      contractPassed: true,
+    })),
+    contract: { currentHeadRequired: true, productionCommitRequired: true, everyRequiredInputSha256Bound: true, currentHeadTrackedBlobMatchRequired: true, mixedSourceLiveEvidenceFailsClosed: true, deterministicPacketDigestRequired: true, mutationApprovalRemainsSeparate: true },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorOrEmbeddingMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
+    remainingBoundary: { freshFullRepositorySecurityRescanRequiredForClosure: true, approvalGatedMutationsRemainClosed: true },
   };
 }
 
@@ -2932,6 +2969,7 @@ function createFixtureRoot(): { root: string; head: string } {
   writeJson(root, "evaluation/current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31/report.json", currentSourcePhotoReadinessAuthFanoutRemediationFixture());
   writeJson(root, "evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.json", currentSourceMcpGenerationCancellationRemediationFixture());
   writeJson(root, "evaluation/current-source-security-kosha-archive-preflight-remediation-2026-08-31/report.json", currentSourceKoshaArchivePreflightRemediationFixture());
+  writeJson(root, "evaluation/current-source-security-stale-approval-evidence-binding-remediation-2026-08-31/report.json", staleApprovalEvidenceBindingRemediationFixture());
   writeJson(root, "evaluation/current-source-security-residual-remediation-2026-08-28/report.json", currentSourceSecurityResidualRemediationFixture());
   writeJson(root, "evaluation/share-ack-prebody-admission-2026-08-28/report.json", shareAckPreBodyAdmissionFixture());
   writeJson(root, "evaluation/safety-status-disconnect-lease-2026-08-28/report.json", safetyStatusDisconnectLeaseFixture());
@@ -3341,6 +3379,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-kosha-archive-preflight-remediation-2026-08-31/report.json",
+    "evaluation/current-source-security-stale-approval-evidence-binding-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-residual-remediation-2026-08-28/report.json",
     "evaluation/share-ack-prebody-admission-2026-08-28/report.json",
     "evaluation/safety-status-disconnect-lease-2026-08-28/report.json",
@@ -4165,6 +4204,25 @@ describe("northstar live rollup", () => {
       behavioralProbeExecuted: false,
       followUpSecurityScanRequired: true,
       securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "stale_approval_evidence_binding_security")).toMatchObject({
+      artifact: path.join("evaluation", "current-source-security-stale-approval-evidence-binding-remediation-2026-08-31", "report.json"),
+      sourceCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      sourceStatus: "ancestor",
+    });
+    expect(report.staleApprovalEvidenceBindingRemediation).toMatchObject({
+      verdict: "PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      findingId: "csf_86ec127fb3d5b7d397649611",
+      workflowCount: 4,
+      passedCount: 4,
+      failedCount: 0,
+      bindingVerifiedCount: 4,
+      blockedWorkflowCount: 4,
+      noMutation: true,
+      freshFullRepositorySecurityRescanRequired: true,
+      approvalGatedMutationsRemainClosed: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "share_ack_prebody_admission_security")).toMatchObject({

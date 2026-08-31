@@ -1152,6 +1152,59 @@ function currentSecurityGovernedPathCompatibilityFixture(): Record<string, unkno
   };
 }
 
+function staleApprovalEvidenceBindingRemediationFixture(): Record<string, unknown> {
+  const workflowIds = ["rls_llm_wiki", "distributed_admission", "share_recipient_ack", "kosha_exact_promotion"];
+  return {
+    schemaVersion: "safeclaw-stale-approval-evidence-binding-remediation/v1",
+    generatedAt: "2026-08-31T00:00:00.000Z",
+    sourceHead: "fixture-sha",
+    verdict: "PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED",
+    finding: {
+      findingId: "csf_86ec127fb3d5b7d397649611",
+      ruleId: "approval-integrity.stale-evidence-binding",
+    },
+    workflowCount: 4,
+    passedCount: 4,
+    failedCount: 0,
+    rows: workflowIds.map((id, index) => ({
+      id,
+      overall: "blocked_preflight_failed",
+      verdict: id === "kosha_exact_promotion" ? "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED" : null,
+      bindingVerified: true,
+      bindingFailureExposed: false,
+      blocked: true,
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      artifactCount: index + 4,
+      packetDigest: `${String(index + 1).repeat(64)}`,
+      bindingFailures: [],
+      contractPassed: true,
+    })),
+    contract: {
+      currentHeadRequired: true,
+      productionCommitRequired: true,
+      everyRequiredInputSha256Bound: true,
+      currentHeadTrackedBlobMatchRequired: true,
+      mixedSourceLiveEvidenceFailsClosed: true,
+      deterministicPacketDigestRequired: true,
+      mutationApprovalRemainsSeparate: true,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+    remainingBoundary: {
+      freshFullRepositorySecurityRescanRequiredForClosure: true,
+      approvalGatedMutationsRemainClosed: true,
+    },
+  };
+}
+
 function currentSourceSecurityResidualRemediationFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING",
@@ -5409,6 +5462,21 @@ function createFixtureRoot(): string {
     path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
     currentSecurityGovernedPathCompatibilityFixture(),
   );
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-stale-approval-evidence-binding-remediation-2026-08-31", "report.json"),
+    staleApprovalEvidenceBindingRemediationFixture(),
+  );
+  for (const relativePath of [
+    "scripts/approval_evidence_binding.mjs",
+    "scripts/distributed_admission_activation_preflight.mjs",
+    "scripts/kosha_exact_promotion_review_gate.mjs",
+    "scripts/rls_llm_wiki_approval_preflight.mjs",
+    "scripts/share_recipient_ack_approval_preflight.mjs",
+    "scripts/stale_approval_evidence_binding_remediation.mjs",
+  ]) {
+    writeText(rootDir, relativePath, "export const approvalEvidenceBindingFixture = true;\n");
+  }
   writeJson(rootDir, path.join(freshScanRoot, "canonical", "scan-manifest.json"), { scan: { status: "completed" } });
   writeJson(rootDir, path.join(freshScanRoot, "canonical", "findings.json"), { findings: [] });
   writeJson(rootDir, path.join(freshScanRoot, "canonical", "coverage.json"), { completeness: "partial" });
@@ -8265,6 +8333,12 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     });
 
     expect(audit.overall).toBe("open");
+    expect(audit.gates.find((gate) => gate.id === "stale_approval_evidence_binding_security")).toMatchObject({
+      state: "proven",
+      evidencePath: path.join("evaluation", "current-source-security-stale-approval-evidence-binding-remediation-2026-08-31", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "stale_approval_evidence_binding_security")?.detail).toContain("All four workflows remain fail-closed");
+    expect(audit.gates.find((gate) => gate.id === "stale_approval_evidence_binding_security")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "final_99_gate")?.state).toBe("notice");
     expect(audit.gates.find((gate) => gate.id === "live_harness_quality")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "live_document_quality_matrix")).toMatchObject({
@@ -8904,6 +8978,28 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "current_live_document_editorial_runtime")?.detail).toContain(
       "providerBoundaryPass=false",
     );
+  });
+
+  it("fails stale approval evidence binding closed when exact saved Share is overclaimed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-security-stale-approval-evidence-binding-remediation-2026-08-31",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      mutationBoundary: { exactSavedShareVerdict: string };
+    };
+    report.mutationBoundary.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((gate) => gate.id === "stale_approval_evidence_binding_security")).toMatchObject({
+      state: "contradicted",
+    });
+    expect(audit.gates.find((gate) => gate.id === "stale_approval_evidence_binding_security")?.detail).toContain("exactShare=PASS");
   });
 
   it.each([

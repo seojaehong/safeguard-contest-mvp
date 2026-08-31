@@ -773,6 +773,21 @@ type NextRunwayReport = {
     securityComplete: boolean;
     exactSavedShareVerdict: string;
   };
+  staleApprovalEvidenceBindingRemediation: {
+    verdict: string;
+    sourceHead: string;
+    findingId: string;
+    workflowCount: number | null;
+    passedCount: number | null;
+    failedCount: number | null;
+    bindingVerifiedCount: number;
+    blockedWorkflowCount: number;
+    packetDigests: string[];
+    noMutation: boolean;
+    freshFullRepositorySecurityRescanRequired: boolean;
+    approvalGatedMutationsRemainClosed: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceSecurityResidualRemediation: {
     verdict: string;
     sourceHead: string;
@@ -2080,6 +2095,29 @@ function currentSourceSecurityResidualRemediationFixture(sourceHead: string): Re
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
+  };
+}
+
+function staleApprovalEvidenceBindingRemediationFixture(sourceHead: string): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-stale-approval-evidence-binding-remediation/v1",
+    sourceHead,
+    verdict: "PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED",
+    finding: { findingId: "csf_86ec127fb3d5b7d397649611", ruleId: "approval-integrity.stale-evidence-binding" },
+    workflowCount: 4,
+    passedCount: 4,
+    failedCount: 0,
+    rows: ["rls_llm_wiki", "distributed_admission", "share_recipient_ack", "kosha_exact_promotion"].map((id, index) => ({
+      id,
+      bindingVerified: true,
+      blocked: true,
+      artifactCount: index + 4,
+      packetDigest: String(index + 1).repeat(64),
+      contractPassed: true,
+    })),
+    contract: { currentHeadRequired: true, productionCommitRequired: true, everyRequiredInputSha256Bound: true, currentHeadTrackedBlobMatchRequired: true, mixedSourceLiveEvidenceFailsClosed: true, deterministicPacketDigestRequired: true, mutationApprovalRemainsSeparate: true },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorOrEmbeddingMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
+    remainingBoundary: { freshFullRepositorySecurityRescanRequiredForClosure: true, approvalGatedMutationsRemainClosed: true },
   };
 }
 
@@ -4014,6 +4052,11 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
   );
   writeJson(
     root,
+    "evaluation/current-source-security-stale-approval-evidence-binding-remediation-2026-08-31/report.json",
+    staleApprovalEvidenceBindingRemediationFixture(firstHead),
+  );
+  writeJson(
+    root,
     "evaluation/share-ack-prebody-admission-2026-08-28/report.json",
     shareAckPreBodyAdmissionFixture(firstHead),
   );
@@ -5567,6 +5610,26 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       fullyClosedBoundedSourceCandidateCount: 1,
       freshFullRepositoryScanCompleted: true,
       securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "stale_approval_evidence_binding_security",
+      state: "proven",
+      reason: expect.stringContaining("4/4 approval workflows"),
+    }));
+    expect(report.staleApprovalEvidenceBindingRemediation).toMatchObject({
+      verdict: "PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      findingId: "csf_86ec127fb3d5b7d397649611",
+      workflowCount: 4,
+      passedCount: 4,
+      failedCount: 0,
+      bindingVerifiedCount: 4,
+      blockedWorkflowCount: 4,
+      packetDigests: ["1".repeat(64), "2".repeat(64), "3".repeat(64), "4".repeat(64)],
+      noMutation: true,
+      freshFullRepositorySecurityRescanRequired: true,
+      approvalGatedMutationsRemainClosed: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.completedCurrentHeadStandardSecurityScan).toMatchObject({
