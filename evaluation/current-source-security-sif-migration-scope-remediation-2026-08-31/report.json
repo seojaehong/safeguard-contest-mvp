@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-sif-migration-scope-remediation/v1",
+  "generatedAt": "2026-08-31T19:22:53.1027505+09:00",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_SIF_MIGRATION_SCOPE_AND_DIGEST_RESCAN_PENDING",
+  "userContext": "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
+  "productCommits": [
+    "69e3ed12fe087413a726e161f019d301b4586a1c",
+    "f92e84596b1e78c3e52d83362b99680835fd5ed7"
+  ],
+  "sourceHead": "f92e84596b1e78c3e52d83362b99680835fd5ed7",
+  "productionBuild": {
+    "commitSha": "f92e84596b1e78c3e52d83362b99680835fd5ed7",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-aq14jyn9x-seojaehongs-projects.vercel.app",
+    "verifiedAt": "2026-08-31T19:22:53.1027505+09:00"
+  },
+  "immutableSecurityContext": {
+    "originalAccountedBaselineFindingCount": 18,
+    "originalAccountedBaselinePreserved": true,
+    "currentFinding": {
+      "scanId": "f6bef30a-7250-428b-9f66-0bad1e42058c",
+      "targetRevision": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+      "findingId": "csf_3ca8a70c1e96599ce7b6b795",
+      "title": "SIF approval preflight can skip migration scope validation",
+      "severity": "low",
+      "canonicalFindingState": "open_pending_fresh_rescan",
+      "findingRewritten": false
+    }
+  },
+  "remediation": {
+    "governedPath": "scripts/sif_embedding_approval_preflight.mjs",
+    "scopeCheckId": "migration_scope_is_sif_embedding_only",
+    "digestCheckId": "migration_digest_matches_canonical_approval_artifact",
+    "scopePolicy": {
+      "filenameControlsAdmission": false,
+      "topLevelSqlStatementAllowlist": true,
+      "allowedExtension": "vector",
+      "allowedTable": "safety_reference_embeddings",
+      "allowedFunction": "match_safety_reference_embeddings",
+      "allowedIndexPrefix": "idx_safety_reference_embeddings_",
+      "nonSifDdlOrDmlFailsClosed": true
+    },
+    "digestBinding": {
+      "canonicalMigrationPath": "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql",
+      "canonicalMigrationSha256": "4322657cde9e852ecf8fd242715bfdefb526f320891a0fa2e085ac565419acf7",
+      "arbitraryFilenameWithIdenticalBytesAllowed": true,
+      "contentChangeFailsClosed": true
+    }
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "files": 4,
+      "tests": 19,
+      "failed": 0,
+      "status": "PASS",
+      "command": "npm.cmd exec -- vitest run tests/sif-embedding-preflight.test.ts tests/sif-embedding-approval-packet.test.ts tests/sif-embedding-gate-status.test.ts tests/sif-embedding-post-migration-verify.test.ts --maxWorkers=1 --fileParallelism=false"
+    },
+    "strictTypecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "preflight": {
+      "artifactPath": "evaluation/current-source-security-sif-migration-scope-remediation-2026-08-31/preflight-report.json",
+      "sourceSha": "f92e84596b1e78c3e52d83362b99680835fd5ed7",
+      "ok": true,
+      "approvalHeld": true,
+      "scopePass": true,
+      "digestPass": true,
+      "inspectedStatementCount": 9,
+      "violationCount": 0,
+      "corpusCount": 6032,
+      "batchCount": 61
+    },
+    "liveProductCommitMarkerAligned": true,
+    "liveMigrationOrEmbeddingExecutionPerformed": false,
+    "liveExecutionBoundary": "Production marker proves deployed source. The approval preflight was run locally without migration, embedding generation, upload, or vector activation."
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "embeddingUploaded": false,
+    "vectorRuntimeActivated": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "freshFullRepositoryRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "sifEmbeddingRuntimeApprovalGated": true,
+    "approvalGatedFindingsClosed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}

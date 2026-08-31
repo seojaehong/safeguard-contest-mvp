@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-31T10:01:59.795Z",
-  "sourceSha": "5f55f48fec24c7e1e614545e1cdd42dc3f3d97b5",
+  "generatedAt": "2026-08-31T10:52:29.363Z",
+  "sourceSha": "f92e84596b1e78c3e52d83362b99680835fd5ed7",
   "overall": "open",
   "gates": [
     {
@@ -375,6 +375,16 @@
       "detail": "Deployed product source 5f55f48f bounds operator smoke HTTP responses, Chrome, and child processes with deadlines, byte ceilings, termination, and temporary-profile cleanup. Three files / 17 tests, strict typecheck, and the 28-page build pass. The sealed finding remains open pending a fresh scan, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Include the operator smoke resource contract in the next full repository scan before reclassifying the sealed finding."
+      ]
+    },
+    {
+      "id": "current_source_sif_migration_scope_remediation",
+      "state": "notice",
+      "label": "Current-source SIF migration scope remediation",
+      "evidencePath": "evaluation\\current-source-security-sif-migration-scope-remediation-2026-08-31\\report.json",
+      "detail": "Deployed product source f92e8459 validates every selected SIF migration through a top-level SQL allowlist and the canonical migration SHA-256, independent of filename. Four files / 19 tests, strict typecheck, the 28-page build, and the 6,032-record no-mutation preflight pass. The sealed finding remains open pending a fresh scan, SIF runtime remains approval-gated, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Include the SIF migration scope-and-digest contract in the next full repository scan before reclassifying the sealed finding; keep migration, embedding, upload, and vector activation approval-gated."
       ]
     },
     {

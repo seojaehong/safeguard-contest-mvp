@@ -77,6 +77,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSourceForwardedIdentityRemediation: path.join("evaluation", "current-source-security-forwarded-identity-remediation-2026-08-31", "report.json"),
   currentSourceTemplateInventoryRemediation: path.join("evaluation", "current-source-security-template-inventory-remediation-2026-08-31", "report.json"),
   currentSourceExportSmokeResourceRemediation: path.join("evaluation", "current-source-security-export-smoke-resource-remediation-2026-08-31", "report.json"),
+  currentSourceSifMigrationScopeRemediation: path.join("evaluation", "current-source-security-sif-migration-scope-remediation-2026-08-31", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
@@ -9061,6 +9062,117 @@ function evaluateCurrentSourceExportSmokeResourceRemediationGate(rootDir) {
 
 /**
  * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateCurrentSourceSifMigrationScopeRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourceSifMigrationScopeRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_source_sif_migration_scope_remediation",
+      label: "Current-source SIF migration scope remediation",
+      state: "missing",
+      evidencePath,
+      detail: "The SIF migration scope-and-digest remediation receipt is missing or invalid.",
+      nextActions: ["Restore the deployed-source receipt without reclassifying the sealed finding or activating SIF runtime."],
+    });
+  }
+
+  const immutable = isRecord(report.immutableSecurityContext) ? report.immutableSecurityContext : {};
+  const finding = isRecord(immutable.currentFinding) ? immutable.currentFinding : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const scopePolicy = isRecord(remediation.scopePolicy) ? remediation.scopePolicy : {};
+  const digestBinding = isRecord(remediation.digestBinding) ? remediation.digestBinding : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacentTests) ? verification.focusedAndAdjacentTests : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const preflight = isRecord(verification.preflight) ? verification.preflight : {};
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(productionBuild.commitSha);
+  const governedPaths = [
+    "scripts/sif_embedding_approval_preflight.mjs",
+    "tests/sif-embedding-preflight.test.ts",
+  ];
+  const sourceCurrent = /^[0-9a-f]{40}$/u.test(sourceHead)
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.embeddingGenerated === false
+    && mutation.embeddingUploaded === false
+    && mutation.vectorRuntimeActivated === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.schemaVersion) === "safeclaw-current-source-security-sif-migration-scope-remediation/v1"
+    && readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_SIF_MIGRATION_SCOPE_AND_DIGEST_RESCAN_PENDING"
+    && sourceHead === productionCommit
+    && sourceCurrent
+    && readString(productionBuild.branch) === "master"
+    && readString(productionBuild.environment) === "production"
+    && immutable.originalAccountedBaselinePreserved === true
+    && readNumber(immutable.originalAccountedBaselineFindingCount) === 18
+    && readString(finding.scanId) === "f6bef30a-7250-428b-9f66-0bad1e42058c"
+    && readString(finding.targetRevision) === "9504d8db95fcbc9f37f6c5abc638e9ad0813a325"
+    && readString(finding.findingId) === "csf_3ca8a70c1e96599ce7b6b795"
+    && readString(finding.canonicalFindingState) === "open_pending_fresh_rescan"
+    && finding.findingRewritten === false
+    && readString(remediation.governedPath) === "scripts/sif_embedding_approval_preflight.mjs"
+    && scopePolicy.filenameControlsAdmission === false
+    && scopePolicy.topLevelSqlStatementAllowlist === true
+    && readString(scopePolicy.allowedExtension) === "vector"
+    && readString(scopePolicy.allowedTable) === "safety_reference_embeddings"
+    && readString(scopePolicy.allowedFunction) === "match_safety_reference_embeddings"
+    && readString(scopePolicy.allowedIndexPrefix) === "idx_safety_reference_embeddings_"
+    && scopePolicy.nonSifDdlOrDmlFailsClosed === true
+    && readString(digestBinding.canonicalMigrationPath) === "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql"
+    && /^[0-9a-f]{64}$/u.test(readString(digestBinding.canonicalMigrationSha256))
+    && digestBinding.arbitraryFilenameWithIdenticalBytesAllowed === true
+    && digestBinding.contentChangeFailsClosed === true
+    && readNumber(focused.files) === 4
+    && readNumber(focused.tests) === 19
+    && readNumber(focused.failed) === 0
+    && readString(focused.status) === "PASS"
+    && readString(verification.strictTypecheck) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && readString(preflight.sourceSha) === sourceHead
+    && preflight.ok === true
+    && preflight.approvalHeld === true
+    && preflight.scopePass === true
+    && preflight.digestPass === true
+    && readNumber(preflight.inspectedStatementCount) === 9
+    && readNumber(preflight.violationCount) === 0
+    && readNumber(preflight.corpusCount) === 6032
+    && readNumber(preflight.batchCount) === 61
+    && verification.liveProductCommitMarkerAligned === true
+    && verification.liveMigrationOrEmbeddingExecutionPerformed === false
+    && noMutation
+    && remaining.freshFullRepositoryRescanRequired === true
+    && remaining.securityCompleteClaimAllowed === false
+    && remaining.sifEmbeddingRuntimeApprovalGated === true
+    && remaining.approvalGatedFindingsClosed === false
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+
+  return gateResult({
+    id: "current_source_sif_migration_scope_remediation",
+    label: "Current-source SIF migration scope remediation",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? `Deployed product source ${sourceHead.slice(0, 8)} validates every selected SIF migration through a top-level SQL allowlist and the canonical migration SHA-256, independent of filename. Four files / 19 tests, strict typecheck, the 28-page build, and the 6,032-record no-mutation preflight pass. The sealed finding remains open pending a fresh scan, SIF runtime remains approval-gated, and exact saved Share remains MISSING_EVIDENCE.`
+      : `SIF scope verdict=${readString(report.verdict) || "missing"}, source/live=${sourceHead || "missing"}/${productionCommit || "missing"}, sourceCurrent=${sourceCurrent}, scope/digest=${preflight.scopePass === true}/${preflight.digestPass === true}, tests=${readNumber(focused.files)}/${readNumber(focused.tests)}, noMutation=${noMutation}, SIFApproval=${remaining.sifEmbeddingRuntimeApprovalGated === true}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Include the SIF migration scope-and-digest contract in the next full repository scan before reclassifying the sealed finding; keep migration, embedding, upload, and vector activation approval-gated."]
+      : ["Restore source/live identity, SQL allowlist and canonical digest checks, verification counts, no-mutation boundaries, SIF approval hold, fresh-rescan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
  * @param {unknown} relativePath
  * @param {unknown} expectedSha256
  */
@@ -14382,6 +14494,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentSourceForwardedIdentityRemediationGate(rootDir),
     evaluateCurrentSourceTemplateInventoryRemediationGate(rootDir),
     evaluateCurrentSourceExportSmokeResourceRemediationGate(rootDir),
+    evaluateCurrentSourceSifMigrationScopeRemediationGate(rootDir),
     evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir),
     evaluateCurrentSourceSecurityResourceBudgetRemediationGate(rootDir),
     evaluateCurrentSourceLogoutStorageRemediationGate(rootDir),

@@ -734,6 +734,35 @@ function currentSourceExportSmokeResourceRemediationFixture(): Record<string, un
   };
 }
 
+function currentSourceSifMigrationScopeRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-current-source-security-sif-migration-scope-remediation/v1",
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_SIF_MIGRATION_SCOPE_AND_DIGEST_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    immutableSecurityContext: {
+      originalAccountedBaselineFindingCount: 18,
+      originalAccountedBaselinePreserved: true,
+      currentFinding: { scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c", targetRevision: "9504d8db95fcbc9f37f6c5abc638e9ad0813a325", findingId: "csf_3ca8a70c1e96599ce7b6b795", canonicalFindingState: "open_pending_fresh_rescan", findingRewritten: false },
+    },
+    remediation: {
+      governedPath: "scripts/sif_embedding_approval_preflight.mjs",
+      scopePolicy: { filenameControlsAdmission: false, topLevelSqlStatementAllowlist: true, allowedExtension: "vector", allowedTable: "safety_reference_embeddings", allowedFunction: "match_safety_reference_embeddings", allowedIndexPrefix: "idx_safety_reference_embeddings_", nonSifDdlOrDmlFailsClosed: true },
+      digestBinding: { canonicalMigrationPath: "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql", canonicalMigrationSha256: "a".repeat(64), arbitraryFilenameWithIdenticalBytesAllowed: true, contentChangeFailsClosed: true },
+    },
+    verification: {
+      focusedAndAdjacentTests: { files: 4, tests: 19, failed: 0, status: "PASS" },
+      strictTypecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+      preflight: { sourceSha: "fixture-sha", ok: true, approvalHeld: true, scopePass: true, digestPass: true, inspectedStatementCount: 9, violationCount: 0, corpusCount: 6032, batchCount: 61 },
+      liveProductCommitMarkerAligned: true,
+      liveMigrationOrEmbeddingExecutionPerformed: false,
+    },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, embeddingGenerated: false, embeddingUploaded: false, vectorRuntimeActivated: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false },
+    remainingBoundaries: { freshFullRepositoryRescanRequired: true, securityCompleteClaimAllowed: false, sifEmbeddingRuntimeApprovalGated: true, approvalGatedFindingsClosed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  };
+}
+
 function currentSourcePhotoReadinessAuthFanoutRemediationFixture(): Record<string, unknown> {
   return {
     schemaVersion: "safeclaw-current-source-security-photo-readiness-auth-fanout-remediation/v1",
@@ -5289,6 +5318,13 @@ function createFixtureRoot(): string {
   ]) {
     writeText(rootDir, relativePath, "export const boundedOperatorSmoke = true;\n");
   }
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-sif-migration-scope-remediation-2026-08-31", "report.json"),
+    currentSourceSifMigrationScopeRemediationFixture(),
+  );
+  writeText(rootDir, "scripts/sif_embedding_approval_preflight.mjs", "export const boundedSifMigrationScope = true;\n");
+  writeText(rootDir, "tests/sif-embedding-preflight.test.ts", "export const boundedSifMigrationScopeTest = true;\n");
   writeJson(
     rootDir,
     path.join("evaluation", "current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31", "report.json"),
@@ -9873,6 +9909,33 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "current_source_export_smoke_resource_remediation")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records SIF migration scope and digest binding without activating the approval gate", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "current-source-security-sif-migration-scope-remediation-2026-08-31", "report.json");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_sif_migration_scope_remediation");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("top-level SQL allowlist and the canonical migration SHA-256");
+    expect(gate?.detail).toContain("Four files / 19 tests");
+    expect(gate?.detail).toContain("SIF runtime remains approval-gated");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      verification: { preflight: { digestPass: boolean } };
+      mutationBoundary: { embeddingGenerated: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.verification.preflight.digestPass = false;
+    report.mutationBoundary.embeddingGenerated = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "current_source_sif_migration_scope_remediation")?.state)
       .toBe("contradicted");
   });
 
