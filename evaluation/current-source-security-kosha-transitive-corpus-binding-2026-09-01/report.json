@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-kosha-transitive-corpus-binding/v1",
+  "generatedAt": "2026-09-01T05:31:00+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_KOSHA_TRANSITIVE_CORPUS_BINDING_LIVE_PENDING",
+  "sourceHead": "950e889020c546d5889a63d985db467fd1b297af",
+  "productionBuild": {
+    "commitSha": "bad17019136999655854cff2e49d0e165909ba74",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-ha5ofrmn4-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": false
+  },
+  "commitChain": {
+    "corpusBindingImplementation": "f012df5b3f2e82de7aa85713d3d01fe38cb95123",
+    "gitCleanFilterBinding": "21e6393532357880ed882c1268f6a71f869bc41e",
+    "ancestorReviewBinding": "f7fb87abb287594a75c7e01f1b0b948ad06d8065",
+    "reviewGateEvidence": "950e889020c546d5889a63d985db467fd1b297af"
+  },
+  "securityRule": "kosha.transitive-corpus-binding",
+  "corpusBinding": {
+    "schemaVersion": "safeclaw-kosha-corpus-binding/v1",
+    "bindingSha256": "236b96114afa53f7313ccea9883b0c1dd9f8553744c06ed56503d90aa6bbb303",
+    "currentManifestItemsBound": true,
+    "snapshotAndSourceIdentityBound": true,
+    "decompressedItemsDigestBound": true,
+    "candidateStableKeyVersionBodyPdfPairsBound": true,
+    "candidateCount": 8
+  },
+  "machineEvidence": {
+    "promotionPacketVerdict": "EXACT_PROMOTION_PACKET_READY_FOR_OPERATOR_REVIEW",
+    "officialPdfAuditVerdict": "PASS_OFFICIAL_PDF_AUTHENTICITY_BODY_PAIR_REVIEW_STILL_REQUIRED",
+    "officialPdfMachineVerified": 8,
+    "officialLifecycleVerdict": "PASS_OFFICIAL_CURRENT_LIFECYCLE_MACHINE_SUPPORTED_HUMAN_REVIEW_REQUIRED",
+    "officialLifecycleMachineSupported": 8,
+    "reviewerSupportVerdict": "PASS_MACHINE_REVIEWER_SUPPORT_HUMAN_CONFIRMATION_REQUIRED",
+    "reviewerSupportMachineSupported": 8,
+    "semanticGroupCount": 24,
+    "failedSemanticGroupCount": 0
+  },
+  "reviewGate": {
+    "verdict": "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
+    "approvalEvidenceBindingVerified": true,
+    "corpusBindingFailureCount": 0,
+    "nonHumanFailureCount": 0,
+    "unconfirmedRequiredCheckCount": 40,
+    "missingHumanConfirmationCount": 8,
+    "missingReviewerCount": 8,
+    "missingReviewedAtCount": 8,
+    "failureCount": 64,
+    "reviewChecklistComplete": false,
+    "exactPromotionPerformed": false,
+    "separatePromotionApprovalRequired": true
+  },
+  "verification": {
+    "vitest": {
+      "files": 6,
+      "tests": 62,
+      "passed": 62
+    },
+    "pythonUnittest": {
+      "files": 3,
+      "tests": 21,
+      "passed": 21
+    },
+    "typecheck": "PASS",
+    "lineEndingRegressionCovered": true,
+    "ancestorBindingRegressionCovered": true,
+    "tamperTestsFailClosed": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerationPerformed": false,
+    "vectorRuntimeMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "humanKoshaReview": "REQUIRED",
+    "exactKoshaPromotionApproval": "REQUIRED_SEPARATELY",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "liveAfterDeploymentRequired": true
+  }
+}
