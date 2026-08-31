@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-credential-output-remediation/v1",
+  "generatedAt": "2026-08-31T05:28:14.4288071Z",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_CREDENTIAL_OUTPUT_CONTRACT",
+  "sourceBaseCommit": "e15d8a87b42908d4788d24bb79b7b6998da0b439",
+  "sourceHead": "32bba02b79b4beefe0a217b1afe7180483398cf4",
+  "productCommit": "32bba02b79b4beefe0a217b1afe7180483398cf4",
+  "productionCommit": "32bba02b79b4beefe0a217b1afe7180483398cf4",
+  "sourceIncludedInProduction": true,
+  "masterContainsProductCommit": true,
+  "finding": {
+    "scanId": "f6bef30a-7250-428b-9f66-0bad1e42058c",
+    "scanTargetRevision": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+    "sealedFindingCount": 21,
+    "findingId": "csf_ad5c841841dbdcc55b2c1d5a",
+    "occurrenceId": "occ_a537b254313fd0a608524cc5",
+    "ruleId": "credential-exposure.token-stdout",
+    "severity": "low",
+    "title": "Credential issuance CLIs print bearer tokens to stdout",
+    "sealedFindingReclassified": false,
+    "freshRescanRequired": true
+  },
+  "remediation": {
+    "credentialCliCount": 2,
+    "credentialClis": [
+      "scripts/issue-mcp-token.mjs",
+      "scripts/issue_supabase_auth_token.mjs"
+    ],
+    "explicitOutputModeRequiredBeforeCredentialWork": true,
+    "defaultBearerTokenStdout": false,
+    "interactiveRevealRequiresTty": true,
+    "automationOutputUsesExclusiveCreate": true,
+    "automationOutputMode": "0600",
+    "writtenModeVerified": true,
+    "preExistingOutputFileRejected": true,
+    "windowsUnverifiableFileModeRejected": true,
+    "tier1AutomationUsesTemporaryDirectoryMode": "0700",
+    "tier1AutomationDeletesTemporaryCredential": true,
+    "tier1AutomationCleanupTrapInstalled": true,
+    "tokenHashOnlyDatabaseStoragePreserved": true,
+    "supabaseAuthenticationBehaviorPreserved": true
+  },
+  "verification": {
+    "focusedAndAdjacentTests": {
+      "command": "npm.cmd test -- tests/credential-issuance-output.test.ts tests/issue-mcp-token-cli.test.ts tests/mcp-token-service.test.ts tests/mcp-auth.test.ts tests/tenant-harness-memory.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 5,
+      "testsPassed": 88,
+      "testsFailed": 0
+    },
+    "ciFullSuiteObservation": {
+      "runId": 33359573901,
+      "status": "COMPLETED_WITH_PRE_EXISTING_UNRELATED_RED",
+      "credentialOutputTestsPassed": 8,
+      "mcpTokenCliTestsPassed": 5,
+      "totalFilesPassed": 263,
+      "totalFilesFailed": 2,
+      "totalTestsPassed": 3193,
+      "totalTestsFailed": 8,
+      "unrelatedFailedFiles": [
+        "tests/knowledge-promotion-gate.test.ts",
+        "tests/knowledge-write-request-budget.test.ts"
+      ],
+      "ciBuildSkippedAfterUnrelatedTestFailure": true
+    },
+    "syntax": {
+      "nodeCheckFiles": 3,
+      "nodeCheckStatus": "PASS",
+      "tier1BashSyntaxStatus": "PASS"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "productionBuild": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "failClosedCliProbes": [
+      {
+        "cli": "issue-mcp-token.mjs",
+        "requestedOutputMode": "missing",
+        "status": 1,
+        "credentialWorkReached": false,
+        "plaintextTokenOutput": false
+      },
+      {
+        "cli": "issue_supabase_auth_token.mjs",
+        "requestedOutputMode": "missing",
+        "status": 1,
+        "credentialWorkReached": false,
+        "plaintextTokenOutput": false
+      },
+      {
+        "cli": "issue-mcp-token.mjs",
+        "requestedOutputMode": "windows-output-file",
+        "status": 1,
+        "credentialWorkReached": false,
+        "plaintextTokenOutput": false
+      }
+    ],
+    "liveDeployment": {
+      "status": "PASS_DEPLOYED_SOURCE_NO_CREDENTIAL_ISSUANCE_EXECUTED",
+      "commitSha": "32bba02b79b4beefe0a217b1afe7180483398cf4",
+      "branch": "chore/recipient-foreign-live-gate-20260720",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-2g6e5evg1-seojaehongs-projects.vercel.app",
+      "productionDeploymentId": "dpl_7xFPqeGjBkjbwPZ2ytJujLimrDqJ",
+      "productionDeploymentReady": true,
+      "credentialIssuanceExecuted": false,
+      "credentialIssuanceReason": "A live credential issuance would create or expose operator credentials and is unnecessary to prove the source-level output contract."
+    }
+  },
+  "mutationBoundary": {
+    "mcpTokenIssued": false,
+    "supabaseAuthTokenIssued": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "immutableOriginal18FindingBaselinePreserved": true,
+    "sealedCurrentHeadScanPreserved": true,
+    "securityComplete": false,
+    "freshFollowUpSecurityScan": "REQUIRED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedFindingsRemainOpen": true,
+    "liveAfterDeploymentRequired": false
+  }
+}
