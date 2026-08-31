@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "safeclaw-stale-approval-evidence-binding-remediation/v1",
+  "generatedAt": "2026-08-31T12:38:52.293Z",
+  "sourceHead": "3ac91d3d1530ec7f89b13631969995c887f58ea4",
+  "verdict": "PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED",
+  "finding": {
+    "findingId": "csf_86ec127fb3d5b7d397649611",
+    "occurrenceId": "occ_23bd4bcc20f50a7e11e7bc19",
+    "ruleId": "approval-integrity.stale-evidence-binding",
+    "immutableOriginalFindingBaselinePreserved": true
+  },
+  "workflowCount": 4,
+  "passedCount": 4,
+  "failedCount": 0,
+  "rows": [
+    {
+      "id": "rls_llm_wiki",
+      "overall": "blocked_preflight_failed",
+      "verdict": null,
+      "bindingVerified": true,
+      "bindingFailureExposed": false,
+      "blocked": true,
+      "sourceHead": "3ac91d3d1530ec7f89b13631969995c887f58ea4",
+      "productionCommit": "7ff45318ba8a8a0c411eb402bfa90c880c38015d",
+      "artifactCount": 13,
+      "packetDigest": "1f088ccb6614efc59a27f358268d52290847a67cc86ad187bf935b0fc952b38a",
+      "bindingFailures": [],
+      "contractPassed": true
+    },
+    {
+      "id": "distributed_admission",
+      "overall": "blocked_preflight_failed",
+      "verdict": "BLOCKED_DISTRIBUTED_ADMISSION_ACTIVATION_PREFLIGHT_FAILED",
+      "bindingVerified": true,
+      "bindingFailureExposed": false,
+      "blocked": true,
+      "sourceHead": "3ac91d3d1530ec7f89b13631969995c887f58ea4",
+      "productionCommit": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
+      "artifactCount": 4,
+      "packetDigest": "aa40571fd6c4785cc0dcd28110b52ae8ea3adb7d57cc233a1799b3b7e8b21b68",
+      "bindingFailures": [],
+      "contractPassed": true
+    },
+    {
+      "id": "share_recipient_ack",
+      "overall": "blocked_preflight_failed",
+      "verdict": null,
+      "bindingVerified": true,
+      "bindingFailureExposed": false,
+      "blocked": true,
+      "sourceHead": "3ac91d3d1530ec7f89b13631969995c887f58ea4",
+      "productionCommit": "57cd6c1034da9893f8080dc85f7d7ac844589005",
+      "artifactCount": 7,
+      "packetDigest": "7de4b2bffa9e99db1388b43bdd805612535d457279449700ccb3df61f24aa22f",
+      "bindingFailures": [],
+      "contractPassed": true
+    },
+    {
+      "id": "kosha_exact_promotion",
+      "overall": null,
+      "verdict": "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
+      "bindingVerified": true,
+      "bindingFailureExposed": true,
+      "blocked": true,
+      "sourceHead": "3ac91d3d1530ec7f89b13631969995c887f58ea4",
+      "productionCommit": "ca16e7de36b04e84f2e63700ae60b907915b0428",
+      "artifactCount": 4,
+      "packetDigest": "76825ad2d20015fdceaac81fb9c563cb8ab270cd21029df5488c26c194f370b4",
+      "bindingFailures": [],
+      "contractPassed": true
+    }
+  ],
+  "contract": {
+    "currentHeadRequired": true,
+    "productionCommitRequired": true,
+    "everyRequiredInputSha256Bound": true,
+    "currentHeadTrackedBlobMatchRequired": true,
+    "mixedSourceLiveEvidenceFailsClosed": true,
+    "deterministicPacketDigestRequired": true,
+    "mutationApprovalRemainsSeparate": true
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "remainingBoundary": {
+    "freshFullRepositorySecurityRescanRequiredForClosure": true,
+    "approvalGatedMutationsRemainClosed": true
+  }
+}
