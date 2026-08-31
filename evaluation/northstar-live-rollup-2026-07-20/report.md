@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T16:35:17.392Z
-Source HEAD at generation: 0261e05219af16310549b43e17f40a5b49968876
-Live commit at generation: 0261e05219af16310549b43e17f40a5b49968876
+Generated at: 2026-08-31T18:55:37.676Z
+Source HEAD at generation: 35c47474b3116712ecceb8cb0b5ec7b1762ddf9d
+Live commit at generation: 35c47474b3116712ecceb8cb0b5ec7b1762ddf9d
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -136,6 +136,13 @@ Overall: `northstar_open_approval_gated`
 - Immutable original baseline: 18; rewritten=false
 - Deferred candidates retained: 2; live provider cancellation probe executed=false
 - Exact saved Share: MISSING_EVIDENCE
+
+## Public request lifetime remediation
+
+- Verdict: `PASS_LIVE_PRODUCTION_PUBLIC_REQUEST_LIFETIME_REMEDIATION_RESCAN_PENDING`
+- Product / production: b983f9f8b7fe9b3aa57b4701bc782fd3799a421c / 35c47474b3116712ecceb8cb0b5ec7b1762ddf9d
+- Scoped findings remediated: 2; sealed scan findings: 19; immutable original baseline: 18
+- Fresh rescan required: true; security-complete: false; exact saved Share: MISSING_EVIDENCE
 
 ## Completed Current-head Standard Security Scan
 - Verdict: `NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE`; scan `f6bef30a-7250-428b-9f66-0bad1e42058c`; source `9504d8db95fcbc9f37f6c5abc638e9ad0813a325`
@@ -463,6 +470,7 @@ Overall: `northstar_open_approval_gated`
 | current_source_sif_migration_scope_remediation | notice | evaluation\current-source-security-sif-migration-scope-remediation-2026-08-31\report.json |
 | current_source_document_publication_isolation_remediation | notice | evaluation\current-source-security-document-publication-isolation-remediation-2026-08-31\report.json |
 | current_source_approval_free_security_remediation | notice | evaluation\current-source-security-approval-free-remediation-2026-08-31\report.json |
+| current_source_public_lifetime_remediation | notice | evaluation\current-source-security-public-lifetime-remediation-2026-09-01\report.json |
 | current_source_security_resource_budget_remediation | proven | evaluation\current-source-security-resource-budget-remediation-2026-08-31\report.json |
 | current_source_logout_storage_remediation | notice | evaluation\current-source-security-logout-storage-remediation-2026-08-31\report.json |
 | current_source_ontology_error_projection_remediation | notice | evaluation\current-source-security-ontology-error-projection-remediation-2026-08-31\report.json |
@@ -567,6 +575,7 @@ Overall: `northstar_open_approval_gated`
 | current_source_forwarded_identity_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-forwarded-identity-remediation-2026-08-31\report.json |
 | current_source_template_inventory_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-template-inventory-remediation-2026-08-31\report.json |
 | current_source_approval_free_security_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-approval-free-remediation-2026-08-31\report.json |
+| current_source_public_lifetime_remediation | ancestor | matches_live_source_mismatch | evaluation\current-source-security-public-lifetime-remediation-2026-09-01\report.json |
 | current_source_security_resource_budget_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-resource-budget-remediation-2026-08-31\report.json |
 | current_source_logout_storage_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-logout-storage-remediation-2026-08-31\report.json |
 | current_source_ontology_error_projection_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-ontology-error-projection-remediation-2026-08-31\report.json |
@@ -576,7 +585,7 @@ Overall: `northstar_open_approval_gated`
 | current_source_mcp_generation_cancellation_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\report.json |
 | current_source_kosha_archive_preflight_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-kosha-archive-preflight-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | ancestor | ancestor_of_head | evaluation\current-source-security-remediation-2026-08-30\report.json |
-| current_security_governed_path_compatibility | exact | matches_live | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
+| current_security_governed_path_compatibility | ancestor | ancestor_of_head | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
 | stale_approval_evidence_binding_security | ancestor | missing | evaluation\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\report.json |
 | current_source_security_residual_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | ancestor | ancestor_of_head | evaluation\share-ack-prebody-admission-2026-08-28\report.json |

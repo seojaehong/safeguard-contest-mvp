@@ -80,6 +80,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSourceSifMigrationScopeRemediation: path.join("evaluation", "current-source-security-sif-migration-scope-remediation-2026-08-31", "report.json"),
   currentSourceDocumentPublicationIsolationRemediation: path.join("evaluation", "current-source-security-document-publication-isolation-remediation-2026-08-31", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
+  currentSourcePublicLifetimeRemediation: path.join("evaluation", "current-source-security-public-lifetime-remediation-2026-09-01", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
   currentSourceOntologyErrorProjectionRemediation: path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
@@ -1887,6 +1888,26 @@ const KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_PATHS = [
   "app/knowledge/KnowledgeReviewInbox.tsx",
 ];
 
+/** @param {string} rootDir */
+function isCurrentPublicLifetimeKnowledgeCompatibility(rootDir) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.currentSourcePublicLifetimeRemediation);
+  if (!isRecord(report)) return false;
+  const scan = isRecord(report.scan) ? report.scan : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const productCommit = readString(report.productCommit);
+  return readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_REQUEST_LIFETIME_REMEDIATION_RESCAN_PENDING"
+    && productCommit.length === 40
+    && isEvidenceCurrentForPaths(rootDir, productCommit, ["app/api/knowledge/review/prepare/route.ts"])
+    && scan.sealedScanReclassified === false
+    && scan.freshRescanRequired === true
+    && mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && remaining.securityComplete === false
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+}
+
 /**
  * @param {string} rootDir
  * @returns {GateResult}
@@ -1935,7 +1956,13 @@ function evaluateKnowledgePreparationCapabilityTruthGate(rootDir) {
         rootDir,
         "knowledge_preparation_capability_truth",
         KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_PATHS,
-      ))
+      )
+      || (isCurrentSecurityGovernedPathCompatibility(
+        rootDir,
+        "knowledge_preparation_capability_truth",
+        ["app/knowledge/KnowledgeReviewInbox.tsx"],
+      )
+        && isCurrentPublicLifetimeKnowledgeCompatibility(rootDir)))
     && isGitAncestor(rootDir, productionCommit)
     && report.productionIncludesProductCommit === true
     && readString(before.distributedAdmissionFailurePublicCode) === "PUBLIC_ASK_CONCURRENCY_LIMIT"
@@ -9468,6 +9495,98 @@ function evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir) {
   });
 }
 
+const CURRENT_SOURCE_PUBLIC_LIFETIME_PATHS = [
+  "app/api/knowledge/review/prepare/route.ts",
+  "app/ontology/page.tsx",
+  "app/ontology/OntologyLivePage.tsx",
+  "lib/ontology/schema.ts",
+];
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateCurrentSourcePublicLifetimeRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourcePublicLifetimeRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_source_public_lifetime_remediation",
+      label: "Current-source public request lifetime remediation",
+      state: "missing",
+      evidencePath,
+      detail: "The scoped public request lifetime remediation receipt is missing or invalid.",
+      nextActions: ["Restore the scoped receipt without reclassifying the sealed scan or changing approval boundaries."],
+    });
+  }
+
+  const scan = isRecord(report.scan) ? report.scan : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacentTests) ? verification.focusedAndAdjacentTests : {};
+  const browser = isRecord(verification.ontologyBrowser) ? verification.ontologyBrowser : {};
+  const live = isRecord(verification.liveProduction) ? verification.liveProduction : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const findings = Array.isArray(report.findings) ? report.findings.filter(isRecord) : [];
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const expectedFindings = [
+    "csf_f862edc1756bf16c2655d023",
+    "csf_619758dd4106628fbf7e6b3b",
+  ];
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.schemaVersion) === "safeclaw-current-source-security-public-lifetime-remediation/v1"
+    && readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_REQUEST_LIFETIME_REMEDIATION_RESCAN_PENDING"
+    && productCommit.length === 40
+    && productionCommit.length === 40
+    && isEvidenceCurrentForPaths(rootDir, productCommit, CURRENT_SOURCE_PUBLIC_LIFETIME_PATHS)
+    && isGitAncestorOf(rootDir, productCommit, productionCommit)
+    && readString(scan.scanId) === "1e5d68c4-fd86-4df4-bb95-542a9708ffef"
+    && readNumber(scan.findingCount) === 19
+    && readNumber(scan.immutableOriginalFindingCount) === 18
+    && scan.immutableOriginalBaselinePreserved === true
+    && scan.sealedScanReclassified === false
+    && scan.freshRescanRequired === true
+    && findings.length === 2
+    && expectedFindings.every((findingId) => findings.some((finding) => readString(finding.findingId) === findingId))
+    && readNumber(focused.filesPassed) === 7
+    && readNumber(focused.testsPassed) === 56
+    && readNumber(focused.testsFailed) === 0
+    && readNumber(browser.testsPassed) === 2
+    && browser.validatedLiveTransition === true
+    && browser.malformedPayloadFallback === true
+    && readString(live.buildInfoCommit) === productionCommit
+    && live.productCommitIncluded === true
+    && readNumber(live.knowledgePrepareUnauthenticatedStatus) === 401
+    && live.knowledgePrepareBodyReadBeforeAuthentication === false
+    && readNumber(live.ontologyGraphStatus) === 503
+    && readString(live.ontologyGraphCode) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+    && live.ontologyGraphProviderOrDbWorkExecuted === false
+    && noMutation
+    && remaining.securityComplete === false
+    && remaining.liveAfterDeploymentRequired === false
+    && remaining.approvalGatedFindingsRemainOpen === true
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+
+  return gateResult({
+    id: "current_source_public_lifetime_remediation",
+    label: "Current-source public request lifetime remediation",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Current production includes the bounded knowledge-review auth-before-body and Ontology caller-cancellation remediations. Read-only live probes returned 401 before unauthenticated preparation body handling and 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before Ontology provider or database work; browser fallback contracts passed. The immutable 18-finding baseline and sealed 19-finding current scan remain unchanged, a fresh scan is required, security-complete is false, approval-gated findings remain open, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      : `Public lifetime verdict=${readString(report.verdict) || "missing"}, product=${productCommit || "missing"}, production=${productionCommit || "missing"}, findings=${findings.length}, focused=${readNumber(focused.testsPassed)}, browser=${readNumber(browser.testsPassed)}, prepare=${readNumber(live.knowledgePrepareUnauthenticatedStatus)}, ontology=${readNumber(live.ontologyGraphStatus)}/${readString(live.ontologyGraphCode) || "missing"}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Run a fresh full-repository security scan before reclassifying either sealed finding or making a security-complete claim."]
+      : ["Restore source/live identity, both finding identities, verification totals, live fail-closed probes, no-mutation boundaries, fresh-rescan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
 /**
  * @param {string} rootDir
  * @returns {GateResult}
@@ -14748,6 +14867,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentSourceSifMigrationScopeRemediationGate(rootDir),
     evaluateCurrentSourceDocumentPublicationIsolationRemediationGate(rootDir),
     evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir),
+    evaluateCurrentSourcePublicLifetimeRemediationGate(rootDir),
     evaluateCurrentSourceSecurityResourceBudgetRemediationGate(rootDir),
     evaluateCurrentSourceLogoutStorageRemediationGate(rootDir),
     evaluateCurrentSourceOntologyErrorProjectionRemediationGate(rootDir),

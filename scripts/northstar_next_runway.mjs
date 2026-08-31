@@ -58,6 +58,7 @@ const ARTIFACTS = Object.freeze({
   currentSourceForwardedIdentityRemediation: path.join("evaluation", "current-source-security-forwarded-identity-remediation-2026-08-31", "report.json"),
   currentSourceTemplateInventoryRemediation: path.join("evaluation", "current-source-security-template-inventory-remediation-2026-08-31", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
+  currentSourcePublicLifetimeRemediation: path.join("evaluation", "current-source-security-public-lifetime-remediation-2026-09-01", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
   currentSourceOntologyErrorProjectionRemediation: path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
@@ -2539,6 +2540,29 @@ function currentSourceApprovalFreeSecurityRemediationSummary(report) {
 }
 
 /** @param {unknown} report */
+function currentSourcePublicLifetimeRemediationSummary(report) {
+  if (!isRecord(report)) return {};
+  const scan = isRecord(report.scan) ? report.scan : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const live = isRecord(verification.liveProduction) ? verification.liveProduction : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    productCommit: asString(report.productCommit),
+    productionCommit: asString(report.productionCommit),
+    remediatedFindingCount: Array.isArray(report.findings) ? report.findings.length : 0,
+    sealedFindingCount: typeof scan.findingCount === "number" ? scan.findingCount : null,
+    immutableOriginalFindingCount: typeof scan.immutableOriginalFindingCount === "number" ? scan.immutableOriginalFindingCount : null,
+    knowledgePrepareStatus: typeof live.knowledgePrepareUnauthenticatedStatus === "number" ? live.knowledgePrepareUnauthenticatedStatus : null,
+    ontologyGraphStatus: typeof live.ontologyGraphStatus === "number" ? live.ontologyGraphStatus : null,
+    ontologyGraphCode: asString(live.ontologyGraphCode),
+    freshRescanRequired: scan.freshRescanRequired === true,
+    securityComplete: remaining.securityComplete === true,
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
 function currentSourceSecurityResourceBudgetRemediationSummary(report) {
   if (!isRecord(report)) return {};
   const baseline = isRecord(report.securityBaseline) ? report.securityBaseline : {};
@@ -3969,6 +3993,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.currentSourceApprovalFreeSecurityRemediation,
   );
+  const currentSourcePublicLifetimeRemediation = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.currentSourcePublicLifetimeRemediation,
+  );
   const currentSourceSecurityResourceBudgetRemediation = readOptionalJson(
     options.rootDir,
     ARTIFACTS.currentSourceSecurityResourceBudgetRemediation,
@@ -4176,6 +4204,9 @@ export function buildNorthstarNextRunway(options) {
   );
   const currentSourceApprovalFreeSecurityRemediationResult = currentSourceApprovalFreeSecurityRemediationSummary(
     currentSourceApprovalFreeSecurityRemediation,
+  );
+  const currentSourcePublicLifetimeRemediationResult = currentSourcePublicLifetimeRemediationSummary(
+    currentSourcePublicLifetimeRemediation,
   );
   const currentSourceSecurityResourceBudgetRemediationResult = currentSourceSecurityResourceBudgetRemediationSummary(
     currentSourceSecurityResourceBudgetRemediation,
@@ -4421,6 +4452,11 @@ export function buildNorthstarNextRunway(options) {
         reason: `current live source records ${currentSourceApprovalFreeSecurityRemediationResult.currentSourceRemediatedCount ?? "unknown"}/${currentSourceApprovalFreeSecurityRemediationResult.approvalFreeFindingCount ?? "unknown"} bounded approval-free remediations with ${currentSourceApprovalFreeSecurityRemediationResult.currentSourceOpenApprovalFreeCount ?? "unknown"} approval-free source residuals left before rescan; the sealed ${currentSourceApprovalFreeSecurityRemediationResult.reportableFindingCount ?? "unknown"}-finding scan is unchanged, ${currentSourceApprovalFreeSecurityRemediationResult.approvalGatedFindingCount ?? "unknown"} database/RLS/atomicity findings remain approval-gated, fresh full rescan required=${currentSourceApprovalFreeSecurityRemediationResult.freshFullRepositoryRescanRequired === true}, security-complete is false, and exact saved Share remains ${currentSourceApprovalFreeSecurityRemediationResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
       },
       {
+        gate: "current_source_public_lifetime_remediation",
+        state: "notice",
+        reason: `live product ${currentSourcePublicLifetimeRemediationResult.productionCommit?.slice(0, 8) || "missing"} includes ${currentSourcePublicLifetimeRemediationResult.remediatedFindingCount ?? "unknown"} bounded public lifetime remediations; knowledge prepare=${currentSourcePublicLifetimeRemediationResult.knowledgePrepareStatus ?? "unknown"}, ontology=${currentSourcePublicLifetimeRemediationResult.ontologyGraphStatus ?? "unknown"}/${currentSourcePublicLifetimeRemediationResult.ontologyGraphCode || "missing"}. The immutable ${currentSourcePublicLifetimeRemediationResult.immutableOriginalFindingCount ?? "unknown"}-finding baseline and sealed ${currentSourcePublicLifetimeRemediationResult.sealedFindingCount ?? "unknown"}-finding scan remain unchanged, fresh rescan required=${currentSourcePublicLifetimeRemediationResult.freshRescanRequired === true}, security-complete=${currentSourcePublicLifetimeRemediationResult.securityComplete === true}, and exact saved Share remains ${currentSourcePublicLifetimeRemediationResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+      },
+      {
         gate: "current_source_security_resource_budget_remediation",
         state: "proven",
         reason: `current live source records ${currentSourceSecurityResourceBudgetRemediationResult.remediatedFindingCount ?? "unknown"} bounded resource-budget remediations from canonical scan ${currentSourceSecurityResourceBudgetRemediationResult.scanId || "missing"}; canonical findings remain ${currentSourceSecurityResourceBudgetRemediationResult.canonicalFindingCount ?? "unknown"}, manifest status remains ${currentSourceSecurityResourceBudgetRemediationResult.manifestStatus || "missing"}, ${currentSourceSecurityResourceBudgetRemediationResult.approvalGatedFindingCount ?? "unknown"} database/RLS/atomicity findings remain approval-gated, direct live provider budget execution proven=${currentSourceSecurityResourceBudgetRemediationResult.directLiveBudgetExecutionProven === true}, security-complete is false, and exact saved Share remains ${currentSourceSecurityResourceBudgetRemediationResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
@@ -4661,6 +4697,7 @@ export function buildNorthstarNextRunway(options) {
     currentSourceForwardedIdentityRemediation: currentSourceForwardedIdentityRemediationResult,
     currentSourceTemplateInventoryRemediation: currentSourceTemplateInventoryRemediationResult,
     currentSourceApprovalFreeSecurityRemediation: currentSourceApprovalFreeSecurityRemediationResult,
+    currentSourcePublicLifetimeRemediation: currentSourcePublicLifetimeRemediationResult,
     currentSourceSecurityResourceBudgetRemediation: currentSourceSecurityResourceBudgetRemediationResult,
     currentSourceLogoutStorageRemediation: currentSourceLogoutStorageRemediationResult,
     currentSourceOntologyErrorProjectionRemediation: currentSourceOntologyErrorProjectionRemediationResult,
@@ -4859,6 +4896,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Verified forwarded identity remediation is \`${report.currentSourceForwardedIdentityRemediation.verdict || "missing"}\`: source/live \`${report.currentSourceForwardedIdentityRemediation.sourceHead || "missing"}/${report.currentSourceForwardedIdentityRemediation.productionCommit || "missing"}\`, source included \`${report.currentSourceForwardedIdentityRemediation.sourceIncludedInProduction === true}\`, finding \`${report.currentSourceForwardedIdentityRemediation.findingRule || "missing"}\`, and tests \`${report.currentSourceForwardedIdentityRemediation.testFileCount ?? "unknown"}/${report.currentSourceForwardedIdentityRemediation.testCount ?? "unknown"}\`. No live identity-key disclosure probe was executed \`${report.currentSourceForwardedIdentityRemediation.liveBehavioralProbeExecuted === true}\`; fresh scan remains \`${report.currentSourceForwardedIdentityRemediation.freshFollowUpSecurityScan || "REQUIRED"}\`, security-complete remains \`${report.currentSourceForwardedIdentityRemediation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.currentSourceForwardedIdentityRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Bounded template inventory remediation is \`${report.currentSourceTemplateInventoryRemediation.verdict || "missing"}\`: source/live \`${report.currentSourceTemplateInventoryRemediation.sourceHead || "missing"}/${report.currentSourceTemplateInventoryRemediation.productionCommit || "missing"}\`, source included \`${report.currentSourceTemplateInventoryRemediation.sourceIncludedInProduction === true}\`, finding \`${report.currentSourceTemplateInventoryRemediation.findingRule || "missing"}\`, and scanner/archive tests \`${report.currentSourceTemplateInventoryRemediation.scannerTestCount ?? "unknown"}/${report.currentSourceTemplateInventoryRemediation.archiveSafetyTestCount ?? "unknown"}\`. No remote operator-script execution was performed \`${report.currentSourceTemplateInventoryRemediation.liveBehavioralProbeExecuted === true}\`; fresh scan remains \`${report.currentSourceTemplateInventoryRemediation.freshFollowUpSecurityScan || "REQUIRED"}\`, security-complete remains \`${report.currentSourceTemplateInventoryRemediation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.currentSourceTemplateInventoryRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Current-source approval-free security remediation is \`${report.currentSourceApprovalFreeSecurityRemediation.verdict || "missing"}\`: bounded source remediation \`${report.currentSourceApprovalFreeSecurityRemediation.currentSourceRemediatedCount ?? "unknown"}/${report.currentSourceApprovalFreeSecurityRemediation.approvalFreeFindingCount ?? "unknown"}\`, open approval-free source residuals \`${report.currentSourceApprovalFreeSecurityRemediation.currentSourceOpenApprovalFreeCount ?? "unknown"}\`, and sealed scan finding reclassification performed \`${report.currentSourceApprovalFreeSecurityRemediation.scanFindingReclassificationPerformed === true}\`. The fresh full scan remains required \`${report.currentSourceApprovalFreeSecurityRemediation.freshFullRepositoryRescanRequired === true}\`, database/RLS/atomicity findings remain \`${report.currentSourceApprovalFreeSecurityRemediation.approvalGatedFindingCount ?? "unknown"}\`, security-complete remains \`${report.currentSourceApprovalFreeSecurityRemediation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.currentSourceApprovalFreeSecurityRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Public request lifetime remediation is \`${report.currentSourcePublicLifetimeRemediation.verdict || "missing"}\`: product/production \`${report.currentSourcePublicLifetimeRemediation.productCommit || "missing"}/${report.currentSourcePublicLifetimeRemediation.productionCommit || "missing"}\`, scoped findings \`${report.currentSourcePublicLifetimeRemediation.remediatedFindingCount ?? "unknown"}\`, live knowledge preparation \`${report.currentSourcePublicLifetimeRemediation.knowledgePrepareStatus ?? "unknown"}\`, and Ontology \`${report.currentSourcePublicLifetimeRemediation.ontologyGraphStatus ?? "unknown"}/${report.currentSourcePublicLifetimeRemediation.ontologyGraphCode || "missing"}\`. The immutable \`${report.currentSourcePublicLifetimeRemediation.immutableOriginalFindingCount ?? "unknown"}\`-finding baseline and sealed \`${report.currentSourcePublicLifetimeRemediation.sealedFindingCount ?? "unknown"}\`-finding scan remain unchanged; fresh rescan required remains \`${report.currentSourcePublicLifetimeRemediation.freshRescanRequired === true}\`, security-complete remains \`${report.currentSourcePublicLifetimeRemediation.securityComplete === true}\`, and exact saved Share remains \`${report.currentSourcePublicLifetimeRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Current-source security resource-budget remediation is \`${report.currentSourceSecurityResourceBudgetRemediation.verdict || "missing"}\`: source/live \`${report.currentSourceSecurityResourceBudgetRemediation.sourceHead || "missing"}/${report.currentSourceSecurityResourceBudgetRemediation.productionCommit || "missing"}\`, remediated \`${report.currentSourceSecurityResourceBudgetRemediation.remediatedFindingCount ?? "unknown"}\`, canonical findings \`${report.currentSourceSecurityResourceBudgetRemediation.canonicalFindingCount ?? "unknown"}\`, manifest \`${report.currentSourceSecurityResourceBudgetRemediation.manifestStatus || "missing"}\`, and approval-gated findings \`${report.currentSourceSecurityResourceBudgetRemediation.approvalGatedFindingCount ?? "unknown"}\`. Direct live provider budget execution remains \`${report.currentSourceSecurityResourceBudgetRemediation.directLiveBudgetExecutionProven === true}\`; security-complete remains \`${report.currentSourceSecurityResourceBudgetRemediation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.currentSourceSecurityResourceBudgetRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Current-source logout storage remediation is \`${report.currentSourceLogoutStorageRemediation.verdict || "missing"}\`: source/live \`${report.currentSourceLogoutStorageRemediation.sourceHead || "missing"}/${report.currentSourceLogoutStorageRemediation.productionCommit || "missing"}\`, exact keys/prefixes/preferences \`${report.currentSourceLogoutStorageRemediation.exactKeyCount ?? "unknown"}/${report.currentSourceLogoutStorageRemediation.clearedPrefixCount ?? "unknown"}/${report.currentSourceLogoutStorageRemediation.preservedPreferenceCount ?? "unknown"}\`, tests \`${report.currentSourceLogoutStorageRemediation.testsPassed ?? "unknown"}\`, build \`${report.currentSourceLogoutStorageRemediation.buildStatus || "missing"}\`, and static violations \`${report.currentSourceLogoutStorageRemediation.staticViolationCount ?? "unknown"}\`. Behavioral logout remains \`${report.currentSourceLogoutStorageRemediation.behavioralLogoutExecuted === true}\`; fresh rescan required remains \`${report.currentSourceLogoutStorageRemediation.freshRescanRequired === true}\`, security-complete remains \`${report.currentSourceLogoutStorageRemediation.securityComplete === true}\`, and exact saved Share remains \`${report.currentSourceLogoutStorageRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Current-source ontology error projection remediation is \`${report.currentSourceOntologyErrorProjectionRemediation.verdict || "missing"}\`: product/live \`${report.currentSourceOntologyErrorProjectionRemediation.sourceHead || "missing"}/${report.currentSourceOntologyErrorProjectionRemediation.productionCommit || "missing"}\`, fixed public codes \`${report.currentSourceOntologyErrorProjectionRemediation.publicErrorCodeCount ?? "unknown"}\`, tests \`${report.currentSourceOntologyErrorProjectionRemediation.testsPassed ?? "unknown"}\`, build \`${report.currentSourceOntologyErrorProjectionRemediation.buildStatus || "missing"}\`, and live admission \`${report.currentSourceOntologyErrorProjectionRemediation.liveProbeCode || "missing"}\`. No provider failure was induced \`${report.currentSourceOntologyErrorProjectionRemediation.upstreamFailureInduced === true}\`; fresh rescan required remains \`${report.currentSourceOntologyErrorProjectionRemediation.freshRescanRequired === true}\`, security-complete remains \`${report.currentSourceOntologyErrorProjectionRemediation.securityComplete === true}\`, and exact saved Share remains \`${report.currentSourceOntologyErrorProjectionRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.

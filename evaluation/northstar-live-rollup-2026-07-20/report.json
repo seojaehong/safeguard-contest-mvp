@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-31T16:35:17.392Z",
-  "head": "0261e05219af16310549b43e17f40a5b49968876",
+  "generatedAt": "2026-08-31T18:55:37.676Z",
+  "head": "35c47474b3116712ecceb8cb0b5ec7b1762ddf9d",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "0261e05219af16310549b43e17f40a5b49968876",
+    "commitSha": "35c47474b3116712ecceb8cb0b5ec7b1762ddf9d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ajcxfvsm8-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-3ws475ajc-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 101
+    "gateCount": 102
   },
   "provenGates": [
     {
@@ -254,6 +254,12 @@
       "state": "notice",
       "artifact": "evaluation\\current-source-security-approval-free-remediation-2026-08-31\\report.json",
       "detail": "All four approval-free findings from Standard scan 8d7fd844 now have bounded current-source and aligned-production remediation receipts: structured XLSX render budgeting, operator parser admission, orchestration smoke CSV formula neutralization, and HWPX archive anonymization. The sealed 9-finding scan is unchanged, the five database/RLS/atomicity findings remain approval-gated, a fresh full repository rescan is still required before reclassification, security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "current_source_public_lifetime_remediation",
+      "state": "notice",
+      "artifact": "evaluation\\current-source-security-public-lifetime-remediation-2026-09-01\\report.json",
+      "detail": "Current production includes the bounded knowledge-review auth-before-body and Ontology caller-cancellation remediations. Read-only live probes returned 401 before unauthenticated preparation body handling and 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before Ontology provider or database work; browser fallback contracts passed. The immutable 18-finding baseline and sealed 19-finding current scan remain unchanged, a fresh scan is required, security-complete is false, approval-gated findings remain open, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_source_security_resource_budget_remediation",
@@ -964,6 +970,18 @@
     "approvalGatedFindingCount": 5,
     "freshFullRepositoryRescanRequired": true,
     "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "currentSourcePublicLifetimeRemediation": {
+    "artifact": "evaluation\\current-source-security-public-lifetime-remediation-2026-09-01\\report.json",
+    "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_REQUEST_LIFETIME_REMEDIATION_RESCAN_PENDING",
+    "productCommit": "b983f9f8b7fe9b3aa57b4701bc782fd3799a421c",
+    "productionCommit": "35c47474b3116712ecceb8cb0b5ec7b1762ddf9d",
+    "remediatedFindingCount": 2,
+    "sealedFindingCount": 19,
+    "immutableOriginalFindingCount": 18,
+    "freshRescanRequired": true,
+    "securityComplete": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "currentSourceSecurityResourceBudgetRemediation": {
@@ -2286,9 +2304,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "0261e05219af16310549b43e17f40a5b49968876",
+      "sourceCommit": "35c47474b3116712ecceb8cb0b5ec7b1762ddf9d",
       "sourceStatus": "exact",
-      "productionCommit": "0261e05219af16310549b43e17f40a5b49968876",
+      "productionCommit": "35c47474b3116712ecceb8cb0b5ec7b1762ddf9d",
       "productionStatus": "matches_live"
     },
     {
@@ -2580,6 +2598,14 @@
       "productionStatus": "ancestor_of_head"
     },
     {
+      "id": "current_source_public_lifetime_remediation",
+      "artifact": "evaluation\\current-source-security-public-lifetime-remediation-2026-09-01\\report.json",
+      "sourceCommit": "b983f9f8b7fe9b3aa57b4701bc782fd3799a421c",
+      "sourceStatus": "ancestor",
+      "productionCommit": "35c47474b3116712ecceb8cb0b5ec7b1762ddf9d",
+      "productionStatus": "matches_live_source_mismatch"
+    },
+    {
       "id": "current_source_security_resource_budget_remediation",
       "artifact": "evaluation\\current-source-security-resource-budget-remediation-2026-08-31\\report.json",
       "sourceCommit": "8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f",
@@ -2655,9 +2681,9 @@
       "id": "current_security_governed_path_compatibility",
       "artifact": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
       "sourceCommit": "0261e05219af16310549b43e17f40a5b49968876",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "0261e05219af16310549b43e17f40a5b49968876",
-      "productionStatus": "matches_live"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "stale_approval_evidence_binding_security",

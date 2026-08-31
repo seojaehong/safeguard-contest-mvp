@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-31T16:35:45.923Z",
+  "generatedAt": "2026-08-31T18:56:08.892Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "0261e05219af16310549b43e17f40a5b49968876",
-  "productionCommit": "0261e05219af16310549b43e17f40a5b49968876",
+  "sourceHead": "35c47474b3116712ecceb8cb0b5ec7b1762ddf9d",
+  "productionCommit": "35c47474b3116712ecceb8cb0b5ec7b1762ddf9d",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "0261e05219af16310549b43e17f40a5b49968876",
+    "commitSha": "35c47474b3116712ecceb8cb0b5ec7b1762ddf9d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ajcxfvsm8-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-3ws475ajc-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "0261e05219af16310549b43e17f40a5b49968876",
-  "liveRollupLiveCommit": "0261e05219af16310549b43e17f40a5b49968876",
+  "liveExactEvidenceCommit": "35c47474b3116712ecceb8cb0b5ec7b1762ddf9d",
+  "liveRollupLiveCommit": "35c47474b3116712ecceb8cb0b5ec7b1762ddf9d",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -70,6 +70,7 @@
     "currentSourceForwardedIdentityRemediation": "evaluation\\current-source-security-forwarded-identity-remediation-2026-08-31\\report.json",
     "currentSourceTemplateInventoryRemediation": "evaluation\\current-source-security-template-inventory-remediation-2026-08-31\\report.json",
     "currentSourceApprovalFreeSecurityRemediation": "evaluation\\current-source-security-approval-free-remediation-2026-08-31\\report.json",
+    "currentSourcePublicLifetimeRemediation": "evaluation\\current-source-security-public-lifetime-remediation-2026-09-01\\report.json",
     "currentSourceSecurityResourceBudgetRemediation": "evaluation\\current-source-security-resource-budget-remediation-2026-08-31\\report.json",
     "currentSourceLogoutStorageRemediation": "evaluation\\current-source-security-logout-storage-remediation-2026-08-31\\report.json",
     "currentSourceOntologyErrorProjectionRemediation": "evaluation\\current-source-security-ontology-error-projection-remediation-2026-08-31\\report.json",
@@ -236,6 +237,11 @@
       "gate": "current_source_approval_free_security_remediation",
       "state": "notice",
       "reason": "current live source records 4/4 bounded approval-free remediations with 0 approval-free source residuals left before rescan; the sealed 9-finding scan is unchanged, 5 database/RLS/atomicity findings remain approval-gated, fresh full rescan required=true, security-complete is false, and exact saved Share remains MISSING_EVIDENCE"
+    },
+    {
+      "gate": "current_source_public_lifetime_remediation",
+      "state": "notice",
+      "reason": "live product 35c47474 includes 2 bounded public lifetime remediations; knowledge prepare=401, ontology=503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE. The immutable 18-finding baseline and sealed 19-finding scan remain unchanged, fresh rescan required=true, security-complete=false, and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "current_source_security_resource_budget_remediation",
@@ -1349,6 +1355,20 @@
     "scanFindingReclassificationPerformed": false,
     "freshFullRepositoryRescanRequired": true,
     "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "currentSourcePublicLifetimeRemediation": {
+    "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_REQUEST_LIFETIME_REMEDIATION_RESCAN_PENDING",
+    "productCommit": "b983f9f8b7fe9b3aa57b4701bc782fd3799a421c",
+    "productionCommit": "35c47474b3116712ecceb8cb0b5ec7b1762ddf9d",
+    "remediatedFindingCount": 2,
+    "sealedFindingCount": 19,
+    "immutableOriginalFindingCount": 18,
+    "knowledgePrepareStatus": 401,
+    "ontologyGraphStatus": 503,
+    "ontologyGraphCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "freshRescanRequired": true,
+    "securityComplete": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "currentSourceSecurityResourceBudgetRemediation": {

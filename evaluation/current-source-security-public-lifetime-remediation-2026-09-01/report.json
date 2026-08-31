@@ -1,11 +1,12 @@
 {
   "schemaVersion": "safeclaw-current-source-security-public-lifetime-remediation/v1",
-  "generatedAt": "2026-08-31T18:04:52.8319399Z",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PUBLIC_REQUEST_LIFETIME_REMEDIATION_LIVE_PENDING",
+  "generatedAt": "2026-08-31T18:10:20.000Z",
+  "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_REQUEST_LIFETIME_REMEDIATION_RESCAN_PENDING",
   "userContext": "Preserve immutable original 18-finding baseline. Verify current 02bc23029eb3dee1ad0027878454fb34d801ffa3 source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
   "sourceBaseCommit": "02bc23029eb3dee1ad0027878454fb34d801ffa3",
   "sourceHead": "b983f9f8b7fe9b3aa57b4701bc782fd3799a421c",
   "productCommit": "b983f9f8b7fe9b3aa57b4701bc782fd3799a421c",
+  "productionCommit": "35c47474b3116712ecceb8cb0b5ec7b1762ddf9d",
   "scan": {
     "scanId": "1e5d68c4-fd86-4df4-bb95-542a9708ffef",
     "targetRevision": "02bc23029eb3dee1ad0027878454fb34d801ffa3",
@@ -84,6 +85,18 @@
         "safeclaw-share-recipient-documents-summary after pseudo-element line-height tier",
         "safeclaw-share-recipient-documents-summary after pseudo-element typography tuple"
       ]
+    },
+    "liveProduction": {
+      "buildInfoCommit": "35c47474b3116712ecceb8cb0b5ec7b1762ddf9d",
+      "productCommitIncluded": true,
+      "deploymentUrl": "safeguard-contest-3ws475ajc-seojaehongs-projects.vercel.app",
+      "knowledgePrepareUnauthenticatedStatus": 401,
+      "knowledgePrepareBodyReadBeforeAuthentication": false,
+      "ontologyGraphStatus": 503,
+      "ontologyGraphCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      "ontologyGraphProviderOrDbWorkExecuted": false,
+      "ontologyBrowserFilesPassed": 1,
+      "ontologyBrowserTestsPassed": 2
     }
   },
   "mutationBoundary": {
@@ -96,7 +109,7 @@
   },
   "remainingBoundaries": {
     "securityComplete": false,
-    "liveAfterDeploymentRequired": true,
+    "liveAfterDeploymentRequired": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedFindingsRemainOpen": true
   }

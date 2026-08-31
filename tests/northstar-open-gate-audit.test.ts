@@ -13906,6 +13906,22 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "live_document_field_isolation")?.detail).toContain("maintenanceAccidentIsolation=false");
   });
 
+  it("keeps the public lifetime remediation scoped to live evidence with sealed findings open", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir: path.resolve("."),
+      generatedAt: "2026-09-01T00:00:00.000Z",
+    });
+    const gate = audit.gates.find((item) => item.id === "current_source_public_lifetime_remediation");
+
+    expect(gate).toMatchObject({ state: "notice" });
+    expect(gate?.detail).toContain("immutable 18-finding baseline");
+    expect(gate?.detail).toContain("sealed 19-finding current scan");
+    expect(gate?.detail).toContain("503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+    expect(gate?.detail).toContain("security-complete is false");
+    expect(gate?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
+  });
+
   it("renders the approval boundary and forbidden claims in the Markdown report", async () => {
     const { buildNorthstarOpenGateAudit, renderNorthstarOpenGateMarkdown } = await loadAuditModule();
     const rootDir = createFixtureRoot();

@@ -1,7 +1,8 @@
 # SafeClaw public request lifetime remediation
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_PUBLIC_REQUEST_LIFETIME_REMEDIATION_LIVE_PENDING`
+- Verdict: `PASS_LIVE_PRODUCTION_PUBLIC_REQUEST_LIFETIME_REMEDIATION_RESCAN_PENDING`
 - Product commit: `b983f9f8b7fe9b3aa57b4701bc782fd3799a421c`
+- Production commit: `35c47474b3116712ecceb8cb0b5ec7b1762ddf9d`
 - Scan input: `1e5d68c4-fd86-4df4-bb95-542a9708ffef` at `02bc2302`
 
 ## Remediation
@@ -19,9 +20,12 @@ The public Ontology page no longer creates a detached synthetic server request f
 - Strict TypeScript: PASS.
 - Production build: Next.js `15.5.22`, `29/29` static pages PASS.
 - Two independent read-only security reviews found no remaining blocker after the review findings were fixed.
+- Production `POST /api/knowledge/review/prepare` returned `401` for the unauthenticated read-only probe.
+- Production `/api/ontology/graph` returned `503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE` before provider or database work because distributed admission is not configured.
+- Production Ontology browser verification passed `1` file / `2` tests, including fallback containment.
 
 The frontend static audit still reports two pre-existing Share summary pseudo-element typography residuals. Coverage is complete and the route contract passes; this receipt does not hide or reclassify those unrelated residuals.
 
 ## Boundary
 
-This is current-source local remediation evidence, not a rewrite or reclassification of any sealed scan. The immutable original 18-finding baseline remains unchanged, and the sealed current scan's 19 findings remain historical evidence until a fresh scan is completed. No database, provider dispatch, Share-session, vector or embedding, Wiki publication, or KOSHA registry mutation occurred. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`; approval-gated findings remain open; security-complete remains false. Live verification is pending deployment of the product commit.
+This is scoped current-source and live-production remediation evidence, not a rewrite or reclassification of any sealed scan. The immutable original 18-finding baseline remains unchanged, and the sealed current scan's 19 findings remain historical evidence until a fresh scan is completed. No database, provider dispatch, Share-session, vector or embedding, Wiki publication, or KOSHA registry mutation occurred. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`; approval-gated findings remain open; security-complete remains false. Distributed ontology admission still requires operator configuration, and a fresh full-repository scan remains required before finding reclassification.

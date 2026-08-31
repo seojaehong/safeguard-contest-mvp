@@ -53,6 +53,7 @@ const ARTIFACTS = Object.freeze({
   currentSourceForwardedIdentityRemediation: path.join("evaluation", "current-source-security-forwarded-identity-remediation-2026-08-31", "report.json"),
   currentSourceTemplateInventoryRemediation: path.join("evaluation", "current-source-security-template-inventory-remediation-2026-08-31", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
+  currentSourcePublicLifetimeRemediation: path.join("evaluation", "current-source-security-public-lifetime-remediation-2026-09-01", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
   currentSourceOntologyErrorProjectionRemediation: path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
@@ -592,6 +593,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const currentSourceForwardedIdentityRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceForwardedIdentityRemediation);
   const currentSourceTemplateInventoryRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceTemplateInventoryRemediation);
   const currentSourceApprovalFreeSecurityRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceApprovalFreeSecurityRemediation);
+  const currentSourcePublicLifetimeRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourcePublicLifetimeRemediation);
   const currentSourceSecurityResourceBudgetRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityResourceBudgetRemediation);
   const currentSourceLogoutStorageRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceLogoutStorageRemediation);
   const currentSourceOntologyErrorProjectionRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceOntologyErrorProjectionRemediation);
@@ -750,6 +752,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_forwarded_identity_remediation", ARTIFACTS.currentSourceForwardedIdentityRemediation, currentSourceForwardedIdentityRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_template_inventory_remediation", ARTIFACTS.currentSourceTemplateInventoryRemediation, currentSourceTemplateInventoryRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_approval_free_security_remediation", ARTIFACTS.currentSourceApprovalFreeSecurityRemediation, currentSourceApprovalFreeSecurityRemediation),
+    evidenceStatus(rootDir, currentHead, liveCommit, "current_source_public_lifetime_remediation", ARTIFACTS.currentSourcePublicLifetimeRemediation, currentSourcePublicLifetimeRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_resource_budget_remediation", ARTIFACTS.currentSourceSecurityResourceBudgetRemediation, currentSourceSecurityResourceBudgetRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_logout_storage_remediation", ARTIFACTS.currentSourceLogoutStorageRemediation, currentSourceLogoutStorageRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_ontology_error_projection_remediation", ARTIFACTS.currentSourceOntologyErrorProjectionRemediation, currentSourceOntologyErrorProjectionRemediation),
@@ -1107,6 +1110,18 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       freshFullRepositoryRescanRequired: recordAt(currentSourceApprovalFreeSecurityRemediation, "boundaries")?.freshFullRepositoryRescanRequired === true,
       securityCompleteClaimAllowed: recordAt(currentSourceApprovalFreeSecurityRemediation, "boundaries")?.securityCompleteClaimAllowed === true,
       exactSavedShareVerdict: asString(recordAt(currentSourceApprovalFreeSecurityRemediation, "boundaries")?.exactSavedShareVerdict),
+    },
+    currentSourcePublicLifetimeRemediation: {
+      artifact: ARTIFACTS.currentSourcePublicLifetimeRemediation,
+      verdict: isRecord(currentSourcePublicLifetimeRemediation) ? asString(currentSourcePublicLifetimeRemediation.verdict) : "missing",
+      productCommit: isRecord(currentSourcePublicLifetimeRemediation) ? asString(currentSourcePublicLifetimeRemediation.productCommit) : "",
+      productionCommit: isRecord(currentSourcePublicLifetimeRemediation) ? asString(currentSourcePublicLifetimeRemediation.productionCommit) : "",
+      remediatedFindingCount: isRecord(currentSourcePublicLifetimeRemediation) && Array.isArray(currentSourcePublicLifetimeRemediation.findings) ? currentSourcePublicLifetimeRemediation.findings.length : 0,
+      sealedFindingCount: asNumber(recordAt(currentSourcePublicLifetimeRemediation, "scan")?.findingCount),
+      immutableOriginalFindingCount: asNumber(recordAt(currentSourcePublicLifetimeRemediation, "scan")?.immutableOriginalFindingCount),
+      freshRescanRequired: recordAt(currentSourcePublicLifetimeRemediation, "scan")?.freshRescanRequired === true,
+      securityComplete: recordAt(currentSourcePublicLifetimeRemediation, "remainingBoundaries")?.securityComplete === true,
+      exactSavedShareVerdict: asString(recordAt(currentSourcePublicLifetimeRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     currentSourceSecurityResourceBudgetRemediation: {
       artifact: ARTIFACTS.currentSourceSecurityResourceBudgetRemediation,
@@ -2711,6 +2726,13 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Immutable original baseline: ${rollup.securityFollowupRemediation.immutableOriginalBaselineFindingCount ?? "unknown"}; rewritten=${rollup.securityFollowupRemediation.originalBaselineRewritten}`,
     `- Deferred candidates retained: ${rollup.securityFollowupRemediation.deferredCandidateCount ?? "unknown"}; live provider cancellation probe executed=${rollup.securityFollowupRemediation.liveProviderCancellationProbeExecuted}`,
     `- Exact saved Share: ${rollup.securityFollowupRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "",
+    "## Public request lifetime remediation",
+    "",
+    `- Verdict: \`${rollup.currentSourcePublicLifetimeRemediation.verdict || "missing"}\``,
+    `- Product / production: ${rollup.currentSourcePublicLifetimeRemediation.productCommit || "missing"} / ${rollup.currentSourcePublicLifetimeRemediation.productionCommit || "missing"}`,
+    `- Scoped findings remediated: ${rollup.currentSourcePublicLifetimeRemediation.remediatedFindingCount ?? "unknown"}; sealed scan findings: ${rollup.currentSourcePublicLifetimeRemediation.sealedFindingCount ?? "unknown"}; immutable original baseline: ${rollup.currentSourcePublicLifetimeRemediation.immutableOriginalFindingCount ?? "unknown"}`,
+    `- Fresh rescan required: ${rollup.currentSourcePublicLifetimeRemediation.freshRescanRequired === true}; security-complete: ${rollup.currentSourcePublicLifetimeRemediation.securityComplete === true}; exact saved Share: ${rollup.currentSourcePublicLifetimeRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "",
     "## Completed Current-head Standard Security Scan",
     `- Verdict: \`${rollup.completedCurrentHeadStandardSecurityScan.verdict || "missing"}\`; scan \`${rollup.completedCurrentHeadStandardSecurityScan.scanId || "missing"}\`; source \`${rollup.completedCurrentHeadStandardSecurityScan.sourceHead || "missing"}\``,

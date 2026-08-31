@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-31T16:35:11.494Z",
-  "sourceSha": "0261e05219af16310549b43e17f40a5b49968876",
+  "generatedAt": "2026-08-31T18:50:13.220Z",
+  "sourceSha": "35c47474b3116712ecceb8cb0b5ec7b1762ddf9d",
   "overall": "open",
   "gates": [
     {
@@ -406,6 +406,16 @@
       "nextActions": [
         "Start a new Desktop Standard scan over the current repository HEAD before reclassifying the four sealed findings or making any security-complete claim.",
         "Keep the five database/RLS/atomicity findings and exact saved Share on their existing approval paths."
+      ]
+    },
+    {
+      "id": "current_source_public_lifetime_remediation",
+      "state": "notice",
+      "label": "Current-source public request lifetime remediation",
+      "evidencePath": "evaluation\\current-source-security-public-lifetime-remediation-2026-09-01\\report.json",
+      "detail": "Current production includes the bounded knowledge-review auth-before-body and Ontology caller-cancellation remediations. Read-only live probes returned 401 before unauthenticated preparation body handling and 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before Ontology provider or database work; browser fallback contracts passed. The immutable 18-finding baseline and sealed 19-finding current scan remain unchanged, a fresh scan is required, security-complete is false, approval-gated findings remain open, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Run a fresh full-repository security scan before reclassifying either sealed finding or making a security-complete claim."
       ]
     },
     {
