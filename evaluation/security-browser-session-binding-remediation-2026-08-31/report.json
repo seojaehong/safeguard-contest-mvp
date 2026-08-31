@@ -1,0 +1,90 @@
+{
+  "schema": "safeclaw-security-browser-session-binding-remediation/v1",
+  "verdict": "PASS_CURRENT_SOURCE_BROWSER_SESSION_BINDING_LIVE_PENDING",
+  "generatedAt": "2026-08-31T23:02:37+09:00",
+  "sourceHead": "e36356d84fa8ac2331f8d0b81229d0532024a876",
+  "productCommit": "e36356d84fa8ac2331f8d0b81229d0532024a876",
+  "baseline": {
+    "scanId": "a4044172-9b4b-4e36-84be-a8955d9150ac",
+    "targetRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+    "findingId": "csf_f90250720fbf70f18d0a3f2f",
+    "occurrenceId": "occ_18cebdaaa1dcad6569b469d3",
+    "ruleId": "auth.unbound-url-fragment-session",
+    "severity": "medium",
+    "findingTitle": "Non-callback pages accept unbound Supabase sessions from URL fragments",
+    "immutableCompletedScanPreserved": true
+  },
+  "remediation": {
+    "factory": "lib/supabase-browser-client.ts",
+    "detectSessionInUrl": false,
+    "browserClientSurfaceCount": 11,
+    "rawCreateClientCallCountInAppAndComponents": 0,
+    "callbackTransactionValidationPreserved": true,
+    "screenLocalClientCachingPreserved": true,
+    "serviceRoleClientChanged": false
+  },
+  "verification": {
+    "focusedAuth": {
+      "command": "npm.cmd test -- tests/auth-callback.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 1,
+      "testsPassed": 14,
+      "testsFailed": 0
+    },
+    "adjacentSurfaceContracts": {
+      "command": "npm.cmd test -- tests/evidence-file.test.ts tests/reports-download-center.test.ts tests/knowledge-review-inbox-browser.test.ts tests/ai-connect-design-contract.test.ts tests/ai-connect-production-matrix.test.ts tests/workpack-archive-tenant-boundary.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testsPassed": 27,
+      "testsSkipped": 2,
+      "testsFailed": 1,
+      "targetRemediationRegressionObserved": false,
+      "residualFailure": {
+        "test": "tests/ai-connect-design-contract.test.ts",
+        "reason": "Pre-existing frontend consistency audit findings at app/globals.css:15979",
+        "rules": [
+          "line-height-tier",
+          "typography-tuple"
+        ],
+        "selector": ".safeclaw-share-recipient-documents-summary::after",
+        "inRemediationScope": false
+      }
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "passed": true
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "passed": true,
+      "nextVersion": "15.5.22",
+      "staticPagesGenerated": 28
+    },
+    "diffCheckPassed": true
+  },
+  "production": {
+    "checkedAt": "2026-08-31T23:02:37+09:00",
+    "commitSha": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-2ywzc7h9z-seojaehongs-projects.vercel.app",
+    "productCommitLive": false,
+    "liveVerificationPending": true
+  },
+  "securityScan": {
+    "findingRemediatedInCurrentSource": true,
+    "findingClosureClaimed": false,
+    "freshPostDeploymentVerificationRequired": true,
+    "completedBaselineFindingCount": 14
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "fixtureOrGeneratedShareUsedAsExactProof": false,
+    "approvalGatedBoundariesPreserved": true
+  }
+}
