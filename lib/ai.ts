@@ -25,6 +25,48 @@ const RESPONSE_TIMEOUT_MS = resolvePositiveIntEnv(process.env.OPENAI_TIMEOUT_MS,
 const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "25000", 10);
 const RETRY_DELAY_MS = 500;
 
+export const AI_ANSWER_OUTPUT_BUDGET = Object.freeze({
+  label: "AI answer",
+  maxOutputTokens: 2_048,
+  maxOutputChars: 8_000,
+});
+export const AI_CITATION_MAPPING_OUTPUT_BUDGET = Object.freeze({
+  label: "AI citation mapping",
+  maxOutputTokens: 1_024,
+  maxOutputChars: 4_000,
+});
+export const AI_KNOWLEDGE_OUTPUT_BUDGET = Object.freeze({
+  label: "AI knowledge candidate",
+  maxOutputTokens: 2_048,
+  maxOutputChars: 8_000,
+});
+export const AI_REMEDIATION_OUTPUT_BUDGET = Object.freeze({
+  label: "AI workpack remediation",
+  maxOutputTokens: 1_024,
+  maxOutputChars: 4_000,
+});
+
+type ProviderTextBudget = Readonly<{
+  label: string;
+  maxOutputTokens: number;
+  maxOutputChars: number;
+}>;
+
+export type KnowledgeGenerationPurpose = "knowledge-candidate" | "workpack-remediation";
+
+function enforceProviderTextBudget(text: string, budget: ProviderTextBudget): string {
+  if (text.length > budget.maxOutputChars) {
+    throw new Error(`${budget.label} exceeded the ${budget.maxOutputChars}-character output budget`);
+  }
+  return text;
+}
+
+function resolveKnowledgeGenerationBudget(purpose: KnowledgeGenerationPurpose): ProviderTextBudget {
+  return purpose === "workpack-remediation"
+    ? AI_REMEDIATION_OUTPUT_BUDGET
+    : AI_KNOWLEDGE_OUTPUT_BUDGET;
+}
+
 function safeGenerationFailureContext(error: unknown): { errorType: string; timeout: boolean } {
   return {
     errorType: error instanceof Error ? error.name : typeof error,
@@ -125,7 +167,11 @@ async function withRetry<T>(
   throw lastError instanceof Error ? lastError : new Error(`${label} failed`);
 }
 
-async function generateWithOpenAI(prompt: string, signal?: AbortSignal): Promise<ProviderGenerationResult> {
+async function generateWithOpenAI(
+  prompt: string,
+  budget: ProviderTextBudget,
+  signal?: AbortSignal,
+): Promise<ProviderGenerationResult> {
   if (!openAiApiKey) {
     throw new Error("OPENAI_API_KEY is not set");
   }
@@ -136,7 +182,8 @@ async function generateWithOpenAI(prompt: string, signal?: AbortSignal): Promise
       withTimeout(
         (requestSignal) => client.responses.create({
           model: openAiModel,
-          input: prompt
+          input: prompt,
+          max_output_tokens: budget.maxOutputTokens,
         }, { signal: requestSignal }),
         RESPONSE_TIMEOUT_MS,
         "OpenAI response",
@@ -147,10 +194,14 @@ async function generateWithOpenAI(prompt: string, signal?: AbortSignal): Promise
     signal,
   );
 
+  const answer = enforceProviderTextBudget(
+    response.output_text || "답변을 생성하지 못했습니다.",
+    budget,
+  );
   return {
-    answer: response.output_text || "답변을 생성하지 못했습니다.",
+    answer,
     providerLabel: "OpenAI",
-    policyNote: `OpenAI 응답은 timeout ${RESPONSE_TIMEOUT_MS}ms, retry 없음, 실패 시 graceful fallback 정책을 따릅니다.`,
+    policyNote: `OpenAI 응답은 최대 ${budget.maxOutputTokens} tokens/${budget.maxOutputChars} chars, timeout ${RESPONSE_TIMEOUT_MS}ms, retry 없음, 실패 시 graceful fallback 정책을 따릅니다.`,
     provider: "openai",
     model: openAiModel,
     fallbackUsed: false
@@ -160,35 +211,44 @@ async function generateWithOpenAI(prompt: string, signal?: AbortSignal): Promise
 async function generateWithGeminiModel(
   prompt: string,
   model: string,
+  budget: ProviderTextBudget,
   signal?: AbortSignal,
 ): Promise<ProviderGenerationResult> {
   // generateWithVertex handles its own timeout internally (Promise.race).
   // 1 attempt only — retry doubles wall time, which defeats the timeout budget.
   const answer = await withRetry(
-    () => generateWithVertex(model, prompt, { timeoutMs: GEMINI_TIMEOUT_MS, signal }),
+    () => generateWithVertex(model, prompt, {
+      generationConfig: { maxOutputTokens: budget.maxOutputTokens },
+      timeoutMs: GEMINI_TIMEOUT_MS,
+      signal,
+    }),
     1,
     `Vertex AI response (${model})`,
     signal,
   );
 
   return {
-    answer,
+    answer: enforceProviderTextBudget(answer, budget),
     providerLabel: `Gemini via Vertex (${model})`,
-    policyNote: `Vertex AI 응답은 timeout ${GEMINI_TIMEOUT_MS}ms, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다.`,
+    policyNote: `Vertex AI 응답은 최대 ${budget.maxOutputTokens} tokens/${budget.maxOutputChars} chars, timeout ${GEMINI_TIMEOUT_MS}ms, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다.`,
     provider: "vertex",
     model,
     fallbackUsed: false
   };
 }
 
-async function generateWithGemini(prompt: string, signal?: AbortSignal): Promise<ProviderGenerationResult> {
+async function generateWithGemini(
+  prompt: string,
+  budget: ProviderTextBudget,
+  signal?: AbortSignal,
+): Promise<ProviderGenerationResult> {
   const models = [...new Set([geminiModel, ...geminiFallbackModels])];
   let lastError: unknown;
 
   for (const [index, model] of models.entries()) {
     signal?.throwIfAborted();
     try {
-      const result = await generateWithGeminiModel(prompt, model, signal);
+      const result = await generateWithGeminiModel(prompt, model, budget, signal);
       return { ...result, fallbackUsed: index > 0 };
     } catch (error) {
       signal?.throwIfAborted();
@@ -329,16 +389,16 @@ export async function enhanceLegalEvidenceMappings(
 
   const prompt = buildCitationMappingPrompt(question, citations, phaseAGrounding);
   const response = isVertexConfigured()
-      ? await generateWithGemini(prompt, signal).catch((error) => {
+      ? await generateWithGemini(prompt, AI_CITATION_MAPPING_OUTPUT_BUDGET, signal).catch((error) => {
         signal?.throwIfAborted();
         if (!openAiApiKey) throw error;
         log.error(
           "Vertex AI legal evidence mapping failed; falling back to OpenAI",
           safeGenerationFailureContext(error)
         );
-        return generateWithOpenAI(prompt, signal);
+        return generateWithOpenAI(prompt, AI_CITATION_MAPPING_OUTPUT_BUDGET, signal);
       })
-    : await generateWithOpenAI(prompt, signal);
+    : await generateWithOpenAI(prompt, AI_CITATION_MAPPING_OUTPUT_BUDGET, signal);
 
   const mappings = parseCitationMappings(response.answer);
   if (!mappings.length) return citations;
@@ -388,13 +448,14 @@ export async function generateAnswer(
   const prompt = buildPrompt(question, citations, options.phaseAGrounding);
 
   const response = isVertexConfigured()
-    ? await generateWithGemini(prompt, options.signal).catch((error) => {
+    ? await generateWithGemini(prompt, AI_ANSWER_OUTPUT_BUDGET, options.signal).catch((error) => {
         options.signal?.throwIfAborted();
         if (!openAiApiKey) throw error;
         log.error("Vertex AI model chain failed; falling back to OpenAI", safeGenerationFailureContext(error));
-        return generateWithOpenAI(prompt, options.signal).then((fallback) => ({ ...fallback, fallbackUsed: true }));
+        return generateWithOpenAI(prompt, AI_ANSWER_OUTPUT_BUDGET, options.signal)
+          .then((fallback) => ({ ...fallback, fallbackUsed: true }));
       })
-    : await generateWithOpenAI(prompt, options.signal);
+    : await generateWithOpenAI(prompt, AI_ANSWER_OUTPUT_BUDGET, options.signal);
 
   const live = buildMockAskResponse(
     question,
@@ -427,8 +488,13 @@ export async function generateAnswer(
   };
 }
 
-export async function generateKnowledgeText(prompt: string, signal?: AbortSignal) {
+export async function generateKnowledgeText(
+  prompt: string,
+  signal?: AbortSignal,
+  purpose: KnowledgeGenerationPurpose = "knowledge-candidate",
+) {
   signal?.throwIfAborted();
+  const budget = resolveKnowledgeGenerationBudget(purpose);
   if (!isVertexConfigured() && !openAiApiKey) {
     return {
       configured: false,
@@ -439,16 +505,16 @@ export async function generateKnowledgeText(prompt: string, signal?: AbortSignal
   }
 
   const response = isVertexConfigured()
-    ? await generateWithGemini(prompt, signal).catch((error) => {
+    ? await generateWithGemini(prompt, budget, signal).catch((error) => {
         signal?.throwIfAborted();
         if (!openAiApiKey) throw error;
         log.error(
           "Vertex AI knowledge generation failed; falling back to OpenAI",
           safeGenerationFailureContext(error)
         );
-        return generateWithOpenAI(prompt, signal);
+        return generateWithOpenAI(prompt, budget, signal);
       })
-    : await generateWithOpenAI(prompt, signal);
+    : await generateWithOpenAI(prompt, budget, signal);
 
   return {
     configured: true,

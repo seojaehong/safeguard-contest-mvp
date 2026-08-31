@@ -34,10 +34,16 @@ describe("cancellable Vertex transport", () => {
     vi.stubGlobal("fetch", fetchMock);
     const { generateWithVertex } = await import("@/lib/vertex/client");
 
-    await expect(generateWithVertex("gemini-test", "prompt")).resolves.toBe("안전 답변");
+    await expect(generateWithVertex("gemini-test", "prompt", {
+      generationConfig: { maxOutputTokens: 1_234 },
+    })).resolves.toBe("안전 답변");
     expect(String(fetchMock.mock.calls[0]?.[0])).toContain(
       "/projects/test-project/locations/asia-northeast3/publishers/google/models/gemini-test:generateContent",
     );
+    const requestBody = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body)) as {
+      generationConfig?: { maxOutputTokens?: number };
+    };
+    expect(requestBody.generationConfig?.maxOutputTokens).toBe(1_234);
   });
 
   it("aborts the underlying Vertex fetch when the caller disconnects", async () => {

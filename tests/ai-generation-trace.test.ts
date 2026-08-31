@@ -52,6 +52,18 @@ describe("answer generation trace", () => {
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("safeclaw_answer_trace"));
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"traceId":"trace-openai-answer"'));
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"model":"gpt-4.1-mini"'));
+    expect(mocks.openAiCreate.mock.calls[0]?.[0]).toMatchObject({
+      max_output_tokens: 2_048,
+    });
+  });
+
+  test("rejects provider answer text beyond the application output ceiling", async () => {
+    mocks.openAiCreate.mockResolvedValueOnce({ output_text: "가".repeat(8_001) });
+    const { generateAnswer } = await import("@/lib/ai");
+
+    await expect(generateAnswer("일반 작업", [], {
+      traceId: "trace-openai-output-budget",
+    })).rejects.toThrow("AI answer exceeded the 8000-character output budget");
   });
 
   test("aborts the active OpenAI request when the caller disconnects", async () => {
@@ -89,6 +101,9 @@ describe("answer generation trace", () => {
       provider: "openai",
       model: "gpt-4.1-mini",
       fallbackUsed: true
+    });
+    expect(mocks.vertexGenerate.mock.calls[0]?.[2]).toMatchObject({
+      generationConfig: { maxOutputTokens: 2_048 },
     });
     const logged = errorSpy.mock.calls.flat().map(String).join("\n");
     expect(logged).not.toContain("PII_MARKER");
@@ -183,5 +198,22 @@ describe("answer generation trace", () => {
     expect(request?.input?.indexOf("<<<BEGIN_PHASE_A_UNTRUSTED_EVIDENCE_JSON>>>")).toBeLessThan(
       request?.input?.indexOf("당신은 산업안전 문서팩의 근거 매핑 편집자다.") ?? -1,
     );
+    expect(mocks.openAiCreate.mock.calls[0]?.[0]).toMatchObject({
+      max_output_tokens: 1_024,
+    });
+  });
+
+  test("uses separate knowledge and remediation output budgets", async () => {
+    const { generateKnowledgeText } = await import("@/lib/ai");
+
+    await generateKnowledgeText("지식 후보 초안");
+    await generateKnowledgeText("보완 체크리스트", undefined, "workpack-remediation");
+
+    expect(mocks.openAiCreate.mock.calls[0]?.[0]).toMatchObject({
+      max_output_tokens: 2_048,
+    });
+    expect(mocks.openAiCreate.mock.calls[1]?.[0]).toMatchObject({
+      max_output_tokens: 1_024,
+    });
   });
 });

@@ -264,7 +264,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const generated = await generateKnowledgeText(promptBundle.prompt, request.signal);
+    const generated = await generateKnowledgeText(
+      promptBundle.prompt,
+      request.signal,
+      "workpack-remediation",
+    );
     const fallbackText = buildFallbackText(promptBundle.rubricItem.title, promptBundle.rubricItem.improvementAction);
     const text = generated.text.trim() || fallbackText;
     const sources = promptBundle.matches.flatMap((match) => (

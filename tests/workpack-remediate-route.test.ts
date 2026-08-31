@@ -147,6 +147,7 @@ describe("workpack remediation route", () => {
     }));
     const body = await response.json() as { sources: Array<{ title: string; url: string }> };
     const generatedPrompt = vi.mocked(generateKnowledgeText).mock.calls[0]?.[0] || "";
+    const generationPurpose = vi.mocked(generateKnowledgeText).mock.calls[0]?.[2];
 
     expect(response.headers.get("X-SafeClaw-Rate-Limit")).toBe("instance");
     expect(response.headers.get("X-SafeClaw-AI-Mode")).toBe("enhanced");
@@ -156,6 +157,7 @@ describe("workpack remediation route", () => {
     expect(body.sources.find((source) => source.title === readableTitle)?.url).toContain(encodeURIComponent(readableTitle));
     expect(generatedPrompt).toContain(readableTitle);
     expect(generatedPrompt).not.toContain(rawTitle);
+    expect(generationPurpose).toBe("workpack-remediation");
     expect(archiveSifReference().title).toBe(rawTitle);
   });
 
