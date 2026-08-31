@@ -16,6 +16,7 @@ type LaunchReadinessReport = {
   apiAsk: {
     errorCode: string;
     rateLimit: string;
+    requestedAiMode: string;
     retryAfterSeconds: number | null;
     status: number | null;
     workUnit: string;
@@ -48,9 +49,12 @@ type LaunchReadinessReport = {
     databaseMutationPerformed: boolean;
     distributedAdmissionActivation: string;
     distributedAdmissionBlocked: boolean;
+    enhancedFullDistributedAdmissionPending: boolean;
     exactSavedShareVerdict: string;
+    providerBackedModesReady: boolean | null;
     providerDispatchExecuted: boolean;
     providerWorkExecuted: boolean | null;
+    templateModeOnly: boolean;
   };
   safeLaunchDemoClaimAllowed: boolean;
   sourceHeadAtGeneration: string;
@@ -108,6 +112,7 @@ function createFixtureRoot(): { head: string; rootDir: string } {
     generatedAt: "2026-07-22T00:00:00.000Z",
     apiAskOk: true,
     apiAskStatus: 200,
+    requestedAiMode: "template",
     baseUrl: "https://www.safeclaw.kr",
     connections: [
       { liveStatus: "연결됨", name: "Law.go / korean-law-mcp" },
@@ -235,6 +240,7 @@ describe("launch readiness current report", () => {
       presentCount: 12,
     });
     expect(report.documentCoverage.present).toContain("workPermitDraft");
+    expect(report.apiAsk.requestedAiMode).toBe("template");
     expect(report.rawAuditFreshness).toMatchObject({ ready: true, reasons: [] });
     expect(report.approvalGatedBoundaryCount).toBe(8);
     expect(report.approvalGatedBoundaryIds).toEqual([
@@ -252,6 +258,13 @@ describe("launch readiness current report", () => {
       gate: "distributed_admission_activation",
       state: "approval_gated",
     });
+    expect(report.runtimeBoundary).toMatchObject({
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      enhancedFullDistributedAdmissionPending: true,
+      providerBackedModesReady: false,
+      providerWorkExecuted: false,
+      templateModeOnly: true,
+    });
     expect(report.final99Boundary).toMatchObject({
       fullyAutomatedLaunchClaimAllowed: false,
       noticeCount: 2,
@@ -265,6 +278,8 @@ describe("launch readiness current report", () => {
     expect(report.uiArchitectureBoundary.shareRouteEvidenceBoundary).toContain("exact saved/session missing");
     expect(report.forbiddenClaims).toContain("Real provider dispatch is production-live for any channel.");
     expect(markdown).toContain("SAFETYGUARD_AUDIT_DISPATCH=false");
+    expect(markdown).toContain("requested AI mode: `template`");
+    expect(markdown).toContain("Enhanced/full provider-backed generation remains separately approval-gated.");
     expect(markdown).toContain("Exact saved user share session reproduced: `false`");
     expect(markdown).toContain("Final-99 remains `pass_with_notice`; 2 notices are carried.");
     expect(markdown).not.toContain("Final-99 remains `undefined`");
@@ -310,6 +325,7 @@ describe("launch readiness current report", () => {
       apiAskRetryAfterSeconds: 5,
       apiAskStatus: 503,
       apiAskWorkUnit: "generation",
+      requestedAiMode: "enhanced",
       baseUrl: "https://www.safeclaw.kr",
       connections: [],
       dispatchOk: null,
@@ -344,9 +360,12 @@ describe("launch readiness current report", () => {
       databaseMutationPerformed: false,
       distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
       distributedAdmissionBlocked: true,
+      enhancedFullDistributedAdmissionPending: true,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
+      providerBackedModesReady: false,
       providerDispatchExecuted: false,
       providerWorkExecuted: false,
+      templateModeOnly: false,
     });
     expect(report.final99Boundary).toMatchObject({
       historicalGateSafeLaunchDemoClaimAllowed: true,
@@ -355,6 +374,27 @@ describe("launch readiness current report", () => {
     expect(report.forbiddenClaims).toContain("Current live /api/ask generation is available for a launch demo.");
     expect(markdown).toContain("Current live launch demo generation is not allowed");
     expect(markdown).toContain("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+  });
+
+  it("fails closed when a successful audit does not prove explicit template mode", async () => {
+    const module = await loadReportModule();
+    const { head, rootDir } = createFixtureRoot();
+    const rawAuditPath = "evaluation/launch-readiness-current-2026-07-22/api-connection-audit.json";
+    const rawAudit = JSON.parse(fs.readFileSync(path.join(rootDir, rawAuditPath), "utf8")) as Record<string, unknown>;
+    const { requestedAiMode: _requestedAiMode, ...withoutMode } = rawAudit;
+    writeJson(rootDir, rawAuditPath, withoutMode);
+
+    const report = module.buildLaunchReadinessCurrentReport({
+      generatedAt: "2026-07-22T00:00:00.000Z",
+      productionCommit: head,
+      rootDir,
+    });
+
+    expect(report).toMatchObject({
+      safeLaunchDemoClaimAllowed: false,
+      verdict: "REVIEW_REQUIRED_WITH_BOUNDARIES",
+    });
+    expect(report.apiAsk.requestedAiMode).toBe("");
   });
 
   it("fails closed when a historical raw audit is relabeled with the current production marker", async () => {

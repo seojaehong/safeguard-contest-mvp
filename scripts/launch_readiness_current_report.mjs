@@ -5,7 +5,7 @@ import process from "node:process";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-const SCHEMA_VERSION = "safeclaw-launch-readiness-current/v5";
+const SCHEMA_VERSION = "safeclaw-launch-readiness-current/v6";
 const DEFAULT_BASE_URL = "https://www.safeclaw.kr";
 const DEFAULT_OUTPUT_DIR = path.join("evaluation", "launch-readiness-current-2026-07-22");
 const DEFAULT_RAW_AUDIT = path.join(DEFAULT_OUTPUT_DIR, "api-connection-audit.json");
@@ -236,6 +236,9 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
   const approvalRunwayPath = options.approvalRunwayPath || DEFAULT_APPROVAL_RUNWAY;
   const approvalRunway = readJson(rootDir, approvalRunwayPath);
   const approvalGatedBoundaries = buildApprovalGatedBoundaries(approvalRunway);
+  const distributedAdmissionActivationPending = approvalGatedBoundaries.some(
+    (boundary) => boundary.gate === "distributed_admission_activation"
+  );
   const generatedAt = options.generatedAt || new Date().toISOString();
   const sourceHeadAtGeneration = options.sourceHead || gitHead(rootDir);
   const productionBuild = isRecord(options.productionBuild) ? options.productionBuild : {};
@@ -249,18 +252,20 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
   const coverage = documentCoverage(rawAudit);
   const summary = connectionSummary(rawAudit);
   const dispatchCalled = rawAudit.dispatchStatus !== null && rawAudit.dispatchStatus !== undefined;
+  const requestedAiMode = asString(rawAudit.requestedAiMode);
   const distributedAdmissionBlocked = auditFreshness.ready
     && asNumber(rawAudit.apiAskStatus) === 503
     && asString(rawAudit.apiAskErrorCode) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
     && !dispatchCalled;
-  const liveGenerationPassed = auditFreshness.ready
+  const templateGenerationPassed = auditFreshness.ready
+    && requestedAiMode === "template"
     && rawAudit.apiAskOk === true
     && coverage.missing.length === 0
     && summary.needsCheckCount === 0
     && !dispatchCalled;
   const verdict = !auditFreshness.ready
     ? "STALE_LIVE_PROBE_REQUIRES_RERUN_NO_DISPATCH"
-    : liveGenerationPassed
+    : templateGenerationPassed
     ? "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES"
     : distributedAdmissionBlocked
       ? "BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH"
@@ -276,13 +281,14 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
     evidenceHeadBeforeThisReport: options.evidenceHeadBeforeThisReport || sourceHeadAtGeneration,
     currentHeadIsEvidenceOnlyPending: Boolean(sourceHeadAtGeneration && productionCommit && sourceHeadAtGeneration !== productionCommit),
     verdict,
-    safeLaunchDemoClaimAllowed: liveGenerationPassed,
-    guidedPilotClaimAllowed: liveGenerationPassed,
+    safeLaunchDemoClaimAllowed: templateGenerationPassed,
+    guidedPilotClaimAllowed: templateGenerationPassed,
     fullyAutomatedLaunchClaimAllowed: false,
     selfServeSaasLaunchClaimAllowed: false,
     providerDispatchLiveClaimed: false,
     dispatchCalled,
     apiAsk: {
+      requestedAiMode,
       status: asNumber(rawAudit.apiAskStatus),
       ok: rawAudit.apiAskOk === true,
       elapsedMs: asNumber(rawAudit.elapsedMs),
@@ -295,11 +301,14 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
     rawAuditFreshness: auditFreshness,
     runtimeBoundary: {
       distributedAdmissionBlocked,
-      providerWorkExecuted: distributedAdmissionBlocked ? false : null,
+      templateModeOnly: templateGenerationPassed,
+      providerBackedModesReady: distributedAdmissionActivationPending ? false : null,
+      enhancedFullDistributedAdmissionPending: distributedAdmissionActivationPending,
+      providerWorkExecuted: requestedAiMode === "template" || distributedAdmissionBlocked ? false : null,
       providerDispatchExecuted: false,
       databaseMutationPerformed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
-      distributedAdmissionActivation: distributedAdmissionBlocked
+      distributedAdmissionActivation: distributedAdmissionActivationPending
         ? "OPERATOR_CONFIGURATION_REQUIRED"
         : "NOT_MEASURED_BY_THIS_SMOKE"
     },
@@ -331,7 +340,7 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
       rlsWikiPreflight: DEFAULT_RLS_WIKI,
       approvalRunway: approvalRunwayPath
     },
-    final99Boundary: final99Boundary(final99, noticeCarry, liveGenerationPassed),
+    final99Boundary: final99Boundary(final99, noticeCarry, templateGenerationPassed),
     northstarOverall: {
       verdict: asString(openGates.verdict) || asString(openGates.overall) || "unknown"
     },
@@ -346,10 +355,10 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
     approvalGatedBoundaryCount: approvalGatedBoundaries.length,
     approvalGatedBoundaryIds: approvalGatedBoundaries.map((boundary) => boundary.gate),
     approvalGatedBoundaries,
-    safeClaims: liveGenerationPassed
+    safeClaims: templateGenerationPassed
       ? [
-          `Live /api/ask generated the expected ${coverage.presentCount}-document workpack for the audited construction scenario.`,
-          `Live public-data/AI surfaces returned connected statuses for ${summary.connectedCount} connection surface(s) in this smoke.`,
+          `Live /api/ask in explicit deterministic template mode generated the expected ${coverage.presentCount}-document workpack for the audited construction scenario.`,
+          `The template smoke returned connected statuses for ${summary.connectedCount} connection surface(s) without provider-backed enhanced/full generation.`,
           `A safe launch demo or guided pilot can be claimed only with all ${approvalGatedBoundaries.length} canonical approval boundaries preserved.`,
           "Documents selected-only bounded workbench evidence is current in scoped artifacts; route split alone is not accepted as the UX fix."
         ]
@@ -369,6 +378,7 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
       "Live Supabase RLS tenant isolation is launch-proven.",
       "Exact saved/generated user share session has been reproduced unless a concrete session URL/state is measured.",
       "n8n/provider dispatch was executed in the latest launch-readiness smoke.",
+      ...(distributedAdmissionActivationPending ? ["Enhanced/full provider-backed generation is production-ready."] : []),
       ...(!auditFreshness.ready ? ["The stored launch smoke proves the current production runtime is launch-ready."] : []),
       ...(distributedAdmissionBlocked ? ["Current live /api/ask generation is available for a launch demo."] : [])
     ],
@@ -416,7 +426,7 @@ Current HEAD is evidence-only pending relative to production: \`${report.current
 \`${report.verdict}\`
 
 ${report.safeLaunchDemoClaimAllowed
-    ? "Safe launch demo / guided pilot wording is allowed with the recorded boundaries."
+    ? "Safe launch demo / guided pilot wording is allowed for the explicit deterministic template path with the recorded boundaries. Enhanced/full provider-backed generation remains separately approval-gated."
     : "Current live launch demo generation is not allowed while the measured runtime blocker remains active."} Fully automated self-serve launch and real provider dispatch readiness are not allowed.
 
 ## Live Smoke
@@ -428,11 +438,13 @@ ${report.safeLaunchDemoClaimAllowed
 - raw audit current for this report: \`${report.rawAuditFreshness?.ready === true}\`
 - raw audit freshness reasons: \`${Array.isArray(report.rawAuditFreshness?.reasons) && report.rawAuditFreshness.reasons.length ? report.rawAuditFreshness.reasons.join(", ") : "none"}\`
 - \`/api/ask\`: ${report.apiAsk?.status ?? "unknown"} ${report.apiAsk?.ok ? "OK" : "CHECK"}
+- requested AI mode: \`${report.apiAsk?.requestedAiMode || "missing"}\`
 - error code: \`${report.apiAsk?.errorCode || "none"}\`
 - admission: \`${report.apiAsk?.rateLimit || "unknown"}\` / \`${report.apiAsk?.workUnit || "unknown"}\`
 - elapsed: ${report.apiAsk?.elapsedMs ?? "unknown"} ms
 - dispatch call: ${report.dispatchCalled ? "run" : "not run"}
 - generated documents: ${report.documentCoverage?.presentCount ?? 0} / ${report.documentCoverage?.expectedCount ?? 0}
+- enhanced/full distributed admission: \`${report.runtimeBoundary?.distributedAdmissionActivation || "unknown"}\`
 - connection verdict: \`${report.connectionVerdict}\` (${report.connectionSummary?.connectedCount ?? 0} connected, ${report.connectionSummary?.partialCount ?? 0} bounded fallback, ${report.connectionSummary?.needsCheckCount ?? 0} check-required)
 - scenario: \`${asString(report.scenario?.workSummary) || "unknown"}\`
 

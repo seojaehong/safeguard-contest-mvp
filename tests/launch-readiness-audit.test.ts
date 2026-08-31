@@ -271,6 +271,7 @@ function expectBuildInfoThenAskRequests(result: ChildResult): void {
   expect(result.requests[0].body).toBe("");
   expect(result.requests[1]).toMatchObject({ method: "POST", url: "/api/ask" });
   expect(parseJsonObject(result.requests[1].body)).toEqual({
+    aiMode: "template",
     question: "Local fixture launch readiness question",
   });
 }
@@ -295,6 +296,7 @@ describe("launch readiness audit process lifecycle", () => {
     expect(parseJsonObject(result.stdout.trim())).toMatchObject({
       apiAskOk: true,
       dispatchOk: null,
+      requestedAiMode: "template",
     });
     expect(result.outputFiles).toEqual(["audit.json"]);
     const report = parseJsonObject(result.outputText ?? "");
@@ -305,6 +307,7 @@ describe("launch readiness audit process lifecycle", () => {
       dispatchStatus: null,
       productionCommit: "fixture-production-commit",
       productionBuild: buildInfoPayload,
+      requestedAiMode: "template",
     });
     expect(asJsonObject(report.documents)).toMatchObject({
       workPermitDraft: true,

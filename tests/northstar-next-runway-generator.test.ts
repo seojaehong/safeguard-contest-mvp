@@ -52,6 +52,7 @@ type NextRunwayReport = {
   launchReadiness: {
     verdict: string;
     safeLaunchDemoClaimAllowed: boolean;
+    requestedAiMode: string;
     apiAskStatus: number | null;
     apiAskErrorCode: string;
     apiAskRateLimit: string;
@@ -59,6 +60,9 @@ type NextRunwayReport = {
     dispatchCalled: boolean;
     distributedAdmissionBlocked: boolean;
     distributedAdmissionActivation: string;
+    enhancedFullDistributedAdmissionPending: boolean;
+    providerBackedModesReady: boolean;
+    templateModeOnly: boolean;
     exactSavedShareVerdict: string;
     rawAuditFresh: boolean;
     rawAuditFreshnessReasons: string[];
@@ -2328,8 +2332,15 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     selfServeSaasLaunchClaimAllowed: false,
     providerDispatchLiveClaimed: false,
     dispatchCalled: false,
-    apiAsk: { ok: true },
+    apiAsk: { ok: true, requestedAiMode: "template" },
     rawAuditFreshness: { ready: true, reasons: [] },
+    runtimeBoundary: {
+      distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      enhancedFullDistributedAdmissionPending: true,
+      providerBackedModesReady: false,
+      templateModeOnly: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
     documentCoverage: {
       expectedCount: 12,
       presentCount: 12,
@@ -6315,6 +6326,7 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       apiAsk: {
         status: 503,
         ok: false,
+        requestedAiMode: "enhanced",
         errorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
         rateLimit: "distributed",
         workUnit: "generation",
@@ -6323,6 +6335,9 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       runtimeBoundary: {
         distributedAdmissionBlocked: true,
         distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+        enhancedFullDistributedAdmissionPending: true,
+        providerBackedModesReady: false,
+        templateModeOnly: false,
         exactSavedShareVerdict: "MISSING_EVIDENCE",
       },
       documentCoverage: {
@@ -6344,18 +6359,23 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       verdict: "BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH",
       safeLaunchDemoClaimAllowed: false,
       apiAskStatus: 503,
+      requestedAiMode: "enhanced",
       apiAskErrorCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
       apiAskRateLimit: "distributed",
       apiAskWorkUnit: "generation",
       dispatchCalled: false,
       distributedAdmissionBlocked: true,
       distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+      enhancedFullDistributedAdmissionPending: true,
+      providerBackedModesReady: false,
+      templateModeOnly: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
       rawAuditFresh: true,
       rawAuditFreshnessReasons: [],
     });
     expect(markdown).toContain("BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH");
     expect(markdown).toContain("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+    expect(markdown).toContain("requested mode `enhanced`");
     expect(markdown).toContain("demo allowed=`false`");
     expect(markdown).toContain("exact saved Share remains `MISSING_EVIDENCE`");
   });
@@ -6391,6 +6411,29 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
     });
     expect(markdown).toContain("raw audit fresh=`false`");
     expect(markdown).toContain("raw_audit_production_commit_mismatch");
+  });
+
+  it("fails launch claims closed when the child report omits explicit template mode proof", async () => {
+    const { buildNorthstarNextRunway } = await loadNextRunwayModule();
+    const { root, secondHead } = createFixtureRoot();
+    const launchPath = "evaluation/launch-readiness-current-2026-07-22/report.json";
+    const launch = JSON.parse(fs.readFileSync(path.join(root, launchPath), "utf8")) as Record<string, unknown>;
+    const apiAsk = launch.apiAsk as Record<string, unknown>;
+    const { requestedAiMode: _requestedAiMode, ...apiAskWithoutMode } = apiAsk;
+    writeJson(root, launchPath, { ...launch, apiAsk: apiAskWithoutMode });
+
+    const report = buildNorthstarNextRunway({
+      rootDir: root,
+      buildInfo: { commitSha: secondHead },
+    });
+
+    expect(report.launchReadiness).toMatchObject({
+      requestedAiMode: "",
+      safeLaunchDemoClaimAllowed: false,
+      guidedPilotClaimAllowed: false,
+      rawAuditFresh: true,
+      templateModeOnly: true,
+    });
   });
 
   it("keeps an evidence-only source head pending after refreshing the rollup from that source head", async () => {

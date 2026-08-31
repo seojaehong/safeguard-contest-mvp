@@ -350,16 +350,20 @@ function launchReadinessSummary(launch) {
   const runtimeBoundary = isRecord(launch.runtimeBoundary) ? launch.runtimeBoundary : {};
   const rawAuditFreshness = isRecord(launch.rawAuditFreshness) ? launch.rawAuditFreshness : {};
   const rawAuditFresh = rawAuditFreshness.ready === true;
+  const requestedAiMode = asString(apiAsk.requestedAiMode);
+  const templateModeOnly = asBoolean(runtimeBoundary.templateModeOnly);
+  const templateDemoProven = rawAuditFresh && requestedAiMode === "template" && templateModeOnly;
   return {
     verdict: rawAuditFresh
       ? asString(launch.verdict)
       : "STALE_LIVE_PROBE_REQUIRES_RERUN_NO_DISPATCH",
-    safeLaunchDemoClaimAllowed: rawAuditFresh && asBoolean(launch.safeLaunchDemoClaimAllowed),
-    guidedPilotClaimAllowed: rawAuditFresh && asBoolean(launch.guidedPilotClaimAllowed),
+    safeLaunchDemoClaimAllowed: templateDemoProven && asBoolean(launch.safeLaunchDemoClaimAllowed),
+    guidedPilotClaimAllowed: templateDemoProven && asBoolean(launch.guidedPilotClaimAllowed),
     fullyAutomatedLaunchClaimAllowed: asBoolean(launch.fullyAutomatedLaunchClaimAllowed),
     selfServeSaasLaunchClaimAllowed: asBoolean(launch.selfServeSaasLaunchClaimAllowed),
     providerDispatchLiveClaimed: asBoolean(launch.providerDispatchLiveClaimed),
     apiAskOk: asBoolean(apiAsk.ok),
+    requestedAiMode,
     apiAskStatus: typeof apiAsk.status === "number" && Number.isFinite(apiAsk.status)
       ? apiAsk.status
       : null,
@@ -369,6 +373,9 @@ function launchReadinessSummary(launch) {
     dispatchCalled: asBoolean(launch.dispatchCalled),
     distributedAdmissionBlocked: asBoolean(runtimeBoundary.distributedAdmissionBlocked),
     distributedAdmissionActivation: asString(runtimeBoundary.distributedAdmissionActivation),
+    enhancedFullDistributedAdmissionPending: asBoolean(runtimeBoundary.enhancedFullDistributedAdmissionPending),
+    providerBackedModesReady: asBoolean(runtimeBoundary.providerBackedModesReady),
+    templateModeOnly,
     exactSavedShareVerdict: asString(runtimeBoundary.exactSavedShareVerdict),
     rawAuditFresh,
     rawAuditFreshnessReasons: Array.isArray(rawAuditFreshness.reasons)
@@ -4742,7 +4749,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 
 ## Proven Current State
 
-- Current launch smoke is \`${report.launchReadiness.verdict || "missing"}\`: raw audit fresh=\`${report.launchReadiness.rawAuditFresh === true}\` (${Array.isArray(report.launchReadiness.rawAuditFreshnessReasons) && report.launchReadiness.rawAuditFreshnessReasons.length ? report.launchReadiness.rawAuditFreshnessReasons.join(", ") : "no freshness errors"}), \`/api/ask\` status \`${report.launchReadiness.apiAskStatus ?? "unknown"}\`, error \`${report.launchReadiness.apiAskErrorCode || "none"}\`, admission \`${report.launchReadiness.apiAskRateLimit || "unknown"}/${report.launchReadiness.apiAskWorkUnit || "unknown"}\`, demo allowed=\`${report.launchReadiness.safeLaunchDemoClaimAllowed === true}\`, dispatch called=\`${report.launchReadiness.dispatchCalled === true}\`. Distributed admission activation is \`${report.launchReadiness.distributedAdmissionActivation || "unknown"}\`; exact saved Share remains \`${report.launchReadiness.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Current launch smoke is \`${report.launchReadiness.verdict || "missing"}\`: raw audit fresh=\`${report.launchReadiness.rawAuditFresh === true}\` (${Array.isArray(report.launchReadiness.rawAuditFreshnessReasons) && report.launchReadiness.rawAuditFreshnessReasons.length ? report.launchReadiness.rawAuditFreshnessReasons.join(", ") : "no freshness errors"}), requested mode \`${report.launchReadiness.requestedAiMode || "missing"}\`, \`/api/ask\` status \`${report.launchReadiness.apiAskStatus ?? "unknown"}\`, error \`${report.launchReadiness.apiAskErrorCode || "none"}\`, admission \`${report.launchReadiness.apiAskRateLimit || "unknown"}/${report.launchReadiness.apiAskWorkUnit || "unknown"}\`, template demo allowed=\`${report.launchReadiness.safeLaunchDemoClaimAllowed === true}\`, dispatch called=\`${report.launchReadiness.dispatchCalled === true}\`. Enhanced/full distributed admission is \`${report.launchReadiness.distributedAdmissionActivation || "unknown"}\`; exact saved Share remains \`${report.launchReadiness.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Live harness quality is proven.
 - KOSHA exact trust registry is proven for the accepted exact-trust slice.
 - KOSHA next exact candidate audit identifies the 234-item current native technical-support subset and 231 metadata-verified non-exact candidates without mutation.

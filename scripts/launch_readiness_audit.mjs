@@ -29,6 +29,7 @@ loadEnvFile(path.join(process.cwd(), ".env"));
 
 const question = process.env.SAFETYGUARD_AUDIT_QUESTION ||
   "도시가스공사 열수송관 굴착공사. 작업자 7명, 외국인 근로자 2명, 신규 투입자 1명, 이동식 크레인과 굴착기 사용, 매설물 확인 필요. 오늘 작업 전 문서팩을 만들어줘.";
+const requestedAiMode = "template";
 
 fs.mkdirSync(outDir, { recursive: true });
 fs.rmSync(outputPath, { force: true });
@@ -174,7 +175,7 @@ try {
   const ask = await fetchJson(`${baseUrl}/api/ask`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ question })
+    body: JSON.stringify({ question, aiMode: requestedAiMode })
   });
 
   let dispatchResult = null;
@@ -201,6 +202,7 @@ try {
     productionCommit,
     productionBuild: buildInfo.parsed,
     elapsedMs: Date.now() - startedAt,
+    requestedAiMode,
     apiAskStatus: ask.response.status,
     apiAskOk: ask.response.ok,
     apiAskErrorCode: typeof ask.parsed?.code === "string" ? ask.parsed.code : null,
@@ -224,6 +226,7 @@ try {
   await writeJsonLine(process.stdout, {
     generatedAt: audit.generatedAt,
     baseUrl: audit.baseUrl,
+    requestedAiMode: audit.requestedAiMode,
     apiAskOk: audit.apiAskOk,
     apiAskErrorCode: audit.apiAskErrorCode,
     dispatchOk: audit.dispatchOk,
