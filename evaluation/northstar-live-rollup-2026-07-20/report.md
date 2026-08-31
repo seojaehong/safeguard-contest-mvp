@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T08:44:57.181Z
-Source HEAD at generation: 9e235ad9c51f85582b6353b580da6c6063f80d1d
-Live commit at generation: 9e235ad9c51f85582b6353b580da6c6063f80d1d
+Generated at: 2026-08-31T10:03:06.852Z
+Source HEAD at generation: 5f55f48fec24c7e1e614545e1cdd42dc3f3d97b5
+Live commit at generation: 5f55f48fec24c7e1e614545e1cdd42dc3f3d97b5
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -459,6 +459,7 @@ Overall: `northstar_open_approval_gated`
 | completed_current_head_standard_security_scan | notice | evaluation\current-head-standard-security-scan-2026-08-31-9504d8db-complete\report.json |
 | current_source_forwarded_identity_remediation | proven | evaluation\current-source-security-forwarded-identity-remediation-2026-08-31\report.json |
 | current_source_template_inventory_remediation | proven | evaluation\current-source-security-template-inventory-remediation-2026-08-31\report.json |
+| current_source_export_smoke_resource_remediation | notice | evaluation\current-source-security-export-smoke-resource-remediation-2026-08-31\report.json |
 | current_source_approval_free_security_remediation | notice | evaluation\current-source-security-approval-free-remediation-2026-08-31\report.json |
 | current_source_security_resource_budget_remediation | proven | evaluation\current-source-security-resource-budget-remediation-2026-08-31\report.json |
 | current_source_logout_storage_remediation | notice | evaluation\current-source-security-logout-storage-remediation-2026-08-31\report.json |

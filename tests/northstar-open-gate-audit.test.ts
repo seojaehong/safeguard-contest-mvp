@@ -710,6 +710,30 @@ function currentSourceCredentialOutputRemediationFixture(): Record<string, unkno
   };
 }
 
+function currentSourceExportSmokeResourceRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-current-source-security-export-smoke-resource-remediation/v1",
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_OPERATOR_EXPORT_SMOKE_RESOURCE_BUDGET_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    immutableSecurityContext: {
+      originalAccountedBaselineFindingCount: 18,
+      originalAccountedBaselinePreserved: true,
+      completedScan: { scanId: "8fe9c06a-018c-446f-aa98-1b37df95287a", targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f", status: "complete", reportableFindingCount: 17, deferredCandidateCount: 1, approvalGatedFindingCount: 14, findingsRewritten: false },
+      currentFinding: { scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c", findingId: "csf_55bf22e9ff3507c519ffde3b", canonicalFindingState: "open_pending_fresh_rescan", findingRewritten: false },
+    },
+    remediation: {
+      sharedHelper: "scripts/operator_smoke_resource_budget.mjs",
+      http: { defaultTimeoutMs: 30000, maximumConfiguredTimeoutMs: 120000, defaultResponseMaxBytes: 8388608, maximumConfiguredResponseBytes: 33554432, contentLengthPrecheck: true, streamedByteCeiling: true, upstreamAbortForwarded: true },
+      subprocess: { defaultTimeoutMs: 180000, defaultMaxBufferBytes: 8388608, killSignal: "SIGKILL", windowsHidden: true, chromeTimeoutMs: 30000, chromeMaxBufferBytes: 1048576, chromeTemporaryProfileRemoved: true },
+    },
+    verification: { focusedTests: { files: 3, tests: 17, failed: 0, status: "PASS" }, strictTypecheck: "PASS", build: { status: "PASS", staticPages: 28 }, liveProductCommitMarkerAligned: true, liveOperatorExportSmokeExecuted: false },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, embeddingOrVectorMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false },
+    remainingBoundaries: { freshFullRepositoryRescanRequired: true, securityCompleteClaimAllowed: false, approvalGatedFindingsClosed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  };
+}
+
 function currentSourcePhotoReadinessAuthFanoutRemediationFixture(): Record<string, unknown> {
   return {
     schemaVersion: "safeclaw-current-source-security-photo-readiness-auth-fanout-remediation/v1",
@@ -5250,6 +5274,21 @@ function createFixtureRoot(): string {
     path.join("evaluation", "current-source-security-credential-output-remediation-2026-08-31", "report.json"),
     currentSourceCredentialOutputRemediationFixture(),
   );
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-export-smoke-resource-remediation-2026-08-31", "report.json"),
+    currentSourceExportSmokeResourceRemediationFixture(),
+  );
+  for (const relativePath of [
+    "scripts/operator_smoke_resource_budget.mjs",
+    "scripts/prod_orchestration_download_smoke.mjs",
+    "scripts/final_e2e_matrix_runner.mjs",
+    "scripts/final_output_integrity_audit.mjs",
+    "scripts/submission_readiness_smoke.mjs",
+    "scripts/final_99_gate_runner.mjs",
+  ]) {
+    writeText(rootDir, relativePath, "export const boundedOperatorSmoke = true;\n");
+  }
   writeJson(
     rootDir,
     path.join("evaluation", "current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31", "report.json"),
@@ -9809,6 +9848,31 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "current_source_credential_output_remediation")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records bounded operator smoke resources without closing the sealed finding", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "current-source-security-export-smoke-resource-remediation-2026-08-31", "report.json");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_export_smoke_resource_remediation");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("deadlines, byte ceilings, termination");
+    expect(gate?.detail).toContain("Three files / 17 tests");
+    expect(gate?.detail).toContain("sealed finding remains open pending a fresh scan");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remediation: { http: { defaultResponseMaxBytes: number } };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.remediation.http.defaultResponseMaxBytes = 0;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "current_source_export_smoke_resource_remediation")?.state)
       .toBe("contradicted");
   });
 

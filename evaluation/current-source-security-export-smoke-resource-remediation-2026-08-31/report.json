@@ -1,0 +1,115 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-export-smoke-resource-remediation/v1",
+  "generatedAt": "2026-08-31T18:31:52.8215928+09:00",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_OPERATOR_EXPORT_SMOKE_RESOURCE_BUDGET_RESCAN_PENDING",
+  "userContext": "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
+  "productCommit": "5f55f48fec24c7e1e614545e1cdd42dc3f3d97b5",
+  "sourceHead": "5f55f48fec24c7e1e614545e1cdd42dc3f3d97b5",
+  "productionBuild": {
+    "commitSha": "5f55f48fec24c7e1e614545e1cdd42dc3f3d97b5",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-r09gsjr2t-seojaehongs-projects.vercel.app",
+    "verifiedAt": "2026-08-31T18:31:52.8215928+09:00"
+  },
+  "immutableSecurityContext": {
+    "originalAccountedBaselineFindingCount": 18,
+    "originalAccountedBaselinePreserved": true,
+    "completedScan": {
+      "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+      "targetRevision": "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
+      "status": "complete",
+      "reportableFindingCount": 17,
+      "deferredCandidateCount": 1,
+      "coverage": "partial",
+      "sourceBudgetFindings": [
+        {
+          "findingId": "csf_e45a58b22598698e0bf4de16",
+          "title": "Public legal search can amplify unbounded provider work",
+          "currentDisposition": "bounded_in_deployed_source_existing_receipt"
+        },
+        {
+          "findingId": "csf_249dcc0898d9d68ffe436ac9",
+          "title": "Public safety-reference search lacks request work budgets",
+          "currentDisposition": "bounded_in_deployed_source_existing_receipt"
+        },
+        {
+          "findingId": "csf_f30faad248ef517b894c8946",
+          "title": "MCP document generation accepts unbounded authenticated inputs",
+          "currentDisposition": "bounded_in_deployed_source_existing_receipt"
+        }
+      ],
+      "approvalGatedFindingCount": 14,
+      "findingsRewritten": false
+    },
+    "currentFinding": {
+      "scanId": "f6bef30a-7250-428b-9f66-0bad1e42058c",
+      "targetRevision": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+      "findingId": "csf_55bf22e9ff3507c519ffde3b",
+      "title": "Export smoke chain accepts unbounded responses and lacks subprocess deadlines",
+      "severity": "low",
+      "canonicalFindingState": "open_pending_fresh_rescan",
+      "findingRewritten": false
+    }
+  },
+  "remediation": {
+    "sharedHelper": "scripts/operator_smoke_resource_budget.mjs",
+    "http": {
+      "defaultTimeoutMs": 30000,
+      "maximumConfiguredTimeoutMs": 120000,
+      "defaultResponseMaxBytes": 8388608,
+      "maximumConfiguredResponseBytes": 33554432,
+      "contentLengthPrecheck": true,
+      "streamedByteCeiling": true,
+      "upstreamAbortForwarded": true
+    },
+    "subprocess": {
+      "defaultTimeoutMs": 180000,
+      "defaultMaxBufferBytes": 8388608,
+      "killSignal": "SIGKILL",
+      "windowsHidden": true,
+      "chromeTimeoutMs": 30000,
+      "chromeMaxBufferBytes": 1048576,
+      "chromeTemporaryProfileRemoved": true
+    },
+    "governedPaths": [
+      "scripts/prod_orchestration_download_smoke.mjs",
+      "scripts/final_e2e_matrix_runner.mjs",
+      "scripts/final_output_integrity_audit.mjs",
+      "scripts/submission_readiness_smoke.mjs",
+      "scripts/final_99_gate_runner.mjs"
+    ]
+  },
+  "verification": {
+    "focusedTests": {
+      "files": 3,
+      "tests": 17,
+      "failed": 0,
+      "status": "PASS",
+      "command": "npm.cmd exec -- vitest run tests/operator-smoke-resource-budget.test.ts tests/final-99-gate-runner.test.ts tests/spreadsheet-delimited-cell.test.ts --maxWorkers=1 --fileParallelism=false"
+    },
+    "strictTypecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "liveProductCommitMarkerAligned": true,
+    "liveOperatorExportSmokeExecuted": false,
+    "liveExecutionBoundary": "Production marker proves source deployment. The operator smoke was not run against production because this remediation concerns local operator tooling and a live provider-backed orchestration run is unnecessary for the fail-closed unit contract."
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "freshFullRepositoryRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "approvalGatedFindingsClosed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}

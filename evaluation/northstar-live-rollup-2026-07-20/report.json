@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-31T08:44:57.181Z",
-  "head": "9e235ad9c51f85582b6353b580da6c6063f80d1d",
+  "generatedAt": "2026-08-31T10:03:06.852Z",
+  "head": "5f55f48fec24c7e1e614545e1cdd42dc3f3d97b5",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "9e235ad9c51f85582b6353b580da6c6063f80d1d",
+    "commitSha": "5f55f48fec24c7e1e614545e1cdd42dc3f3d97b5",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-cop4nf7ax-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-r09gsjr2t-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 97
+    "gateCount": 98
   },
   "provenGates": [
     {
@@ -230,6 +230,12 @@
       "state": "proven",
       "artifact": "evaluation\\current-source-security-template-inventory-remediation-2026-08-31\\report.json",
       "detail": "Deployed product source 8a9269a4 bounds the local template inventory before parser initialization with no-follow traversal, file/byte/parser/time/image/ZIP budgets, and fail-closed code 2 without partial summary output. Scanner 6/6, shared archive safety 5/5, and Python compilation pass. The sealed 21-finding scan is unchanged, fresh rescan remains required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "current_source_export_smoke_resource_remediation",
+      "state": "notice",
+      "artifact": "evaluation\\current-source-security-export-smoke-resource-remediation-2026-08-31\\report.json",
+      "detail": "Deployed product source 5f55f48f bounds operator smoke HTTP responses, Chrome, and child processes with deadlines, byte ceilings, termination, and temporary-profile cleanup. Three files / 17 tests, strict typecheck, and the 28-page build pass. The sealed finding remains open pending a fresh scan, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_source_approval_free_security_remediation",
@@ -2243,9 +2249,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "9e235ad9c51f85582b6353b580da6c6063f80d1d",
+      "sourceCommit": "5f55f48fec24c7e1e614545e1cdd42dc3f3d97b5",
       "sourceStatus": "exact",
-      "productionCommit": "9e235ad9c51f85582b6353b580da6c6063f80d1d",
+      "productionCommit": "5f55f48fec24c7e1e614545e1cdd42dc3f3d97b5",
       "productionStatus": "matches_live"
     },
     {

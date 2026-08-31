@@ -76,6 +76,7 @@ const EVIDENCE_PATHS = Object.freeze({
   completedCurrentHeadStandardSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-9504d8db-complete", "report.json"),
   currentSourceForwardedIdentityRemediation: path.join("evaluation", "current-source-security-forwarded-identity-remediation-2026-08-31", "report.json"),
   currentSourceTemplateInventoryRemediation: path.join("evaluation", "current-source-security-template-inventory-remediation-2026-08-31", "report.json"),
+  currentSourceExportSmokeResourceRemediation: path.join("evaluation", "current-source-security-export-smoke-resource-remediation-2026-08-31", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
@@ -8946,6 +8947,120 @@ function evaluateCurrentSourceTemplateInventoryRemediationGate(rootDir) {
 
 /**
  * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateCurrentSourceExportSmokeResourceRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourceExportSmokeResourceRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_source_export_smoke_resource_remediation",
+      label: "Current-source export smoke resource remediation",
+      state: "missing",
+      evidencePath,
+      detail: "The operator export smoke resource-budget receipt is missing or invalid.",
+      nextActions: ["Restore the deployed-source receipt without reclassifying the sealed finding."],
+    });
+  }
+
+  const immutable = isRecord(report.immutableSecurityContext) ? report.immutableSecurityContext : {};
+  const completedScan = isRecord(immutable.completedScan) ? immutable.completedScan : {};
+  const currentFinding = isRecord(immutable.currentFinding) ? immutable.currentFinding : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const http = isRecord(remediation.http) ? remediation.http : {};
+  const subprocess = isRecord(remediation.subprocess) ? remediation.subprocess : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedTests) ? verification.focusedTests : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(productionBuild.commitSha);
+  const governedPaths = [
+    "scripts/operator_smoke_resource_budget.mjs",
+    "scripts/prod_orchestration_download_smoke.mjs",
+    "scripts/final_e2e_matrix_runner.mjs",
+    "scripts/final_output_integrity_audit.mjs",
+    "scripts/submission_readiness_smoke.mjs",
+    "scripts/final_99_gate_runner.mjs",
+  ];
+  const sourceCurrent = /^[0-9a-f]{40}$/u.test(sourceHead)
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.embeddingOrVectorMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.schemaVersion) === "safeclaw-current-source-security-export-smoke-resource-remediation/v1"
+    && readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_OPERATOR_EXPORT_SMOKE_RESOURCE_BUDGET_RESCAN_PENDING"
+    && sourceHead === productCommit
+    && sourceHead === productionCommit
+    && sourceCurrent
+    && readString(productionBuild.branch) === "master"
+    && readString(productionBuild.environment) === "production"
+    && immutable.originalAccountedBaselinePreserved === true
+    && readNumber(immutable.originalAccountedBaselineFindingCount) === 18
+    && readString(completedScan.scanId) === "8fe9c06a-018c-446f-aa98-1b37df95287a"
+    && readString(completedScan.targetRevision) === "f0c8a7be02becd53c21fb80842cf23c571f22b1f"
+    && readString(completedScan.status) === "complete"
+    && readNumber(completedScan.reportableFindingCount) === 17
+    && readNumber(completedScan.deferredCandidateCount) === 1
+    && readNumber(completedScan.approvalGatedFindingCount) === 14
+    && completedScan.findingsRewritten === false
+    && readString(currentFinding.scanId) === "f6bef30a-7250-428b-9f66-0bad1e42058c"
+    && readString(currentFinding.findingId) === "csf_55bf22e9ff3507c519ffde3b"
+    && readString(currentFinding.canonicalFindingState) === "open_pending_fresh_rescan"
+    && currentFinding.findingRewritten === false
+    && readString(remediation.sharedHelper) === "scripts/operator_smoke_resource_budget.mjs"
+    && readNumber(http.defaultTimeoutMs) === 30000
+    && readNumber(http.maximumConfiguredTimeoutMs) === 120000
+    && readNumber(http.defaultResponseMaxBytes) === 8388608
+    && readNumber(http.maximumConfiguredResponseBytes) === 33554432
+    && http.contentLengthPrecheck === true
+    && http.streamedByteCeiling === true
+    && http.upstreamAbortForwarded === true
+    && readNumber(subprocess.defaultTimeoutMs) === 180000
+    && readNumber(subprocess.defaultMaxBufferBytes) === 8388608
+    && readString(subprocess.killSignal) === "SIGKILL"
+    && subprocess.windowsHidden === true
+    && readNumber(subprocess.chromeTimeoutMs) === 30000
+    && readNumber(subprocess.chromeMaxBufferBytes) === 1048576
+    && subprocess.chromeTemporaryProfileRemoved === true
+    && readNumber(focused.files) === 3
+    && readNumber(focused.tests) === 17
+    && readNumber(focused.failed) === 0
+    && readString(focused.status) === "PASS"
+    && readString(verification.strictTypecheck) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && verification.liveProductCommitMarkerAligned === true
+    && verification.liveOperatorExportSmokeExecuted === false
+    && noMutation
+    && remaining.freshFullRepositoryRescanRequired === true
+    && remaining.securityCompleteClaimAllowed === false
+    && remaining.approvalGatedFindingsClosed === false
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+
+  return gateResult({
+    id: "current_source_export_smoke_resource_remediation",
+    label: "Current-source export smoke resource remediation",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? `Deployed product source ${sourceHead.slice(0, 8)} bounds operator smoke HTTP responses, Chrome, and child processes with deadlines, byte ceilings, termination, and temporary-profile cleanup. Three files / 17 tests, strict typecheck, and the 28-page build pass. The sealed finding remains open pending a fresh scan, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE.`
+      : `Export-smoke verdict=${readString(report.verdict) || "missing"}, source/live=${sourceHead || "missing"}/${productionCommit || "missing"}, sourceCurrent=${sourceCurrent}, tests=${readNumber(focused.files)}/${readNumber(focused.tests)}, noMutation=${noMutation}, freshRescan=${remaining.freshFullRepositoryRescanRequired === true}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Include the operator smoke resource contract in the next full repository scan before reclassifying the sealed finding."]
+      : ["Restore source/live identity, response and subprocess budgets, verification counts, no-mutation boundaries, fresh-rescan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
  * @param {unknown} relativePath
  * @param {unknown} expectedSha256
  */
@@ -14266,6 +14381,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCompletedCurrentHeadStandardSecurityScanGate(rootDir),
     evaluateCurrentSourceForwardedIdentityRemediationGate(rootDir),
     evaluateCurrentSourceTemplateInventoryRemediationGate(rootDir),
+    evaluateCurrentSourceExportSmokeResourceRemediationGate(rootDir),
     evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir),
     evaluateCurrentSourceSecurityResourceBudgetRemediationGate(rootDir),
     evaluateCurrentSourceLogoutStorageRemediationGate(rootDir),
