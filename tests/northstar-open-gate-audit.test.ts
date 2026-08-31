@@ -1089,6 +1089,9 @@ function currentSecurityGovernedPathCompatibilityFixture(): Record<string, unkno
       "mcp_provider_admission_security",
       "mcp_generation_work_budget_security",
       "security_followup_remediation",
+      "knowledge_preparation_capability_truth",
+      "public_provider_cancellation",
+      "public_generation_admission_security",
     ],
     governedPaths: [
       "app/api/ask/route.ts",
@@ -1118,12 +1121,18 @@ function currentSecurityGovernedPathCompatibilityFixture(): Record<string, unkno
       "tests/mcp-provider-admission.test.ts",
       "tests/mcp-work-budget.test.ts",
       "tests/workpack-share-authority-routes.test.ts",
+      "app/api/knowledge/review/prepare/route.ts",
+      "app/knowledge/KnowledgeReviewInbox.tsx",
+      "app/api/knowledge/regenerate/route.ts",
+      "app/api/workpack/remediate/route.ts",
+      "lib/ai.ts",
+      "lib/knowledge-candidate-route.ts",
     ],
     verification: {
       vitest: {
-        filesPassed: 22,
+        filesPassed: 28,
         filesSkipped: 1,
-        testsPassed: 358,
+        testsPassed: 317,
         testsSkipped: 7,
         status: "PASS_WITH_BROWSER_OPT_IN_SKIPPED",
       },
@@ -10342,8 +10351,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const audit = buildNorthstarOpenGateAudit({ rootDir });
     const gate = audit.gates.find((item) => item.id === "current_security_governed_path_compatibility");
     expect(gate?.state).toBe("notice");
-    expect(gate?.detail).toContain("10 security notices across 27 governed paths");
-    expect(gate?.detail).toContain("22 files / 358 tests");
+    expect(gate?.detail).toContain("13 security notices across 33 governed paths");
+    expect(gate?.detail).toContain("28 files / 317 tests");
     expect(gate?.detail).toContain("7 tests were skipped");
     expect(gate?.detail).toContain("no fresh browser PASS is claimed");
     expect(gate?.detail).toContain("Sealed full scan f218c713 is complete with 18 open findings and partial coverage");
@@ -10360,6 +10369,9 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       "mcp_provider_admission_security",
       "mcp_generation_work_budget_security",
       "security_followup_remediation",
+      "knowledge_preparation_capability_truth",
+      "public_provider_cancellation",
+      "public_generation_admission_security",
     ]) {
       expect(audit.gates.find((item) => item.id === gateId)?.state).not.toBe("contradicted");
     }
@@ -10377,6 +10389,33 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "current_security_governed_path_compatibility")?.state)
       .toBe("contradicted");
+  });
+
+  it("uses the current governed-path receipt when provider cancellation evidence is stale", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    writeText(rootDir, path.join("lib", "ai.ts"), "export const currentProviderCancellationCompatibility = true;\n");
+    execFileSync("git", ["add", "lib/ai.ts"], { cwd: rootDir, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "update provider cancellation path"], { cwd: rootDir, stdio: "ignore" });
+    const currentSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: rootDir, encoding: "utf8" }).trim();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-security-governed-path-compatibility-2026-08-30",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      sourceHead: string;
+      productionCommit: string;
+    };
+    report.sourceHead = currentSha;
+    report.productionCommit = currentSha;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(audit.gates.find((item) => item.id === "public_provider_cancellation")?.state).toBe("notice");
+    expect(audit.gates.find((item) => item.id === "current_security_governed_path_compatibility")?.state)
+      .toBe("notice");
   });
 
   it("uses current companion receipts for governed paths changed after the shared compatibility receipt", async () => {

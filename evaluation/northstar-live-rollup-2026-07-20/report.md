@@ -1,11 +1,11 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T14:57:13.144Z
-Source HEAD at generation: 77bcd6ea4ec1ea1914126dd7ba924f788b972602
-Live commit at generation: 77bcd6ea4ec1ea1914126dd7ba924f788b972602
+Generated at: 2026-08-31T16:35:17.392Z
+Source HEAD at generation: 0261e05219af16310549b43e17f40a5b49968876
+Live commit at generation: 0261e05219af16310549b43e17f40a5b49968876
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
-Overall: `northstar_evidence_missing_or_unknown`
+Overall: `northstar_open_approval_gated`
 
 ## Current Workspace Mobile Geometry
 
@@ -438,6 +438,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | current_live_document_editorial_runtime | proven | evaluation\live-document-editorial-template-runtime-2026-08-27\report.json |
 | product_capability_truth | proven | evaluation\product-capability-truth-2026-07-25\report.json |
 | ci_supply_chain_full_suite | proven | evaluation\ci-full-suite-remediation-2026-08-29\report.json |
+| knowledge_preparation_capability_truth | notice | evaluation\knowledge-preparation-capability-truth-2026-08-28\report.json |
 | launch_operations_readiness_cockpit | proven | evaluation\launch-operations-readiness-2026-08-26\report.json |
 | document_export_capability_truth | proven | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | ontology_viewport_workbench | proven | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
@@ -471,6 +472,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | current_source_mcp_generation_cancellation_remediation | notice | evaluation\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\report.json |
 | current_source_kosha_archive_preflight_remediation | notice | evaluation\current-source-security-kosha-archive-preflight-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | notice | evaluation\current-source-security-remediation-2026-08-30\report.json |
+| current_security_governed_path_compatibility | notice | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
 | stale_approval_evidence_binding_security | proven | evaluation\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\report.json |
 | current_source_security_residual_remediation | notice | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | notice | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
@@ -489,6 +491,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | improvement_photo_analysis_budget | notice | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | notice | evaluation\public-provider-cancellation-2026-08-11\report.json |
 | public_provider_admission | notice | evaluation\public-provider-admission-2026-08-11\report.json |
+| public_ask_distributed_admission | proven | evaluation\public-ask-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_admission | proven | evaluation\public-search-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_rate_limit_readiness | notice | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | notice | evaluation\security-public-generation-admission-2026-08-04\report.json |
@@ -573,7 +576,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | current_source_mcp_generation_cancellation_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\report.json |
 | current_source_kosha_archive_preflight_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-kosha-archive-preflight-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | ancestor | ancestor_of_head | evaluation\current-source-security-remediation-2026-08-30\report.json |
-| current_security_governed_path_compatibility | ancestor | ancestor_of_head | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
+| current_security_governed_path_compatibility | exact | matches_live | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
 | stale_approval_evidence_binding_security | ancestor | missing | evaluation\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\report.json |
 | current_source_security_residual_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | ancestor | ancestor_of_head | evaluation\share-ack-prebody-admission-2026-08-28\report.json |

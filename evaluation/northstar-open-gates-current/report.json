@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-31T14:57:11.314Z",
-  "sourceSha": "77bcd6ea4ec1ea1914126dd7ba924f788b972602",
-  "overall": "contradicted",
+  "generatedAt": "2026-08-31T16:35:11.494Z",
+  "sourceSha": "0261e05219af16310549b43e17f40a5b49968876",
+  "overall": "open",
   "gates": [
     {
       "id": "final_99_gate",
@@ -152,12 +152,12 @@
     },
     {
       "id": "knowledge_preparation_capability_truth",
-      "state": "contradicted",
+      "state": "notice",
       "label": "Knowledge preparation capability truth",
       "evidencePath": "evaluation\\knowledge-preparation-capability-truth-2026-08-28\\report.json",
-      "detail": "Knowledge preparation verdict=PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD, source=ea9fb620c17be6dd3b21105d8df2accf9bff6994, production=ea9fb620c17be6dd3b21105d8df2accf9bff6994, codes=DISTRIBUTED_RATE_LIMIT_UNAVAILABLE/PUBLIC_ASK_CONCURRENCY_LIMIT, tests=29+88, live=PASS_DEPLOYED_SOURCE_MARKER_ONLY_AUTHENTICATED_PROBE_HELD/false, runtime=BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION, noMutation=true, exactShare=MISSING_EVIDENCE.",
+      "detail": "Deployed source distinguishes a distributed-configuration lock from temporary load in the knowledge preparation route and review UI, with 117 focused and adjacent tests, strict typecheck, and a 28-page production build. This is marker-only capability truth: enhanced LLM preparation remains blocked, the authenticated preparation probe and Wiki/RLS publication remain approval-gated, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore source/live ancestry, the distinct configuration and load codes/messages, 117 passing tests, no-mutation boundaries, blocked runtime, approval gates, and exact Share MISSING_EVIDENCE."
+        "Configure approved distributed admission, then run one bounded authenticated preparation probe before claiming enhanced LLM runtime readiness; keep Wiki publication and RLS as separate approvals."
       ]
     },
     {
@@ -330,9 +330,9 @@
       "state": "notice",
       "label": "Fresh current-source security scan",
       "evidencePath": "evaluation\\current-source-standard-security-scan-2026-08-31-121c8a01-complete\\report.json",
-      "detail": "Current Standard scan a4044172 is sealed at source/live 121c8a01 with 14 findings (10 medium, 4 low), 14 finding write-ups, and partial canonical coverage across 21 recorded surface rows with 22 deferred entries in a 6,981-file repository. The immutable original 18-finding baseline and every prior scan remain preserved. Seven approval-free source findings and seven database/RLS/atomicity findings were open at scan time; the separately committed browser-session remediation is deployed in production 77bcd6ea and reduces the current-source approval-free residual to six without rewriting or closing the sealed scan finding. This is not security-complete: no live auth-session mutation occurred, a post-remediation repository rescan remains required, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Current Standard scan a4044172 is sealed at source/live 121c8a01 with 14 findings (10 medium, 4 low), 14 finding write-ups, and partial canonical coverage across 21 recorded surface rows with 22 deferred entries in a 6,981-file repository. The immutable original 18-finding baseline and every prior scan remain preserved. Seven approval-free source findings and seven database/RLS/atomicity findings were open at scan time; the browser-session remediation is deployed in production 77bcd6ea and production 18a9fc1a contains provider-output remediation e9934679, reducing the current-source approval-free residual to five without rewriting or closing sealed scan findings. This is not security-complete: no external provider call was executed, a post-remediation repository rescan remains required, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Remediate the six remaining approval-free source findings in bounded waves and rerun focused validation.",
+        "Remediate the five remaining approval-free source findings in bounded waves and rerun focused validation.",
         "Keep the seven database/RLS/atomicity findings approval-gated; do not claim security completion from scan completion or the bounded browser-session remediation."
       ]
     },
@@ -508,12 +508,12 @@
     },
     {
       "id": "current_security_governed_path_compatibility",
-      "state": "contradicted",
+      "state": "notice",
       "label": "Current security governed-path compatibility",
       "evidencePath": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
-      "detail": "Current compatibility verdict=PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_COMPLETE_FINDINGS_OPEN, tests=22/358, browserSkipped=1/7, rescan=COMPLETE_SEALED_PARTIAL_COVERAGE_18_FINDINGS_OPEN, exactShare=MISSING_EVIDENCE.",
+      "detail": "Current source and production include a shared compatibility receipt for 13 security notices across 33 governed paths. Contract regression passed 28 files / 317 tests; the opt-in recipient browser file and its 7 tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. Sealed full scan f218c713 is complete with 18 open findings and partial coverage; this receipt does not rewrite immutable findings or claim security completion. Distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore all governed-path receipts, at least the original 20/233 contract coverage, transparent browser skips, no-mutation boundaries, the sealed 18-finding scan boundary, and exact Share MISSING_EVIDENCE."
+        "Keep prior live browser receipts visible, remediate the eight approval-free findings in bounded waves, and retain distributed, DB/RLS, recipient ACK, and exact saved Share approval boundaries."
       ]
     },
     {
@@ -713,12 +713,13 @@
     },
     {
       "id": "public_ask_distributed_admission",
-      "state": "contradicted",
+      "state": "proven",
       "label": "Public Ask distributed admission",
       "evidencePath": "evaluation\\public-ask-distributed-admission-2026-08-14\\report.json",
-      "detail": "Public Ask distributed admission verdict=PASS_LIVE_PRODUCTION_PUBLIC_ASK_PROVIDER_MODES_FAIL_CLOSED_WITHOUT_DISTRIBUTED_ADMISSION, sourceCurrent=false, finding=csf_9b3cc6648586dabf4bfa61e9, localCases=3, liveCases=5, providerCall=false, activation=OPERATOR_CONFIGURATION_REQUIRED, rescan=REQUIRED, noMutation=true, exactShare=MISSING_EVIDENCE.",
+      "detail": "Current production keeps template work at zero and fails JSON/SSE enhanced/full closed with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before provider work when distributed admission is unavailable. The immutable csf_9b3cc6648586dabf4bfa61e9 finding still requires a fresh scan; backend activation is OPERATOR_CONFIGURATION_REQUIRED, no provider or mutation was used, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Restore deployed source alignment, all JSON/SSE template/enhanced/full cases, verification totals, no-provider/no-mutation boundaries, fresh-scan requirement, and exact Share MISSING_EVIDENCE."
+        "Configure and verify an approved distributed admission backend before enabling enhanced/full provider modes horizontally.",
+        "Run a fresh repository security scan before reclassifying the immutable finding or making a security-complete claim."
       ]
     },
     {

@@ -1930,7 +1930,12 @@ function evaluateKnowledgePreparationCapabilityTruthGate(rootDir) {
       === "PASS_LIVE_DEPLOYED_SOURCE_KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_AUTHENTICATED_PROBE_HELD"
     && sourceHead.length === 40
     && productionCommit.length === 40
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_PATHS)
+    && (isEvidenceCurrentForPaths(rootDir, sourceHead, KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_PATHS)
+      || isCurrentSecurityGovernedPathCompatibility(
+        rootDir,
+        "knowledge_preparation_capability_truth",
+        KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_PATHS,
+      ))
     && isGitAncestor(rootDir, productionCommit)
     && report.productionIncludesProductCommit === true
     && readString(before.distributedAdmissionFailurePublicCode) === "PUBLIC_ASK_CONCURRENCY_LIMIT"
@@ -9668,6 +9673,9 @@ const CURRENT_SECURITY_GOVERNED_COMPATIBILITY_GATE_IDS = [
   "mcp_provider_admission_security",
   "mcp_generation_work_budget_security",
   "security_followup_remediation",
+  "knowledge_preparation_capability_truth",
+  "public_provider_cancellation",
+  "public_generation_admission_security",
 ];
 
 /**
@@ -12632,6 +12640,7 @@ function evaluatePublicProviderCancellationGate(rootDir) {
     || isPublicSearchDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isSecurityUpstreamTransportCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
+    || isCurrentSecurityGovernedPathCompatibility(rootDir, "public_provider_cancellation", PUBLIC_PROVIDER_CANCELLATION_PATHS)
     || wikiCandidateCancellationCompatibility
     || wikiSifCancellationCompatibility
     || eventFactCancellationCompatibility
@@ -13174,7 +13183,12 @@ function evaluatePublicGenerationAdmissionSecurityGate(rootDir) {
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_PUBLIC_GENERATION_DISTRIBUTED_CONFIGURATION_TRUTH"
     && productCommit.length > 0
     && isGitAncestor(rootDir, productCommit)
-    && isEvidenceCurrentForPaths(rootDir, productCommit, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)
+    && (isEvidenceCurrentForPaths(rootDir, productCommit, PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS)
+      || isCurrentSecurityGovernedPathCompatibility(
+        rootDir,
+        "public_generation_admission_security",
+        PUBLIC_GENERATION_ADMISSION_SECURITY_PATHS,
+      ))
     && readString(report.productionCommit) === productCommit
     && readString(baseScan.scanId) === "d12d04ce-deaf-497d-8754-33d5baab2ca0"
     && readString(baseScan.targetCommit) === "e087d474a1de72bd3687c703a61a4263fe792fa4"

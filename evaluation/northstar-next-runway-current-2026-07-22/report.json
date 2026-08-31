@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-31T14:57:46.886Z",
+  "generatedAt": "2026-08-31T16:35:45.923Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "77bcd6ea4ec1ea1914126dd7ba924f788b972602",
-  "productionCommit": "77bcd6ea4ec1ea1914126dd7ba924f788b972602",
+  "sourceHead": "0261e05219af16310549b43e17f40a5b49968876",
+  "productionCommit": "0261e05219af16310549b43e17f40a5b49968876",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "77bcd6ea4ec1ea1914126dd7ba924f788b972602",
+    "commitSha": "0261e05219af16310549b43e17f40a5b49968876",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-7mrube1p3-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-ajcxfvsm8-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "77bcd6ea4ec1ea1914126dd7ba924f788b972602",
-  "liveRollupLiveCommit": "77bcd6ea4ec1ea1914126dd7ba924f788b972602",
+  "liveExactEvidenceCommit": "0261e05219af16310549b43e17f40a5b49968876",
+  "liveRollupLiveCommit": "0261e05219af16310549b43e17f40a5b49968876",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -215,7 +215,7 @@
     {
       "gate": "fresh_current_source_security_scan",
       "state": "notice",
-      "reason": "fresh Standard scan a4044172-9b4b-4e36-84be-a8955d9150ac records 14 open findings with partial coverage; 7 approval-free source residuals, 0 separately reportable Share capability findings, and 7 database/RLS/atomicity findings remain open; security-complete is false and exact saved Share remains MISSING_EVIDENCE"
+      "reason": "fresh Standard scan a4044172-9b4b-4e36-84be-a8955d9150ac records 14 open findings with partial coverage; scan-time/current approval-free source residuals are 7/5, provider-output remediation is PASS_LIVE_DEPLOYED_SOURCE_PUBLIC_PROVIDER_OUTPUT_BUDGET_RESCAN_PENDING at production 18a9fc1a, 0 separately reportable Share capability findings and 7 database/RLS/atomicity findings remain open; security-complete is false and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "completed_current_head_standard_security_scan",
@@ -285,7 +285,7 @@
     {
       "gate": "current_security_governed_path_compatibility",
       "state": "notice",
-      "reason": "current source compatibility covers 10 security notices across 27 paths with 22 files / 358 tests passing; 1 opt-in browser file / 7 tests were skipped and no fresh browser PASS is claimed; sealed scan f218c713-1a1c-4f4e-9777-8095926be1df records 18 open findings with partial coverage, security-complete=false, and exact saved Share remains MISSING_EVIDENCE"
+      "reason": "current source compatibility covers 13 security notices across 33 paths with 28 files / 317 tests passing; 1 opt-in browser file / 7 tests were skipped and no fresh browser PASS is claimed; sealed scan f218c713-1a1c-4f4e-9777-8095926be1df records 18 open findings with partial coverage, security-complete=false, and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "stale_approval_evidence_binding_security",
@@ -1280,6 +1280,10 @@
     "approvalGatedDatabaseOrAtomicityCount": 7,
     "approvalSensitiveShareCapabilityCount": 0,
     "approvalFreeProductSourceResidualCount": 7,
+    "currentApprovalFreeFindingCount": 5,
+    "providerOutputBudgetVerdict": "PASS_LIVE_DEPLOYED_SOURCE_PUBLIC_PROVIDER_OUTPUT_BUDGET_RESCAN_PENDING",
+    "providerOutputBudgetProductCommit": "e99346797f4d874e83188d8f37941a603a272a6d",
+    "providerOutputBudgetProductionCommit": "18a9fc1a7f9a549d73474d5fb881268bb69404d9",
     "fullyClosedBoundedSourceCandidateCount": 0,
     "freshFullRepositoryScanCompleted": true,
     "securityCompleteClaimAllowed": false,
@@ -1489,13 +1493,13 @@
   },
   "currentSecurityGovernedPathCompatibility": {
     "verdict": "PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_COMPLETE_FINDINGS_OPEN",
-    "sourceHead": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
-    "productionCommit": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
-    "coveredGateCount": 10,
-    "governedPathCount": 27,
-    "filesPassed": 22,
+    "sourceHead": "0261e05219af16310549b43e17f40a5b49968876",
+    "productionCommit": "0261e05219af16310549b43e17f40a5b49968876",
+    "coveredGateCount": 13,
+    "governedPathCount": 33,
+    "filesPassed": 28,
     "filesSkipped": 1,
-    "testsPassed": 358,
+    "testsPassed": 317,
     "testsSkipped": 7,
     "browserCompatibility": "PRESERVED_PRIOR_LIVE_EVIDENCE_NOT_REEXECUTED",
     "postFixFullRepositoryScan": "COMPLETE_SEALED_PARTIAL_COVERAGE_18_FINDINGS_OPEN",

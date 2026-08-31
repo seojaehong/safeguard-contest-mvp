@@ -1,14 +1,14 @@
 # Current Security Governed-Path Compatibility
 
 - Verdict: `PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_COMPLETE_FINDINGS_OPEN`
-- Product source: `679bb91711c0afecf12aea8a0b650da8a99c03ff`
-- Observed production marker: `b5f145120766cd2ef904fce38ef32ed1a9facf74`
-- Covered notice gates: 10
-- Governed paths: 27
+- Product source: `0261e05219af16310549b43e17f40a5b49968876`
+- Observed production marker: `0261e05219af16310549b43e17f40a5b49968876`
+- Covered notice gates: 13
+- Governed paths: 33
 
 ## Verification
 
-- Current route and contract regression: 22 files / 358 tests PASS
+- Current route and contract regression: 28 files / 317 tests PASS
 - Opt-in recipient browser suite: 1 file / 7 tests skipped; no fresh browser PASS is claimed
 - Strict TypeScript typecheck: PASS
 - Existing live browser evidence is preserved rather than rewritten

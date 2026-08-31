@@ -1,9 +1,9 @@
 {
   "schemaVersion": "safeclaw-current-security-governed-path-compatibility/v1",
-  "generatedAt": "2026-08-31T05:15:00+09:00",
+  "generatedAt": "2026-09-01T01:26:00+09:00",
   "verdict": "PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_COMPLETE_FINDINGS_OPEN",
-  "sourceHead": "679bb91711c0afecf12aea8a0b650da8a99c03ff",
-  "productionCommit": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
+  "sourceHead": "0261e05219af16310549b43e17f40a5b49968876",
+  "productionCommit": "0261e05219af16310549b43e17f40a5b49968876",
   "productionIncludesSourceHead": true,
   "coveredGateIds": [
     "share_ack_prebody_admission_security",
@@ -15,7 +15,10 @@
     "learning_export_renderer_security",
     "mcp_provider_admission_security",
     "mcp_generation_work_budget_security",
-    "security_followup_remediation"
+    "security_followup_remediation",
+    "knowledge_preparation_capability_truth",
+    "public_provider_cancellation",
+    "public_generation_admission_security"
   ],
   "governedPaths": [
     "app/api/ask/route.ts",
@@ -44,16 +47,54 @@
     "tests/mcp-auth.test.ts",
     "tests/mcp-provider-admission.test.ts",
     "tests/mcp-work-budget.test.ts",
-    "tests/workpack-share-authority-routes.test.ts"
+    "tests/workpack-share-authority-routes.test.ts",
+    "app/api/knowledge/review/prepare/route.ts",
+    "app/knowledge/KnowledgeReviewInbox.tsx",
+    "app/api/knowledge/regenerate/route.ts",
+    "app/api/workpack/remediate/route.ts",
+    "lib/ai.ts",
+    "lib/knowledge-candidate-route.ts"
   ],
   "verification": {
     "vitest": {
-      "filesPassed": 22,
+      "command": "npm.cmd test -- tests/auth-callback.test.ts tests/knowledge-review-prepare-route.test.ts tests/knowledge-review-prepare.test.ts tests/knowledge-review-inbox-browser.test.ts tests/knowledge-regenerate-route.test.ts tests/workpack-remediate-route.test.ts tests/ai-generation-trace.test.ts tests/vertex-client-cancellation.test.ts tests/provider-request-lifetime.test.ts tests/provider-descendant-cancellation.test.ts tests/public-ask-concurrency-admission.test.ts tests/ask-public-surface.test.ts tests/ask-stream-client.test.ts tests/ask-generation-evidence-routes.test.ts tests/public-page-provider-admission.test.ts tests/run-ask-work-budget.test.ts tests/security-budget-wiring.test.ts tests/photo-vision-analysis-route.test.ts tests/photo-analysis-admission.test.ts tests/knowledge-match-request-budget.test.ts tests/workpack-share-authority.test.ts tests/workpack-share-authority-routes.test.ts tests/public-export-admission.test.ts tests/mcp-auth.test.ts tests/mcp-provider-admission.test.ts tests/mcp-work-budget.test.ts tests/mcp-generation-cancellation.test.ts tests/weather-route-budget.test.ts tests/share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "files": [
+        "tests/auth-callback.test.ts",
+        "tests/knowledge-review-prepare-route.test.ts",
+        "tests/knowledge-review-prepare.test.ts",
+        "tests/knowledge-review-inbox-browser.test.ts",
+        "tests/knowledge-regenerate-route.test.ts",
+        "tests/workpack-remediate-route.test.ts",
+        "tests/ai-generation-trace.test.ts",
+        "tests/vertex-client-cancellation.test.ts",
+        "tests/provider-request-lifetime.test.ts",
+        "tests/provider-descendant-cancellation.test.ts",
+        "tests/public-ask-concurrency-admission.test.ts",
+        "tests/ask-public-surface.test.ts",
+        "tests/ask-stream-client.test.ts",
+        "tests/ask-generation-evidence-routes.test.ts",
+        "tests/public-page-provider-admission.test.ts",
+        "tests/run-ask-work-budget.test.ts",
+        "tests/security-budget-wiring.test.ts",
+        "tests/photo-vision-analysis-route.test.ts",
+        "tests/photo-analysis-admission.test.ts",
+        "tests/knowledge-match-request-budget.test.ts",
+        "tests/workpack-share-authority.test.ts",
+        "tests/workpack-share-authority-routes.test.ts",
+        "tests/public-export-admission.test.ts",
+        "tests/mcp-auth.test.ts",
+        "tests/mcp-provider-admission.test.ts",
+        "tests/mcp-work-budget.test.ts",
+        "tests/mcp-generation-cancellation.test.ts",
+        "tests/weather-route-budget.test.ts",
+        "tests/share-recipient-portal-browser.test.ts"
+      ],
+      "filesPassed": 28,
       "filesSkipped": 1,
-      "testsPassed": 358,
+      "testsPassed": 317,
       "testsSkipped": 7,
       "status": "PASS_WITH_BROWSER_OPT_IN_SKIPPED",
-      "durationSeconds": 18.09
+      "durationSeconds": 64.87
     },
     "typecheck": "PASS",
     "browserCompatibility": "PRESERVED_PRIOR_LIVE_EVIDENCE_NOT_REEXECUTED",
