@@ -22,7 +22,7 @@ import {
   getWorkspaceUser
 } from "@/lib/supabase-admin";
 import {
-  enforcePublicJsonRequestBodyBudget,
+  enforceAuthenticatedJsonRequestBodyBudget,
   KNOWLEDGE_WRITE_REQUEST_MAX_BYTES
 } from "@/lib/public-work-budget";
 
@@ -102,10 +102,27 @@ export async function POST(request: NextRequest) {
   const limited = publicRateLimitResponse(rateLimit);
   if (limited) return limited;
 
-  const bodyBudget = await enforcePublicJsonRequestBodyBudget(
+  const client = createSupabaseAdminClient();
+  if (!client) {
+    return applyPublicRateLimitHeader(NextResponse.json({
+      ok: false,
+      configured: false,
+      message: "사람 검토 저장소가 설정되지 않았습니다."
+    }, { status: 503 }), rateLimit);
+  }
+
+  const user = await getWorkspaceUser(client, request.headers);
+  if (!user) {
+    return applyPublicRateLimitHeader(NextResponse.json({
+      ok: false,
+      configured: true,
+      message: "로그인이 필요합니다."
+    }, { status: 401 }), rateLimit);
+  }
+
+  const bodyBudget = await enforceAuthenticatedJsonRequestBodyBudget(
     request,
     KNOWLEDGE_WRITE_REQUEST_MAX_BYTES,
-    "request body exceeds the knowledge write byte budget",
   );
   if (!bodyBudget.ok) return applyPublicRateLimitHeader(bodyBudget.response, rateLimit);
 
@@ -123,24 +140,6 @@ export async function POST(request: NextRequest) {
       code: "prepare_run_id_required",
       message: "유효한 runId가 필요합니다."
     }, { status: 400 }), rateLimit);
-  }
-
-  const client = createSupabaseAdminClient();
-  if (!client) {
-    return applyPublicRateLimitHeader(NextResponse.json({
-      ok: false,
-      configured: false,
-      message: "사람 검토 저장소가 설정되지 않았습니다."
-    }, { status: 503 }), rateLimit);
-  }
-
-  const user = await getWorkspaceUser(client, request.headers);
-  if (!user) {
-    return applyPublicRateLimitHeader(NextResponse.json({
-      ok: false,
-      configured: true,
-      message: "로그인이 필요합니다."
-    }, { status: 401 }), rateLimit);
   }
 
   try {

@@ -14,6 +14,7 @@ describe("security budget wiring", () => {
     "app/api/education-records/route.ts",
     "app/api/knowledge/ingest/route.ts",
     "app/api/knowledge/review/route.ts",
+    "app/api/knowledge/review/prepare/route.ts",
     "app/api/workers/route.ts",
     "app/api/workpacks/route.ts",
     "app/api/workpacks/[id]/share-sessions/route.ts",
@@ -36,6 +37,12 @@ describe("security budget wiring", () => {
     },
     {
       relativePath: "app/api/knowledge/review/route.ts",
+      startMarker: "export async function POST",
+      admissionMarker: "getWorkspaceUser(client, request.headers)",
+      parseMarker: "bodyBudget.request.json()",
+    },
+    {
+      relativePath: "app/api/knowledge/review/prepare/route.ts",
       startMarker: "export async function POST",
       admissionMarker: "getWorkspaceUser(client, request.headers)",
       parseMarker: "bodyBudget.request.json()",

@@ -99,6 +99,29 @@ describe("knowledge review prepare route", () => {
     expect(mocks.prepareKnowledgeReviewCandidate).not.toHaveBeenCalled();
   });
 
+  it("authenticates before reading an unauthenticated request body", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.getWorkspaceUser.mockResolvedValue(null);
+    const unauthenticatedRequest = new NextRequest(
+      "http://localhost/api/knowledge/review/prepare",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-forwarded-for": "198.51.100.95",
+        },
+        body: JSON.stringify({ runId: RUN_ID }),
+      },
+    );
+    const { POST } = await import("@/app/api/knowledge/review/prepare/route");
+
+    const response = await POST(unauthenticatedRequest);
+
+    expect(response.status).toBe(401);
+    expect(unauthenticatedRequest.bodyUsed).toBe(false);
+    expect(mocks.prepareKnowledgeReviewCandidate).not.toHaveBeenCalled();
+  });
+
   it("rejects an invalid body before candidate preparation", async () => {
     mocks.createSupabaseAdminClient.mockReturnValue({});
     mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: null });
@@ -119,8 +142,8 @@ describe("knowledge review prepare route", () => {
       const response = await POST(request({ runId }));
 
       expect(response.status).toBe(400);
-      expect(mocks.createSupabaseAdminClient).not.toHaveBeenCalled();
-      expect(mocks.getWorkspaceUser).not.toHaveBeenCalled();
+      expect(mocks.createSupabaseAdminClient).toHaveBeenCalledOnce();
+      expect(mocks.getWorkspaceUser).toHaveBeenCalledOnce();
       expect(mocks.prepareKnowledgeReviewCandidate).not.toHaveBeenCalled();
     }
   );

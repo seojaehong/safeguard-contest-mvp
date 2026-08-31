@@ -7,6 +7,7 @@ import {
   countPositionOverlaps,
   type NeighborhoodSource
 } from "@/app/ontology/ontology-neighborhood";
+import { publicOntologyGraphSchema } from "@/lib/ontology/schema";
 
 const root = path.resolve(__dirname, "..");
 
@@ -134,12 +135,39 @@ describe("ontology P0 neighborhood contract", () => {
 });
 
 describe("ontology P0 presentation contract", () => {
+  it("rejects malformed browser graph payloads before visualization", () => {
+    expect(publicOntologyGraphSchema.safeParse({
+      nodes: [{
+        node_id: "unsafe",
+        kind: "Task",
+        label: "unsafe",
+        text_excerpt: null,
+        cited_uids: [],
+        meta: {},
+        review_state: "draft",
+      }],
+      edges: [],
+      counts: {
+        nodes: 1,
+        edges: 0,
+        nodes_by_kind: { Task: 1, Hazard: 0, Control: 0, Article: 0, Accident: 0, Document: 0, Duty: 0 },
+        uncited_dropped_nodes: 0,
+        uncited_dropped_edges: 0,
+        dangling_dropped_edges: 0,
+      },
+      uncited_dropped: { nodes: [], edges: [] },
+      advisory_notice: "검증 필요",
+    }).success).toBe(false);
+  });
+
   it("replaces the two hairball graphs with a single task-focused explorer", () => {
     const page = read("app/ontology/page.tsx");
+    const livePage = read("app/ontology/OntologyLivePage.tsx");
     const explorer = read("app/ontology/OntologyExplorer.tsx");
 
     expect(page).not.toContain("OperationMemoryPreview");
-    expect(page).toContain("OntologyExplorer");
+    expect(page).toContain("OntologyLivePage");
+    expect(livePage).toContain("OntologyExplorer");
     expect(explorer).toContain("data-testid=\"ontology-neighborhood-graph\"");
     expect(explorer).toContain("data-testid=\"ontology-mobile-relations\"");
     expect(explorer).toContain("그래프 전체 화면");

@@ -357,7 +357,9 @@ describe("frontend route classification", () => {
     }
 
     for (const route of userVisibleRoutes) {
-      const pageSource = read(pageFileFromRoute(route));
+      const pageSource = route === "/ontology"
+        ? `${read(pageFileFromRoute(route))}\n${read("app/ontology/OntologyLivePage.tsx")}`
+        : read(pageFileFromRoute(route));
       const owners = [routeSurfaceOwners[route], delegatedHeadingOwners[route]].filter(
         (owner): owner is string => Boolean(owner),
       );

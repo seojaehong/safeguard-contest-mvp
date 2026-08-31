@@ -68,6 +68,14 @@ describe("public status page admission", () => {
       if (file.relativePath === "app/api/ontology/graph/route.ts") {
         expect(file.source).toContain("withPublicStatusAdmission");
         expect(file.source).toContain("loadPublicOntologyGraph");
+      } else if (file.relativePath === "app/ontology/page.tsx") {
+        const livePage = await readFile(path.join(root, "app/ontology/OntologyLivePage.tsx"), "utf8");
+        expect(file.source).toContain("OntologyLivePage");
+        expect(livePage).toContain('fetch("/api/ontology/graph"');
+        expect(livePage).toContain("new AbortController()");
+        expect(livePage).toContain("signal: controller.signal");
+        expect(file.source).not.toContain("createPublicPageAdmissionRequest");
+        expect(file.source).not.toContain("runPublicOntologyGraphRead");
       } else {
         expect(file.source, file.relativePath).toMatch(/runPublic(?:SafetyReferenceStats|OntologyGraph)Read/u);
       }

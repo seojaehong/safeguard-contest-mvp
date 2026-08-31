@@ -116,6 +116,59 @@ export const ontologyEdgeSchema = z.object({
   review_state: z.enum(REVIEW_STATES).default("draft")
 });
 
+const nonNegativeIntegerSchema = z.number().int().nonnegative();
+
+export const publicOntologyGraphSchema = z.object({
+  nodes: z.array(ontologyNodeSchema),
+  edges: z.array(ontologyEdgeSchema),
+  counts: z.object({
+    nodes: nonNegativeIntegerSchema,
+    edges: nonNegativeIntegerSchema,
+    nodes_by_kind: z.object({
+      Task: nonNegativeIntegerSchema,
+      Hazard: nonNegativeIntegerSchema,
+      Control: nonNegativeIntegerSchema,
+      Article: nonNegativeIntegerSchema,
+      Accident: nonNegativeIntegerSchema,
+      Document: nonNegativeIntegerSchema,
+      Duty: nonNegativeIntegerSchema,
+    }),
+    uncited_dropped_nodes: nonNegativeIntegerSchema,
+    uncited_dropped_edges: nonNegativeIntegerSchema,
+    dangling_dropped_edges: nonNegativeIntegerSchema,
+  }),
+  uncited_dropped: z.object({
+    nodes: z.array(z.string()),
+    edges: z.array(z.string()),
+  }),
+  advisory_notice: z.string().min(1),
+}).superRefine((graph, context) => {
+  if (graph.counts.nodes !== graph.nodes.length || graph.counts.edges !== graph.edges.length) {
+    context.addIssue({ code: z.ZodIssueCode.custom, message: "graph counts do not match graph rows" });
+  }
+  const nodeIds = new Set(graph.nodes.map((node) => node.node_id));
+  if (nodeIds.size !== graph.nodes.length) {
+    context.addIssue({ code: z.ZodIssueCode.custom, message: "graph contains duplicate node ids" });
+  }
+  if (graph.nodes.some((node) => node.review_state !== "published" || node.cited_uids.length === 0)) {
+    context.addIssue({ code: z.ZodIssueCode.custom, message: "graph contains unpublished or uncited nodes" });
+  }
+  if (graph.edges.some((edge) => (
+    edge.review_state !== "published"
+    || edge.cited_uids.length === 0
+    || !nodeIds.has(edge.src)
+    || !nodeIds.has(edge.dst)
+  ))) {
+    context.addIssue({ code: z.ZodIssueCode.custom, message: "graph contains invalid public edges" });
+  }
+  for (const kind of NODE_KINDS) {
+    const actual = graph.nodes.filter((node) => node.kind === kind).length;
+    if (graph.counts.nodes_by_kind[kind] !== actual) {
+      context.addIssue({ code: z.ZodIssueCode.custom, message: `graph ${kind} count is inconsistent` });
+    }
+  }
+});
+
 export type OntologyNode = z.infer<typeof ontologyNodeSchema>;
 export type OntologyEdge = z.infer<typeof ontologyEdgeSchema>;
 export type OntologyNodeInput = z.input<typeof ontologyNodeSchema>;

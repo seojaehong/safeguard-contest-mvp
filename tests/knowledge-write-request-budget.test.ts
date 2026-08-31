@@ -34,9 +34,11 @@ describe("knowledge write request body budget", () => {
     ["/api/knowledge/ingest", () => import("@/app/api/knowledge/ingest/route")],
     ["/api/knowledge/review", () => import("@/app/api/knowledge/review/route")],
     ["/api/knowledge/review/prepare", () => import("@/app/api/knowledge/review/prepare/route")],
-  ] as const)("rejects oversized %s bodies before storage or authentication", async (path, loadRoute) => {
+  ] as const)("rejects oversized authenticated %s bodies before storage mutation", async (path, loadRoute) => {
     mocks.createSupabaseAdminClient.mockClear();
     mocks.getWorkspaceUser.mockClear();
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: null });
     const { POST } = await loadRoute();
 
     const response = await POST(oversizedRequest(path));
@@ -44,10 +46,10 @@ describe("knowledge write request body budget", () => {
 
     expect(response.status).toBe(413);
     expect(payload).toMatchObject({
-      code: "PUBLIC_WORK_BUDGET_EXCEEDED",
+      code: "AUTHENTICATED_JSON_BODY_TOO_LARGE",
       limit: KNOWLEDGE_WRITE_REQUEST_MAX_BYTES,
     });
-    expect(mocks.createSupabaseAdminClient).not.toHaveBeenCalled();
-    expect(mocks.getWorkspaceUser).not.toHaveBeenCalled();
+    expect(mocks.createSupabaseAdminClient).toHaveBeenCalledOnce();
+    expect(mocks.getWorkspaceUser).toHaveBeenCalledOnce();
   });
 });

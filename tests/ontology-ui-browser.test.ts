@@ -2,6 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium, type Page } from "playwright";
 import { describe, expect, it } from "vitest";
+import { assembleGraph } from "@/lib/ontology/graph-store";
+import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
 
 const baseUrl = process.env.ONTOLOGY_BASE_URL;
 const artifactDirectory = path.resolve(__dirname, "..", "evaluation", "ontology-viewport-workbench-2026-08-17");
@@ -266,6 +268,38 @@ async function auditVariant(
 }
 
 describe.skipIf(!baseUrl)("ontology UI production browser contract", () => {
+  it("promotes only a validated live graph and preserves fallback for malformed payloads", async () => {
+    const browser = await chromium.launch({ headless: true });
+    try {
+      const published = (value: unknown) => (
+        typeof value === "object"
+        && value !== null
+        && !Array.isArray(value)
+        && (value as Record<string, unknown>).review_state === "published"
+      );
+      const graph = assembleGraph(SEED_NODES.filter(published), SEED_EDGES.filter(published));
+      const livePage = await browser.newPage({ viewport: { width: 1440, height: 723 } });
+      await livePage.route("**/api/ontology/graph", async (route) => route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, configured: true, scope: "published", graph, message: "live fixture" }),
+      }));
+      await livePage.goto(`${baseUrl}/ontology?theme=day`, { waitUntil: "networkidle" });
+      await expect(livePage.locator(".safeclaw-module-status.live").textContent()).resolves.toContain("바로 사용");
+      await expect(livePage.locator('[data-testid="ontology-explorer-root"]').isVisible()).resolves.toBe(true);
+
+      const fallbackPage = await browser.newPage({ viewport: { width: 1440, height: 723 } });
+      await fallbackPage.route("**/api/ontology/graph", async (route) => route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, configured: true, scope: "published", graph: { nodes: "invalid" } }),
+      }));
+      await fallbackPage.goto(`${baseUrl}/ontology?theme=day`, { waitUntil: "networkidle" });
+      await expect(fallbackPage.locator(".safeclaw-module-status.partial").textContent()).resolves.toContain("연결 확인");
+      await expect(fallbackPage.locator('[data-testid="ontology-explorer-root"]').isVisible()).resolves.toBe(true);
+    } finally {
+      await browser.close();
+    }
+  }, 30_000);
+
   it("passes desktop and mobile Day/Night geometry and contrast gates", async () => {
     fs.mkdirSync(artifactDirectory, { recursive: true });
     const browser = await chromium.launch({ headless: true });
