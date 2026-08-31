@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-31T07:41:51.104Z",
-  "head": "f58cb9eff321c1de914ce6313cce2fa451474706",
+  "generatedAt": "2026-08-31T08:24:15.907Z",
+  "head": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f58cb9eff321c1de914ce6313cce2fa451474706",
+    "commitSha": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-7nkjlgso8-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-462lyhtpc-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -561,7 +561,7 @@
       "id": "distributed_admission_activation",
       "state": "approval_gated",
       "artifact": "evaluation\\distributed-admission-activation-approval-2026-08-29\\report.json",
-      "detail": "Production distributed admission is approval-ready but not activated: the packet requests exactly the Upstash REST URL/token, records no secret values, performs no Redis/DB/provider/Share/vector/Wiki/KOSHA mutation, keeps remote Hermes mode separate, requires a bounded post-deploy connectivity probe, and preserves exact saved Share as MISSING_EVIDENCE."
+      "detail": "Production distributed admission is approval-ready but not activated at current source/live 01f7dfe5: the current operations cockpit passes 4/4 viewports while reporting absent/unavailable admission and preview-only dispatch. The packet requests exactly the Upstash REST URL/token, records no secret values, performs no Redis/DB/provider/Share/vector/Wiki/KOSHA mutation, keeps remote Hermes mode separate, requires a bounded post-deploy connectivity probe, and preserves exact saved Share as MISSING_EVIDENCE."
     },
     {
       "id": "security_atomic_db_race_remediation",
@@ -1684,9 +1684,9 @@
   "launchOperationsReadiness": {
     "artifact": "evaluation\\launch-operations-readiness-2026-08-26\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
-    "sourceHead": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
-    "productCommit": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
-    "productionCommit": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
+    "sourceHead": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
+    "productCommit": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
+    "productionCommit": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
     "rowCount": 4,
     "firstViewportCount": 4,
     "desktopFourColumnCount": 2,
@@ -2243,9 +2243,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "f58cb9eff321c1de914ce6313cce2fa451474706",
+      "sourceCommit": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
       "sourceStatus": "exact",
-      "productionCommit": "f58cb9eff321c1de914ce6313cce2fa451474706",
+      "productionCommit": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
       "productionStatus": "matches_live"
     },
     {
@@ -2379,10 +2379,10 @@
     {
       "id": "launch_operations_readiness_cockpit",
       "artifact": "evaluation\\launch-operations-readiness-2026-08-26\\report.json",
-      "sourceCommit": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
-      "sourceStatus": "ancestor",
-      "productionCommit": "0dc07b609751980ce8838d9028c2c12ae35c57c8",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
+      "sourceStatus": "exact",
+      "productionCommit": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
+      "productionStatus": "matches_live"
     },
     {
       "id": "document_export_capability_truth",

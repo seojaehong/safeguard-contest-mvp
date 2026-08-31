@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-31T07:41:49.780Z",
-  "sourceSha": "f58cb9eff321c1de914ce6313cce2fa451474706",
+  "generatedAt": "2026-08-31T08:24:08.592Z",
+  "sourceSha": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
   "overall": "open",
   "gates": [
     {
@@ -175,7 +175,7 @@
       "state": "approval_gated",
       "label": "Distributed admission activation approval",
       "evidencePath": "evaluation\\distributed-admission-activation-approval-2026-08-29\\report.json",
-      "detail": "Production distributed admission is approval-ready but not activated: the packet requests exactly the Upstash REST URL/token, records no secret values, performs no Redis/DB/provider/Share/vector/Wiki/KOSHA mutation, keeps remote Hermes mode separate, requires a bounded post-deploy connectivity probe, and preserves exact saved Share as MISSING_EVIDENCE.",
+      "detail": "Production distributed admission is approval-ready but not activated at current source/live 01f7dfe5: the current operations cockpit passes 4/4 viewports while reporting absent/unavailable admission and preview-only dispatch. The packet requests exactly the Upstash REST URL/token, records no secret values, performs no Redis/DB/provider/Share/vector/Wiki/KOSHA mutation, keeps remote Hermes mode separate, requires a bounded post-deploy connectivity probe, and preserves exact saved Share as MISSING_EVIDENCE.",
       "nextActions": [
         "Obtain operator approval, configure both Production-scoped variables together, run the bounded readiness/connectivity probes, and rerun the fresh Standard scan before any security-complete claim."
       ]

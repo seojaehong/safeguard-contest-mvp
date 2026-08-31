@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T07:41:51.104Z
-Source HEAD at generation: f58cb9eff321c1de914ce6313cce2fa451474706
-Live commit at generation: f58cb9eff321c1de914ce6313cce2fa451474706
+Generated at: 2026-08-31T08:24:15.907Z
+Source HEAD at generation: 01f7dfe54f1f2709d3a1b72a608820a904d2d8e3
+Live commit at generation: 01f7dfe54f1f2709d3a1b72a608820a904d2d8e3
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -543,7 +543,7 @@ Overall: `northstar_open_approval_gated`
 | product_capability_truth | ancestor | ancestor_of_head | evaluation\product-capability-truth-2026-07-25\report.json |
 | ci_supply_chain_full_suite | ancestor | ancestor_of_head | evaluation\ci-full-suite-remediation-2026-08-29\report.json |
 | knowledge_preparation_capability_truth | ancestor | ancestor_of_head | evaluation\knowledge-preparation-capability-truth-2026-08-28\report.json |
-| launch_operations_readiness_cockpit | ancestor | ancestor_of_head | evaluation\launch-operations-readiness-2026-08-26\report.json |
+| launch_operations_readiness_cockpit | exact | matches_live | evaluation\launch-operations-readiness-2026-08-26\report.json |
 | document_export_capability_truth | ancestor | ancestor_of_head | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | ontology_viewport_workbench | ancestor | ancestor_of_head | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
 | knowledge_viewport_workbench | ancestor | ancestor_of_head | evaluation\knowledge-viewport-workbench-2026-08-17\report.json |
@@ -629,7 +629,7 @@ Overall: `northstar_open_approval_gated`
 
 ## Approval-Gated Work
 
-- distributed_admission_activation: Production distributed admission is approval-ready but not activated: the packet requests exactly the Upstash REST URL/token, records no secret values, performs no Redis/DB/provider/Share/vector/Wiki/KOSHA mutation, keeps remote Hermes mode separate, requires a bounded post-deploy connectivity probe, and preserves exact saved Share as MISSING_EVIDENCE.
+- distributed_admission_activation: Production distributed admission is approval-ready but not activated at current source/live 01f7dfe5: the current operations cockpit passes 4/4 viewports while reporting absent/unavailable admission and preview-only dispatch. The packet requests exactly the Upstash REST URL/token, records no secret values, performs no Redis/DB/provider/Share/vector/Wiki/KOSHA mutation, keeps remote Hermes mode separate, requires a bounded post-deploy connectivity probe, and preserves exact saved Share as MISSING_EVIDENCE.
 - security_atomic_db_race_remediation: The MCP token-cap and worker site-binding races have bounded transactional database designs and concurrency test plans, but no migration, RPC, trigger, DB mutation, or closure claim was made. Both sealed low findings remain open pending explicit schema approval, database integration proof, deployment, and a fresh scan; exact saved Share remains MISSING_EVIDENCE.
 - share_recipient_ack_approval: Recipient ACK route/test preflight is operator-ready, but a real production invited-recipient ACK canary would create workpack_share_sessions and workpack_read_confirmations rows, so it remains approval-gated with no DB mutation or provider message sent.
 - provider_dispatch_persistence: Provider dispatch remains preview-only: attempt-level idempotency reservation draft exists with an updated_at trigger, but per-channel result persistence/exactly-once behavior is not approved or proven; no migration, DB mutation, provider send, or live unlock occurred.

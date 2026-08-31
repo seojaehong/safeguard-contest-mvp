@@ -1,7 +1,9 @@
 # Distributed Admission Activation Approval Preflight
 
-Generated: `2026-08-28T21:20:11.476Z`
-Source SHA: `86a4f6508bada4af3e196e369f9167976834cf63`
+Generated: `2026-08-31T08:23:39.899Z`
+Source SHA: `01f7dfe54f1f2709d3a1b72a608820a904d2d8e3`
+Production commit: `01f7dfe54f1f2709d3a1b72a608820a904d2d8e3`
+Source matches production: `true`
 Verdict: `APPROVAL_REQUIRED_DISTRIBUTED_ADMISSION_ACTIVATION_NO_MUTATION`
 Operator approval required: `true`
 Activation performed: `false`
@@ -17,6 +19,8 @@ The source and live truth are ready for an operator decision. This packet does n
 - Variables: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
 - Secret values inspected or recorded: `false` / `false`
 - Remote Hermes ledger enabled by this change: `false`
+- Current runtime: `absent` admission, `preview_only` dispatch
+- Current operations viewports: `4/4` PASS
 
 ## Checks
 
@@ -28,6 +32,7 @@ The source and live truth are ready for an operator decision. This packet does n
 | `source_uses_namespaced_hashed_rate_and_lease_keys` | PASS | ok |
 | `remote_hermes_ledger_requires_separate_explicit_mode` | PASS | ok |
 | `operations_ui_reports_activation_boundary` | PASS | ok |
+| `launch_operations_evidence_matches_current_head` | PASS | ok |
 | `no_mutation_or_security_completion_overclaim` | PASS | ok |
 
 ## Post-approval Validation

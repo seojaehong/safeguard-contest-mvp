@@ -1,7 +1,9 @@
 {
   "schemaVersion": "safeclaw-distributed-admission-activation-preflight/v1",
-  "generatedAt": "2026-08-28T21:20:11.476Z",
-  "sourceSha": "86a4f6508bada4af3e196e369f9167976834cf63",
+  "generatedAt": "2026-08-31T08:23:39.899Z",
+  "sourceSha": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
+  "productionCommit": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
+  "sourceMatchesProduction": true,
   "verdict": "APPROVAL_REQUIRED_DISTRIBUTED_ADMISSION_ACTIVATION_NO_MUTATION",
   "overall": "approval_ready_open",
   "operatorApprovalRequired": true,
@@ -19,6 +21,14 @@
       "UPSTASH_REDIS_REST_TOKEN"
     ],
     "remoteHermesLedgerModeChangeRequested": false
+  },
+  "currentRuntimeTruth": {
+    "operationsVerdict": "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
+    "viewportPassCount": 4,
+    "viewportCount": 4,
+    "configurationState": "absent",
+    "publicAdmission": "unavailable",
+    "providerDispatch": "preview_only"
   },
   "sharedCredentialBoundary": {
     "publicAdmissionWouldUseCredentials": true,
@@ -88,6 +98,11 @@
     },
     {
       "id": "operations_ui_reports_activation_boundary",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "launch_operations_evidence_matches_current_head",
       "passed": true,
       "message": "ok"
     },
