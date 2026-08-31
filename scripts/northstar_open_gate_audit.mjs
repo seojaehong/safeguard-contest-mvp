@@ -2360,6 +2360,7 @@ function evaluateDistributedAdmissionActivationApprovalGate(rootDir) {
   const requestedChange = isRecord(report.requestedChange) ? report.requestedChange : {};
   const sharedBoundary = isRecord(report.sharedCredentialBoundary) ? report.sharedCredentialBoundary : {};
   const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const runtimeTruth = isRecord(report.currentRuntimeTruth) ? report.currentRuntimeTruth : {};
   const variables = readStringArray(requestedChange.requiredVariables);
   const checks = Array.isArray(report.checks) ? report.checks.filter(isRecord) : [];
   const exactVariables = variables.length === 2
@@ -2374,6 +2375,15 @@ function evaluateDistributedAdmissionActivationApprovalGate(rootDir) {
     && mutationBoundary.vectorOrEmbeddingMutationPerformed === false
     && mutationBoundary.wikiPublicationPerformed === false
     && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const currentRuntimePass = report.sourceMatchesProduction === true
+    && readString(report.sourceSha).length > 0
+    && readString(report.sourceSha) === readString(report.productionCommit)
+    && readString(runtimeTruth.operationsVerdict) === "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH"
+    && readNumber(runtimeTruth.viewportPassCount) === 4
+    && readNumber(runtimeTruth.viewportCount) === 4
+    && readString(runtimeTruth.configurationState) === "absent"
+    && readString(runtimeTruth.publicAdmission) === "unavailable"
+    && readString(runtimeTruth.providerDispatch) === "preview_only";
   const pass = readString(report.verdict) === "APPROVAL_REQUIRED_DISTRIBUTED_ADMISSION_ACTIVATION_NO_MUTATION"
     && readString(report.overall) === "approval_ready_open"
     && report.operatorApprovalRequired === true
@@ -2386,10 +2396,11 @@ function evaluateDistributedAdmissionActivationApprovalGate(rootDir) {
     && readString(requestedChange.environment) === "Production"
     && requestedChange.remoteHermesLedgerModeChangeRequested === false
     && sharedBoundary.remoteHermesLedgerEnabledByThisChange === false
-    && checks.length >= 7
+    && checks.length >= 8
     && checks.every((item) => item.passed === true)
     && readStringArray(report.failedCheckIds).length === 0
     && noMutation
+    && currentRuntimePass
     && readString(mutationBoundary.exactSavedShareVerdict) === "MISSING_EVIDENCE";
 
   return gateResult({
@@ -2398,8 +2409,8 @@ function evaluateDistributedAdmissionActivationApprovalGate(rootDir) {
     state: pass ? "approval_gated" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Production distributed admission is approval-ready but not activated: the packet requests exactly the Upstash REST URL/token, records no secret values, performs no Redis/DB/provider/Share/vector/Wiki/KOSHA mutation, keeps remote Hermes mode separate, requires a bounded post-deploy connectivity probe, and preserves exact saved Share as MISSING_EVIDENCE."
-      : `Distributed activation verdict=${readString(report.verdict) || "missing"}, overall=${readString(report.overall) || "missing"}, approval=${report.operatorApprovalRequired === true}, activated=${report.activationPerformed === true}, variables=${variables.join(",") || "missing"}, checks=${checks.length}, noMutation=${noMutation}, exactShare=${readString(mutationBoundary.exactSavedShareVerdict) || "missing"}.`,
+      ? `Production distributed admission is approval-ready but not activated at current source/live ${readString(report.productionCommit).slice(0, 8)}: the current operations cockpit passes 4/4 viewports while reporting absent/unavailable admission and preview-only dispatch. The packet requests exactly the Upstash REST URL/token, records no secret values, performs no Redis/DB/provider/Share/vector/Wiki/KOSHA mutation, keeps remote Hermes mode separate, requires a bounded post-deploy connectivity probe, and preserves exact saved Share as MISSING_EVIDENCE.`
+      : `Distributed activation verdict=${readString(report.verdict) || "missing"}, overall=${readString(report.overall) || "missing"}, approval=${report.operatorApprovalRequired === true}, activated=${report.activationPerformed === true}, variables=${variables.join(",") || "missing"}, checks=${checks.length}, currentRuntime=${currentRuntimePass}, noMutation=${noMutation}, exactShare=${readString(mutationBoundary.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? ["Obtain operator approval, configure both Production-scoped variables together, run the bounded readiness/connectivity probes, and rerun the fresh Standard scan before any security-complete claim."]
       : ["Regenerate the activation packet and restore the no-secret, no-mutation, separate-Hermes, and exact Share boundaries."],

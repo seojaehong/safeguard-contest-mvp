@@ -1,4 +1,5 @@
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -13,6 +14,7 @@ type ActivationReport = {
   operatorApprovalRequired: boolean;
   overall: string;
   requestedChange: { requiredVariables: string[]; remoteHermesLedgerModeChangeRequested: boolean };
+  sourceMatchesProduction: boolean;
   secretValuesInspected: boolean;
   secretValuesRecorded: boolean;
   sharedCredentialBoundary: { remoteHermesLedgerEnabledByThisChange: boolean };
@@ -81,6 +83,16 @@ function createFixtureRoot(): string {
   writeJson(root, "evaluation/launch-operations-readiness-2026-08-26/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
     summary: { configurationState: "absent" },
+    sourceHead: null,
+    productCommit: null,
+    productionBuild: { commitSha: null },
+    rows: ["desktop-day", "desktop-night", "mobile-day", "mobile-night"].map((name) => ({
+      name,
+      ok: true,
+      publicAdmission: "unavailable",
+      publicAdmissionConfiguration: "absent",
+      providerDispatch: "preview_only",
+    })),
     boundaries: {
       distributedAdmissionConfigured: false,
       distributedAdmissionActivationRequired: true,
@@ -92,6 +104,22 @@ function createFixtureRoot(): string {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   });
+  execFileSync("git", ["init"], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["config", "user.email", "fixture@example.test"], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["config", "user.name", "Fixture"], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["commit", "-m", "fixture"], { cwd: root, stdio: "ignore" });
+  const sourceSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
+  const operationsPath = join(root, "evaluation/launch-operations-readiness-2026-08-26/report.json");
+  const operations = JSON.parse(readFileSync(operationsPath, "utf8")) as {
+    sourceHead: string | null;
+    productCommit: string | null;
+    productionBuild: { commitSha: string | null };
+  };
+  operations.sourceHead = sourceSha;
+  operations.productCommit = sourceSha;
+  operations.productionBuild.commitSha = sourceSha;
+  writeFileSync(operationsPath, `${JSON.stringify(operations, null, 2)}\n`, "utf8");
   return root;
 }
 
@@ -114,6 +142,7 @@ describe("distributed admission activation approval preflight", () => {
     ]);
     expect(report.requestedChange.remoteHermesLedgerModeChangeRequested).toBe(false);
     expect(report.sharedCredentialBoundary.remoteHermesLedgerEnabledByThisChange).toBe(false);
+    expect(report.sourceMatchesProduction).toBe(true);
     expect(report.mutationBoundary.exactSavedShareVerdict).toBe("MISSING_EVIDENCE");
     expect(report.failedCheckIds).toEqual([]);
   });
@@ -142,6 +171,20 @@ describe("distributed admission activation approval preflight", () => {
 
     const report = buildDistributedAdmissionActivationPreflight({ root });
     expect(report.failedCheckIds).toContain("remote_hermes_ledger_requires_separate_explicit_mode");
+  });
+
+  it("fails closed when current launch operations evidence is stale", async () => {
+    const { buildDistributedAdmissionActivationPreflight } = await loadModule();
+    const root = createFixtureRoot();
+    const reportPath = join(root, "evaluation/launch-operations-readiness-2026-08-26/report.json");
+    const operations = JSON.parse(readFileSync(reportPath, "utf8")) as {
+      productionBuild: { commitSha: string | null };
+    };
+    operations.productionBuild.commitSha = "stale-production";
+    writeFileSync(reportPath, `${JSON.stringify(operations, null, 2)}\n`, "utf8");
+
+    const report = buildDistributedAdmissionActivationPreflight({ root });
+    expect(report.failedCheckIds).toContain("launch_operations_evidence_matches_current_head");
   });
 
   it("renders the approval, behavioral-probe, rollback, and exact Share boundaries", async () => {

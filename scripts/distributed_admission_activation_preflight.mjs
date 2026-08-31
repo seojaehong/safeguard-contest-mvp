@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // @ts-check
 
 import { execFileSync } from "node:child_process";
@@ -94,11 +93,13 @@ export function buildDistributedAdmissionActivationPreflight({ root }) {
   const hermesSource = readText(root, REQUIRED_FILES.remoteHermesLedgerSource);
   const readiness = readJson(root, REQUIRED_FILES.readinessEvidence);
   const operations = readJson(root, REQUIRED_FILES.launchOperationsEvidence);
+  const sourceSha = currentHead(root);
   const readinessVariables = Array.isArray(readiness.configuration?.requiredVariables)
     ? readiness.configuration.requiredVariables.filter((item) => typeof item === "string")
     : [];
   const operationBoundaries = operations.boundaries ?? {};
   const readinessBoundary = readiness.boundary ?? {};
+  const operationRows = Array.isArray(operations.rows) ? operations.rows : [];
 
   const checks = [
     check(
@@ -156,6 +157,19 @@ export function buildDistributedAdmissionActivationPreflight({ root }) {
       "The live operations cockpit must show configuration absent and preserve separate launch/provider approvals.",
     ),
     check(
+      "launch_operations_evidence_matches_current_head",
+      sourceSha !== null
+        && operations.sourceHead === sourceSha
+        && operations.productCommit === sourceSha
+        && operations.productionBuild?.commitSha === sourceSha
+        && operationRows.length === 4
+        && operationRows.every((row) => row.ok === true
+          && row.publicAdmission === "unavailable"
+          && row.publicAdmissionConfiguration === "absent"
+          && row.providerDispatch === "preview_only"),
+      "The approval packet must be bound to the current source/live commit and all four current operations viewports.",
+    ),
+    check(
       "no_mutation_or_security_completion_overclaim",
       readinessBoundary.dbMutationPerformed === false
         && readinessBoundary.providerDispatchCalled === false
@@ -177,7 +191,11 @@ export function buildDistributedAdmissionActivationPreflight({ root }) {
   return {
     schemaVersion: "safeclaw-distributed-admission-activation-preflight/v1",
     generatedAt: new Date().toISOString(),
-    sourceSha: currentHead(root),
+    sourceSha,
+    productionCommit: typeof operations.productionBuild?.commitSha === "string"
+      ? operations.productionBuild.commitSha
+      : null,
+    sourceMatchesProduction: sourceSha !== null && operations.productionBuild?.commitSha === sourceSha,
     verdict: ready
       ? "APPROVAL_REQUIRED_DISTRIBUTED_ADMISSION_ACTIVATION_NO_MUTATION"
       : "BLOCKED_DISTRIBUTED_ADMISSION_ACTIVATION_PREFLIGHT_FAILED",
@@ -194,6 +212,14 @@ export function buildDistributedAdmissionActivationPreflight({ root }) {
       environment: "Production",
       requiredVariables: REQUIRED_VARIABLES,
       remoteHermesLedgerModeChangeRequested: false,
+    },
+    currentRuntimeTruth: {
+      operationsVerdict: operations.verdict,
+      viewportPassCount: operationRows.filter((row) => row.ok === true).length,
+      viewportCount: operationRows.length,
+      configurationState: operations.summary?.configurationState ?? null,
+      publicAdmission: operationRows[0]?.publicAdmission ?? null,
+      providerDispatch: operationRows[0]?.providerDispatch ?? null,
     },
     sharedCredentialBoundary: {
       publicAdmissionWouldUseCredentials: true,
@@ -246,6 +272,8 @@ export function renderDistributedAdmissionActivationPreflightMarkdown(report) {
 
 Generated: \`${report.generatedAt}\`
 Source SHA: \`${report.sourceSha ?? "unknown"}\`
+Production commit: \`${report.productionCommit ?? "unknown"}\`
+Source matches production: \`${report.sourceMatchesProduction}\`
 Verdict: \`${report.verdict}\`
 Operator approval required: \`${report.operatorApprovalRequired}\`
 Activation performed: \`${report.activationPerformed}\`
@@ -263,6 +291,8 @@ ${report.overall === "approval_ready_open"
 - Variables: ${(report.requestedChange?.requiredVariables ?? []).map((item) => `\`${item}\``).join(", ") || "None"}
 - Secret values inspected or recorded: \`${report.secretValuesInspected}\` / \`${report.secretValuesRecorded}\`
 - Remote Hermes ledger enabled by this change: \`${report.sharedCredentialBoundary?.remoteHermesLedgerEnabledByThisChange}\`
+- Current runtime: \`${report.currentRuntimeTruth?.configurationState ?? "unknown"}\` admission, \`${report.currentRuntimeTruth?.providerDispatch ?? "unknown"}\` dispatch
+- Current operations viewports: \`${report.currentRuntimeTruth?.viewportPassCount ?? 0}/${report.currentRuntimeTruth?.viewportCount ?? 0}\` PASS
 
 ## Checks
 

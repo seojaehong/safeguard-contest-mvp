@@ -4072,6 +4072,9 @@ function createFixtureRoot(): string {
     },
   });
   writeJson(rootDir, path.join("evaluation", "distributed-admission-activation-approval-2026-08-29", "report.json"), {
+    sourceSha: "current-sha",
+    productionCommit: "current-sha",
+    sourceMatchesProduction: true,
     verdict: "APPROVAL_REQUIRED_DISTRIBUTED_ADMISSION_ACTIVATION_NO_MUTATION",
     overall: "approval_ready_open",
     operatorApprovalRequired: true,
@@ -4089,7 +4092,15 @@ function createFixtureRoot(): string {
     sharedCredentialBoundary: {
       remoteHermesLedgerEnabledByThisChange: false,
     },
-    checks: Array.from({ length: 7 }, (_, index) => ({ id: `check-${index + 1}`, passed: true, message: "ok" })),
+    currentRuntimeTruth: {
+      operationsVerdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
+      viewportPassCount: 4,
+      viewportCount: 4,
+      configurationState: "absent",
+      publicAdmission: "unavailable",
+      providerDispatch: "preview_only",
+    },
+    checks: Array.from({ length: 8 }, (_, index) => ({ id: `check-${index + 1}`, passed: true, message: "ok" })),
     failedCheckIds: [],
     mutationBoundary: {
       dbSchemaMutationPerformed: false,
