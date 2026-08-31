@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import childProcess from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -8,6 +7,11 @@ import { pathToFileURL } from "node:url";
 import { initSync, HwpDocument } from "@rhwp/core";
 import ExcelJS from "exceljs";
 import { encodeSpreadsheetDelimitedCell } from "../lib/spreadsheet-delimited-cell.ts";
+import {
+  fetchBufferWithBudget,
+  readBoundedPositiveInteger,
+  spawnSyncWithBudget,
+} from "./operator_smoke_resource_budget.mjs";
 
 const baseUrl = process.env.SAFEGUARD_BASE_URL || "https://safeguard-contest-mvp.vercel.app";
 const outDir = path.resolve(process.env.SAFEGUARD_OUT_DIR || path.join(process.cwd(), "evaluation", "2026-04-29-orchestration-download-smoke"));
@@ -16,6 +20,9 @@ const question = process.env.SAFEGUARD_SMOKE_QUESTION || "대구 달서구 창�
 const askAiMode = ["template", "enhanced", "full"].includes(process.env.SAFEGUARD_SMOKE_AI_MODE || "")
   ? process.env.SAFEGUARD_SMOKE_AI_MODE
   : undefined;
+const httpTimeoutMs = readBoundedPositiveInteger(process.env.SAFEGUARD_SMOKE_HTTP_TIMEOUT_MS, 30_000, { max: 120_000 });
+const responseMaxBytes = readBoundedPositiveInteger(process.env.SAFEGUARD_SMOKE_RESPONSE_MAX_BYTES, 8 * 1024 * 1024, { max: 32 * 1024 * 1024 });
+const chromeTimeoutMs = readBoundedPositiveInteger(process.env.SAFEGUARD_SMOKE_CHROME_TIMEOUT_MS, 30_000, { max: 120_000 });
 
 const documentMeta = [
   ["workpackSummaryDraft", "점검결과 요약", "workpack-summary"],
@@ -409,7 +416,14 @@ function runChrome(args) {
   if (!executable) {
     throw new Error("Chrome executable not found. Set CHROME_PATH to run PDF/JPG export smoke.");
   }
-  childProcess.execFileSync(executable, args, { stdio: "ignore" });
+  const result = spawnSyncWithBudget(executable, args, { stdio: "ignore" }, {
+    timeoutMs: chromeTimeoutMs,
+    maxBufferBytes: 1024 * 1024,
+  });
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    throw new Error(`Chrome export failed with status ${result.status ?? "unknown"}`);
+  }
 }
 
 function waitForFile(pathToCheck, minBytes = 1, timeoutMs = 5000) {
@@ -423,8 +437,11 @@ function waitForFile(pathToCheck, minBytes = 1, timeoutMs = 5000) {
 
 async function fetchJson(url, init) {
   const startedAt = Date.now();
-  const response = await fetch(url, init);
-  const text = await response.text();
+  const { response, buffer } = await fetchBufferWithBudget(url, init, {
+    timeoutMs: httpTimeoutMs,
+    maxBytes: responseMaxBytes,
+  });
+  const text = buffer.toString("utf8");
   let parsed = null;
   try {
     parsed = JSON.parse(text);
@@ -544,10 +561,14 @@ async function writeDownloads(ask, filesDir) {
   const pdfPath = path.join(filesDir, `${company}-${sampleMeta[2]}.pdf`);
   const jpgPath = path.join(filesDir, `${company}-${sampleMeta[2]}.jpg`);
   const userDataDir = path.join(os.tmpdir(), `safeguard-chrome-${Date.now()}`);
-  runChrome(["--headless=new", "--disable-gpu", "--no-sandbox", `--user-data-dir=${userDataDir}`, `--print-to-pdf=${pdfPath}`, pathToFileURL(htmlPath).href]);
-  waitForFile(pdfPath, 1000);
-  runChrome(["--headless=new", "--disable-gpu", "--no-sandbox", `--user-data-dir=${userDataDir}`, "--window-size=1240,1754", `--screenshot=${jpgPath}`, pathToFileURL(htmlPath).href]);
-  waitForFile(jpgPath, 1000);
+  try {
+    runChrome(["--headless=new", "--disable-gpu", "--no-sandbox", `--user-data-dir=${userDataDir}`, `--print-to-pdf=${pdfPath}`, pathToFileURL(htmlPath).href]);
+    waitForFile(pdfPath, 1000);
+    runChrome(["--headless=new", "--disable-gpu", "--no-sandbox", `--user-data-dir=${userDataDir}`, "--window-size=1240,1754", `--screenshot=${jpgPath}`, pathToFileURL(htmlPath).href]);
+    waitForFile(jpgPath, 1000);
+  } finally {
+    fs.rmSync(userDataDir, { recursive: true, force: true });
+  }
 
   const allRows = documentMeta.flatMap(([key, title]) => parseSheetRows(title, values[key]));
   const allTxtPath = path.join(filesDir, `${company}-safeguard-workpack.txt`);

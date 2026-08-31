@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import childProcess from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
@@ -8,6 +7,7 @@ import {
   extractBudgetedHwpxText,
   extractBudgetedXlsxText
 } from "./final_output_parser_safety.mjs";
+import { spawnSyncWithBudget } from "./operator_smoke_resource_budget.mjs";
 
 const startedAt = Date.now();
 const rootDir = process.cwd();
@@ -300,11 +300,13 @@ async function runFormatAudit(scenario) {
     SAFEGUARD_OUT_DIR: scenarioOut,
     SAFEGUARD_SMOKE_QUESTION: scenario.question
   };
-  const result = childProcess.spawnSync(process.execPath, ["./scripts/prod_orchestration_download_smoke.mjs"], {
+  const result = spawnSyncWithBudget(process.execPath, ["./scripts/prod_orchestration_download_smoke.mjs"], {
     cwd: rootDir,
     env,
     encoding: "utf8",
-    maxBuffer: 20 * 1024 * 1024
+  }, {
+    timeoutMs: 180_000,
+    maxBufferBytes: 20 * 1024 * 1024,
   });
   const logPath = path.join(scenarioOut, "download-smoke.log");
   fs.writeFileSync(logPath, [

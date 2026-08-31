@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import childProcess from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { spawnSyncWithBudget } from "./operator_smoke_resource_budget.mjs";
 
 const baseUrl = process.env.SAFEGUARD_BASE_URL || "https://safeguard-contest-mvp.vercel.app";
 const outDir = path.resolve(process.env.SAFEGUARD_SUBMISSION_OUT_DIR || path.join(process.cwd(), "evaluation", "submission-readiness"));
@@ -301,11 +301,17 @@ function runFormatSmoke(scenario) {
     SAFEGUARD_SMOKE_QUESTION: scenario.question
   };
   try {
-    childProcess.execFileSync(process.execPath, ["./scripts/prod_orchestration_download_smoke.mjs"], {
+    const result = spawnSyncWithBudget(process.execPath, ["./scripts/prod_orchestration_download_smoke.mjs"], {
       cwd: process.cwd(),
       env,
-      stdio: "pipe"
+      stdio: "pipe",
+      encoding: "utf8",
+    }, {
+      timeoutMs: 180_000,
+      maxBufferBytes: 8 * 1024 * 1024,
     });
+    if (result.error) throw result.error;
+    if (result.status !== 0) throw new Error(`format smoke failed with status ${result.status ?? "unknown"}`);
     const reportPath = path.join(scenarioOut, "api-orchestration-download-smoke.json");
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
     const requiredFormats = ["PDF", "HWPX", "XLS", "ALL_XLS"];

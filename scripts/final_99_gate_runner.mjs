@@ -318,7 +318,10 @@ function runOrchestrationDownloadSmoke() {
       SAFEGUARD_SMOKE_QUESTION: primaryQuestion,
       SAFEGUARD_SMOKE_AI_MODE: askAiMode || ""
     },
-    timeout: 180_000
+    timeout: 180_000,
+    maxBuffer: 8 * 1024 * 1024,
+    killSignal: "SIGKILL",
+    windowsHide: true,
   });
   let parsedStdout = null;
   try {

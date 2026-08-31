@@ -3,6 +3,11 @@ import childProcess from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import {
+  fetchBufferWithBudget,
+  readBoundedPositiveInteger,
+  spawnSyncWithBudget,
+} from "./operator_smoke_resource_budget.mjs";
 
 const outDir = path.resolve(process.env.SAFECLAW_FINAL_MATRIX_OUT_DIR || path.join(process.cwd(), "evaluation", "final-e2e-matrix"));
 const baseUrl = (process.env.SAFEGUARD_BASE_URL || "https://safeguard-contest-mvp.vercel.app").replace(/\/+$/g, "");
@@ -11,6 +16,9 @@ const localBaseUrl = (process.env.SAFECLAW_FINAL_LOCAL_BASE_URL || `http://127.0
 const runLocalUi = process.env.SAFECLAW_FINAL_SKIP_UI_LOCAL !== "1";
 const commandTimeoutMs = Number.parseInt(process.env.SAFECLAW_FINAL_COMMAND_TIMEOUT_MS || "600000", 10);
 const serverTimeoutMs = Number.parseInt(process.env.SAFECLAW_FINAL_SERVER_TIMEOUT_MS || "90000", 10);
+const responseTimeoutMs = readBoundedPositiveInteger(process.env.SAFECLAW_FINAL_RESPONSE_TIMEOUT_MS, 30_000, { max: 120_000 });
+const responseMaxBytes = readBoundedPositiveInteger(process.env.SAFECLAW_FINAL_RESPONSE_MAX_BYTES, 8 * 1024 * 1024, { max: 32 * 1024 * 1024 });
+const commandMaxBufferBytes = readBoundedPositiveInteger(process.env.SAFECLAW_FINAL_COMMAND_MAX_BUFFER_BYTES, 8 * 1024 * 1024, { max: 32 * 1024 * 1024 });
 
 const STATUS = {
   pass: "pass",
@@ -89,12 +97,13 @@ function runCommand(name, command, args, envUpdates = {}) {
   const startedAt = Date.now();
   const env = { ...process.env, ...envUpdates };
   try {
-    const result = childProcess.spawnSync(command, args, {
+    const result = spawnSyncWithBudget(command, args, {
       cwd: process.cwd(),
       env,
       encoding: "utf8",
-      timeout: commandTimeoutMs,
-      windowsHide: true
+    }, {
+      timeoutMs: commandTimeoutMs,
+      maxBufferBytes: commandMaxBufferBytes,
     });
     return {
       name,
@@ -129,8 +138,11 @@ function runCommand(name, command, args, envUpdates = {}) {
 async function fetchText(route, init = {}) {
   const startedAt = Date.now();
   try {
-    const response = await fetch(`${baseUrl}${route}`, init);
-    const text = await response.text();
+    const { response, buffer } = await fetchBufferWithBudget(`${baseUrl}${route}`, init, {
+      timeoutMs: responseTimeoutMs,
+      maxBytes: responseMaxBytes,
+    });
+    const text = buffer.toString("utf8");
     return {
       ok: response.ok,
       statusCode: response.status,
@@ -157,8 +169,10 @@ async function fetchText(route, init = {}) {
 async function fetchBinary(route, init = {}) {
   const startedAt = Date.now();
   try {
-    const response = await fetch(`${baseUrl}${route}`, init);
-    const buffer = Buffer.from(await response.arrayBuffer());
+    const { response, buffer } = await fetchBufferWithBudget(`${baseUrl}${route}`, init, {
+      timeoutMs: responseTimeoutMs,
+      maxBytes: responseMaxBytes,
+    });
     return {
       ok: response.ok,
       statusCode: response.status,
