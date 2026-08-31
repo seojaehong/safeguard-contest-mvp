@@ -9990,6 +9990,92 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
       .toBe("contradicted");
   });
 
+  it("uses current companion receipts for governed paths changed after the shared compatibility receipt", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    for (const relativePath of [
+      "app/api/input-photos/hazard-analysis/route.ts",
+      "app/api/knowledge/match/route.ts",
+      "app/api/mcp/[transport]/implementation.ts",
+      "lib/public-distributed-rate-limit.ts",
+      "lib/api-guard.ts",
+      "tests/api-guard.test.ts",
+    ]) {
+      writeText(rootDir, relativePath, `export const currentCompanionReceipt = ${JSON.stringify(relativePath)};\n`);
+    }
+    execFileSync("git", [
+      "add",
+      "app/api/input-photos/hazard-analysis/route.ts",
+      "app/api/knowledge/match/route.ts",
+      "app/api/mcp/[transport]/implementation.ts",
+      "lib/public-distributed-rate-limit.ts",
+      "lib/api-guard.ts",
+      "tests/api-guard.test.ts",
+    ], { cwd: rootDir, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "apply current companion remediations"], { cwd: rootDir, stdio: "ignore" });
+    const currentSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: rootDir, encoding: "utf8" }).trim();
+
+    const rawPath = path.join(rootDir, "evaluation", "current-source-security-raw-error-projection-remediation-2026-08-31", "report.json");
+    const raw = JSON.parse(fs.readFileSync(rawPath, "utf8")) as {
+      sourceHead: string;
+      productCommit: string;
+      productionCommit: string;
+      verification: { liveDeployment: { commitSha: string } };
+      mutationBoundary: { dbMutationPerformed: boolean };
+    };
+    raw.sourceHead = currentSha;
+    raw.productCommit = currentSha;
+    raw.productionCommit = currentSha;
+    raw.verification.liveDeployment.commitSha = currentSha;
+    fs.writeFileSync(rawPath, `${JSON.stringify(raw, null, 2)}\n`, "utf8");
+
+    const mcpPath = path.join(rootDir, "evaluation", "current-source-security-mcp-generation-cancellation-remediation-2026-08-31", "report.json");
+    const mcp = JSON.parse(fs.readFileSync(mcpPath, "utf8")) as {
+      sourceHead: string;
+      productCommit: string;
+      productionCommit: string;
+      verification: { liveDeployment: { commitSha: string } };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    mcp.sourceHead = currentSha;
+    mcp.productCommit = currentSha;
+    mcp.productionCommit = currentSha;
+    mcp.verification.liveDeployment.commitSha = currentSha;
+    fs.writeFileSync(mcpPath, `${JSON.stringify(mcp, null, 2)}\n`, "utf8");
+
+    const identityPath = path.join(rootDir, "evaluation", "current-source-security-forwarded-identity-remediation-2026-08-31", "report.json");
+    const identity = JSON.parse(fs.readFileSync(identityPath, "utf8")) as {
+      sourceHead: string;
+      productionCommit: string;
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    identity.sourceHead = currentSha;
+    identity.productionCommit = currentSha;
+    fs.writeFileSync(identityPath, `${JSON.stringify(identity, null, 2)}\n`, "utf8");
+
+    const current = buildNorthstarOpenGateAudit({ rootDir });
+    expect(current.gates.find((item) => item.id === "public_json_request_body_budget")?.state).toBe("proven");
+    expect(current.gates.find((item) => item.id === "improvement_photo_analysis_budget")?.state).toBe("notice");
+    expect(current.gates.find((item) => item.id === "public_provider_admission")?.state).toBe("notice");
+    expect(current.gates.find((item) => item.id === "security_followup_remediation")?.state).toBe("proven");
+    expect(current.gates.find((item) => item.id === "current_security_governed_path_compatibility")?.state).toBe("notice");
+    expect(current.gates.find((item) => item.id === "current_source_security_residual_remediation")?.state)
+      .toBe("notice");
+
+    raw.mutationBoundary.dbMutationPerformed = true;
+    mcp.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    identity.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(rawPath, `${JSON.stringify(raw, null, 2)}\n`, "utf8");
+    fs.writeFileSync(mcpPath, `${JSON.stringify(mcp, null, 2)}\n`, "utf8");
+    fs.writeFileSync(identityPath, `${JSON.stringify(identity, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "current_security_governed_path_compatibility")?.state)
+      .toBe("contradicted");
+    expect(contradicted.gates.find((item) => item.id === "current_source_security_residual_remediation")?.state)
+      .toBe("contradicted");
+  });
+
   it("records deployed security residual remediation as notice without closing the sealed scan", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();

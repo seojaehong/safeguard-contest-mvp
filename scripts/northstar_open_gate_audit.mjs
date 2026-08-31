@@ -10075,6 +10075,46 @@ function isCurrentPhotoReadinessAuthFanoutCompatibility(rootDir, governedPaths) 
  * @param {string} rootDir
  * @param {string[]} governedPaths
  */
+function isCurrentRawErrorProjectionCompatibility(rootDir, governedPaths) {
+  const gate = evaluateCurrentSourceRawErrorProjectionRemediationGate(rootDir);
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.currentSourceRawErrorProjectionRemediation);
+  const productCommit = isRecord(report) ? readString(report.productCommit) : "";
+  if (gate.state !== "notice" || !productCommit) return false;
+  try {
+    execFileSync("git", ["diff", "--quiet", `${productCommit}..HEAD`, "--", ...governedPaths], {
+      cwd: rootDir,
+      stdio: ["ignore", "ignore", "ignore"],
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * @param {string} rootDir
+ * @param {string[]} governedPaths
+ */
+function isCurrentForwardedIdentityCompatibility(rootDir, governedPaths) {
+  const gate = evaluateCurrentSourceForwardedIdentityRemediationGate(rootDir);
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.currentSourceForwardedIdentityRemediation);
+  const sourceHead = isRecord(report) ? readString(report.sourceHead) : "";
+  if (gate.state !== "proven" || !sourceHead) return false;
+  try {
+    execFileSync("git", ["diff", "--quiet", `${sourceHead}..HEAD`, "--", ...governedPaths], {
+      cwd: rootDir,
+      stdio: ["ignore", "ignore", "ignore"],
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * @param {string} rootDir
+ * @param {string[]} governedPaths
+ */
 function isCurrentSecurityGovernedPathReceiptCurrent(rootDir, governedPaths) {
   return isCurrentSecurityGovernedPathCompatibility(
     rootDir,
@@ -10095,6 +10135,14 @@ const CURRENT_SOURCE_SECURITY_RESIDUAL_PATHS = [
   "tests/upstream-http-security.test.ts",
   "tests/upstream-integration-security.test.ts",
 ];
+
+const CURRENT_SOURCE_SECURITY_RESIDUAL_FORWARDED_IDENTITY_PATHS = [
+  "lib/api-guard.ts",
+  "tests/api-guard.test.ts",
+];
+
+const CURRENT_SOURCE_SECURITY_RESIDUAL_UNCHANGED_PATHS = CURRENT_SOURCE_SECURITY_RESIDUAL_PATHS
+  .filter((pathName) => !CURRENT_SOURCE_SECURITY_RESIDUAL_FORWARDED_IDENTITY_PATHS.includes(pathName));
 
 /**
  * @param {string} rootDir
@@ -10129,6 +10177,12 @@ function evaluateCurrentSourceSecurityResidualRemediationGate(rootDir) {
   const sourceHead = readString(report.sourceHead);
   const productionCommit = readString(report.productionCommit);
   const residualAnchors = residuals.map((item) => readString(item.anchor)).sort();
+  const sourceCurrent = isEvidenceCurrentForPaths(rootDir, sourceHead, CURRENT_SOURCE_SECURITY_RESIDUAL_PATHS)
+    || (isEvidenceCurrentForPaths(rootDir, sourceHead, CURRENT_SOURCE_SECURITY_RESIDUAL_UNCHANGED_PATHS)
+      && isCurrentForwardedIdentityCompatibility(
+        rootDir,
+        CURRENT_SOURCE_SECURITY_RESIDUAL_FORWARDED_IDENTITY_PATHS,
+      ));
   const noMutation = mutation.dbMutationPerformed === false
     && mutation.providerDispatchCalled === false
     && mutation.shareSessionCreated === false
@@ -10139,7 +10193,7 @@ function evaluateCurrentSourceSecurityResidualRemediationGate(rootDir) {
   const pass = readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING"
     && sourceHead.length === 40
     && productionCommit.length === 40
-    && isEvidenceCurrentForPaths(rootDir, sourceHead, CURRENT_SOURCE_SECURITY_RESIDUAL_PATHS)
+    && sourceCurrent
     && isGitAncestor(rootDir, productionCommit)
     && report.productionIncludesProductCommit === true
     && readString(baseline.scanId) === "3358978a-75d1-454a-9dcd-4b63b52b9768"
@@ -10178,8 +10232,8 @@ function evaluateCurrentSourceSecurityResidualRemediationGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Deployed source includes bounded remediation for provider-detail, dns-toctou, and xff-spoof with 174 focused and adjacent tests, strict typecheck, and a 28-page production build. This is deployed-source plus local contract evidence only: the immutable 18-finding baseline and sealed 17-finding partial-coverage scan remain visible, no mutation occurred, a follow-up full scan is required, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
-      : `Security residual verdict=${readString(report.verdict) || "missing"}, source=${sourceHead || "missing"}, production=${productionCommit || "missing"}, residuals=${residualAnchors.join(",") || "missing"}, tests=${readNumber(focused.tests)}+${readNumber(adjacent.tests)}, live=${readString(live.status) || "missing"}/${live.behavioralProbeExecuted === true}, noMutation=${noMutation}, rescan=${remaining.followUpSecurityScanRequired === true}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+      ? "Deployed source includes bounded remediation for provider-detail, dns-toctou, and xff-spoof with 174 focused and adjacent tests, strict typecheck, a 28-page production build, and a current forwarded-identity companion for the only subsequently changed governed paths. This is deployed-source plus local contract evidence only: the immutable 18-finding baseline and sealed 17-finding partial-coverage scan remain visible, no mutation occurred, a follow-up full scan is required, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
+      : `Security residual verdict=${readString(report.verdict) || "missing"}, source=${sourceHead || "missing"}, sourceCurrent=${sourceCurrent}, production=${productionCommit || "missing"}, residuals=${residualAnchors.join(",") || "missing"}, tests=${readNumber(focused.tests)}+${readNumber(adjacent.tests)}, live=${readString(live.status) || "missing"}/${live.behavioralProbeExecuted === true}, noMutation=${noMutation}, rescan=${remaining.followUpSecurityScanRequired === true}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? ["Run a fresh full-repository security scan before reclassifying the three immutable findings or making any security-complete claim."]
       : ["Restore exact source/live marker ancestry, the three residual anchors, 174 tests, no-mutation boundaries, follow-up scan requirement, and exact Share MISSING_EVIDENCE."],
@@ -11284,7 +11338,8 @@ function evaluateSecurityFollowupRemediationGate(rootDir) {
     || isSecuritySafetyReferenceSurfaceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
     || isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, "security_followup_remediation", SECURITY_FOLLOWUP_REMEDIATION_PATHS)
-    || isCurrentSecurityGovernedPathReceiptCurrent(rootDir, ["lib/public-distributed-rate-limit.ts"]);
+    || isCurrentSecurityGovernedPathReceiptCurrent(rootDir, ["lib/public-distributed-rate-limit.ts"])
+    || isCurrentForwardedIdentityCompatibility(rootDir, ["lib/public-distributed-rate-limit.ts"]);
   const currentResidualCompatibility = isCurrentSourceSecurityResidualCompatibilityCurrent(
     rootDir,
     "security_followup_remediation",
@@ -11426,7 +11481,8 @@ function evaluatePublicJsonRequestBodyBudgetGate(rootDir) {
     || isCurrentSecurityRemediationCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
     || isPostRemediationSecuritySourceCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
     || isPublicAdmissionCurrentSourceCompatibilityCurrent(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
-    || isCurrentSecurityGovernedPathCompatibility(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS);
+    || isCurrentSecurityGovernedPathCompatibility(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
+    || isCurrentRawErrorProjectionCompatibility(rootDir, PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS);
   const expectedCases = [
     { path: "/api/ask", limit: 131072 },
     { path: "/api/ask/stream", limit: 131072 },
@@ -11858,7 +11914,8 @@ function evaluateImprovementPhotoAnalysisBudgetGate(rootDir) {
     || isDocumentExportAdmissionCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
     || isPublicAdmissionCurrentSourceCompatibilityCurrent(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
     || isCurrentSecurityGovernedPathCompatibility(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
-    || isCurrentPhotoReadinessAuthFanoutCompatibility(rootDir, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS);
+    || isCurrentPhotoReadinessAuthFanoutCompatibility(rootDir, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
+    || isCurrentRawErrorProjectionCompatibility(rootDir, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS);
   const noMutation = mutation.dbSchemaMutation === false
     && mutation.dbDataMutation === false
     && mutation.providerDispatchCalled === false
@@ -12273,7 +12330,8 @@ function evaluatePublicProviderAdmissionGate(rootDir) {
       || isPublicSearchDistributedAdmissionCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
       || isDocumentExportAdmissionCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
       || isPublicAdmissionCurrentSourceCompatibilityCurrent(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
-      || isCurrentSecurityGovernedPathCompatibility(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS))
+      || isCurrentSecurityGovernedPathCompatibility(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
+      || isCurrentRawErrorProjectionCompatibility(rootDir, PUBLIC_PROVIDER_ADMISSION_PATHS))
     && findings.length === 2
     && findings.every((item) => readString(item.scanId) === "c4e9e2f1-7ce4-4313-a651-32205fca401f"
       && expectedFindingIds.has(readString(item.findingId))
@@ -14078,17 +14136,21 @@ function evaluateCurrentSecurityGovernedPathCompatibilityGate(rootDir) {
   const pass = isRecord(report)
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "share_ack_prebody_admission_security", SHARE_ACK_PREBODY_ADMISSION_PATHS)
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "share_recipient_contact_verification_security", SHARE_RECIPIENT_CONTACT_VERIFICATION_PATHS)
-    && isCurrentSecurityGovernedPathCompatibility(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
+    && (isCurrentSecurityGovernedPathCompatibility(rootDir, "public_json_request_body_budget", PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS)
+      || isCurrentRawErrorProjectionCompatibility(rootDir, PUBLIC_JSON_REQUEST_BODY_BUDGET_PATHS))
     && (isCurrentSecurityGovernedPathCompatibility(rootDir, "improvement_photo_analysis_budget", IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
-      || isCurrentPhotoReadinessAuthFanoutCompatibility(rootDir, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS))
-    && isCurrentSecurityGovernedPathCompatibility(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
+      || isCurrentPhotoReadinessAuthFanoutCompatibility(rootDir, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS)
+      || isCurrentRawErrorProjectionCompatibility(rootDir, IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_PATHS))
+    && (isCurrentSecurityGovernedPathCompatibility(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
+      || isCurrentRawErrorProjectionCompatibility(rootDir, PUBLIC_PROVIDER_ADMISSION_PATHS))
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "public_ask_distributed_admission", PUBLIC_ASK_DISTRIBUTED_ADMISSION_PATHS)
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "learning_export_renderer_security", LEARNING_EXPORT_RENDERER_SECURITY_PATHS)
     && (isCurrentSecurityGovernedPathCompatibility(rootDir, "mcp_provider_admission_security", MCP_PROVIDER_ADMISSION_PATHS)
       || isCurrentMcpGenerationCancellationCompatibility(rootDir, MCP_PROVIDER_ADMISSION_PATHS))
     && (isCurrentSecurityGovernedPathCompatibility(rootDir, "mcp_generation_work_budget_security", MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS)
       || isCurrentMcpGenerationCancellationCompatibility(rootDir, MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS))
-    && isCurrentSecurityGovernedPathCompatibility(rootDir, "security_followup_remediation", ["lib/public-distributed-rate-limit.ts"]);
+    && (isCurrentSecurityGovernedPathCompatibility(rootDir, "security_followup_remediation", ["lib/public-distributed-rate-limit.ts"])
+      || isCurrentForwardedIdentityCompatibility(rootDir, ["lib/public-distributed-rate-limit.ts"]));
   const verification = isRecord(report) && isRecord(report.verification) ? report.verification : {};
   const vitest = isRecord(verification.vitest) ? verification.vitest : {};
   const remaining = isRecord(report) && isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
