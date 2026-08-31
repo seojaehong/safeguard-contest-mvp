@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-workspace-bounded-workbench-current/v1",
-  "checkedAt": "2026-08-27T22:40:47.422Z",
+  "checkedAt": "2026-08-31T06:49:46.477Z",
   "baseUrl": "https://www.safeclaw.kr",
   "measurementMode": "live-production",
-  "sourceHead": "5f280fafeb1c378eedff35e1dc1c011eda802716",
-  "productionCommit": "5f280fafeb1c378eedff35e1dc1c011eda802716",
+  "sourceHead": "44af0108d28eee519e853356830ee70f1117abc7",
+  "productionCommit": "44af0108d28eee519e853356830ee70f1117abc7",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "5f280fafeb1c378eedff35e1dc1c011eda802716",
+    "commitSha": "44af0108d28eee519e853356830ee70f1117abc7",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8sd7kd840-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-k9o3bs18k-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "routeSplitAloneAcceptedAsFix": false,

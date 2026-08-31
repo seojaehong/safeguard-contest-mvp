@@ -1,12 +1,12 @@
 # Share Desktop Perception Probe
 
-Checked at: 2026-08-16T08:17:02.747Z
+Checked at: 2026-08-31T06:49:21.144Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD: `be494e764282cc4961b1259975324ef0d38669bc`
+Source HEAD: `44af0108d28eee519e853356830ee70f1117abc7`
 
-Production commit: `be494e764282cc4961b1259975324ef0d38669bc`
+Production commit: `44af0108d28eee519e853356830ee70f1117abc7`
 
 Verdict: `PASS_LIVE_PRODUCTION_SCOPED_WORKSPACE_AND_INVITED_FIXTURE`
 
@@ -33,9 +33,9 @@ Literal two-column and perceived full-workbench breadth are separate checks. A r
 | /workspace share step | desktop-1440x900 | PASS | PASS | PASS | PASS | 0.82 | 4 | 1180 | 0 | 401 | 757 | false | 0 |
 | /share/[sessionId] invited recipient fixture | desktop-1440x900 | PASS | PASS | PASS | PASS | 0.84 | 2 | n/a | n/a | 529 | 586 | false | 0 |
 | /workspace share step | mobile-short-390x723 | PASS | PASS | PASS | PASS | 0.86 | 2 | 368 | 0 | 696 | 637 | false | 0 |
-| /share/[sessionId] invited recipient fixture | mobile-short-390x723 | PASS | PASS | PASS | PASS | 1 | 1 | n/a | n/a | 707 | 1186 | false | 0 |
+| /share/[sessionId] invited recipient fixture | mobile-short-390x723 | PASS | PASS | PASS | PASS | 1 | 1 | n/a | n/a | 685 | 1164 | false | 0 |
 | /workspace share step | mobile-390x844 | PASS | PASS | PASS | PASS | 0.86 | 2 | 368 | 0 | 742 | 683 | false | 0 |
-| /share/[sessionId] invited recipient fixture | mobile-390x844 | PASS | PASS | PASS | PASS | 1 | 1 | n/a | n/a | 707 | 1186 | false | 0 |
+| /share/[sessionId] invited recipient fixture | mobile-390x844 | PASS | PASS | PASS | PASS | 1 | 1 | n/a | n/a | 685 | 1164 | false | 0 |
 
 ## Remaining UX Boundary
 

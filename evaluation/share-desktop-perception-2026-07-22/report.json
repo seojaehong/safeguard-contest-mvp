@@ -1,17 +1,17 @@
 {
   "schemaVersion": "safeclaw-share-desktop-perception/v1",
-  "checkedAt": "2026-08-16T08:17:02.747Z",
+  "checkedAt": "2026-08-31T06:49:21.144Z",
   "baseUrl": "https://www.safeclaw.kr",
   "mode": "live-production",
-  "sourceHead": "be494e764282cc4961b1259975324ef0d38669bc",
+  "sourceHead": "44af0108d28eee519e853356830ee70f1117abc7",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "be494e764282cc4961b1259975324ef0d38669bc",
+    "commitSha": "44af0108d28eee519e853356830ee70f1117abc7",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-6bl3i33hz-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-k9o3bs18k-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "providerDispatchLiveClaimed": false,
@@ -69,9 +69,9 @@
           "left": 139,
           "right": 654,
           "top": 345,
-          "bottom": 708,
+          "bottom": 705,
           "width": 515,
-          "height": 363
+          "height": 360
         },
         "preview": {
           "left": 660,
@@ -101,9 +101,9 @@
           "left": 139,
           "right": 654,
           "top": 547,
-          "bottom": 708,
+          "bottom": 705,
           "width": 515,
-          "height": 161
+          "height": 158
         },
         "language": {
           "left": 490,
@@ -124,19 +124,19 @@
         "channelCards": [
           {
             "width": 162,
-            "height": 59,
+            "height": 56,
             "left": 148,
             "right": 310
           },
           {
             "width": 162,
-            "height": 59,
+            "height": 56,
             "left": 316,
             "right": 477
           },
           {
             "width": 162,
-            "height": 59,
+            "height": 56,
             "left": 483,
             "right": 645
           }
@@ -260,24 +260,24 @@
       "metrics": {
         "viewportWidth": 1440,
         "viewportHeight": 900,
-        "pageHeight": 963,
+        "pageHeight": 960,
         "pageHeightRatio": 1.07,
         "root": {
           "left": 130,
           "right": 1310,
           "top": 189,
-          "bottom": 899,
+          "bottom": 896,
           "width": 1180,
-          "height": 710
+          "height": 707
         },
         "rootWidthRatio": 0.82,
         "form": {
           "left": 143,
           "right": 651,
           "top": 357,
-          "bottom": 742,
+          "bottom": 739,
           "width": 508,
-          "height": 385
+          "height": 382
         },
         "preview": {
           "left": 661,
@@ -307,9 +307,9 @@
           "left": 143,
           "right": 651,
           "top": 575,
-          "bottom": 742,
+          "bottom": 739,
           "width": 508,
-          "height": 167
+          "height": 164
         },
         "language": {
           "left": 490,
@@ -330,19 +330,19 @@
         "channelCards": [
           {
             "width": 158,
-            "height": 61,
+            "height": 58,
             "left": 154,
             "right": 312
           },
           {
             "width": 158,
-            "height": 61,
+            "height": 58,
             "left": 318,
             "right": 476
           },
           {
             "width": 158,
-            "height": 61,
+            "height": 58,
             "left": 482,
             "right": 640
           }
@@ -586,30 +586,30 @@
       "metrics": {
         "viewportWidth": 390,
         "viewportHeight": 723,
-        "pageHeight": 1350,
-        "pageHeightRatio": 1.87,
+        "pageHeight": 1328,
+        "pageHeightRatio": 1.84,
         "root": {
           "left": 0,
           "right": 390,
           "top": 438,
-          "bottom": 1302,
+          "bottom": 1280,
           "width": 390,
-          "height": 864
+          "height": 841
         },
         "rootWidthRatio": 1,
         "task": {
           "left": 16,
           "right": 374,
-          "top": 765,
-          "bottom": 974,
+          "top": 742,
+          "bottom": 951,
           "width": 358,
           "height": 209
         },
         "notice": {
           "left": 16,
           "right": 374,
-          "top": 984,
-          "bottom": 1176,
+          "top": 961,
+          "bottom": 1154,
           "width": 358,
           "height": 193
         },
@@ -617,29 +617,29 @@
         "confirm": {
           "left": 16,
           "right": 374,
-          "top": 533,
-          "bottom": 755,
+          "top": 511,
+          "bottom": 732,
           "width": 358,
           "height": 221
         },
         "docs": {
           "left": 16,
           "right": 374,
-          "top": 1186,
-          "bottom": 1270,
+          "top": 1164,
+          "bottom": 1248,
           "width": 358,
           "height": 84
         },
         "confirmButton": {
           "left": 31,
           "right": 359,
-          "top": 663,
-          "bottom": 707,
+          "top": 641,
+          "bottom": 685,
           "width": 328,
           "height": 44
         },
-        "confirmButtonBottom": 707,
-        "documentsTop": 1186,
+        "confirmButtonBottom": 685,
+        "documentsTop": 1164,
         "distinctFirstViewportRegions": 1,
         "primaryLeftRegionRight": 374,
         "primaryRightRegionLeft": 390,
@@ -792,30 +792,30 @@
       "metrics": {
         "viewportWidth": 390,
         "viewportHeight": 844,
-        "pageHeight": 1350,
-        "pageHeightRatio": 1.6,
+        "pageHeight": 1328,
+        "pageHeightRatio": 1.57,
         "root": {
           "left": 0,
           "right": 390,
           "top": 438,
-          "bottom": 1302,
+          "bottom": 1280,
           "width": 390,
-          "height": 864
+          "height": 841
         },
         "rootWidthRatio": 1,
         "task": {
           "left": 16,
           "right": 374,
-          "top": 765,
-          "bottom": 974,
+          "top": 742,
+          "bottom": 951,
           "width": 358,
           "height": 209
         },
         "notice": {
           "left": 16,
           "right": 374,
-          "top": 984,
-          "bottom": 1176,
+          "top": 961,
+          "bottom": 1154,
           "width": 358,
           "height": 193
         },
@@ -823,29 +823,29 @@
         "confirm": {
           "left": 16,
           "right": 374,
-          "top": 533,
-          "bottom": 755,
+          "top": 511,
+          "bottom": 732,
           "width": 358,
           "height": 221
         },
         "docs": {
           "left": 16,
           "right": 374,
-          "top": 1186,
-          "bottom": 1270,
+          "top": 1164,
+          "bottom": 1248,
           "width": 358,
           "height": 84
         },
         "confirmButton": {
           "left": 31,
           "right": 359,
-          "top": 663,
-          "bottom": 707,
+          "top": 641,
+          "bottom": 685,
           "width": 328,
           "height": 44
         },
-        "confirmButtonBottom": 707,
-        "documentsTop": 1186,
+        "confirmButtonBottom": 685,
+        "documentsTop": 1164,
         "distinctFirstViewportRegions": 1,
         "primaryLeftRegionRight": 374,
         "primaryRightRegionLeft": 390,
