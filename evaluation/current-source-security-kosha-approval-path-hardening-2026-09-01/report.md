@@ -1,8 +1,12 @@
 # Current-Source KOSHA Approval Path Hardening
 
-Verdict: `PASS_CURRENT_SOURCE_LOCAL_APPROVAL_EVIDENCE_PATH_HARDENING_LIVE_PENDING`
+Verdict: `PASS_LIVE_PRODUCTION_APPROVAL_EVIDENCE_PATH_HARDENING`
 
 Source commit: `c7535131fa8ff40deebeb0e84afb3ba6d4be5880`
+
+Production commit: `52293d4813476ff9231f5ec937b705fad38c5fac`
+
+Production deployment: `safeguard-contest-6yze30w23-seojaehongs-projects.vercel.app`
 
 Security scan: `87e5bcdf-c1d2-4094-8ad9-a670fd1fd521`
 
@@ -24,7 +28,7 @@ Security scan: `87e5bcdf-c1d2-4094-8ad9-a670fd1fd521`
 - No database, provider, Share-session, embedding, vector, Wiki, or exact KOSHA registry mutation was performed.
 - Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
 - Human KOSHA review and separate exact-promotion approval remain required.
-- Live deployment verification is pending; this report proves current-source local behavior only.
+- Production `/api/build-info` reached the evidence commit containing the product fix; live deployment alignment is verified.
 
 ## Follow-up Security Work
 

@@ -1,8 +1,10 @@
 {
   "schemaVersion": "safeclaw-current-source-security-kosha-approval-path-hardening/v1",
   "generatedAt": "2026-08-31T19:59:51.890Z",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_APPROVAL_EVIDENCE_PATH_HARDENING_LIVE_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_APPROVAL_EVIDENCE_PATH_HARDENING",
   "sourceHead": "c7535131fa8ff40deebeb0e84afb3ba6d4be5880",
+  "productionCommit": "52293d4813476ff9231f5ec937b705fad38c5fac",
+  "productionDeploymentUrl": "safeguard-contest-6yze30w23-seojaehongs-projects.vercel.app",
   "securityScanId": "87e5bcdf-c1d2-4094-8ad9-a670fd1fd521",
   "immutableOriginalFindingBaselinePreserved": true,
   "userContext": "Preserve immutable original 18-finding baseline. Verify current 4321140c61ff2c7ffd2eff5b1b8cffc1b5e10017 source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
@@ -60,7 +62,7 @@
   "successCount": 2,
   "failureCount": 0,
   "elapsedTimeMs": 207000,
-  "liveAfterDeploymentRequired": true,
+  "liveAfterDeploymentRequired": false,
   "remainingSecurityWork": [
     {
       "ruleId": "approval-evidence.stale-source-binding",
@@ -85,6 +87,6 @@
   "remainingBoundaries": {
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedClaimsClosed": false,
-    "liveDeploymentVerified": false
+    "liveDeploymentVerified": true
   }
 }
