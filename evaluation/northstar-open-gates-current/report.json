@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-30T23:02:15.160Z",
-  "sourceSha": "7f445c336bea5cde0db8988af43163170062b65c",
+  "generatedAt": "2026-08-31T00:35:08.243Z",
+  "sourceSha": "d7f4794bef57d651a2e0d9581245e45d984185b2",
   "overall": "open",
   "gates": [
     {
@@ -392,6 +392,17 @@
       ]
     },
     {
+      "id": "current_source_mcp_generation_cancellation_remediation",
+      "state": "notice",
+      "label": "Current-source MCP generation cancellation remediation",
+      "evidencePath": "evaluation\\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\\report.json",
+      "detail": "Current live source threads one MCP transport AbortSignal through plain and reviewed generation, both ontology fetches, runAsk, and QA, then stops before persistence on cancellation. Five focused files / 54 tests plus five adjacent files / 143 tests, typecheck, and the 28-page build pass. No authenticated runtime cancellation probe or provider call was executed; the sealed finding stays open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Include the deployed MCP cancellation contract in the next full repository scan before reclassifying the sealed finding.",
+        "Run a valid-token runtime cancellation probe only under a separately approved non-production-safe execution plan; keep exact saved Share and all mutation boundaries open."
+      ]
+    },
+    {
       "id": "current_source_security_remediation_followup",
       "state": "notice",
       "label": "Current-source security remediation follow-up",
@@ -656,7 +667,7 @@
       "state": "notice",
       "label": "MCP generation work-budget security",
       "evidencePath": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
-      "detail": "Current production 75027ffa proves distributed MCP admission is required but not configured: the readiness endpoint reports configurationState=absent and the pre-auth guard returns 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification preserves the 96 KiB body contract with 3 files / 65 focused tests and 8 files / 126 adjacent MCP tests. Distributed activation, a valid authenticated runtime probe, and a fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Current production 5ed2558b proves distributed MCP admission is required but not configured: the readiness endpoint reports configurationState=absent and the pre-auth guard returns 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification preserves the 96 KiB body contract with 3 files / 65 focused tests and 8 files / 126 adjacent MCP tests. Distributed activation, a valid authenticated runtime probe, and a fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Run a valid credential-safe production MCP boundary probe without exposing the token.",
         "Activate the approved distributed limiter configuration before claiming authenticated MCP availability, then complete a fresh security rescan."

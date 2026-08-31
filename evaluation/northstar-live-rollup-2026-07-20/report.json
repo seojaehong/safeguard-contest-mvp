@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-30T23:02:16.537Z",
-  "head": "7f445c336bea5cde0db8988af43163170062b65c",
+  "generatedAt": "2026-08-31T00:35:12.956Z",
+  "head": "d7f4794bef57d651a2e0d9581245e45d984185b2",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "b1dc9a48e12e314d66e58b489c2103740bc7aa25",
+    "commitSha": "7ce18543c8fcc211c48134d3425b0c52a98d3f06",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-dzz5a5g6d-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-lz85i9ky9-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 90
+    "gateCount": 91
   },
   "provenGates": [
     {
@@ -244,6 +244,12 @@
       "detail": "Current live source returns one coarse photo readiness response for anonymous and arbitrary-Bearer GET requests without creating a Supabase admin client or calling authentication. Two files / 13 tests, typecheck, and the 28-page build pass; live responses are identical and expose no provider or API-key diagnostics. Photo-analysis POST authentication and upload/provider budgets remain intact. The sealed finding stays open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
+      "id": "current_source_mcp_generation_cancellation_remediation",
+      "state": "notice",
+      "artifact": "evaluation\\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\\report.json",
+      "detail": "Current live source threads one MCP transport AbortSignal through plain and reviewed generation, both ontology fetches, runAsk, and QA, then stops before persistence on cancellation. Five focused files / 54 tests plus five adjacent files / 143 tests, typecheck, and the 28-page build pass. No authenticated runtime cancellation probe or provider call was executed; the sealed finding stays open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
       "id": "current_source_security_remediation_followup",
       "state": "notice",
       "artifact": "evaluation\\current-source-security-remediation-2026-08-30\\report.json",
@@ -391,7 +397,7 @@
       "id": "mcp_generation_work_budget_security",
       "state": "notice",
       "artifact": "evaluation\\security-mcp-generation-work-budget-2026-08-04\\report.json",
-      "detail": "Current production 75027ffa proves distributed MCP admission is required but not configured: the readiness endpoint reports configurationState=absent and the pre-auth guard returns 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification preserves the 96 KiB body contract with 3 files / 65 focused tests and 8 files / 126 adjacent MCP tests. Distributed activation, a valid authenticated runtime probe, and a fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Current production 5ed2558b proves distributed MCP admission is required but not configured: the readiness endpoint reports configurationState=absent and the pre-auth guard returns 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification preserves the 96 KiB body contract with 3 files / 65 focused tests and 8 files / 126 adjacent MCP tests. Distributed activation, a valid authenticated runtime probe, and a fresh security rescan remain open. The sealed finding is unchanged, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "learning_export_renderer_security",
@@ -901,6 +907,23 @@
     "publicGetCreatesSupabaseAdminClient": false,
     "publicGetCallsSupabaseAuthentication": false,
     "responseBodiesEqual": true,
+    "freshRescanRequired": true,
+    "securityComplete": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "currentSourceMcpGenerationCancellationRemediation": {
+    "artifact": "evaluation\\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\\report.json",
+    "verdict": "PASS_LIVE_DEPLOYED_SOURCE_MCP_GENERATION_CANCELLATION_CONTRACT",
+    "sourceHead": "5ed2558b25a139c32c300163d1386863bbc3589d",
+    "productionCommit": "5ed2558b25a139c32c300163d1386863bbc3589d",
+    "findingId": "csf_c2f6fb44442dee56c0d5c2ed",
+    "focusedTestsPassed": 54,
+    "adjacentTestsPassed": 143,
+    "buildStatus": "PASS",
+    "plainSignalForwarded": true,
+    "reviewedSignalForwarded": true,
+    "persistenceSkippedAfterAbort": true,
+    "authenticatedRuntimeProbeExecuted": false,
     "freshRescanRequired": true,
     "securityComplete": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
@@ -2085,9 +2108,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "7f445c336bea5cde0db8988af43163170062b65c",
+      "sourceCommit": "d7f4794bef57d651a2e0d9581245e45d984185b2",
       "sourceStatus": "exact",
-      "productionCommit": "7f445c336bea5cde0db8988af43163170062b65c",
+      "productionCommit": "d7f4794bef57d651a2e0d9581245e45d984185b2",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -2384,6 +2407,14 @@
       "sourceCommit": "007f1d2b687102bd5020c85adf527ef5907956ad",
       "sourceStatus": "ancestor",
       "productionCommit": "007f1d2b687102bd5020c85adf527ef5907956ad",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "current_source_mcp_generation_cancellation_remediation",
+      "artifact": "evaluation\\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\\report.json",
+      "sourceCommit": "5ed2558b25a139c32c300163d1386863bbc3589d",
+      "sourceStatus": "ancestor",
+      "productionCommit": "5ed2558b25a139c32c300163d1386863bbc3589d",
       "productionStatus": "ancestor_of_head"
     },
     {
