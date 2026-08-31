@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `d7f4794bef57d651a2e0d9581245e45d984185b2`
+Source HEAD: `d5bf216674692268b8a51d0900f08cff6b844af7`
 
-Production `/api/build-info`: `7ce18543c8fcc211c48134d3425b0c52a98d3f06`
+Production `/api/build-info`: `b07a772485e8912c96a6af37b792489b12b8c2b0`
 
 Latest evidence commit live: `false`
 
@@ -14,17 +14,17 @@ Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.json`, `evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.md`, `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
+Source pending changed paths: `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
 Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `d7f4794bef57d651a2e0d9581245e45d984185b2`
+Live rollup source head: `d5bf216674692268b8a51d0900f08cff6b844af7`
 
 Live rollup matches production: `true`
 
-Note: current HEAD `d7f4794bef57d651a2e0d9581245e45d984185b2` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `7ce18543c8fcc211c48134d3425b0c52a98d3f06`, and the live rollup remains exact for that deployed marker.
+Note: current HEAD `d5bf216674692268b8a51d0900f08cff6b844af7` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `b07a772485e8912c96a6af37b792489b12b8c2b0`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -82,6 +82,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Current-source ontology error projection remediation is `PASS_LIVE_DEPLOYED_SOURCE_ONTOLOGY_ERROR_PROJECTION_CONTRACT`: product/live `68a8f9dae349cb03d8c77abedd27040b9679bde0/05e70640ec305ff651eba1c42654a6a3b8a02f1e`, fixed public codes `2`, tests `12`, build `PASS`, and live admission `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`. No provider failure was induced `false`; fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source photo readiness auth fan-out remediation is `PASS_LIVE_DEPLOYED_SOURCE_PHOTO_READINESS_AUTH_FANOUT_CONTRACT`: product/live `007f1d2b687102bd5020c85adf527ef5907956ad/007f1d2b687102bd5020c85adf527ef5907956ad`, tests `13`, build `PASS`, Supabase client/auth fan-out `false/false`, and identical live anonymous/Bearer responses `true`. Fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source MCP generation cancellation remediation is `PASS_LIVE_DEPLOYED_SOURCE_MCP_GENERATION_CANCELLATION_CONTRACT`: product/live `5ed2558b25a139c32c300163d1386863bbc3589d/5ed2558b25a139c32c300163d1386863bbc3589d`, focused/adjacent tests `54/143`, build `PASS`, plain/reviewed signal forwarding `true/true`, and persistence skipped after abort `true`. Authenticated runtime cancellation probe remains `false`, fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
+- Current-source KOSHA archive preflight remediation is `PASS_LIVE_DEPLOYED_SOURCE_KOSHA_ARCHIVE_PREFLIGHT_CONTRACT`: product/live `41de3997aed1907a95b794040edef542cb1f40f2/b07a772485e8912c96a6af37b792489b12b8c2b0`, focused Python/Vitest `64/112`, adjacent Python/Vitest `13/37`, member/aggregate byte budgets `10000/1073741824`, and same-handle preflight `true`. Runtime local-archive probe remains `false`, fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source security residual remediation is `PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING`: anchors `dns-toctou, provider-detail, xff-spoof`, tests `174`, live evidence `PASS_DEPLOYED_SOURCE_MARKER_ONLY` with behavioral probe `false`. The immutable scan remains open, follow-up scan required=`true`, security-complete=`false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Share ACK pre-body admission is `PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED`: coarse IP rate/body concurrency ordering `true/true`, recipient-specific post-parse admission `true`, tests `66`, and live `503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE/distributed`. The sealed finding remains rescan-pending `true`; security-complete remains `false`, recipient ACK is `APPROVAL_GATED`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Safety status disconnect lease is `PASS_LIVE_PRODUCTION_SAFETY_STATUS_DISCONNECT_LEASE_SOURCE_REMEDIATED`: work settlement before abort rejection/lease release `true/true`, two-disconnect concurrency proof `true`, tests `16`, and live `503/DISTRIBUTED_RATE_LIMIT_UNAVAILABLE/safety-reference-status`. The sealed finding remains rescan-pending `true`; security-complete remains `false`, distributed activation is `OPERATOR_CONFIGURATION_REQUIRED`, and exact saved Share remains `MISSING_EVIDENCE`.

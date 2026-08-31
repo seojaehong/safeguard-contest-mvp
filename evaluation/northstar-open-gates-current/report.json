@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-31T00:35:08.243Z",
-  "sourceSha": "d7f4794bef57d651a2e0d9581245e45d984185b2",
+  "generatedAt": "2026-08-31T01:40:45.861Z",
+  "sourceSha": "d5bf216674692268b8a51d0900f08cff6b844af7",
   "overall": "open",
   "gates": [
     {
@@ -400,6 +400,17 @@
       "nextActions": [
         "Include the deployed MCP cancellation contract in the next full repository scan before reclassifying the sealed finding.",
         "Run a valid-token runtime cancellation probe only under a separately approved non-production-safe execution plan; keep exact saved Share and all mutation boundaries open."
+      ]
+    },
+    {
+      "id": "current_source_kosha_archive_preflight_remediation",
+      "state": "notice",
+      "label": "Current-source KOSHA archive preflight remediation",
+      "evidencePath": "evaluation\\current-source-security-kosha-archive-preflight-remediation-2026-08-31\\report.json",
+      "detail": "Current live source removes the unbounded AdmZip inventory and preflights a bounded ZIP central directory on the same open file handle before Python ZipFile materialization. Focused Python/Vitest 64/112 plus adjacent Python/Vitest 13/37, typecheck, and the 28-page build pass. The over-budget regression stops before provider or database work. No live local-archive probe was executed; the sealed finding stays open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated KOSHA promotion remains open, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Include the deployed KOSHA archive preflight contract in the next full repository scan before reclassifying the sealed finding.",
+        "Keep exact saved Share, KOSHA exact promotion, and all DB/provider/vector/wiki mutation boundaries open."
       ]
     },
     {

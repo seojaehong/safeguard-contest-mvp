@@ -1,8 +1,8 @@
 # SafeClaw KOSHA archive preflight remediation
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_KOSHA_ARCHIVE_PREFLIGHT_LIVE_PENDING`
+- Verdict: `PASS_LIVE_DEPLOYED_SOURCE_KOSHA_ARCHIVE_PREFLIGHT_CONTRACT`
 - Product commit: `41de3997aed1907a95b794040edef542cb1f40f2`
-- Production at verification: `d7f4794bef57d651a2e0d9581245e45d984185b2`
+- Production at verification: `b07a772485e8912c96a6af37b792489b12b8c2b0`
 - Finding: `csf_d7f23c57f1ee89b4c6cdad17` (`resource-exhaustion.unbounded-audit-archive-preflight`, medium)
 
 ## Remediation
@@ -25,6 +25,6 @@ The inventory path preserves the prior audit meaning by considering ZIP members 
 
 ## Boundary
 
-Production still reports `d7f4794b`; therefore this receipt proves current-source/local-production behavior only and remains live pending until `41de3997` is deployed. It does not reclassify the sealed finding or rewrite the immutable original 18-finding baseline. A fresh full-repository security scan remains required for broader closure.
+Production reports `b07a7724`, which contains product commit `41de3997`; the deployed-source contract is therefore live-aligned. No production-local archive was opened or parsed by this verification, so the runtime archive probe remains explicitly unexecuted. This receipt does not reclassify the sealed finding or rewrite the immutable original 18-finding baseline. A fresh full-repository security scan remains required for broader closure.
 
 No database, provider dispatch, Share-session, vector/embedding, Wiki, or KOSHA registry mutation occurred. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`; approval-gated findings and security-complete remain open.

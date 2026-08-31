@@ -1,11 +1,11 @@
 {
   "schemaVersion": "safeclaw-current-source-security-kosha-archive-preflight-remediation/v1",
-  "generatedAt": "2026-08-31T01:06:46.2933363Z",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_KOSHA_ARCHIVE_PREFLIGHT_LIVE_PENDING",
+  "generatedAt": "2026-08-31T01:14:51.9740694Z",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_KOSHA_ARCHIVE_PREFLIGHT_CONTRACT",
   "sourceBaseCommit": "171e0c5f0247b90325ffa6bde2561ac286d11127",
   "sourceHead": "41de3997aed1907a95b794040edef542cb1f40f2",
   "productCommit": "41de3997aed1907a95b794040edef542cb1f40f2",
-  "productionCommit": "d7f4794bef57d651a2e0d9581245e45d984185b2",
+  "productionCommit": "b07a772485e8912c96a6af37b792489b12b8c2b0",
   "finding": {
     "findingId": "csf_d7f23c57f1ee89b4c6cdad17",
     "occurrenceId": "occ_150ad7ac80e3ea536f29ffcf",
@@ -75,12 +75,12 @@
       "staticPages": 28
     },
     "liveDeployment": {
-      "status": "PENDING_PRODUCT_COMMIT_DEPLOYMENT",
-      "commitSha": "d7f4794bef57d651a2e0d9581245e45d984185b2",
+      "status": "PASS_DEPLOYED_SOURCE_CONTRACT_LOCAL_ARCHIVE_PROBE_NOT_EXECUTED",
+      "commitSha": "b07a772485e8912c96a6af37b792489b12b8c2b0",
       "branch": "master",
       "environment": "production",
-      "deploymentUrl": "safeguard-contest-8ujw3bc6r-seojaehongs-projects.vercel.app",
-      "sourceHeadMatchesProduction": false,
+      "deploymentUrl": "safeguard-contest-l2w68vxqv-seojaehongs-projects.vercel.app",
+      "sourceHeadMatchesProduction": true,
       "runtimeArchiveProbeExecuted": false
     }
   },
@@ -98,7 +98,7 @@
     "securityComplete": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedFindingsRemainOpen": true,
-    "liveAfterDeploymentRequired": true,
+    "liveAfterDeploymentRequired": false,
     "freshFullRepositorySecurityRescanRequired": true
   }
 }

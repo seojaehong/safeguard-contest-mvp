@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-31T00:35:34.156Z",
+  "generatedAt": "2026-08-31T01:41:05.673Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "d7f4794bef57d651a2e0d9581245e45d984185b2",
-  "productionCommit": "7ce18543c8fcc211c48134d3425b0c52a98d3f06",
+  "sourceHead": "d5bf216674692268b8a51d0900f08cff6b844af7",
+  "productionCommit": "b07a772485e8912c96a6af37b792489b12b8c2b0",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "7ce18543c8fcc211c48134d3425b0c52a98d3f06",
+    "commitSha": "b07a772485e8912c96a6af37b792489b12b8c2b0",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-lz85i9ky9-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-l2w68vxqv-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": false,
@@ -20,8 +20,6 @@
   "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
   "sourcePendingChangedPaths": [
-    "evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.json",
-    "evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.md",
     "scripts/northstar_live_rollup.mjs",
     "scripts/northstar_next_runway.mjs",
     "scripts/northstar_open_gate_audit.mjs",
@@ -31,8 +29,8 @@
   ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "d7f4794bef57d651a2e0d9581245e45d984185b2",
-  "liveRollupLiveCommit": "7ce18543c8fcc211c48134d3425b0c52a98d3f06",
+  "liveExactEvidenceCommit": "d5bf216674692268b8a51d0900f08cff6b844af7",
+  "liveRollupLiveCommit": "b07a772485e8912c96a6af37b792489b12b8c2b0",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -81,6 +79,7 @@
     "currentSourceOntologyErrorProjectionRemediation": "evaluation\\current-source-security-ontology-error-projection-remediation-2026-08-31\\report.json",
     "currentSourcePhotoReadinessAuthFanoutRemediation": "evaluation\\current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31\\report.json",
     "currentSourceMcpGenerationCancellationRemediation": "evaluation\\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\\report.json",
+    "currentSourceKoshaArchivePreflightRemediation": "evaluation\\current-source-security-kosha-archive-preflight-remediation-2026-08-31\\report.json",
     "currentSourceSecurityRemediationFollowup": "evaluation\\current-source-security-remediation-2026-08-30\\report.json",
     "currentSecurityGovernedPathCompatibility": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
     "currentSourceSecurityResidualRemediation": "evaluation\\current-source-security-residual-remediation-2026-08-28\\report.json",
@@ -247,6 +246,11 @@
       "gate": "current_source_mcp_generation_cancellation_remediation",
       "state": "notice",
       "reason": "live source threads MCP cancellation through plain/reviewed registration, ontology fetches, runAsk, and QA with persistence skipped=true; focused/adjacent tests 54/143, build=PASS. Valid authenticated runtime cancellation probe executed=false; sealed finding fresh-rescan pending=true, security-complete=false, and exact saved Share remains MISSING_EVIDENCE"
+    },
+    {
+      "gate": "current_source_kosha_archive_preflight_remediation",
+      "state": "notice",
+      "reason": "live source replaces the unbounded AdmZip inventory with bounded Python central-directory preflight on the same open file handle=true; focused Python/Vitest 64/112, adjacent Python/Vitest 13/37, build=PASS. Runtime local-archive probe executed=false; sealed finding fresh-rescan pending=true, security-complete=false, and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "current_source_security_remediation_followup",
@@ -1332,6 +1336,25 @@
     "reviewedSignalForwarded": true,
     "persistenceSkippedAfterAbort": true,
     "authenticatedRuntimeProbeExecuted": false,
+    "freshRescanRequired": true,
+    "securityComplete": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "currentSourceKoshaArchivePreflightRemediation": {
+    "verdict": "PASS_LIVE_DEPLOYED_SOURCE_KOSHA_ARCHIVE_PREFLIGHT_CONTRACT",
+    "sourceHead": "41de3997aed1907a95b794040edef542cb1f40f2",
+    "productionCommit": "b07a772485e8912c96a6af37b792489b12b8c2b0",
+    "findingId": "csf_d7f23c57f1ee89b4c6cdad17",
+    "focusedPythonTestsPassed": 64,
+    "focusedVitestTestsPassed": 112,
+    "adjacentPythonTestsPassed": 13,
+    "adjacentVitestTestsPassed": 37,
+    "buildStatus": "PASS",
+    "boundedPythonInventoryUsed": true,
+    "sameOpenFileHandleUsed": true,
+    "maxMemberCount": 10000,
+    "maxTotalUncompressedBytes": 1073741824,
+    "runtimeArchiveProbeExecuted": false,
     "freshRescanRequired": true,
     "securityComplete": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T00:35:12.956Z
-Source HEAD at generation: d7f4794bef57d651a2e0d9581245e45d984185b2
-Live commit at generation: 7ce18543c8fcc211c48134d3425b0c52a98d3f06
+Generated at: 2026-08-31T01:40:46.760Z
+Source HEAD at generation: d5bf216674692268b8a51d0900f08cff6b844af7
+Live commit at generation: b07a772485e8912c96a6af37b792489b12b8c2b0
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -446,6 +446,7 @@ Overall: `northstar_open_approval_gated`
 | current_source_ontology_error_projection_remediation | notice | evaluation\current-source-security-ontology-error-projection-remediation-2026-08-31\report.json |
 | current_source_photo_readiness_auth_fanout_remediation | notice | evaluation\current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31\report.json |
 | current_source_mcp_generation_cancellation_remediation | notice | evaluation\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\report.json |
+| current_source_kosha_archive_preflight_remediation | notice | evaluation\current-source-security-kosha-archive-preflight-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | notice | evaluation\current-source-security-remediation-2026-08-30\report.json |
 | current_security_governed_path_compatibility | notice | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
 | current_source_security_residual_remediation | notice | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
@@ -543,6 +544,7 @@ Overall: `northstar_open_approval_gated`
 | current_source_ontology_error_projection_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-ontology-error-projection-remediation-2026-08-31\report.json |
 | current_source_photo_readiness_auth_fanout_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31\report.json |
 | current_source_mcp_generation_cancellation_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\report.json |
+| current_source_kosha_archive_preflight_remediation | ancestor | matches_live_source_mismatch | evaluation\current-source-security-kosha-archive-preflight-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | ancestor | ancestor_of_head | evaluation\current-source-security-remediation-2026-08-30\report.json |
 | current_security_governed_path_compatibility | ancestor | ancestor_of_head | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
 | current_source_security_residual_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |

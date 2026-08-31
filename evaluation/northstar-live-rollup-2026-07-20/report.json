@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-31T00:35:12.956Z",
-  "head": "d7f4794bef57d651a2e0d9581245e45d984185b2",
+  "generatedAt": "2026-08-31T01:40:46.760Z",
+  "head": "d5bf216674692268b8a51d0900f08cff6b844af7",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "7ce18543c8fcc211c48134d3425b0c52a98d3f06",
+    "commitSha": "b07a772485e8912c96a6af37b792489b12b8c2b0",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-lz85i9ky9-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-l2w68vxqv-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 91
+    "gateCount": 92
   },
   "provenGates": [
     {
@@ -248,6 +248,12 @@
       "state": "notice",
       "artifact": "evaluation\\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\\report.json",
       "detail": "Current live source threads one MCP transport AbortSignal through plain and reviewed generation, both ontology fetches, runAsk, and QA, then stops before persistence on cancellation. Five focused files / 54 tests plus five adjacent files / 143 tests, typecheck, and the 28-page build pass. No authenticated runtime cancellation probe or provider call was executed; the sealed finding stays open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "current_source_kosha_archive_preflight_remediation",
+      "state": "notice",
+      "artifact": "evaluation\\current-source-security-kosha-archive-preflight-remediation-2026-08-31\\report.json",
+      "detail": "Current live source removes the unbounded AdmZip inventory and preflights a bounded ZIP central directory on the same open file handle before Python ZipFile materialization. Focused Python/Vitest 64/112 plus adjacent Python/Vitest 13/37, typecheck, and the 28-page build pass. The over-budget regression stops before provider or database work. No live local-archive probe was executed; the sealed finding stays open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated KOSHA promotion remains open, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_source_security_remediation_followup",
@@ -924,6 +930,24 @@
     "reviewedSignalForwarded": true,
     "persistenceSkippedAfterAbort": true,
     "authenticatedRuntimeProbeExecuted": false,
+    "freshRescanRequired": true,
+    "securityComplete": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "currentSourceKoshaArchivePreflightRemediation": {
+    "artifact": "evaluation\\current-source-security-kosha-archive-preflight-remediation-2026-08-31\\report.json",
+    "verdict": "PASS_LIVE_DEPLOYED_SOURCE_KOSHA_ARCHIVE_PREFLIGHT_CONTRACT",
+    "sourceHead": "41de3997aed1907a95b794040edef542cb1f40f2",
+    "productionCommit": "b07a772485e8912c96a6af37b792489b12b8c2b0",
+    "findingId": "csf_d7f23c57f1ee89b4c6cdad17",
+    "focusedPythonTestsPassed": 64,
+    "focusedVitestTestsPassed": 112,
+    "adjacentPythonTestsPassed": 13,
+    "adjacentVitestTestsPassed": 37,
+    "buildStatus": "PASS",
+    "boundedPythonInventoryUsed": true,
+    "sameOpenFileHandleUsed": true,
+    "runtimeArchiveProbeExecuted": false,
     "freshRescanRequired": true,
     "securityComplete": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
@@ -2108,9 +2132,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "d7f4794bef57d651a2e0d9581245e45d984185b2",
+      "sourceCommit": "d5bf216674692268b8a51d0900f08cff6b844af7",
       "sourceStatus": "exact",
-      "productionCommit": "d7f4794bef57d651a2e0d9581245e45d984185b2",
+      "productionCommit": "d5bf216674692268b8a51d0900f08cff6b844af7",
       "productionStatus": "ancestor_of_head"
     },
     {
@@ -2416,6 +2440,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "5ed2558b25a139c32c300163d1386863bbc3589d",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "current_source_kosha_archive_preflight_remediation",
+      "artifact": "evaluation\\current-source-security-kosha-archive-preflight-remediation-2026-08-31\\report.json",
+      "sourceCommit": "41de3997aed1907a95b794040edef542cb1f40f2",
+      "sourceStatus": "ancestor",
+      "productionCommit": "b07a772485e8912c96a6af37b792489b12b8c2b0",
+      "productionStatus": "matches_live_source_mismatch"
     },
     {
       "id": "current_source_security_remediation_followup",
