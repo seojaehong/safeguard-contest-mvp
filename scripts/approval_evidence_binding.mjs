@@ -50,6 +50,26 @@ function gitBlobBatch(root, blobIds) {
   }
 }
 
+function gitWorkingBlobBatch(root, gitPaths) {
+  if (gitPaths.length === 0 || gitPaths.some((value) => /[\r\n]/u.test(value))) return new Map();
+  try {
+    const output = execFileSync("git", ["hash-object", "--stdin-paths"], {
+      cwd: root,
+      encoding: "utf8",
+      input: `${gitPaths.join("\n")}\n`,
+      maxBuffer: 16 * 1024 * 1024,
+      stdio: ["pipe", "pipe", "ignore"],
+    });
+    const hashes = output.trim().split(/\r?\n/u);
+    if (hashes.length !== gitPaths.length || hashes.some((value) => !/^[0-9a-f]{40}$/u.test(value))) {
+      return new Map();
+    }
+    return new Map(gitPaths.map((gitPath, index) => [gitPath, hashes[index]]));
+  } catch {
+    return new Map();
+  }
+}
+
 function normalizeGitPath(relativePath) {
   return relativePath.replaceAll("\\", "/");
 }
@@ -128,6 +148,7 @@ export function buildApprovalEvidenceBinding({ root, inputPaths, productionCommi
     if (match) headEntries.set(match[3], { mode: match[1], blob: match[2] });
   }
   const headBlobBytes = gitBlobBatch(root, [...headEntries.values()].map(({ blob }) => blob));
+  const workingBlobHashes = gitWorkingBlobBatch(root, gitPaths);
   const dirtyRows = git(root, ["diff", "HEAD", "--name-only", "--", ...gitPaths]) ?? "";
   const dirtyPaths = new Set(dirtyRows.split(/\r?\n/u).map((value) => value.trim()).filter(Boolean));
   const artifacts = uniquePaths.map((relativePath) => {
@@ -139,24 +160,26 @@ export function buildApprovalEvidenceBinding({ root, inputPaths, productionCommi
     const readable = pathState.exists && pathState.regularFile && !pathState.symlink && pathState.realPathWithinRoot;
     const workingBytes = readable ? readFileSync(pathState.absolutePath) : null;
     const headBytes = headEntry && gitModeRegular ? headBlobBytes.get(headEntry.blob) ?? null : null;
-    const workingSha256 = workingBytes ? sha256(workingBytes) : null;
+    const workingRawSha256 = workingBytes ? sha256(workingBytes) : null;
     const headSha256 = headBytes ? sha256(headBytes) : null;
     const headBlobSha1 = headEntry?.blob ?? null;
-    const workingTreeMatchesHead = workingSha256 !== null
-      && headSha256 !== null
-      && workingSha256 === headSha256
+    const workingBlobSha1 = readable ? workingBlobHashes.get(gitPath) ?? null : null;
+    const workingTreeMatchesHead = workingBlobSha1 !== null
+      && headBlobSha1 !== null
+      && workingBlobSha1 === headBlobSha1
       && !dirtyPaths.has(gitPath);
     return {
       path: relativePath,
       bytes: workingBytes?.byteLength ?? null,
-      sha256: workingSha256,
+      sha256: workingTreeMatchesHead ? headSha256 : workingRawSha256,
+      workingRawSha256,
       headSha256,
       gitMode,
       regularFile: pathState.regularFile,
       symlink: pathState.symlink,
       realPathWithinRoot: pathState.realPathWithinRoot,
       headBlobSha1,
-      workingBlobSha1: workingTreeMatchesHead ? headBlobSha1 : null,
+      workingBlobSha1,
       trackedAtHead: /^[0-9a-f]{40}$/u.test(headBlobSha1 ?? "") && gitModeRegular,
       workingTreeMatchesHead,
     };

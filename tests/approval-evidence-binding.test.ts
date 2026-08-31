@@ -69,6 +69,31 @@ describe("approval evidence binding", () => {
     expect(binding.artifacts[0].headSha256).toMatch(/^[0-9a-f]{64}$/u);
   });
 
+  it("accepts Git-clean line ending normalization without weakening content checks", async () => {
+    const root = initRepository();
+    const relativePath = "evaluation/report.json";
+    fs.mkdirSync(path.dirname(path.join(root, relativePath)), { recursive: true });
+    fs.writeFileSync(path.join(root, ".gitattributes"), "*.json text eol=lf\n", "utf8");
+    fs.writeFileSync(path.join(root, relativePath), "{\"ok\":true}\n", "utf8");
+    const head = commitAll(root);
+    fs.writeFileSync(path.join(root, relativePath), "{\"ok\":true}\r\n", "utf8");
+    const module = await loadBindingModule();
+
+    const binding = module.buildApprovalEvidenceBinding({
+      root,
+      inputPaths: [relativePath],
+      productionCommit: head,
+      evidenceCommits: [head],
+    });
+
+    expect(binding.verified).toBe(true);
+    expect(binding.failures).toEqual([]);
+    expect(binding.artifacts[0]).toMatchObject({
+      gitMode: "100644",
+      workingTreeMatchesHead: true,
+    });
+  });
+
   it("fails closed when working bytes differ from the HEAD blob", async () => {
     const root = initRepository();
     const relativePath = "evaluation/report.json";
