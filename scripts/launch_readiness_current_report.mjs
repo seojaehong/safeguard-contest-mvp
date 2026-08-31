@@ -261,7 +261,6 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
     && requestedAiMode === "template"
     && rawAudit.apiAskOk === true
     && coverage.missing.length === 0
-    && summary.needsCheckCount === 0
     && !dispatchCalled;
   const verdict = !auditFreshness.ready
     ? "STALE_LIVE_PROBE_REQUIRES_RERUN_NO_DISPATCH"
@@ -318,6 +317,8 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
       ? "STALE_PROBE_NOT_CURRENT_LIVE_EVIDENCE"
       : distributedAdmissionBlocked
       ? "BLOCKED_BEFORE_CONNECTION_CHECK_NO_DISPATCH"
+      : templateGenerationPassed && (summary.needsCheckCount > 0 || summary.partialCount > 0)
+        ? "PASS_TEMPLATE_GENERATION_CONNECTIONS_BOUNDED_NO_DISPATCH"
       : summary.needsCheckCount === 0 && summary.partialCount === 0
         ? "PASS_CONNECTED_NO_DISPATCH"
         : "REVIEW_CONNECTIONS_NO_DISPATCH",
@@ -358,7 +359,7 @@ export function buildLaunchReadinessCurrentReport(options = {}) {
     safeClaims: templateGenerationPassed
       ? [
           `Live /api/ask in explicit deterministic template mode generated the expected ${coverage.presentCount}-document workpack for the audited construction scenario.`,
-          `The template smoke returned connected statuses for ${summary.connectedCount} connection surface(s) without provider-backed enhanced/full generation.`,
+          `External connection status remains separately bounded (${summary.connectedCount} connected, ${summary.partialCount} fallback, ${summary.needsCheckCount} check-required) and does not claim enhanced/full provider readiness.`,
           `A safe launch demo or guided pilot can be claimed only with all ${approvalGatedBoundaries.length} canonical approval boundaries preserved.`,
           "Documents selected-only bounded workbench evidence is current in scoped artifacts; route split alone is not accepted as the UX fix."
         ]

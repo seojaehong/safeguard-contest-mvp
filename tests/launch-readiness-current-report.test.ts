@@ -312,6 +312,33 @@ describe("launch readiness current report", () => {
     });
   });
 
+  it("keeps template demo readiness separate from bounded external connection status", async () => {
+    const module = await loadReportModule();
+    const { head, rootDir } = createFixtureRoot();
+    const rawAuditPath = "evaluation/launch-readiness-current-2026-07-22/api-connection-audit.json";
+    const rawAudit = JSON.parse(fs.readFileSync(path.join(rootDir, rawAuditPath), "utf8")) as Record<string, unknown>;
+    const connections = rawAudit.connections as Array<Record<string, unknown>>;
+    writeJson(rootDir, rawAuditPath, {
+      ...rawAudit,
+      connections: connections.map((connection, index) => index === 0
+        ? { ...connection, liveStatus: "연결 점검 필요" }
+        : connection),
+    });
+
+    const report = module.buildLaunchReadinessCurrentReport({
+      generatedAt: "2026-07-22T00:00:00.000Z",
+      productionCommit: head,
+      rootDir,
+    });
+
+    expect(report).toMatchObject({
+      connectionVerdict: "PASS_TEMPLATE_GENERATION_CONNECTIONS_BOUNDED_NO_DISPATCH",
+      safeLaunchDemoClaimAllowed: true,
+      guidedPilotClaimAllowed: true,
+      verdict: "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
+    });
+  });
+
   it("classifies distributed admission unavailability as a live launch blocker without overclaiming document failure", async () => {
     const module = await loadReportModule();
     const { head, rootDir } = createFixtureRoot();
