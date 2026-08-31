@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T21:20:10.081Z
-Source HEAD at generation: 346f36e3fb2f97cc3b0adda4b73ee970df05d6a7
-Live commit at generation: 346f36e3fb2f97cc3b0adda4b73ee970df05d6a7
+Generated at: 2026-08-31T22:07:35.802Z
+Source HEAD at generation: 9b93e229111f25067f9a57f432e2b5b867ca406a
+Live commit at generation: 9b93e229111f25067f9a57f432e2b5b867ca406a
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -586,7 +586,7 @@ Overall: `northstar_open_approval_gated`
 | current_source_kosha_archive_preflight_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-kosha-archive-preflight-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | ancestor | ancestor_of_head | evaluation\current-source-security-remediation-2026-08-30\report.json |
 | current_security_governed_path_compatibility | ancestor | ancestor_of_head | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
-| stale_approval_evidence_binding_security | exact | missing | evaluation\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\report.json |
+| stale_approval_evidence_binding_security | ancestor | missing | evaluation\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\report.json |
 | current_source_security_residual_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | ancestor | ancestor_of_head | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | ancestor | ancestor_of_head | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
