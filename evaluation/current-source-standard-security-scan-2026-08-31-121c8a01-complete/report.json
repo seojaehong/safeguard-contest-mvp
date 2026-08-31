@@ -61,8 +61,12 @@
     "browserSessionBindingEvidenceCommit": "285b924d",
     "browserSessionBindingVerdict": "PASS_LIVE_DEPLOYED_SOURCE_BROWSER_SESSION_BINDING_RESCAN_PENDING",
     "browserSessionBindingProductionCommit": "77bcd6ea4ec1ea1914126dd7ba924f788b972602",
+    "providerOutputBudgetProductCommit": "e99346797f4d874e83188d8f37941a603a272a6d",
+    "providerOutputBudgetEvidenceCommit": "18a9fc1a",
+    "providerOutputBudgetVerdict": "PASS_LIVE_DEPLOYED_SOURCE_PUBLIC_PROVIDER_OUTPUT_BUDGET_RESCAN_PENDING",
+    "providerOutputBudgetProductionCommit": "18a9fc1a7f9a549d73474d5fb881268bb69404d9",
     "scanFindingReclassified": false,
-    "remainingApprovalFreeFindingCount": 6
+    "remainingApprovalFreeFindingCount": 5
   },
   "canonicalArtifacts": {
     "manifest": "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/scan-manifest.json",

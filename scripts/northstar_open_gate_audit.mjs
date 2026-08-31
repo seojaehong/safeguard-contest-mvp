@@ -8651,8 +8651,12 @@ function evaluateFreshCurrentSourceSecurityScanGate(rootDir) {
     && readString(postScanRemediation.browserSessionBindingProductCommit) === "e36356d84fa8ac2331f8d0b81229d0532024a876"
     && readString(postScanRemediation.browserSessionBindingVerdict) === "PASS_LIVE_DEPLOYED_SOURCE_BROWSER_SESSION_BINDING_RESCAN_PENDING"
     && readString(postScanRemediation.browserSessionBindingProductionCommit) === "77bcd6ea4ec1ea1914126dd7ba924f788b972602"
+    && readString(postScanRemediation.providerOutputBudgetProductCommit) === "e99346797f4d874e83188d8f37941a603a272a6d"
+    && readString(postScanRemediation.providerOutputBudgetEvidenceCommit) === "18a9fc1a"
+    && readString(postScanRemediation.providerOutputBudgetVerdict) === "PASS_LIVE_DEPLOYED_SOURCE_PUBLIC_PROVIDER_OUTPUT_BUDGET_RESCAN_PENDING"
+    && readString(postScanRemediation.providerOutputBudgetProductionCommit) === "18a9fc1a7f9a549d73474d5fb881268bb69404d9"
     && postScanRemediation.scanFindingReclassified === false
-    && readNumber(postScanRemediation.remainingApprovalFreeFindingCount) === 6;
+    && readNumber(postScanRemediation.remainingApprovalFreeFindingCount) === 5;
 
   return gateResult({
     id: "fresh_current_source_security_scan",
@@ -8660,11 +8664,11 @@ function evaluateFreshCurrentSourceSecurityScanGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Current Standard scan a4044172 is sealed at source/live 121c8a01 with 14 findings (10 medium, 4 low), 14 finding write-ups, and partial canonical coverage across 21 recorded surface rows with 22 deferred entries in a 6,981-file repository. The immutable original 18-finding baseline and every prior scan remain preserved. Seven approval-free source findings and seven database/RLS/atomicity findings were open at scan time; the separately committed browser-session remediation is deployed in production 77bcd6ea and reduces the current-source approval-free residual to six without rewriting or closing the sealed scan finding. This is not security-complete: no live auth-session mutation occurred, a post-remediation repository rescan remains required, and exact saved Share remains MISSING_EVIDENCE."
+      ? "Current Standard scan a4044172 is sealed at source/live 121c8a01 with 14 findings (10 medium, 4 low), 14 finding write-ups, and partial canonical coverage across 21 recorded surface rows with 22 deferred entries in a 6,981-file repository. The immutable original 18-finding baseline and every prior scan remain preserved. Seven approval-free source findings and seven database/RLS/atomicity findings were open at scan time; the browser-session remediation is deployed in production 77bcd6ea and production 18a9fc1a contains provider-output remediation e9934679, reducing the current-source approval-free residual to five without rewriting or closing sealed scan findings. This is not security-complete: no external provider call was executed, a post-remediation repository rescan remains required, and exact saved Share remains MISSING_EVIDENCE."
       : `Fresh scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(report.scanId) || "missing"}, source=${readString(report.sourceHead) || "missing"}, findings=${readNumber(scan.reportableFindingCount)}, severity=${readNumber(severity.medium)}/${readNumber(severity.low)}, coverage=${readString(scan.coverageCompleteness) || "missing"}/${readNumber(scan.reviewedSurfaceCount)}/${readNumber(scan.deferredCoverageItemCount)}, canonical=${canonicalFilesPresent}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
-          "Remediate the six remaining approval-free source findings in bounded waves and rerun focused validation.",
+          "Remediate the five remaining approval-free source findings in bounded waves and rerun focused validation.",
           "Keep the seven database/RLS/atomicity findings approval-gated; do not claim security completion from scan completion or the bounded browser-session remediation.",
         ]
       : ["Restore the exact sealed scan identity, 14-finding and 14-write-up counts, canonical files, partial-coverage boundary, bounded browser-session receipt, no-mutation state, and exact Share MISSING_EVIDENCE."],

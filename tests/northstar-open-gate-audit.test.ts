@@ -220,8 +220,12 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
       browserSessionBindingProductCommit: "e36356d84fa8ac2331f8d0b81229d0532024a876",
       browserSessionBindingVerdict: "PASS_LIVE_DEPLOYED_SOURCE_BROWSER_SESSION_BINDING_RESCAN_PENDING",
       browserSessionBindingProductionCommit: "77bcd6ea4ec1ea1914126dd7ba924f788b972602",
+      providerOutputBudgetProductCommit: "e99346797f4d874e83188d8f37941a603a272a6d",
+      providerOutputBudgetEvidenceCommit: "18a9fc1a",
+      providerOutputBudgetVerdict: "PASS_LIVE_DEPLOYED_SOURCE_PUBLIC_PROVIDER_OUTPUT_BUDGET_RESCAN_PENDING",
+      providerOutputBudgetProductionCommit: "18a9fc1a7f9a549d73474d5fb881268bb69404d9",
       scanFindingReclassified: false,
-      remainingApprovalFreeFindingCount: 6,
+      remainingApprovalFreeFindingCount: 5,
     },
     canonicalArtifacts: {
       manifest: "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/scan-manifest.json",
@@ -9750,7 +9754,8 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(gate?.detail).toContain("22 deferred entries");
     expect(gate?.detail).toContain("Seven approval-free source findings");
     expect(gate?.detail).toContain("seven database/RLS/atomicity findings");
-    expect(gate?.detail).toContain("current-source approval-free residual to six");
+    expect(gate?.detail).toContain("current-source approval-free residual to five");
+    expect(gate?.detail).toContain("production 18a9fc1a contains provider-output remediation e9934679");
     expect(gate?.detail).toContain("not security-complete");
     expect(gate?.detail).toContain("MISSING_EVIDENCE");
 

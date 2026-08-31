@@ -24,6 +24,11 @@ hashes recorded in `report.json`.
   URL-fragment session finding and is included in production `77bcd6ea`. The
   sealed finding itself is not rewritten; a later repository rescan is required
   for reclassification.
+- Product commit `e9934679` adds deterministic output-token and accepted-text
+  budgets to public Ask, citation mapping, knowledge regeneration, and workpack
+  remediation. Production `18a9fc1a` contains that product commit; no external
+  provider call was executed. Five approval-free findings remain and a fresh
+  repository rescan is required without rewriting the sealed scan.
 
 ## Boundaries
 

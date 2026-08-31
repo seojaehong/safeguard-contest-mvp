@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_PUBLIC_PROVIDER_OUTPUT_BUDGET_LIVE_PENDING`
+`PASS_LIVE_DEPLOYED_SOURCE_PUBLIC_PROVIDER_OUTPUT_BUDGET_RESCAN_PENDING`
 
 Product commit `e9934679` adds deterministic provider and application output
 budgets to every free-text generation path shared by public Ask, knowledge
@@ -32,9 +32,9 @@ safety instruction.
 
 ## Live state
 
-Production still reported `48d7c3a9` when checked. Product commit `e9934679`
-is pushed to `master` but is not yet live-proven, so this receipt remains
-current-source PASS and live-pending.
+Production reported `18a9fc1a` when checked, which contains product commit
+`e9934679`. This proves deployed-source alignment without executing an external
+provider call. A fresh post-remediation repository scan is still required.
 
 ## Boundaries
 

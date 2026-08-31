@@ -1,7 +1,7 @@
 {
   "schema": "safeclaw-security-public-provider-output-budget-remediation/v1",
-  "verdict": "PASS_CURRENT_SOURCE_PUBLIC_PROVIDER_OUTPUT_BUDGET_LIVE_PENDING",
-  "generatedAt": "2026-09-01T00:21:47+09:00",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_PUBLIC_PROVIDER_OUTPUT_BUDGET_RESCAN_PENDING",
+  "generatedAt": "2026-09-01T01:10:20+09:00",
   "sourceHead": "e99346797f4d874e83188d8f37941a603a272a6d",
   "productCommit": "e99346797f4d874e83188d8f37941a603a272a6d",
   "baseline": {
@@ -57,18 +57,18 @@
     "diffCheckPassed": true
   },
   "production": {
-    "checkedAt": "2026-09-01T00:21:47+09:00",
-    "commitSha": "48d7c3a9460c75b5c9f76de04f25d6f3f08ea455",
+    "checkedAt": "2026-09-01T01:10:20+09:00",
+    "commitSha": "18a9fc1a7f9a549d73474d5fb881268bb69404d9",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-13nsz1bpt-seojaehongs-projects.vercel.app",
-    "productCommitLive": false,
-    "liveVerificationPending": true
+    "deploymentUrl": "safeguard-contest-dcu9rtqp5-seojaehongs-projects.vercel.app",
+    "productCommitLive": true,
+    "liveVerificationPending": false
   },
   "securityScan": {
     "findingRemediatedInCurrentSource": true,
     "findingClosureClaimed": false,
-    "freshPostDeploymentVerificationRequired": true,
+    "freshPostDeploymentVerificationRequired": false,
     "freshPostRemediationRepositoryRescanRequired": true,
     "completedBaselineFindingCount": 14,
     "remainingApprovalFreeFindingCount": 5
