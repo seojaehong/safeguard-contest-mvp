@@ -584,6 +584,23 @@ type RollupReport = {
     securityComplete: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceKoshaArchivePreflightRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    findingId: string;
+    focusedPythonTestsPassed: number | null;
+    focusedVitestTestsPassed: number | null;
+    adjacentPythonTestsPassed: number | null;
+    adjacentVitestTestsPassed: number | null;
+    buildStatus: string;
+    boundedPythonInventoryUsed: boolean;
+    sameOpenFileHandleUsed: boolean;
+    runtimeArchiveProbeExecuted: boolean;
+    freshRescanRequired: boolean;
+    securityComplete: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceSecurityResidualRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1356,6 +1373,59 @@ function currentSourceMcpGenerationCancellationRemediationFixture(): Record<stri
       securityComplete: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
+  };
+}
+
+function currentSourceKoshaArchivePreflightRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-current-source-security-kosha-archive-preflight-remediation/v1",
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_KOSHA_ARCHIVE_PREFLIGHT_CONTRACT",
+    sourceHead: "TO_FILL",
+    productCommit: "TO_FILL",
+    productionCommit: "TO_FILL",
+    finding: {
+      findingId: "csf_d7f23c57f1ee89b4c6cdad17",
+      occurrenceId: "occ_150ad7ac80e3ea536f29ffcf",
+      ruleId: "resource-exhaustion.unbounded-audit-archive-preflight",
+      sealedFindingReclassified: false,
+      freshRescanRequired: true,
+    },
+    remediation: {
+      nodeAdmZipInventoryRemoved: true,
+      boundedPythonInventoryUsed: true,
+      endOfCentralDirectoryTailBytes: 65557,
+      maxCentralDirectoryBytes: 67108864,
+      maxMemberCount: 10000,
+      maxMemberBytes: 67108864,
+      maxTotalUncompressedBytes: 1073741824,
+      maxCompressionRatio: 100,
+      inventoryTimeoutMs: 60000,
+      parseTimeoutMs: 900000,
+      sameOpenFileHandleUsedForPreflightAndZipFile: true,
+      aggregateArchiveMemberBudgetEnforced: true,
+      aggregateArchiveByteBudgetEnforced: true,
+      directPdfLegacyInventorySemanticsPreserved: true,
+      fixedSanitizedHelperErrors: true,
+      providerOrDatabaseWorkReachedByOverBudgetRegression: false,
+    },
+    verification: {
+      focusedPython: { testsPassed: 64, testsFailed: 0 },
+      focusedVitest: { testsPassed: 112, testsFailed: 0 },
+      adjacentPython: { testsPassed: 13, testsFailed: 0 },
+      adjacentVitest: { testsPassed: 37, testsFailed: 0 },
+      typecheck: { status: "PASS" },
+      productionBuild: { status: "PASS", staticPages: 28 },
+      liveDeployment: {
+        status: "PASS_DEPLOYED_SOURCE_CONTRACT_LOCAL_ARCHIVE_PROBE_NOT_EXECUTED",
+        commitSha: "TO_FILL",
+        branch: "master",
+        environment: "production",
+        sourceHeadMatchesProduction: true,
+        runtimeArchiveProbeExecuted: false,
+      },
+    },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorOrEmbeddingMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false },
+    remainingBoundaries: { immutableOriginal18FindingBaselinePreserved: true, sealedCurrentHeadScanPreserved: true, securityComplete: false, exactSavedShareVerdict: "MISSING_EVIDENCE", approvalGatedFindingsRemainOpen: true, liveAfterDeploymentRequired: false, freshFullRepositorySecurityRescanRequired: true },
   };
 }
 
@@ -2680,6 +2750,7 @@ function createFixtureRoot(): { root: string; head: string } {
   writeJson(root, "evaluation/current-source-security-ontology-error-projection-remediation-2026-08-31/report.json", currentSourceOntologyErrorProjectionRemediationFixture());
   writeJson(root, "evaluation/current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31/report.json", currentSourcePhotoReadinessAuthFanoutRemediationFixture());
   writeJson(root, "evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.json", currentSourceMcpGenerationCancellationRemediationFixture());
+  writeJson(root, "evaluation/current-source-security-kosha-archive-preflight-remediation-2026-08-31/report.json", currentSourceKoshaArchivePreflightRemediationFixture());
   writeJson(root, "evaluation/current-source-security-residual-remediation-2026-08-28/report.json", currentSourceSecurityResidualRemediationFixture());
   writeJson(root, "evaluation/share-ack-prebody-admission-2026-08-28/report.json", shareAckPreBodyAdmissionFixture());
   writeJson(root, "evaluation/safety-status-disconnect-lease-2026-08-28/report.json", safetyStatusDisconnectLeaseFixture());
@@ -3083,6 +3154,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/current-source-security-ontology-error-projection-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.json",
+    "evaluation/current-source-security-kosha-archive-preflight-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-residual-remediation-2026-08-28/report.json",
     "evaluation/share-ack-prebody-admission-2026-08-28/report.json",
     "evaluation/safety-status-disconnect-lease-2026-08-28/report.json",
@@ -3778,6 +3850,26 @@ describe("northstar live rollup", () => {
       reviewedSignalForwarded: true,
       persistenceSkippedAfterAbort: true,
       authenticatedRuntimeProbeExecuted: false,
+      freshRescanRequired: true,
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "current_source_kosha_archive_preflight_remediation")).toMatchObject({
+      artifact: path.join("evaluation", "current-source-security-kosha-archive-preflight-remediation-2026-08-31", "report.json"),
+    });
+    expect(report.currentSourceKoshaArchivePreflightRemediation).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_KOSHA_ARCHIVE_PREFLIGHT_CONTRACT",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      findingId: "csf_d7f23c57f1ee89b4c6cdad17",
+      focusedPythonTestsPassed: 64,
+      focusedVitestTestsPassed: 112,
+      adjacentPythonTestsPassed: 13,
+      adjacentVitestTestsPassed: 37,
+      buildStatus: "PASS",
+      boundedPythonInventoryUsed: true,
+      sameOpenFileHandleUsed: true,
+      runtimeArchiveProbeExecuted: false,
       freshRescanRequired: true,
       securityComplete: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",

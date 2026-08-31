@@ -55,6 +55,7 @@ const ARTIFACTS = Object.freeze({
   currentSourceOntologyErrorProjectionRemediation: path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
   currentSourcePhotoReadinessAuthFanoutRemediation: path.join("evaluation", "current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31", "report.json"),
   currentSourceMcpGenerationCancellationRemediation: path.join("evaluation", "current-source-security-mcp-generation-cancellation-remediation-2026-08-31", "report.json"),
+  currentSourceKoshaArchivePreflightRemediation: path.join("evaluation", "current-source-security-kosha-archive-preflight-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
@@ -587,6 +588,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const currentSourceOntologyErrorProjectionRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceOntologyErrorProjectionRemediation);
   const currentSourcePhotoReadinessAuthFanoutRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourcePhotoReadinessAuthFanoutRemediation);
   const currentSourceMcpGenerationCancellationRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceMcpGenerationCancellationRemediation);
+  const currentSourceKoshaArchivePreflightRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceKoshaArchivePreflightRemediation);
   const currentSourceSecurityRemediationFollowup = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityRemediationFollowup);
   const currentSecurityGovernedPathCompatibility = tryReadJson(rootDir, ARTIFACTS.currentSecurityGovernedPathCompatibility);
   const currentSourceSecurityResidualRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityResidualRemediation);
@@ -738,6 +740,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_ontology_error_projection_remediation", ARTIFACTS.currentSourceOntologyErrorProjectionRemediation, currentSourceOntologyErrorProjectionRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_photo_readiness_auth_fanout_remediation", ARTIFACTS.currentSourcePhotoReadinessAuthFanoutRemediation, currentSourcePhotoReadinessAuthFanoutRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_mcp_generation_cancellation_remediation", ARTIFACTS.currentSourceMcpGenerationCancellationRemediation, currentSourceMcpGenerationCancellationRemediation),
+    evidenceStatus(rootDir, currentHead, liveCommit, "current_source_kosha_archive_preflight_remediation", ARTIFACTS.currentSourceKoshaArchivePreflightRemediation, currentSourceKoshaArchivePreflightRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_remediation_followup", ARTIFACTS.currentSourceSecurityRemediationFollowup, currentSourceSecurityRemediationFollowup),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_security_governed_path_compatibility", ARTIFACTS.currentSecurityGovernedPathCompatibility, currentSecurityGovernedPathCompatibility),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_residual_remediation", ARTIFACTS.currentSourceSecurityResidualRemediation, currentSourceSecurityResidualRemediation),
@@ -1144,6 +1147,30 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       freshRescanRequired: recordAt(currentSourceMcpGenerationCancellationRemediation, "finding")?.freshRescanRequired === true,
       securityComplete: recordAt(currentSourceMcpGenerationCancellationRemediation, "remainingBoundaries")?.securityComplete === true,
       exactSavedShareVerdict: asString(recordAt(currentSourceMcpGenerationCancellationRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    currentSourceKoshaArchivePreflightRemediation: {
+      artifact: ARTIFACTS.currentSourceKoshaArchivePreflightRemediation,
+      verdict: isRecord(currentSourceKoshaArchivePreflightRemediation)
+        ? asString(currentSourceKoshaArchivePreflightRemediation.verdict)
+        : "missing",
+      sourceHead: isRecord(currentSourceKoshaArchivePreflightRemediation)
+        ? asString(currentSourceKoshaArchivePreflightRemediation.sourceHead)
+        : "",
+      productionCommit: isRecord(currentSourceKoshaArchivePreflightRemediation)
+        ? asString(currentSourceKoshaArchivePreflightRemediation.productionCommit)
+        : "",
+      findingId: asString(recordAt(currentSourceKoshaArchivePreflightRemediation, "finding")?.findingId),
+      focusedPythonTestsPassed: asNumber(recordAt(recordAt(currentSourceKoshaArchivePreflightRemediation, "verification"), "focusedPython")?.testsPassed),
+      focusedVitestTestsPassed: asNumber(recordAt(recordAt(currentSourceKoshaArchivePreflightRemediation, "verification"), "focusedVitest")?.testsPassed),
+      adjacentPythonTestsPassed: asNumber(recordAt(recordAt(currentSourceKoshaArchivePreflightRemediation, "verification"), "adjacentPython")?.testsPassed),
+      adjacentVitestTestsPassed: asNumber(recordAt(recordAt(currentSourceKoshaArchivePreflightRemediation, "verification"), "adjacentVitest")?.testsPassed),
+      buildStatus: asString(recordAt(recordAt(currentSourceKoshaArchivePreflightRemediation, "verification"), "productionBuild")?.status),
+      boundedPythonInventoryUsed: recordAt(currentSourceKoshaArchivePreflightRemediation, "remediation")?.boundedPythonInventoryUsed === true,
+      sameOpenFileHandleUsed: recordAt(currentSourceKoshaArchivePreflightRemediation, "remediation")?.sameOpenFileHandleUsedForPreflightAndZipFile === true,
+      runtimeArchiveProbeExecuted: recordAt(recordAt(currentSourceKoshaArchivePreflightRemediation, "verification"), "liveDeployment")?.runtimeArchiveProbeExecuted === true,
+      freshRescanRequired: recordAt(currentSourceKoshaArchivePreflightRemediation, "finding")?.freshRescanRequired === true,
+      securityComplete: recordAt(currentSourceKoshaArchivePreflightRemediation, "remainingBoundaries")?.securityComplete === true,
+      exactSavedShareVerdict: asString(recordAt(currentSourceKoshaArchivePreflightRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     currentSourceSecurityResidualRemediation: {
       artifact: ARTIFACTS.currentSourceSecurityResidualRemediation,

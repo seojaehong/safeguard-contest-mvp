@@ -78,6 +78,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSourceOntologyErrorProjectionRemediation: path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
   currentSourcePhotoReadinessAuthFanoutRemediation: path.join("evaluation", "current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31", "report.json"),
   currentSourceMcpGenerationCancellationRemediation: path.join("evaluation", "current-source-security-mcp-generation-cancellation-remediation-2026-08-31", "report.json"),
+  currentSourceKoshaArchivePreflightRemediation: path.join("evaluation", "current-source-security-kosha-archive-preflight-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
@@ -8604,6 +8605,32 @@ function evaluateFreshCurrentSourceSecurityScanGate(rootDir) {
 
 /**
  * @param {string} rootDir
+ * @param {string} possibleAncestorSha
+ * @param {string} descendantSha
+ */
+function isGitAncestorOf(rootDir, possibleAncestorSha, descendantSha) {
+  if (!/^[0-9a-f]{40}$/u.test(possibleAncestorSha) || !/^[0-9a-f]{40}$/u.test(descendantSha)) {
+    return false;
+  }
+  const cacheKey = `${rootDir}\0${possibleAncestorSha}\0${descendantSha}`;
+  if (gitAncestorCache.has(cacheKey)) {
+    return gitAncestorCache.get(cacheKey);
+  }
+  try {
+    execFileSync("git", ["merge-base", "--is-ancestor", possibleAncestorSha, descendantSha], {
+      cwd: rootDir,
+      stdio: ["ignore", "ignore", "ignore"],
+    });
+    gitAncestorCache.set(cacheKey, true);
+    return true;
+  } catch {
+    gitAncestorCache.set(cacheKey, false);
+    return false;
+  }
+}
+
+/**
+ * @param {string} rootDir
  * @returns {GateResult}
  */
 function evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir) {
@@ -9359,6 +9386,119 @@ function evaluateCurrentSourceMcpGenerationCancellationRemediationGate(rootDir) 
           "Run a valid-token runtime cancellation probe only under a separately approved non-production-safe execution plan; keep exact saved Share and all mutation boundaries open.",
         ]
       : ["Restore end-to-end signal propagation, aligned source/live identity, verification counts, fresh-rescan/runtime-probe boundaries, no-mutation, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateCurrentSourceKoshaArchivePreflightRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourceKoshaArchivePreflightRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_source_kosha_archive_preflight_remediation",
+      label: "Current-source KOSHA archive preflight remediation",
+      state: "missing",
+      evidencePath,
+      detail: "The KOSHA archive preflight remediation receipt is missing or invalid.",
+      nextActions: ["Restore deployed-source archive preflight evidence without reclassifying the sealed finding or closing approval boundaries."],
+    });
+  }
+
+  const finding = isRecord(report.finding) ? report.finding : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focusedPython = isRecord(verification.focusedPython) ? verification.focusedPython : {};
+  const focusedVitest = isRecord(verification.focusedVitest) ? verification.focusedVitest : {};
+  const adjacentPython = isRecord(verification.adjacentPython) ? verification.adjacentPython : {};
+  const adjacentVitest = isRecord(verification.adjacentVitest) ? verification.adjacentVitest : {};
+  const typecheck = isRecord(verification.typecheck) ? verification.typecheck : {};
+  const build = isRecord(verification.productionBuild) ? verification.productionBuild : {};
+  const live = isRecord(verification.liveDeployment) ? verification.liveDeployment : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const boundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const productCommitCurrent = isGitAncestor(rootDir, productCommit);
+  const productionCommitCurrent = isGitAncestor(rootDir, productionCommit);
+  const productionIncludesProduct = isGitAncestorOf(rootDir, productCommit, productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.schemaVersion) === "safeclaw-current-source-security-kosha-archive-preflight-remediation/v1"
+    && readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_KOSHA_ARCHIVE_PREFLIGHT_CONTRACT"
+    && productCommit !== ""
+    && productCommit === readString(report.sourceHead)
+    && productionCommit !== ""
+    && productionCommit === readString(live.commitSha)
+    && productCommitCurrent
+    && productionCommitCurrent
+    && productionIncludesProduct
+    && readString(live.branch) === "master"
+    && readString(live.environment) === "production"
+    && readString(finding.findingId) === "csf_d7f23c57f1ee89b4c6cdad17"
+    && readString(finding.occurrenceId) === "occ_150ad7ac80e3ea536f29ffcf"
+    && readString(finding.ruleId) === "resource-exhaustion.unbounded-audit-archive-preflight"
+    && finding.sealedFindingReclassified === false
+    && finding.freshRescanRequired === true
+    && remediation.nodeAdmZipInventoryRemoved === true
+    && remediation.boundedPythonInventoryUsed === true
+    && readNumber(remediation.endOfCentralDirectoryTailBytes) === 65557
+    && readNumber(remediation.maxCentralDirectoryBytes) === 64 * 1024 * 1024
+    && readNumber(remediation.maxMemberCount) === 10000
+    && readNumber(remediation.maxMemberBytes) === 64 * 1024 * 1024
+    && readNumber(remediation.maxTotalUncompressedBytes) === 1024 * 1024 * 1024
+    && readNumber(remediation.maxCompressionRatio) === 100
+    && readNumber(remediation.inventoryTimeoutMs) === 60000
+    && readNumber(remediation.parseTimeoutMs) === 900000
+    && remediation.sameOpenFileHandleUsedForPreflightAndZipFile === true
+    && remediation.aggregateArchiveMemberBudgetEnforced === true
+    && remediation.aggregateArchiveByteBudgetEnforced === true
+    && remediation.directPdfLegacyInventorySemanticsPreserved === true
+    && remediation.fixedSanitizedHelperErrors === true
+    && remediation.providerOrDatabaseWorkReachedByOverBudgetRegression === false
+    && readNumber(focusedPython.testsPassed) === 64
+    && readNumber(focusedPython.testsFailed) === 0
+    && readNumber(focusedVitest.testsPassed) === 112
+    && readNumber(focusedVitest.testsFailed) === 0
+    && readNumber(adjacentPython.testsPassed) === 13
+    && readNumber(adjacentPython.testsFailed) === 0
+    && readNumber(adjacentVitest.testsPassed) === 37
+    && readNumber(adjacentVitest.testsFailed) === 0
+    && readString(typecheck.status) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && readString(live.status) === "PASS_DEPLOYED_SOURCE_CONTRACT_LOCAL_ARCHIVE_PROBE_NOT_EXECUTED"
+    && live.sourceHeadMatchesProduction === true
+    && live.runtimeArchiveProbeExecuted === false
+    && noMutation
+    && boundaries.immutableOriginal18FindingBaselinePreserved === true
+    && boundaries.sealedCurrentHeadScanPreserved === true
+    && boundaries.securityComplete === false
+    && readString(boundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && boundaries.approvalGatedFindingsRemainOpen === true
+    && boundaries.liveAfterDeploymentRequired === false
+    && boundaries.freshFullRepositorySecurityRescanRequired === true;
+
+  return gateResult({
+    id: "current_source_kosha_archive_preflight_remediation",
+    label: "Current-source KOSHA archive preflight remediation",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Current live source removes the unbounded AdmZip inventory and preflights a bounded ZIP central directory on the same open file handle before Python ZipFile materialization. Focused Python/Vitest 64/112 plus adjacent Python/Vitest 13/37, typecheck, and the 28-page build pass. The over-budget regression stops before provider or database work. No live local-archive probe was executed; the sealed finding stays open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated KOSHA promotion remains open, and exact saved Share remains MISSING_EVIDENCE."
+      : `KOSHA archive verdict=${readString(report.verdict) || "missing"}, product/live=${productCommit || "missing"}/${productionCommit || "missing"}, ancestry=${productCommitCurrent}/${productionCommitCurrent}/${productionIncludesProduct}, tests=${readNumber(focusedPython.testsPassed)}+${readNumber(focusedVitest.testsPassed)}+${readNumber(adjacentPython.testsPassed)}+${readNumber(adjacentVitest.testsPassed)}, preflight=${remediation.boundedPythonInventoryUsed === true}/${remediation.sameOpenFileHandleUsedForPreflightAndZipFile === true}, runtimeProbe=${live.runtimeArchiveProbeExecuted === true}, freshRescan=${finding.freshRescanRequired === true}, noMutation=${noMutation}, securityComplete=${boundaries.securityComplete === true}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Include the deployed KOSHA archive preflight contract in the next full repository scan before reclassifying the sealed finding.",
+          "Keep exact saved Share, KOSHA exact promotion, and all DB/provider/vector/wiki mutation boundaries open.",
+        ]
+      : ["Restore same-handle central-directory preflight, aligned source/live identity, verification counts, fresh-rescan boundary, no-mutation, and exact Share MISSING_EVIDENCE."],
   });
 }
 
@@ -13487,6 +13627,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentSourceOntologyErrorProjectionRemediationGate(rootDir),
     evaluateCurrentSourcePhotoReadinessAuthFanoutRemediationGate(rootDir),
     evaluateCurrentSourceMcpGenerationCancellationRemediationGate(rootDir),
+    evaluateCurrentSourceKoshaArchivePreflightRemediationGate(rootDir),
     evaluateCurrentSourceSecurityRemediationFollowupGate(rootDir),
     evaluateCurrentSecurityGovernedPathCompatibilityGate(rootDir),
     evaluateCurrentSourceSecurityResidualRemediationGate(rootDir),

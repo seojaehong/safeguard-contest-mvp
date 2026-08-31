@@ -591,6 +591,74 @@ function currentSourceMcpGenerationCancellationRemediationFixture(): Record<stri
   };
 }
 
+function currentSourceKoshaArchivePreflightRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-current-source-security-kosha-archive-preflight-remediation/v1",
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_KOSHA_ARCHIVE_PREFLIGHT_CONTRACT",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    finding: {
+      findingId: "csf_d7f23c57f1ee89b4c6cdad17",
+      occurrenceId: "occ_150ad7ac80e3ea536f29ffcf",
+      ruleId: "resource-exhaustion.unbounded-audit-archive-preflight",
+      sealedFindingReclassified: false,
+      freshRescanRequired: true,
+    },
+    remediation: {
+      nodeAdmZipInventoryRemoved: true,
+      boundedPythonInventoryUsed: true,
+      endOfCentralDirectoryTailBytes: 65557,
+      maxCentralDirectoryBytes: 64 * 1024 * 1024,
+      maxMemberCount: 10000,
+      maxMemberBytes: 64 * 1024 * 1024,
+      maxTotalUncompressedBytes: 1024 * 1024 * 1024,
+      maxCompressionRatio: 100,
+      inventoryTimeoutMs: 60000,
+      parseTimeoutMs: 900000,
+      sameOpenFileHandleUsedForPreflightAndZipFile: true,
+      aggregateArchiveMemberBudgetEnforced: true,
+      aggregateArchiveByteBudgetEnforced: true,
+      directPdfLegacyInventorySemanticsPreserved: true,
+      fixedSanitizedHelperErrors: true,
+      providerOrDatabaseWorkReachedByOverBudgetRegression: false,
+    },
+    verification: {
+      focusedPython: { testsPassed: 64, testsFailed: 0 },
+      focusedVitest: { testsPassed: 112, testsFailed: 0 },
+      adjacentPython: { testsPassed: 13, testsFailed: 0 },
+      adjacentVitest: { testsPassed: 37, testsFailed: 0 },
+      typecheck: { status: "PASS" },
+      productionBuild: { status: "PASS", staticPages: 28 },
+      liveDeployment: {
+        status: "PASS_DEPLOYED_SOURCE_CONTRACT_LOCAL_ARCHIVE_PROBE_NOT_EXECUTED",
+        commitSha: "fixture-sha",
+        branch: "master",
+        environment: "production",
+        sourceHeadMatchesProduction: true,
+        runtimeArchiveProbeExecuted: false,
+      },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      immutableOriginal18FindingBaselinePreserved: true,
+      sealedCurrentHeadScanPreserved: true,
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      approvalGatedFindingsRemainOpen: true,
+      liveAfterDeploymentRequired: false,
+      freshFullRepositorySecurityRescanRequired: true,
+    },
+  };
+}
+
 function currentSourceSecurityRemediationFollowupFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_PRODUCTION_APPROVAL_FREE_SECURITY_REMEDIATIONS_POST_FIX_RESCAN_PENDING",
@@ -4854,6 +4922,11 @@ function createFixtureRoot(): string {
     rootDir,
     path.join("evaluation", "current-source-security-mcp-generation-cancellation-remediation-2026-08-31", "report.json"),
     currentSourceMcpGenerationCancellationRemediationFixture(),
+  );
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-kosha-archive-preflight-remediation-2026-08-31", "report.json"),
+    currentSourceKoshaArchivePreflightRemediationFixture(),
   );
   for (const receipt of approvalFreeRemediation.receipts as Array<{ evidencePath: string }>) {
     writeJson(rootDir, receipt.evidencePath, { verdict: "PASS_FIXTURE" });
@@ -9307,6 +9380,63 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "current_source_mcp_generation_cancellation_remediation")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records bounded KOSHA archive preflight without closing the sealed finding or approval boundaries", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-security-kosha-archive-preflight-remediation-2026-08-31",
+      "report.json",
+    );
+
+    const productCommit = execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: rootDir,
+      encoding: "utf8",
+    }).trim();
+    fs.writeFileSync(path.join(rootDir, "deployed-evidence-marker.txt"), "evidence-only deployment\n", "utf8");
+    execFileSync("git", ["add", "deployed-evidence-marker.txt"], { cwd: rootDir, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "deploy evidence marker"], { cwd: rootDir, stdio: "ignore" });
+    const productionCommit = execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: rootDir,
+      encoding: "utf8",
+    }).trim();
+    const deployedReport = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      sourceHead: string;
+      productCommit: string;
+      productionCommit: string;
+      verification: { liveDeployment: { commitSha: string } };
+    };
+    deployedReport.sourceHead = productCommit;
+    deployedReport.productCommit = productCommit;
+    deployedReport.productionCommit = productionCommit;
+    deployedReport.verification.liveDeployment.commitSha = productionCommit;
+    fs.writeFileSync(reportPath, `${JSON.stringify(deployedReport, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_kosha_archive_preflight_remediation");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("same open file handle");
+    expect(gate?.detail).toContain("64/112");
+    expect(gate?.detail).toContain("No live local-archive probe");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((item) => item.id === "kosha_exact_promotion_review_gate")?.state)
+      .toBe("approval_gated");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remediation: { sameOpenFileHandleUsedForPreflightAndZipFile: boolean };
+      mutationBoundary: { dbMutationPerformed: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.remediation.sameOpenFileHandleUsedForPreflightAndZipFile = false;
+    report.mutationBoundary.dbMutationPerformed = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "current_source_kosha_archive_preflight_remediation")?.state)
       .toBe("contradicted");
   });
 
