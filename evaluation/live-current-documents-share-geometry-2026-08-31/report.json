@@ -1,0 +1,177 @@
+{
+  "schemaVersion": "safeclaw-live-current-documents-share-geometry/v1",
+  "checkedAt": "2026-08-31T01:50:11.9130546Z",
+  "verdict": "PASS_LIVE_PRODUCTION_CURRENT_DOCUMENTS_AND_SCOPED_WORKSPACE_SHARE_GEOMETRY",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "3dda5436e672f602aa57829c1b76c739e7b04e2c",
+  "productCommit": "3dda5436e672f602aa57829c1b76c739e7b04e2c",
+  "productionBuild": {
+    "commitSha": "3dda5436e672f602aa57829c1b76c739e7b04e2c",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-cup1mzghs-seojaehongs-projects.vercel.app"
+  },
+  "documents": {
+    "route": "/documents?theme=day",
+    "reportedBodyHeight2070Reproduced": false,
+    "desktop1440x723": {
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "horizontalOverflow": false
+    },
+    "mobile390x723": {
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "horizontalOverflow": false
+    },
+    "afterLiveRemediation": {
+      "productCommit": "3dda5436e672f602aa57829c1b76c739e7b04e2c",
+      "productionCommit": "3dda5436e672f602aa57829c1b76c739e7b04e2c",
+      "viewport": "390x723",
+      "horizontalOverflow": false,
+      "workpackShellClientWidth": 327,
+      "workpackShellScrollWidth": 327,
+      "riskRowClientWidth": 265,
+      "riskRowScrollWidth": 265,
+      "visualHorizontalScrollbarPresent": false
+    },
+    "desktop": {
+      "viewport": { "width": 1440, "height": 723 },
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "bodyRatio": 1,
+      "horizontalOverflow": false,
+      "launcherRect": { "left": 252, "top": 205, "right": 504, "bottom": 429, "width": 252, "height": 224 },
+      "workbenchRect": { "left": 512, "top": 205, "right": 1424, "bottom": 653, "width": 912, "height": 448 },
+      "workbenchClientHeight": 448,
+      "workbenchScrollHeight": 868,
+      "workbenchScrollRatio": 1.938,
+      "workbenchOverflowY": "auto",
+      "coreKeys": ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"],
+      "coreCount": 3,
+      "uniqueDocumentKeyCount": 12,
+      "supportingCount": 9,
+      "supportingOpen": false,
+      "supportingVisibleCount": 0,
+      "stickyCount": 3,
+      "stickyOverlapCount": 0,
+      "screenshot": "documents-desktop-1440x723.png"
+    },
+    "mobile": {
+      "viewport": { "width": 390, "height": 723 },
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "bodyRatio": 1,
+      "horizontalOverflow": false,
+      "launcherRect": { "left": 36, "top": 179, "right": 354, "bottom": 308, "width": 318, "height": 129 },
+      "workbenchRect": { "left": 24, "top": 320, "right": 366, "bottom": 672, "width": 342, "height": 352 },
+      "workbenchClientHeight": 352,
+      "workbenchScrollHeight": 873,
+      "workbenchScrollRatio": 2.48,
+      "workbenchOverflowY": "auto",
+      "coreKeys": ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"],
+      "coreCount": 3,
+      "uniqueDocumentKeyCount": 12,
+      "supportingCount": 9,
+      "supportingOpen": false,
+      "supportingVisibleCount": 0,
+      "stickyCount": 2,
+      "stickyOverlapCount": 0,
+      "screenshot": "documents-mobile-390x723.png"
+    }
+  },
+  "workspaceShare": {
+    "route": "/workspace?theme=day",
+    "state": "authenticated-read-only-share-stage",
+    "reportedDesktopMobileCardReproduced": false,
+    "desktop1440x723": {
+      "pageHeight": 723,
+      "horizontalOverflow": 0,
+      "visiblePhoneShellCount": 0,
+      "root": { "columns": [508.477, 399.523, 227] }
+    },
+    "mobile390x723": {
+      "pageHeight": 723,
+      "horizontalOverflow": 0,
+      "desktopStatusRailDisplay": "none",
+      "root": { "columns": [303] }
+    },
+    "desktop": {
+      "viewport": { "width": 1440, "height": 723 },
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "bodyRatio": 1,
+      "horizontalOverflow": false,
+      "root": {
+        "left": 130,
+        "top": 195,
+        "right": 1310,
+        "bottom": 716,
+        "width": 1180,
+        "height": 521,
+        "clientHeight": 519,
+        "scrollHeight": 649,
+        "overflowY": "auto",
+        "gridTemplateColumns": "508.477px 399.523px 227px"
+      },
+      "formRect": { "left": 139, "top": 345, "right": 647.477, "bottom": 705, "width": 508.477, "height": 360 },
+      "previewRect": { "left": 653.477, "top": 345, "right": 1053, "bottom": 571, "width": 399.523, "height": 226 },
+      "statusRailRect": { "left": 1059, "top": 345, "right": 1286, "bottom": 678, "width": 227, "height": 333 },
+      "statusRailDisplay": "grid",
+      "primaryActionBottom": 389,
+      "channelWidths": [159.492, 159.492, 159.492],
+      "distinctFirstViewportRegions": 3,
+      "screenshot": "workspace-share-desktop-1440x723.png"
+    },
+    "mobile": {
+      "viewport": { "width": 390, "height": 723 },
+      "documentHeight": 723,
+      "bodyHeight": 723,
+      "bodyRatio": 1,
+      "horizontalOverflow": false,
+      "root": {
+        "left": 27,
+        "top": 273.25,
+        "right": 363,
+        "bottom": 704.25,
+        "width": 336,
+        "height": 431,
+        "clientHeight": 429,
+        "scrollHeight": 489,
+        "overflowY": "auto",
+        "gridTemplateColumns": "303px"
+      },
+      "formRect": { "left": 36, "top": 643.25, "right": 339, "bottom": 705.25, "width": 303, "height": 62 },
+      "previewRect": { "left": 36, "top": 445.25, "right": 339, "bottom": 637.25, "width": 303, "height": 192 },
+      "statusRailDisplay": "none",
+      "primaryActionBottom": 705.25,
+      "screenshot": "workspace-share-mobile-390x723.png"
+    }
+  },
+  "interpretation": {
+    "currentDefaultDocumentsPass": true,
+    "currentAuthenticatedWorkspaceSharePass": true,
+    "productPatchRequiredForMeasuredDefaultRoutes": false,
+    "possibleUnmeasuredCauses": [
+      "stale browser bundle or cache",
+      "a different route or expanded document state",
+      "an exact saved Share session with user-specific content"
+    ]
+  },
+  "boundaries": {
+    "routeSplitAloneAcceptedAsFix": false,
+    "exactSavedUserSessionReproduced": false,
+    "concreteSavedSessionUrlProvided": false,
+    "dbBackedCreationApproved": false,
+    "exactSavedSessionVerdict": "MISSING_EVIDENCE",
+    "invitedFixtureAcceptedAsExactSavedSessionProof": false,
+    "fixtureAcceptedAsExactSavedSessionProof": false,
+    "dbMutationPerformed": false,
+    "shareSessionCreated": false,
+    "providerDispatchCalled": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "securityCompleteClaimAllowed": false
+  }
+}

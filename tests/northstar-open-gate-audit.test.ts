@@ -3451,7 +3451,7 @@ function createFixtureRoot(): string {
       },
     ],
   });
-  writeJson(rootDir, path.join("evaluation", "live-current-documents-share-geometry-2026-08-26", "report.json"), {
+  writeJson(rootDir, path.join("evaluation", "live-current-documents-share-geometry-2026-08-31", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_CURRENT_DOCUMENTS_AND_SCOPED_WORKSPACE_SHARE_GEOMETRY",
     sourceHead: "fixture-evidence-sha",
     productCommit: "fixture-product-sha",
@@ -8239,7 +8239,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("/share/[sessionId] desktop recipient confirmation");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("mobile confirmation CTA before document details");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.evidencePath).toBe(
-      path.join("evaluation", "document-risk-row-add-touch-2026-08-27", "report.json"),
+      path.join("evaluation", "live-current-documents-share-geometry-2026-08-31", "report.json"),
     );
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("raw/source editing as an explicit live-bounded secondary drilldown");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.nextActions.join("\n")).toContain("selected-editor evidence/recheck CTA remains live-proven before raw editing");
@@ -11344,7 +11344,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
   it("contradicts the UI gate when the live mobile document shell regains horizontal overflow", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
-    const reportPath = path.join(rootDir, "evaluation", "live-current-documents-share-geometry-2026-08-26", "report.json");
+    const reportPath = path.join(rootDir, "evaluation", "live-current-documents-share-geometry-2026-08-31", "report.json");
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
       documents: { afterLiveRemediation: { workpackShellScrollWidth: number } };
     };
@@ -11358,7 +11358,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     });
     const gate = audit.gates.find((item) => item.id === "ui_documents_share_cockpit");
     expect(gate?.state).toBe("contradicted");
-    expect(gate?.evidencePath).toBe(path.join("evaluation", "live-current-documents-share-geometry-2026-08-26", "report.json"));
+    expect(gate?.evidencePath).toBe(path.join("evaluation", "live-current-documents-share-geometry-2026-08-31", "report.json"));
   });
 
   it("fails document export capability truth closed when locked server actions are enabled", async () => {

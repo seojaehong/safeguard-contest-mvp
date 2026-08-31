@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T01:40:46.760Z
-Source HEAD at generation: d5bf216674692268b8a51d0900f08cff6b844af7
-Live commit at generation: b07a772485e8912c96a6af37b792489b12b8c2b0
+Generated at: 2026-08-31T01:58:05.486Z
+Source HEAD at generation: 3dda5436e672f602aa57829c1b76c739e7b04e2c
+Live commit at generation: 3dda5436e672f602aa57829c1b76c739e7b04e2c
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -484,7 +484,7 @@ Overall: `northstar_open_approval_gated`
 | hermes_review_trace_matrix | proven | evaluation\hermes-knowledge-review-trace-matrix-2026-08-26\report.json |
 | live_document_secondary_grounding | proven | evaluation\live-document-secondary-grounding-2026-07-25\report.json |
 | live_document_seed_profile_isolation | proven | evaluation\live-document-seed-profile-isolation-2026-07-25\report.json |
-| ui_documents_share_cockpit | proven | evaluation\document-risk-row-add-touch-2026-08-27\report.json |
+| ui_documents_share_cockpit | proven | evaluation\live-current-documents-share-geometry-2026-08-31\report.json |
 | live_documents_share_route_perception | proven | evaluation\live-documents-share-route-perception-2026-08-28\report.json |
 | deployment_freshness_guard | proven | evaluation\deployment-freshness-guard-2026-08-14\report.json |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-first-viewport-containment-2026-08-27\report.json |
@@ -505,7 +505,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -544,7 +544,7 @@ Overall: `northstar_open_approval_gated`
 | current_source_ontology_error_projection_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-ontology-error-projection-remediation-2026-08-31\report.json |
 | current_source_photo_readiness_auth_fanout_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31\report.json |
 | current_source_mcp_generation_cancellation_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\report.json |
-| current_source_kosha_archive_preflight_remediation | ancestor | matches_live_source_mismatch | evaluation\current-source-security-kosha-archive-preflight-remediation-2026-08-31\report.json |
+| current_source_kosha_archive_preflight_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-kosha-archive-preflight-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | ancestor | ancestor_of_head | evaluation\current-source-security-remediation-2026-08-30\report.json |
 | current_security_governed_path_compatibility | ancestor | ancestor_of_head | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
 | current_source_security_residual_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
