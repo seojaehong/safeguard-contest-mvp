@@ -1,6 +1,6 @@
 # Current-source distributed admission identity remediation
 
-- Verdict: `PASS_CURRENT_SOURCE_VERIFIED_DISTRIBUTED_ADMISSION_IDENTITY_LIVE_PENDING`
+- Verdict: `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_VERIFIED_DISTRIBUTED_ADMISSION_IDENTITY`
 - Product source: `e0ee11205043a6155fa7d4f2d9ba13f28599172a`
 - Sealed scan: `f6bef30a-7250-428b-9f66-0bad1e42058c`
 - Finding: `rate-limit-bypass.untrusted-forwarded-identity`
@@ -9,7 +9,7 @@
 
 `x-vercel-forwarded-for` is now trusted only when `NODE_ENV=production`, `VERCEL=1`, and `VERCEL_ENV=production` are all present. Other production contexts ignore that header and collapse to the conservative `unknown` admission bucket unless an explicit trusted proxy configuration applies. The environment injected into the distributed limiter now also governs identity selection.
 
-Focused and adjacent verification passed: 7 files, 44 tests, plus strict TypeScript typecheck. Live deployment verification remains pending.
+Focused and adjacent verification passed: 7 files, 44 tests, plus strict TypeScript typecheck. Production marker `3133218f` includes product source `e0ee1120`. No behavioral probe exposes or inspects the private distributed admission key.
 
 ## Boundary
 

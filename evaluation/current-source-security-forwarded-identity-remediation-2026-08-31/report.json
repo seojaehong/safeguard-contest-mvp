@@ -1,9 +1,10 @@
 {
   "schemaVersion": "safeclaw-current-source-security-forwarded-identity-remediation/v1",
   "generatedAt": "2026-08-31T03:18:49.1113929Z",
-  "verdict": "PASS_CURRENT_SOURCE_VERIFIED_DISTRIBUTED_ADMISSION_IDENTITY_LIVE_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_VERIFIED_DISTRIBUTED_ADMISSION_IDENTITY",
   "sourceHead": "e0ee11205043a6155fa7d4f2d9ba13f28599172a",
-  "productionCommit": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+  "productionCommit": "3133218f67a2af790c31ab9ecf8617a5a467ae37",
+  "sourceIncludedInProduction": true,
   "securityBaseline": {
     "scanId": "f6bef30a-7250-428b-9f66-0bad1e42058c",
     "findingRule": "rate-limit-bypass.untrusted-forwarded-identity",
@@ -27,7 +28,13 @@
       "status": "PASS"
     },
     "typecheck": "PASS",
-    "liveBehavioralProbeExecuted": false
+    "liveBehavioralProbeExecuted": false,
+    "productionBuild": {
+      "commitSha": "3133218f67a2af790c31ab9ecf8617a5a467ae37",
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-pi18kbdb3-seojaehongs-projects.vercel.app"
+    }
   },
   "mutationBoundary": {
     "dbMutationPerformed": false,
@@ -39,7 +46,7 @@
     "exactTrustRegistryMutationPerformed": false
   },
   "remainingBoundaries": {
-    "liveDeploymentVerification": "PENDING",
+    "liveDeploymentVerification": "SOURCE_INCLUDED_NO_IDENTITY_KEY_DISCLOSURE",
     "freshFollowUpSecurityScan": "REQUIRED",
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "databaseSecurityRemediation": "APPROVAL_GATED",
