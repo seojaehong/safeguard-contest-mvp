@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-stale-approval-evidence-binding-remediation/v1",
-  "generatedAt": "2026-08-31T12:38:52.293Z",
-  "sourceHead": "3ac91d3d1530ec7f89b13631969995c887f58ea4",
+  "generatedAt": "2026-08-31T21:15:21.250Z",
+  "sourceHead": "355a2dbd7def9e47054782d89bb35561dc62514f",
   "verdict": "PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED",
   "finding": {
     "findingId": "csf_86ec127fb3d5b7d397649611",
@@ -17,14 +17,16 @@
       "id": "rls_llm_wiki",
       "overall": "blocked_preflight_failed",
       "verdict": null,
-      "bindingVerified": true,
-      "bindingFailureExposed": false,
+      "bindingVerified": false,
+      "bindingFailureExposed": true,
       "blocked": true,
-      "sourceHead": "3ac91d3d1530ec7f89b13631969995c887f58ea4",
+      "sourceHead": "355a2dbd7def9e47054782d89bb35561dc62514f",
       "productionCommit": "7ff45318ba8a8a0c411eb402bfa90c880c38015d",
       "artifactCount": 13,
-      "packetDigest": "1f088ccb6614efc59a27f358268d52290847a67cc86ad187bf935b0fc952b38a",
-      "bindingFailures": [],
+      "packetDigest": "b9c6df7033c9b2387bd3efec381eb90f84e2ba561a88a26366bdb015c29b867c",
+      "bindingFailures": [
+        "input-differs-from-head:evaluation/northstar-open-gates-current/report.json"
+      ],
       "contractPassed": true
     },
     {
@@ -34,10 +36,10 @@
       "bindingVerified": true,
       "bindingFailureExposed": false,
       "blocked": true,
-      "sourceHead": "3ac91d3d1530ec7f89b13631969995c887f58ea4",
+      "sourceHead": "355a2dbd7def9e47054782d89bb35561dc62514f",
       "productionCommit": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
       "artifactCount": 4,
-      "packetDigest": "aa40571fd6c4785cc0dcd28110b52ae8ea3adb7d57cc233a1799b3b7e8b21b68",
+      "packetDigest": "b632026648e05f8af75ef5dda545f1b69ed2a69f37a1d268243898a38062ee31",
       "bindingFailures": [],
       "contractPassed": true
     },
@@ -48,10 +50,10 @@
       "bindingVerified": true,
       "bindingFailureExposed": false,
       "blocked": true,
-      "sourceHead": "3ac91d3d1530ec7f89b13631969995c887f58ea4",
+      "sourceHead": "355a2dbd7def9e47054782d89bb35561dc62514f",
       "productionCommit": "57cd6c1034da9893f8080dc85f7d7ac844589005",
       "artifactCount": 7,
-      "packetDigest": "7de4b2bffa9e99db1388b43bdd805612535d457279449700ccb3df61f24aa22f",
+      "packetDigest": "c8a57a996560f6c95d22989223251fd3a312c27162f8f479d75f855aa7d375b7",
       "bindingFailures": [],
       "contractPassed": true
     },
@@ -60,12 +62,12 @@
       "overall": null,
       "verdict": "REVIEW_CHECKLIST_INCOMPLETE_BLOCKED",
       "bindingVerified": true,
-      "bindingFailureExposed": true,
+      "bindingFailureExposed": false,
       "blocked": true,
-      "sourceHead": "3ac91d3d1530ec7f89b13631969995c887f58ea4",
-      "productionCommit": "ca16e7de36b04e84f2e63700ae60b907915b0428",
+      "sourceHead": "355a2dbd7def9e47054782d89bb35561dc62514f",
+      "productionCommit": "bad17019136999655854cff2e49d0e165909ba74",
       "artifactCount": 4,
-      "packetDigest": "76825ad2d20015fdceaac81fb9c563cb8ab270cd21029df5488c26c194f370b4",
+      "packetDigest": "b4e65674b71af66bc857c6cca9c1aefb8683fc245de59631fdeaaf37974e6746",
       "bindingFailures": [],
       "contractPassed": true
     }

@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-31T19:01:27.119Z",
-  "head": "0543684cc4f56d8b82480b060cf0283c44920222",
+  "generatedAt": "2026-08-31T21:15:47.827Z",
+  "head": "355a2dbd7def9e47054782d89bb35561dc62514f",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "0543684cc4f56d8b82480b060cf0283c44920222",
+    "commitSha": "521c1582b1887154e0906e8e8ebe0bbf9282ae00",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-jtfrceukg-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-n69mtbefm-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -325,7 +325,7 @@
       "id": "stale_approval_evidence_binding_security",
       "state": "proven",
       "artifact": "evaluation\\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\\report.json",
-      "detail": "Current source binds the RLS/LLM Wiki, distributed admission, Share ACK, and KOSHA promotion approval preflights to current HEAD, production ancestry, tracked input SHA-256 values, and deterministic packet digests. All four workflows remain fail-closed, no mutation occurred, the completed scan's remaining findings stay open, and exact saved Share remains MISSING_EVIDENCE."
+      "detail": "Current source binds the RLS/LLM Wiki, distributed admission, Share ACK, and KOSHA promotion approval preflights to current HEAD, production ancestry, tracked input SHA-256 values, and deterministic packet digests, or explicitly blocks when a tracked aggregate changes. All four workflows remain fail-closed, no mutation occurred, the completed scan's remaining findings stay open, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_source_security_residual_remediation",
@@ -633,7 +633,7 @@
       "id": "kosha_exact_promotion_review_gate",
       "state": "approval_gated",
       "artifact": "evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\report.json",
-      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Reviewer-facing checklist evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\review-template.md exposes 8 candidates, 48 initially unchecked human inputs, 8 official PDF links, and 24 page receipts with no pre-checked items; machine evidence does not replace human review and checklist completion does not approve promotion. Official PDF audit evaluation\\kosha-exact-official-pdf-audit-2026-07-25\\report.json re-downloaded and machine-verified all 8 PDF/body pairs while preserving lifecycle, human-review, and promotion boundaries. Official lifecycle audit evaluation\\kosha-exact-official-lifecycle-audit-2026-07-25\\report.json reconciles all 8 packet versions against current and retired inventories with 8 exact official-current titles; corpus source titles remain separately preserved for provenance. Reviewer-support audit evaluation\\kosha-exact-promotion-reviewer-support-2026-07-25\\report.json records bounded excerpts plus 24/24 PDF page/body location receipts for 8/8 candidates and 24/24 semantic groups, bound to the corpus snapshot identity, without completing human review or creating a registry artifact. Reviewer cockpit evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\report.json presents 8 candidates, 24 readable page-and-term cues with each raw PDF excerpt preserved behind an initially closed disclosure, 24 PDF page/body receipts, 2 reconciled official/corpus title provenance rows, and all 64 required human inputs in a viewport-contained no-mutation UI; the 8-candidate/48-unchecked-input human checklist is directly reachable before completion, export remains locked until complete, and promotion remains separate approval. Browser geometry evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\browser-report.json preserves one visible candidate, explicit official-current and corpus-source titles, 40 checks, receipt access in the bounded evidence pane, three bounded desktop/mobile cases, reciprocal breakpoint-aware tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection with the selected candidate fully visible, a two-card mobile rail with an always-visible `후보 1/8 · 현재 0/8 · 전체 0/64` candidate/current/global progress row, a next-incomplete command that wraps and skips completed candidates, fail-visible future review timestamp rejection, visible empty/changed/restored/stale-rejected draft states plus a fail-visible browser-storage error, all 24 reading cues plus 24 closed raw-excerpt disclosures, corpus-title-and-receipt-bound draft restore that rejects stale fingerprints, and polite live progress. Contract audit evaluation\\kosha-exact-promotion-review-contract-audit-2026-07-23\\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval."
+      "detail": "Review template covers 8 KOSHA candidates and is blocked by default (64 checklist failures); no DB, embedding, provider, or exact-registry mutation was performed. Exact promotion still requires completed human review and separate approval. Packet evaluation\\kosha-exact-promotion-packet-2026-07-22\\report.json, official PDF, lifecycle, reviewer-support, and final review gate share corpus binding 236b96114afa53f7313ccea9883b0c1dd9f8553744c06ed56503d90aa6bbb303; approval evidence is Git-blob verified and all remaining failures are human-review inputs only. Reviewer-facing checklist evaluation\\kosha-exact-promotion-review-gate-2026-07-22\\review-template.md exposes 8 candidates, 48 initially unchecked human inputs, 8 official PDF links, and 24 page receipts with no pre-checked items; machine evidence does not replace human review and checklist completion does not approve promotion. Official PDF audit evaluation\\kosha-exact-official-pdf-audit-2026-07-25\\report.json re-downloaded and machine-verified all 8 PDF/body pairs while preserving lifecycle, human-review, and promotion boundaries. Official lifecycle audit evaluation\\kosha-exact-official-lifecycle-audit-2026-07-25\\report.json reconciles all 8 packet versions against current and retired inventories with 8 exact official-current titles; corpus source titles remain separately preserved for provenance. Reviewer-support audit evaluation\\kosha-exact-promotion-reviewer-support-2026-07-25\\report.json records bounded excerpts plus 24/24 PDF page/body location receipts for 8/8 candidates and 24/24 semantic groups, bound to the corpus snapshot identity, without completing human review or creating a registry artifact. Reviewer cockpit evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\report.json presents 8 candidates, 24 readable page-and-term cues with each raw PDF excerpt preserved behind an initially closed disclosure, 24 PDF page/body receipts, 2 reconciled official/corpus title provenance rows, and all 64 required human inputs in a viewport-contained no-mutation UI; the 8-candidate/48-unchecked-input human checklist is directly reachable before completion, export remains locked until complete, and promotion remains separate approval. Browser geometry evaluation\\kosha-exact-promotion-reviewer-cockpit-2026-07-25\\browser-report.json preserves one visible candidate, explicit official-current and corpus-source titles, 40 checks, receipt access in the bounded evidence pane, three bounded desktop/mobile cases, reciprocal breakpoint-aware tab/tabpanel semantics, one roving tab stop, End/Home keyboard selection with the selected candidate fully visible, a two-card mobile rail with an always-visible `후보 1/8 · 현재 0/8 · 전체 0/64` candidate/current/global progress row, a next-incomplete command that wraps and skips completed candidates, fail-visible future review timestamp rejection, visible empty/changed/restored/stale-rejected draft states plus a fail-visible browser-storage error, all 24 reading cues plus 24 closed raw-excerpt disclosures, corpus-title-and-receipt-bound draft restore that rejects stale fingerprints, and polite live progress. Contract audit evaluation\\kosha-exact-promotion-review-contract-audit-2026-07-23\\report.json confirms shallow human-confirmation-only reviews are blocked and completed review remains no-mutation plus separate approval."
     }
   ],
   "mobileP0": {
@@ -1112,12 +1112,12 @@
   "staleApprovalEvidenceBindingRemediation": {
     "artifact": "evaluation\\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\\report.json",
     "verdict": "PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED",
-    "sourceHead": "3ac91d3d1530ec7f89b13631969995c887f58ea4",
+    "sourceHead": "355a2dbd7def9e47054782d89bb35561dc62514f",
     "findingId": "csf_86ec127fb3d5b7d397649611",
     "workflowCount": 4,
     "passedCount": 4,
     "failedCount": 0,
-    "bindingVerifiedCount": 4,
+    "bindingVerifiedCount": 3,
     "blockedWorkflowCount": 4,
     "noMutation": true,
     "freshFullRepositorySecurityRescanRequired": true,
@@ -2304,10 +2304,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "0543684cc4f56d8b82480b060cf0283c44920222",
+      "sourceCommit": "355a2dbd7def9e47054782d89bb35561dc62514f",
       "sourceStatus": "exact",
-      "productionCommit": "0543684cc4f56d8b82480b060cf0283c44920222",
-      "productionStatus": "matches_live"
+      "productionCommit": "355a2dbd7def9e47054782d89bb35561dc62514f",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -2688,8 +2688,8 @@
     {
       "id": "stale_approval_evidence_binding_security",
       "artifact": "evaluation\\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\\report.json",
-      "sourceCommit": "3ac91d3d1530ec7f89b13631969995c887f58ea4",
-      "sourceStatus": "ancestor",
+      "sourceCommit": "355a2dbd7def9e47054782d89bb35561dc62514f",
+      "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
     },

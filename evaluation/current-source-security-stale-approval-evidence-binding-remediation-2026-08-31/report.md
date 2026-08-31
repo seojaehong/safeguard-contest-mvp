@@ -1,16 +1,16 @@
 # Current-source stale approval evidence binding remediation
 
 - Verdict: `PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED`
-- Source HEAD: `3ac91d3d1530ec7f89b13631969995c887f58ea4`
+- Source HEAD: `355a2dbd7def9e47054782d89bb35561dc62514f`
 - Finding: `csf_86ec127fb3d5b7d397649611` / `approval-integrity.stale-evidence-binding`
 - Workflow contracts: `4/4`
 
 | Workflow | Contract | Binding verified | Blocked | Inputs | Packet digest |
 | --- | --- | --- | --- | --- | --- |
-| rls_llm_wiki | PASS | true | true | 13 | `1f088ccb6614efc59a27f358268d52290847a67cc86ad187bf935b0fc952b38a` |
-| distributed_admission | PASS | true | true | 4 | `aa40571fd6c4785cc0dcd28110b52ae8ea3adb7d57cc233a1799b3b7e8b21b68` |
-| share_recipient_ack | PASS | true | true | 7 | `7de4b2bffa9e99db1388b43bdd805612535d457279449700ccb3df61f24aa22f` |
-| kosha_exact_promotion | PASS | true | true | 4 | `76825ad2d20015fdceaac81fb9c563cb8ab270cd21029df5488c26c194f370b4` |
+| rls_llm_wiki | PASS | false | true | 13 | `b9c6df7033c9b2387bd3efec381eb90f84e2ba561a88a26366bdb015c29b867c` |
+| distributed_admission | PASS | true | true | 4 | `b632026648e05f8af75ef5dda545f1b69ed2a69f37a1d268243898a38062ee31` |
+| share_recipient_ack | PASS | true | true | 7 | `c8a57a996560f6c95d22989223251fd3a312c27162f8f479d75f855aa7d375b7` |
+| kosha_exact_promotion | PASS | true | true | 4 | `b4e65674b71af66bc857c6cca9c1aefb8683fc245de59631fdeaaf37974e6746` |
 
 ## Boundary
 

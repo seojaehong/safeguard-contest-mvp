@@ -1,29 +1,34 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-31T19:01:55.120Z",
+  "generatedAt": "2026-08-31T21:16:13.233Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "0543684cc4f56d8b82480b060cf0283c44920222",
-  "productionCommit": "0543684cc4f56d8b82480b060cf0283c44920222",
+  "sourceHead": "355a2dbd7def9e47054782d89bb35561dc62514f",
+  "productionCommit": "521c1582b1887154e0906e8e8ebe0bbf9282ae00",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "0543684cc4f56d8b82480b060cf0283c44920222",
+    "commitSha": "521c1582b1887154e0906e8e8ebe0bbf9282ae00",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-jtfrceukg-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-n69mtbefm-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": true,
-  "currentHeadIsEvidenceOnlyPending": false,
-  "sourceHeadLivePending": false,
+  "latestEvidenceCommitLive": false,
+  "currentHeadIsEvidenceOnlyPending": true,
+  "sourceHeadLivePending": true,
   "sourceHeadHasProductChanges": false,
-  "sourcePendingChangedPaths": [],
+  "sourcePendingChangedPaths": [
+    "scripts/northstar_next_runway.mjs",
+    "scripts/northstar_open_gate_audit.mjs",
+    "tests/northstar-next-runway-generator.test.ts",
+    "tests/northstar-open-gate-audit.test.ts"
+  ],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "0543684cc4f56d8b82480b060cf0283c44920222",
-  "liveRollupLiveCommit": "0543684cc4f56d8b82480b060cf0283c44920222",
+  "liveExactEvidenceCommit": "355a2dbd7def9e47054782d89bb35561dc62514f",
+  "liveRollupLiveCommit": "521c1582b1887154e0906e8e8ebe0bbf9282ae00",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -167,7 +172,6 @@
     "security_resource_remediation",
     "security_upstream_transport_remediation",
     "security_safety_reference_surface_remediation",
-    "stale_approval_evidence_binding_security",
     "learning_export_renderer_security",
     "hermes_knowledge_review_authority",
     "hermes_knowledge_review_ui",
@@ -296,7 +300,7 @@
     {
       "gate": "stale_approval_evidence_binding_security",
       "state": "proven",
-      "reason": "current live source binds 4/4 approval workflows to current HEAD, production ancestry, required-input SHA-256 values, and deterministic packet digests; all 4 remain fail-closed, no mutation=true, fresh full rescan required=true, and exact saved Share remains MISSING_EVIDENCE"
+      "reason": "current live source binds 3/4 approval workflows to current HEAD, production ancestry, required-input SHA-256 values, and deterministic packet digests; all 4 remain fail-closed, no mutation=true, fresh full rescan required=true, and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "current_source_security_residual_remediation",
@@ -1531,18 +1535,18 @@
   },
   "staleApprovalEvidenceBindingRemediation": {
     "verdict": "PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED",
-    "sourceHead": "3ac91d3d1530ec7f89b13631969995c887f58ea4",
+    "sourceHead": "355a2dbd7def9e47054782d89bb35561dc62514f",
     "findingId": "csf_86ec127fb3d5b7d397649611",
     "workflowCount": 4,
     "passedCount": 4,
     "failedCount": 0,
-    "bindingVerifiedCount": 4,
+    "bindingVerifiedCount": 3,
     "blockedWorkflowCount": 4,
     "packetDigests": [
-      "1f088ccb6614efc59a27f358268d52290847a67cc86ad187bf935b0fc952b38a",
-      "aa40571fd6c4785cc0dcd28110b52ae8ea3adb7d57cc233a1799b3b7e8b21b68",
-      "7de4b2bffa9e99db1388b43bdd805612535d457279449700ccb3df61f24aa22f",
-      "76825ad2d20015fdceaac81fb9c563cb8ab270cd21029df5488c26c194f370b4"
+      "b9c6df7033c9b2387bd3efec381eb90f84e2ba561a88a26366bdb015c29b867c",
+      "b632026648e05f8af75ef5dda545f1b69ed2a69f37a1d268243898a38062ee31",
+      "c8a57a996560f6c95d22989223251fd3a312c27162f8f479d75f855aa7d375b7",
+      "b4e65674b71af66bc857c6cca9c1aefb8683fc245de59631fdeaaf37974e6746"
     ],
     "noMutation": true,
     "freshFullRepositorySecurityRescanRequired": true,
@@ -2187,6 +2191,8 @@
     "dbMutationPerformed": false,
     "embeddingGenerationPerformed": false,
     "exactPromotionPerformed": false,
+    "corpusBindingSchemaVersion": "safeclaw-kosha-corpus-binding/v1",
+    "corpusBindingSha256": "236b96114afa53f7313ccea9883b0c1dd9f8553744c06ed56503d90aa6bbb303",
     "forbiddenClaims": [
       "These candidates are already exact production evidence.",
       "The exact-kosha registry was expanded by this packet.",
