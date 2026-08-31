@@ -220,6 +220,103 @@ describe("SIF embedding approval preflight", () => {
     expect(result.uploaded).toBe(false);
   });
 
+  it("fails closed when an arbitrary migration path contains non-SIF schema changes", () => {
+    const outDir = mkdtempSync(join(tmpdir(), "safeclaw-sif-preflight-scope-"));
+    const migrationPath = join(outDir, "operator-provided.sql");
+    const outPath = join(outDir, "approval-preflight-report.json");
+    writeFileSync(migrationPath, [
+      readFileSync("evaluation/sif-embedding-gate/sif-embedding-only-migration.sql", "utf8"),
+      "create table if not exists workpack_share_sessions (id uuid primary key);"
+    ].join("\n"), "utf8");
+
+    let stdout = "";
+    try {
+      execFileSync(process.execPath, [
+        "scripts/sif_embedding_approval_preflight.mjs",
+        "--migration",
+        migrationPath,
+        "--no-env-file",
+        "--output",
+        outPath
+      ], {
+        cwd: process.cwd(),
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          OPENAI_API_KEY: "",
+          SUPABASE_SERVICE_ROLE_KEY: "",
+          SUPABASE_URL: "",
+          NEXT_PUBLIC_SUPABASE_URL: "",
+          SAFETY_REFERENCE_VECTOR_SEARCH: ""
+        }
+      });
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "stdout" in error) {
+        stdout = String((error as { stdout: unknown }).stdout);
+      } else {
+        throw error;
+      }
+    }
+
+    const result = asRecord(JSON.parse(stdout));
+    const checks = result.checks as Array<Record<string, unknown>>;
+    const migrationCheck = checks.find((check) => check.id === "migration_scope_is_sif_embedding_only");
+    expect(result.ok).toBe(false);
+    expect(asStringArray(result.failedCheckIds)).toContain("migration_scope_is_sif_embedding_only");
+    expect(migrationCheck?.passed).toBe(false);
+    expect(asRecord(migrationCheck?.evidence)).toMatchObject({
+      fileNameSuggestsSifOnly: false,
+      sifOnly: false
+    });
+    expect(asStringArray(asRecord(migrationCheck?.evidence).violations)).toContain("table:workpack_share_sessions");
+    expect(result.dbMutationPerformed).toBe(false);
+    expect(result.embeddingGenerated).toBe(false);
+    expect(result.uploaded).toBe(false);
+  });
+
+  it("accepts an arbitrary migration filename when its SQL remains SIF-only", () => {
+    const outDir = mkdtempSync(join(tmpdir(), "safeclaw-sif-preflight-valid-scope-"));
+    const migrationPath = join(outDir, "operator-reviewed.sql");
+    const outPath = join(outDir, "approval-preflight-report.json");
+    writeFileSync(
+      migrationPath,
+      readFileSync("evaluation/sif-embedding-gate/sif-embedding-only-migration.sql", "utf8"),
+      "utf8"
+    );
+
+    const stdout = execFileSync(process.execPath, [
+      "scripts/sif_embedding_approval_preflight.mjs",
+      "--migration",
+      migrationPath,
+      "--no-env-file",
+      "--output",
+      outPath
+    ], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        OPENAI_API_KEY: "",
+        SUPABASE_SERVICE_ROLE_KEY: "",
+        SUPABASE_URL: "",
+        NEXT_PUBLIC_SUPABASE_URL: "",
+        SAFETY_REFERENCE_VECTOR_SEARCH: ""
+      }
+    });
+
+    const result = asRecord(JSON.parse(stdout));
+    const checks = result.checks as Array<Record<string, unknown>>;
+    const migrationCheck = checks.find((check) => check.id === "migration_scope_is_sif_embedding_only");
+    expect(result.ok).toBe(true);
+    expect(migrationCheck?.passed).toBe(true);
+    expect(asRecord(migrationCheck?.evidence)).toMatchObject({
+      fileNameSuggestsSifOnly: false,
+      sifOnly: true,
+      violations: []
+    });
+    expect(result.dbMutationPerformed).toBe(false);
+  });
+
   it("keeps the embedding cost approval guard in the corpus script", () => {
     const source = readFileSync("scripts/prepare_sif_embedding_corpus.mjs", "utf8");
 

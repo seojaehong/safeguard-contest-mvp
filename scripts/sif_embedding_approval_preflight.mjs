@@ -229,8 +229,90 @@ function boolEnv(name) {
   return Boolean(process.env[name]?.trim());
 }
 
+function inspectMigrationScope(migrationSql) {
+  const normalized = migrationSql.toLowerCase();
+  const withoutFunctionBodies = normalized.replace(/\$([a-z0-9_]*)\$[\s\S]*?\$\1\$/giu, " $$body$$ ");
+  const violations = [];
+  const inspectedObjects = [];
+  const recordTargets = (pattern, kind, allowed) => {
+    for (const match of withoutFunctionBodies.matchAll(pattern)) {
+      const target = match[1]?.replaceAll('"', "") || "unknown";
+      inspectedObjects.push({ kind, target });
+      if (!allowed(target, match)) violations.push(`${kind}:${target}`);
+    }
+  };
+
+  recordTargets(
+    /\b(?:create\s+table(?:\s+if\s+not\s+exists)?|alter\s+table|drop\s+table(?:\s+if\s+exists)?|truncate\s+table)\s+([a-z0-9_."]+)/giu,
+    "table",
+    (target) => target === "safety_reference_embeddings"
+  );
+  recordTargets(
+    /\bcreate\s+(?:unique\s+)?index(?:\s+if\s+not\s+exists)?\s+([a-z0-9_."]+)\s+on\s+([a-z0-9_."]+)/giu,
+    "index",
+    (target, match) => target.startsWith("idx_safety_reference_embeddings_")
+      && match[2]?.replaceAll('"', "") === "safety_reference_embeddings"
+  );
+  recordTargets(
+    /\b(?:create\s+or\s+replace\s+function|create\s+function|alter\s+function|drop\s+function(?:\s+if\s+exists)?)\s+([a-z0-9_."]+)/giu,
+    "function",
+    (target) => target === "match_safety_reference_embeddings"
+  );
+  recordTargets(
+    /\bcreate\s+extension(?:\s+if\s+not\s+exists)?\s+([a-z0-9_."]+)/giu,
+    "extension",
+    (target) => target === "vector"
+  );
+  recordTargets(
+    /\b(?:create|drop)\s+policy(?:\s+if\s+exists)?\s+(?:"[^"]+"|[a-z0-9_]+)\s+on\s+([a-z0-9_."]+)/giu,
+    "policy-table",
+    (target) => target === "safety_reference_embeddings"
+  );
+
+  const forbiddenTopLevelOperations = [
+    /\binsert\s+into\b/iu,
+    /\bupdate\s+[a-z0-9_."]+\s+set\b/iu,
+    /\bdelete\s+from\b/iu,
+    /\bgrant\s+\S+\s+on\b/iu,
+    /\brevoke\s+\S+\s+on\b/iu,
+    /\bcreate\s+(?:or\s+replace\s+)?(?:trigger|schema|role|view|materialized\s+view)\b/iu,
+    /\balter\s+(?:schema|role|view|materialized\s+view)\b/iu
+  ];
+  for (const pattern of forbiddenTopLevelOperations) {
+    if (pattern.test(withoutFunctionBodies)) violations.push(`operation:${pattern.source}`);
+  }
+
+  const allowedStatementStarts = [
+    /^create\s+extension(?:\s+if\s+not\s+exists)?\s+vector\b/iu,
+    /^create\s+table(?:\s+if\s+not\s+exists)?\s+safety_reference_embeddings\b/iu,
+    /^create\s+(?:unique\s+)?index(?:\s+if\s+not\s+exists)?\s+idx_safety_reference_embeddings_[a-z0-9_]+\s+on\s+safety_reference_embeddings\b/iu,
+    /^create\s+or\s+replace\s+function\s+match_safety_reference_embeddings\b/iu,
+    /^comment\s+on\s+function\s+match_safety_reference_embeddings\b/iu,
+    /^alter\s+table\s+safety_reference_embeddings\b/iu,
+    /^drop\s+policy(?:\s+if\s+exists)?\s+(?:"[^"]+"|[a-z0-9_]+)\s+on\s+safety_reference_embeddings\b/iu,
+    /^create\s+policy\s+(?:"[^"]+"|[a-z0-9_]+)\s+on\s+safety_reference_embeddings\b/iu
+  ];
+  const topLevelStatements = withoutFunctionBodies
+    .replace(/--.*$/gmu, "")
+    .split(";")
+    .map((statement) => statement.trim())
+    .filter(Boolean);
+  for (const statement of topLevelStatements) {
+    if (!allowedStatementStarts.some((pattern) => pattern.test(statement))) {
+      violations.push(`statement:${statement.replace(/\s+/gu, " ").slice(0, 120)}`);
+    }
+  }
+
+  return {
+    sifOnly: violations.length === 0,
+    inspectedObjects,
+    inspectedStatementCount: topLevelStatements.length,
+    violations: [...new Set(violations)]
+  };
+}
+
 function findChecks(report, manifest, corpusInspection, manifestInspection, vectorsPath, migrationSql, scriptSource, migrationPath, scriptPath) {
-  const lowerMigrationSql = migrationSql.toLowerCase();
+  const migrationScope = inspectMigrationScope(migrationSql);
   return [
     {
       id: "sif_source_count",
@@ -348,16 +430,14 @@ function findChecks(report, manifest, corpusInspection, manifestInspection, vect
     },
     {
       id: "migration_scope_is_sif_embedding_only",
-      passed: migrationPath.includes("sif-embedding-only")
-        ? !lowerMigrationSql.includes("workpack_share_sessions")
-          && !lowerMigrationSql.includes("workpack_read_confirmations")
-          && !lowerMigrationSql.includes("workpack_improvements")
-          && !lowerMigrationSql.includes("report_snapshots")
-          && !lowerMigrationSql.includes("export_jobs")
-        : true,
+      passed: migrationScope.sifOnly,
       evidence: {
         migrationPath,
-        sifOnly: migrationPath.includes("sif-embedding-only")
+        fileNameSuggestsSifOnly: migrationPath.includes("sif-embedding-only"),
+        sifOnly: migrationScope.sifOnly,
+        inspectedObjects: migrationScope.inspectedObjects,
+        inspectedStatementCount: migrationScope.inspectedStatementCount,
+        violations: migrationScope.violations
       }
     }
   ];
