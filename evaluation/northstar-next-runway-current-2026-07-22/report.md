@@ -4,27 +4,27 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `cc76962075a0bf8089cd0de4d3688f0a374f3dad`
+Source HEAD: `3e548c56b6c0294bd89929668d7da958211c2a65`
 
-Production `/api/build-info`: `cc76962075a0bf8089cd0de4d3688f0a374f3dad`
+Production `/api/build-info`: `e0ec763b63ee5eb22587895cc48de7d1d46423cb`
 
-Latest evidence commit live: `true`
+Latest evidence commit live: `false`
 
-Source head live pending: `false`
+Source head live pending: `true`
 
 Source head has product changes: `false`
 
-Source pending changed paths: `none`
+Source pending changed paths: `scripts/northstar_live_rollup.mjs`, `scripts/northstar_next_runway.mjs`, `scripts/northstar_open_gate_audit.mjs`, `tests/northstar-live-rollup.test.ts`, `tests/northstar-next-runway-generator.test.ts`, `tests/northstar-open-gate-audit.test.ts`
 
-Current head is evidence-only pending: `false`
+Current head is evidence-only pending: `true`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `cc76962075a0bf8089cd0de4d3688f0a374f3dad`
+Live rollup source head: `3e548c56b6c0294bd89929668d7da958211c2a65`
 
 Live rollup matches production: `true`
 
-Note: source HEAD and production marker match for this artifact.
+Note: current HEAD `3e548c56b6c0294bd89929668d7da958211c2a65` is an evidence-only or tooling refresh pushed after the live-exact artifact set. Production is still `e0ec763b63ee5eb22587895cc48de7d1d46423cb`, and the live rollup remains exact for that deployed marker.
 
 Open-gate artifact: `evaluation\northstar-open-gates-current\report.json`
 
@@ -84,6 +84,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Current-source logout storage remediation is `PASS_LIVE_DEPLOYED_SOURCE_LOGOUT_USER_CONTENT_PURGE_CONTRACT`: source/live `e7533365e3ceb9ceef733587e05709cb59860d4f/e7533365e3ceb9ceef733587e05709cb59860d4f`, exact keys/prefixes/preferences `2/3/2`, tests `100`, build `PASS`, and static violations `0`. Behavioral logout remains `false`; fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source ontology error projection remediation is `PASS_LIVE_DEPLOYED_SOURCE_ONTOLOGY_ERROR_PROJECTION_CONTRACT`: product/live `68a8f9dae349cb03d8c77abedd27040b9679bde0/05e70640ec305ff651eba1c42654a6a3b8a02f1e`, fixed public codes `2`, tests `12`, build `PASS`, and live admission `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`. No provider failure was induced `false`; fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source raw error projection remediation is `PASS_LIVE_DEPLOYED_SOURCE_RAW_ERROR_PROJECTION_CONTRACT`: product/live `856f7e65c33aa71d97277c8abca83864fee8ca47/856f7e65c33aa71d97277c8abca83864fee8ca47`, stable public codes `5`, focused/adjacent tests `93/122`, build `PASS`, and live probes `4`. No production failure was induced `false`; fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
+- Current-source credential output remediation is `PASS_LIVE_DEPLOYED_SOURCE_CREDENTIAL_OUTPUT_CONTRACT`: product/live `32bba02b79b4beefe0a217b1afe7180483398cf4/32bba02b79b4beefe0a217b1afe7180483398cf4`, credential CLIs `2`, focused tests `88`, CI credential/MCP tests `8/5`, build `PASS`, and fail-closed probes `3`. Credential issuance executed remains `false`; fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source photo readiness auth fan-out remediation is `PASS_LIVE_DEPLOYED_SOURCE_PHOTO_READINESS_AUTH_FANOUT_CONTRACT`: product/live `007f1d2b687102bd5020c85adf527ef5907956ad/007f1d2b687102bd5020c85adf527ef5907956ad`, tests `13`, build `PASS`, Supabase client/auth fan-out `false/false`, and identical live anonymous/Bearer responses `true`. Fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source MCP generation cancellation remediation is `PASS_LIVE_DEPLOYED_SOURCE_MCP_GENERATION_CANCELLATION_CONTRACT`: product/live `5ed2558b25a139c32c300163d1386863bbc3589d/5ed2558b25a139c32c300163d1386863bbc3589d`, focused/adjacent tests `54/143`, build `PASS`, plain/reviewed signal forwarding `true/true`, and persistence skipped after abort `true`. Authenticated runtime cancellation probe remains `false`, fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source KOSHA archive preflight remediation is `PASS_LIVE_DEPLOYED_SOURCE_KOSHA_ARCHIVE_PREFLIGHT_CONTRACT`: product/live `41de3997aed1907a95b794040edef542cb1f40f2/b07a772485e8912c96a6af37b792489b12b8c2b0`, focused Python/Vitest `64/112`, adjacent Python/Vitest `13/37`, member/aggregate byte budgets `10000/1073741824`, and same-handle preflight `true`. Runtime local-archive probe remains `false`, fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.

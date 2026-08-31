@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-31T04:44:34.805Z",
-  "sourceSha": "cc76962075a0bf8089cd0de4d3688f0a374f3dad",
+  "generatedAt": "2026-08-31T05:54:26.538Z",
+  "sourceSha": "3e548c56b6c0294bd89929668d7da958211c2a65",
   "overall": "contradicted",
   "gates": [
     {
@@ -420,6 +420,17 @@
       "nextActions": [
         "Include the deployed raw-error projection contract in the next full repository scan before reclassifying the sealed finding.",
         "Keep exact saved Share and all DB/provider/vector/wiki/KOSHA approval boundaries open."
+      ]
+    },
+    {
+      "id": "current_source_credential_output_remediation",
+      "state": "notice",
+      "label": "Current-source credential output remediation",
+      "evidencePath": "evaluation\\current-source-security-credential-output-remediation-2026-08-31\\report.json",
+      "detail": "Current live source protects two credential issuance CLIs with explicit interactive TTY reveal or exclusive POSIX 0600 file output, while Tier1 automation uses a temporary 0700 directory and removes the credential. Five files / 88 tests, syntax, typecheck, and the 28-page build pass; CI separately proves the 8 credential-output and 5 MCP CLI tests while retaining two unrelated red files. No credential was issued and no mutation occurred. The sealed 21-finding scan remains unchanged pending a fresh scan, security-complete is false, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Include the credential-output contract in the next full repository scan before reclassifying the sealed finding.",
+        "Keep credential issuance, exact saved Share, and all DB/provider/vector/wiki/KOSHA approval boundaries open."
       ]
     },
     {

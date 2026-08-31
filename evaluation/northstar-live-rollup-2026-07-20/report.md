@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T04:44:36.031Z
-Source HEAD at generation: cc76962075a0bf8089cd0de4d3688f0a374f3dad
-Live commit at generation: cc76962075a0bf8089cd0de4d3688f0a374f3dad
+Generated at: 2026-08-31T05:54:31.277Z
+Source HEAD at generation: 3e548c56b6c0294bd89929668d7da958211c2a65
+Live commit at generation: e0ec763b63ee5eb22587895cc48de7d1d46423cb
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_evidence_missing_or_unknown`
@@ -464,6 +464,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | current_source_logout_storage_remediation | notice | evaluation\current-source-security-logout-storage-remediation-2026-08-31\report.json |
 | current_source_ontology_error_projection_remediation | notice | evaluation\current-source-security-ontology-error-projection-remediation-2026-08-31\report.json |
 | current_source_raw_error_projection_remediation | notice | evaluation\current-source-security-raw-error-projection-remediation-2026-08-31\report.json |
+| current_source_credential_output_remediation | notice | evaluation\current-source-security-credential-output-remediation-2026-08-31\report.json |
 | current_source_photo_readiness_auth_fanout_remediation | notice | evaluation\current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31\report.json |
 | current_source_mcp_generation_cancellation_remediation | notice | evaluation\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\report.json |
 | current_source_kosha_archive_preflight_remediation | notice | evaluation\current-source-security-kosha-archive-preflight-remediation-2026-08-31\report.json |
@@ -519,7 +520,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -560,6 +561,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | current_source_logout_storage_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-logout-storage-remediation-2026-08-31\report.json |
 | current_source_ontology_error_projection_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-ontology-error-projection-remediation-2026-08-31\report.json |
 | current_source_raw_error_projection_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-raw-error-projection-remediation-2026-08-31\report.json |
+| current_source_credential_output_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-credential-output-remediation-2026-08-31\report.json |
 | current_source_photo_readiness_auth_fanout_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31\report.json |
 | current_source_mcp_generation_cancellation_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\report.json |
 | current_source_kosha_archive_preflight_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-kosha-archive-preflight-remediation-2026-08-31\report.json |
