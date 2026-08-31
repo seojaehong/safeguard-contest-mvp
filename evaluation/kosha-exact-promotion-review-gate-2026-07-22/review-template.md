@@ -1,8 +1,8 @@
 # KOSHA Exact Promotion Human Review Checklist
 
-Generated at: `2026-08-31T20:15:22.674Z`
+Generated at: `2026-08-31T20:23:58.055Z`
 
-Source HEAD: `72c32feafdbc01a687d35d8d155a4197374264d3`
+Source HEAD: `1824723028b381c2b07b024ba860cd96680294a9`
 
 Candidates: `8`
 
