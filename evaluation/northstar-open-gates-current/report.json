@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-31T12:08:30.478Z",
-  "sourceSha": "997f141daccd01aa8ba234a6bced2c2cdaa6ff4b",
+  "generatedAt": "2026-08-31T13:20:47.248Z",
+  "sourceSha": "f011257a6663cd0a8f945d81e8f2b1dab92a286f",
   "overall": "open",
   "gates": [
     {
@@ -514,6 +514,16 @@
       "detail": "Current source and production include a shared compatibility receipt for 10 security notices across 27 governed paths. Contract regression passed 22 files / 358 tests; the opt-in recipient browser file and its 7 tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. Sealed full scan f218c713 is complete with 18 open findings and partial coverage; this receipt does not rewrite immutable findings or claim security completion. Distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Keep prior live browser receipts visible, remediate the eight approval-free findings in bounded waves, and retain distributed, DB/RLS, recipient ACK, and exact saved Share approval boundaries."
+      ]
+    },
+    {
+      "id": "stale_approval_evidence_binding_security",
+      "state": "proven",
+      "label": "Stale approval evidence binding security",
+      "evidencePath": "evaluation\\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\\report.json",
+      "detail": "Current source binds the RLS/LLM Wiki, distributed admission, Share ACK, and KOSHA promotion approval preflights to current HEAD, production ancestry, tracked input SHA-256 values, and deterministic packet digests. All four workflows remain fail-closed, no mutation occurred, the completed scan's remaining findings stay open, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Preserve the immutable security scan findings and require a fresh full-repository rescan before any security-complete claim; keep all DB, provider, Share-session, vector, Wiki, and KOSHA promotion actions approval-gated."
       ]
     },
     {

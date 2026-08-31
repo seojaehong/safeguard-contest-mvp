@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T12:08:35.714Z
-Source HEAD at generation: 997f141daccd01aa8ba234a6bced2c2cdaa6ff4b
-Live commit at generation: 997f141daccd01aa8ba234a6bced2c2cdaa6ff4b
+Generated at: 2026-08-31T13:20:57.410Z
+Source HEAD at generation: f011257a6663cd0a8f945d81e8f2b1dab92a286f
+Live commit at generation: f19ce3c6a4613f9354e298e44f32cd705b07c4e9
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -473,6 +473,7 @@ Overall: `northstar_open_approval_gated`
 | current_source_kosha_archive_preflight_remediation | notice | evaluation\current-source-security-kosha-archive-preflight-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | notice | evaluation\current-source-security-remediation-2026-08-30\report.json |
 | current_security_governed_path_compatibility | notice | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
+| stale_approval_evidence_binding_security | proven | evaluation\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\report.json |
 | current_source_security_residual_remediation | notice | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | notice | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | notice | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |
@@ -529,7 +530,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -576,6 +577,7 @@ Overall: `northstar_open_approval_gated`
 | current_source_kosha_archive_preflight_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-kosha-archive-preflight-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | ancestor | ancestor_of_head | evaluation\current-source-security-remediation-2026-08-30\report.json |
 | current_security_governed_path_compatibility | ancestor | ancestor_of_head | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
+| stale_approval_evidence_binding_security | ancestor | missing | evaluation\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\report.json |
 | current_source_security_residual_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | ancestor | ancestor_of_head | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
 | safety_status_disconnect_lease_security | ancestor | ancestor_of_head | evaluation\safety-status-disconnect-lease-2026-08-28\report.json |

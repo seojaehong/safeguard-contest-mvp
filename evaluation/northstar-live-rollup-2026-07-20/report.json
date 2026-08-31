@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-31T12:08:35.714Z",
-  "head": "997f141daccd01aa8ba234a6bced2c2cdaa6ff4b",
+  "generatedAt": "2026-08-31T13:20:57.410Z",
+  "head": "f011257a6663cd0a8f945d81e8f2b1dab92a286f",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "997f141daccd01aa8ba234a6bced2c2cdaa6ff4b",
+    "commitSha": "f19ce3c6a4613f9354e298e44f32cd705b07c4e9",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-nb7sm2tvd-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-9if1s0u6n-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 100
+    "gateCount": 101
   },
   "provenGates": [
     {
@@ -314,6 +314,12 @@
       "state": "notice",
       "artifact": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
       "detail": "Current source and production include a shared compatibility receipt for 10 security notices across 27 governed paths. Contract regression passed 22 files / 358 tests; the opt-in recipient browser file and its 7 tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. Sealed full scan f218c713 is complete with 18 open findings and partial coverage; this receipt does not rewrite immutable findings or claim security completion. Distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "stale_approval_evidence_binding_security",
+      "state": "proven",
+      "artifact": "evaluation\\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\\report.json",
+      "detail": "Current source binds the RLS/LLM Wiki, distributed admission, Share ACK, and KOSHA promotion approval preflights to current HEAD, production ancestry, tracked input SHA-256 values, and deterministic packet digests. All four workflows remain fail-closed, no mutation occurred, the completed scan's remaining findings stay open, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_source_security_residual_remediation",
@@ -1079,6 +1085,21 @@
     "runtimeArchiveProbeExecuted": false,
     "freshRescanRequired": true,
     "securityComplete": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "staleApprovalEvidenceBindingRemediation": {
+    "artifact": "evaluation\\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\\report.json",
+    "verdict": "PASS_CURRENT_SOURCE_STALE_APPROVAL_EVIDENCE_BINDING_FAIL_CLOSED",
+    "sourceHead": "3ac91d3d1530ec7f89b13631969995c887f58ea4",
+    "findingId": "csf_86ec127fb3d5b7d397649611",
+    "workflowCount": 4,
+    "passedCount": 4,
+    "failedCount": 0,
+    "bindingVerifiedCount": 4,
+    "blockedWorkflowCount": 4,
+    "noMutation": true,
+    "freshFullRepositorySecurityRescanRequired": true,
+    "approvalGatedMutationsRemainClosed": true,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "currentSourceSecurityResidualRemediation": {
@@ -2261,10 +2282,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "997f141daccd01aa8ba234a6bced2c2cdaa6ff4b",
+      "sourceCommit": "f011257a6663cd0a8f945d81e8f2b1dab92a286f",
       "sourceStatus": "exact",
-      "productionCommit": "997f141daccd01aa8ba234a6bced2c2cdaa6ff4b",
-      "productionStatus": "matches_live"
+      "productionCommit": "f011257a6663cd0a8f945d81e8f2b1dab92a286f",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -2633,6 +2654,14 @@
       "sourceStatus": "ancestor",
       "productionCommit": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
       "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "stale_approval_evidence_binding_security",
+      "artifact": "evaluation\\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\\report.json",
+      "sourceCommit": "3ac91d3d1530ec7f89b13631969995c887f58ea4",
+      "sourceStatus": "ancestor",
+      "productionCommit": null,
+      "productionStatus": "missing"
     },
     {
       "id": "current_source_security_residual_remediation",
