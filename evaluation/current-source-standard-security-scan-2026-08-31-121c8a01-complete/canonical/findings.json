@@ -1,0 +1,3373 @@
+{
+  "documentType": "codex-security.findings",
+  "findings": [
+    {
+      "artifactPaths": [
+        "findings/legacy-public-tables/legacy-public-tables.md",
+        "findings/legacy-public-tables/poc/evidence.md"
+      ],
+      "attackPath": {
+        "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+        "counterevidence": "Current grants and live table contents were not inspected; no current application caller was found.",
+        "dataflow": {
+          "outcome": "Table read or mutation without tenant ownership enforcement",
+          "sink": "Table read or mutation without tenant ownership enforcement",
+          "source": "Direct PostgREST access to public.query_logs or public.documents",
+          "summary": "Direct PostgREST access to public.query_logs or public.documents -> missing or non-atomic control -> Table read or mutation without tenant ownership enforcement"
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Table read or mutation without tenant ownership enforcement"
+        },
+        "likelihood": {
+          "level": "high",
+          "why": "A Supabase Data API caller with anon or authenticated public-schema privileges"
+        },
+        "reachability": {
+          "attacker": "A Supabase Data API caller with anon or authenticated public-schema privileges",
+          "entrypoint": "Direct PostgREST access to public.query_logs or public.documents",
+          "outcome": "Table read or mutation without tenant ownership enforcement",
+          "summary": "Direct PostgREST access to public.query_logs or public.documents"
+        }
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+      },
+      "findingId": "csf_c5a7ed46f68516cb933e456c",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:f72b16e7df3db2e7cb74330dd142c1059e1ee1a6dd775d67e7f1e7a5316884e6"
+      },
+      "identity": {
+        "anchor": "legacy-public-tables-lack-row-level-security"
+      },
+      "locations": [
+        {
+          "endLine": 17,
+          "path": "supabase/migrations/001_init.sql",
+          "role": "root_control",
+          "startLine": 1
+        },
+        {
+          "endLine": 18,
+          "path": "supabase/config.toml",
+          "role": "evidence",
+          "startLine": 7
+        }
+      ],
+      "occurrenceId": "occ_5051412f497dd200881d43e3",
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+              "counterevidence": "Current grants and live table contents were not inspected; no current application caller was found.",
+              "dataflow": {
+                "outcome": "Table read or mutation without tenant ownership enforcement",
+                "sink": "Table read or mutation without tenant ownership enforcement",
+                "source": "Direct PostgREST access to public.query_logs or public.documents",
+                "summary": "Direct PostgREST access to public.query_logs or public.documents -> missing or non-atomic control -> Table read or mutation without tenant ownership enforcement"
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Table read or mutation without tenant ownership enforcement"
+              },
+              "likelihood": {
+                "level": "high",
+                "why": "A Supabase Data API caller with anon or authenticated public-schema privileges"
+              },
+              "reachability": {
+                "attacker": "A Supabase Data API caller with anon or authenticated public-schema privileges",
+                "entrypoint": "Direct PostgREST access to public.query_logs or public.documents",
+                "outcome": "Table read or mutation without tenant ownership enforcement",
+                "summary": "Direct PostgREST access to public.query_logs or public.documents"
+              }
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "identity": {
+              "anchor": "legacy-public-tables-lack-row-level-security"
+            },
+            "locations": [
+              {
+                "endLine": 17,
+                "path": "supabase/migrations/001_init.sql",
+                "role": "root_control",
+                "startLine": 1
+              },
+              {
+                "endLine": 18,
+                "path": "supabase/config.toml",
+                "role": "evidence",
+                "startLine": 7
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Enable and force RLS or remove the unused tables in an approval-gated migration, revoke unneeded roles, and add direct-role denial tests.",
+            "rootCause": {
+              "summary": "query_logs and documents are created in the API-exposed public schema without RLS, tenant ownership, or explicit role revocation; effective deployed grants remain unverified."
+            },
+            "ruleId": "database.rls.legacy-public-tables",
+            "severity": {
+              "level": "medium",
+              "rationale": "query_logs and documents are created in the API-exposed public schema without RLS, tenant ownership, or explicit role revocation; effective deployed grants remain unverified."
+            },
+            "summary": "query_logs and documents are created in the API-exposed public schema without RLS, tenant ownership, or explicit role revocation; effective deployed grants remain unverified.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-862"
+              ]
+            },
+            "title": "Legacy public tables lack row-level security",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "query_logs and documents are created in the API-exposed public schema without RLS, tenant ownership, or explicit role revocation; effective deployed grants remain unverified."
+            }
+          },
+          {
+            "confidence": {
+              "level": "medium",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "locations": [
+              {
+                "endLine": 17,
+                "path": "supabase/migrations/001_init.sql",
+                "role": "root_control",
+                "startLine": 1
+              },
+              {
+                "endLine": 18,
+                "path": "supabase/config.toml",
+                "role": "evidence",
+                "startLine": 7
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Enable and force RLS or remove the unused tables in an approval-gated migration, revoke unneeded roles, and add direct-role denial tests.",
+            "rootCause": {
+              "summary": "query_logs and documents are created in the API-exposed public schema without RLS, tenant ownership, or explicit role revocation; effective deployed grants remain unverified."
+            },
+            "ruleId": "database.rls.legacy-public-tables",
+            "severity": {
+              "level": "medium",
+              "rationale": "query_logs and documents are created in the API-exposed public schema without RLS, tenant ownership, or explicit role revocation; effective deployed grants remain unverified."
+            },
+            "summary": "query_logs and documents are created in the API-exposed public schema without RLS, tenant ownership, or explicit role revocation; effective deployed grants remain unverified.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-862"
+              ]
+            },
+            "title": "Legacy public tables lack row-level security",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "query_logs and documents are created in the API-exposed public schema without RLS, tenant ownership, or explicit role revocation; effective deployed grants remain unverified."
+            }
+          }
+        ],
+        "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Enable and force RLS or remove the unused tables in an approval-gated migration, revoke unneeded roles, and add direct-role denial tests.",
+      "rootCause": {
+        "summary": "query_logs and documents are created in the API-exposed public schema without RLS, tenant ownership, or explicit role revocation; effective deployed grants remain unverified."
+      },
+      "ruleId": "database.rls.legacy-public-tables",
+      "severity": {
+        "level": "medium",
+        "rationale": "query_logs and documents are created in the API-exposed public schema without RLS, tenant ownership, or explicit role revocation; effective deployed grants remain unverified."
+      },
+      "summary": "query_logs and documents are created in the API-exposed public schema without RLS, tenant ownership, or explicit role revocation; effective deployed grants remain unverified.",
+      "taxonomy": {
+        "category": "Security control failure",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Legacy public tables lack row-level security",
+      "validation": {
+        "limitations": [
+          "Production was not treated as source-equivalent evidence.",
+          "Approval-gated mutation and exact saved Share reproduction were not performed."
+        ],
+        "method": "Independent discovery receipts followed by parent static source validation",
+        "summary": "query_logs and documents are created in the API-exposed public schema without RLS, tenant ownership, or explicit role revocation; effective deployed grants remain unverified."
+      },
+      "writeup": {
+        "reportPath": "findings/legacy-public-tables/legacy-public-tables.md"
+      }
+    },
+    {
+      "artifactPaths": [
+        "findings/null-tenant-dispatch/null-tenant-dispatch.md",
+        "findings/null-tenant-dispatch/poc/evidence.md"
+      ],
+      "attackPath": {
+        "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+        "counterevidence": "Application dispatch routes add stronger controls; direct Data API grants and live migration state remain unverified.",
+        "dataflow": {
+          "outcome": "Forged or modified unowned dispatch evidence",
+          "sink": "Forged or modified unowned dispatch evidence",
+          "source": "Direct INSERT, SELECT, UPDATE, or DELETE of dispatch_logs with organization_id NULL",
+          "summary": "Direct INSERT, SELECT, UPDATE, or DELETE of dispatch_logs with organization_id NULL -> missing or non-atomic control -> Forged or modified unowned dispatch evidence"
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Forged or modified unowned dispatch evidence"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "An authenticated Supabase Data API caller"
+        },
+        "reachability": {
+          "attacker": "An authenticated Supabase Data API caller",
+          "entrypoint": "Direct INSERT, SELECT, UPDATE, or DELETE of dispatch_logs with organization_id NULL",
+          "outcome": "Forged or modified unowned dispatch evidence",
+          "summary": "Direct INSERT, SELECT, UPDATE, or DELETE of dispatch_logs with organization_id NULL"
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+      },
+      "findingId": "csf_bc075c66ab0f366bf7c009cc",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:3df8566dce6a24eee7621422147259388512b3fffe1a110010ff7dd317359032"
+      },
+      "identity": {
+        "anchor": "null-tenant-dispatch-rows-bypass-owner-scoped-rls"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 76
+        },
+        {
+          "endLine": 200,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 183
+        }
+      ],
+      "occurrenceId": "occ_eef849a5e52b65a1927ad26a",
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+              "counterevidence": "Application dispatch routes add stronger controls; direct Data API grants and live migration state remain unverified.",
+              "dataflow": {
+                "outcome": "Forged or modified unowned dispatch evidence",
+                "sink": "Forged or modified unowned dispatch evidence",
+                "source": "Direct INSERT, SELECT, UPDATE, or DELETE of dispatch_logs with organization_id NULL",
+                "summary": "Direct INSERT, SELECT, UPDATE, or DELETE of dispatch_logs with organization_id NULL -> missing or non-atomic control -> Forged or modified unowned dispatch evidence"
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Forged or modified unowned dispatch evidence"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "An authenticated Supabase Data API caller"
+              },
+              "reachability": {
+                "attacker": "An authenticated Supabase Data API caller",
+                "entrypoint": "Direct INSERT, SELECT, UPDATE, or DELETE of dispatch_logs with organization_id NULL",
+                "outcome": "Forged or modified unowned dispatch evidence",
+                "summary": "Direct INSERT, SELECT, UPDATE, or DELETE of dispatch_logs with organization_id NULL"
+              }
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "identity": {
+              "anchor": "null-tenant-dispatch-rows-bypass-owner-scoped-rls"
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "source",
+                "startLine": 76
+              },
+              {
+                "endLine": 200,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 183
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Backfill or quarantine NULL rows, require organization_id, remove the NULL branch, and split read and trusted mutation policies.",
+            "rootCause": {
+              "summary": "dispatch_logs.organization_id is nullable and both USING and WITH CHECK explicitly authorize NULL, permitting unowned dispatch evidence where direct table DML is available."
+            },
+            "ruleId": "database.rls.null-tenant-dispatch",
+            "severity": {
+              "level": "medium",
+              "rationale": "dispatch_logs.organization_id is nullable and both USING and WITH CHECK explicitly authorize NULL, permitting unowned dispatch evidence where direct table DML is available."
+            },
+            "summary": "dispatch_logs.organization_id is nullable and both USING and WITH CHECK explicitly authorize NULL, permitting unowned dispatch evidence where direct table DML is available.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "NULL-tenant dispatch rows bypass owner-scoped RLS",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "dispatch_logs.organization_id is nullable and both USING and WITH CHECK explicitly authorize NULL, permitting unowned dispatch evidence where direct table DML is available."
+            }
+          },
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "source",
+                "startLine": 76
+              },
+              {
+                "endLine": 200,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 183
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Backfill or quarantine NULL rows, require organization_id, remove the NULL branch, and split read and trusted mutation policies.",
+            "rootCause": {
+              "summary": "dispatch_logs.organization_id is nullable and both USING and WITH CHECK explicitly authorize NULL, permitting unowned dispatch evidence where direct table DML is available."
+            },
+            "ruleId": "database.rls.null-tenant-dispatch",
+            "severity": {
+              "level": "medium",
+              "rationale": "dispatch_logs.organization_id is nullable and both USING and WITH CHECK explicitly authorize NULL, permitting unowned dispatch evidence where direct table DML is available."
+            },
+            "summary": "dispatch_logs.organization_id is nullable and both USING and WITH CHECK explicitly authorize NULL, permitting unowned dispatch evidence where direct table DML is available.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "NULL-tenant dispatch rows bypass owner-scoped RLS",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "dispatch_logs.organization_id is nullable and both USING and WITH CHECK explicitly authorize NULL, permitting unowned dispatch evidence where direct table DML is available."
+            }
+          }
+        ],
+        "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Backfill or quarantine NULL rows, require organization_id, remove the NULL branch, and split read and trusted mutation policies.",
+      "rootCause": {
+        "summary": "dispatch_logs.organization_id is nullable and both USING and WITH CHECK explicitly authorize NULL, permitting unowned dispatch evidence where direct table DML is available."
+      },
+      "ruleId": "database.rls.null-tenant-dispatch",
+      "severity": {
+        "level": "medium",
+        "rationale": "dispatch_logs.organization_id is nullable and both USING and WITH CHECK explicitly authorize NULL, permitting unowned dispatch evidence where direct table DML is available."
+      },
+      "summary": "dispatch_logs.organization_id is nullable and both USING and WITH CHECK explicitly authorize NULL, permitting unowned dispatch evidence where direct table DML is available.",
+      "taxonomy": {
+        "category": "Security control failure",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "NULL-tenant dispatch rows bypass owner-scoped RLS",
+      "validation": {
+        "limitations": [
+          "Production was not treated as source-equivalent evidence.",
+          "Approval-gated mutation and exact saved Share reproduction were not performed."
+        ],
+        "method": "Independent discovery receipts followed by parent static source validation",
+        "summary": "dispatch_logs.organization_id is nullable and both USING and WITH CHECK explicitly authorize NULL, permitting unowned dispatch evidence where direct table DML is available."
+      },
+      "writeup": {
+        "reportPath": "findings/null-tenant-dispatch/null-tenant-dispatch.md"
+      }
+    },
+    {
+      "artifactPaths": [
+        "findings/related-object-binding/related-object-binding.md",
+        "findings/related-object-binding/poc/evidence.md"
+      ],
+      "attackPath": {
+        "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+        "counterevidence": "Application routes often apply tuple checks; foreign identifiers and direct table DML are prerequisites.",
+        "dataflow": {
+          "outcome": "Cross-tenant relationship and provenance corruption",
+          "sink": "Cross-tenant relationship and provenance corruption",
+          "source": "Direct Data API write with an owned organization_id and a foreign site, worker, workpack, session, or improvement ID",
+          "summary": "Direct Data API write with an owned organization_id and a foreign site, worker, workpack, session, or improvement ID -> missing or non-atomic control -> Cross-tenant relationship and provenance corruption"
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Cross-tenant relationship and provenance corruption"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "An authenticated tenant owner who knows a foreign related-object UUID"
+        },
+        "reachability": {
+          "attacker": "An authenticated tenant owner who knows a foreign related-object UUID",
+          "entrypoint": "Direct Data API write with an owned organization_id and a foreign site, worker, workpack, session, or improvement ID",
+          "outcome": "Cross-tenant relationship and provenance corruption",
+          "summary": "Direct Data API write with an owned organization_id and a foreign site, worker, workpack, session, or improvement ID"
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+      },
+      "findingId": "csf_7197eb450ca366eb95968490",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:5668a3663cacaf8427407e333d7914cb9d281a1fba06e88696b97fdcda761efd"
+      },
+      "identity": {
+        "anchor": "tenant-policies-do-not-bind-related-objects-to-the-same-tenant"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "endLine": 181,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 132
+        },
+        {
+          "endLine": 63,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "source",
+          "startLine": 1
+        },
+        {
+          "endLine": 86,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "endLine": 227,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 161
+        }
+      ],
+      "occurrenceId": "occ_7a6d0f84a5148fe6b5350725",
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+              "counterevidence": "Application routes often apply tuple checks; foreign identifiers and direct table DML are prerequisites.",
+              "dataflow": {
+                "outcome": "Cross-tenant relationship and provenance corruption",
+                "sink": "Cross-tenant relationship and provenance corruption",
+                "source": "Direct Data API write with an owned organization_id and a foreign site, worker, workpack, session, or improvement ID",
+                "summary": "Direct Data API write with an owned organization_id and a foreign site, worker, workpack, session, or improvement ID -> missing or non-atomic control -> Cross-tenant relationship and provenance corruption"
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Cross-tenant relationship and provenance corruption"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "An authenticated tenant owner who knows a foreign related-object UUID"
+              },
+              "reachability": {
+                "attacker": "An authenticated tenant owner who knows a foreign related-object UUID",
+                "entrypoint": "Direct Data API write with an owned organization_id and a foreign site, worker, workpack, session, or improvement ID",
+                "outcome": "Cross-tenant relationship and provenance corruption",
+                "summary": "Direct Data API write with an owned organization_id and a foreign site, worker, workpack, session, or improvement ID"
+              }
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "identity": {
+              "anchor": "tenant-policies-do-not-bind-related-objects-to-the-same-tenant"
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "source",
+                "startLine": 21
+              },
+              {
+                "endLine": 181,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 132
+              },
+              {
+                "endLine": 63,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "source",
+                "startLine": 1
+              },
+              {
+                "endLine": 86,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "source",
+                "startLine": 21
+              },
+              {
+                "endLine": 227,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 161
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Use composite tenant keys or validation triggers and WITH CHECK predicates that prove every related object belongs to the same organization and site.",
+            "rootCause": {
+              "summary": "Owner policies authorize only the row organization_id while independent site, workpack, worker, session, improvement, and parent foreign keys can reference another tenant when identifiers are known."
+            },
+            "ruleId": "database.tenant-related-object-binding",
+            "severity": {
+              "level": "low",
+              "rationale": "Owner policies authorize only the row organization_id while independent site, workpack, worker, session, improvement, and parent foreign keys can reference another tenant when identifiers are known."
+            },
+            "summary": "Owner policies authorize only the row organization_id while independent site, workpack, worker, session, improvement, and parent foreign keys can reference another tenant when identifiers are known.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Tenant policies do not bind related objects to the same tenant",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "Owner policies authorize only the row organization_id while independent site, workpack, worker, session, improvement, and parent foreign keys can reference another tenant when identifiers are known."
+            }
+          },
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "source",
+                "startLine": 21
+              },
+              {
+                "endLine": 181,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 132
+              },
+              {
+                "endLine": 63,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "source",
+                "startLine": 1
+              },
+              {
+                "endLine": 86,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "source",
+                "startLine": 21
+              },
+              {
+                "endLine": 227,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 161
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Use composite tenant keys or validation triggers and WITH CHECK predicates that prove every related object belongs to the same organization and site.",
+            "rootCause": {
+              "summary": "Owner policies authorize only the row organization_id while independent site, workpack, worker, session, improvement, and parent foreign keys can reference another tenant when identifiers are known."
+            },
+            "ruleId": "database.tenant-related-object-binding",
+            "severity": {
+              "level": "low",
+              "rationale": "Owner policies authorize only the row organization_id while independent site, workpack, worker, session, improvement, and parent foreign keys can reference another tenant when identifiers are known."
+            },
+            "summary": "Owner policies authorize only the row organization_id while independent site, workpack, worker, session, improvement, and parent foreign keys can reference another tenant when identifiers are known.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Tenant policies do not bind related objects to the same tenant",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "Owner policies authorize only the row organization_id while independent site, workpack, worker, session, improvement, and parent foreign keys can reference another tenant when identifiers are known."
+            }
+          }
+        ],
+        "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use composite tenant keys or validation triggers and WITH CHECK predicates that prove every related object belongs to the same organization and site.",
+      "rootCause": {
+        "summary": "Owner policies authorize only the row organization_id while independent site, workpack, worker, session, improvement, and parent foreign keys can reference another tenant when identifiers are known."
+      },
+      "ruleId": "database.tenant-related-object-binding",
+      "severity": {
+        "level": "low",
+        "rationale": "Owner policies authorize only the row organization_id while independent site, workpack, worker, session, improvement, and parent foreign keys can reference another tenant when identifiers are known."
+      },
+      "summary": "Owner policies authorize only the row organization_id while independent site, workpack, worker, session, improvement, and parent foreign keys can reference another tenant when identifiers are known.",
+      "taxonomy": {
+        "category": "Security control failure",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "Tenant policies do not bind related objects to the same tenant",
+      "validation": {
+        "limitations": [
+          "Production was not treated as source-equivalent evidence.",
+          "Approval-gated mutation and exact saved Share reproduction were not performed."
+        ],
+        "method": "Independent discovery receipts followed by parent static source validation",
+        "summary": "Owner policies authorize only the row organization_id while independent site, workpack, worker, session, improvement, and parent foreign keys can reference another tenant when identifiers are known."
+      },
+      "writeup": {
+        "reportPath": "findings/related-object-binding/related-object-binding.md"
+      }
+    },
+    {
+      "artifactPaths": [
+        "findings/authoritative-state-direct-write/authoritative-state-direct-write.md",
+        "findings/authoritative-state-direct-write/poc/evidence.md"
+      ],
+      "attackPath": {
+        "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+        "counterevidence": "Application routes perform workflow checks, but they do not govern direct table REST.",
+        "dataflow": {
+          "outcome": "Fabricated authoritative workflow evidence",
+          "sink": "Fabricated authoritative workflow evidence",
+          "source": "Direct updates to review, approval, dispatch, acknowledgement, or provenance fields",
+          "summary": "Direct updates to review, approval, dispatch, acknowledgement, or provenance fields -> missing or non-atomic control -> Fabricated authoritative workflow evidence"
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Fabricated authoritative workflow evidence"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "An authenticated tenant owner with direct table mutation privileges"
+        },
+        "reachability": {
+          "attacker": "An authenticated tenant owner with direct table mutation privileges",
+          "entrypoint": "Direct updates to review, approval, dispatch, acknowledgement, or provenance fields",
+          "outcome": "Fabricated authoritative workflow evidence",
+          "summary": "Direct updates to review, approval, dispatch, acknowledgement, or provenance fields"
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+      },
+      "findingId": "csf_6e1f0055fa54b572f96ca725",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:1f4658e8a0d951f53b85fc8216b7d4d3665387db782016447d1df4ba58f499e4"
+      },
+      "identity": {
+        "anchor": "tenant-writable-rows-can-forge-authoritative-workflow-evidence"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 76
+        },
+        {
+          "endLine": 200,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 183
+        },
+        {
+          "endLine": 63,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "endLine": 126,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "root_control",
+          "startLine": 94
+        },
+        {
+          "endLine": 86,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "endLine": 227,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 161
+        }
+      ],
+      "occurrenceId": "occ_9ad82cc0e8234dc5262cc7a5",
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+              "counterevidence": "Application routes perform workflow checks, but they do not govern direct table REST.",
+              "dataflow": {
+                "outcome": "Fabricated authoritative workflow evidence",
+                "sink": "Fabricated authoritative workflow evidence",
+                "source": "Direct updates to review, approval, dispatch, acknowledgement, or provenance fields",
+                "summary": "Direct updates to review, approval, dispatch, acknowledgement, or provenance fields -> missing or non-atomic control -> Fabricated authoritative workflow evidence"
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Fabricated authoritative workflow evidence"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "An authenticated tenant owner with direct table mutation privileges"
+              },
+              "reachability": {
+                "attacker": "An authenticated tenant owner with direct table mutation privileges",
+                "entrypoint": "Direct updates to review, approval, dispatch, acknowledgement, or provenance fields",
+                "outcome": "Fabricated authoritative workflow evidence",
+                "summary": "Direct updates to review, approval, dispatch, acknowledgement, or provenance fields"
+              }
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "identity": {
+              "anchor": "tenant-writable-rows-can-forge-authoritative-workflow-evidence"
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "source",
+                "startLine": 76
+              },
+              {
+                "endLine": 200,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 183
+              },
+              {
+                "endLine": 63,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "source",
+                "startLine": 21
+              },
+              {
+                "endLine": 126,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "root_control",
+                "startLine": 94
+              },
+              {
+                "endLine": 86,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "source",
+                "startLine": 21
+              },
+              {
+                "endLine": 227,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 161
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Separate tenant-editable input from authoritative state and expose narrow approval-gated RPC transitions with immutable audit fields.",
+            "rootCause": {
+              "summary": "Broad owner FOR ALL policies allow direct mutation of review, approval, dispatch, acknowledgement, publication, and provenance fields instead of limiting them to trusted server transitions."
+            },
+            "ruleId": "database.authoritative-state-direct-write",
+            "severity": {
+              "level": "low",
+              "rationale": "Broad owner FOR ALL policies allow direct mutation of review, approval, dispatch, acknowledgement, publication, and provenance fields instead of limiting them to trusted server transitions."
+            },
+            "summary": "Broad owner FOR ALL policies allow direct mutation of review, approval, dispatch, acknowledgement, publication, and provenance fields instead of limiting them to trusted server transitions.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Tenant-writable rows can forge authoritative workflow evidence",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "Broad owner FOR ALL policies allow direct mutation of review, approval, dispatch, acknowledgement, publication, and provenance fields instead of limiting them to trusted server transitions."
+            }
+          },
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "source",
+                "startLine": 76
+              },
+              {
+                "endLine": 200,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 183
+              },
+              {
+                "endLine": 63,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "source",
+                "startLine": 21
+              },
+              {
+                "endLine": 126,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "root_control",
+                "startLine": 94
+              },
+              {
+                "endLine": 86,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "source",
+                "startLine": 21
+              },
+              {
+                "endLine": 227,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 161
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Separate tenant-editable input from authoritative state and expose narrow approval-gated RPC transitions with immutable audit fields.",
+            "rootCause": {
+              "summary": "Broad owner FOR ALL policies allow direct mutation of review, approval, dispatch, acknowledgement, publication, and provenance fields instead of limiting them to trusted server transitions."
+            },
+            "ruleId": "database.authoritative-state-direct-write",
+            "severity": {
+              "level": "low",
+              "rationale": "Broad owner FOR ALL policies allow direct mutation of review, approval, dispatch, acknowledgement, publication, and provenance fields instead of limiting them to trusted server transitions."
+            },
+            "summary": "Broad owner FOR ALL policies allow direct mutation of review, approval, dispatch, acknowledgement, publication, and provenance fields instead of limiting them to trusted server transitions.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Tenant-writable rows can forge authoritative workflow evidence",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "Broad owner FOR ALL policies allow direct mutation of review, approval, dispatch, acknowledgement, publication, and provenance fields instead of limiting them to trusted server transitions."
+            }
+          }
+        ],
+        "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Separate tenant-editable input from authoritative state and expose narrow approval-gated RPC transitions with immutable audit fields.",
+      "rootCause": {
+        "summary": "Broad owner FOR ALL policies allow direct mutation of review, approval, dispatch, acknowledgement, publication, and provenance fields instead of limiting them to trusted server transitions."
+      },
+      "ruleId": "database.authoritative-state-direct-write",
+      "severity": {
+        "level": "low",
+        "rationale": "Broad owner FOR ALL policies allow direct mutation of review, approval, dispatch, acknowledgement, publication, and provenance fields instead of limiting them to trusted server transitions."
+      },
+      "summary": "Broad owner FOR ALL policies allow direct mutation of review, approval, dispatch, acknowledgement, publication, and provenance fields instead of limiting them to trusted server transitions.",
+      "taxonomy": {
+        "category": "Security control failure",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "Tenant-writable rows can forge authoritative workflow evidence",
+      "validation": {
+        "limitations": [
+          "Production was not treated as source-equivalent evidence.",
+          "Approval-gated mutation and exact saved Share reproduction were not performed."
+        ],
+        "method": "Independent discovery receipts followed by parent static source validation",
+        "summary": "Broad owner FOR ALL policies allow direct mutation of review, approval, dispatch, acknowledgement, publication, and provenance fields instead of limiting them to trusted server transitions."
+      },
+      "writeup": {
+        "reportPath": "findings/authoritative-state-direct-write/authoritative-state-direct-write.md"
+      }
+    },
+    {
+      "artifactPaths": [
+        "findings/mcp-token-quota-race/mcp-token-quota-race.md",
+        "findings/mcp-token-quota-race/poc/evidence.md"
+      ],
+      "attackPath": {
+        "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+        "counterevidence": "Tokens default to read scope, expire, and provider work remains separately admitted.",
+        "dataflow": {
+          "outcome": "More than the intended active MCP credentials are issued",
+          "sink": "More than the intended active MCP credentials are issued",
+          "source": "Concurrent POST requests to /api/mcp-tokens",
+          "summary": "Concurrent POST requests to /api/mcp-tokens -> missing or non-atomic control -> More than the intended active MCP credentials are issued"
+        },
+        "impact": {
+          "level": "medium",
+          "why": "More than the intended active MCP credentials are issued"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "An authenticated site user"
+        },
+        "reachability": {
+          "attacker": "An authenticated site user",
+          "entrypoint": "Concurrent POST requests to /api/mcp-tokens",
+          "outcome": "More than the intended active MCP credentials are issued",
+          "summary": "Concurrent POST requests to /api/mcp-tokens"
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+      },
+      "findingId": "csf_efa79a137c0521a0f29b628b",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:861ae9e2a83ad50be484f78f64076a306de800467c467af73687e34684855144"
+      },
+      "identity": {
+        "anchor": "mcp-token-quota-can-be-exceeded-through-concurrent-issuance"
+      },
+      "locations": [
+        {
+          "endLine": 278,
+          "path": "app/api/mcp-tokens/route.ts",
+          "role": "entrypoint",
+          "startLine": 247
+        },
+        {
+          "endLine": 81,
+          "path": "lib/mcp-token-service.ts",
+          "role": "root_control",
+          "startLine": 17
+        },
+        {
+          "endLine": 21,
+          "path": "supabase/migrations/009_mcp_token_query_indexes.sql",
+          "role": "evidence",
+          "startLine": 19
+        }
+      ],
+      "occurrenceId": "occ_27f7132d268d4a68beff1495",
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+              "counterevidence": "Tokens default to read scope, expire, and provider work remains separately admitted.",
+              "dataflow": {
+                "outcome": "More than the intended active MCP credentials are issued",
+                "sink": "More than the intended active MCP credentials are issued",
+                "source": "Concurrent POST requests to /api/mcp-tokens",
+                "summary": "Concurrent POST requests to /api/mcp-tokens -> missing or non-atomic control -> More than the intended active MCP credentials are issued"
+              },
+              "impact": {
+                "level": "medium",
+                "why": "More than the intended active MCP credentials are issued"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "An authenticated site user"
+              },
+              "reachability": {
+                "attacker": "An authenticated site user",
+                "entrypoint": "Concurrent POST requests to /api/mcp-tokens",
+                "outcome": "More than the intended active MCP credentials are issued",
+                "summary": "Concurrent POST requests to /api/mcp-tokens"
+              }
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "identity": {
+              "anchor": "mcp-token-quota-can-be-exceeded-through-concurrent-issuance"
+            },
+            "locations": [
+              {
+                "endLine": 278,
+                "path": "app/api/mcp-tokens/route.ts",
+                "role": "entrypoint",
+                "startLine": 247
+              },
+              {
+                "endLine": 81,
+                "path": "lib/mcp-token-service.ts",
+                "role": "root_control",
+                "startLine": 17
+              },
+              {
+                "endLine": 21,
+                "path": "supabase/migrations/009_mcp_token_query_indexes.sql",
+                "role": "evidence",
+                "startLine": 19
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Use an approval-gated transactional RPC or per-site lock/slot constraint and add a simultaneous issuance test.",
+            "rootCause": {
+              "summary": "The route counts active tokens and inserts a new token in separate service-role operations; indexes and token uniqueness do not atomically enforce the per-site cap."
+            },
+            "ruleId": "mcp.token-quota-race",
+            "severity": {
+              "level": "medium",
+              "rationale": "The route counts active tokens and inserts a new token in separate service-role operations; indexes and token uniqueness do not atomically enforce the per-site cap."
+            },
+            "summary": "The route counts active tokens and inserts a new token in separate service-role operations; indexes and token uniqueness do not atomically enforce the per-site cap.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "MCP token quota can be exceeded through concurrent issuance",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "The route counts active tokens and inserts a new token in separate service-role operations; indexes and token uniqueness do not atomically enforce the per-site cap."
+            }
+          },
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "locations": [
+              {
+                "endLine": 278,
+                "path": "app/api/mcp-tokens/route.ts",
+                "role": "entrypoint",
+                "startLine": 247
+              },
+              {
+                "endLine": 81,
+                "path": "lib/mcp-token-service.ts",
+                "role": "root_control",
+                "startLine": 17
+              },
+              {
+                "endLine": 21,
+                "path": "supabase/migrations/009_mcp_token_query_indexes.sql",
+                "role": "evidence",
+                "startLine": 19
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Use an approval-gated transactional RPC or per-site lock/slot constraint and add a simultaneous issuance test.",
+            "rootCause": {
+              "summary": "The route counts active tokens and inserts a new token in separate service-role operations; indexes and token uniqueness do not atomically enforce the per-site cap."
+            },
+            "ruleId": "mcp.token-quota-race",
+            "severity": {
+              "level": "medium",
+              "rationale": "The route counts active tokens and inserts a new token in separate service-role operations; indexes and token uniqueness do not atomically enforce the per-site cap."
+            },
+            "summary": "The route counts active tokens and inserts a new token in separate service-role operations; indexes and token uniqueness do not atomically enforce the per-site cap.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "MCP token quota can be exceeded through concurrent issuance",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "The route counts active tokens and inserts a new token in separate service-role operations; indexes and token uniqueness do not atomically enforce the per-site cap."
+            }
+          }
+        ],
+        "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use an approval-gated transactional RPC or per-site lock/slot constraint and add a simultaneous issuance test.",
+      "rootCause": {
+        "summary": "The route counts active tokens and inserts a new token in separate service-role operations; indexes and token uniqueness do not atomically enforce the per-site cap."
+      },
+      "ruleId": "mcp.token-quota-race",
+      "severity": {
+        "level": "medium",
+        "rationale": "The route counts active tokens and inserts a new token in separate service-role operations; indexes and token uniqueness do not atomically enforce the per-site cap."
+      },
+      "summary": "The route counts active tokens and inserts a new token in separate service-role operations; indexes and token uniqueness do not atomically enforce the per-site cap.",
+      "taxonomy": {
+        "category": "Security control failure",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "MCP token quota can be exceeded through concurrent issuance",
+      "validation": {
+        "limitations": [
+          "Production was not treated as source-equivalent evidence.",
+          "Approval-gated mutation and exact saved Share reproduction were not performed."
+        ],
+        "method": "Independent discovery receipts followed by parent static source validation",
+        "summary": "The route counts active tokens and inserts a new token in separate service-role operations; indexes and token uniqueness do not atomically enforce the per-site cap."
+      },
+      "writeup": {
+        "reportPath": "findings/mcp-token-quota-race/mcp-token-quota-race.md"
+      }
+    },
+    {
+      "artifactPaths": [
+        "findings/worker-site-transfer-race/worker-site-transfer-race.md",
+        "findings/worker-site-transfer-race/poc/evidence.md"
+      ],
+      "attackPath": {
+        "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+        "counterevidence": "The race stays within one organization and requires concurrent authorized requests.",
+        "dataflow": {
+          "outcome": "Worker site binding changes without the required transfer procedure",
+          "sink": "Worker site binding changes without the required transfer procedure",
+          "source": "Concurrent POST /api/workers requests assigning one external worker key to different sites",
+          "summary": "Concurrent POST /api/workers requests assigning one external worker key to different sites -> missing or non-atomic control -> Worker site binding changes without the required transfer procedure"
+        },
+        "impact": {
+          "level": "low",
+          "why": "Worker site binding changes without the required transfer procedure"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "An authenticated organization user"
+        },
+        "reachability": {
+          "attacker": "An authenticated organization user",
+          "entrypoint": "Concurrent POST /api/workers requests assigning one external worker key to different sites",
+          "outcome": "Worker site binding changes without the required transfer procedure",
+          "summary": "Concurrent POST /api/workers requests assigning one external worker key to different sites"
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+      },
+      "findingId": "csf_d4753afe3c1f97cc84792d96",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:d2ed222a433b9298d7ec49d29877db266d9c690d2a887871caa3dec9916f8476"
+      },
+      "identity": {
+        "anchor": "worker-site-transfer-validation-and-upsert-are-non-atomic"
+      },
+      "locations": [
+        {
+          "endLine": 120,
+          "path": "app/api/workers/route.ts",
+          "role": "entrypoint",
+          "startLine": 84
+        },
+        {
+          "endLine": 42,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 21
+        }
+      ],
+      "occurrenceId": "occ_dd587fe146f52c5f6b0b41e3",
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+              "counterevidence": "The race stays within one organization and requires concurrent authorized requests.",
+              "dataflow": {
+                "outcome": "Worker site binding changes without the required transfer procedure",
+                "sink": "Worker site binding changes without the required transfer procedure",
+                "source": "Concurrent POST /api/workers requests assigning one external worker key to different sites",
+                "summary": "Concurrent POST /api/workers requests assigning one external worker key to different sites -> missing or non-atomic control -> Worker site binding changes without the required transfer procedure"
+              },
+              "impact": {
+                "level": "low",
+                "why": "Worker site binding changes without the required transfer procedure"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "An authenticated organization user"
+              },
+              "reachability": {
+                "attacker": "An authenticated organization user",
+                "entrypoint": "Concurrent POST /api/workers requests assigning one external worker key to different sites",
+                "outcome": "Worker site binding changes without the required transfer procedure",
+                "summary": "Concurrent POST /api/workers requests assigning one external worker key to different sites"
+              }
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "identity": {
+              "anchor": "worker-site-transfer-validation-and-upsert-are-non-atomic"
+            },
+            "locations": [
+              {
+                "endLine": 120,
+                "path": "app/api/workers/route.ts",
+                "role": "entrypoint",
+                "startLine": 84
+              },
+              {
+                "endLine": 42,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 21
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Move the check and upsert into one transaction with row locking or a guarded RPC and test simultaneous cross-site imports.",
+            "rootCause": {
+              "summary": "The worker route checks existing site bindings and then separately upserts on organization_id,external_key, so concurrent requests can both pass and move the same worker to different sites."
+            },
+            "ruleId": "workers.site-transfer-race",
+            "severity": {
+              "level": "low",
+              "rationale": "The worker route checks existing site bindings and then separately upserts on organization_id,external_key, so concurrent requests can both pass and move the same worker to different sites."
+            },
+            "summary": "The worker route checks existing site bindings and then separately upserts on organization_id,external_key, so concurrent requests can both pass and move the same worker to different sites.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "Worker site-transfer validation and upsert are non-atomic",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "The worker route checks existing site bindings and then separately upserts on organization_id,external_key, so concurrent requests can both pass and move the same worker to different sites."
+            }
+          },
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "locations": [
+              {
+                "endLine": 120,
+                "path": "app/api/workers/route.ts",
+                "role": "entrypoint",
+                "startLine": 84
+              },
+              {
+                "endLine": 42,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 21
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Move the check and upsert into one transaction with row locking or a guarded RPC and test simultaneous cross-site imports.",
+            "rootCause": {
+              "summary": "The worker route checks existing site bindings and then separately upserts on organization_id,external_key, so concurrent requests can both pass and move the same worker to different sites."
+            },
+            "ruleId": "workers.site-transfer-race",
+            "severity": {
+              "level": "low",
+              "rationale": "The worker route checks existing site bindings and then separately upserts on organization_id,external_key, so concurrent requests can both pass and move the same worker to different sites."
+            },
+            "summary": "The worker route checks existing site bindings and then separately upserts on organization_id,external_key, so concurrent requests can both pass and move the same worker to different sites.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "Worker site-transfer validation and upsert are non-atomic",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "The worker route checks existing site bindings and then separately upserts on organization_id,external_key, so concurrent requests can both pass and move the same worker to different sites."
+            }
+          }
+        ],
+        "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Move the check and upsert into one transaction with row locking or a guarded RPC and test simultaneous cross-site imports.",
+      "rootCause": {
+        "summary": "The worker route checks existing site bindings and then separately upserts on organization_id,external_key, so concurrent requests can both pass and move the same worker to different sites."
+      },
+      "ruleId": "workers.site-transfer-race",
+      "severity": {
+        "level": "low",
+        "rationale": "The worker route checks existing site bindings and then separately upserts on organization_id,external_key, so concurrent requests can both pass and move the same worker to different sites."
+      },
+      "summary": "The worker route checks existing site bindings and then separately upserts on organization_id,external_key, so concurrent requests can both pass and move the same worker to different sites.",
+      "taxonomy": {
+        "category": "Security control failure",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Worker site-transfer validation and upsert are non-atomic",
+      "validation": {
+        "limitations": [
+          "Production was not treated as source-equivalent evidence.",
+          "Approval-gated mutation and exact saved Share reproduction were not performed."
+        ],
+        "method": "Independent discovery receipts followed by parent static source validation",
+        "summary": "The worker route checks existing site bindings and then separately upserts on organization_id,external_key, so concurrent requests can both pass and move the same worker to different sites."
+      },
+      "writeup": {
+        "reportPath": "findings/worker-site-transfer-race/worker-site-transfer-race.md"
+      }
+    },
+    {
+      "artifactPaths": [
+        "findings/workspace-provisioning-race/workspace-provisioning-race.md",
+        "findings/workspace-provisioning-race/poc/evidence.md"
+      ],
+      "attackPath": {
+        "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+        "counterevidence": "Impact is tenant-local consistency and availability rather than cross-tenant access.",
+        "dataflow": {
+          "outcome": "Duplicate organizations or sites and ambiguous first-row selection",
+          "sink": "Duplicate organizations or sites and ambiguous first-row selection",
+          "source": "Concurrent first-use routes calling ensureWorkspaceContext",
+          "summary": "Concurrent first-use routes calling ensureWorkspaceContext -> missing or non-atomic control -> Duplicate organizations or sites and ambiguous first-row selection"
+        },
+        "impact": {
+          "level": "low",
+          "why": "Duplicate organizations or sites and ambiguous first-row selection"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "An authenticated new workspace user"
+        },
+        "reachability": {
+          "attacker": "An authenticated new workspace user",
+          "entrypoint": "Concurrent first-use routes calling ensureWorkspaceContext",
+          "outcome": "Duplicate organizations or sites and ambiguous first-row selection",
+          "summary": "Concurrent first-use routes calling ensureWorkspaceContext"
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+      },
+      "findingId": "csf_083a76e92f29d9cab3b7d362",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:49b1d94acc565f6ee685cb103a921aecf0e498c63f90e7317a356e4f37a8fd98"
+      },
+      "identity": {
+        "anchor": "workspace-provisioning-uses-non-atomic-select-then-insert"
+      },
+      "locations": [
+        {
+          "endLine": 681,
+          "path": "lib/supabase-admin.ts",
+          "role": "entrypoint",
+          "startLine": 645
+        },
+        {
+          "endLine": 716,
+          "path": "lib/supabase-admin.ts",
+          "role": "sink",
+          "startLine": 684
+        },
+        {
+          "endLine": 20,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 1
+        }
+      ],
+      "occurrenceId": "occ_dda9e615c3cfb7ad8f076802",
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+              "counterevidence": "Impact is tenant-local consistency and availability rather than cross-tenant access.",
+              "dataflow": {
+                "outcome": "Duplicate organizations or sites and ambiguous first-row selection",
+                "sink": "Duplicate organizations or sites and ambiguous first-row selection",
+                "source": "Concurrent first-use routes calling ensureWorkspaceContext",
+                "summary": "Concurrent first-use routes calling ensureWorkspaceContext -> missing or non-atomic control -> Duplicate organizations or sites and ambiguous first-row selection"
+              },
+              "impact": {
+                "level": "low",
+                "why": "Duplicate organizations or sites and ambiguous first-row selection"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "An authenticated new workspace user"
+              },
+              "reachability": {
+                "attacker": "An authenticated new workspace user",
+                "entrypoint": "Concurrent first-use routes calling ensureWorkspaceContext",
+                "outcome": "Duplicate organizations or sites and ambiguous first-row selection",
+                "summary": "Concurrent first-use routes calling ensureWorkspaceContext"
+              }
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "identity": {
+              "anchor": "workspace-provisioning-uses-non-atomic-select-then-insert"
+            },
+            "locations": [
+              {
+                "endLine": 681,
+                "path": "lib/supabase-admin.ts",
+                "role": "entrypoint",
+                "startLine": 645
+              },
+              {
+                "endLine": 716,
+                "path": "lib/supabase-admin.ts",
+                "role": "sink",
+                "startLine": 684
+              },
+              {
+                "endLine": 20,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 1
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Add database uniqueness for one owner workspace and organization/name sites, then use atomic upsert or conflict recovery.",
+            "rootCause": {
+              "summary": "ensureWorkspaceContext selects the first organization and named site, then independently inserts missing rows without uniqueness or transactional conflict recovery."
+            },
+            "ruleId": "workspace.provisioning-race",
+            "severity": {
+              "level": "low",
+              "rationale": "ensureWorkspaceContext selects the first organization and named site, then independently inserts missing rows without uniqueness or transactional conflict recovery."
+            },
+            "summary": "ensureWorkspaceContext selects the first organization and named site, then independently inserts missing rows without uniqueness or transactional conflict recovery.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "Workspace provisioning uses non-atomic select-then-insert",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "ensureWorkspaceContext selects the first organization and named site, then independently inserts missing rows without uniqueness or transactional conflict recovery."
+            }
+          },
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "locations": [
+              {
+                "endLine": 681,
+                "path": "lib/supabase-admin.ts",
+                "role": "entrypoint",
+                "startLine": 645
+              },
+              {
+                "endLine": 716,
+                "path": "lib/supabase-admin.ts",
+                "role": "sink",
+                "startLine": 684
+              },
+              {
+                "endLine": 20,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 1
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Add database uniqueness for one owner workspace and organization/name sites, then use atomic upsert or conflict recovery.",
+            "rootCause": {
+              "summary": "ensureWorkspaceContext selects the first organization and named site, then independently inserts missing rows without uniqueness or transactional conflict recovery."
+            },
+            "ruleId": "workspace.provisioning-race",
+            "severity": {
+              "level": "low",
+              "rationale": "ensureWorkspaceContext selects the first organization and named site, then independently inserts missing rows without uniqueness or transactional conflict recovery."
+            },
+            "summary": "ensureWorkspaceContext selects the first organization and named site, then independently inserts missing rows without uniqueness or transactional conflict recovery.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "Workspace provisioning uses non-atomic select-then-insert",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "ensureWorkspaceContext selects the first organization and named site, then independently inserts missing rows without uniqueness or transactional conflict recovery."
+            }
+          }
+        ],
+        "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Add database uniqueness for one owner workspace and organization/name sites, then use atomic upsert or conflict recovery.",
+      "rootCause": {
+        "summary": "ensureWorkspaceContext selects the first organization and named site, then independently inserts missing rows without uniqueness or transactional conflict recovery."
+      },
+      "ruleId": "workspace.provisioning-race",
+      "severity": {
+        "level": "low",
+        "rationale": "ensureWorkspaceContext selects the first organization and named site, then independently inserts missing rows without uniqueness or transactional conflict recovery."
+      },
+      "summary": "ensureWorkspaceContext selects the first organization and named site, then independently inserts missing rows without uniqueness or transactional conflict recovery.",
+      "taxonomy": {
+        "category": "Security control failure",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Workspace provisioning uses non-atomic select-then-insert",
+      "validation": {
+        "limitations": [
+          "Production was not treated as source-equivalent evidence.",
+          "Approval-gated mutation and exact saved Share reproduction were not performed."
+        ],
+        "method": "Independent discovery receipts followed by parent static source validation",
+        "summary": "ensureWorkspaceContext selects the first organization and named site, then independently inserts missing rows without uniqueness or transactional conflict recovery."
+      },
+      "writeup": {
+        "reportPath": "findings/workspace-provisioning-race/workspace-provisioning-race.md"
+      }
+    },
+    {
+      "artifactPaths": [
+        "findings/public-output-budget/public-output-budget.md",
+        "findings/public-output-budget/poc/evidence.md"
+      ],
+      "attackPath": {
+        "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+        "counterevidence": "Request size, rate, concurrency, and time are bounded; Vertex also has a 2 MiB response ceiling.",
+        "dataflow": {
+          "outcome": "Provider-defined verbose output consumes paid tokens, buffering, and response bandwidth",
+          "sink": "Provider-defined verbose output consumes paid tokens, buffering, and response bandwidth",
+          "source": "Public Ask, knowledge regeneration, or remediation request after rate and concurrency admission",
+          "summary": "Public Ask, knowledge regeneration, or remediation request after rate and concurrency admission -> missing or non-atomic control -> Provider-defined verbose output consumes paid tokens, buffering, and response bandwidth"
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Provider-defined verbose output consumes paid tokens, buffering, and response bandwidth"
+        },
+        "likelihood": {
+          "level": "high",
+          "why": "An anonymous remote caller"
+        },
+        "reachability": {
+          "attacker": "An anonymous remote caller",
+          "entrypoint": "Public Ask, knowledge regeneration, or remediation request after rate and concurrency admission",
+          "outcome": "Provider-defined verbose output consumes paid tokens, buffering, and response bandwidth",
+          "summary": "Public Ask, knowledge regeneration, or remediation request after rate and concurrency admission"
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+      },
+      "findingId": "csf_04dc86a81d1f8858f8bd50a7",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:e7440228b13da37d1174998323714fad7d10cf59c76cce0617e5a9cd8a892226"
+      },
+      "identity": {
+        "anchor": "anonymous-provider-generation-lacks-deterministic-output-token-budgets"
+      },
+      "locations": [
+        {
+          "endLine": 61,
+          "path": "app/api/ask/route.ts",
+          "role": "entrypoint",
+          "startLine": 61
+        },
+        {
+          "endLine": 114,
+          "path": "app/api/ask/stream/route.ts",
+          "role": "entrypoint",
+          "startLine": 114
+        },
+        {
+          "endLine": 34,
+          "path": "app/api/knowledge/regenerate/route.ts",
+          "role": "entrypoint",
+          "startLine": 34
+        },
+        {
+          "endLine": 301,
+          "path": "app/api/workpack/remediate/route.ts",
+          "role": "entrypoint",
+          "startLine": 247
+        },
+        {
+          "endLine": 176,
+          "path": "lib/ai.ts",
+          "role": "sink",
+          "startLine": 128
+        },
+        {
+          "endLine": 457,
+          "path": "lib/ai.ts",
+          "role": "sink",
+          "startLine": 430
+        },
+        {
+          "endLine": 99,
+          "path": "lib/vertex/client.ts",
+          "role": "concrete_implementation",
+          "startLine": 44
+        }
+      ],
+      "occurrenceId": "occ_906edfdbe955b6c2c9dd56be",
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+              "counterevidence": "Request size, rate, concurrency, and time are bounded; Vertex also has a 2 MiB response ceiling.",
+              "dataflow": {
+                "outcome": "Provider-defined verbose output consumes paid tokens, buffering, and response bandwidth",
+                "sink": "Provider-defined verbose output consumes paid tokens, buffering, and response bandwidth",
+                "source": "Public Ask, knowledge regeneration, or remediation request after rate and concurrency admission",
+                "summary": "Public Ask, knowledge regeneration, or remediation request after rate and concurrency admission -> missing or non-atomic control -> Provider-defined verbose output consumes paid tokens, buffering, and response bandwidth"
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Provider-defined verbose output consumes paid tokens, buffering, and response bandwidth"
+              },
+              "likelihood": {
+                "level": "high",
+                "why": "An anonymous remote caller"
+              },
+              "reachability": {
+                "attacker": "An anonymous remote caller",
+                "entrypoint": "Public Ask, knowledge regeneration, or remediation request after rate and concurrency admission",
+                "outcome": "Provider-defined verbose output consumes paid tokens, buffering, and response bandwidth",
+                "summary": "Public Ask, knowledge regeneration, or remediation request after rate and concurrency admission"
+              }
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "identity": {
+              "anchor": "anonymous-provider-generation-lacks-deterministic-output-token-budgets"
+            },
+            "locations": [
+              {
+                "endLine": 61,
+                "path": "app/api/ask/route.ts",
+                "role": "entrypoint",
+                "startLine": 61
+              },
+              {
+                "endLine": 114,
+                "path": "app/api/ask/stream/route.ts",
+                "role": "entrypoint",
+                "startLine": 114
+              },
+              {
+                "endLine": 34,
+                "path": "app/api/knowledge/regenerate/route.ts",
+                "role": "entrypoint",
+                "startLine": 34
+              },
+              {
+                "endLine": 301,
+                "path": "app/api/workpack/remediate/route.ts",
+                "role": "entrypoint",
+                "startLine": 247
+              },
+              {
+                "endLine": 176,
+                "path": "lib/ai.ts",
+                "role": "sink",
+                "startLine": 128
+              },
+              {
+                "endLine": 457,
+                "path": "lib/ai.ts",
+                "role": "sink",
+                "startLine": 430
+              },
+              {
+                "endLine": 99,
+                "path": "lib/vertex/client.ts",
+                "role": "concrete_implementation",
+                "startLine": 44
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Define task-specific output-token limits for OpenAI and Vertex and enforce final character or byte ceilings before public serialization.",
+            "rootCause": {
+              "summary": "Public Ask, knowledge regeneration, and workpack remediation reach OpenAI or Vertex without task-specific output-token limits; generated answer text is returned without a final application text ceiling."
+            },
+            "ruleId": "provider.public-output-budget",
+            "severity": {
+              "level": "medium",
+              "rationale": "Public Ask, knowledge regeneration, and workpack remediation reach OpenAI or Vertex without task-specific output-token limits; generated answer text is returned without a final application text ceiling."
+            },
+            "summary": "Public Ask, knowledge regeneration, and workpack remediation reach OpenAI or Vertex without task-specific output-token limits; generated answer text is returned without a final application text ceiling.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-770"
+              ]
+            },
+            "title": "Anonymous provider generation lacks deterministic output-token budgets",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "Public Ask, knowledge regeneration, and workpack remediation reach OpenAI or Vertex without task-specific output-token limits; generated answer text is returned without a final application text ceiling."
+            }
+          },
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "locations": [
+              {
+                "endLine": 61,
+                "path": "app/api/ask/route.ts",
+                "role": "entrypoint",
+                "startLine": 61
+              },
+              {
+                "endLine": 114,
+                "path": "app/api/ask/stream/route.ts",
+                "role": "entrypoint",
+                "startLine": 114
+              },
+              {
+                "endLine": 34,
+                "path": "app/api/knowledge/regenerate/route.ts",
+                "role": "entrypoint",
+                "startLine": 34
+              },
+              {
+                "endLine": 301,
+                "path": "app/api/workpack/remediate/route.ts",
+                "role": "entrypoint",
+                "startLine": 247
+              },
+              {
+                "endLine": 176,
+                "path": "lib/ai.ts",
+                "role": "sink",
+                "startLine": 128
+              },
+              {
+                "endLine": 457,
+                "path": "lib/ai.ts",
+                "role": "sink",
+                "startLine": 430
+              },
+              {
+                "endLine": 99,
+                "path": "lib/vertex/client.ts",
+                "role": "concrete_implementation",
+                "startLine": 44
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Define task-specific output-token limits for OpenAI and Vertex and enforce final character or byte ceilings before public serialization.",
+            "rootCause": {
+              "summary": "Public Ask, knowledge regeneration, and workpack remediation reach OpenAI or Vertex without task-specific output-token limits; generated answer text is returned without a final application text ceiling."
+            },
+            "ruleId": "provider.public-output-budget",
+            "severity": {
+              "level": "medium",
+              "rationale": "Public Ask, knowledge regeneration, and workpack remediation reach OpenAI or Vertex without task-specific output-token limits; generated answer text is returned without a final application text ceiling."
+            },
+            "summary": "Public Ask, knowledge regeneration, and workpack remediation reach OpenAI or Vertex without task-specific output-token limits; generated answer text is returned without a final application text ceiling.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-770"
+              ]
+            },
+            "title": "Anonymous provider generation lacks deterministic output-token budgets",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "Public Ask, knowledge regeneration, and workpack remediation reach OpenAI or Vertex without task-specific output-token limits; generated answer text is returned without a final application text ceiling."
+            }
+          }
+        ],
+        "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Define task-specific output-token limits for OpenAI and Vertex and enforce final character or byte ceilings before public serialization.",
+      "rootCause": {
+        "summary": "Public Ask, knowledge regeneration, and workpack remediation reach OpenAI or Vertex without task-specific output-token limits; generated answer text is returned without a final application text ceiling."
+      },
+      "ruleId": "provider.public-output-budget",
+      "severity": {
+        "level": "medium",
+        "rationale": "Public Ask, knowledge regeneration, and workpack remediation reach OpenAI or Vertex without task-specific output-token limits; generated answer text is returned without a final application text ceiling."
+      },
+      "summary": "Public Ask, knowledge regeneration, and workpack remediation reach OpenAI or Vertex without task-specific output-token limits; generated answer text is returned without a final application text ceiling.",
+      "taxonomy": {
+        "category": "Security control failure",
+        "cwe": [
+          "CWE-770"
+        ]
+      },
+      "title": "Anonymous provider generation lacks deterministic output-token budgets",
+      "validation": {
+        "limitations": [
+          "Production was not treated as source-equivalent evidence.",
+          "Approval-gated mutation and exact saved Share reproduction were not performed."
+        ],
+        "method": "Independent discovery receipts followed by parent static source validation",
+        "summary": "Public Ask, knowledge regeneration, and workpack remediation reach OpenAI or Vertex without task-specific output-token limits; generated answer text is returned without a final application text ceiling."
+      },
+      "writeup": {
+        "reportPath": "findings/public-output-budget/public-output-budget.md"
+      }
+    },
+    {
+      "artifactPaths": [
+        "findings/unbound-url-fragment-session/unbound-url-fragment-session.md",
+        "findings/unbound-url-fragment-session/poc/evidence.md"
+      ],
+      "attackPath": {
+        "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+        "counterevidence": "The dedicated callback is transaction-bound and the active email is visible; victim interaction is required.",
+        "dataflow": {
+          "outcome": "Victim-entered worker PII and workpacks are stored in the attacker's tenant",
+          "sink": "Victim-entered worker PII and workpacks are stored in the attacker's tenant",
+          "source": "Victim opens a crafted non-callback URL fragment and later saves workspace data",
+          "summary": "Victim opens a crafted non-callback URL fragment and later saves workspace data -> missing or non-atomic control -> Victim-entered worker PII and workpacks are stored in the attacker's tenant"
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Victim-entered worker PII and workpacks are stored in the attacker's tenant"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "A remote attacker with a valid session for an attacker-controlled account"
+        },
+        "reachability": {
+          "attacker": "A remote attacker with a valid session for an attacker-controlled account",
+          "entrypoint": "Victim opens a crafted non-callback URL fragment and later saves workspace data",
+          "outcome": "Victim-entered worker PII and workpacks are stored in the attacker's tenant",
+          "summary": "Victim opens a crafted non-callback URL fragment and later saves workspace data"
+        }
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+      },
+      "findingId": "csf_f90250720fbf70f18d0a3f2f",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:d580d9aacbcab6415644a6137a0bcb0c3b1990cc7854cc4f34a2b6b6fac101a1"
+      },
+      "identity": {
+        "anchor": "non-callback-pages-accept-unbound-supabase-sessions-from-url-fragments"
+      },
+      "locations": [
+        {
+          "endLine": 58,
+          "path": "components/AuthCallbackClient.tsx",
+          "role": "root_control",
+          "startLine": 20
+        },
+        {
+          "endLine": 52,
+          "path": "components/AdminLoginPanel.tsx",
+          "role": "entrypoint",
+          "startLine": 16
+        },
+        {
+          "endLine": 172,
+          "path": "components/FieldOperationsWorkspace.tsx",
+          "role": "entrypoint",
+          "startLine": 163
+        },
+        {
+          "endLine": 295,
+          "path": "components/FieldOperationsWorkspace.tsx",
+          "role": "sink",
+          "startLine": 275
+        }
+      ],
+      "occurrenceId": "occ_18cebdaaa1dcad6569b469d3",
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+              "counterevidence": "The dedicated callback is transaction-bound and the active email is visible; victim interaction is required.",
+              "dataflow": {
+                "outcome": "Victim-entered worker PII and workpacks are stored in the attacker's tenant",
+                "sink": "Victim-entered worker PII and workpacks are stored in the attacker's tenant",
+                "source": "Victim opens a crafted non-callback URL fragment and later saves workspace data",
+                "summary": "Victim opens a crafted non-callback URL fragment and later saves workspace data -> missing or non-atomic control -> Victim-entered worker PII and workpacks are stored in the attacker's tenant"
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Victim-entered worker PII and workpacks are stored in the attacker's tenant"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "A remote attacker with a valid session for an attacker-controlled account"
+              },
+              "reachability": {
+                "attacker": "A remote attacker with a valid session for an attacker-controlled account",
+                "entrypoint": "Victim opens a crafted non-callback URL fragment and later saves workspace data",
+                "outcome": "Victim-entered worker PII and workpacks are stored in the attacker's tenant",
+                "summary": "Victim opens a crafted non-callback URL fragment and later saves workspace data"
+              }
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "identity": {
+              "anchor": "non-callback-pages-accept-unbound-supabase-sessions-from-url-fragments"
+            },
+            "locations": [
+              {
+                "endLine": 58,
+                "path": "components/AuthCallbackClient.tsx",
+                "role": "root_control",
+                "startLine": 20
+              },
+              {
+                "endLine": 52,
+                "path": "components/AdminLoginPanel.tsx",
+                "role": "entrypoint",
+                "startLine": 16
+              },
+              {
+                "endLine": 172,
+                "path": "components/FieldOperationsWorkspace.tsx",
+                "role": "entrypoint",
+                "startLine": 163
+              },
+              {
+                "endLine": 295,
+                "path": "components/FieldOperationsWorkspace.tsx",
+                "role": "sink",
+                "startLine": 275
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Centralize browser client construction with detectSessionInUrl:false outside the single transaction-validating callback, clear unexpected auth fragments, and add route-wide regression tests.",
+            "rootCause": {
+              "summary": "The dedicated callback disables automatic URL-session detection and consumes auth_tx, but other browser clients use default createClient options and accept auth state into privileged workspace requests without the transaction check."
+            },
+            "ruleId": "auth.unbound-url-fragment-session",
+            "severity": {
+              "level": "medium",
+              "rationale": "The dedicated callback disables automatic URL-session detection and consumes auth_tx, but other browser clients use default createClient options and accept auth state into privileged workspace requests without the transaction check."
+            },
+            "summary": "The dedicated callback disables automatic URL-session detection and consumes auth_tx, but other browser clients use default createClient options and accept auth state into privileged workspace requests without the transaction check.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-352"
+              ]
+            },
+            "title": "Non-callback pages accept unbound Supabase sessions from URL fragments",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "The dedicated callback disables automatic URL-session detection and consumes auth_tx, but other browser clients use default createClient options and accept auth state into privileged workspace requests without the transaction check."
+            }
+          },
+          {
+            "confidence": {
+              "level": "medium",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "locations": [
+              {
+                "endLine": 58,
+                "path": "components/AuthCallbackClient.tsx",
+                "role": "root_control",
+                "startLine": 20
+              },
+              {
+                "endLine": 52,
+                "path": "components/AdminLoginPanel.tsx",
+                "role": "entrypoint",
+                "startLine": 16
+              },
+              {
+                "endLine": 172,
+                "path": "components/FieldOperationsWorkspace.tsx",
+                "role": "entrypoint",
+                "startLine": 163
+              },
+              {
+                "endLine": 295,
+                "path": "components/FieldOperationsWorkspace.tsx",
+                "role": "sink",
+                "startLine": 275
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Centralize browser client construction with detectSessionInUrl:false outside the single transaction-validating callback, clear unexpected auth fragments, and add route-wide regression tests.",
+            "rootCause": {
+              "summary": "The dedicated callback disables automatic URL-session detection and consumes auth_tx, but other browser clients use default createClient options and accept auth state into privileged workspace requests without the transaction check."
+            },
+            "ruleId": "auth.unbound-url-fragment-session",
+            "severity": {
+              "level": "medium",
+              "rationale": "The dedicated callback disables automatic URL-session detection and consumes auth_tx, but other browser clients use default createClient options and accept auth state into privileged workspace requests without the transaction check."
+            },
+            "summary": "The dedicated callback disables automatic URL-session detection and consumes auth_tx, but other browser clients use default createClient options and accept auth state into privileged workspace requests without the transaction check.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-352"
+              ]
+            },
+            "title": "Non-callback pages accept unbound Supabase sessions from URL fragments",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "The dedicated callback disables automatic URL-session detection and consumes auth_tx, but other browser clients use default createClient options and accept auth state into privileged workspace requests without the transaction check."
+            }
+          }
+        ],
+        "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Centralize browser client construction with detectSessionInUrl:false outside the single transaction-validating callback, clear unexpected auth fragments, and add route-wide regression tests.",
+      "rootCause": {
+        "summary": "The dedicated callback disables automatic URL-session detection and consumes auth_tx, but other browser clients use default createClient options and accept auth state into privileged workspace requests without the transaction check."
+      },
+      "ruleId": "auth.unbound-url-fragment-session",
+      "severity": {
+        "level": "medium",
+        "rationale": "The dedicated callback disables automatic URL-session detection and consumes auth_tx, but other browser clients use default createClient options and accept auth state into privileged workspace requests without the transaction check."
+      },
+      "summary": "The dedicated callback disables automatic URL-session detection and consumes auth_tx, but other browser clients use default createClient options and accept auth state into privileged workspace requests without the transaction check.",
+      "taxonomy": {
+        "category": "Security control failure",
+        "cwe": [
+          "CWE-352"
+        ]
+      },
+      "title": "Non-callback pages accept unbound Supabase sessions from URL fragments",
+      "validation": {
+        "limitations": [
+          "Production was not treated as source-equivalent evidence.",
+          "Approval-gated mutation and exact saved Share reproduction were not performed."
+        ],
+        "method": "Independent discovery receipts followed by parent static source validation",
+        "summary": "The dedicated callback disables automatic URL-session detection and consumes auth_tx, but other browser clients use default createClient options and accept auth state into privileged workspace requests without the transaction check."
+      },
+      "writeup": {
+        "reportPath": "findings/unbound-url-fragment-session/unbound-url-fragment-session.md"
+      }
+    },
+    {
+      "artifactPaths": [
+        "findings/kosha-preflight-toctou/kosha-preflight-toctou.md",
+        "findings/kosha-preflight-toctou/poc/evidence.md"
+      ],
+      "attackPath": {
+        "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+        "counterevidence": "Resume and archive controls exist; exploitation requires same-run local or CI file replacement.",
+        "dataflow": {
+          "outcome": "Corpus poisoning under a stale identity or bypass of archive budgets",
+          "sink": "Corpus poisoning under a stale identity or bypass of archive budgets",
+          "source": "Replace an archive or PDF after discovery/preflight but before reopened processing",
+          "summary": "Replace an archive or PDF after discovery/preflight but before reopened processing -> missing or non-atomic control -> Corpus poisoning under a stale identity or bypass of archive budgets"
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Corpus poisoning under a stale identity or bypass of archive budgets"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "A malicious local process or CI artifact supplier"
+        },
+        "reachability": {
+          "attacker": "A malicious local process or CI artifact supplier",
+          "entrypoint": "Replace an archive or PDF after discovery/preflight but before reopened processing",
+          "outcome": "Corpus poisoning under a stale identity or bypass of archive budgets",
+          "summary": "Replace an archive or PDF after discovery/preflight but before reopened processing"
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+      },
+      "findingId": "csf_4133ff572b30e1e2152052d9",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c01a3a64f18a5fe2cd8bb1af4fac671934815492d95aaef915e7578d00d6b894"
+      },
+      "identity": {
+        "anchor": "kosha-corpus-source-can-change-after-preflight"
+      },
+      "locations": [
+        {
+          "endLine": 545,
+          "path": "scripts/snapshot_kosha_guide_corpus.py",
+          "role": "root_control",
+          "startLine": 525
+        },
+        {
+          "endLine": 705,
+          "path": "scripts/snapshot_kosha_guide_corpus.py",
+          "role": "sink",
+          "startLine": 678
+        },
+        {
+          "endLine": 1812,
+          "path": "scripts/snapshot_kosha_guide_corpus.py",
+          "role": "source",
+          "startLine": 1810
+        },
+        {
+          "endLine": 1941,
+          "path": "scripts/snapshot_kosha_guide_corpus.py",
+          "role": "sink",
+          "startLine": 1925
+        }
+      ],
+      "occurrenceId": "occ_375303460ff25afdb1de4c1d",
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+              "counterevidence": "Resume and archive controls exist; exploitation requires same-run local or CI file replacement.",
+              "dataflow": {
+                "outcome": "Corpus poisoning under a stale identity or bypass of archive budgets",
+                "sink": "Corpus poisoning under a stale identity or bypass of archive budgets",
+                "source": "Replace an archive or PDF after discovery/preflight but before reopened processing",
+                "summary": "Replace an archive or PDF after discovery/preflight but before reopened processing -> missing or non-atomic control -> Corpus poisoning under a stale identity or bypass of archive budgets"
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Corpus poisoning under a stale identity or bypass of archive budgets"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "A malicious local process or CI artifact supplier"
+              },
+              "reachability": {
+                "attacker": "A malicious local process or CI artifact supplier",
+                "entrypoint": "Replace an archive or PDF after discovery/preflight but before reopened processing",
+                "outcome": "Corpus poisoning under a stale identity or bypass of archive budgets",
+                "summary": "Replace an archive or PDF after discovery/preflight but before reopened processing"
+              }
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "identity": {
+              "anchor": "kosha-corpus-source-can-change-after-preflight"
+            },
+            "locations": [
+              {
+                "endLine": 545,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "root_control",
+                "startLine": 525
+              },
+              {
+                "endLine": 705,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "sink",
+                "startLine": 678
+              },
+              {
+                "endLine": 1812,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "source",
+                "startLine": 1810
+              },
+              {
+                "endLine": 1941,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "sink",
+                "startLine": 1925
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Retain preflighted descriptors or revalidate full source digest and member metadata on every reopen; perform actual reads through the bounded reader.",
+            "rootCause": {
+              "summary": "Archive discovery preflights and records identity, but processing later reopens paths with ZipFile/read_bytes without revalidating the source digest and member metadata, allowing raced bytes to bypass recorded identity and budgets."
+            },
+            "ruleId": "kosha.corpus-preflight-toctou",
+            "severity": {
+              "level": "medium",
+              "rationale": "Archive discovery preflights and records identity, but processing later reopens paths with ZipFile/read_bytes without revalidating the source digest and member metadata, allowing raced bytes to bypass recorded identity and budgets."
+            },
+            "summary": "Archive discovery preflights and records identity, but processing later reopens paths with ZipFile/read_bytes without revalidating the source digest and member metadata, allowing raced bytes to bypass recorded identity and budgets.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-367"
+              ]
+            },
+            "title": "KOSHA corpus source can change after preflight",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "Archive discovery preflights and records identity, but processing later reopens paths with ZipFile/read_bytes without revalidating the source digest and member metadata, allowing raced bytes to bypass recorded identity and budgets."
+            }
+          },
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "locations": [
+              {
+                "endLine": 545,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "root_control",
+                "startLine": 525
+              },
+              {
+                "endLine": 705,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "sink",
+                "startLine": 678
+              },
+              {
+                "endLine": 1812,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "source",
+                "startLine": 1810
+              },
+              {
+                "endLine": 1941,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "sink",
+                "startLine": 1925
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Retain preflighted descriptors or revalidate full source digest and member metadata on every reopen; perform actual reads through the bounded reader.",
+            "rootCause": {
+              "summary": "Archive discovery preflights and records identity, but processing later reopens paths with ZipFile/read_bytes without revalidating the source digest and member metadata, allowing raced bytes to bypass recorded identity and budgets."
+            },
+            "ruleId": "kosha.corpus-preflight-toctou",
+            "severity": {
+              "level": "medium",
+              "rationale": "Archive discovery preflights and records identity, but processing later reopens paths with ZipFile/read_bytes without revalidating the source digest and member metadata, allowing raced bytes to bypass recorded identity and budgets."
+            },
+            "summary": "Archive discovery preflights and records identity, but processing later reopens paths with ZipFile/read_bytes without revalidating the source digest and member metadata, allowing raced bytes to bypass recorded identity and budgets.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-367"
+              ]
+            },
+            "title": "KOSHA corpus source can change after preflight",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "Archive discovery preflights and records identity, but processing later reopens paths with ZipFile/read_bytes without revalidating the source digest and member metadata, allowing raced bytes to bypass recorded identity and budgets."
+            }
+          }
+        ],
+        "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Retain preflighted descriptors or revalidate full source digest and member metadata on every reopen; perform actual reads through the bounded reader.",
+      "rootCause": {
+        "summary": "Archive discovery preflights and records identity, but processing later reopens paths with ZipFile/read_bytes without revalidating the source digest and member metadata, allowing raced bytes to bypass recorded identity and budgets."
+      },
+      "ruleId": "kosha.corpus-preflight-toctou",
+      "severity": {
+        "level": "medium",
+        "rationale": "Archive discovery preflights and records identity, but processing later reopens paths with ZipFile/read_bytes without revalidating the source digest and member metadata, allowing raced bytes to bypass recorded identity and budgets."
+      },
+      "summary": "Archive discovery preflights and records identity, but processing later reopens paths with ZipFile/read_bytes without revalidating the source digest and member metadata, allowing raced bytes to bypass recorded identity and budgets.",
+      "taxonomy": {
+        "category": "Security control failure",
+        "cwe": [
+          "CWE-367"
+        ]
+      },
+      "title": "KOSHA corpus source can change after preflight",
+      "validation": {
+        "limitations": [
+          "Production was not treated as source-equivalent evidence.",
+          "Approval-gated mutation and exact saved Share reproduction were not performed."
+        ],
+        "method": "Independent discovery receipts followed by parent static source validation",
+        "summary": "Archive discovery preflights and records identity, but processing later reopens paths with ZipFile/read_bytes without revalidating the source digest and member metadata, allowing raced bytes to bypass recorded identity and budgets."
+      },
+      "writeup": {
+        "reportPath": "findings/kosha-preflight-toctou/kosha-preflight-toctou.md"
+      }
+    },
+    {
+      "artifactPaths": [
+        "findings/kosha-pdf-parser-deadline/kosha-pdf-parser-deadline.md",
+        "findings/kosha-pdf-parser-deadline/poc/evidence.md"
+      ],
+      "attackPath": {
+        "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+        "counterevidence": "Input bytes, pages, and extracted characters are bounded, but those checks do not interrupt a stuck parser call.",
+        "dataflow": {
+          "outcome": "Corpus generation worker hangs or exhausts resources",
+          "sink": "Corpus generation worker hangs or exhausts resources",
+          "source": "Crafted PDF reaches PdfReader and page.extract_text in the main process",
+          "summary": "Crafted PDF reaches PdfReader and page.extract_text in the main process -> missing or non-atomic control -> Corpus generation worker hangs or exhausts resources"
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Corpus generation worker hangs or exhausts resources"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "A malicious local or CI PDF supplier"
+        },
+        "reachability": {
+          "attacker": "A malicious local or CI PDF supplier",
+          "entrypoint": "Crafted PDF reaches PdfReader and page.extract_text in the main process",
+          "outcome": "Corpus generation worker hangs or exhausts resources",
+          "summary": "Crafted PDF reaches PdfReader and page.extract_text in the main process"
+        }
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+      },
+      "findingId": "csf_2e589b3df72b3995728d9a0a",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:0a49b87eba58588b1357ceafba697c99f9b0a46962820927d09aa23c949ad18a"
+      },
+      "identity": {
+        "anchor": "untrusted-kosha-pdfs-are-parsed-without-an-enforceable-deadline"
+      },
+      "locations": [
+        {
+          "endLine": 988,
+          "path": "scripts/snapshot_kosha_guide_corpus.py",
+          "role": "sink",
+          "startLine": 958
+        },
+        {
+          "endLine": 80,
+          "path": "scripts/snapshot_kosha_guide_corpus.py",
+          "role": "root_control",
+          "startLine": 65
+        }
+      ],
+      "occurrenceId": "occ_596eef27525c424e59a8d55b",
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+              "counterevidence": "Input bytes, pages, and extracted characters are bounded, but those checks do not interrupt a stuck parser call.",
+              "dataflow": {
+                "outcome": "Corpus generation worker hangs or exhausts resources",
+                "sink": "Corpus generation worker hangs or exhausts resources",
+                "source": "Crafted PDF reaches PdfReader and page.extract_text in the main process",
+                "summary": "Crafted PDF reaches PdfReader and page.extract_text in the main process -> missing or non-atomic control -> Corpus generation worker hangs or exhausts resources"
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Corpus generation worker hangs or exhausts resources"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "A malicious local or CI PDF supplier"
+              },
+              "reachability": {
+                "attacker": "A malicious local or CI PDF supplier",
+                "entrypoint": "Crafted PDF reaches PdfReader and page.extract_text in the main process",
+                "outcome": "Corpus generation worker hangs or exhausts resources",
+                "summary": "Crafted PDF reaches PdfReader and page.extract_text in the main process"
+              }
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "identity": {
+              "anchor": "untrusted-kosha-pdfs-are-parsed-without-an-enforceable-deadline"
+            },
+            "locations": [
+              {
+                "endLine": 988,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "sink",
+                "startLine": 958
+              },
+              {
+                "endLine": 80,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "root_control",
+                "startLine": 65
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Parse each PDF in a disposable worker process with wall-clock and memory limits, kill on timeout, and admit only bounded structured output.",
+            "rootCause": {
+              "summary": "PdfReader construction and page.extract_text run synchronously in the main corpus process; page and character limits apply only after parser work returns."
+            },
+            "ruleId": "kosha.pdf-parser-deadline",
+            "severity": {
+              "level": "medium",
+              "rationale": "PdfReader construction and page.extract_text run synchronously in the main corpus process; page and character limits apply only after parser work returns."
+            },
+            "summary": "PdfReader construction and page.extract_text run synchronously in the main corpus process; page and character limits apply only after parser work returns.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "Untrusted KOSHA PDFs are parsed without an enforceable deadline",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "PdfReader construction and page.extract_text run synchronously in the main corpus process; page and character limits apply only after parser work returns."
+            }
+          },
+          {
+            "confidence": {
+              "level": "medium",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "locations": [
+              {
+                "endLine": 988,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "sink",
+                "startLine": 958
+              },
+              {
+                "endLine": 80,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "root_control",
+                "startLine": 65
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Parse each PDF in a disposable worker process with wall-clock and memory limits, kill on timeout, and admit only bounded structured output.",
+            "rootCause": {
+              "summary": "PdfReader construction and page.extract_text run synchronously in the main corpus process; page and character limits apply only after parser work returns."
+            },
+            "ruleId": "kosha.pdf-parser-deadline",
+            "severity": {
+              "level": "medium",
+              "rationale": "PdfReader construction and page.extract_text run synchronously in the main corpus process; page and character limits apply only after parser work returns."
+            },
+            "summary": "PdfReader construction and page.extract_text run synchronously in the main corpus process; page and character limits apply only after parser work returns.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "Untrusted KOSHA PDFs are parsed without an enforceable deadline",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "PdfReader construction and page.extract_text run synchronously in the main corpus process; page and character limits apply only after parser work returns."
+            }
+          }
+        ],
+        "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Parse each PDF in a disposable worker process with wall-clock and memory limits, kill on timeout, and admit only bounded structured output.",
+      "rootCause": {
+        "summary": "PdfReader construction and page.extract_text run synchronously in the main corpus process; page and character limits apply only after parser work returns."
+      },
+      "ruleId": "kosha.pdf-parser-deadline",
+      "severity": {
+        "level": "medium",
+        "rationale": "PdfReader construction and page.extract_text run synchronously in the main corpus process; page and character limits apply only after parser work returns."
+      },
+      "summary": "PdfReader construction and page.extract_text run synchronously in the main corpus process; page and character limits apply only after parser work returns.",
+      "taxonomy": {
+        "category": "Security control failure",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Untrusted KOSHA PDFs are parsed without an enforceable deadline",
+      "validation": {
+        "limitations": [
+          "Production was not treated as source-equivalent evidence.",
+          "Approval-gated mutation and exact saved Share reproduction were not performed."
+        ],
+        "method": "Independent discovery receipts followed by parent static source validation",
+        "summary": "PdfReader construction and page.extract_text run synchronously in the main corpus process; page and character limits apply only after parser work returns."
+      },
+      "writeup": {
+        "reportPath": "findings/kosha-pdf-parser-deadline/kosha-pdf-parser-deadline.md"
+      }
+    },
+    {
+      "artifactPaths": [
+        "findings/hwpx-anonymization-fail-open/hwpx-anonymization-fail-open.md",
+        "findings/hwpx-anonymization-fail-open/poc/evidence.md"
+      ],
+      "attackPath": {
+        "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+        "counterevidence": "Archive structure and size controls exist; the concrete residual identifiers depend on the supplied template.",
+        "dataflow": {
+          "outcome": "Sensitive identifiers remain in committed or distributed HWPX outputs marked successful",
+          "sink": "Sensitive identifiers remain in committed or distributed HWPX outputs marked successful",
+          "source": "Missing or malformed cleanup policy followed by normal anonymization execution",
+          "summary": "Missing or malformed cleanup policy followed by normal anonymization execution -> missing or non-atomic control -> Sensitive identifiers remain in committed or distributed HWPX outputs marked successful"
+        },
+        "impact": {
+          "level": "high",
+          "why": "Sensitive identifiers remain in committed or distributed HWPX outputs marked successful"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "A malicious or mistaken source-template supplier"
+        },
+        "reachability": {
+          "attacker": "A malicious or mistaken source-template supplier",
+          "entrypoint": "Missing or malformed cleanup policy followed by normal anonymization execution",
+          "outcome": "Sensitive identifiers remain in committed or distributed HWPX outputs marked successful",
+          "summary": "Missing or malformed cleanup policy followed by normal anonymization execution"
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+      },
+      "findingId": "csf_31688b8eea2704dad07fb85e",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:0fa0958875d70f1a52f6f3ef13e99c421cef682a51e8d09fd971eab42a5d1ab4"
+      },
+      "identity": {
+        "anchor": "hwpx-anonymization-succeeds-with-missing-or-invalid-policy"
+      },
+      "locations": [
+        {
+          "endLine": 42,
+          "path": "scripts/anonymize_hwpx_templates.mjs",
+          "role": "root_control",
+          "startLine": 25
+        },
+        {
+          "endLine": 236,
+          "path": "scripts/anonymize_hwpx_templates.mjs",
+          "role": "sink",
+          "startLine": 202
+        }
+      ],
+      "occurrenceId": "occ_fe21f209152adc21d0666986",
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+              "counterevidence": "Archive structure and size controls exist; the concrete residual identifiers depend on the supplied template.",
+              "dataflow": {
+                "outcome": "Sensitive identifiers remain in committed or distributed HWPX outputs marked successful",
+                "sink": "Sensitive identifiers remain in committed or distributed HWPX outputs marked successful",
+                "source": "Missing or malformed cleanup policy followed by normal anonymization execution",
+                "summary": "Missing or malformed cleanup policy followed by normal anonymization execution -> missing or non-atomic control -> Sensitive identifiers remain in committed or distributed HWPX outputs marked successful"
+              },
+              "impact": {
+                "level": "high",
+                "why": "Sensitive identifiers remain in committed or distributed HWPX outputs marked successful"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "A malicious or mistaken source-template supplier"
+              },
+              "reachability": {
+                "attacker": "A malicious or mistaken source-template supplier",
+                "entrypoint": "Missing or malformed cleanup policy followed by normal anonymization execution",
+                "outcome": "Sensitive identifiers remain in committed or distributed HWPX outputs marked successful",
+                "summary": "Missing or malformed cleanup policy followed by normal anonymization execution"
+              }
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "identity": {
+              "anchor": "hwpx-anonymization-succeeds-with-missing-or-invalid-policy"
+            },
+            "locations": [
+              {
+                "endLine": 42,
+                "path": "scripts/anonymize_hwpx_templates.mjs",
+                "role": "root_control",
+                "startLine": 25
+              },
+              {
+                "endLine": 236,
+                "path": "scripts/anonymize_hwpx_templates.mjs",
+                "role": "sink",
+                "startLine": 202
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Fail closed on absent or invalid policy, require approved identifiers, inspect all relevant archive entries and metadata, and block output when residual sensitive tokens remain.",
+            "rootCause": {
+              "summary": "Missing or malformed cleanup-token configuration returns an empty list, yet outputs are written with status ok and no archive-wide residual identifier gate."
+            },
+            "ruleId": "hwpx.anonymization-fail-open",
+            "severity": {
+              "level": "medium",
+              "rationale": "Missing or malformed cleanup-token configuration returns an empty list, yet outputs are written with status ok and no archive-wide residual identifier gate."
+            },
+            "summary": "Missing or malformed cleanup-token configuration returns an empty list, yet outputs are written with status ok and no archive-wide residual identifier gate.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-200"
+              ]
+            },
+            "title": "HWPX anonymization succeeds with missing or invalid policy",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "Missing or malformed cleanup-token configuration returns an empty list, yet outputs are written with status ok and no archive-wide residual identifier gate."
+            }
+          },
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "locations": [
+              {
+                "endLine": 42,
+                "path": "scripts/anonymize_hwpx_templates.mjs",
+                "role": "root_control",
+                "startLine": 25
+              },
+              {
+                "endLine": 236,
+                "path": "scripts/anonymize_hwpx_templates.mjs",
+                "role": "sink",
+                "startLine": 202
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Fail closed on absent or invalid policy, require approved identifiers, inspect all relevant archive entries and metadata, and block output when residual sensitive tokens remain.",
+            "rootCause": {
+              "summary": "Missing or malformed cleanup-token configuration returns an empty list, yet outputs are written with status ok and no archive-wide residual identifier gate."
+            },
+            "ruleId": "hwpx.anonymization-fail-open",
+            "severity": {
+              "level": "medium",
+              "rationale": "Missing or malformed cleanup-token configuration returns an empty list, yet outputs are written with status ok and no archive-wide residual identifier gate."
+            },
+            "summary": "Missing or malformed cleanup-token configuration returns an empty list, yet outputs are written with status ok and no archive-wide residual identifier gate.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-200"
+              ]
+            },
+            "title": "HWPX anonymization succeeds with missing or invalid policy",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "Missing or malformed cleanup-token configuration returns an empty list, yet outputs are written with status ok and no archive-wide residual identifier gate."
+            }
+          }
+        ],
+        "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Fail closed on absent or invalid policy, require approved identifiers, inspect all relevant archive entries and metadata, and block output when residual sensitive tokens remain.",
+      "rootCause": {
+        "summary": "Missing or malformed cleanup-token configuration returns an empty list, yet outputs are written with status ok and no archive-wide residual identifier gate."
+      },
+      "ruleId": "hwpx.anonymization-fail-open",
+      "severity": {
+        "level": "medium",
+        "rationale": "Missing or malformed cleanup-token configuration returns an empty list, yet outputs are written with status ok and no archive-wide residual identifier gate."
+      },
+      "summary": "Missing or malformed cleanup-token configuration returns an empty list, yet outputs are written with status ok and no archive-wide residual identifier gate.",
+      "taxonomy": {
+        "category": "Security control failure",
+        "cwe": [
+          "CWE-200"
+        ]
+      },
+      "title": "HWPX anonymization succeeds with missing or invalid policy",
+      "validation": {
+        "limitations": [
+          "Production was not treated as source-equivalent evidence.",
+          "Approval-gated mutation and exact saved Share reproduction were not performed."
+        ],
+        "method": "Independent discovery receipts followed by parent static source validation",
+        "summary": "Missing or malformed cleanup-token configuration returns an empty list, yet outputs are written with status ok and no archive-wide residual identifier gate."
+      },
+      "writeup": {
+        "reportPath": "findings/hwpx-anonymization-fail-open/hwpx-anonymization-fail-open.md"
+      }
+    },
+    {
+      "artifactPaths": [
+        "findings/approval-evidence-symlink/approval-evidence-symlink.md",
+        "findings/approval-evidence-symlink/poc/evidence.md"
+      ],
+      "attackPath": {
+        "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+        "counterevidence": "The attacker needs repository or local filesystem influence; path tracking, ancestry, and dirty checks otherwise exist.",
+        "dataflow": {
+          "outcome": "Mutable external bytes are accepted as clean immutable approval evidence",
+          "sink": "Mutable external bytes are accepted as clean immutable approval evidence",
+          "source": "Tracked symlink at a required evidence path is followed by the binding helper",
+          "summary": "Tracked symlink at a required evidence path is followed by the binding helper -> missing or non-atomic control -> Mutable external bytes are accepted as clean immutable approval evidence"
+        },
+        "impact": {
+          "level": "medium",
+          "why": "Mutable external bytes are accepted as clean immutable approval evidence"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "A malicious contributor or local artifact supplier"
+        },
+        "reachability": {
+          "attacker": "A malicious contributor or local artifact supplier",
+          "entrypoint": "Tracked symlink at a required evidence path is followed by the binding helper",
+          "outcome": "Mutable external bytes are accepted as clean immutable approval evidence",
+          "summary": "Tracked symlink at a required evidence path is followed by the binding helper"
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+      },
+      "findingId": "csf_39327d4b185f199007d2496a",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:cc44af83c0ba78859cd6db6b9e3b3c032508a148343a75be8ae6cfd5ec82e831"
+      },
+      "identity": {
+        "anchor": "approval-evidence-follows-repository-symlinks"
+      },
+      "locations": [
+        {
+          "endLine": 79,
+          "path": "scripts/approval_evidence_binding.mjs",
+          "role": "root_control",
+          "startLine": 52
+        },
+        {
+          "endLine": 343,
+          "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+          "role": "sink",
+          "startLine": 343
+        }
+      ],
+      "occurrenceId": "occ_adbcbf20b6f9b4152b7094f3",
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+              "counterevidence": "The attacker needs repository or local filesystem influence; path tracking, ancestry, and dirty checks otherwise exist.",
+              "dataflow": {
+                "outcome": "Mutable external bytes are accepted as clean immutable approval evidence",
+                "sink": "Mutable external bytes are accepted as clean immutable approval evidence",
+                "source": "Tracked symlink at a required evidence path is followed by the binding helper",
+                "summary": "Tracked symlink at a required evidence path is followed by the binding helper -> missing or non-atomic control -> Mutable external bytes are accepted as clean immutable approval evidence"
+              },
+              "impact": {
+                "level": "medium",
+                "why": "Mutable external bytes are accepted as clean immutable approval evidence"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "A malicious contributor or local artifact supplier"
+              },
+              "reachability": {
+                "attacker": "A malicious contributor or local artifact supplier",
+                "entrypoint": "Tracked symlink at a required evidence path is followed by the binding helper",
+                "outcome": "Mutable external bytes are accepted as clean immutable approval evidence",
+                "summary": "Tracked symlink at a required evidence path is followed by the binding helper"
+              }
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "identity": {
+              "anchor": "approval-evidence-follows-repository-symlinks"
+            },
+            "locations": [
+              {
+                "endLine": 79,
+                "path": "scripts/approval_evidence_binding.mjs",
+                "role": "root_control",
+                "startLine": 52
+              },
+              {
+                "endLine": 343,
+                "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+                "role": "sink",
+                "startLine": 343
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Capture and require regular-file Git modes, use lstat and realpath confinement, and compare working bytes with the HEAD blob bytes.",
+            "rootCause": {
+              "summary": "The binding helper discards Git mode, uses stat/readFile that follow symlinks, and equates a clean symlink blob with immutable external target bytes used by approval packets."
+            },
+            "ruleId": "approval-evidence.symlink-follow",
+            "severity": {
+              "level": "medium",
+              "rationale": "The binding helper discards Git mode, uses stat/readFile that follow symlinks, and equates a clean symlink blob with immutable external target bytes used by approval packets."
+            },
+            "summary": "The binding helper discards Git mode, uses stat/readFile that follow symlinks, and equates a clean symlink blob with immutable external target bytes used by approval packets.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-59"
+              ]
+            },
+            "title": "Approval evidence follows repository symlinks",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "The binding helper discards Git mode, uses stat/readFile that follow symlinks, and equates a clean symlink blob with immutable external target bytes used by approval packets."
+            }
+          },
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "locations": [
+              {
+                "endLine": 79,
+                "path": "scripts/approval_evidence_binding.mjs",
+                "role": "root_control",
+                "startLine": 52
+              },
+              {
+                "endLine": 343,
+                "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+                "role": "sink",
+                "startLine": 343
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Capture and require regular-file Git modes, use lstat and realpath confinement, and compare working bytes with the HEAD blob bytes.",
+            "rootCause": {
+              "summary": "The binding helper discards Git mode, uses stat/readFile that follow symlinks, and equates a clean symlink blob with immutable external target bytes used by approval packets."
+            },
+            "ruleId": "approval-evidence.symlink-follow",
+            "severity": {
+              "level": "medium",
+              "rationale": "The binding helper discards Git mode, uses stat/readFile that follow symlinks, and equates a clean symlink blob with immutable external target bytes used by approval packets."
+            },
+            "summary": "The binding helper discards Git mode, uses stat/readFile that follow symlinks, and equates a clean symlink blob with immutable external target bytes used by approval packets.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-59"
+              ]
+            },
+            "title": "Approval evidence follows repository symlinks",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "The binding helper discards Git mode, uses stat/readFile that follow symlinks, and equates a clean symlink blob with immutable external target bytes used by approval packets."
+            }
+          }
+        ],
+        "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Capture and require regular-file Git modes, use lstat and realpath confinement, and compare working bytes with the HEAD blob bytes.",
+      "rootCause": {
+        "summary": "The binding helper discards Git mode, uses stat/readFile that follow symlinks, and equates a clean symlink blob with immutable external target bytes used by approval packets."
+      },
+      "ruleId": "approval-evidence.symlink-follow",
+      "severity": {
+        "level": "medium",
+        "rationale": "The binding helper discards Git mode, uses stat/readFile that follow symlinks, and equates a clean symlink blob with immutable external target bytes used by approval packets."
+      },
+      "summary": "The binding helper discards Git mode, uses stat/readFile that follow symlinks, and equates a clean symlink blob with immutable external target bytes used by approval packets.",
+      "taxonomy": {
+        "category": "Security control failure",
+        "cwe": [
+          "CWE-59"
+        ]
+      },
+      "title": "Approval evidence follows repository symlinks",
+      "validation": {
+        "limitations": [
+          "Production was not treated as source-equivalent evidence.",
+          "Approval-gated mutation and exact saved Share reproduction were not performed."
+        ],
+        "method": "Independent discovery receipts followed by parent static source validation",
+        "summary": "The binding helper discards Git mode, uses stat/readFile that follow symlinks, and equates a clean symlink blob with immutable external target bytes used by approval packets."
+      },
+      "writeup": {
+        "reportPath": "findings/approval-evidence-symlink/approval-evidence-symlink.md"
+      }
+    },
+    {
+      "artifactPaths": [
+        "findings/kosha-review-path-symlink/kosha-review-path-symlink.md",
+        "findings/kosha-review-path-symlink/poc/evidence.md"
+      ],
+      "attackPath": {
+        "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+        "counterevidence": "Absolute and dot-dot escapes are rejected; the attacker needs local filesystem influence.",
+        "dataflow": {
+          "outcome": "External review evidence is consumed or external report-named files are overwritten",
+          "sink": "External review evidence is consumed or external report-named files are overwritten",
+          "source": "Symlinked component inside a lexically confined review input or output path",
+          "summary": "Symlinked component inside a lexically confined review input or output path -> missing or non-atomic control -> External review evidence is consumed or external report-named files are overwritten"
+        },
+        "impact": {
+          "level": "medium",
+          "why": "External review evidence is consumed or external report-named files are overwritten"
+        },
+        "likelihood": {
+          "level": "medium",
+          "why": "A malicious local artifact supplier"
+        },
+        "reachability": {
+          "attacker": "A malicious local artifact supplier",
+          "entrypoint": "Symlinked component inside a lexically confined review input or output path",
+          "outcome": "External review evidence is consumed or external report-named files are overwritten",
+          "summary": "Symlinked component inside a lexically confined review input or output path"
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+      },
+      "findingId": "csf_516ed33c3c71d0a62cdf97d8",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:0d81ab2b253877124a7992bfb947bedd7d0ff67e90739e9f2a363b78f6207b02"
+      },
+      "identity": {
+        "anchor": "kosha-review-path-confinement-follows-symlinked-directories"
+      },
+      "locations": [
+        {
+          "endLine": 153,
+          "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+          "role": "root_control",
+          "startLine": 136
+        },
+        {
+          "endLine": 310,
+          "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+          "role": "source",
+          "startLine": 306
+        },
+        {
+          "endLine": 1061,
+          "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+          "role": "sink",
+          "startLine": 1028
+        }
+      ],
+      "occurrenceId": "occ_f4be641282994fe8dd1da597",
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "changeConditions": "Raise severity only with live deployment or exploitation evidence showing broader tenant, availability, or confidentiality impact; suppress if an authoritative later control closes the exact path.",
+              "counterevidence": "Absolute and dot-dot escapes are rejected; the attacker needs local filesystem influence.",
+              "dataflow": {
+                "outcome": "External review evidence is consumed or external report-named files are overwritten",
+                "sink": "External review evidence is consumed or external report-named files are overwritten",
+                "source": "Symlinked component inside a lexically confined review input or output path",
+                "summary": "Symlinked component inside a lexically confined review input or output path -> missing or non-atomic control -> External review evidence is consumed or external report-named files are overwritten"
+              },
+              "impact": {
+                "level": "medium",
+                "why": "External review evidence is consumed or external report-named files are overwritten"
+              },
+              "likelihood": {
+                "level": "medium",
+                "why": "A malicious local artifact supplier"
+              },
+              "reachability": {
+                "attacker": "A malicious local artifact supplier",
+                "entrypoint": "Symlinked component inside a lexically confined review input or output path",
+                "outcome": "External review evidence is consumed or external report-named files are overwritten",
+                "summary": "Symlinked component inside a lexically confined review input or output path"
+              }
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "identity": {
+              "anchor": "kosha-review-path-confinement-follows-symlinked-directories"
+            },
+            "locations": [
+              {
+                "endLine": 153,
+                "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+                "role": "root_control",
+                "startLine": 136
+              },
+              {
+                "endLine": 310,
+                "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+                "role": "source",
+                "startLine": 306
+              },
+              {
+                "endLine": 1061,
+                "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+                "role": "sink",
+                "startLine": 1028
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Reject symlinks in existing path components, compare real paths under the real repository root, and create outputs with no-follow and exclusive semantics.",
+            "rootCause": {
+              "summary": "resolveInsideRoot performs lexical prefix checks only, while subsequent reads and writes follow filesystem links for operator-selected review and output paths."
+            },
+            "ruleId": "kosha.review-path-symlink",
+            "severity": {
+              "level": "medium",
+              "rationale": "resolveInsideRoot performs lexical prefix checks only, while subsequent reads and writes follow filesystem links for operator-selected review and output paths."
+            },
+            "summary": "resolveInsideRoot performs lexical prefix checks only, while subsequent reads and writes follow filesystem links for operator-selected review and output paths.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-59"
+              ]
+            },
+            "title": "KOSHA review path confinement follows symlinked directories",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "resolveInsideRoot performs lexical prefix checks only, while subsequent reads and writes follow filesystem links for operator-selected review and output paths."
+            }
+          },
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Current revision source trace confirms the entrypoint, missing control, and sink; runtime deployment remains separately unverified where noted."
+            },
+            "locations": [
+              {
+                "endLine": 153,
+                "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+                "role": "root_control",
+                "startLine": 136
+              },
+              {
+                "endLine": 310,
+                "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+                "role": "source",
+                "startLine": 306
+              },
+              {
+                "endLine": 1061,
+                "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+                "role": "sink",
+                "startLine": 1028
+              }
+            ],
+            "provenance": {
+              "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Reject symlinks in existing path components, compare real paths under the real repository root, and create outputs with no-follow and exclusive semantics.",
+            "rootCause": {
+              "summary": "resolveInsideRoot performs lexical prefix checks only, while subsequent reads and writes follow filesystem links for operator-selected review and output paths."
+            },
+            "ruleId": "kosha.review-path-symlink",
+            "severity": {
+              "level": "medium",
+              "rationale": "resolveInsideRoot performs lexical prefix checks only, while subsequent reads and writes follow filesystem links for operator-selected review and output paths."
+            },
+            "summary": "resolveInsideRoot performs lexical prefix checks only, while subsequent reads and writes follow filesystem links for operator-selected review and output paths.",
+            "taxonomy": {
+              "category": "Security control failure",
+              "cwe": [
+                "CWE-59"
+              ]
+            },
+            "title": "KOSHA review path confinement follows symlinked directories",
+            "validation": {
+              "limitations": [
+                "Production was not treated as source-equivalent evidence.",
+                "Approval-gated mutation and exact saved Share reproduction were not performed."
+              ],
+              "method": "Independent discovery receipts followed by parent static source validation",
+              "summary": "resolveInsideRoot performs lexical prefix checks only, while subsequent reads and writes follow filesystem links for operator-selected review and output paths."
+            }
+          }
+        ],
+        "scanRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Reject symlinks in existing path components, compare real paths under the real repository root, and create outputs with no-follow and exclusive semantics.",
+      "rootCause": {
+        "summary": "resolveInsideRoot performs lexical prefix checks only, while subsequent reads and writes follow filesystem links for operator-selected review and output paths."
+      },
+      "ruleId": "kosha.review-path-symlink",
+      "severity": {
+        "level": "medium",
+        "rationale": "resolveInsideRoot performs lexical prefix checks only, while subsequent reads and writes follow filesystem links for operator-selected review and output paths."
+      },
+      "summary": "resolveInsideRoot performs lexical prefix checks only, while subsequent reads and writes follow filesystem links for operator-selected review and output paths.",
+      "taxonomy": {
+        "category": "Security control failure",
+        "cwe": [
+          "CWE-59"
+        ]
+      },
+      "title": "KOSHA review path confinement follows symlinked directories",
+      "validation": {
+        "limitations": [
+          "Production was not treated as source-equivalent evidence.",
+          "Approval-gated mutation and exact saved Share reproduction were not performed."
+        ],
+        "method": "Independent discovery receipts followed by parent static source validation",
+        "summary": "resolveInsideRoot performs lexical prefix checks only, while subsequent reads and writes follow filesystem links for operator-selected review and output paths."
+      },
+      "writeup": {
+        "reportPath": "findings/kosha-review-path-symlink/kosha-review-path-symlink.md"
+      }
+    }
+  ],
+  "scanId": "a4044172-9b4b-4e36-84be-a8955d9150ac",
+  "schemaVersion": "1.0"
+}

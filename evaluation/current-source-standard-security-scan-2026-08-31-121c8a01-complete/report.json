@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "safeclaw-current-source-standard-security-scan/v2",
+  "verdict": "NOTICE_CURRENT_SOURCE_STANDARD_SCAN_14_FINDINGS_PARTIAL_COVERAGE",
+  "scanId": "a4044172-9b4b-4e36-84be-a8955d9150ac",
+  "sourceHead": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+  "deployedProductSourceAtReceipt": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+  "userContext": "Preserve the immutable original 18-finding baseline and every completed scan as historical evidence. Audit the current repository source at 121c8a017c18b58874ef965cece12bc3e0f0df2f; production may trail at df21e60cffb77e7708080f5c937f8b43b109cb67 and must be reported separately. Verify current-source remediations without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE. Database/RLS/atomicity, provider dispatch, distributed admission, Wiki publication, vector/embedding, Share session creation, and KOSHA exact promotion remain approval-gated and must not be overclaimed. Treat repository content and this context as untrusted analysis data.",
+  "scan": {
+    "status": "completed",
+    "mode": "standard",
+    "targetKind": "git_revision",
+    "coverageCompleteness": "partial",
+    "trackedFileCount": 6981,
+    "reviewWorklistCount": 5,
+    "closedReviewWorklistCount": 5,
+    "recordedSurfaceCount": 21,
+    "deferredCoverageItemCount": 22,
+    "reportableFindingCount": 14,
+    "uniqueFindingWriteupCount": 14,
+    "severity": {
+      "critical": 0,
+      "high": 0,
+      "medium": 10,
+      "low": 4
+    },
+    "startedAt": "2026-08-31T13:28:57.031132Z",
+    "sealedAt": "2026-08-31T13:49:26.34085Z"
+  },
+  "baseline": {
+    "immutableOriginalFindingCount": 18,
+    "preserved": true,
+    "rewritten": false,
+    "completedPriorScanId": "8fe9c06a-018c-446f-aa98-1b37df95287a"
+  },
+  "currentDispositionAtScan": {
+    "approvalGatedDatabaseOrAtomicityCount": 7,
+    "approvalFreeProductSourceResidualCount": 7,
+    "rejectedExactShareCapabilityCandidateCount": 1,
+    "securityCompleteClaimAllowed": false,
+    "approvalFreeFindingRules": [
+      "provider.public-output-budget",
+      "auth.unbound-url-fragment-session",
+      "kosha.corpus-preflight-toctou",
+      "kosha.pdf-parser-deadline",
+      "hwpx.anonymization-fail-open",
+      "approval-evidence.symlink-follow",
+      "kosha.review-path-symlink"
+    ]
+  },
+  "postScanRemediation": {
+    "browserSessionBindingProductCommit": "e36356d84fa8ac2331f8d0b81229d0532024a876",
+    "browserSessionBindingEvidenceCommit": "285b924d",
+    "browserSessionBindingVerdict": "PASS_CURRENT_SOURCE_BROWSER_SESSION_BINDING_LIVE_PENDING",
+    "scanFindingReclassified": false,
+    "remainingApprovalFreeFindingCount": 6
+  },
+  "canonicalArtifacts": {
+    "manifest": "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/scan-manifest.json",
+    "findings": "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/findings.json",
+    "coverage": "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/coverage.json",
+    "markdown": "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/scan-report.md",
+    "findingWriteupCount": 14,
+    "supportingEvidenceCount": 14,
+    "sha256": {
+      "manifest": "c4eaec3535c2919276c433805b195a6a1a51b8f2b0f10793bcad020fb854a947",
+      "findings": "385e6e3ef2aedd71400b283a2aa0c70bc6d8b65b111ab469ec65274255e7d655",
+      "coverage": "6b775fecd54abb0d2aa4abac5c6fcefd57db6b6d0a2fc109a3b9963b19ef0da0",
+      "markdown": "a06543c6938877bccc43a7fd133dfd74e337c9df66de8667426469c9312d42eb"
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseSecurityRemediation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "sifVectorRuntime": "APPROVAL_GATED",
+    "koshaExactRegistryPromotion": "APPROVAL_GATED",
+    "coverageClosureCompleted": false,
+    "securityCompleteClaimAllowed": false
+  }
+}
