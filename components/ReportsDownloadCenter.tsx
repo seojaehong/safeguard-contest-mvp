@@ -1,6 +1,5 @@
 "use client";
 
-import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -37,6 +36,7 @@ import {
   type ReportViewState
 } from "@/lib/reporting-downloads";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
+import { createSafeClawBrowserSupabaseClient } from "@/lib/supabase-browser-client";
 
 const periodOptions: Array<{ value: ReportPeriod; label: string; detail: string }> = [
   { value: "daily", label: "오늘", detail: "당일" },
@@ -209,7 +209,7 @@ async function readReportAccessToken(): Promise<string | null> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) return null;
-  const client = createClient(url, anonKey);
+  const client = createSafeClawBrowserSupabaseClient(url, anonKey);
   const { data, error } = await client.auth.getSession();
   if (error) {
     console.error("report session read failed", error);

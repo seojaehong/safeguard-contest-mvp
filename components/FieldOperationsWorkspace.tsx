@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, startTransition } from "react";
-import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
+import { type Session, type SupabaseClient } from "@supabase/supabase-js";
 import { CitationList } from "@/components/CitationList";
 import { ClawChat } from "@/components/ClawChat";
 import {
@@ -38,6 +38,7 @@ import {
 } from "@/lib/workpack-readiness";
 import { buildWorkspaceOperationMemoryGraph } from "@/lib/workspace-operation-graph";
 import { resolveSavedWorkerIds } from "@/lib/workflow-share-client";
+import { createSafeClawBrowserSupabaseClient } from "@/lib/supabase-browser-client";
 import {
   buildDefaultWorkers,
   buildEducationRecordDrafts,
@@ -167,7 +168,7 @@ function getSupabaseBrowserClient() {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) return null;
   if (!supabaseBrowserClient) {
-    supabaseBrowserClient = createClient(url, anonKey);
+    supabaseBrowserClient = createSafeClawBrowserSupabaseClient(url, anonKey);
   }
   return supabaseBrowserClient;
 }

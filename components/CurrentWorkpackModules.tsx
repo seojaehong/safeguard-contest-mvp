@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { createClient, type Session } from "@supabase/supabase-js";
+import { type Session } from "@supabase/supabase-js";
 import { CitationList } from "@/components/CitationList";
+import { createSafeClawBrowserSupabaseClient } from "@/lib/supabase-browser-client";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
 import {
   WorkpackEditor,
@@ -681,7 +682,7 @@ function createBrowserSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) return null;
-  return createClient(url, anonKey);
+  return createSafeClawBrowserSupabaseClient(url, anonKey);
 }
 
 function readArchiveWorkpacks(value: unknown): ArchiveWorkpack[] {

@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { createClient, type Session } from "@supabase/supabase-js";
+import { type Session } from "@supabase/supabase-js";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { buildDemoEvidenceWorkpacks } from "@/lib/evidence-file-demo";
 import { groupEvidenceByArticle, type EvidenceFileResult, type EvidenceFileWorkpack } from "@/lib/evidence-file";
 import { getDocumentTitle } from "@/lib/document-titles";
 import { formatEvidenceBadge } from "@/lib/smsa-mapping";
 import { isRecord, readString } from "@/lib/workspace-api";
+import { createSafeClawBrowserSupabaseClient } from "@/lib/supabase-browser-client";
 
 type LoadStatus = "checking" | "ready" | "empty" | "login-required" | "unconfigured" | "error";
 
@@ -25,7 +26,7 @@ function createBrowserSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) return null;
-  return createClient(url, anonKey);
+  return createSafeClawBrowserSupabaseClient(url, anonKey);
 }
 
 async function readSession(): Promise<Session | null> {

@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
+import { type Session, type SupabaseClient } from "@supabase/supabase-js";
+import { createSafeClawBrowserSupabaseClient } from "@/lib/supabase-browser-client";
 import styles from "./KnowledgePage.module.css";
 
 type ReviewAction = "approve_candidate" | "keep_site_only" | "reject";
@@ -168,7 +169,7 @@ function getBrowserSupabaseClient(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) return null;
-  if (!browserClient) browserClient = createClient(url, anonKey);
+  if (!browserClient) browserClient = createSafeClawBrowserSupabaseClient(url, anonKey);
   return browserClient;
 }
 

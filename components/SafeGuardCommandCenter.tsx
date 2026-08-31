@@ -2,7 +2,6 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { createClient } from "@supabase/supabase-js";
 import { FieldOperationsWorkspace } from "@/components/FieldOperationsWorkspace";
 import {
   buildGenerationEvidenceFingerprint,
@@ -65,6 +64,7 @@ import {
 } from "@/lib/workpack-readiness";
 import { formatCustomerFacingLabel, formatCustomerFacingText } from "@/lib/web-safe-presentation";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
+import { createSafeClawBrowserSupabaseClient } from "@/lib/supabase-browser-client";
 
 type SafeGuardCommandCenterProps = {
   examples: FieldExample[];
@@ -141,14 +141,14 @@ type LocalPhoto = {
 type InputHazardCandidate = HazardPhotoGenerationCandidate & { source: "vision" | "local" };
 type InputHazardPhotoAnalysis = InputHazardPhotoAnalysisState<InputHazardCandidate>;
 
-let workspaceAuthClient: ReturnType<typeof createClient> | null = null;
+let workspaceAuthClient: ReturnType<typeof createSafeClawBrowserSupabaseClient> | null = null;
 
 async function readWorkspaceAccessToken(): Promise<string | null> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) return null;
   try {
-    if (!workspaceAuthClient) workspaceAuthClient = createClient(url, anonKey);
+    if (!workspaceAuthClient) workspaceAuthClient = createSafeClawBrowserSupabaseClient(url, anonKey);
     const { data, error } = await workspaceAuthClient.auth.getSession();
     if (error) {
       console.error("workspace photo analysis session read failed", error);

@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { type SupabaseClient } from "@supabase/supabase-js";
 
 import {
   consumeAuthTransaction,
   parseAuthHashSession,
   resolveSafeNextPath
 } from "@/lib/auth-callback";
+import { createSafeClawBrowserSupabaseClient } from "@/lib/supabase-browser-client";
 
 let browserClient: SupabaseClient | null = null;
 
@@ -17,9 +18,7 @@ function getBrowserSupabaseClient() {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) return null;
   if (!browserClient) {
-    browserClient = createClient(url, anonKey, {
-      auth: { detectSessionInUrl: false }
-    });
+    browserClient = createSafeClawBrowserSupabaseClient(url, anonKey);
   }
   return browserClient;
 }

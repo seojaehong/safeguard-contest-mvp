@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
+import { type Session, type SupabaseClient } from "@supabase/supabase-js";
 import {
   MCP_ENDPOINT_URL,
   buildOpenClawHarnessAgentCommand,
@@ -28,6 +28,7 @@ import {
   readPhotoVisionPresentationPayload,
   type PhotoVisionPresentationPayload
 } from "@/lib/web-safe-presentation";
+import { createSafeClawBrowserSupabaseClient } from "@/lib/supabase-browser-client";
 
 let browserClient: SupabaseClient | null = null;
 
@@ -35,7 +36,7 @@ function getBrowserSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) return null;
-  if (!browserClient) browserClient = createClient(url, anonKey);
+  if (!browserClient) browserClient = createSafeClawBrowserSupabaseClient(url, anonKey);
   return browserClient;
 }
 

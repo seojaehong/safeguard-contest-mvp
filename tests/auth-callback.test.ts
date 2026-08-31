@@ -11,6 +11,14 @@ import {
   resolveSafeNextPath
 } from "@/lib/auth-callback";
 
+function collectTypeScriptFiles(directory: string): string[] {
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry): string[] => {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) return collectTypeScriptFiles(entryPath);
+    return /\.tsx?$/u.test(entry.name) ? [entryPath] : [];
+  });
+}
+
 describe("parseAuthHashSession", () => {
   it("extracts access and refresh tokens from a Supabase magic-link hash", () => {
     expect(parseAuthHashSession("#access_token=access-demo&refresh_token=refresh-demo&token_type=bearer")).toEqual({
@@ -104,13 +112,32 @@ describe("auth callback transaction", () => {
     const root = process.cwd();
     const callbackSource = fs.readFileSync(path.join(root, "components", "AuthCallbackClient.tsx"), "utf8");
     const loginSource = fs.readFileSync(path.join(root, "components", "AdminLoginPanel.tsx"), "utf8");
+    const browserClientSource = fs.readFileSync(path.join(root, "lib", "supabase-browser-client.ts"), "utf8");
 
-    expect(callbackSource).toContain("detectSessionInUrl: false");
+    expect(browserClientSource).toContain("detectSessionInUrl: false");
     expect(callbackSource.indexOf("consumeAuthTransaction(")).toBeLessThan(
       callbackSource.indexOf("parseAuthHashSession(window.location.hash)")
     );
     expect(loginSource.match(/createAuthTransaction\(\)/gu)).toHaveLength(2);
     expect(loginSource.match(/buildAuthCallbackUrl\(window\.location\.origin, nextPath, transaction\.state\)/gu)).toHaveLength(2);
+  });
+
+  it("routes every browser Supabase client through the URL-session-safe factory", () => {
+    const root = process.cwd();
+    const browserFiles = [
+      ...collectTypeScriptFiles(path.join(root, "app")),
+      ...collectTypeScriptFiles(path.join(root, "components"))
+    ];
+    const clientSurfaces = browserFiles.filter((filePath) => (
+      fs.readFileSync(filePath, "utf8").includes("createSafeClawBrowserSupabaseClient")
+    ));
+
+    expect(clientSurfaces).toHaveLength(11);
+    for (const filePath of browserFiles) {
+      const relativePath = path.relative(root, filePath);
+      const source = fs.readFileSync(filePath, "utf8");
+      expect(source, relativePath).not.toMatch(/\bcreateClient\s*\(/u);
+    }
   });
 
   it("clears persisted user content on explicit and auth-event logout paths", () => {

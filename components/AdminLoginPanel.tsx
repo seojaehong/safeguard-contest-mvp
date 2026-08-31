@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createClient, type Provider, type Session, type SupabaseClient } from "@supabase/supabase-js";
+import { type Provider, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import {
   AUTH_TRANSACTION_STORAGE_KEY,
   buildAuthCallbackUrl,
@@ -10,6 +10,7 @@ import {
   resolveSafeNextPath
 } from "@/lib/auth-callback";
 import { clearStoredSafeClawUserContent } from "@/lib/current-workpack";
+import { createSafeClawBrowserSupabaseClient } from "@/lib/supabase-browser-client";
 
 let browserClient: SupabaseClient | null = null;
 
@@ -18,7 +19,7 @@ function getBrowserSupabaseClient() {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) return null;
   if (!browserClient) {
-    browserClient = createClient(url, anonKey);
+    browserClient = createSafeClawBrowserSupabaseClient(url, anonKey);
   }
   return browserClient;
 }
