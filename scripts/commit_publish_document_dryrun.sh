@@ -6,16 +6,19 @@ COMMIT_APPROVED="${SAFETYGUARD_COMMIT_APPROVED:-0}"
 AUTO_PUSH="${SAFETYGUARD_AUTO_PUSH:-0}"
 PUSH_APPROVED="${SAFETYGUARD_PUSH_APPROVED:-0}"
 EXPECTED_HEAD="${SAFETYGUARD_EXPECTED_HEAD:-}"
+EXPECTED_SOURCE_BRANCH="${SAFETYGUARD_EXPECTED_SOURCE_BRANCH:-}"
 EXPECTED_REMOTE="${SAFETYGUARD_EXPECTED_REMOTE:-}"
 EXPECTED_BRANCH="${SAFETYGUARD_EXPECTED_BRANCH:-}"
 EXPECTED_PREFIX="${SAFETYGUARD_EXPECTED_PREFIX:-}"
 readonly PUBLISH_REMOTE="contest-mvp-origin"
 readonly PUBLISH_BRANCH="master"
 readonly PUBLISH_PREFIX="contest-mvp"
-readonly EXPECTED_PATHS=(
+readonly SNAPSHOT_PATHS=(
   "data/dryrun/latest-document-dryrun.json"
   "data/dryrun/latest-document-dryrun.md"
 )
+readonly MANIFEST_PATH="data/dryrun/latest-document-dryrun-manifest.json"
+readonly EXPECTED_PATHS=("${SNAPSHOT_PATHS[@]}" "$MANIFEST_PATH")
 
 cd "$ROOT"
 
@@ -75,6 +78,30 @@ assert_commit_contains_expected_paths_only() {
   done < <(git diff-tree --no-commit-id --name-only -r -z HEAD)
 }
 
+write_snapshot_manifest() {
+  node - "$START_HEAD" "${SNAPSHOT_PATHS[@]}" "$MANIFEST_PATH" <<'NODE'
+const fs = require("node:fs");
+const crypto = require("node:crypto");
+const [sourceHead, ...paths] = process.argv.slice(2);
+const manifestPath = paths.pop();
+const artifacts = paths.map((artifactPath) => {
+  const bytes = fs.readFileSync(artifactPath);
+  return {
+    path: artifactPath,
+    bytes: bytes.length,
+    sha256: crypto.createHash("sha256").update(bytes).digest("hex"),
+  };
+});
+const manifest = {
+  schemaVersion: "safeclaw-document-dryrun-publication/v1",
+  generatedAt: new Date().toISOString(),
+  sourceHead,
+  artifacts,
+};
+fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+NODE
+}
+
 STAGED_BY_SCRIPT=0
 cleanup_staging() {
   if [[ "$STAGED_BY_SCRIPT" == "1" ]]; then
@@ -90,20 +117,25 @@ npm run dryrun:documents
 
 [[ "$(git rev-parse HEAD)" == "$START_HEAD" ]] \
   || fail "HEAD changed while the dry-run was executing"
+write_snapshot_manifest
 assert_expected_changes_only
 
 git add -- "${EXPECTED_PATHS[@]}"
 STAGED_BY_SCRIPT=1
 assert_staged_changes_only
+echo "Exact staged publication diff:"
+git diff --cached -- "${EXPECTED_PATHS[@]}"
 
 if [[ "$COMMIT_APPROVED" != "1" ]]; then
   echo "Snapshot generated and verified. Commit is held until SAFETYGUARD_COMMIT_APPROVED=1."
-  git diff --cached --stat
   exit 0
 fi
 
 [[ -n "$EXPECTED_HEAD" && "$EXPECTED_HEAD" == "$START_HEAD" ]] \
   || fail "SAFETYGUARD_EXPECTED_HEAD must equal the clean starting HEAD"
+CURRENT_BRANCH="$(git branch --show-current)"
+[[ -n "$EXPECTED_SOURCE_BRANCH" && "$EXPECTED_SOURCE_BRANCH" == "$CURRENT_BRANCH" ]] \
+  || fail "SAFETYGUARD_EXPECTED_SOURCE_BRANCH must equal the current source branch"
 
 STAMP="$(date -u +%Y-%m-%d)"
 git commit -m "chore: publish SafetyGuard daily dry-run snapshot ${STAMP}"
