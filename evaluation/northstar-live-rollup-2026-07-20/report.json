@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-31T10:52:30.543Z",
-  "head": "f92e84596b1e78c3e52d83362b99680835fd5ed7",
+  "generatedAt": "2026-08-31T11:36:19.016Z",
+  "head": "e2b9e76fafe21a0a2e6b7b0d9882e83e25817ee9",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f92e84596b1e78c3e52d83362b99680835fd5ed7",
+    "commitSha": "e2b9e76fafe21a0a2e6b7b0d9882e83e25817ee9",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-aq14jyn9x-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-gpjaywfr3-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "open",
-    "gateCount": 99
+    "gateCount": 100
   },
   "provenGates": [
     {
@@ -242,6 +242,12 @@
       "state": "notice",
       "artifact": "evaluation\\current-source-security-sif-migration-scope-remediation-2026-08-31\\report.json",
       "detail": "Deployed product source f92e8459 validates every selected SIF migration through a top-level SQL allowlist and the canonical migration SHA-256, independent of filename. Four files / 19 tests, strict typecheck, the 28-page build, and the 6,032-record no-mutation preflight pass. The sealed finding remains open pending a fresh scan, SIF runtime remains approval-gated, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
+      "id": "current_source_document_publication_isolation_remediation",
+      "state": "notice",
+      "artifact": "evaluation\\current-source-security-document-publication-isolation-remediation-2026-08-31\\report.json",
+      "detail": "Deployed product source e2b9e76f requires a clean and stable publication source, stages only two generated snapshots plus their SHA-256 manifest, prints the exact diff, and independently binds commit and push approvals. One file / 7 tests, Bash syntax, strict typecheck, and the 28-page build pass. The sealed finding remains open pending a fresh scan, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_source_approval_free_security_remediation",
@@ -2255,9 +2261,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "f92e84596b1e78c3e52d83362b99680835fd5ed7",
+      "sourceCommit": "e2b9e76fafe21a0a2e6b7b0d9882e83e25817ee9",
       "sourceStatus": "exact",
-      "productionCommit": "f92e84596b1e78c3e52d83362b99680835fd5ed7",
+      "productionCommit": "e2b9e76fafe21a0a2e6b7b0d9882e83e25817ee9",
       "productionStatus": "matches_live"
     },
     {

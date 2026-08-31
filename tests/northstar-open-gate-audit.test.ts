@@ -763,6 +763,55 @@ function currentSourceSifMigrationScopeRemediationFixture(): Record<string, unkn
   };
 }
 
+function currentSourceDocumentPublicationIsolationRemediationFixture(): Record<string, unknown> {
+  const scriptBody = "export const boundedDocumentPublication = true;\n";
+  const testBody = "export const boundedDocumentPublicationTest = true;\n";
+  return {
+    schemaVersion: "safeclaw-current-source-security-document-publication-isolation-remediation/v1",
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_DOCUMENT_PUBLICATION_ISOLATION_RESCAN_PENDING",
+    userContext: "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
+    sourceHead: "fixture-sha",
+    productionBuild: { commitSha: "fixture-sha", branch: "master", environment: "production" },
+    immutableSecurityContext: {
+      originalAccountedBaselineFindingCount: 18,
+      originalAccountedBaselinePreserved: true,
+      completedPriorScan: { scanId: "8fe9c06a-018c-446f-aa98-1b37df95287a", targetRevision: "f0c8a7be02becd53c21fb80842cf23c571f22b1f", status: "complete", reportableFindingCount: 17, deferredCandidateCount: 1, findingsRewritten: false },
+      sealedCurrentHeadScan: { scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c", targetRevision: "9504d8db95fcbc9f37f6c5abc638e9ad0813a325", reportableFindingCount: 21, coverageCompleteness: "partial", findingsRewritten: false },
+      currentFinding: { findingId: "csf_f95afe61f821089be16a9597", occurrenceId: "occ_a97b68814542094abd455220", ruleId: "supply-chain.unbound-publication-diff", canonicalFindingState: "open_pending_fresh_rescan", findingRewritten: false },
+    },
+    remediation: {
+      governedPath: "scripts/commit_publish_document_dryrun.sh",
+      cleanStartingTreeRequired: true,
+      headStableDuringGenerationRequired: true,
+      generatedSnapshotPaths: ["data/dryrun/latest-document-dryrun.json", "data/dryrun/latest-document-dryrun.md"],
+      manifestPath: "data/dryrun/latest-document-dryrun-manifest.json",
+      manifestSchemaVersion: "safeclaw-document-dryrun-publication/v1",
+      artifactSha256Recorded: true,
+      unexpectedGeneratedPathFailsClosed: true,
+      unexpectedStagedPathFailsClosed: true,
+      exactStagedDiffPrinted: true,
+      commitApproval: { defaultHeld: true, explicitFlagRequired: true, expectedStartingHeadRequired: true, expectedSourceBranchRequired: true, committedPathSetRevalidated: true },
+      pushApproval: { defaultDisabled: true, separateExplicitFlagRequired: true, expectedRemoteRequired: "contest-mvp-origin", expectedBranchRequired: "master", expectedPrefixRequired: "contest-mvp" },
+      sourceArtifacts: [
+        { path: "scripts/commit_publish_document_dryrun.sh", sha256: createHash("sha256").update(scriptBody).digest("hex") },
+        { path: "tests/commit-publish-document-dryrun.test.ts", sha256: createHash("sha256").update(testBody).digest("hex") },
+      ],
+    },
+    verification: {
+      focusedTests: { files: 1, tests: 7, failed: 0, status: "PASS" },
+      bashSyntax: "PASS",
+      strictTypecheck: "PASS",
+      build: { status: "PASS", staticPages: 28 },
+      liveProductCommitMarkerAligned: true,
+      livePublicationScriptExecuted: false,
+      providerOrRepositoryPushExecutedByScript: false,
+      fixtureCoverage: { cleanDefaultRunLeavesHeadUnchangedAndStagingEmpty: true, unexpectedGeneratedPathFailsClosed: true, missingExpectedHeadFailsClosed: true, approvedCommitContainsOnlyThreeDigestBoundPaths: true, pushRemainsDisabledAfterApprovedCommit: true },
+    },
+    mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, embeddingGenerated: false, vectorUploadPerformed: false, wikiPublished: false, koshaRegistryMutationPerformed: false },
+    remainingBoundaries: { freshFullRepositoryRescanRequired: true, securityCompleteClaimAllowed: false, approvalGatedFindingsClosed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  };
+}
+
 function currentSourcePhotoReadinessAuthFanoutRemediationFixture(): Record<string, unknown> {
   return {
     schemaVersion: "safeclaw-current-source-security-photo-readiness-auth-fanout-remediation/v1",
@@ -5325,6 +5374,13 @@ function createFixtureRoot(): string {
   );
   writeText(rootDir, "scripts/sif_embedding_approval_preflight.mjs", "export const boundedSifMigrationScope = true;\n");
   writeText(rootDir, "tests/sif-embedding-preflight.test.ts", "export const boundedSifMigrationScopeTest = true;\n");
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-document-publication-isolation-remediation-2026-08-31", "report.json"),
+    currentSourceDocumentPublicationIsolationRemediationFixture(),
+  );
+  writeText(rootDir, "scripts/commit_publish_document_dryrun.sh", "export const boundedDocumentPublication = true;\n");
+  writeText(rootDir, "tests/commit-publish-document-dryrun.test.ts", "export const boundedDocumentPublicationTest = true;\n");
   writeJson(
     rootDir,
     path.join("evaluation", "current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31", "report.json"),
@@ -9937,6 +9993,59 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "current_source_sif_migration_scope_remediation")?.state)
       .toBe("contradicted");
+  });
+
+  it("records digest-bound document publication without closing the sealed finding", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "current-source-security-document-publication-isolation-remediation-2026-08-31", "report.json");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_document_publication_isolation_remediation");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("two generated snapshots plus their SHA-256 manifest");
+    expect(gate?.detail).toContain("independently binds commit and push approvals");
+    expect(gate?.detail).toContain("sealed finding remains open pending a fresh scan");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+  });
+
+  it("fails document publication isolation closed for each immutable or approval boundary independently", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "current-source-security-document-publication-isolation-remediation-2026-08-31", "report.json");
+    type PublicationReport = {
+      userContext: string;
+      productionBuild: { commitSha: string };
+      immutableSecurityContext: {
+        completedPriorScan: { targetRevision: string };
+        currentFinding: { findingRewritten: boolean };
+      };
+      remediation: { commitApproval: { expectedSourceBranchRequired: boolean } };
+      mutationBoundary: { providerDispatchCalled: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    const original = JSON.parse(fs.readFileSync(reportPath, "utf8")) as PublicationReport;
+    const mutations: Array<{ label: string; apply: (report: PublicationReport) => void }> = [
+      { label: "user context", apply: (report) => { report.userContext = "changed"; } },
+      { label: "baseline target", apply: (report) => { report.immutableSecurityContext.completedPriorScan.targetRevision = "0".repeat(40); } },
+      { label: "finding rewrite", apply: (report) => { report.immutableSecurityContext.currentFinding.findingRewritten = true; } },
+      { label: "source/live identity", apply: (report) => { report.productionBuild.commitSha = "0".repeat(40); } },
+      { label: "source branch approval", apply: (report) => { report.remediation.commitApproval.expectedSourceBranchRequired = false; } },
+      { label: "provider mutation", apply: (report) => { report.mutationBoundary.providerDispatchCalled = true; } },
+      { label: "exact saved Share", apply: (report) => { report.remainingBoundaries.exactSavedShareVerdict = "PASS"; } },
+    ];
+
+    for (const mutation of mutations) {
+      const report = structuredClone(original);
+      mutation.apply(report);
+      fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+      const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+      expect(
+        contradicted.gates.find((item) => item.id === "current_source_document_publication_isolation_remediation")?.state,
+        mutation.label,
+      ).toBe("contradicted");
+    }
   });
 
   it("records auth-free photo readiness without closing the sealed finding or approval boundaries", async () => {

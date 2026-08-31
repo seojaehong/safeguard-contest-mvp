@@ -78,6 +78,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSourceTemplateInventoryRemediation: path.join("evaluation", "current-source-security-template-inventory-remediation-2026-08-31", "report.json"),
   currentSourceExportSmokeResourceRemediation: path.join("evaluation", "current-source-security-export-smoke-resource-remediation-2026-08-31", "report.json"),
   currentSourceSifMigrationScopeRemediation: path.join("evaluation", "current-source-security-sif-migration-scope-remediation-2026-08-31", "report.json"),
+  currentSourceDocumentPublicationIsolationRemediation: path.join("evaluation", "current-source-security-document-publication-isolation-remediation-2026-08-31", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
@@ -9173,6 +9174,147 @@ function evaluateCurrentSourceSifMigrationScopeRemediationGate(rootDir) {
 
 /**
  * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateCurrentSourceDocumentPublicationIsolationRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourceDocumentPublicationIsolationRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_source_document_publication_isolation_remediation",
+      label: "Current-source document publication isolation remediation",
+      state: "missing",
+      evidencePath,
+      detail: "The document publication isolation receipt is missing or invalid.",
+      nextActions: ["Restore the deployed-source receipt without reclassifying the sealed finding or enabling unattended publication."],
+    });
+  }
+
+  const immutable = isRecord(report.immutableSecurityContext) ? report.immutableSecurityContext : {};
+  const completedPriorScan = isRecord(immutable.completedPriorScan) ? immutable.completedPriorScan : {};
+  const sealedCurrentHeadScan = isRecord(immutable.sealedCurrentHeadScan) ? immutable.sealedCurrentHeadScan : {};
+  const finding = isRecord(immutable.currentFinding) ? immutable.currentFinding : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const commitApproval = isRecord(remediation.commitApproval) ? remediation.commitApproval : {};
+  const pushApproval = isRecord(remediation.pushApproval) ? remediation.pushApproval : {};
+  const sourceArtifacts = Array.isArray(remediation.sourceArtifacts) ? remediation.sourceArtifacts.filter(isRecord) : [];
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedTests) ? verification.focusedTests : {};
+  const build = isRecord(verification.build) ? verification.build : {};
+  const fixtureCoverage = isRecord(verification.fixtureCoverage) ? verification.fixtureCoverage : {};
+  const productionBuild = isRecord(report.productionBuild) ? report.productionBuild : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(productionBuild.commitSha);
+  const governedPaths = [
+    "scripts/commit_publish_document_dryrun.sh",
+    "tests/commit-publish-document-dryrun.test.ts",
+  ];
+  const expectedSnapshotPaths = [
+    "data/dryrun/latest-document-dryrun.json",
+    "data/dryrun/latest-document-dryrun.md",
+  ];
+  const sourceCurrent = /^[0-9a-f]{40}$/u.test(sourceHead)
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths);
+  const sourceArtifactDigestsPass = sourceArtifacts.length === governedPaths.length
+    && governedPaths.every((governedPath) => sourceArtifacts.some((artifact) => (
+      readString(artifact.path) === governedPath
+      && evidenceFileMatchesSha256(rootDir, artifact.path, artifact.sha256)
+    )));
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.embeddingGenerated === false
+    && mutation.vectorUploadPerformed === false
+    && mutation.wikiPublished === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.schemaVersion) === "safeclaw-current-source-security-document-publication-isolation-remediation/v1"
+    && readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_DOCUMENT_PUBLICATION_ISOLATION_RESCAN_PENDING"
+    && readString(report.userContext) === "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed."
+    && sourceHead === productionCommit
+    && sourceCurrent
+    && readString(productionBuild.branch) === "master"
+    && readString(productionBuild.environment) === "production"
+    && immutable.originalAccountedBaselinePreserved === true
+    && readNumber(immutable.originalAccountedBaselineFindingCount) === 18
+    && readString(completedPriorScan.scanId) === "8fe9c06a-018c-446f-aa98-1b37df95287a"
+    && readString(completedPriorScan.targetRevision) === "f0c8a7be02becd53c21fb80842cf23c571f22b1f"
+    && readString(completedPriorScan.status) === "complete"
+    && readNumber(completedPriorScan.reportableFindingCount) === 17
+    && readNumber(completedPriorScan.deferredCandidateCount) === 1
+    && readNumber(completedPriorScan.reportableFindingCount) + readNumber(completedPriorScan.deferredCandidateCount) === readNumber(immutable.originalAccountedBaselineFindingCount)
+    && completedPriorScan.findingsRewritten === false
+    && readString(sealedCurrentHeadScan.scanId) === "f6bef30a-7250-428b-9f66-0bad1e42058c"
+    && readString(sealedCurrentHeadScan.targetRevision) === "9504d8db95fcbc9f37f6c5abc638e9ad0813a325"
+    && readNumber(sealedCurrentHeadScan.reportableFindingCount) === 21
+    && readString(sealedCurrentHeadScan.coverageCompleteness) === "partial"
+    && sealedCurrentHeadScan.findingsRewritten === false
+    && readString(finding.findingId) === "csf_f95afe61f821089be16a9597"
+    && readString(finding.occurrenceId) === "occ_a97b68814542094abd455220"
+    && readString(finding.ruleId) === "supply-chain.unbound-publication-diff"
+    && readString(finding.canonicalFindingState) === "open_pending_fresh_rescan"
+    && finding.findingRewritten === false
+    && readString(remediation.governedPath) === "scripts/commit_publish_document_dryrun.sh"
+    && remediation.cleanStartingTreeRequired === true
+    && remediation.headStableDuringGenerationRequired === true
+    && JSON.stringify(remediation.generatedSnapshotPaths) === JSON.stringify(expectedSnapshotPaths)
+    && readString(remediation.manifestPath) === "data/dryrun/latest-document-dryrun-manifest.json"
+    && readString(remediation.manifestSchemaVersion) === "safeclaw-document-dryrun-publication/v1"
+    && remediation.artifactSha256Recorded === true
+    && remediation.unexpectedGeneratedPathFailsClosed === true
+    && remediation.unexpectedStagedPathFailsClosed === true
+    && remediation.exactStagedDiffPrinted === true
+    && commitApproval.defaultHeld === true
+    && commitApproval.explicitFlagRequired === true
+    && commitApproval.expectedStartingHeadRequired === true
+    && commitApproval.expectedSourceBranchRequired === true
+    && commitApproval.committedPathSetRevalidated === true
+    && pushApproval.defaultDisabled === true
+    && pushApproval.separateExplicitFlagRequired === true
+    && readString(pushApproval.expectedRemoteRequired) === "contest-mvp-origin"
+    && readString(pushApproval.expectedBranchRequired) === "master"
+    && readString(pushApproval.expectedPrefixRequired) === "contest-mvp"
+    && sourceArtifactDigestsPass
+    && readNumber(focused.files) === 1
+    && readNumber(focused.tests) === 7
+    && readNumber(focused.failed) === 0
+    && readString(focused.status) === "PASS"
+    && readString(verification.bashSyntax) === "PASS"
+    && readString(verification.strictTypecheck) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && verification.liveProductCommitMarkerAligned === true
+    && verification.livePublicationScriptExecuted === false
+    && verification.providerOrRepositoryPushExecutedByScript === false
+    && fixtureCoverage.cleanDefaultRunLeavesHeadUnchangedAndStagingEmpty === true
+    && fixtureCoverage.unexpectedGeneratedPathFailsClosed === true
+    && fixtureCoverage.missingExpectedHeadFailsClosed === true
+    && fixtureCoverage.approvedCommitContainsOnlyThreeDigestBoundPaths === true
+    && fixtureCoverage.pushRemainsDisabledAfterApprovedCommit === true
+    && noMutation
+    && remaining.freshFullRepositoryRescanRequired === true
+    && remaining.securityCompleteClaimAllowed === false
+    && remaining.approvalGatedFindingsClosed === false
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE";
+
+  return gateResult({
+    id: "current_source_document_publication_isolation_remediation",
+    label: "Current-source document publication isolation remediation",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? `Deployed product source ${sourceHead.slice(0, 8)} requires a clean and stable publication source, stages only two generated snapshots plus their SHA-256 manifest, prints the exact diff, and independently binds commit and push approvals. One file / 7 tests, Bash syntax, strict typecheck, and the 28-page build pass. The sealed finding remains open pending a fresh scan, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE.`
+      : `Publication isolation verdict=${readString(report.verdict) || "missing"}, source/live=${sourceHead || "missing"}/${productionCommit || "missing"}, sourceCurrent=${sourceCurrent}, sourceDigests=${sourceArtifactDigestsPass}, tests=${readNumber(focused.files)}/${readNumber(focused.tests)}, noMutation=${noMutation}, freshRescan=${remaining.freshFullRepositoryRescanRequired === true}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Include the document publication isolation contract in the next full repository scan before reclassifying the sealed finding; keep all publication approvals explicit."]
+      : ["Restore source/live identity, clean-tree and digest-bound path controls, separate commit/push approvals, verification counts, no-mutation boundaries, fresh-rescan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
  * @param {unknown} relativePath
  * @param {unknown} expectedSha256
  */
@@ -14495,6 +14637,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentSourceTemplateInventoryRemediationGate(rootDir),
     evaluateCurrentSourceExportSmokeResourceRemediationGate(rootDir),
     evaluateCurrentSourceSifMigrationScopeRemediationGate(rootDir),
+    evaluateCurrentSourceDocumentPublicationIsolationRemediationGate(rootDir),
     evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir),
     evaluateCurrentSourceSecurityResourceBudgetRemediationGate(rootDir),
     evaluateCurrentSourceLogoutStorageRemediationGate(rootDir),

@@ -1,0 +1,126 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-document-publication-isolation-remediation/v1",
+  "generatedAt": "2026-08-31T20:14:00+09:00",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_DOCUMENT_PUBLICATION_ISOLATION_RESCAN_PENDING",
+  "userContext": "Preserve immutable original 18-finding baseline. Verify current f0c8a7be source/live-aligned state without DB, provider, share-session, vector, wiki, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
+  "productCommits": [
+    "056bf80399b8bed979734f9eba8b03ba456f4f4a",
+    "e2b9e76fafe21a0a2e6b7b0d9882e83e25817ee9"
+  ],
+  "sourceHead": "e2b9e76fafe21a0a2e6b7b0d9882e83e25817ee9",
+  "productionBuild": {
+    "commitSha": "e2b9e76fafe21a0a2e6b7b0d9882e83e25817ee9",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-gpjaywfr3-seojaehongs-projects.vercel.app",
+    "verifiedAt": "2026-08-31T20:14:00+09:00"
+  },
+  "immutableSecurityContext": {
+    "originalAccountedBaselineFindingCount": 18,
+    "originalAccountedBaselinePreserved": true,
+    "completedPriorScan": {
+      "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+      "targetRevision": "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
+      "status": "complete",
+      "reportableFindingCount": 17,
+      "deferredCandidateCount": 1,
+      "findingsRewritten": false
+    },
+    "sealedCurrentHeadScan": {
+      "scanId": "f6bef30a-7250-428b-9f66-0bad1e42058c",
+      "targetRevision": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+      "reportableFindingCount": 21,
+      "coverageCompleteness": "partial",
+      "findingsRewritten": false
+    },
+    "currentFinding": {
+      "findingId": "csf_f95afe61f821089be16a9597",
+      "occurrenceId": "occ_a97b68814542094abd455220",
+      "ruleId": "supply-chain.unbound-publication-diff",
+      "title": "Dry-run publication can commit and push pre-existing changes",
+      "severity": "low",
+      "canonicalFindingState": "open_pending_fresh_rescan",
+      "findingRewritten": false
+    }
+  },
+  "remediation": {
+    "governedPath": "scripts/commit_publish_document_dryrun.sh",
+    "cleanStartingTreeRequired": true,
+    "headStableDuringGenerationRequired": true,
+    "generatedSnapshotPaths": [
+      "data/dryrun/latest-document-dryrun.json",
+      "data/dryrun/latest-document-dryrun.md"
+    ],
+    "manifestPath": "data/dryrun/latest-document-dryrun-manifest.json",
+    "manifestSchemaVersion": "safeclaw-document-dryrun-publication/v1",
+    "artifactSha256Recorded": true,
+    "unexpectedGeneratedPathFailsClosed": true,
+    "unexpectedStagedPathFailsClosed": true,
+    "exactStagedDiffPrinted": true,
+    "commitApproval": {
+      "defaultHeld": true,
+      "explicitFlagRequired": true,
+      "expectedStartingHeadRequired": true,
+      "expectedSourceBranchRequired": true,
+      "committedPathSetRevalidated": true
+    },
+    "pushApproval": {
+      "defaultDisabled": true,
+      "separateExplicitFlagRequired": true,
+      "expectedRemoteRequired": "contest-mvp-origin",
+      "expectedBranchRequired": "master",
+      "expectedPrefixRequired": "contest-mvp"
+    },
+    "sourceArtifacts": [
+      {
+        "path": "scripts/commit_publish_document_dryrun.sh",
+        "sha256": "8d3471850fd834cd40f86b69702a6503a79b084da118a7617663e2bc2893cee2"
+      },
+      {
+        "path": "tests/commit-publish-document-dryrun.test.ts",
+        "sha256": "1a623e2107745ae962d1002f499712b4d2610861cf2d5f72869083fdba6bb018"
+      }
+    ]
+  },
+  "verification": {
+    "focusedTests": {
+      "files": 1,
+      "tests": 7,
+      "failed": 0,
+      "status": "PASS",
+      "command": "npm.cmd exec -- vitest run tests/commit-publish-document-dryrun.test.ts --maxWorkers=1 --fileParallelism=false"
+    },
+    "bashSyntax": "PASS",
+    "strictTypecheck": "PASS",
+    "build": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "liveProductCommitMarkerAligned": true,
+    "livePublicationScriptExecuted": false,
+    "providerOrRepositoryPushExecutedByScript": false,
+    "fixtureCoverage": {
+      "cleanDefaultRunLeavesHeadUnchangedAndStagingEmpty": true,
+      "unexpectedGeneratedPathFailsClosed": true,
+      "missingExpectedHeadFailsClosed": true,
+      "approvedCommitContainsOnlyThreeDigestBoundPaths": true,
+      "pushRemainsDisabledAfterApprovedCommit": true
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "freshFullRepositoryRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "approvalGatedFindingsClosed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}
