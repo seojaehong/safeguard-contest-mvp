@@ -689,6 +689,21 @@ type NextRunwayReport = {
     securityComplete: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceRawErrorProjectionRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    findingId: string;
+    stablePublicErrorCodeCount: number;
+    focusedTestsPassed: number | null;
+    adjacentTestsPassed: number | null;
+    buildStatus: string;
+    liveProbeCount: number;
+    liveFailureInduced: boolean;
+    freshRescanRequired: boolean;
+    securityComplete: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourcePhotoReadinessAuthFanoutRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1909,6 +1924,23 @@ function currentSourceOntologyErrorProjectionRemediationFixture(): Record<string
       securityComplete: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
+  };
+}
+
+function currentSourceRawErrorProjectionRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_RAW_ERROR_PROJECTION_CONTRACT",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    finding: { findingId: "csf_7aef114e48b74b34b829e893", freshRescanRequired: true },
+    remediation: { stablePublicErrorCodes: ["one", "two", "three", "four", "five"] },
+    verification: {
+      focusedSecurityTests: { testsPassed: 93 },
+      adjacentRegressionTests: { testsPassed: 122 },
+      productionBuild: { status: "PASS" },
+      liveDeployment: { liveFailureInduced: false, readOnlyProbes: [{}, {}, {}, {}] },
+    },
+    remainingBoundaries: { securityComplete: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   };
 }
 
@@ -3631,6 +3663,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
   writeJson(root, "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json", currentSourceSecurityResourceBudgetRemediationFixture());
   writeJson(root, "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json", currentSourceLogoutStorageRemediationFixture());
   writeJson(root, "evaluation/current-source-security-ontology-error-projection-remediation-2026-08-31/report.json", currentSourceOntologyErrorProjectionRemediationFixture());
+  writeJson(root, "evaluation/current-source-security-raw-error-projection-remediation-2026-08-31/report.json", currentSourceRawErrorProjectionRemediationFixture());
   writeJson(root, "evaluation/current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31/report.json", currentSourcePhotoReadinessAuthFanoutRemediationFixture());
   writeJson(root, "evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.json", currentSourceMcpGenerationCancellationRemediationFixture());
   writeJson(root, "evaluation/current-source-security-kosha-archive-preflight-remediation-2026-08-31/report.json", currentSourceKoshaArchivePreflightRemediationFixture());
@@ -5332,6 +5365,24 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       buildStatus: "PASS",
       liveProbeCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
       upstreamFailureInduced: false,
+      freshRescanRequired: true,
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "current_source_raw_error_projection_remediation",
+      state: "notice",
+      reason: expect.stringContaining("5 stable public codes"),
+    }));
+    expect(report.currentSourceRawErrorProjectionRemediation).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_RAW_ERROR_PROJECTION_CONTRACT",
+      findingId: "csf_7aef114e48b74b34b829e893",
+      stablePublicErrorCodeCount: 5,
+      focusedTestsPassed: 93,
+      adjacentTestsPassed: 122,
+      buildStatus: "PASS",
+      liveProbeCount: 4,
+      liveFailureInduced: false,
       freshRescanRequired: true,
       securityComplete: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",

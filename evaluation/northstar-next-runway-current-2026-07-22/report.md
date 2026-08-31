@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `2375ebe8d16274c936aaf980ca072cdbc78953d2`
+Source HEAD: `cc76962075a0bf8089cd0de4d3688f0a374f3dad`
 
-Production `/api/build-info`: `2375ebe8d16274c936aaf980ca072cdbc78953d2`
+Production `/api/build-info`: `cc76962075a0bf8089cd0de4d3688f0a374f3dad`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `2375ebe8d16274c936aaf980ca072cdbc78953d2`
+Live rollup source head: `cc76962075a0bf8089cd0de4d3688f0a374f3dad`
 
 Live rollup matches production: `true`
 
@@ -83,6 +83,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Current-source security resource-budget remediation is `PASS_LIVE_DEPLOYED_SOURCE_APPROVAL_FREE_SECURITY_RESOURCE_BUDGETS_DIRECT_PROBE_ADMISSION_BLOCKED`: source/live `8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f/8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f`, remediated `5`, canonical findings `10`, manifest `failed`, and approval-gated findings `5`. Direct live provider budget execution remains `false`; security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source logout storage remediation is `PASS_LIVE_DEPLOYED_SOURCE_LOGOUT_USER_CONTENT_PURGE_CONTRACT`: source/live `e7533365e3ceb9ceef733587e05709cb59860d4f/e7533365e3ceb9ceef733587e05709cb59860d4f`, exact keys/prefixes/preferences `2/3/2`, tests `100`, build `PASS`, and static violations `0`. Behavioral logout remains `false`; fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source ontology error projection remediation is `PASS_LIVE_DEPLOYED_SOURCE_ONTOLOGY_ERROR_PROJECTION_CONTRACT`: product/live `68a8f9dae349cb03d8c77abedd27040b9679bde0/05e70640ec305ff651eba1c42654a6a3b8a02f1e`, fixed public codes `2`, tests `12`, build `PASS`, and live admission `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`. No provider failure was induced `false`; fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
+- Current-source raw error projection remediation is `PASS_LIVE_DEPLOYED_SOURCE_RAW_ERROR_PROJECTION_CONTRACT`: product/live `856f7e65c33aa71d97277c8abca83864fee8ca47/856f7e65c33aa71d97277c8abca83864fee8ca47`, stable public codes `5`, focused/adjacent tests `93/122`, build `PASS`, and live probes `4`. No production failure was induced `false`; fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source photo readiness auth fan-out remediation is `PASS_LIVE_DEPLOYED_SOURCE_PHOTO_READINESS_AUTH_FANOUT_CONTRACT`: product/live `007f1d2b687102bd5020c85adf527ef5907956ad/007f1d2b687102bd5020c85adf527ef5907956ad`, tests `13`, build `PASS`, Supabase client/auth fan-out `false/false`, and identical live anonymous/Bearer responses `true`. Fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source MCP generation cancellation remediation is `PASS_LIVE_DEPLOYED_SOURCE_MCP_GENERATION_CANCELLATION_CONTRACT`: product/live `5ed2558b25a139c32c300163d1386863bbc3589d/5ed2558b25a139c32c300163d1386863bbc3589d`, focused/adjacent tests `54/143`, build `PASS`, plain/reviewed signal forwarding `true/true`, and persistence skipped after abort `true`. Authenticated runtime cancellation probe remains `false`, fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source KOSHA archive preflight remediation is `PASS_LIVE_DEPLOYED_SOURCE_KOSHA_ARCHIVE_PREFLIGHT_CONTRACT`: product/live `41de3997aed1907a95b794040edef542cb1f40f2/b07a772485e8912c96a6af37b792489b12b8c2b0`, focused Python/Vitest `64/112`, adjacent Python/Vitest `13/37`, member/aggregate byte budgets `10000/1073741824`, and same-handle preflight `true`. Runtime local-archive probe remains `false`, fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.

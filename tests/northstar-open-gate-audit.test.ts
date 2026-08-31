@@ -600,6 +600,71 @@ function currentSourceOntologyErrorProjectionRemediationFixture(): Record<string
   };
 }
 
+function currentSourceRawErrorProjectionRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-current-source-security-raw-error-projection-remediation/v1",
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_RAW_ERROR_PROJECTION_CONTRACT",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    sourceIncludedInProduction: true,
+    finding: {
+      findingId: "csf_7aef114e48b74b34b829e893",
+      occurrenceId: "occ_fe4f32e7d3d3cdce89f794db",
+      ruleId: "information-exposure.raw-error-projection",
+      sealedFindingReclassified: false,
+      freshRescanRequired: true,
+    },
+    remediation: {
+      stablePublicErrorCodes: ["KNOWLEDGE_MATCH_FAILED", "KNOWLEDGE_INGEST_PERSISTENCE_FAILED", "WORKFLOW_PROVIDER_FAILED", "BRIEFING_GENERATION_FAILED", "PHOTO_ANALYSIS_FAILED"],
+      correlationIdGenerated: true,
+      rawExceptionMessageReturnedPublicly: false,
+      rawDatabaseErrorReturnedPublicly: false,
+      failedWebhookResponseBodyReturnedOrThrown: false,
+      successfulWebhookResponseAllowlisted: true,
+      photoProviderAndHarnessErrorsReturnedPublicly: false,
+      invalidPhotoSignatureIoDetailReturnedPublicly: false,
+      callerCancellationPreserved: true,
+    },
+    verification: {
+      focusedSecurityTests: { filesPassed: 5, testsPassed: 93, testsFailed: 0 },
+      adjacentRegressionTests: { filesPassed: 6, testsPassed: 122, testsFailed: 0 },
+      typecheck: { status: "PASS" },
+      productionBuild: { status: "PASS", staticPages: 28 },
+      liveDeployment: {
+        status: "PASS_DEPLOYED_SOURCE_AND_READ_ONLY_PUBLIC_BOUNDARIES",
+        commitSha: "fixture-sha",
+        branch: "master",
+        environment: "production",
+        readOnlyProbes: [
+          { path: "/api/knowledge/match", status: 200, internalErrorDetailExposed: false },
+          { path: "/api/input-photos/hazard-analysis", status: 200, internalErrorDetailExposed: false },
+          { path: "/api/workflow/dispatch", status: 200, providerCalled: false },
+          { path: "/api/briefing/run", status: 401, internalErrorDetailExposed: false },
+        ],
+        liveFailureInduced: false,
+      },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      immutableOriginal18FindingBaselinePreserved: true,
+      sealedCurrentHeadScanPreserved: true,
+      securityComplete: false,
+      freshFollowUpSecurityScan: "REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      approvalGatedFindingsRemainOpen: true,
+      liveAfterDeploymentRequired: false,
+    },
+  };
+}
+
 function currentSourcePhotoReadinessAuthFanoutRemediationFixture(): Record<string, unknown> {
   return {
     schemaVersion: "safeclaw-current-source-security-photo-readiness-auth-fanout-remediation/v1",
@@ -5086,6 +5151,11 @@ function createFixtureRoot(): string {
     rootDir,
     path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
     currentSourceOntologyErrorProjectionRemediationFixture(),
+  );
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-raw-error-projection-remediation-2026-08-31", "report.json"),
+    currentSourceRawErrorProjectionRemediationFixture(),
   );
   writeJson(
     rootDir,
@@ -9588,6 +9658,37 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "current_source_ontology_error_projection_remediation")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records deployed raw error projection without closing the sealed finding or approval boundaries", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-security-raw-error-projection-remediation-2026-08-31",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_raw_error_projection_remediation");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("five stable public codes");
+    expect(gate?.detail).toContain("Five security files / 93 tests");
+    expect(gate?.detail).toContain("without inducing a production failure");
+    expect(gate?.detail).toContain("sealed 21-finding scan remains unchanged pending a fresh scan");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      mutationBoundary: { dbMutationPerformed: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.mutationBoundary.dbMutationPerformed = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "current_source_raw_error_projection_remediation")?.state)
       .toBe("contradicted");
   });
 

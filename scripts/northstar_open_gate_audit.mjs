@@ -80,6 +80,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
   currentSourceOntologyErrorProjectionRemediation: path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
+  currentSourceRawErrorProjectionRemediation: path.join("evaluation", "current-source-security-raw-error-projection-remediation-2026-08-31", "report.json"),
   currentSourcePhotoReadinessAuthFanoutRemediation: path.join("evaluation", "current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31", "report.json"),
   currentSourceMcpGenerationCancellationRemediation: path.join("evaluation", "current-source-security-mcp-generation-cancellation-remediation-2026-08-31", "report.json"),
   currentSourceKoshaArchivePreflightRemediation: path.join("evaluation", "current-source-security-kosha-archive-preflight-remediation-2026-08-31", "report.json"),
@@ -9515,6 +9516,110 @@ function evaluateCurrentSourceOntologyErrorProjectionRemediationGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateCurrentSourceRawErrorProjectionRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourceRawErrorProjectionRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_source_raw_error_projection_remediation",
+      label: "Current-source raw error projection remediation",
+      state: "missing",
+      evidencePath,
+      detail: "The deployed-source raw error projection remediation receipt is missing or invalid.",
+      nextActions: ["Restore the receipt without reclassifying the sealed finding or closing approval boundaries."],
+    });
+  }
+
+  const finding = isRecord(report.finding) ? report.finding : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedSecurityTests) ? verification.focusedSecurityTests : {};
+  const adjacent = isRecord(verification.adjacentRegressionTests) ? verification.adjacentRegressionTests : {};
+  const typecheck = isRecord(verification.typecheck) ? verification.typecheck : {};
+  const build = isRecord(verification.productionBuild) ? verification.productionBuild : {};
+  const live = isRecord(verification.liveDeployment) ? verification.liveDeployment : {};
+  const probes = Array.isArray(live.readOnlyProbes) ? live.readOnlyProbes.filter(isRecord) : [];
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const boundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const codes = Array.isArray(remediation.stablePublicErrorCodes)
+    ? remediation.stablePublicErrorCodes.map(readString).filter(Boolean)
+    : [];
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.schemaVersion) === "safeclaw-current-source-security-raw-error-projection-remediation/v1"
+    && readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_RAW_ERROR_PROJECTION_CONTRACT"
+    && productCommit !== ""
+    && productCommit === readString(report.sourceHead)
+    && productionCommit === productCommit
+    && productionCommit === readString(live.commitSha)
+    && report.sourceIncludedInProduction === true
+    && isGitAncestor(rootDir, productCommit)
+    && readString(live.branch) === "master"
+    && readString(live.environment) === "production"
+    && readString(finding.findingId) === "csf_7aef114e48b74b34b829e893"
+    && readString(finding.occurrenceId) === "occ_fe4f32e7d3d3cdce89f794db"
+    && readString(finding.ruleId) === "information-exposure.raw-error-projection"
+    && finding.sealedFindingReclassified === false
+    && finding.freshRescanRequired === true
+    && codes.length === 5
+    && ["KNOWLEDGE_MATCH_FAILED", "KNOWLEDGE_INGEST_PERSISTENCE_FAILED", "WORKFLOW_PROVIDER_FAILED", "BRIEFING_GENERATION_FAILED", "PHOTO_ANALYSIS_FAILED"].every((code) => codes.includes(code))
+    && remediation.correlationIdGenerated === true
+    && remediation.rawExceptionMessageReturnedPublicly === false
+    && remediation.rawDatabaseErrorReturnedPublicly === false
+    && remediation.failedWebhookResponseBodyReturnedOrThrown === false
+    && remediation.successfulWebhookResponseAllowlisted === true
+    && remediation.photoProviderAndHarnessErrorsReturnedPublicly === false
+    && remediation.invalidPhotoSignatureIoDetailReturnedPublicly === false
+    && remediation.callerCancellationPreserved === true
+    && readNumber(focused.filesPassed) === 5
+    && readNumber(focused.testsPassed) === 93
+    && readNumber(focused.testsFailed) === 0
+    && readNumber(adjacent.filesPassed) === 6
+    && readNumber(adjacent.testsPassed) === 122
+    && readNumber(adjacent.testsFailed) === 0
+    && readString(typecheck.status) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && readString(live.status) === "PASS_DEPLOYED_SOURCE_AND_READ_ONLY_PUBLIC_BOUNDARIES"
+    && probes.length === 4
+    && probes.every((probe) => probe.internalErrorDetailExposed !== true && probe.providerCalled !== true)
+    && live.liveFailureInduced === false
+    && noMutation
+    && boundaries.immutableOriginal18FindingBaselinePreserved === true
+    && boundaries.sealedCurrentHeadScanPreserved === true
+    && boundaries.securityComplete === false
+    && readString(boundaries.freshFollowUpSecurityScan) === "REQUIRED"
+    && readString(boundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && boundaries.approvalGatedFindingsRemainOpen === true
+    && boundaries.liveAfterDeploymentRequired === false;
+
+  return gateResult({
+    id: "current_source_raw_error_projection_remediation",
+    label: "Current-source raw error projection remediation",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Current live source replaces raw database, provider, webhook, file-I/O, and exception details with five stable public codes and correlation IDs across knowledge, dispatch, briefing, and photo boundaries. Five security files / 93 tests, six adjacent files / 122 tests, typecheck, and the 28-page build pass; four read-only live probes preserve public boundaries without inducing a production failure. The sealed 21-finding scan remains unchanged pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
+      : `Raw-error verdict=${readString(report.verdict) || "missing"}, product/live=${productCommit || "missing"}/${productionCommit || "missing"}, tests=${readNumber(focused.testsPassed)}/${readNumber(adjacent.testsPassed)}, codes=${codes.length}, probes=${probes.length}, failureInduced=${live.liveFailureInduced === true}, freshRescan=${finding.freshRescanRequired === true}, noMutation=${noMutation}, securityComplete=${boundaries.securityComplete === true}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Include the deployed raw-error projection contract in the next full repository scan before reclassifying the sealed finding.",
+          "Keep exact saved Share and all DB/provider/vector/wiki/KOSHA approval boundaries open.",
+        ]
+      : ["Restore fixed public codes, safe diagnostics, aligned source/live identity, verification counts, fresh-rescan boundary, no-mutation boundary, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateCurrentSourcePhotoReadinessAuthFanoutRemediationGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.currentSourcePhotoReadinessAuthFanoutRemediation;
   const report = readJsonFile(rootDir, evidencePath);
@@ -13947,6 +14052,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentSourceSecurityResourceBudgetRemediationGate(rootDir),
     evaluateCurrentSourceLogoutStorageRemediationGate(rootDir),
     evaluateCurrentSourceOntologyErrorProjectionRemediationGate(rootDir),
+    evaluateCurrentSourceRawErrorProjectionRemediationGate(rootDir),
     evaluateCurrentSourcePhotoReadinessAuthFanoutRemediationGate(rootDir),
     evaluateCurrentSourceMcpGenerationCancellationRemediationGate(rootDir),
     evaluateCurrentSourceKoshaArchivePreflightRemediationGate(rootDir),

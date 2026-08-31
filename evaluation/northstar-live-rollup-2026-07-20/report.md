@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T04:04:55.348Z
-Source HEAD at generation: 2375ebe8d16274c936aaf980ca072cdbc78953d2
-Live commit at generation: 2375ebe8d16274c936aaf980ca072cdbc78953d2
+Generated at: 2026-08-31T04:44:36.031Z
+Source HEAD at generation: cc76962075a0bf8089cd0de4d3688f0a374f3dad
+Live commit at generation: cc76962075a0bf8089cd0de4d3688f0a374f3dad
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_evidence_missing_or_unknown`
@@ -463,6 +463,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | current_source_security_resource_budget_remediation | proven | evaluation\current-source-security-resource-budget-remediation-2026-08-31\report.json |
 | current_source_logout_storage_remediation | notice | evaluation\current-source-security-logout-storage-remediation-2026-08-31\report.json |
 | current_source_ontology_error_projection_remediation | notice | evaluation\current-source-security-ontology-error-projection-remediation-2026-08-31\report.json |
+| current_source_raw_error_projection_remediation | notice | evaluation\current-source-security-raw-error-projection-remediation-2026-08-31\report.json |
 | current_source_photo_readiness_auth_fanout_remediation | notice | evaluation\current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31\report.json |
 | current_source_mcp_generation_cancellation_remediation | notice | evaluation\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\report.json |
 | current_source_kosha_archive_preflight_remediation | notice | evaluation\current-source-security-kosha-archive-preflight-remediation-2026-08-31\report.json |
@@ -476,7 +477,6 @@ Overall: `northstar_evidence_missing_or_unknown`
 | share_recipient_contact_verification_security | notice | evaluation\share-recipient-contact-verification-2026-08-14\report.json |
 | agent_chat_durable_admission_security | notice | evaluation\security-agent-chat-durable-admission-2026-08-14\report.json |
 | mcp_provider_admission_security | notice | evaluation\security-mcp-provider-admission-2026-08-14\report.json |
-| public_json_request_body_budget | proven | evaluation\public-json-request-body-budget-2026-08-11\report.json |
 | security_resource_remediation | proven | evaluation\security-resource-remediation-2026-08-11\report.json |
 | security_upstream_transport_remediation | proven | evaluation\security-upstream-transport-remediation-2026-08-11\report.json |
 | security_safety_reference_surface_remediation | proven | evaluation\security-safety-reference-surface-remediation-2026-08-11\report.json |
@@ -559,6 +559,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | current_source_security_resource_budget_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-resource-budget-remediation-2026-08-31\report.json |
 | current_source_logout_storage_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-logout-storage-remediation-2026-08-31\report.json |
 | current_source_ontology_error_projection_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-ontology-error-projection-remediation-2026-08-31\report.json |
+| current_source_raw_error_projection_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-raw-error-projection-remediation-2026-08-31\report.json |
 | current_source_photo_readiness_auth_fanout_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31\report.json |
 | current_source_mcp_generation_cancellation_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\report.json |
 | current_source_kosha_archive_preflight_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-kosha-archive-preflight-remediation-2026-08-31\report.json |

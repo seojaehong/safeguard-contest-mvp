@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-31T04:04:55.348Z",
-  "head": "2375ebe8d16274c936aaf980ca072cdbc78953d2",
+  "generatedAt": "2026-08-31T04:44:36.031Z",
+  "head": "cc76962075a0bf8089cd0de4d3688f0a374f3dad",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "2375ebe8d16274c936aaf980ca072cdbc78953d2",
+    "commitSha": "cc76962075a0bf8089cd0de4d3688f0a374f3dad",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-laqq7033z-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-e8iyrgdyg-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_evidence_missing_or_unknown",
@@ -18,7 +18,7 @@
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
     "overall": "contradicted",
-    "gateCount": 95
+    "gateCount": 96
   },
   "provenGates": [
     {
@@ -256,6 +256,12 @@
       "detail": "Current live source returns two fixed public ontology error codes with correlation IDs while excluding upstream bodies and arbitrary exception messages from public JSON and server diagnostics. Three files / 12 tests, typecheck, and the 28-page build pass; live public admission fails closed before upstream work. No provider failure was induced, the sealed finding remains open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
+      "id": "current_source_raw_error_projection_remediation",
+      "state": "notice",
+      "artifact": "evaluation\\current-source-security-raw-error-projection-remediation-2026-08-31\\report.json",
+      "detail": "Current live source replaces raw database, provider, webhook, file-I/O, and exception details with five stable public codes and correlation IDs across knowledge, dispatch, briefing, and photo boundaries. Five security files / 93 tests, six adjacent files / 122 tests, typecheck, and the 28-page build pass; four read-only live probes preserve public boundaries without inducing a production failure. The sealed 21-finding scan remains unchanged pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
+    },
+    {
       "id": "current_source_photo_readiness_auth_fanout_remediation",
       "state": "notice",
       "artifact": "evaluation\\current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31\\report.json",
@@ -332,12 +338,6 @@
       "state": "notice",
       "artifact": "evaluation\\security-mcp-provider-admission-2026-08-14\\report.json",
       "detail": "Live source requires token-and-tenant-bound distributed rate admission plus a weighted durable lease before either provider-generating MCP tool runs, while read-only tools and deterministic template mode remain available. Current compatibility=true records that an invalid non-secret token now fails earlier at distributed admission with 503 before auth, tool dispatch, or provider work. Valid authenticated generation remains unprobed without an MCP token and fail-closed until operator configuration; the immutable medium finding and fresh rescan remain open, no provider or mutation work occurred, and exact saved Share remains MISSING_EVIDENCE."
-    },
-    {
-      "id": "public_json_request_body_budget",
-      "state": "proven",
-      "artifact": "evaluation\\public-json-request-body-budget-2026-08-11\\report.json",
-      "detail": "The corrected current-source scan's medium public JSON body-budget finding is source-remediated and live-proven across /api/ask, /api/ask/stream, and /api/knowledge/match with pre-parse byte limits, 48 focused/adjacent tests, and a current 23 files / 215 tests governed-path companion. The immutable 14-finding scan and nine deferred candidates remain visible, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "security_resource_remediation",
@@ -935,6 +935,21 @@
     "publicErrorCodeCount": 2,
     "upstreamFailureInduced": false,
     "liveProbeCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "freshRescanRequired": true,
+    "securityComplete": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "currentSourceRawErrorProjectionRemediation": {
+    "artifact": "evaluation\\current-source-security-raw-error-projection-remediation-2026-08-31\\report.json",
+    "verdict": "PASS_LIVE_DEPLOYED_SOURCE_RAW_ERROR_PROJECTION_CONTRACT",
+    "sourceHead": "856f7e65c33aa71d97277c8abca83864fee8ca47",
+    "productionCommit": "856f7e65c33aa71d97277c8abca83864fee8ca47",
+    "findingId": "csf_7aef114e48b74b34b829e893",
+    "stablePublicErrorCodeCount": 5,
+    "focusedTestsPassed": 93,
+    "adjacentTestsPassed": 122,
+    "liveProbeCount": 4,
+    "liveFailureInduced": false,
     "freshRescanRequired": true,
     "securityComplete": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
@@ -2169,9 +2184,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "2375ebe8d16274c936aaf980ca072cdbc78953d2",
+      "sourceCommit": "cc76962075a0bf8089cd0de4d3688f0a374f3dad",
       "sourceStatus": "exact",
-      "productionCommit": "2375ebe8d16274c936aaf980ca072cdbc78953d2",
+      "productionCommit": "cc76962075a0bf8089cd0de4d3688f0a374f3dad",
       "productionStatus": "matches_live"
     },
     {
@@ -2484,6 +2499,14 @@
       "sourceCommit": "68a8f9dae349cb03d8c77abedd27040b9679bde0",
       "sourceStatus": "ancestor",
       "productionCommit": "05e70640ec305ff651eba1c42654a6a3b8a02f1e",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "current_source_raw_error_projection_remediation",
+      "artifact": "evaluation\\current-source-security-raw-error-projection-remediation-2026-08-31\\report.json",
+      "sourceCommit": "856f7e65c33aa71d97277c8abca83864fee8ca47",
+      "sourceStatus": "ancestor",
+      "productionCommit": "856f7e65c33aa71d97277c8abca83864fee8ca47",
       "productionStatus": "ancestor_of_head"
     },
     {

@@ -600,6 +600,20 @@ type RollupReport = {
     securityComplete: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceRawErrorProjectionRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    findingId: string;
+    stablePublicErrorCodeCount: number;
+    focusedTestsPassed: number | null;
+    adjacentTestsPassed: number | null;
+    liveProbeCount: number;
+    liveFailureInduced: boolean;
+    freshRescanRequired: boolean;
+    securityComplete: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourcePhotoReadinessAuthFanoutRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1432,6 +1446,23 @@ function currentSourceOntologyErrorProjectionRemediationFixture(): Record<string
       securityComplete: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
+  };
+}
+
+function currentSourceRawErrorProjectionRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_RAW_ERROR_PROJECTION_CONTRACT",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    finding: { findingId: "csf_7aef114e48b74b34b829e893", freshRescanRequired: true },
+    remediation: { stablePublicErrorCodes: ["one", "two", "three", "four", "five"] },
+    verification: {
+      focusedSecurityTests: { testsPassed: 93 },
+      adjacentRegressionTests: { testsPassed: 122 },
+      productionBuild: { status: "PASS" },
+      liveDeployment: { liveFailureInduced: false, readOnlyProbes: [{}, {}, {}, {}] },
+    },
+    remainingBoundaries: { securityComplete: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   };
 }
 
@@ -2862,6 +2893,7 @@ function createFixtureRoot(): { root: string; head: string } {
   writeJson(root, "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json", currentSourceSecurityResourceBudgetRemediationFixture());
   writeJson(root, "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json", currentSourceLogoutStorageRemediationFixture());
   writeJson(root, "evaluation/current-source-security-ontology-error-projection-remediation-2026-08-31/report.json", currentSourceOntologyErrorProjectionRemediationFixture());
+  writeJson(root, "evaluation/current-source-security-raw-error-projection-remediation-2026-08-31/report.json", currentSourceRawErrorProjectionRemediationFixture());
   writeJson(root, "evaluation/current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31/report.json", currentSourcePhotoReadinessAuthFanoutRemediationFixture());
   writeJson(root, "evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.json", currentSourceMcpGenerationCancellationRemediationFixture());
   writeJson(root, "evaluation/current-source-security-kosha-archive-preflight-remediation-2026-08-31/report.json", currentSourceKoshaArchivePreflightRemediationFixture());
@@ -3269,6 +3301,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-ontology-error-projection-remediation-2026-08-31/report.json",
+    "evaluation/current-source-security-raw-error-projection-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-kosha-archive-preflight-remediation-2026-08-31/report.json",
@@ -3986,6 +4019,23 @@ describe("northstar live rollup", () => {
       publicErrorCodeCount: 2,
       upstreamFailureInduced: false,
       liveProbeCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      freshRescanRequired: true,
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "current_source_raw_error_projection_remediation")).toMatchObject({
+      artifact: path.join("evaluation", "current-source-security-raw-error-projection-remediation-2026-08-31", "report.json"),
+    });
+    expect(report.currentSourceRawErrorProjectionRemediation).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_RAW_ERROR_PROJECTION_CONTRACT",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      findingId: "csf_7aef114e48b74b34b829e893",
+      stablePublicErrorCodeCount: 5,
+      focusedTestsPassed: 93,
+      adjacentTestsPassed: 122,
+      liveProbeCount: 4,
+      liveFailureInduced: false,
       freshRescanRequired: true,
       securityComplete: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
