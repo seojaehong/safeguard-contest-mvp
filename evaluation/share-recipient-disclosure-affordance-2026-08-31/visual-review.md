@@ -9,7 +9,7 @@
 - Source commit: `fa9fc6c44e6602a105078c337102d81ed98229dd`
 - Local production URL: `http://127.0.0.1:3083`
 - Existing live product baseline at review start: `44af0108d28eee519e853356830ee70f1117abc7`
-- After-live source and production commit: `1861ae72dcbec17e047d61bc517cc8216453798e`
+- After-live source and production commit: `b104b9f7bff24d414a31a82fae51d0f151af1f62`
 - Reviewed surface: route-controlled invited recipient fixture at `/share/[sessionId]?workerId=...`
 - Viewports: `1440x723`, `1440x900`, `390x723`, and `390x844`
 
@@ -17,6 +17,7 @@
 
 - The closed `3 core documents` disclosure now exposes a stable 32px `+` affordance instead of appearing as an empty titled card.
 - Opening the disclosure changes the affordance to `-`; the browser contract verifies both computed pseudo-element states.
+- The live runner records `documentsPanelOpen=false` and `documentsSummaryAffordance="+"` in all four recipient viewports and fails closed if either contract regresses.
 - The desktop recipient surface remains a two-region workbench. The mobile surface remains stacked without horizontal overflow.
 - The confirmation action remains in the first desktop viewport, and all three nested document bodies remain collapsed by default.
 
@@ -41,6 +42,6 @@
 
 ## Boundaries
 
-- Current-source local-production and live-production runs both pass. The live runner observed source and production at `1861ae72`.
+- Current-source local-production and live-production runs both pass. The structured live runner observed source and production at `b104b9f7`.
 - This route-controlled fixture does not reproduce an exact user-saved `/share/[sessionId]` session. Exact saved Share remains `MISSING_EVIDENCE`.
 - No DB write, Share-session creation, recipient confirmation POST, provider dispatch, vector operation, Wiki publication, or KOSHA registry mutation was performed.

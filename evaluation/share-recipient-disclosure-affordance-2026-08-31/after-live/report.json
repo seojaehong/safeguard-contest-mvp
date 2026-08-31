@@ -1,17 +1,17 @@
 {
   "schemaVersion": "safeclaw-share-desktop-perception/v1",
-  "checkedAt": "2026-08-31T07:04:16.019Z",
+  "checkedAt": "2026-08-31T07:11:55.729Z",
   "baseUrl": "https://www.safeclaw.kr",
   "mode": "live-production",
-  "sourceHead": "1861ae72dcbec17e047d61bc517cc8216453798e",
+  "sourceHead": "b104b9f7bff24d414a31a82fae51d0f151af1f62",
   "productionBuild": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "1861ae72dcbec17e047d61bc517cc8216453798e",
+    "commitSha": "b104b9f7bff24d414a31a82fae51d0f151af1f62",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-1s8f5g4bc-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-a9rigmbbo-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "providerDispatchLiveClaimed": false,
@@ -26,6 +26,7 @@
       "root/content width ratio >= 0.78",
       "Workspace Share has at least three visually distinct first-viewport x regions",
       "invited recipient fixture has at least two visually distinct first-viewport x regions",
+      "invited recipient document disclosure is closed by default and exposes a visible + affordance",
       "Workspace Share status/provenance rail is visible inside the first viewport",
       "primary CTA/confirmation inside first viewport",
       "preview/notice/result region inside first viewport",
@@ -33,6 +34,7 @@
     ],
     "mobile": [
       "primary CTA/confirmation before long details",
+      "invited recipient document disclosure is closed by default and exposes a visible + affordance",
       "horizontal overflow false and outside elements 0"
     ]
   },
@@ -69,9 +71,9 @@
           "left": 139,
           "right": 654,
           "top": 345,
-          "bottom": 653,
+          "bottom": 705,
           "width": 515,
-          "height": 308
+          "height": 360
         },
         "preview": {
           "left": 660,
@@ -101,9 +103,9 @@
           "left": 139,
           "right": 654,
           "top": 547,
-          "bottom": 653,
+          "bottom": 705,
           "width": 515,
-          "height": 106
+          "height": 158
         },
         "language": {
           "left": 490,
@@ -117,9 +119,9 @@
           "left": 1071,
           "right": 1301,
           "top": 345,
-          "bottom": 705,
+          "bottom": 678,
           "width": 230,
-          "height": 360
+          "height": 333
         },
         "channelCards": [
           {
@@ -144,7 +146,7 @@
         "distinctFirstViewportRegions": 4,
         "primaryBottom": 389,
         "previewBottom": 571,
-        "desktopStatusRailBottom": 705,
+        "desktopStatusRailBottom": 678,
         "desktopStatusRailDisplay": "grid",
         "previewRightOfPrimary": true,
         "workspaceSideNavWidth": 1180,
@@ -228,6 +230,8 @@
         },
         "confirmButtonBottom": 529,
         "documentsTop": 586,
+        "documentsPanelOpen": false,
+        "documentsSummaryAffordance": "+",
         "distinctFirstViewportRegions": 2,
         "primaryLeftRegionRight": 770,
         "primaryRightRegionLeft": 788,
@@ -260,24 +264,24 @@
       "metrics": {
         "viewportWidth": 1440,
         "viewportHeight": 900,
-        "pageHeight": 960,
-        "pageHeightRatio": 1.07,
+        "pageHeight": 908,
+        "pageHeightRatio": 1.01,
         "root": {
           "left": 130,
           "right": 1310,
           "top": 189,
-          "bottom": 896,
+          "bottom": 844,
           "width": 1180,
-          "height": 707
+          "height": 655
         },
         "rootWidthRatio": 0.82,
         "form": {
           "left": 143,
           "right": 651,
           "top": 357,
-          "bottom": 739,
+          "bottom": 687,
           "width": 508,
-          "height": 382
+          "height": 330
         },
         "preview": {
           "left": 661,
@@ -307,9 +311,9 @@
           "left": 143,
           "right": 651,
           "top": 575,
-          "bottom": 739,
+          "bottom": 687,
           "width": 508,
-          "height": 164
+          "height": 112
         },
         "language": {
           "left": 490,
@@ -323,9 +327,9 @@
           "left": 1070,
           "right": 1297,
           "top": 357,
-          "bottom": 690,
+          "bottom": 717,
           "width": 227,
-          "height": 333
+          "height": 360
         },
         "channelCards": [
           {
@@ -350,7 +354,7 @@
         "distinctFirstViewportRegions": 4,
         "primaryBottom": 401,
         "previewBottom": 757,
-        "desktopStatusRailBottom": 690,
+        "desktopStatusRailBottom": 717,
         "desktopStatusRailDisplay": "grid",
         "previewRightOfPrimary": true,
         "workspaceSideNavWidth": 1180,
@@ -434,6 +438,8 @@
         },
         "confirmButtonBottom": 529,
         "documentsTop": 586,
+        "documentsPanelOpen": false,
+        "documentsSummaryAffordance": "+",
         "distinctFirstViewportRegions": 2,
         "primaryLeftRegionRight": 770,
         "primaryRightRegionLeft": 788,
@@ -640,6 +646,8 @@
         },
         "confirmButtonBottom": 685,
         "documentsTop": 1164,
+        "documentsPanelOpen": false,
+        "documentsSummaryAffordance": "+",
         "distinctFirstViewportRegions": 1,
         "primaryLeftRegionRight": 374,
         "primaryRightRegionLeft": 390,
@@ -846,6 +854,8 @@
         },
         "confirmButtonBottom": 685,
         "documentsTop": 1164,
+        "documentsPanelOpen": false,
+        "documentsSummaryAffordance": "+",
         "distinctFirstViewportRegions": 1,
         "primaryLeftRegionRight": 374,
         "primaryRightRegionLeft": 390,
