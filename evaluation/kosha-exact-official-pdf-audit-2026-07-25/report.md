@@ -1,7 +1,7 @@
 # KOSHA Exact Official PDF Audit
 
 - Verdict: `PASS_OFFICIAL_PDF_AUTHENTICITY_BODY_PAIR_REVIEW_STILL_REQUIRED`
-- Source HEAD: `f012df5b3f2e82de7aa85713d3d01fe38cb95123`
+- Source HEAD: `21e6393532357880ed882c1268f6a71f869bc41e`
 - Candidates: `8`
 - Machine verified: `8`
 - Failed: `0`

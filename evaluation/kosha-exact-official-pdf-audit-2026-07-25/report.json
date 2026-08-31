@@ -1,11 +1,11 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-official-pdf-audit/v1",
-  "generatedAt": "2026-08-31T20:14:36.022623+00:00",
-  "sourceHead": "f012df5b3f2e82de7aa85713d3d01fe38cb95123",
+  "generatedAt": "2026-08-31T20:23:14.636339+00:00",
+  "sourceHead": "21e6393532357880ed882c1268f6a71f869bc41e",
   "verdict": "PASS_OFFICIAL_PDF_AUTHENTICITY_BODY_PAIR_REVIEW_STILL_REQUIRED",
   "scope": "read-only official KOSHA PDF and immutable body-pair verification for the bounded promotion packet",
   "packetPath": "evaluation/kosha-exact-promotion-packet-2026-07-22/report.json",
-  "packetSha256": "f705e6d8d9d90e7a30f3ab9fb9eb43ffbca0065133b7187e5b07de2b547761d9",
+  "packetSha256": "994cfbdeacf1a84375569796b8c9843a391344a1ea391e8b6a75a0ac3bc29937",
   "corpusBinding": {
     "schemaVersion": "safeclaw-kosha-corpus-binding/v1",
     "snapshotId": "e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12",
@@ -81,7 +81,7 @@
   "candidateCount": 8,
   "machineVerifiedCount": 8,
   "failedCount": 0,
-  "elapsedMs": 43905,
+  "elapsedMs": 39516,
   "temporaryPdfFilesRetained": 0,
   "results": [
     {

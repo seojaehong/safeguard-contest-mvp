@@ -1,10 +1,10 @@
 # KOSHA Exact Promotion Packet
 
-Generated at: 2026-08-31T20:13:46.195Z
+Generated at: 2026-08-31T20:22:33.558Z
 
 Verdict: `EXACT_PROMOTION_PACKET_READY_FOR_OPERATOR_REVIEW`
 
-Source HEAD: `f012df5b3f2e82de7aa85713d3d01fe38cb95123`
+Source HEAD: `21e6393532357880ed882c1268f6a71f869bc41e`
 
 Live commit at packet generation: `bad17019136999655854cff2e49d0e165909ba74`
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-kosha-exact-promotion-reviewer-support/v1",
-  "generatedAt": "2026-08-31T20:14:54.543074+00:00",
-  "sourceHead": "f012df5b3f2e82de7aa85713d3d01fe38cb95123",
+  "generatedAt": "2026-08-31T20:23:22.726676+00:00",
+  "sourceHead": "21e6393532357880ed882c1268f6a71f869bc41e",
   "verdict": "PASS_MACHINE_REVIEWER_SUPPORT_HUMAN_CONFIRMATION_REQUIRED",
   "scope": "read-only semantic support for the bounded KOSHA exact-promotion human review",
   "candidateCount": 8,
@@ -88,15 +88,15 @@
   "upstreamArtifacts": {
     "packet": {
       "path": "evaluation/kosha-exact-promotion-packet-2026-07-22/report.json",
-      "sha256": "f705e6d8d9d90e7a30f3ab9fb9eb43ffbca0065133b7187e5b07de2b547761d9"
+      "sha256": "994cfbdeacf1a84375569796b8c9843a391344a1ea391e8b6a75a0ac3bc29937"
     },
     "pdfAudit": {
       "path": "evaluation/kosha-exact-official-pdf-audit-2026-07-25/report.json",
-      "sha256": "99ec318c7d91b07b78783fcf29bb042de2666c6b6eb317c2589fb85164c7c175"
+      "sha256": "5828d4aaa95397177899ce217e8c8f1d1903d966619e32f11f3500084577c9cd"
     },
     "lifecycleAudit": {
       "path": "evaluation/kosha-exact-official-lifecycle-audit-2026-07-25/report.json",
-      "sha256": "5f242c1226520d5470d37f8b24ecc249f1e382f930f64a08884b6b6503f4d07f"
+      "sha256": "2b71726911b22cb277d3846614faec84b81104bfb0343ab517551ee759977b0b"
     }
   },
   "results": [
