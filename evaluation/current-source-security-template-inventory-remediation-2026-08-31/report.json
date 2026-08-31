@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-template-inventory-remediation/v1",
+  "verdict": "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_BOUNDED_TEMPLATE_INVENTORY_SCAN",
+  "generatedAt": "2026-08-31T03:58:51.0336894Z",
+  "sourceHead": "8a9269a43adf369df3b530d0adad54309f22168a",
+  "productionCommit": "8a9269a43adf369df3b530d0adad54309f22168a",
+  "sourceIncludedInProduction": true,
+  "securityBaseline": {
+    "scanId": "f6bef30a-7250-428b-9f66-0bad1e42058c",
+    "findingId": "csf_4ee29cf0d24bdba57c1518a1",
+    "findingRule": "resource-exhaustion.unbounded-template-inventory",
+    "severity": "medium",
+    "immutableFindingCount": 21,
+    "findingReclassified": false
+  },
+  "remediation": {
+    "governedPath": "scripts/scan_industrial_safety_templates.py",
+    "noFollowTraversal": true,
+    "sourceRootSymlinkRejected": true,
+    "maxFiles": 10000,
+    "maxTotalBytes": 4294967296,
+    "maxFileBytes": 134217728,
+    "maxParserFiles": 2000,
+    "maxElapsedSeconds": 900,
+    "maxImagePixels": 80000000,
+    "structuredArchivePreflightBeforeParser": true,
+    "maxArchiveMembers": 4096,
+    "maxArchiveMemberBytes": 67108864,
+    "maxArchiveTotalUncompressedBytes": 536870912,
+    "maxArchiveCompressionRatio": 100,
+    "maxArchiveCentralDirectoryBytes": 16777216,
+    "budgetFailureExitCode": 2,
+    "partialOutputWrittenOnAdmissionFailure": false,
+    "limitsRecordedInSummary": true
+  },
+  "verification": {
+    "scannerUnitTests": {
+      "command": "python scripts/tests/test_scan_industrial_safety_templates.py",
+      "files": 1,
+      "tests": 6,
+      "status": "PASS"
+    },
+    "archiveSafetyTests": {
+      "command": "python scripts/tests/test_archive_safety.py",
+      "files": 1,
+      "tests": 5,
+      "status": "PASS"
+    },
+    "pythonCompile": {
+      "command": "python -m py_compile scripts/scan_industrial_safety_templates.py scripts/tests/test_scan_industrial_safety_templates.py",
+      "status": "PASS"
+    },
+    "cliSuccessAndFailClosedContract": "PASS",
+    "liveBehavioralProbeExecuted": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "liveDeploymentVerification": "SOURCE_INCLUDED_OPERATOR_SCRIPT_NOT_REMOTELY_EXECUTED",
+    "freshFollowUpSecurityScan": "REQUIRED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseSecurityRemediation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "sifVectorRuntime": "APPROVAL_GATED",
+    "koshaExactRegistryPromotion": "APPROVAL_GATED",
+    "securityCompleteClaimAllowed": false
+  }
+}
