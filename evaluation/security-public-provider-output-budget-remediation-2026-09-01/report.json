@@ -1,0 +1,90 @@
+{
+  "schema": "safeclaw-security-public-provider-output-budget-remediation/v1",
+  "verdict": "PASS_CURRENT_SOURCE_PUBLIC_PROVIDER_OUTPUT_BUDGET_LIVE_PENDING",
+  "generatedAt": "2026-09-01T00:21:47+09:00",
+  "sourceHead": "e99346797f4d874e83188d8f37941a603a272a6d",
+  "productCommit": "e99346797f4d874e83188d8f37941a603a272a6d",
+  "baseline": {
+    "scanId": "a4044172-9b4b-4e36-84be-a8955d9150ac",
+    "targetRevision": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+    "findingId": "csf_04dc86a81d1f8858f8bd50a7",
+    "occurrenceId": "occ_906edfdbe955b6c2c9dd56be",
+    "ruleId": "provider.public-output-budget",
+    "severity": "medium",
+    "findingTitle": "Anonymous provider generation lacks deterministic output-token budgets",
+    "immutableCompletedScanPreserved": true
+  },
+  "remediation": {
+    "openAiMaxOutputTokensApplied": true,
+    "vertexMaxOutputTokensApplied": true,
+    "finalTextCeilingFailClosed": true,
+    "silentTruncationUsed": false,
+    "surfaces": {
+      "answer": { "maxOutputTokens": 2048, "maxOutputChars": 8000 },
+      "citationMapping": { "maxOutputTokens": 1024, "maxOutputChars": 4000 },
+      "knowledgeCandidate": { "maxOutputTokens": 2048, "maxOutputChars": 8000 },
+      "workpackRemediation": { "maxOutputTokens": 1024, "maxOutputChars": 4000 }
+    },
+    "publicRoutesCovered": [
+      "/api/ask",
+      "/api/ask/stream",
+      "/api/knowledge/regenerate",
+      "/api/workpack/remediate"
+    ],
+    "authenticatedKnowledgePreparationAlsoBounded": true
+  },
+  "verification": {
+    "focused": {
+      "command": "npm.cmd test -- tests/ai-generation-trace.test.ts tests/vertex-client-cancellation.test.ts tests/workpack-remediate-route.test.ts tests/knowledge-regenerate-route.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 4,
+      "testsPassed": 41,
+      "testsFailed": 0
+    },
+    "adjacent": {
+      "command": "npm.cmd test -- tests/run-ask-mode.test.ts tests/ask-generation-evidence-routes.test.ts tests/knowledge-review-prepare-route.test.ts tests/knowledge-review-prepare.test.ts tests/kosha-current-review-run-ask.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 5,
+      "testsPassed": 76,
+      "testsFailed": 0
+    },
+    "typecheck": { "command": "npm.cmd run typecheck", "passed": true },
+    "build": {
+      "command": "npm.cmd run build",
+      "passed": true,
+      "nextVersion": "15.5.22",
+      "staticPagesGenerated": 28
+    },
+    "npmAuditVulnerabilityCount": 0,
+    "diffCheckPassed": true
+  },
+  "production": {
+    "checkedAt": "2026-09-01T00:21:47+09:00",
+    "commitSha": "48d7c3a9460c75b5c9f76de04f25d6f3f08ea455",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-13nsz1bpt-seojaehongs-projects.vercel.app",
+    "productCommitLive": false,
+    "liveVerificationPending": true
+  },
+  "securityScan": {
+    "findingRemediatedInCurrentSource": true,
+    "findingClosureClaimed": false,
+    "freshPostDeploymentVerificationRequired": true,
+    "freshPostRemediationRepositoryRescanRequired": true,
+    "completedBaselineFindingCount": 14,
+    "remainingApprovalFreeFindingCount": 5
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedDatabaseOrAtomicityFindingCount": 7,
+    "approvalGatedBoundariesPreserved": true,
+    "securityCompleteClaimAllowed": false
+  }
+}
