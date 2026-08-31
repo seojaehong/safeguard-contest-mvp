@@ -1,10 +1,10 @@
 # KOSHA Exact Promotion Review Gate
 
-Generated at: 2026-08-28T13:08:19.552Z
+Generated at: 2026-08-31T20:27:33.287Z
 
 Verdict: `REVIEW_CHECKLIST_INCOMPLETE_BLOCKED`
 
-Source HEAD: `eea3e284b35085fa084d362c8f7c050d0879572d`
+Source HEAD: `f7fb87abb287594a75c7e01f1b0b948ad06d8065`
 
 Packet: `evaluation\kosha-exact-promotion-packet-2026-07-22\report.json`
 
@@ -14,7 +14,7 @@ Official lifecycle audit: `evaluation\kosha-exact-official-lifecycle-audit-2026-
 
 Reviewer support: `evaluation\kosha-exact-promotion-reviewer-support-2026-07-25\report.json`
 
-Review input: `evaluation/kosha-exact-promotion-review-gate-2026-07-22/review-template.json`
+Review input: `evaluation\kosha-exact-promotion-review-gate-2026-07-22\review-template.json`
 
 Checklist complete: `false`
 
