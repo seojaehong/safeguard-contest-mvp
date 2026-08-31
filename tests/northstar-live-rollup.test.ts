@@ -614,6 +614,22 @@ type RollupReport = {
     securityComplete: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceCredentialOutputRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    findingId: string;
+    credentialCliCount: number | null;
+    testsPassed: number | null;
+    ciCredentialTestsPassed: number | null;
+    ciMcpCliTestsPassed: number | null;
+    buildStatus: string;
+    cliProbeCount: number;
+    credentialIssuanceExecuted: boolean;
+    freshRescanRequired: boolean;
+    securityComplete: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourcePhotoReadinessAuthFanoutRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1461,6 +1477,24 @@ function currentSourceRawErrorProjectionRemediationFixture(): Record<string, unk
       adjacentRegressionTests: { testsPassed: 122 },
       productionBuild: { status: "PASS" },
       liveDeployment: { liveFailureInduced: false, readOnlyProbes: [{}, {}, {}, {}] },
+    },
+    remainingBoundaries: { securityComplete: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  };
+}
+
+function currentSourceCredentialOutputRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_CREDENTIAL_OUTPUT_CONTRACT",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    finding: { findingId: "csf_ad5c841841dbdcc55b2c1d5a", freshRescanRequired: true },
+    remediation: { credentialCliCount: 2 },
+    verification: {
+      focusedAndAdjacentTests: { testsPassed: 88 },
+      ciFullSuiteObservation: { credentialOutputTestsPassed: 8, mcpTokenCliTestsPassed: 5 },
+      productionBuild: { status: "PASS" },
+      failClosedCliProbes: [{}, {}, {}],
+      liveDeployment: { credentialIssuanceExecuted: false },
     },
     remainingBoundaries: { securityComplete: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   };
@@ -2894,6 +2928,7 @@ function createFixtureRoot(): { root: string; head: string } {
   writeJson(root, "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json", currentSourceLogoutStorageRemediationFixture());
   writeJson(root, "evaluation/current-source-security-ontology-error-projection-remediation-2026-08-31/report.json", currentSourceOntologyErrorProjectionRemediationFixture());
   writeJson(root, "evaluation/current-source-security-raw-error-projection-remediation-2026-08-31/report.json", currentSourceRawErrorProjectionRemediationFixture());
+  writeJson(root, "evaluation/current-source-security-credential-output-remediation-2026-08-31/report.json", currentSourceCredentialOutputRemediationFixture());
   writeJson(root, "evaluation/current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31/report.json", currentSourcePhotoReadinessAuthFanoutRemediationFixture());
   writeJson(root, "evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.json", currentSourceMcpGenerationCancellationRemediationFixture());
   writeJson(root, "evaluation/current-source-security-kosha-archive-preflight-remediation-2026-08-31/report.json", currentSourceKoshaArchivePreflightRemediationFixture());
@@ -3302,6 +3337,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-ontology-error-projection-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-raw-error-projection-remediation-2026-08-31/report.json",
+    "evaluation/current-source-security-credential-output-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-kosha-archive-preflight-remediation-2026-08-31/report.json",
@@ -4036,6 +4072,25 @@ describe("northstar live rollup", () => {
       adjacentTestsPassed: 122,
       liveProbeCount: 4,
       liveFailureInduced: false,
+      freshRescanRequired: true,
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "current_source_credential_output_remediation")).toMatchObject({
+      artifact: path.join("evaluation", "current-source-security-credential-output-remediation-2026-08-31", "report.json"),
+    });
+    expect(report.currentSourceCredentialOutputRemediation).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_CREDENTIAL_OUTPUT_CONTRACT",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      findingId: "csf_ad5c841841dbdcc55b2c1d5a",
+      credentialCliCount: 2,
+      testsPassed: 88,
+      ciCredentialTestsPassed: 8,
+      ciMcpCliTestsPassed: 5,
+      buildStatus: "PASS",
+      cliProbeCount: 3,
+      credentialIssuanceExecuted: false,
       freshRescanRequired: true,
       securityComplete: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",

@@ -665,6 +665,51 @@ function currentSourceRawErrorProjectionRemediationFixture(): Record<string, unk
   };
 }
 
+function currentSourceCredentialOutputRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-current-source-security-credential-output-remediation/v1",
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_CREDENTIAL_OUTPUT_CONTRACT",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    sourceIncludedInProduction: true,
+    masterContainsProductCommit: true,
+    finding: { findingId: "csf_ad5c841841dbdcc55b2c1d5a", occurrenceId: "occ_a537b254313fd0a608524cc5", ruleId: "credential-exposure.token-stdout", sealedFindingReclassified: false, freshRescanRequired: true },
+    remediation: {
+      credentialCliCount: 2,
+      credentialClis: ["scripts/issue-mcp-token.mjs", "scripts/issue_supabase_auth_token.mjs"],
+      explicitOutputModeRequiredBeforeCredentialWork: true,
+      defaultBearerTokenStdout: false,
+      interactiveRevealRequiresTty: true,
+      automationOutputUsesExclusiveCreate: true,
+      automationOutputMode: "0600",
+      writtenModeVerified: true,
+      preExistingOutputFileRejected: true,
+      windowsUnverifiableFileModeRejected: true,
+      tier1AutomationUsesTemporaryDirectoryMode: "0700",
+      tier1AutomationDeletesTemporaryCredential: true,
+      tier1AutomationCleanupTrapInstalled: true,
+      tokenHashOnlyDatabaseStoragePreserved: true,
+      supabaseAuthenticationBehaviorPreserved: true,
+    },
+    verification: {
+      focusedAndAdjacentTests: { filesPassed: 5, testsPassed: 88, testsFailed: 0 },
+      ciFullSuiteObservation: { status: "COMPLETED_WITH_PRE_EXISTING_UNRELATED_RED", credentialOutputTestsPassed: 8, mcpTokenCliTestsPassed: 5, totalFilesPassed: 263, totalFilesFailed: 2, totalTestsPassed: 3193, totalTestsFailed: 8, unrelatedFailedFiles: ["tests/knowledge-promotion-gate.test.ts", "tests/knowledge-write-request-budget.test.ts"], ciBuildSkippedAfterUnrelatedTestFailure: true },
+      syntax: { nodeCheckFiles: 3, nodeCheckStatus: "PASS", tier1BashSyntaxStatus: "PASS" },
+      typecheck: { status: "PASS" },
+      productionBuild: { status: "PASS", staticPages: 28 },
+      failClosedCliProbes: [
+        { status: 1, credentialWorkReached: false, plaintextTokenOutput: false },
+        { status: 1, credentialWorkReached: false, plaintextTokenOutput: false },
+        { status: 1, credentialWorkReached: false, plaintextTokenOutput: false },
+      ],
+      liveDeployment: { status: "PASS_DEPLOYED_SOURCE_NO_CREDENTIAL_ISSUANCE_EXECUTED", commitSha: "fixture-sha", environment: "production", productionDeploymentReady: true, credentialIssuanceExecuted: false },
+    },
+    mutationBoundary: { mcpTokenIssued: false, supabaseAuthTokenIssued: false, dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, vectorOrEmbeddingMutationPerformed: false, wikiPublicationPerformed: false, koshaRegistryMutationPerformed: false },
+    remainingBoundaries: { immutableOriginal18FindingBaselinePreserved: true, sealedCurrentHeadScanPreserved: true, securityComplete: false, freshFollowUpSecurityScan: "REQUIRED", exactSavedShareVerdict: "MISSING_EVIDENCE", approvalGatedFindingsRemainOpen: true, liveAfterDeploymentRequired: false },
+  };
+}
+
 function currentSourcePhotoReadinessAuthFanoutRemediationFixture(): Record<string, unknown> {
   return {
     schemaVersion: "safeclaw-current-source-security-photo-readiness-auth-fanout-remediation/v1",
@@ -5156,6 +5201,11 @@ function createFixtureRoot(): string {
     rootDir,
     path.join("evaluation", "current-source-security-raw-error-projection-remediation-2026-08-31", "report.json"),
     currentSourceRawErrorProjectionRemediationFixture(),
+  );
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-credential-output-remediation-2026-08-31", "report.json"),
+    currentSourceCredentialOutputRemediationFixture(),
   );
   writeJson(
     rootDir,
@@ -9689,6 +9739,32 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "current_source_raw_error_projection_remediation")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records protected credential output without issuing credentials or closing the sealed finding", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "current-source-security-credential-output-remediation-2026-08-31", "report.json");
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_credential_output_remediation");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("two credential issuance CLIs");
+    expect(gate?.detail).toContain("Five files / 88 tests");
+    expect(gate?.detail).toContain("No credential was issued");
+    expect(gate?.detail).toContain("sealed 21-finding scan remains unchanged pending a fresh scan");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      mutationBoundary: { mcpTokenIssued: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.mutationBoundary.mcpTokenIssued = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "current_source_credential_output_remediation")?.state)
       .toBe("contradicted");
   });
 

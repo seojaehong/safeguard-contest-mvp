@@ -81,6 +81,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
   currentSourceOntologyErrorProjectionRemediation: path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
   currentSourceRawErrorProjectionRemediation: path.join("evaluation", "current-source-security-raw-error-projection-remediation-2026-08-31", "report.json"),
+  currentSourceCredentialOutputRemediation: path.join("evaluation", "current-source-security-credential-output-remediation-2026-08-31", "report.json"),
   currentSourcePhotoReadinessAuthFanoutRemediation: path.join("evaluation", "current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31", "report.json"),
   currentSourceMcpGenerationCancellationRemediation: path.join("evaluation", "current-source-security-mcp-generation-cancellation-remediation-2026-08-31", "report.json"),
   currentSourceKoshaArchivePreflightRemediation: path.join("evaluation", "current-source-security-kosha-archive-preflight-remediation-2026-08-31", "report.json"),
@@ -9620,6 +9621,110 @@ function evaluateCurrentSourceRawErrorProjectionRemediationGate(rootDir) {
  * @param {string} rootDir
  * @returns {GateResult}
  */
+function evaluateCurrentSourceCredentialOutputRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourceCredentialOutputRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({ id: "current_source_credential_output_remediation", label: "Current-source credential output remediation", state: "missing", evidencePath, detail: "The deployed credential-output remediation receipt is missing or invalid.", nextActions: ["Restore the receipt without issuing credentials or reclassifying the sealed finding."] });
+  }
+
+  const finding = isRecord(report.finding) ? report.finding : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacentTests) ? verification.focusedAndAdjacentTests : {};
+  const ci = isRecord(verification.ciFullSuiteObservation) ? verification.ciFullSuiteObservation : {};
+  const syntax = isRecord(verification.syntax) ? verification.syntax : {};
+  const typecheck = isRecord(verification.typecheck) ? verification.typecheck : {};
+  const build = isRecord(verification.productionBuild) ? verification.productionBuild : {};
+  const live = isRecord(verification.liveDeployment) ? verification.liveDeployment : {};
+  const probes = Array.isArray(verification.failClosedCliProbes) ? verification.failClosedCliProbes.filter(isRecord) : [];
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const boundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const clis = Array.isArray(remediation.credentialClis) ? remediation.credentialClis.map(readString).filter(Boolean) : [];
+  const unrelatedFailedFiles = Array.isArray(ci.unrelatedFailedFiles) ? ci.unrelatedFailedFiles.map(readString).filter(Boolean) : [];
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.mcpTokenIssued === false
+    && mutation.supabaseAuthTokenIssued === false
+    && mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.schemaVersion) === "safeclaw-current-source-security-credential-output-remediation/v1"
+    && readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_CREDENTIAL_OUTPUT_CONTRACT"
+    && productCommit !== ""
+    && productCommit === readString(report.sourceHead)
+    && productionCommit === productCommit
+    && productionCommit === readString(live.commitSha)
+    && report.sourceIncludedInProduction === true
+    && report.masterContainsProductCommit === true
+    && isGitAncestor(rootDir, productCommit)
+    && readString(finding.findingId) === "csf_ad5c841841dbdcc55b2c1d5a"
+    && readString(finding.occurrenceId) === "occ_a537b254313fd0a608524cc5"
+    && readString(finding.ruleId) === "credential-exposure.token-stdout"
+    && finding.sealedFindingReclassified === false
+    && finding.freshRescanRequired === true
+    && readNumber(remediation.credentialCliCount) === 2
+    && clis.length === 2
+    && ["scripts/issue-mcp-token.mjs", "scripts/issue_supabase_auth_token.mjs"].every((cli) => clis.includes(cli))
+    && remediation.explicitOutputModeRequiredBeforeCredentialWork === true
+    && remediation.defaultBearerTokenStdout === false
+    && remediation.interactiveRevealRequiresTty === true
+    && remediation.automationOutputUsesExclusiveCreate === true
+    && readString(remediation.automationOutputMode) === "0600"
+    && remediation.writtenModeVerified === true
+    && remediation.preExistingOutputFileRejected === true
+    && remediation.windowsUnverifiableFileModeRejected === true
+    && readString(remediation.tier1AutomationUsesTemporaryDirectoryMode) === "0700"
+    && remediation.tier1AutomationDeletesTemporaryCredential === true
+    && remediation.tier1AutomationCleanupTrapInstalled === true
+    && remediation.tokenHashOnlyDatabaseStoragePreserved === true
+    && remediation.supabaseAuthenticationBehaviorPreserved === true
+    && readNumber(focused.filesPassed) === 5 && readNumber(focused.testsPassed) === 88 && readNumber(focused.testsFailed) === 0
+    && readString(ci.status) === "COMPLETED_WITH_PRE_EXISTING_UNRELATED_RED"
+    && readNumber(ci.credentialOutputTestsPassed) === 8 && readNumber(ci.mcpTokenCliTestsPassed) === 5
+    && readNumber(ci.totalFilesPassed) === 263 && readNumber(ci.totalFilesFailed) === 2
+    && readNumber(ci.totalTestsPassed) === 3193 && readNumber(ci.totalTestsFailed) === 8
+    && unrelatedFailedFiles.length === 2
+    && ["tests/knowledge-promotion-gate.test.ts", "tests/knowledge-write-request-budget.test.ts"].every((file) => unrelatedFailedFiles.includes(file))
+    && ci.ciBuildSkippedAfterUnrelatedTestFailure === true
+    && readNumber(syntax.nodeCheckFiles) === 3 && readString(syntax.nodeCheckStatus) === "PASS"
+    && readString(syntax.tier1BashSyntaxStatus) === "PASS"
+    && readString(typecheck.status) === "PASS" && readString(build.status) === "PASS" && readNumber(build.staticPages) === 28
+    && probes.length === 3
+    && probes.every((probe) => readNumber(probe.status) === 1 && probe.credentialWorkReached === false && probe.plaintextTokenOutput === false)
+    && readString(live.status) === "PASS_DEPLOYED_SOURCE_NO_CREDENTIAL_ISSUANCE_EXECUTED"
+    && readString(live.environment) === "production"
+    && live.productionDeploymentReady === true && live.credentialIssuanceExecuted === false
+    && noMutation
+    && boundaries.immutableOriginal18FindingBaselinePreserved === true
+    && boundaries.sealedCurrentHeadScanPreserved === true
+    && boundaries.securityComplete === false
+    && readString(boundaries.freshFollowUpSecurityScan) === "REQUIRED"
+    && readString(boundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && boundaries.approvalGatedFindingsRemainOpen === true
+    && boundaries.liveAfterDeploymentRequired === false;
+
+  return gateResult({
+    id: "current_source_credential_output_remediation",
+    label: "Current-source credential output remediation",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Current live source protects two credential issuance CLIs with explicit interactive TTY reveal or exclusive POSIX 0600 file output, while Tier1 automation uses a temporary 0700 directory and removes the credential. Five files / 88 tests, syntax, typecheck, and the 28-page build pass; CI separately proves the 8 credential-output and 5 MCP CLI tests while retaining two unrelated red files. No credential was issued and no mutation occurred. The sealed 21-finding scan remains unchanged pending a fresh scan, security-complete is false, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
+      : `Credential-output verdict=${readString(report.verdict) || "missing"}, product/live=${productCommit || "missing"}/${productionCommit || "missing"}, tests=${readNumber(focused.testsPassed)}, CI credential/MCP=${readNumber(ci.credentialOutputTestsPassed)}/${readNumber(ci.mcpTokenCliTestsPassed)}, probes=${probes.length}, noMutation=${noMutation}, freshRescan=${finding.freshRescanRequired === true}, securityComplete=${boundaries.securityComplete === true}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Include the credential-output contract in the next full repository scan before reclassifying the sealed finding.", "Keep credential issuance, exact saved Share, and all DB/provider/vector/wiki/KOSHA approval boundaries open."]
+      : ["Restore explicit credential output modes, verification counts, aligned live identity, no-issuance/no-mutation boundaries, fresh-rescan requirement, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
 function evaluateCurrentSourcePhotoReadinessAuthFanoutRemediationGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.currentSourcePhotoReadinessAuthFanoutRemediation;
   const report = readJsonFile(rootDir, evidencePath);
@@ -14053,6 +14158,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentSourceLogoutStorageRemediationGate(rootDir),
     evaluateCurrentSourceOntologyErrorProjectionRemediationGate(rootDir),
     evaluateCurrentSourceRawErrorProjectionRemediationGate(rootDir),
+    evaluateCurrentSourceCredentialOutputRemediationGate(rootDir),
     evaluateCurrentSourcePhotoReadinessAuthFanoutRemediationGate(rootDir),
     evaluateCurrentSourceMcpGenerationCancellationRemediationGate(rootDir),
     evaluateCurrentSourceKoshaArchivePreflightRemediationGate(rootDir),

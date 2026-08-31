@@ -57,6 +57,7 @@ const ARTIFACTS = Object.freeze({
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
   currentSourceOntologyErrorProjectionRemediation: path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
   currentSourceRawErrorProjectionRemediation: path.join("evaluation", "current-source-security-raw-error-projection-remediation-2026-08-31", "report.json"),
+  currentSourceCredentialOutputRemediation: path.join("evaluation", "current-source-security-credential-output-remediation-2026-08-31", "report.json"),
   currentSourcePhotoReadinessAuthFanoutRemediation: path.join("evaluation", "current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31", "report.json"),
   currentSourceMcpGenerationCancellationRemediation: path.join("evaluation", "current-source-security-mcp-generation-cancellation-remediation-2026-08-31", "report.json"),
   currentSourceKoshaArchivePreflightRemediation: path.join("evaluation", "current-source-security-kosha-archive-preflight-remediation-2026-08-31", "report.json"),
@@ -594,6 +595,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const currentSourceLogoutStorageRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceLogoutStorageRemediation);
   const currentSourceOntologyErrorProjectionRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceOntologyErrorProjectionRemediation);
   const currentSourceRawErrorProjectionRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceRawErrorProjectionRemediation);
+  const currentSourceCredentialOutputRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceCredentialOutputRemediation);
   const currentSourcePhotoReadinessAuthFanoutRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourcePhotoReadinessAuthFanoutRemediation);
   const currentSourceMcpGenerationCancellationRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceMcpGenerationCancellationRemediation);
   const currentSourceKoshaArchivePreflightRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceKoshaArchivePreflightRemediation);
@@ -750,6 +752,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_logout_storage_remediation", ARTIFACTS.currentSourceLogoutStorageRemediation, currentSourceLogoutStorageRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_ontology_error_projection_remediation", ARTIFACTS.currentSourceOntologyErrorProjectionRemediation, currentSourceOntologyErrorProjectionRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_raw_error_projection_remediation", ARTIFACTS.currentSourceRawErrorProjectionRemediation, currentSourceRawErrorProjectionRemediation),
+    evidenceStatus(rootDir, currentHead, liveCommit, "current_source_credential_output_remediation", ARTIFACTS.currentSourceCredentialOutputRemediation, currentSourceCredentialOutputRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_photo_readiness_auth_fanout_remediation", ARTIFACTS.currentSourcePhotoReadinessAuthFanoutRemediation, currentSourcePhotoReadinessAuthFanoutRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_mcp_generation_cancellation_remediation", ARTIFACTS.currentSourceMcpGenerationCancellationRemediation, currentSourceMcpGenerationCancellationRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_kosha_archive_preflight_remediation", ARTIFACTS.currentSourceKoshaArchivePreflightRemediation, currentSourceKoshaArchivePreflightRemediation),
@@ -1189,6 +1192,25 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       freshRescanRequired: recordAt(currentSourceRawErrorProjectionRemediation, "finding")?.freshRescanRequired === true,
       securityComplete: recordAt(currentSourceRawErrorProjectionRemediation, "remainingBoundaries")?.securityComplete === true,
       exactSavedShareVerdict: asString(recordAt(currentSourceRawErrorProjectionRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    currentSourceCredentialOutputRemediation: {
+      artifact: ARTIFACTS.currentSourceCredentialOutputRemediation,
+      verdict: isRecord(currentSourceCredentialOutputRemediation) ? asString(currentSourceCredentialOutputRemediation.verdict) : null,
+      sourceHead: isRecord(currentSourceCredentialOutputRemediation) ? asString(currentSourceCredentialOutputRemediation.sourceHead) : null,
+      productionCommit: isRecord(currentSourceCredentialOutputRemediation) ? asString(currentSourceCredentialOutputRemediation.productionCommit) : null,
+      findingId: asString(recordAt(currentSourceCredentialOutputRemediation, "finding")?.findingId),
+      credentialCliCount: asNumber(recordAt(currentSourceCredentialOutputRemediation, "remediation")?.credentialCliCount),
+      testsPassed: asNumber(recordAt(recordAt(currentSourceCredentialOutputRemediation, "verification"), "focusedAndAdjacentTests")?.testsPassed),
+      ciCredentialTestsPassed: asNumber(recordAt(recordAt(currentSourceCredentialOutputRemediation, "verification"), "ciFullSuiteObservation")?.credentialOutputTestsPassed),
+      ciMcpCliTestsPassed: asNumber(recordAt(recordAt(currentSourceCredentialOutputRemediation, "verification"), "ciFullSuiteObservation")?.mcpTokenCliTestsPassed),
+      buildStatus: asString(recordAt(recordAt(currentSourceCredentialOutputRemediation, "verification"), "productionBuild")?.status),
+      cliProbeCount: Array.isArray(recordAt(currentSourceCredentialOutputRemediation, "verification")?.failClosedCliProbes)
+        ? recordAt(currentSourceCredentialOutputRemediation, "verification").failClosedCliProbes.length
+        : 0,
+      credentialIssuanceExecuted: recordAt(recordAt(currentSourceCredentialOutputRemediation, "verification"), "liveDeployment")?.credentialIssuanceExecuted === true,
+      freshRescanRequired: recordAt(currentSourceCredentialOutputRemediation, "finding")?.freshRescanRequired === true,
+      securityComplete: recordAt(currentSourceCredentialOutputRemediation, "remainingBoundaries")?.securityComplete === true,
+      exactSavedShareVerdict: asString(recordAt(currentSourceCredentialOutputRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     currentSourcePhotoReadinessAuthFanoutRemediation: {
       artifact: ARTIFACTS.currentSourcePhotoReadinessAuthFanoutRemediation,
