@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-kosha-archive-preflight-remediation/v1",
+  "generatedAt": "2026-08-31T01:06:46.2933363Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_KOSHA_ARCHIVE_PREFLIGHT_LIVE_PENDING",
+  "sourceBaseCommit": "171e0c5f0247b90325ffa6bde2561ac286d11127",
+  "sourceHead": "41de3997aed1907a95b794040edef542cb1f40f2",
+  "productCommit": "41de3997aed1907a95b794040edef542cb1f40f2",
+  "productionCommit": "d7f4794bef57d651a2e0d9581245e45d984185b2",
+  "finding": {
+    "findingId": "csf_d7f23c57f1ee89b4c6cdad17",
+    "occurrenceId": "occ_150ad7ac80e3ea536f29ffcf",
+    "ruleId": "resource-exhaustion.unbounded-audit-archive-preflight",
+    "severity": "medium",
+    "title": "KOSHA audit performs an unbounded AdmZip inventory before bounded snapshot parsing",
+    "sealedFindingReclassified": false,
+    "freshRescanRequired": true
+  },
+  "remediation": {
+    "nodeAdmZipInventoryRemoved": true,
+    "boundedPythonInventoryUsed": true,
+    "endOfCentralDirectoryTailBytes": 65557,
+    "maxCentralDirectoryBytes": 67108864,
+    "maxMemberCount": 10000,
+    "maxMemberBytes": 67108864,
+    "maxTotalUncompressedBytes": 1073741824,
+    "maxCompressionRatio": 100,
+    "inventoryTimeoutMs": 60000,
+    "parseTimeoutMs": 900000,
+    "helperMaxBufferBytes": 67108864,
+    "sameOpenFileHandleUsedForPreflightAndZipFile": true,
+    "aggregateArchiveMemberBudgetEnforced": true,
+    "aggregateArchiveByteBudgetEnforced": true,
+    "directPdfLegacyInventorySemanticsPreserved": true,
+    "fixedSanitizedHelperErrors": true,
+    "providerOrDatabaseWorkReachedByOverBudgetRegression": false
+  },
+  "verification": {
+    "focusedPython": {
+      "command": "python -m unittest scripts.tests.test_archive_safety scripts.tests.test_snapshot_kosha_guide_corpus scripts.tests.test_ingest_safety_reference_catalog",
+      "testsPassed": 64,
+      "testsFailed": 0
+    },
+    "focusedVitest": {
+      "command": "npm.cmd test -- tests/kosha-guide-corpus-audit.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 1,
+      "testsPassed": 112,
+      "testsFailed": 0,
+      "negativeArchiveTests": [
+        "declared ZIP member count over budget fails before ZipFile materialization",
+        "central-directory byte budget fails closed",
+        "tampered EOCD count mismatch fails closed",
+        "offline audit runner rejects an over-budget central directory before provider or database work"
+      ]
+    },
+    "adjacentPython": {
+      "command": "python -m unittest scripts.tests.test_parser_safety scripts.tests.test_operator_parser_budgets scripts.tests.test_extract_kogas_parser_budget",
+      "testsPassed": 13,
+      "testsFailed": 0
+    },
+    "adjacentVitest": {
+      "command": "npm.cmd test -- tests/final-output-parser-safety.test.ts tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-offline-harness-expanded.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 3,
+      "testsPassed": 37,
+      "testsSkipped": 1,
+      "testsFailed": 0
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "productionBuild": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "liveDeployment": {
+      "status": "PENDING_PRODUCT_COMMIT_DEPLOYMENT",
+      "commitSha": "d7f4794bef57d651a2e0d9581245e45d984185b2",
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-8ujw3bc6r-seojaehongs-projects.vercel.app",
+      "sourceHeadMatchesProduction": false,
+      "runtimeArchiveProbeExecuted": false
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "immutableOriginal18FindingBaselinePreserved": true,
+    "sealedCurrentHeadScanPreserved": true,
+    "securityComplete": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedFindingsRemainOpen": true,
+    "liveAfterDeploymentRequired": true,
+    "freshFullRepositorySecurityRescanRequired": true
+  }
+}
