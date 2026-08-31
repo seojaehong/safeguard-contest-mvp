@@ -3309,6 +3309,38 @@ function createFixtureRoot(): string {
       })),
     ],
   });
+  writeJson(rootDir, path.join("evaluation", "share-recipient-disclosure-affordance-2026-08-31", "after-live", "report.json"), {
+    verdict: "PASS_LIVE_PRODUCTION_SCOPED_WORKSPACE_AND_INVITED_FIXTURE",
+    mode: "live-production",
+    sourceHead: "fixture-sha",
+    productionBuild: {
+      commitSha: "fixture-sha",
+      branch: "master",
+      environment: "production",
+    },
+    providerDispatchLiveClaimed: false,
+    dbMutationPerformed: false,
+    exactSavedUserSessionReproduced: false,
+    exactSavedSessionVerdict: "MISSING_EVIDENCE",
+    results: [
+      ...[
+        { label: "desktop-short-1440x723", width: 1440, height: 723 },
+        { label: "desktop-1440x900", width: 1440, height: 900 },
+        { label: "mobile-short-390x723", width: 390, height: 723 },
+        { label: "mobile-390x844", width: 390, height: 844 },
+      ].map((viewport) => ({
+        route: "/share/[sessionId] invited recipient fixture",
+        viewport,
+        verdict: "PASS",
+        metrics: {
+          documentsPanelOpen: false,
+          documentsSummaryAffordance: "+",
+          horizontalOverflow: false,
+          outsideElements: 0,
+        },
+      })),
+    ],
+  });
   writeJson(rootDir, path.join("evaluation", "share-channel-label-polish-2026-08-27", "report.json"), {
     schema: "safeclaw-share-channel-label-polish/v1",
     verdict: "PASS_LIVE_PRODUCTION_SHARE_CHANNEL_LABEL_POLISH",
@@ -8522,6 +8554,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("zero overflowing step-status labels");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("390x723 mobile stack");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("invited recipient fixture retains a separate desktop two-zone contract");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("closed by default with a visible + affordance");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("메일, 문자, and 카카오 channel labels each remain on one nowrap line");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("live mobile selected-summary");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("exact 844px viewport");
@@ -11682,6 +11715,27 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const gate = audit.gates.find((item) => item.id === "ui_documents_share_cockpit");
     expect(gate?.state).toBe("contradicted");
     expect(gate?.evidencePath).toBe(path.join("evaluation", "share-desktop-perception-2026-07-22", "report.json"));
+  });
+
+  it("contradicts the UI gate when the recipient document disclosure loses its visible affordance", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(rootDir, "evaluation", "share-recipient-disclosure-affordance-2026-08-31", "after-live", "report.json");
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      results: Array<{ metrics: { documentsSummaryAffordance: string } }>;
+    };
+    report.results[0].metrics.documentsSummaryAffordance = "";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-08-31T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+    const gate = audit.gates.find((item) => item.id === "ui_documents_share_cockpit");
+    expect(gate?.state).toBe("contradicted");
+    expect(gate?.evidencePath).toBe(path.join("evaluation", "share-recipient-disclosure-affordance-2026-08-31", "after-live", "report.json"));
+    expect(gate?.detail).toContain("shareRecipientDisclosureAffordance=false");
   });
 
   it("contradicts the UI gate when a desktop share channel label wraps", async () => {
