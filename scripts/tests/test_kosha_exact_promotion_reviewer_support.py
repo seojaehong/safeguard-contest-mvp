@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import gzip
+import hashlib
 import json
+import re
 import sys
 import tempfile
 import unittest
+import unicodedata
 from pathlib import Path
 
 
@@ -13,6 +16,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 import kosha_exact_promotion_reviewer_support as support
+import kosha_corpus_binding as corpus_binding
 
 
 def write_json(root: Path, relative_path: Path, value: object) -> None:
@@ -49,12 +53,54 @@ def write_body_rows(root: Path, body_root: Path, rows: list[dict[str, object]]) 
             handle.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
+def normalized_body_sha256(value: str) -> str:
+    normalized = re.sub(r"\s+", " ", unicodedata.normalize("NFKC", value)).strip()
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
+def refresh_corpus_binding(root: Path) -> None:
+    items_path = root / support.DEFAULT_BODY_ROOT / "snapshots/test/items.jsonl.gz"
+    logical_items = gzip.decompress(items_path.read_bytes())
+    manifest_path = root / support.DEFAULT_BODY_ROOT / "snapshots/test/manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["output_hashes"]["items.jsonl"] = hashlib.sha256(logical_items).hexdigest()
+    write_json(root, support.DEFAULT_BODY_ROOT / "snapshots/test/manifest.json", manifest)
+    current = json.loads((root / support.DEFAULT_BODY_CURRENT_PATH).read_text(encoding="utf-8"))
+    current["manifest"]["sha256"] = corpus_binding.sha256_file(manifest_path)
+    write_json(root, support.DEFAULT_BODY_CURRENT_PATH, current)
+    rows = [json.loads(line) for line in logical_items.decode("utf-8").splitlines() if line.strip()]
+    body_by_key = {row["stable_key"]: row for row in rows}
+    packet_path = root / support.DEFAULT_PACKET_PATH
+    packet = json.loads(packet_path.read_text(encoding="utf-8"))
+    candidates = packet["candidates"]
+    for candidate in candidates:
+        body = body_by_key[candidate["stableKey"]]["body"]
+        digest = normalized_body_sha256(body)
+        candidate["bodySha256"] = digest
+        candidate["recomputedBodySha256"] = digest
+    packet["corpusBinding"] = corpus_binding.build_corpus_binding(
+        root,
+        support.DEFAULT_BODY_CURRENT_PATH,
+        support.DEFAULT_BODY_ROOT,
+        candidates,
+    )
+    write_json(root, support.DEFAULT_PACKET_PATH, packet)
+    packet_sha256 = corpus_binding.sha256_file(packet_path)
+    for upstream_path in (support.DEFAULT_PDF_AUDIT_PATH, support.DEFAULT_LIFECYCLE_AUDIT_PATH):
+        upstream = json.loads((root / upstream_path).read_text(encoding="utf-8"))
+        upstream["packetSha256"] = packet_sha256
+        upstream["corpusBinding"] = packet["corpusBinding"]
+        write_json(root, upstream_path, upstream)
+
+
 def fixture_root() -> Path:
     root = Path(tempfile.mkdtemp(prefix="kosha-reviewer-support-"))
     candidates = []
     body_rows = []
     for index, (stable_key, groups) in enumerate(support.SEMANTIC_GROUPS.items(), start=1):
         terms = [group[0] for group in groups]
+        body = f"본문 {' '.join(terms)} 검토 문맥"
+        body_sha256 = hashlib.sha256(body.encode("utf-8")).hexdigest()
         candidates.append(
             {
                 "stableKey": stable_key,
@@ -64,12 +110,16 @@ def fixture_root() -> Path:
                 "rationale": f"{stable_key} rationale",
                 "normalizedCharCount": 1000 + index,
                 "pageCount": 10 + index,
+                "bodySha256": body_sha256,
+                "recomputedBodySha256": body_sha256,
+                "pdfSha256": hashlib.sha256(f"pdf-{stable_key}".encode("utf-8")).hexdigest(),
             }
         )
         body_rows.append(
             {
                 "stable_key": stable_key,
-                "body": f"본문 {' '.join(terms)} 검토 문맥",
+                "version_key": f"{stable_key}-2026",
+                "body": body,
             }
         )
     write_json(
@@ -109,11 +159,47 @@ def fixture_root() -> Path:
         support.DEFAULT_BODY_CURRENT_PATH,
         {
             "snapshot_path": "snapshots/test",
-            "snapshot_id": "test-snapshot",
+            "snapshot_id": "test",
             "source_identity_sha256": "c" * 64,
+            "manifest": {
+                "path": "snapshots/test/manifest.json",
+                "sha256": "",
+            },
         },
     )
     write_body_rows(root, support.DEFAULT_BODY_ROOT, body_rows)
+    items_path = root / support.DEFAULT_BODY_ROOT / "snapshots/test/items.jsonl.gz"
+    logical_items = gzip.decompress(items_path.read_bytes())
+    manifest_path = root / support.DEFAULT_BODY_ROOT / "snapshots/test/manifest.json"
+    write_json(
+        root,
+        support.DEFAULT_BODY_ROOT / "snapshots/test/manifest.json",
+        {
+            "snapshot_id": "test",
+            "source_identity": {"identity_sha256": "c" * 64},
+            "output_hashes": {
+                "items.jsonl": hashlib.sha256(logical_items).hexdigest(),
+            },
+        },
+    )
+    current = json.loads((root / support.DEFAULT_BODY_CURRENT_PATH).read_text(encoding="utf-8"))
+    current["manifest"]["sha256"] = corpus_binding.sha256_file(manifest_path)
+    write_json(root, support.DEFAULT_BODY_CURRENT_PATH, current)
+    packet_path = root / support.DEFAULT_PACKET_PATH
+    packet = json.loads(packet_path.read_text(encoding="utf-8"))
+    packet["corpusBinding"] = corpus_binding.build_corpus_binding(
+        root,
+        support.DEFAULT_BODY_CURRENT_PATH,
+        support.DEFAULT_BODY_ROOT,
+        candidates,
+    )
+    write_json(root, support.DEFAULT_PACKET_PATH, packet)
+    packet_sha256 = corpus_binding.sha256_file(packet_path)
+    for upstream_path in (support.DEFAULT_PDF_AUDIT_PATH, support.DEFAULT_LIFECYCLE_AUDIT_PATH):
+        upstream = json.loads((root / upstream_path).read_text(encoding="utf-8"))
+        upstream["packetSha256"] = packet_sha256
+        upstream["corpusBinding"] = packet["corpusBinding"]
+        write_json(root, upstream_path, upstream)
     return root
 
 
@@ -158,6 +244,7 @@ class KoshaExactPromotionReviewerSupportTest(unittest.TestCase):
         target = next(row for row in rows if row["stable_key"] == "B-E-11")
         target["body"] = "충전전로 전기작업만 포함"
         write_body_rows(root, support.DEFAULT_BODY_ROOT, rows)
+        refresh_corpus_binding(root)
 
         report = support.build_report(root)
 
@@ -175,6 +262,7 @@ class KoshaExactPromotionReviewerSupportTest(unittest.TestCase):
         target = next(row for row in rows if row["stable_key"] == "A-G-1")
         target["body"] = "설치 전 수직형 추락방망 상태와 추락 위험을 현장에서 확인합니다."
         write_body_rows(root, support.DEFAULT_BODY_ROOT, rows)
+        refresh_corpus_binding(root)
 
         report = support.build_report(root)
 
@@ -212,6 +300,7 @@ class KoshaExactPromotionReviewerSupportTest(unittest.TestCase):
             },
         ]
         write_body_rows(root, support.DEFAULT_BODY_ROOT, rows)
+        refresh_corpus_binding(root)
 
         report = support.build_report(root)
 
@@ -231,6 +320,7 @@ class KoshaExactPromotionReviewerSupportTest(unittest.TestCase):
         target = next(row for row in rows if row["stable_key"] == "D-C-10")
         target["pages"][0]["normalized_text_sha256"] = ""
         write_body_rows(root, support.DEFAULT_BODY_ROOT, rows)
+        refresh_corpus_binding(root)
 
         with self.assertRaisesRegex(
             support.ReviewerSupportError,
@@ -246,6 +336,7 @@ class KoshaExactPromotionReviewerSupportTest(unittest.TestCase):
         target = next(row for row in rows if row["stable_key"] == "D-C-10")
         target["pages"][0]["ocr_candidate"] = "false"
         write_body_rows(root, support.DEFAULT_BODY_ROOT, rows)
+        refresh_corpus_binding(root)
 
         with self.assertRaisesRegex(
             support.ReviewerSupportError,
@@ -279,6 +370,7 @@ class KoshaExactPromotionReviewerSupportTest(unittest.TestCase):
             },
         ]
         write_body_rows(root, support.DEFAULT_BODY_ROOT, rows)
+        refresh_corpus_binding(root)
 
         report = support.build_report(root)
         candidate = next(row for row in report["results"] if row["stableKey"] == "B-E-11")
@@ -296,6 +388,21 @@ class KoshaExactPromotionReviewerSupportTest(unittest.TestCase):
         with self.assertRaisesRegex(
             support.ReviewerSupportError,
             "reviewer-support-lifecycle-audit-not-ready",
+        ):
+            support.build_report(root)
+
+    def test_stale_body_corpus_is_rejected_before_semantic_review(self) -> None:
+        root = fixture_root()
+        path = root / support.DEFAULT_BODY_ROOT / "snapshots/test/items.jsonl.gz"
+        with gzip.open(path, "rt", encoding="utf-8") as handle:
+            rows = [json.loads(line) for line in handle if line.strip()]
+        target = next(row for row in rows if row["stable_key"] == "D-C-10")
+        target["body"] = "committed packet 이후 변조된 본문"
+        write_body_rows(root, support.DEFAULT_BODY_ROOT, rows)
+
+        with self.assertRaisesRegex(
+            support.ReviewerSupportError,
+            "corpus-binding-items-logical-hash-mismatch",
         ):
             support.build_report(root)
 

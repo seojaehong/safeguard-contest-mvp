@@ -2,6 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 
@@ -202,6 +203,22 @@ function candidate(stableKey: string, index: number): Candidate {
 function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: string; candidates: Candidate[] } {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "kosha-review-gate-"));
   const candidates = [candidate("D-C-10", 1), candidate("A-G-15", 2)];
+  const corpusBinding = {
+    schemaVersion: "safeclaw-kosha-corpus-binding/v1",
+    snapshotId: "fixture-snapshot",
+    sourceIdentitySha256: "a".repeat(64),
+    current: { path: "data/current.json", sha256: "b".repeat(64) },
+    manifest: { path: "data/manifest.json", sha256: "c".repeat(64), declaredSha256: "c".repeat(64) },
+    items: {
+      path: "data/items.jsonl.gz",
+      gzipSha256: "d".repeat(64),
+      logicalSha256: "e".repeat(64),
+      declaredLogicalSha256: "e".repeat(64),
+    },
+    candidatePairs: [],
+    candidatePairsSha256: "f".repeat(64),
+    bindingSha256: "1".repeat(64),
+  };
   const packetPath = "evaluation/kosha-exact-promotion-packet-2026-07-22/report.json";
   const reviewPath = "evaluation/kosha-exact-promotion-review-2026-07-22/review.json";
   writeJson(root, packetPath, {
@@ -212,6 +229,7 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
     embeddingGenerationPerformed: false,
     sourceHead: null,
     liveBuildInfoAtPacket: { commitSha: null },
+    corpusBinding,
     candidates,
   });
   writeJson(root, reviewPath, {
@@ -236,6 +254,8 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
     exactPromotionPerformed: false,
     separatePromotionApprovalRequired: true,
     sourceHead: null,
+    corpusBinding,
+    packetSha256: null,
     results: candidates.map((row) => ({
       stableKey: row.stableKey,
       version: row.version,
@@ -258,6 +278,8 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
     exactPromotionPerformed: false,
     separatePromotionApprovalRequired: true,
     sourceHead: null,
+    corpusBinding,
+    packetSha256: null,
     reviewChecklistImpact: {
       operatorLifecycleCurrentStatusConfirmed: false,
       humanConfirmationRecorded: false,
@@ -304,6 +326,8 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
     exactRegistryWriteArtifactCreated: false,
     separatePromotionApprovalRequired: true,
     sourceHead: null,
+    corpusBinding,
+    upstreamArtifacts: null,
     results: candidates.map((row) => ({
       stableKey: row.stableKey,
       version: row.version,
@@ -356,6 +380,31 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
     report.sourceHead = productCommit;
     writeJson(root, relativePath, report);
   }
+  const packetSha256 = createHash("sha256").update(fs.readFileSync(path.join(root, packetPath))).digest("hex");
+  for (const relativePath of [
+    "evaluation/kosha-exact-official-pdf-audit-2026-07-25/report.json",
+    "evaluation/kosha-exact-official-lifecycle-audit-2026-07-25/report.json",
+  ]) {
+    const report = JSON.parse(fs.readFileSync(path.join(root, relativePath), "utf8")) as { packetSha256: string | null };
+    report.packetSha256 = packetSha256;
+    writeJson(root, relativePath, report);
+  }
+  const reviewerSupportPath = "evaluation/kosha-exact-promotion-reviewer-support-2026-07-25/report.json";
+  const reviewerSupport = JSON.parse(fs.readFileSync(path.join(root, reviewerSupportPath), "utf8")) as {
+    upstreamArtifacts: unknown;
+  };
+  reviewerSupport.upstreamArtifacts = {
+    packet: { path: packetPath, sha256: packetSha256 },
+    pdfAudit: {
+      path: "evaluation/kosha-exact-official-pdf-audit-2026-07-25/report.json",
+      sha256: createHash("sha256").update(fs.readFileSync(path.join(root, "evaluation/kosha-exact-official-pdf-audit-2026-07-25/report.json"))).digest("hex"),
+    },
+    lifecycleAudit: {
+      path: "evaluation/kosha-exact-official-lifecycle-audit-2026-07-25/report.json",
+      sha256: createHash("sha256").update(fs.readFileSync(path.join(root, "evaluation/kosha-exact-official-lifecycle-audit-2026-07-25/report.json"))).digest("hex"),
+    },
+  };
+  writeJson(root, reviewerSupportPath, reviewerSupport);
   execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
   execFileSync("git", ["commit", "-m", "bind evidence"], { cwd: root, stdio: "ignore" });
   execFileSync("node", [
@@ -545,6 +594,30 @@ describe("KOSHA exact promotion review gate", () => {
     expect(() => module.buildKoshaExactPromotionReviewTemplate({ rootDir: root, packetPath })).toThrow(
       "kosha-review-template-reviewer-support-candidate-not-ready:D-C-10",
     );
+  });
+
+  it("fails closed when a committed companion report changes the corpus binding", async () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const auditPath = "evaluation/kosha-exact-official-pdf-audit-2026-07-25/report.json";
+    const audit = JSON.parse(fs.readFileSync(path.join(root, auditPath), "utf8")) as {
+      corpusBinding: { bindingSha256: string };
+    };
+    audit.corpusBinding.bindingSha256 = "9".repeat(64);
+    writeJson(root, auditPath, audit);
+    execFileSync("git", ["add", auditPath], { cwd: root, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "replace companion"], { cwd: root, stdio: "ignore" });
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({
+      rootDir: root,
+      packetPath,
+      reviewPath,
+      generatedAt: "2026-07-22T00:00:00.000Z",
+    });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.failures).toContain("corpus-binding:artifact-mismatch");
+    expect(report.failures).toContain("corpus-binding:reviewer-upstream-sha-mismatch");
+    expect(report.exactPromotionPerformed).toBe(false);
   });
 
   it("fails closed when the human review is bound to a different evidence digest", async () => {

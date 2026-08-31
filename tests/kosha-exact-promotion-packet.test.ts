@@ -4,6 +4,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
 type PromotionPacket = {
@@ -13,6 +14,14 @@ type PromotionPacket = {
   embeddingGenerationPerformed: boolean;
   exactPromotionPerformed: boolean;
   candidateCount: number;
+  corpusBinding: {
+    schemaVersion: string;
+    snapshotId: string;
+    sourceIdentitySha256: string;
+    items: { logicalSha256: string; declaredLogicalSha256: string };
+    candidatePairsSha256: string;
+    bindingSha256: string;
+  };
   operatorReviewReadiness: {
     packetReadyForReview: boolean;
     reviewChecklistComplete: boolean;
@@ -34,6 +43,7 @@ type PromotionPacket = {
     sourceTitle: string;
     officialCurrentTitle: string;
     bodySha256: string;
+    recomputedBodySha256: string;
     pdfSha256: string;
     requiredReviewChecks: string[];
     reviewChecklistComplete: boolean;
@@ -94,6 +104,7 @@ function writeGzipJsonl(root: string, relativePath: string, rows: readonly unkno
 }
 
 function metadata(stableKey: string, officialVersion: string, category: string, index: number): MetadataRow {
+  const body = `${stableKey} verified body`;
   return {
     stable_key: stableKey,
     official_version: officialVersion,
@@ -103,7 +114,7 @@ function metadata(stableKey: string, officialVersion: string, category: string, 
     official_file_id: `FILE-${index}`,
     official_file_sequence: 1,
     publication_date: "2026-01-30",
-    body_sha256: `${index}`.repeat(64).slice(0, 64),
+    body_sha256: createHash("sha256").update(body).digest("hex"),
     pdf_sha256: `${index + 1}`.repeat(64).slice(0, 64),
   };
 }
@@ -118,6 +129,7 @@ function itemFromMetadata(row: MetadataRow): Record<string, unknown> {
     item_type: "technical-support-regulation",
     normalized_char_count: 1234,
     page_count: 12,
+    body: `${row.stable_key} verified body`,
     official_provenance: {
       body_sha256: row.body_sha256,
       official_file_id: row.official_file_id,
@@ -156,14 +168,15 @@ function writeFixtureRoot(): string {
   }
 
   const snapshotPath = "snapshots/test-snapshot";
-  writeJson(root, "data/safety-knowledge/kosha-guide-corpus/current.json", {
-    schema_version: "safeclaw-kosha-body-current/v1",
-    snapshot_id: "test-snapshot",
-    snapshot_path: snapshotPath,
-  });
-  writeJson(root, "data/safety-knowledge/kosha-guide-corpus/snapshots/test-snapshot/manifest.json", {
+  const sourceIdentitySha256 = "f".repeat(64);
+  const manifestRelativePath = "data/safety-knowledge/kosha-guide-corpus/snapshots/test-snapshot/manifest.json";
+  const itemsRelativePath = "data/safety-knowledge/kosha-guide-corpus/snapshots/test-snapshot/items.jsonl.gz";
+  writeGzipJsonl(root, itemsRelativePath, metadataRows.map(itemFromMetadata));
+  const itemsLogicalBytes = zlib.gunzipSync(fs.readFileSync(path.join(root, itemsRelativePath)));
+  writeJson(root, manifestRelativePath, {
     schema_version: "safeclaw-kosha-verified-subset/v1",
     snapshot_id: "test-snapshot",
+    source_identity: { identity_sha256: sourceIdentitySha256 },
     coverage_scope: {
       scope_id: "technical-support-regulation-current-native",
       accepted_count: metadataRows.length,
@@ -174,8 +187,22 @@ function writeFixtureRoot(): string {
     network_calls_performed: false,
     ocr_performed: false,
     db_mutation_performed: false,
+    output_hashes: {
+      "items.jsonl": createHash("sha256").update(itemsLogicalBytes).digest("hex"),
+    },
   });
-  writeGzipJsonl(root, "data/safety-knowledge/kosha-guide-corpus/snapshots/test-snapshot/items.jsonl.gz", metadataRows.map(itemFromMetadata));
+  const manifestBytes = fs.readFileSync(path.join(root, manifestRelativePath));
+  writeJson(root, "data/safety-knowledge/kosha-guide-corpus/current.json", {
+    schema_version: "safeclaw-kosha-body-current/v1",
+    snapshot_id: "test-snapshot",
+    snapshot_path: snapshotPath,
+    source_identity_sha256: sourceIdentitySha256,
+    manifest: {
+      path: `${snapshotPath}/manifest.json`,
+      sha256: createHash("sha256").update(manifestBytes).digest("hex"),
+      size_bytes: manifestBytes.byteLength,
+    },
+  });
   writeGzipJsonl(root, "data/safety-knowledge/kosha-guide-corpus/snapshots/test-snapshot/chunks.jsonl.gz", Array.from({ length: 9 }, (_, index) => ({ id: index })));
   writeGzipJsonl(root, "data/safety-knowledge/kosha-guide-corpus/snapshots/test-snapshot/failures.jsonl.gz", []);
   writeJson(root, "build-info.json", {
@@ -244,7 +271,16 @@ describe("KOSHA exact promotion packet", () => {
     expect(report.candidates[0].sourceTitle).toContain("sample title");
     expect(report.candidates[0].officialCurrentTitle).toBe("D-C-10 official current title");
     expect(report.candidates[0].bodySha256).toHaveLength(64);
+    expect(report.candidates[0].recomputedBodySha256).toBe(report.candidates[0].bodySha256);
     expect(report.candidates[0].pdfSha256).toHaveLength(64);
+    expect(report.corpusBinding).toMatchObject({
+      schemaVersion: "safeclaw-kosha-corpus-binding/v1",
+      snapshotId: "test-snapshot",
+      sourceIdentitySha256: "f".repeat(64),
+    });
+    expect(report.corpusBinding.items.logicalSha256).toBe(report.corpusBinding.items.declaredLogicalSha256);
+    expect(report.corpusBinding.candidatePairsSha256).toMatch(/^[0-9a-f]{64}$/u);
+    expect(report.corpusBinding.bindingSha256).toMatch(/^[0-9a-f]{64}$/u);
     expect(report.exactPromotionPerformed).toBe(false);
     expect(report.mutationPerformed).toBe(false);
     expect(report.dbMutationPerformed).toBe(false);
@@ -301,7 +337,44 @@ describe("KOSHA exact promotion packet", () => {
       candidateKeys: ["D-C-10"],
       buildInfo: {},
       generatedAt: "2026-07-22T00:00:00.000Z",
-    })).toThrow(/kosha-promotion-packet-body-hash-mismatch:D-C-10/u);
+    })).toThrow(/kosha-body-items-logical-hash-mismatch/u);
+  });
+
+  it("fails closed when current declares the wrong manifest digest", async () => {
+    const root = writeFixtureRoot();
+    const currentPath = path.join(root, "data/safety-knowledge/kosha-guide-corpus/current.json");
+    const current = JSON.parse(fs.readFileSync(currentPath, "utf8")) as { manifest: { sha256: string } };
+    current.manifest.sha256 = "0".repeat(64);
+    writeJson(root, path.relative(root, currentPath), current);
+    const module = await loadPromotionPacketModule();
+
+    expect(() => module.buildKoshaExactPromotionPacket({
+      rootDir: root,
+      candidateKeys: ["D-C-10"],
+      buildInfo: {},
+      generatedAt: "2026-07-22T00:00:00.000Z",
+    })).toThrow(/kosha-body-current-manifest-hash-mismatch/u);
+  });
+
+  it("fails closed when body bytes drift even if declared provenance is rewritten", async () => {
+    const root = writeFixtureRoot();
+    const items = readFixtureItems(root);
+    const target = items.find((item) => item.stable_key === "D-C-10");
+    if (!target || typeof target.official_provenance !== "object" || target.official_provenance === null) {
+      throw new Error("fixture-missing-d-c-10");
+    }
+    target.body = "tampered body";
+    const forgedHash = createHash("sha256").update("tampered body").digest("hex");
+    (target.official_provenance as Record<string, unknown>).body_sha256 = forgedHash;
+    writeGzipJsonl(root, "data/safety-knowledge/kosha-guide-corpus/snapshots/test-snapshot/items.jsonl.gz", items);
+    const module = await loadPromotionPacketModule();
+
+    expect(() => module.buildKoshaExactPromotionPacket({
+      rootDir: root,
+      candidateKeys: ["D-C-10"],
+      buildInfo: {},
+      generatedAt: "2026-07-22T00:00:00.000Z",
+    })).toThrow(/kosha-body-items-logical-hash-mismatch/u);
   });
 
   it("fails closed when candidate metadata is no longer current", async () => {
@@ -336,7 +409,19 @@ describe("KOSHA exact promotion packet", () => {
       network_calls_performed: false,
       ocr_performed: false,
       db_mutation_performed: false,
+      source_identity: { identity_sha256: "f".repeat(64) },
+      output_hashes: {
+        "items.jsonl": createHash("sha256").update(zlib.gunzipSync(fs.readFileSync(
+          path.join(root, "data/safety-knowledge/kosha-guide-corpus/snapshots/test-snapshot/items.jsonl.gz"),
+        ))).digest("hex"),
+      },
     });
+    const currentPath = path.join(root, "data/safety-knowledge/kosha-guide-corpus/current.json");
+    const current = JSON.parse(fs.readFileSync(currentPath, "utf8")) as { manifest: { sha256: string; size_bytes: number } };
+    const manifestBytes = fs.readFileSync(path.join(root, "data/safety-knowledge/kosha-guide-corpus/snapshots/test-snapshot/manifest.json"));
+    current.manifest.sha256 = createHash("sha256").update(manifestBytes).digest("hex");
+    current.manifest.size_bytes = manifestBytes.byteLength;
+    writeJson(root, path.relative(root, currentPath), current);
     const module = await loadPromotionPacketModule();
 
     expect(() => module.buildKoshaExactPromotionPacket({

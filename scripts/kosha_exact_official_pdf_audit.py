@@ -17,6 +17,7 @@ from typing import Callable
 from urllib.parse import urljoin, urlsplit
 
 import snapshot_kosha_guide_corpus
+from kosha_corpus_binding import build_corpus_binding, require_packet_corpus_binding
 
 
 JsonObject = dict[str, object]
@@ -357,6 +358,12 @@ def build_report(
     stable_keys = [_text(row.get("stableKey")) for row in candidates]
     if not all(stable_keys) or len(stable_keys) != len(set(stable_keys)):
         raise AuditError("packet-candidate-set-invalid")
+    try:
+        corpus_binding = build_corpus_binding(root_dir, body_current_path, body_root, candidates)
+        require_packet_corpus_binding(packet, corpus_binding)
+    except RuntimeError as error:
+        raise AuditError(str(error)) from error
+    packet_sha256 = _sha256_file(root_dir / packet_path)
 
     metadata_rows = _read_jsonl(root_dir / metadata_path)
     metadata_by_key = {_text(row.get("stable_key")): row for row in metadata_rows}
@@ -413,6 +420,8 @@ def build_report(
         ),
         "scope": "read-only official KOSHA PDF and immutable body-pair verification for the bounded promotion packet",
         "packetPath": packet_path.as_posix(),
+        "packetSha256": packet_sha256,
+        "corpusBinding": corpus_binding,
         "candidateCount": total_count,
         "machineVerifiedCount": passed_count,
         "failedCount": total_count - passed_count,

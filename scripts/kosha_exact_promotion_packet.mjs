@@ -6,6 +6,7 @@ import process from "node:process";
 import zlib from "node:zlib";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 
 const SCHEMA_VERSION = "safeclaw-kosha-exact-promotion-packet/v1";
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
@@ -73,6 +74,22 @@ function asNumber(value) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+function sha256(value) {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function canonicalJson(value) {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (isRecord(value)) {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function normalizedBodySha256(value) {
+  return sha256(value.normalize("NFKC").replace(/\s+/gu, " ").trim());
+}
+
 /**
  * @param {string} rootDir
  */
@@ -132,6 +149,26 @@ function readJsonlMaybeGzip(filePathWithoutGz) {
   }
   const trimmed = text.trim();
   return trimmed ? trimmed.split(/\r?\n/u).filter(Boolean).map((line) => JSON.parse(line)) : [];
+}
+
+function readLogicalFileMaybeGzip(filePathWithoutGz) {
+  const gzipPath = `${filePathWithoutGz}.gz`;
+  if (fs.existsSync(gzipPath)) {
+    const gzipBytes = fs.readFileSync(gzipPath);
+    return {
+      path: gzipPath,
+      gzipSha256: sha256(gzipBytes),
+      logicalBytes: zlib.gunzipSync(gzipBytes),
+    };
+  }
+  if (fs.existsSync(filePathWithoutGz)) {
+    return {
+      path: filePathWithoutGz,
+      gzipSha256: null,
+      logicalBytes: fs.readFileSync(filePathWithoutGz),
+    };
+  }
+  throw new Error(`kosha-body-output-missing:${filePathWithoutGz}`);
 }
 
 /**
@@ -201,7 +238,9 @@ function readExactVersions(rootDir, exactKoshaDir) {
  * @param {string} bodyCorpusRoot
  */
 function readBodyItems(rootDir, bodyCorpusCurrent, bodyCorpusRoot) {
-  const current = readJson(resolveInsideRoot(rootDir, bodyCorpusCurrent));
+  const currentPath = resolveInsideRoot(rootDir, bodyCorpusCurrent);
+  const currentBytes = fs.readFileSync(currentPath);
+  const current = JSON.parse(currentBytes.toString("utf8"));
   if (!isRecord(current)) throw new Error("invalid-kosha-body-current");
   const snapshotPath = asString(current.snapshot_path);
   if (!snapshotPath) throw new Error("kosha-body-current-missing-snapshot-path");
@@ -210,11 +249,40 @@ function readBodyItems(rootDir, bodyCorpusCurrent, bodyCorpusRoot) {
   if (!snapshotDir.startsWith(`${corpusRoot}${path.sep}`)) {
     throw new Error(`kosha-body-snapshot-outside-root:${snapshotPath}`);
   }
-  const manifest = readJson(path.join(snapshotDir, "manifest.json"));
+  const manifestDescriptor = isRecord(current.manifest) ? current.manifest : {};
+  const declaredManifestPath = asString(manifestDescriptor.path) || path.join(snapshotPath, "manifest.json");
+  const manifestPath = path.resolve(corpusRoot, declaredManifestPath);
+  if (!manifestPath.startsWith(`${corpusRoot}${path.sep}`)) {
+    throw new Error(`kosha-body-manifest-outside-root:${declaredManifestPath}`);
+  }
+  const manifestBytes = fs.readFileSync(manifestPath);
+  const manifestSha256 = sha256(manifestBytes);
+  const declaredManifestSha256 = asString(manifestDescriptor.sha256);
+  if (!declaredManifestSha256 || declaredManifestSha256 !== manifestSha256) {
+    throw new Error("kosha-body-current-manifest-hash-mismatch");
+  }
+  const manifest = JSON.parse(manifestBytes.toString("utf8"));
   if (!isRecord(manifest)) throw new Error("invalid-kosha-body-manifest");
+  const currentSnapshotId = asString(current.snapshot_id);
+  const manifestSnapshotId = asString(manifest.snapshot_id);
+  if (!currentSnapshotId || currentSnapshotId !== manifestSnapshotId || currentSnapshotId !== path.basename(snapshotDir)) {
+    throw new Error("kosha-body-snapshot-identity-mismatch");
+  }
+  const sourceIdentity = isRecord(manifest.source_identity) ? manifest.source_identity : {};
+  if (asString(current.source_identity_sha256) !== asString(sourceIdentity.identity_sha256)) {
+    throw new Error("kosha-body-source-identity-mismatch");
+  }
   const coverage = isRecord(manifest.coverage_scope) ? manifest.coverage_scope : {};
   const launchGate = isRecord(manifest.launch_gate) ? manifest.launch_gate : {};
-  const items = readJsonlMaybeGzip(path.join(snapshotDir, "items.jsonl")).filter(isRecord);
+  const outputHashes = isRecord(manifest.output_hashes) ? manifest.output_hashes : {};
+  const itemsFile = readLogicalFileMaybeGzip(path.join(snapshotDir, "items.jsonl"));
+  const itemsLogicalSha256 = sha256(itemsFile.logicalBytes);
+  const declaredItemsLogicalSha256 = asString(outputHashes["items.jsonl"]);
+  if (!declaredItemsLogicalSha256 || declaredItemsLogicalSha256 !== itemsLogicalSha256) {
+    throw new Error("kosha-body-items-logical-hash-mismatch");
+  }
+  const itemsText = itemsFile.logicalBytes.toString("utf8").trim();
+  const items = (itemsText ? itemsText.split(/\r?\n/u).filter(Boolean).map((line) => JSON.parse(line)) : []).filter(isRecord);
   const chunks = readJsonlMaybeGzip(path.join(snapshotDir, "chunks.jsonl"));
   const failures = readJsonlMaybeGzip(path.join(snapshotDir, "failures.jsonl"));
   return {
@@ -230,6 +298,25 @@ function readBodyItems(rootDir, bodyCorpusCurrent, bodyCorpusRoot) {
     chunksCount: chunks.length,
     failures: failures.length,
     items,
+    corpusSource: {
+      snapshotId: currentSnapshotId,
+      sourceIdentitySha256: asString(sourceIdentity.identity_sha256),
+      current: {
+        path: path.relative(rootDir, currentPath).replaceAll("\\", "/"),
+        sha256: sha256(currentBytes),
+      },
+      manifest: {
+        path: path.relative(rootDir, manifestPath).replaceAll("\\", "/"),
+        sha256: manifestSha256,
+        declaredSha256: declaredManifestSha256,
+      },
+      items: {
+        path: path.relative(rootDir, itemsFile.path).replaceAll("\\", "/"),
+        gzipSha256: itemsFile.gzipSha256,
+        logicalSha256: itemsLogicalSha256,
+        declaredLogicalSha256: declaredItemsLogicalSha256,
+      },
+    },
   };
 }
 
@@ -305,6 +392,8 @@ export function buildKoshaExactPromotionPacket(options) {
     const officialCurrentTitle = asString(lifecycle.currentOfficialTitle);
     if (!officialCurrentTitle) throw new Error(`kosha-promotion-packet-missing-official-current-title:${stableKey}`);
     if (asString(item.version_key) !== version) throw new Error(`kosha-promotion-packet-version-mismatch:${stableKey}`);
+    const recomputedBodySha256 = normalizedBodySha256(asString(item.body));
+    if (recomputedBodySha256 !== bodySha256) throw new Error(`kosha-promotion-packet-body-bytes-mismatch:${stableKey}`);
     if (asString(itemProvenance.body_sha256) !== bodySha256) throw new Error(`kosha-promotion-packet-body-hash-mismatch:${stableKey}`);
     if (asString(itemProvenance.pdf_sha256) !== pdfSha256) throw new Error(`kosha-promotion-packet-pdf-hash-mismatch:${stableKey}`);
     if (asString(itemProvenance.official_file_id) !== asString(metadata.official_file_id)) throw new Error(`kosha-promotion-packet-file-id-mismatch:${stableKey}`);
@@ -320,6 +409,7 @@ export function buildKoshaExactPromotionPacket(options) {
       officialFileId: asString(metadata.official_file_id),
       officialUrl: asString(metadata.official_url),
       bodySha256,
+      recomputedBodySha256,
       pdfSha256,
       normalizedCharCount: asNumber(item.normalized_char_count) ?? 0,
       pageCount: asNumber(item.page_count) ?? 0,
@@ -329,6 +419,26 @@ export function buildKoshaExactPromotionPacket(options) {
       reviewRequiredBeforeExactTrust: true,
     };
   });
+
+  const candidatePairs = candidates
+    .map(({ stableKey, version, recomputedBodySha256, pdfSha256 }) => ({
+      stableKey,
+      version,
+      recomputedBodySha256,
+      expectedPdfSha256: pdfSha256,
+    }))
+    .sort((left, right) => left.stableKey.localeCompare(right.stableKey));
+  const candidatePairsSha256 = sha256(canonicalJson(candidatePairs));
+  const corpusBindingMaterial = {
+    schemaVersion: "safeclaw-kosha-corpus-binding/v1",
+    ...bodySubset.corpusSource,
+    candidatePairs,
+    candidatePairsSha256,
+  };
+  const corpusBinding = {
+    ...corpusBindingMaterial,
+    bindingSha256: sha256(canonicalJson(corpusBindingMaterial)),
+  };
 
   return {
     schemaVersion: SCHEMA_VERSION,
@@ -343,6 +453,7 @@ export function buildKoshaExactPromotionPacket(options) {
     embeddingGenerationPerformed: false,
     exactPromotionPerformed: false,
     candidateCount: candidates.length,
+    corpusBinding,
     officialLifecycleAuditPath,
     titleReconciliation: {
       sourceTitlesPreserved: true,

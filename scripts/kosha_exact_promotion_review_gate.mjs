@@ -362,10 +362,14 @@ export function buildKoshaExactPromotionReviewGate(options) {
   const officialLifecycleAuditPath = options.officialLifecycleAuditPath || DEFAULT_OFFICIAL_LIFECYCLE_AUDIT_PATH;
   const reviewerSupportPath = options.reviewerSupportPath || DEFAULT_REVIEWER_SUPPORT_PATH;
   const generatedAt = options.generatedAt || new Date().toISOString();
-  const packet = readJson(resolveExistingRegularFileInsideRoot(rootDir, packetPath));
-  const officialPdfAudit = readJson(resolveExistingRegularFileInsideRoot(rootDir, officialPdfAuditPath));
-  const officialLifecycleAudit = readJson(resolveExistingRegularFileInsideRoot(rootDir, officialLifecycleAuditPath));
-  const reviewerSupport = readJson(resolveExistingRegularFileInsideRoot(rootDir, reviewerSupportPath));
+  const packetFilePath = resolveExistingRegularFileInsideRoot(rootDir, packetPath);
+  const officialPdfAuditFilePath = resolveExistingRegularFileInsideRoot(rootDir, officialPdfAuditPath);
+  const officialLifecycleAuditFilePath = resolveExistingRegularFileInsideRoot(rootDir, officialLifecycleAuditPath);
+  const reviewerSupportFilePath = resolveExistingRegularFileInsideRoot(rootDir, reviewerSupportPath);
+  const packet = readJson(packetFilePath);
+  const officialPdfAudit = readJson(officialPdfAuditFilePath);
+  const officialLifecycleAudit = readJson(officialLifecycleAuditFilePath);
+  const reviewerSupport = readJson(reviewerSupportFilePath);
   const reviewPath = resolveExistingRegularFileInsideRoot(rootDir, options.reviewPath);
   const review = readJson(reviewPath);
   assertPacketShape(packet);
@@ -391,6 +395,42 @@ export function buildKoshaExactPromotionReviewGate(options) {
   const candidateKeySet = new Set(candidates.map(candidateKey).filter(Boolean));
   const failures = [];
   const passed = [];
+  const packetCorpusBinding = isRecord(packetRecord.corpusBinding) ? packetRecord.corpusBinding : null;
+  const pdfCorpusBinding = isRecord(officialPdfAuditRecord.corpusBinding) ? officialPdfAuditRecord.corpusBinding : null;
+  const lifecycleCorpusBinding = isRecord(officialLifecycleAuditRecord.corpusBinding) ? officialLifecycleAuditRecord.corpusBinding : null;
+  const reviewerCorpusBinding = isRecord(reviewerSupportRecord.corpusBinding) ? reviewerSupportRecord.corpusBinding : null;
+  const corpusBindings = [packetCorpusBinding, pdfCorpusBinding, lifecycleCorpusBinding, reviewerCorpusBinding];
+  const corpusBindingSha256 = asString(packetCorpusBinding?.bindingSha256);
+  if (
+    corpusBindings.some((binding) => binding === null)
+    || asString(packetCorpusBinding?.schemaVersion) !== "safeclaw-kosha-corpus-binding/v1"
+    || !/^[0-9a-f]{64}$/u.test(corpusBindingSha256)
+    || corpusBindings.some((binding) => JSON.stringify(binding) !== JSON.stringify(packetCorpusBinding))
+  ) {
+    failures.push("corpus-binding:artifact-mismatch");
+  }
+  const packetSha256 = sha256File(packetFilePath);
+  const officialPdfAuditSha256 = sha256File(officialPdfAuditFilePath);
+  const officialLifecycleAuditSha256 = sha256File(officialLifecycleAuditFilePath);
+  if (asString(officialPdfAuditRecord.packetSha256) !== packetSha256) {
+    failures.push("corpus-binding:pdf-packet-sha-mismatch");
+  }
+  if (asString(officialLifecycleAuditRecord.packetSha256) !== packetSha256) {
+    failures.push("corpus-binding:lifecycle-packet-sha-mismatch");
+  }
+  const upstreamArtifacts = isRecord(reviewerSupportRecord.upstreamArtifacts)
+    ? reviewerSupportRecord.upstreamArtifacts
+    : null;
+  const reviewerPacketArtifact = isRecord(upstreamArtifacts?.packet) ? upstreamArtifacts.packet : null;
+  const reviewerPdfArtifact = isRecord(upstreamArtifacts?.pdfAudit) ? upstreamArtifacts.pdfAudit : null;
+  const reviewerLifecycleArtifact = isRecord(upstreamArtifacts?.lifecycleAudit) ? upstreamArtifacts.lifecycleAudit : null;
+  if (
+    asString(reviewerPacketArtifact?.sha256) !== packetSha256
+    || asString(reviewerPdfArtifact?.sha256) !== officialPdfAuditSha256
+    || asString(reviewerLifecycleArtifact?.sha256) !== officialLifecycleAuditSha256
+  ) {
+    failures.push("corpus-binding:reviewer-upstream-sha-mismatch");
+  }
   const productionCommit = isRecord(packetRecord.liveBuildInfoAtPacket)
     ? asString(packetRecord.liveBuildInfoAtPacket.commitSha)
     : "";
@@ -655,6 +695,7 @@ export function buildKoshaExactPromotionReviewGate(options) {
     officialPdfAuditPath,
     officialLifecycleAuditPath,
     reviewerSupportPath,
+    corpusBindingSha256,
     reviewPath: options.reviewPath,
     verdict: reviewChecklistComplete ? REVIEW_COMPLETE_VERDICT : REVIEW_INCOMPLETE_VERDICT,
     mutationPerformed: false,

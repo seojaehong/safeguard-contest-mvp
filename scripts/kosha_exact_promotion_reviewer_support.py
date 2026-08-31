@@ -9,6 +9,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from kosha_corpus_binding import build_corpus_binding, require_packet_corpus_binding, sha256_file
+
 
 JsonObject = dict[str, Any]
 
@@ -251,6 +253,32 @@ def build_report(
     lifecycle_audit = _read_json(root_dir / lifecycle_audit_path)
     _assert_upstream_boundaries(packet, pdf_audit, lifecycle_audit)
 
+    candidates_value = packet.get("candidates")
+    candidates = candidates_value if isinstance(candidates_value, list) else []
+    if len(candidates) != 8 or not all(isinstance(value, dict) for value in candidates):
+        raise ReviewerSupportError(f"reviewer-support-candidate-count:{len(candidates)}")
+    typed_candidates = [value for value in candidates if isinstance(value, dict)]
+    try:
+        corpus_binding = build_corpus_binding(
+            root_dir,
+            body_current_path,
+            body_root,
+            typed_candidates,
+        )
+        require_packet_corpus_binding(packet, corpus_binding)
+    except RuntimeError as error:
+        raise ReviewerSupportError(str(error)) from error
+    packet_sha256 = sha256_file(root_dir / packet_path)
+    binding_sha256 = _text(corpus_binding.get("bindingSha256"))
+    for label, upstream in (("pdf", pdf_audit), ("lifecycle", lifecycle_audit)):
+        upstream_binding = upstream.get("corpusBinding")
+        if (
+            not isinstance(upstream_binding, dict)
+            or _text(upstream_binding.get("bindingSha256")) != binding_sha256
+            or _text(upstream.get("packetSha256")) != packet_sha256
+        ):
+            raise ReviewerSupportError(f"reviewer-support-{label}-corpus-binding-mismatch")
+
     current = _read_json(root_dir / body_current_path)
     snapshot_path = _text(current.get("snapshot_path"))
     if not snapshot_path:
@@ -258,11 +286,6 @@ def build_report(
     items_path = root_dir / body_root / snapshot_path / "items.jsonl.gz"
     body_rows = _read_gzip_jsonl(items_path)
     body_by_key = {_text(row.get("stable_key")): row for row in body_rows}
-    candidates_value = packet.get("candidates")
-    candidates = candidates_value if isinstance(candidates_value, list) else []
-    if len(candidates) != 8:
-        raise ReviewerSupportError(f"reviewer-support-candidate-count:{len(candidates)}")
-
     results: list[JsonObject] = []
     for candidate_value in candidates:
         if not isinstance(candidate_value, dict):
@@ -355,6 +378,15 @@ def build_report(
         ),
         "bodySnapshotId": _text(current.get("snapshot_id")),
         "bodySourceIdentitySha256": _text(current.get("source_identity_sha256")),
+        "corpusBinding": corpus_binding,
+        "upstreamArtifacts": {
+            "packet": {"path": packet_path.as_posix(), "sha256": packet_sha256},
+            "pdfAudit": {"path": pdf_audit_path.as_posix(), "sha256": sha256_file(root_dir / pdf_audit_path)},
+            "lifecycleAudit": {
+                "path": lifecycle_audit_path.as_posix(),
+                "sha256": sha256_file(root_dir / lifecycle_audit_path),
+            },
+        },
         "results": results,
         "reviewBoundary": {
             "humanReviewCompleted": False,

@@ -13,6 +13,8 @@ from pathlib import Path
 from typing import Callable
 from urllib.parse import urlsplit
 
+from kosha_corpus_binding import build_corpus_binding, require_packet_corpus_binding, sha256_file
+
 
 JsonObject = dict[str, object]
 PageFetcher = Callable[[str, bool, int, int, float, int], tuple[list[JsonObject], int]]
@@ -20,6 +22,8 @@ PageFetcher = Callable[[str, bool, int, int, float, int], tuple[list[JsonObject]
 SCHEMA_VERSION = "safeclaw-kosha-exact-official-lifecycle-audit/v1"
 OFFICIAL_API_URL = "https://portal.kosha.or.kr/api/portal24/bizV/p/VCPDG08009/selectList"
 DEFAULT_PACKET_PATH = Path("evaluation/kosha-exact-promotion-packet-2026-07-22/report.json")
+DEFAULT_BODY_CURRENT_PATH = Path("data/safety-knowledge/kosha-guide-corpus/current.json")
+DEFAULT_BODY_ROOT = Path("data/safety-knowledge/kosha-guide-corpus")
 DEFAULT_OUTPUT_DIR = Path("evaluation/kosha-exact-official-lifecycle-audit-2026-07-25")
 VERSION_PATTERN = re.compile(r"^(?P<stable>.+)-(?P<year>\d{4})$")
 
@@ -311,6 +315,17 @@ def build_report(
     stable_keys = [_text(row.get("stableKey")) for row in candidates]
     if not all(stable_keys) or len(stable_keys) != len(set(stable_keys)):
         raise LifecycleAuditError("packet-candidate-set-invalid")
+    try:
+        corpus_binding = build_corpus_binding(
+            root_dir,
+            DEFAULT_BODY_CURRENT_PATH,
+            DEFAULT_BODY_ROOT,
+            candidates,
+        )
+        require_packet_corpus_binding(packet, corpus_binding)
+    except RuntimeError as error:
+        raise LifecycleAuditError(str(error)) from error
+    packet_sha256 = sha256_file(root_dir / packet_path)
 
     categories = sorted({stable_key.split("-", maxsplit=1)[0] for stable_key in stable_keys})
     current_rows, current_summary = _fetch_state(
@@ -356,6 +371,8 @@ def build_report(
         "scope": "read-only current and retired KOSHA official-list reconciliation for the bounded promotion packet",
         "officialApiUrl": OFFICIAL_API_URL,
         "packetPath": packet_path.as_posix(),
+        "packetSha256": packet_sha256,
+        "corpusBinding": corpus_binding,
         "candidateCount": total_count,
         "machineLifecycleSupportedCount": passed_count,
         "exactTitleIdentityMatchCount": total_count - title_variant_count,
