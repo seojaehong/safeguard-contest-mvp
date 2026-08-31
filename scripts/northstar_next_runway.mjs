@@ -55,6 +55,7 @@ const ARTIFACTS = Object.freeze({
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-complete", "report.json"),
   completedCurrentHeadStandardSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-9504d8db-complete", "report.json"),
+  currentSourceForwardedIdentityRemediation: path.join("evaluation", "current-source-security-forwarded-identity-remediation-2026-08-31", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
@@ -2449,6 +2450,29 @@ function completedCurrentHeadStandardSecurityScanSummary(report) {
 }
 
 /** @param {unknown} report */
+function currentSourceForwardedIdentityRemediationSummary(report) {
+  if (!isRecord(report)) return {};
+  const baseline = isRecord(report.securityBaseline) ? report.securityBaseline : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacent) ? verification.focusedAndAdjacent : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(report.productionCommit),
+    sourceIncludedInProduction: asBoolean(report.sourceIncludedInProduction),
+    scanId: asString(baseline.scanId),
+    findingRule: asString(baseline.findingRule),
+    testFileCount: typeof focused.files === "number" ? focused.files : null,
+    testCount: typeof focused.tests === "number" ? focused.tests : null,
+    liveBehavioralProbeExecuted: asBoolean(verification.liveBehavioralProbeExecuted),
+    freshFollowUpSecurityScan: asString(remaining.freshFollowUpSecurityScan),
+    securityCompleteClaimAllowed: asBoolean(remaining.securityCompleteClaimAllowed),
+    exactSavedShareVerdict: asString(remaining.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
 function currentSourceApprovalFreeSecurityRemediationSummary(report) {
   if (!isRecord(report)) return {};
   const baseline = isRecord(report.scannedBaseline) ? report.scannedBaseline : {};
@@ -3805,6 +3829,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.completedCurrentHeadStandardSecurityScan,
   );
+  const currentSourceForwardedIdentityRemediation = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.currentSourceForwardedIdentityRemediation,
+  );
   const currentSourceApprovalFreeSecurityRemediation = readOptionalJson(
     options.rootDir,
     ARTIFACTS.currentSourceApprovalFreeSecurityRemediation,
@@ -3995,6 +4023,9 @@ export function buildNorthstarNextRunway(options) {
   );
   const completedCurrentHeadStandardSecurityScanResult = completedCurrentHeadStandardSecurityScanSummary(
     completedCurrentHeadStandardSecurityScan,
+  );
+  const currentSourceForwardedIdentityRemediationResult = currentSourceForwardedIdentityRemediationSummary(
+    currentSourceForwardedIdentityRemediation,
   );
   const currentSourceApprovalFreeSecurityRemediationResult = currentSourceApprovalFreeSecurityRemediationSummary(
     currentSourceApprovalFreeSecurityRemediation,
@@ -4205,6 +4236,11 @@ export function buildNorthstarNextRunway(options) {
         gate: "completed_current_head_standard_security_scan",
         state: "notice",
         reason: `current-head Standard scan ${completedCurrentHeadStandardSecurityScanResult.scanId || "missing"} records ${completedCurrentHeadStandardSecurityScanResult.reportableFindingCount ?? "unknown"} findings (${completedCurrentHeadStandardSecurityScanResult.mediumFindingCount ?? "unknown"} medium, ${completedCurrentHeadStandardSecurityScanResult.lowFindingCount ?? "unknown"} low) with ${completedCurrentHeadStandardSecurityScanResult.coverageCompleteness || "unknown"} coverage; the immutable ${completedCurrentHeadStandardSecurityScanResult.immutableOriginalFindingCount ?? "unknown"}-finding baseline remains preserved, ${completedCurrentHeadStandardSecurityScanResult.approvalFreeProductSourceResidualCount ?? "unknown"} approval-free findings remain open, security-complete is false, and exact saved Share remains ${completedCurrentHeadStandardSecurityScanResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+      },
+      {
+        gate: "current_source_forwarded_identity_remediation",
+        state: "proven",
+        reason: `deployed source ${currentSourceForwardedIdentityRemediationResult.sourceHead?.slice(0, 8) || "missing"} verifies trusted Vercel ingress before using forwarded identity with ${currentSourceForwardedIdentityRemediationResult.testFileCount ?? "unknown"} files / ${currentSourceForwardedIdentityRemediationResult.testCount ?? "unknown"} tests; the sealed scan remains immutable, fresh scan is ${currentSourceForwardedIdentityRemediationResult.freshFollowUpSecurityScan || "REQUIRED"}, security-complete is false, and exact saved Share remains ${currentSourceForwardedIdentityRemediationResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
       },
       {
         gate: "current_source_approval_free_security_remediation",
@@ -4434,6 +4470,7 @@ export function buildNorthstarNextRunway(options) {
     currentRepositorySecurityRescan: currentRepositorySecurityRescanResult,
     freshCurrentSourceSecurityScan: freshCurrentSourceSecurityScanResult,
     completedCurrentHeadStandardSecurityScan: completedCurrentHeadStandardSecurityScanResult,
+    currentSourceForwardedIdentityRemediation: currentSourceForwardedIdentityRemediationResult,
     currentSourceApprovalFreeSecurityRemediation: currentSourceApprovalFreeSecurityRemediationResult,
     currentSourceSecurityResourceBudgetRemediation: currentSourceSecurityResourceBudgetRemediationResult,
     currentSourceLogoutStorageRemediation: currentSourceLogoutStorageRemediationResult,
@@ -4626,6 +4663,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Current security remediation ledger is \`${report.currentSecurityRemediationLedger.verdict || "missing"}\`: deployed-source receipts \`${report.currentSecurityRemediationLedger.deployedSourceRemediationCount ?? "unknown"}/${report.currentSecurityRemediationLedger.totalFindings ?? "unknown"}\`, unresolved \`${report.currentSecurityRemediationLedger.unresolvedCount ?? "unknown"}\`, approval-gated \`${report.currentSecurityRemediationLedger.approvalGatedCount ?? "unknown"}\`, distributed-runtime open \`${report.currentSecurityRemediationLedger.distributedRuntimeOpenCount ?? "unknown"}\`, security-complete=\`${report.currentSecurityRemediationLedger.securityCompleteClaimAllowed === true}\`, exact saved Share \`${report.currentSecurityRemediationLedger.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Fresh current-source Standard security scan is \`${report.freshCurrentSourceSecurityScan.verdict || "missing"}\`: scan \`${report.freshCurrentSourceSecurityScan.scanId || "missing"}\`, findings \`${report.freshCurrentSourceSecurityScan.reportableFindingCount ?? "unknown"}\` (medium/low \`${report.freshCurrentSourceSecurityScan.mediumFindingCount ?? "unknown"}/${report.freshCurrentSourceSecurityScan.lowFindingCount ?? "unknown"}\`), coverage \`${report.freshCurrentSourceSecurityScan.coverageCompleteness || "unknown"}\` with \`${report.freshCurrentSourceSecurityScan.reviewedSurfaceCount ?? "unknown"}\` recorded surfaces and \`${report.freshCurrentSourceSecurityScan.deferredCoverageItemCount ?? "unknown"}\` deferred items. Bounded closures/residuals are \`${report.freshCurrentSourceSecurityScan.fullyClosedBoundedSourceCandidateCount ?? "unknown"}/${report.freshCurrentSourceSecurityScan.approvalFreeProductSourceResidualCount ?? "unknown"}\`; database/atomicity and Share capability boundaries remain \`${report.freshCurrentSourceSecurityScan.approvalGatedDatabaseOrAtomicityCount ?? "unknown"}/${report.freshCurrentSourceSecurityScan.approvalSensitiveShareCapabilityCount ?? "unknown"}\`. Scan completion is not security-complete \`${report.freshCurrentSourceSecurityScan.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.freshCurrentSourceSecurityScan.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Completed current-head Standard security scan is \`${report.completedCurrentHeadStandardSecurityScan.verdict || "missing"}\`: scan \`${report.completedCurrentHeadStandardSecurityScan.scanId || "missing"}\`, source \`${report.completedCurrentHeadStandardSecurityScan.sourceHead || "missing"}\`, findings \`${report.completedCurrentHeadStandardSecurityScan.reportableFindingCount ?? "unknown"}\` (medium/low \`${report.completedCurrentHeadStandardSecurityScan.mediumFindingCount ?? "unknown"}/${report.completedCurrentHeadStandardSecurityScan.lowFindingCount ?? "unknown"}\`), coverage \`${report.completedCurrentHeadStandardSecurityScan.coverageCompleteness || "unknown"}\` with \`${report.completedCurrentHeadStandardSecurityScan.recordedSurfaceCount ?? "unknown"}\` recorded rows and \`${report.completedCurrentHeadStandardSecurityScan.deferredCoverageItemCount ?? "unknown"}\` deferred rows. The immutable \`${report.completedCurrentHeadStandardSecurityScan.immutableOriginalFindingCount ?? "unknown"}\`-finding baseline remains preserved; approval-free/database/Share residuals remain \`${report.completedCurrentHeadStandardSecurityScan.approvalFreeProductSourceResidualCount ?? "unknown"}/${report.completedCurrentHeadStandardSecurityScan.approvalGatedDatabaseOrAtomicityCount ?? "unknown"}/${report.completedCurrentHeadStandardSecurityScan.approvalSensitiveShareCapabilityCount ?? "unknown"}\`. Security-complete remains \`${report.completedCurrentHeadStandardSecurityScan.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.completedCurrentHeadStandardSecurityScan.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Verified forwarded identity remediation is \`${report.currentSourceForwardedIdentityRemediation.verdict || "missing"}\`: source/live \`${report.currentSourceForwardedIdentityRemediation.sourceHead || "missing"}/${report.currentSourceForwardedIdentityRemediation.productionCommit || "missing"}\`, source included \`${report.currentSourceForwardedIdentityRemediation.sourceIncludedInProduction === true}\`, finding \`${report.currentSourceForwardedIdentityRemediation.findingRule || "missing"}\`, and tests \`${report.currentSourceForwardedIdentityRemediation.testFileCount ?? "unknown"}/${report.currentSourceForwardedIdentityRemediation.testCount ?? "unknown"}\`. No live identity-key disclosure probe was executed \`${report.currentSourceForwardedIdentityRemediation.liveBehavioralProbeExecuted === true}\`; fresh scan remains \`${report.currentSourceForwardedIdentityRemediation.freshFollowUpSecurityScan || "REQUIRED"}\`, security-complete remains \`${report.currentSourceForwardedIdentityRemediation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.currentSourceForwardedIdentityRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Current-source approval-free security remediation is \`${report.currentSourceApprovalFreeSecurityRemediation.verdict || "missing"}\`: bounded source remediation \`${report.currentSourceApprovalFreeSecurityRemediation.currentSourceRemediatedCount ?? "unknown"}/${report.currentSourceApprovalFreeSecurityRemediation.approvalFreeFindingCount ?? "unknown"}\`, open approval-free source residuals \`${report.currentSourceApprovalFreeSecurityRemediation.currentSourceOpenApprovalFreeCount ?? "unknown"}\`, and sealed scan finding reclassification performed \`${report.currentSourceApprovalFreeSecurityRemediation.scanFindingReclassificationPerformed === true}\`. The fresh full scan remains required \`${report.currentSourceApprovalFreeSecurityRemediation.freshFullRepositoryRescanRequired === true}\`, database/RLS/atomicity findings remain \`${report.currentSourceApprovalFreeSecurityRemediation.approvalGatedFindingCount ?? "unknown"}\`, security-complete remains \`${report.currentSourceApprovalFreeSecurityRemediation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.currentSourceApprovalFreeSecurityRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Current-source security resource-budget remediation is \`${report.currentSourceSecurityResourceBudgetRemediation.verdict || "missing"}\`: source/live \`${report.currentSourceSecurityResourceBudgetRemediation.sourceHead || "missing"}/${report.currentSourceSecurityResourceBudgetRemediation.productionCommit || "missing"}\`, remediated \`${report.currentSourceSecurityResourceBudgetRemediation.remediatedFindingCount ?? "unknown"}\`, canonical findings \`${report.currentSourceSecurityResourceBudgetRemediation.canonicalFindingCount ?? "unknown"}\`, manifest \`${report.currentSourceSecurityResourceBudgetRemediation.manifestStatus || "missing"}\`, and approval-gated findings \`${report.currentSourceSecurityResourceBudgetRemediation.approvalGatedFindingCount ?? "unknown"}\`. Direct live provider budget execution remains \`${report.currentSourceSecurityResourceBudgetRemediation.directLiveBudgetExecutionProven === true}\`; security-complete remains \`${report.currentSourceSecurityResourceBudgetRemediation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.currentSourceSecurityResourceBudgetRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Current-source logout storage remediation is \`${report.currentSourceLogoutStorageRemediation.verdict || "missing"}\`: source/live \`${report.currentSourceLogoutStorageRemediation.sourceHead || "missing"}/${report.currentSourceLogoutStorageRemediation.productionCommit || "missing"}\`, exact keys/prefixes/preferences \`${report.currentSourceLogoutStorageRemediation.exactKeyCount ?? "unknown"}/${report.currentSourceLogoutStorageRemediation.clearedPrefixCount ?? "unknown"}/${report.currentSourceLogoutStorageRemediation.preservedPreferenceCount ?? "unknown"}\`, tests \`${report.currentSourceLogoutStorageRemediation.testsPassed ?? "unknown"}\`, build \`${report.currentSourceLogoutStorageRemediation.buildStatus || "missing"}\`, and static violations \`${report.currentSourceLogoutStorageRemediation.staticViolationCount ?? "unknown"}\`. Behavioral logout remains \`${report.currentSourceLogoutStorageRemediation.behavioralLogoutExecuted === true}\`; fresh rescan required remains \`${report.currentSourceLogoutStorageRemediation.freshRescanRequired === true}\`, security-complete remains \`${report.currentSourceLogoutStorageRemediation.securityComplete === true}\`, and exact saved Share remains \`${report.currentSourceLogoutStorageRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.

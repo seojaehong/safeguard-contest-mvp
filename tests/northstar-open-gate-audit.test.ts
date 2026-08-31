@@ -286,6 +286,52 @@ function completedCurrentHeadStandardSecurityScanFixture(hashes: Record<string, 
   };
 }
 
+function currentSourceForwardedIdentityRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_VERIFIED_DISTRIBUTED_ADMISSION_IDENTITY",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    sourceIncludedInProduction: true,
+    securityBaseline: {
+      scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c",
+      findingRule: "rate-limit-bypass.untrusted-forwarded-identity",
+      immutableFindingCount: 21,
+      findingReclassified: false,
+    },
+    remediation: {
+      trustedVercelIngressRequires: ["NODE_ENV=production", "VERCEL=1", "VERCEL_ENV=production"],
+      unverifiedForwardedIdentity: "CONSERVATIVE_UNKNOWN_BUCKET",
+      injectedEnvironmentUsedForIdentity: true,
+      rawClientIpStoredInDistributedKey: false,
+    },
+    verification: {
+      focusedAndAdjacent: { files: 7, tests: 44, status: "PASS" },
+      typecheck: "PASS",
+      liveBehavioralProbeExecuted: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      embeddingGenerated: false,
+      vectorUploadPerformed: false,
+      wikiPublished: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      liveDeploymentVerification: "SOURCE_INCLUDED_NO_IDENTITY_KEY_DISCLOSURE",
+      freshFollowUpSecurityScan: "REQUIRED",
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      databaseSecurityRemediation: "APPROVAL_GATED",
+      providerDispatchPersistence: "APPROVAL_GATED",
+      llmWikiPublication: "APPROVAL_GATED",
+      sifVectorRuntime: "APPROVAL_GATED",
+      koshaExactRegistryPromotion: "APPROVAL_GATED",
+      securityCompleteClaimAllowed: false,
+    },
+  };
+}
+
 function currentSourceApprovalFreeSecurityRemediationFixture(): Record<string, unknown> {
   return {
     schemaVersion: "safeclaw-current-source-security-approval-free-remediation/v1",
@@ -1276,6 +1322,10 @@ function createFixtureRoot(): string {
   execFileSync("git", ["config", "maintenance.auto", "false"], { cwd: rootDir, stdio: "ignore" });
   writeText(rootDir, "app/api/knowledge/review/prepare/route.ts", "export const fixture = true;\n");
   writeText(rootDir, "app/knowledge/KnowledgeReviewInbox.tsx", "export const fixture = true;\n");
+  writeText(rootDir, "lib/api-guard.ts", "export const trustedForwardedIdentity = true;\n");
+  writeText(rootDir, "lib/public-distributed-rate-limit.ts", "export const injectedIdentityEnvironment = true;\n");
+  writeText(rootDir, "tests/api-guard.test.ts", "export const apiGuardFixture = true;\n");
+  writeText(rootDir, "tests/public-distributed-rate-limit.test.ts", "export const distributedLimiterFixture = true;\n");
 
   writeJson(rootDir, path.join("evaluation", "final-99-gate", "report.json"), {
     overall: "pass_with_notice",
@@ -4957,6 +5007,11 @@ function createFixtureRoot(): string {
     rootDir,
     path.join(completedScanRoot, "report.json"),
     completedCurrentHeadStandardSecurityScanFixture(completedHashes),
+  );
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-forwarded-identity-remediation-2026-08-31", "report.json"),
+    currentSourceForwardedIdentityRemediationFixture(),
   );
   const approvalFreeRemediation = currentSourceApprovalFreeSecurityRemediationFixture();
   writeJson(
@@ -9304,6 +9359,33 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.appendFileSync(manifestPath, "drift", "utf8");
     expect(buildNorthstarOpenGateAudit({ rootDir }).gates
       .find((item) => item.id === "completed_current_head_standard_security_scan")?.state).toBe("contradicted");
+  });
+
+  it("records the deployed forwarded identity fix without closing scan or approval boundaries", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-security-forwarded-identity-remediation-2026-08-31",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_forwarded_identity_remediation");
+    expect(gate?.state).toBe("proven");
+    expect(gate?.detail).toContain("verified Vercel production ingress");
+    expect(gate?.detail).toContain("44 tests");
+    expect(gate?.detail).toContain("fresh rescan remains required");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    expect(buildNorthstarOpenGateAudit({ rootDir }).gates
+      .find((item) => item.id === "current_source_forwarded_identity_remediation")?.state).toBe("contradicted");
   });
 
   it("records all four approval-free scan residuals as source-remediated without reclassifying the sealed scan", async () => {

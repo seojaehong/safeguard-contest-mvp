@@ -1,8 +1,8 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-31T03:15:33.170Z",
-  "sourceSha": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
-  "overall": "open",
+  "generatedAt": "2026-08-31T03:52:33.988Z",
+  "sourceSha": "a6016f6a14a55f87d887c348f0585a9b23012b68",
+  "overall": "contradicted",
   "gates": [
     {
       "id": "final_99_gate",
@@ -348,6 +348,16 @@
       ]
     },
     {
+      "id": "current_source_forwarded_identity_remediation",
+      "state": "proven",
+      "label": "Current-source forwarded identity remediation",
+      "evidencePath": "evaluation\\current-source-security-forwarded-identity-remediation-2026-08-31\\report.json",
+      "detail": "Deployed product source e0ee1120 accepts x-vercel-forwarded-for only under verified Vercel production ingress, otherwise collapses unverified identity to the conservative unknown bucket. Seven focused/adjacent files with 44 tests and strict typecheck pass. The sealed 21-finding scan is unchanged, fresh rescan remains required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Keep the immutable scan open and verify reclassification only through a fresh follow-up Standard scan."
+      ]
+    },
+    {
       "id": "current_source_approval_free_security_remediation",
       "state": "notice",
       "label": "Current-source approval-free security remediation",
@@ -436,22 +446,22 @@
     },
     {
       "id": "current_security_governed_path_compatibility",
-      "state": "notice",
+      "state": "contradicted",
       "label": "Current security governed-path compatibility",
       "evidencePath": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
-      "detail": "Current source and production include a shared compatibility receipt for 10 security notices across 27 governed paths. Contract regression passed 22 files / 358 tests; the opt-in recipient browser file and its 7 tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. Sealed full scan f218c713 is complete with 18 open findings and partial coverage; this receipt does not rewrite immutable findings or claim security completion. Distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Current compatibility verdict=PASS_CURRENT_SOURCE_LIVE_INCLUDED_SECURITY_GOVERNED_PATH_COMPATIBILITY_RESCAN_COMPLETE_FINDINGS_OPEN, tests=22/358, browserSkipped=1/7, rescan=COMPLETE_SEALED_PARTIAL_COVERAGE_18_FINDINGS_OPEN, exactShare=MISSING_EVIDENCE.",
       "nextActions": [
-        "Keep prior live browser receipts visible, remediate the eight approval-free findings in bounded waves, and retain distributed, DB/RLS, recipient ACK, and exact saved Share approval boundaries."
+        "Restore all governed-path receipts, at least the original 20/233 contract coverage, transparent browser skips, no-mutation boundaries, the sealed 18-finding scan boundary, and exact Share MISSING_EVIDENCE."
       ]
     },
     {
       "id": "current_source_security_residual_remediation",
-      "state": "notice",
+      "state": "contradicted",
       "label": "Current-source security residual remediation",
       "evidencePath": "evaluation\\current-source-security-residual-remediation-2026-08-28\\report.json",
-      "detail": "Deployed source includes bounded remediation for provider-detail, dns-toctou, and xff-spoof with 174 focused and adjacent tests, strict typecheck, and a 28-page production build. This is deployed-source plus local contract evidence only: the immutable 18-finding baseline and sealed 17-finding partial-coverage scan remain visible, no mutation occurred, a follow-up full scan is required, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Security residual verdict=PASS_LIVE_DEPLOYED_SOURCE_SECURITY_RESIDUAL_REMEDIATION_RESCAN_PENDING, source=c68cc7b7a63c3dfb64ed2be147248ecd186c2098, production=5b1f246bcf0587b2c0ac66affab2680fb6ff5fd9, residuals=dns-toctou,provider-detail,xff-spoof, tests=33+141, live=PASS_DEPLOYED_SOURCE_MARKER_ONLY/false, noMutation=true, rescan=true, exactShare=MISSING_EVIDENCE.",
       "nextActions": [
-        "Run a fresh full-repository security scan before reclassifying the three immutable findings or making any security-complete claim."
+        "Restore exact source/live marker ancestry, the three residual anchors, 174 tests, no-mutation boundaries, follow-up scan requirement, and exact Share MISSING_EVIDENCE."
       ]
     },
     {
@@ -599,13 +609,12 @@
     },
     {
       "id": "improvement_photo_analysis_budget",
-      "state": "notice",
+      "state": "contradicted",
       "label": "Improvement photo analysis budget",
       "evidencePath": "evaluation\\improvement-photo-analysis-budget-2026-08-11\\report.json",
-      "detail": "Improvement and dedicated photo analysis now share pre-provider byte, count, MIME/signature, rate, and concurrency controls with 76 tests plus a current 23 files / 215 tests governed-path companion. Production currently reports instance fallback rather than distributed admission, the immutable 14-finding scan remains unchanged, a follow-up scan is required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Improvement photo verdict=PASS_LIVE_PRODUCTION_IMPROVEMENT_PHOTO_ANALYSIS_BUDGET_WITH_INSTANCE_ADMISSION, sourceCurrent=false, liveCases=2, admission=INSTANCE_FALLBACK_ACTIVE, tests=76, followUp=REQUIRED, noMutation=true, exactShare=MISSING_EVIDENCE.",
       "nextActions": [
-        "Activate approved distributed photo-analysis admission before treating process-instance fallback as horizontally durable.",
-        "Keep the canonical findings visible until a fresh follow-up security scan revalidates the patched source."
+        "Restore deployed source ancestry, file budgets, shared live admission, verification totals, no-mutation boundaries, follow-up scan requirement, and exact Share MISSING_EVIDENCE."
       ]
     },
     {
@@ -620,13 +629,12 @@
     },
     {
       "id": "public_provider_admission",
-      "state": "notice",
+      "state": "contradicted",
       "label": "Public provider admission",
       "evidencePath": "evaluation\\public-provider-admission-2026-08-11\\report.json",
-      "detail": "Current production enforces mode-weighted provider work units (template 0, enhanced 2, full 12) with completion/cancellation release, 23 files / 215 tests governed-path compatibility, and live no-provider work-budget probes across ask, weather, and knowledge. Production still reports process-instance admission because Upstash is not configured; both canonical medium findings remain immutable, distributed activation and a fresh follow-up scan remain required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Public provider admission verdict=PARTIAL_LIVE_PRODUCTION_WEIGHTED_INSTANCE_ADMISSION_DISTRIBUTED_ACTIVATION_PENDING, sourceCurrent=false, findings=2, liveChecks=3, distributed=PENDING_CONFIGURATION, followUp=REQUIRED, noMutation=true, exactShare=MISSING_EVIDENCE.",
       "nextActions": [
-        "Configure and verify an approved distributed admission backend before claiming horizontal durability.",
-        "Run a fresh full-repository security scan before reclassifying either immutable finding or making a security-complete claim."
+        "Restore source/live alignment, weighted contracts, all three no-provider live probes, verification totals, instance/distributed boundary, no-mutation boundary, follow-up scan requirement, and exact Share MISSING_EVIDENCE."
       ]
     },
     {
@@ -675,13 +683,12 @@
     },
     {
       "id": "security_followup_remediation",
-      "state": "proven",
+      "state": "contradicted",
       "label": "Security follow-up remediation",
       "evidencePath": "evaluation\\codex-security-followup-remediation-2026-08-11\\report.json",
-      "detail": "The sealed follow-up scan's three diff findings (1 medium, 2 low) remain remediated in deployed production with the original 12 files / 129 tests, its 12/147 compatibility check, and current governed-path receipts including accident-case cancellation and scenario isolation (covered by another current receipt). This does not rewrite the immutable original 18-finding baseline, resolve the two deferred candidates, close the separate public generation admission notice, or claim live provider cancellation probing; no mutation occurred and exact saved Share remains MISSING_EVIDENCE.",
+      "detail": "Security follow-up verdict=PASS_LIVE_PRODUCTION_DEPLOYED_SECURITY_FOLLOWUP, sourceMatchesProduction=true, compatibilityPass=true, latestCompatibilityPass=true, latestCompatibilityCurrent=false, accidentCompatibilityCurrent=false, productPathsCurrent=false, applicableCompanionReceiptsPass=true, exportAdmissionCompatibility=false, findings=3, baseline=18, deferred=2, remediations=3, tests=129, compatibilityTests=147, latestCompatibilityTests=245, liveProviderProbe=false, baselineRewritten=false, noMutation=true, exactShare=MISSING_EVIDENCE.",
       "nextActions": [
-        "Keep the immutable baseline and two deferred candidates visible in future security review; do not convert this scoped remediation into a security-complete claim.",
-        "Retain the separate public generation admission notice and exact saved Share boundary until their own evidence contracts close."
+        "Restore deployed SHA alignment, all three remediation contracts, verification totals, immutable-baseline preservation, no-mutation boundaries, and exact Share MISSING_EVIDENCE."
       ]
     },
     {

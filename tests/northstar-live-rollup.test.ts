@@ -520,6 +520,20 @@ type RollupReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceForwardedIdentityRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    sourceIncludedInProduction: boolean;
+    scanId: string;
+    findingRule: string;
+    testFileCount: number | null;
+    testCount: number | null;
+    liveBehavioralProbeExecuted: boolean;
+    freshFollowUpSecurityScan: string;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceApprovalFreeSecurityRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1260,6 +1274,28 @@ function completedCurrentHeadStandardSecurityScanFixture(): Record<string, unkno
       approvalFreeProductSourceResidualCount: 11,
     },
     remainingBoundaries: { securityCompleteClaimAllowed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
+  };
+}
+
+function currentSourceForwardedIdentityRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_VERIFIED_DISTRIBUTED_ADMISSION_IDENTITY",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    sourceIncludedInProduction: true,
+    securityBaseline: {
+      scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c",
+      findingRule: "rate-limit-bypass.untrusted-forwarded-identity",
+    },
+    verification: {
+      focusedAndAdjacent: { files: 7, tests: 44, status: "PASS" },
+      liveBehavioralProbeExecuted: false,
+    },
+    remainingBoundaries: {
+      freshFollowUpSecurityScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
   };
 }
 
@@ -2781,6 +2817,7 @@ function createFixtureRoot(): { root: string; head: string } {
   });
   writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/report.json", freshCurrentSourceSecurityScanFixture());
   writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-9504d8db-complete/report.json", completedCurrentHeadStandardSecurityScanFixture());
+  writeJson(root, "evaluation/current-source-security-forwarded-identity-remediation-2026-08-31/report.json", currentSourceForwardedIdentityRemediationFixture());
   writeJson(root, "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json", currentSourceApprovalFreeSecurityRemediationFixture());
   writeJson(root, "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json", currentSourceSecurityResourceBudgetRemediationFixture());
   writeJson(root, "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json", currentSourceLogoutStorageRemediationFixture());
@@ -3186,6 +3223,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/current-full-repository-security-scan-2026-08-27/report.json",
     "evaluation/current-head-standard-security-scan-2026-08-31-complete/report.json",
     "evaluation/current-head-standard-security-scan-2026-08-31-9504d8db-complete/report.json",
+    "evaluation/current-source-security-forwarded-identity-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json",
@@ -3810,6 +3848,23 @@ describe("northstar live rollup", () => {
       approvalGatedDatabaseOrAtomicityCount: 9,
       approvalSensitiveShareCapabilityCount: 1,
       approvalFreeProductSourceResidualCount: 11,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "current_source_forwarded_identity_remediation")).toMatchObject({
+      artifact: path.join("evaluation", "current-source-security-forwarded-identity-remediation-2026-08-31", "report.json"),
+    });
+    expect(report.currentSourceForwardedIdentityRemediation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_VERIFIED_DISTRIBUTED_ADMISSION_IDENTITY",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      sourceIncludedInProduction: true,
+      scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c",
+      findingRule: "rate-limit-bypass.untrusted-forwarded-identity",
+      testFileCount: 7,
+      testCount: 44,
+      liveBehavioralProbeExecuted: false,
+      freshFollowUpSecurityScan: "REQUIRED",
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });

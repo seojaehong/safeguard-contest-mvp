@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-31T03:12:07.605Z",
+  "generatedAt": "2026-08-31T03:53:02.738Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
-  "productionCommit": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+  "sourceHead": "a6016f6a14a55f87d887c348f0585a9b23012b68",
+  "productionCommit": "a6016f6a14a55f87d887c348f0585a9b23012b68",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+    "commitSha": "a6016f6a14a55f87d887c348f0585a9b23012b68",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-js81zg0hp-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-j0mp1yv7g-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
-  "liveRollupLiveCommit": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+  "liveExactEvidenceCommit": "a6016f6a14a55f87d887c348f0585a9b23012b68",
+  "liveRollupLiveCommit": "a6016f6a14a55f87d887c348f0585a9b23012b68",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -67,6 +67,7 @@
     "currentRepositorySecurityRescan": "evaluation\\current-full-repository-security-scan-2026-08-27\\report.json",
     "freshCurrentSourceSecurityScan": "evaluation\\current-head-standard-security-scan-2026-08-31-complete\\report.json",
     "completedCurrentHeadStandardSecurityScan": "evaluation\\current-head-standard-security-scan-2026-08-31-9504d8db-complete\\report.json",
+    "currentSourceForwardedIdentityRemediation": "evaluation\\current-source-security-forwarded-identity-remediation-2026-08-31\\report.json",
     "currentSourceApprovalFreeSecurityRemediation": "evaluation\\current-source-security-approval-free-remediation-2026-08-31\\report.json",
     "currentSourceSecurityResourceBudgetRemediation": "evaluation\\current-source-security-resource-budget-remediation-2026-08-31\\report.json",
     "currentSourceLogoutStorageRemediation": "evaluation\\current-source-security-logout-storage-remediation-2026-08-31\\report.json",
@@ -215,6 +216,11 @@
       "gate": "completed_current_head_standard_security_scan",
       "state": "notice",
       "reason": "current-head Standard scan f6bef30a-7250-428b-9f66-0bad1e42058c records 21 findings (7 medium, 14 low) with partial coverage; the immutable 18-finding baseline remains preserved, 11 approval-free findings remain open, security-complete is false, and exact saved Share remains MISSING_EVIDENCE"
+    },
+    {
+      "gate": "current_source_forwarded_identity_remediation",
+      "state": "proven",
+      "reason": "deployed source e0ee1120 verifies trusted Vercel ingress before using forwarded identity with 7 files / 44 tests; the sealed scan remains immutable, fresh scan is REQUIRED, security-complete is false, and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "current_source_approval_free_security_remediation",
@@ -1265,6 +1271,20 @@
     "approvalGatedDatabaseOrAtomicityCount": 9,
     "approvalSensitiveShareCapabilityCount": 1,
     "approvalFreeProductSourceResidualCount": 11,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "currentSourceForwardedIdentityRemediation": {
+    "verdict": "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_VERIFIED_DISTRIBUTED_ADMISSION_IDENTITY",
+    "sourceHead": "e0ee11205043a6155fa7d4f2d9ba13f28599172a",
+    "productionCommit": "3133218f67a2af790c31ab9ecf8617a5a467ae37",
+    "sourceIncludedInProduction": true,
+    "scanId": "f6bef30a-7250-428b-9f66-0bad1e42058c",
+    "findingRule": "rate-limit-bypass.untrusted-forwarded-identity",
+    "testFileCount": 7,
+    "testCount": 44,
+    "liveBehavioralProbeExecuted": false,
+    "freshFollowUpSecurityScan": "REQUIRED",
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },

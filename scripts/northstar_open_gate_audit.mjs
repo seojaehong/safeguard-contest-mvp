@@ -74,6 +74,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-complete", "report.json"),
   completedCurrentHeadStandardSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-9504d8db-complete", "report.json"),
+  currentSourceForwardedIdentityRemediation: path.join("evaluation", "current-source-security-forwarded-identity-remediation-2026-08-31", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
@@ -8702,6 +8703,93 @@ function evaluateCompletedCurrentHeadStandardSecurityScanGate(rootDir) {
 
 /**
  * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateCurrentSourceForwardedIdentityRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourceForwardedIdentityRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_source_forwarded_identity_remediation",
+      label: "Current-source forwarded identity remediation",
+      state: "missing",
+      evidencePath,
+      detail: "The distributed admission identity remediation receipt is missing or invalid.",
+      nextActions: ["Restore the bounded receipt without rewriting the sealed 21-finding scan."],
+    });
+  }
+
+  const baseline = isRecord(report.securityBaseline) ? report.securityBaseline : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedAndAdjacent) ? verification.focusedAndAdjacent : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const governedPaths = [
+    "lib/api-guard.ts",
+    "lib/public-distributed-rate-limit.ts",
+    "tests/api-guard.test.ts",
+    "tests/public-distributed-rate-limit.test.ts",
+  ];
+  const sourceCurrent = sourceHead.length > 0
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.embeddingGenerated === false
+    && mutation.vectorUploadPerformed === false
+    && mutation.wikiPublished === false
+    && mutation.exactTrustRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_VERIFIED_DISTRIBUTED_ADMISSION_IDENTITY"
+    && /^[0-9a-f]{40}$/u.test(sourceHead)
+    && /^[0-9a-f]{40}$/u.test(productionCommit)
+    && report.sourceIncludedInProduction === true
+    && isGitAncestorOf(rootDir, sourceHead, productionCommit)
+    && sourceCurrent
+    && readString(baseline.scanId) === "f6bef30a-7250-428b-9f66-0bad1e42058c"
+    && readString(baseline.findingRule) === "rate-limit-bypass.untrusted-forwarded-identity"
+    && readNumber(baseline.immutableFindingCount) === 21
+    && baseline.findingReclassified === false
+    && Array.isArray(remediation.trustedVercelIngressRequires)
+    && remediation.trustedVercelIngressRequires.length === 3
+    && readString(remediation.unverifiedForwardedIdentity) === "CONSERVATIVE_UNKNOWN_BUCKET"
+    && remediation.injectedEnvironmentUsedForIdentity === true
+    && remediation.rawClientIpStoredInDistributedKey === false
+    && readNumber(focused.files) === 7
+    && readNumber(focused.tests) === 44
+    && readString(focused.status) === "PASS"
+    && readString(verification.typecheck) === "PASS"
+    && verification.liveBehavioralProbeExecuted === false
+    && noMutation
+    && readString(remaining.liveDeploymentVerification) === "SOURCE_INCLUDED_NO_IDENTITY_KEY_DISCLOSURE"
+    && readString(remaining.freshFollowUpSecurityScan) === "REQUIRED"
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remaining.databaseSecurityRemediation) === "APPROVAL_GATED"
+    && readString(remaining.providerDispatchPersistence) === "APPROVAL_GATED"
+    && readString(remaining.llmWikiPublication) === "APPROVAL_GATED"
+    && readString(remaining.sifVectorRuntime) === "APPROVAL_GATED"
+    && readString(remaining.koshaExactRegistryPromotion) === "APPROVAL_GATED"
+    && remaining.securityCompleteClaimAllowed === false;
+
+  return gateResult({
+    id: "current_source_forwarded_identity_remediation",
+    label: "Current-source forwarded identity remediation",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? `Deployed product source ${sourceHead.slice(0, 8)} accepts x-vercel-forwarded-for only under verified Vercel production ingress, otherwise collapses unverified identity to the conservative unknown bucket. Seven focused/adjacent files with 44 tests and strict typecheck pass. The sealed 21-finding scan is unchanged, fresh rescan remains required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`
+      : `Forwarded identity verdict=${readString(report.verdict) || "missing"}, source/live=${sourceHead || "missing"}/${productionCommit || "missing"}, sourceCurrent=${sourceCurrent}, tests=${readNumber(focused.files)}/${readNumber(focused.tests)}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Keep the immutable scan open and verify reclassification only through a fresh follow-up Standard scan."]
+      : ["Restore deployed source ancestry, governed-path currentness, verification counts, no-mutation boundaries, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
  * @param {unknown} relativePath
  * @param {unknown} expectedSha256
  */
@@ -13750,6 +13838,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentRepositorySecurityRescanGate(rootDir),
     evaluateFreshCurrentSourceSecurityScanGate(rootDir),
     evaluateCompletedCurrentHeadStandardSecurityScanGate(rootDir),
+    evaluateCurrentSourceForwardedIdentityRemediationGate(rootDir),
     evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir),
     evaluateCurrentSourceSecurityResourceBudgetRemediationGate(rootDir),
     evaluateCurrentSourceLogoutStorageRemediationGate(rootDir),
