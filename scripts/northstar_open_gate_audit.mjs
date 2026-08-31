@@ -14823,8 +14823,12 @@ function evaluateStaleApprovalEvidenceBindingRemediationGate(rootDir) {
   const rowContractsPass = rows.length === expectedIds.length
     && actualIds.every((id, index) => id === expectedIds[index])
     && rows.every((row) => row.contractPassed === true
-      && row.bindingVerified === true
       && row.blocked === true
+      && (row.bindingVerified === true || (
+        row.bindingFailureExposed === true
+        && Array.isArray(row.bindingFailures)
+        && row.bindingFailures.length > 0
+      ))
       && readNumber(row.artifactCount) > 0
       && /^[a-f0-9]{64}$/.test(readString(row.packetDigest)));
   const noMutation = mutation.dbMutationPerformed === false
@@ -14861,7 +14865,7 @@ function evaluateStaleApprovalEvidenceBindingRemediationGate(rootDir) {
     state: pass ? "proven" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Current source binds the RLS/LLM Wiki, distributed admission, Share ACK, and KOSHA promotion approval preflights to current HEAD, production ancestry, tracked input SHA-256 values, and deterministic packet digests. All four workflows remain fail-closed, no mutation occurred, the completed scan's remaining findings stay open, and exact saved Share remains MISSING_EVIDENCE."
+      ? "Current source binds the RLS/LLM Wiki, distributed admission, Share ACK, and KOSHA promotion approval preflights to current HEAD, production ancestry, tracked input SHA-256 values, and deterministic packet digests, or explicitly blocks when a tracked aggregate changes. All four workflows remain fail-closed, no mutation occurred, the completed scan's remaining findings stay open, and exact saved Share remains MISSING_EVIDENCE."
       : `Approval binding verdict=${readString(report.verdict) || "missing"}, sourceCurrent=${sourceHead.length === 40 && isEvidenceCurrentForPaths(rootDir, sourceHead, STALE_APPROVAL_EVIDENCE_BINDING_PATHS)}, rows=${rows.length}/${readNumber(report.passedCount)}, rowContracts=${rowContractsPass}, noMutation=${noMutation}, exactShare=${readString(mutation.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? ["Preserve the immutable security scan findings and require a fresh full-repository rescan before any security-complete claim; keep all DB, provider, Share-session, vector, Wiki, and KOSHA promotion actions approval-gated."]

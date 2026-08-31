@@ -9042,6 +9042,38 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "stale_approval_evidence_binding_security")?.detail).toContain("exactShare=PASS");
   });
 
+  it("accepts an explicitly blocked stale aggregate binding but rejects a silent mismatch", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-security-stale-approval-evidence-binding-remediation-2026-08-31",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      rows: Array<{
+        bindingVerified: boolean;
+        bindingFailureExposed: boolean;
+        bindingFailures: string[];
+        blocked: boolean;
+      }>;
+    };
+    report.rows[0].bindingVerified = false;
+    report.rows[0].bindingFailureExposed = true;
+    report.rows[0].bindingFailures = ["input-differs-from-head:evaluation/northstar-open-gates-current/report.json"];
+    report.rows[0].blocked = true;
+    writeJson(rootDir, path.relative(rootDir, reportPath), report);
+
+    const blockedAudit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(blockedAudit.gates.find((gate) => gate.id === "stale_approval_evidence_binding_security")?.state).toBe("proven");
+
+    report.rows[0].bindingFailureExposed = false;
+    writeJson(rootDir, path.relative(rootDir, reportPath), report);
+    const silentAudit = buildNorthstarOpenGateAudit({ rootDir });
+    expect(silentAudit.gates.find((gate) => gate.id === "stale_approval_evidence_binding_security")?.state).toBe("contradicted");
+  });
+
   it.each([
     {
       name: "human review completion",
