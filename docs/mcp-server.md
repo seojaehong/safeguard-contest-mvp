@@ -98,18 +98,20 @@ env `SAFECLAW_MCP_TOKENS`는 **전체 신뢰**(모든 사이트 접근) 레거�
 발급하도록 안내한다. 90일이 지난 토큰은 활성 개수에서 제외되고 인증에는 사용되지 않는다.
 비활성·만료 토큰은 감사 이력으로 남는다.
 
-서비스 롤 키가 필요하다(`mcp_tokens`는 RLS로 `service_role` 전용). 평문 토큰은 발급 시
-stdout에 **한 번만** 출력되며 복구 불가다. CLI의 site name은 필수이며, 생략하거나 공백으로
-전달하면 Supabase client 생성이나 DB insert 전에 종료한다.
+서비스 롤 키가 필요하다(`mcp_tokens`는 RLS로 `service_role` 전용). 평문 토큰은 복구 불가이며,
+CLI는 출력 방식을 DB insert 전에 반드시 선택한다. 사람에게 직접 보여줄 때는 interactive TTY의
+`--reveal`, 자동화에서는 새 파일을 `0600`으로 만드는 `--output-file`을 사용한다. site name을
+생략하거나 공백으로 전달해도 Supabase client 생성이나 DB insert 전에 종료한다.
 
 ```bash
 # .env.local의 SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY를 사용한다.
-node scripts/issue-mcp-token.mjs "부평 파일럿 - 안전관리자" "부평공장"
+node scripts/issue-mcp-token.mjs "부평 파일럿 - 안전관리자" "부평공장" --reveal
 # npm 스크립트로도 동일하며 site name은 필수다.
-npm.cmd run token:mcp -- "<label>" "<site name>"
+npm.cmd run token:mcp -- "<label>" "<site name>" --reveal
 ```
 
-출력된 평문 토큰을 그대로 `Authorization: Bearer <token>`으로 쓰면 된다(접속 방법 동일).
+자동화에서는 저장소 밖의 존재하지 않는 절대경로를 `--output-file`로 넘기고, 사용 직후 파일을
+삭제한다. 출력된 평문 토큰을 그대로 `Authorization: Bearer <token>`으로 쓰면 된다.
 
 ### 프로덕션 활성화 (필수)
 

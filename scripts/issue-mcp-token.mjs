@@ -1,14 +1,15 @@
 // SafeClaw MCP tenant token issuance CLI.
 //
 // Generates a random Bearer token, stores only its sha256 hash in mcp_tokens,
-// and prints the plaintext token once. A service-role key is required.
-// Usage: node scripts/issue-mcp-token.mjs "<label>" "<site name>"
+// and reveals it only through an explicitly selected secure output mode.
+// Usage: node scripts/issue-mcp-token.mjs "<label>" "<site name>" (--reveal | --output-file <absolute path>)
 
 import { createHash, randomBytes } from "node:crypto";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { MCP_DEFAULT_SCOPES } from "../lib/mcp-tool-contract.mjs";
+import { emitCredential, prepareCredentialOutput } from "./lib/credential-output.mjs";
 
 const REQUIRED_SITE_USAGE = 'Usage: node scripts/issue-mcp-token.mjs "<label>" "<site name>"';
 
@@ -78,12 +79,16 @@ function loadLocalEnv() {
 async function main() {
   loadLocalEnv();
   try {
+    const output = await prepareCredentialOutput({
+      argv: process.argv,
+      startIndex: 4,
+      commandUsage: REQUIRED_SITE_USAGE,
+    });
     const issued = await issueMcpToken({ argv: process.argv, env: process.env });
     console.error(
       `Issued MCP token id=${issued.id} label=${JSON.stringify(issued.label)} site=${JSON.stringify(issued.siteName)}`,
     );
-    console.error("Plaintext token below - copy it now, it is NOT recoverable:");
-    console.log(issued.token);
+    await emitCredential({ secret: issued.token, output });
   } catch (error) {
     console.error(error instanceof Error ? error.message : "MCP token issuance failed.");
     process.exitCode = 1;

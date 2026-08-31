@@ -84,13 +84,26 @@ fi
 # ── ②-1 테넌트 토큰 발급 ────────────────────────────────────────────────
 log "step 2-1: MCP 테넌트 토큰 발급 (issue-mcp-token.mjs)"
 if [ "$DRY_RUN" -eq 1 ]; then
-  echo "  DRY-RUN would run: node ${REPO_ROOT}/scripts/issue-mcp-token.mjs \"Tier1 파일럿 - ${SITE_NAME}\" \"${SITE_NAME}\""
+  echo "  DRY-RUN would run: node ${REPO_ROOT}/scripts/issue-mcp-token.mjs \"Tier1 파일럿 - ${SITE_NAME}\" \"${SITE_NAME}\" --output-file <temporary-0600-file>"
   MCP_TOKEN="sclaw_DRYRUN_PLACEHOLDER"
 else
-  # stdout에는 평문 토큰만 한 줄, stderr에는 안내 로그(issue-mcp-token.mjs 계약).
-  MCP_TOKEN="$(node "${REPO_ROOT}/scripts/issue-mcp-token.mjs" "Tier1 파일럿 - ${SITE_NAME}" "${SITE_NAME}")"
+  TOKEN_OUTPUT_DIR="$(mktemp -d)"
+  TOKEN_OUTPUT_FILE="${TOKEN_OUTPUT_DIR}/mcp-token"
+  cleanup_token_output() {
+    rm -f "$TOKEN_OUTPUT_FILE"
+    rmdir "$TOKEN_OUTPUT_DIR" 2>/dev/null || true
+  }
+  trap cleanup_token_output EXIT
+  chmod 700 "$TOKEN_OUTPUT_DIR"
+  node "${REPO_ROOT}/scripts/issue-mcp-token.mjs" \
+    "Tier1 파일럿 - ${SITE_NAME}" \
+    "${SITE_NAME}" \
+    --output-file "$TOKEN_OUTPUT_FILE"
+  MCP_TOKEN="$(cat "$TOKEN_OUTPUT_FILE")"
+  cleanup_token_output
+  trap - EXIT
   if [ -z "$MCP_TOKEN" ]; then
-    echo "ERROR: 토큰 발급 실패(stdout 비어있음). issue-mcp-token.mjs 로그를 확인하세요." >&2
+    echo "ERROR: 토큰 발급 결과가 비어있습니다. issue-mcp-token.mjs 로그를 확인하세요." >&2
     exit 1
   fi
 fi
