@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T18:55:37.676Z
-Source HEAD at generation: 35c47474b3116712ecceb8cb0b5ec7b1762ddf9d
-Live commit at generation: 35c47474b3116712ecceb8cb0b5ec7b1762ddf9d
+Generated at: 2026-08-31T19:01:27.119Z
+Source HEAD at generation: 0543684cc4f56d8b82480b060cf0283c44920222
+Live commit at generation: 0543684cc4f56d8b82480b060cf0283c44920222
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -575,7 +575,7 @@ Overall: `northstar_open_approval_gated`
 | current_source_forwarded_identity_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-forwarded-identity-remediation-2026-08-31\report.json |
 | current_source_template_inventory_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-template-inventory-remediation-2026-08-31\report.json |
 | current_source_approval_free_security_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-approval-free-remediation-2026-08-31\report.json |
-| current_source_public_lifetime_remediation | ancestor | matches_live_source_mismatch | evaluation\current-source-security-public-lifetime-remediation-2026-09-01\report.json |
+| current_source_public_lifetime_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-public-lifetime-remediation-2026-09-01\report.json |
 | current_source_security_resource_budget_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-resource-budget-remediation-2026-08-31\report.json |
 | current_source_logout_storage_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-logout-storage-remediation-2026-08-31\report.json |
 | current_source_ontology_error_projection_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-ontology-error-projection-remediation-2026-08-31\report.json |
