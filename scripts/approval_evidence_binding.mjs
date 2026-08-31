@@ -78,6 +78,21 @@ function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
 }
 
+export function approvalEvidencePacketDigest({ sourceHead, productionCommit, artifacts, evidenceCommits }) {
+  return sha256(JSON.stringify({
+    sourceHead,
+    productionCommit,
+    artifacts: artifacts.map(({ path, sha256: artifactSha256, headSha256, headBlobSha1: blob, gitMode }) => ({
+      path,
+      sha256: artifactSha256,
+      headSha256,
+      headBlobSha1: blob,
+      gitMode,
+    })),
+    evidenceCommits,
+  }));
+}
+
 function isInsideRoot(rootPath, targetPath) {
   const relativePath = relative(rootPath, targetPath);
   return relativePath === ""
@@ -204,18 +219,12 @@ export function buildApprovalEvidenceBinding({ root, inputPaths, productionCommi
     else if (!artifact.workingTreeMatchesHead) failures.push(`input-differs-from-head:${artifact.path}`);
     if (!artifact.sha256) failures.push(`input-sha256-missing:${artifact.path}`);
   }
-  const packetDigest = sha256(JSON.stringify({
+  const packetDigest = approvalEvidencePacketDigest({
     sourceHead,
     productionCommit: isCommitSha(productionCommit) ? productionCommit : null,
-    artifacts: artifacts.map(({ path, sha256: artifactSha256, headSha256, headBlobSha1: blob, gitMode }) => ({
-      path,
-      sha256: artifactSha256,
-      headSha256,
-      headBlobSha1: blob,
-      gitMode,
-    })),
+    artifacts,
     evidenceCommits: normalizedEvidenceCommits,
-  }));
+  });
   return {
     schemaVersion: "safeclaw-approval-evidence-binding/v1",
     sourceHead,

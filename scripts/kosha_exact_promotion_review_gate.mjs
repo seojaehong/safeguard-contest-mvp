@@ -7,7 +7,12 @@ import process from "node:process";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
-import { buildApprovalEvidenceBinding, isCommitSha } from "./approval_evidence_binding.mjs";
+import {
+  approvalEvidencePacketDigest,
+  buildApprovalEvidenceBinding,
+  isCommitAncestor,
+  isCommitSha,
+} from "./approval_evidence_binding.mjs";
 
 const SCHEMA_VERSION = "safeclaw-kosha-exact-promotion-review-gate/v1";
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
@@ -452,11 +457,41 @@ export function buildKoshaExactPromotionReviewGate(options) {
   if (!approvalEvidenceBinding.verified) {
     failures.push(...approvalEvidenceBinding.failures.map((failure) => `approval-evidence:${failure}`));
   }
+  const reviewApprovalSourceHead = asString(reviewApprovalEvidence?.sourceHead);
+  const reviewApprovalEvidenceCommits = Array.isArray(reviewApprovalEvidence?.evidenceCommits)
+    ? reviewApprovalEvidence.evidenceCommits.map(asString)
+    : [];
+  const reviewApprovalArtifacts = Array.isArray(reviewApprovalEvidence?.artifacts)
+    ? reviewApprovalEvidence.artifacts.filter(isRecord)
+    : [];
+  const reviewApprovalDigest = reviewApprovalEvidence
+    ? approvalEvidencePacketDigest({
+        sourceHead: reviewApprovalSourceHead,
+        productionCommit: asString(reviewApprovalEvidence.productionCommit) || null,
+        artifacts: reviewApprovalArtifacts,
+        evidenceCommits: reviewApprovalEvidenceCommits,
+      })
+    : "";
+  const projectedCurrentDigest = reviewApprovalEvidence
+    ? approvalEvidencePacketDigest({
+        sourceHead: approvalEvidenceBinding.sourceHead,
+        productionCommit: asString(reviewApprovalEvidence.productionCommit) || null,
+        artifacts: reviewApprovalArtifacts,
+        evidenceCommits: reviewApprovalEvidenceCommits,
+      })
+    : "";
   if (
     !reviewApprovalEvidence
-    || asString(reviewApprovalEvidence.sourceHead) !== approvalEvidenceBinding.sourceHead
+    || asString(reviewApprovalEvidence.schemaVersion) !== "safeclaw-approval-evidence-binding/v1"
+    || reviewApprovalEvidence.verified !== true
+    || !Array.isArray(reviewApprovalEvidence.failures)
+    || reviewApprovalEvidence.failures.length !== 0
+    || !isCommitSha(reviewApprovalSourceHead)
+    || !approvalEvidenceBinding.sourceHead
+    || !isCommitAncestor(rootDir, reviewApprovalSourceHead, approvalEvidenceBinding.sourceHead)
     || asString(reviewApprovalEvidence.productionCommit) !== approvalEvidenceBinding.productionCommit
-    || asString(reviewApprovalEvidence.packetDigest) !== approvalEvidenceBinding.packetDigest
+    || asString(reviewApprovalEvidence.packetDigest) !== reviewApprovalDigest
+    || projectedCurrentDigest !== approvalEvidenceBinding.packetDigest
   ) {
     failures.push("approval-evidence:review-binding-mismatch");
   }

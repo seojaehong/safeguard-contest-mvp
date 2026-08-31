@@ -511,6 +511,24 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.forbiddenClaims).toContain("Completed human review alone writes an exact-kosha registry artifact.");
   });
 
+  it("accepts an ancestor review binding when the bound evidence artifacts are unchanged", async () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    execFileSync("git", ["add", reviewPath], { cwd: root, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "record human review"], { cwd: root, stdio: "ignore" });
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({
+      rootDir: root,
+      packetPath,
+      reviewPath,
+      generatedAt: "2026-07-22T00:00:00.000Z",
+    });
+
+    expect(report.verdict).toBe("HUMAN_REVIEW_COMPLETE_APPROVAL_REQUIRED_NO_MUTATION");
+    expect(report.approvalEvidenceBinding.verified).toBe(true);
+    expect(report.failures).not.toContain("approval-evidence:review-binding-mismatch");
+    expect(report.exactPromotionPerformed).toBe(false);
+  });
+
   it("fails closed when a required check is not confirmed", async () => {
     const { root, packetPath, reviewPath } = writeFixtureRoot();
     const review = JSON.parse(fs.readFileSync(path.join(root, reviewPath), "utf8")) as {
