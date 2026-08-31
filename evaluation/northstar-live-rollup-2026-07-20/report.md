@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T05:54:31.277Z
-Source HEAD at generation: 3e548c56b6c0294bd89929668d7da958211c2a65
-Live commit at generation: e0ec763b63ee5eb22587895cc48de7d1d46423cb
+Generated at: 2026-08-31T05:57:10.842Z
+Source HEAD at generation: ef38bf6670875b95d6ee334f0f5aa1b8def1708c
+Live commit at generation: ef38bf6670875b95d6ee334f0f5aa1b8def1708c
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_evidence_missing_or_unknown`
@@ -520,7 +520,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
