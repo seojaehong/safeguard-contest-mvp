@@ -379,6 +379,46 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
 }
 
 describe("KOSHA exact promotion review gate", () => {
+  it("rejects a review path that crosses a symlinked directory", async () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const reviewDirectory = path.dirname(path.join(root, reviewPath));
+    const externalDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "kosha-review-external-"));
+    fs.copyFileSync(path.join(root, reviewPath), path.join(externalDirectory, "review.json"));
+    fs.rmSync(reviewDirectory, { recursive: true, force: true });
+    fs.symlinkSync(externalDirectory, reviewDirectory, "junction");
+    const module = await loadReviewGateModule();
+
+    expect(() => module.buildKoshaExactPromotionReviewGate({
+      rootDir: root,
+      packetPath,
+      reviewPath,
+      generatedAt: "2026-07-22T00:00:00.000Z",
+    })).toThrow(`path-symlink-not-allowed:${reviewPath}`);
+  });
+
+  it("rejects a symlinked output directory before writing reports", () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const outputRelativePath = "evaluation/escaped-review-output";
+    const outputPath = path.join(root, outputRelativePath);
+    const externalDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "kosha-output-external-"));
+    fs.symlinkSync(externalDirectory, outputPath, "junction");
+
+    expect(() => execFileSync("node", [
+      path.resolve("scripts", "kosha_exact_promotion_review_gate.mjs"),
+      "--root",
+      root,
+      "--packet",
+      packetPath,
+      "--review",
+      reviewPath,
+      "--output",
+      outputRelativePath,
+      "--generated-at",
+      "2026-07-22T00:00:00.000Z",
+    ], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] })).toThrow();
+    expect(fs.readdirSync(externalDirectory)).toEqual([]);
+  });
+
   it("passes only a complete human review while still requiring separate approval", async () => {
     const { root, packetPath, reviewPath } = writeFixtureRoot();
     const module = await loadReviewGateModule();

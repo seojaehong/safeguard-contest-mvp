@@ -133,13 +133,72 @@ function gitHead(rootDir) {
  * @param {string} rootDir
  * @param {string} relativePath
  */
-function resolveInsideRoot(rootDir, relativePath) {
-  const resolved = path.resolve(rootDir, relativePath);
+function isInsideRoot(rootPath, targetPath) {
+  const relativePath = path.relative(rootPath, targetPath);
+  return relativePath === ""
+    || (!path.isAbsolute(relativePath) && relativePath !== ".." && !relativePath.startsWith(`..${path.sep}`));
+}
+
+function resolveLexicallyInsideRoot(rootDir, relativePath) {
   const root = path.resolve(rootDir);
-  if (resolved !== root && !resolved.startsWith(`${root}${path.sep}`)) {
+  const resolved = path.resolve(root, relativePath);
+  if (!isInsideRoot(root, resolved)) {
     throw new Error(`path-outside-root:${relativePath}`);
   }
+  return { root, resolved };
+}
+
+function assertNoSymlinkComponents(root, resolved, relativePath) {
+  const segments = path.relative(root, resolved).split(/[\\/]+/u).filter(Boolean);
+  let cursor = root;
+  for (const segment of segments) {
+    cursor = path.resolve(cursor, segment);
+    if (!fs.existsSync(cursor)) break;
+    if (fs.lstatSync(cursor).isSymbolicLink()) {
+      throw new Error(`path-symlink-not-allowed:${relativePath}`);
+    }
+  }
+}
+
+function resolveExistingRegularFileInsideRoot(rootDir, relativePath) {
+  const { root, resolved } = resolveLexicallyInsideRoot(rootDir, relativePath);
+  assertNoSymlinkComponents(root, resolved, relativePath);
+  if (!fs.existsSync(resolved) || !fs.lstatSync(resolved).isFile()) {
+    throw new Error(`path-not-regular-file:${relativePath}`);
+  }
+  const realRoot = fs.realpathSync(root);
+  const realFile = fs.realpathSync(resolved);
+  if (!isInsideRoot(realRoot, realFile)) {
+    throw new Error(`path-realpath-outside-root:${relativePath}`);
+  }
   return resolved;
+}
+
+function resolveOutputDirectoryInsideRoot(rootDir, relativePath) {
+  const { root, resolved } = resolveLexicallyInsideRoot(rootDir, relativePath);
+  assertNoSymlinkComponents(root, resolved, relativePath);
+  fs.mkdirSync(resolved, { recursive: true });
+  assertNoSymlinkComponents(root, resolved, relativePath);
+  if (!fs.lstatSync(resolved).isDirectory()) {
+    throw new Error(`output-path-not-directory:${relativePath}`);
+  }
+  const realRoot = fs.realpathSync(root);
+  const realOutput = fs.realpathSync(resolved);
+  if (!isInsideRoot(realRoot, realOutput)) {
+    throw new Error(`output-realpath-outside-root:${relativePath}`);
+  }
+  return resolved;
+}
+
+function writeRegularOutputFile(outputDir, filename, contents) {
+  const outputPath = path.join(outputDir, filename);
+  if (fs.existsSync(outputPath)) {
+    const state = fs.lstatSync(outputPath);
+    if (state.isSymbolicLink() || !state.isFile()) {
+      throw new Error(`output-file-not-regular:${filename}`);
+    }
+  }
+  fs.writeFileSync(outputPath, contents, "utf8");
 }
 
 /**
@@ -303,11 +362,12 @@ export function buildKoshaExactPromotionReviewGate(options) {
   const officialLifecycleAuditPath = options.officialLifecycleAuditPath || DEFAULT_OFFICIAL_LIFECYCLE_AUDIT_PATH;
   const reviewerSupportPath = options.reviewerSupportPath || DEFAULT_REVIEWER_SUPPORT_PATH;
   const generatedAt = options.generatedAt || new Date().toISOString();
-  const packet = readJson(resolveInsideRoot(rootDir, packetPath));
-  const officialPdfAudit = readJson(resolveInsideRoot(rootDir, officialPdfAuditPath));
-  const officialLifecycleAudit = readJson(resolveInsideRoot(rootDir, officialLifecycleAuditPath));
-  const reviewerSupport = readJson(resolveInsideRoot(rootDir, reviewerSupportPath));
-  const review = readJson(resolveInsideRoot(rootDir, options.reviewPath));
+  const packet = readJson(resolveExistingRegularFileInsideRoot(rootDir, packetPath));
+  const officialPdfAudit = readJson(resolveExistingRegularFileInsideRoot(rootDir, officialPdfAuditPath));
+  const officialLifecycleAudit = readJson(resolveExistingRegularFileInsideRoot(rootDir, officialLifecycleAuditPath));
+  const reviewerSupport = readJson(resolveExistingRegularFileInsideRoot(rootDir, reviewerSupportPath));
+  const reviewPath = resolveExistingRegularFileInsideRoot(rootDir, options.reviewPath);
+  const review = readJson(reviewPath);
   assertPacketShape(packet);
   assertOfficialPdfAuditShape(officialPdfAudit);
   assertOfficialLifecycleAuditShape(officialLifecycleAudit);
@@ -589,7 +649,7 @@ export function buildKoshaExactPromotionReviewGate(options) {
     approvalEvidenceBinding,
     reviewInput: {
       path: options.reviewPath,
-      sha256: sha256File(resolveInsideRoot(rootDir, options.reviewPath)),
+      sha256: sha256File(reviewPath),
     },
     packetPath,
     officialPdfAuditPath,
@@ -651,8 +711,8 @@ export function buildKoshaExactPromotionReviewTemplate(options) {
   const rootDir = options.rootDir;
   const packetPath = options.packetPath || DEFAULT_PACKET_PATH;
   const reviewerSupportPath = options.reviewerSupportPath || DEFAULT_REVIEWER_SUPPORT_PATH;
-  const packet = readJson(resolveInsideRoot(rootDir, packetPath));
-  const reviewerSupport = readJson(resolveInsideRoot(rootDir, reviewerSupportPath));
+  const packet = readJson(resolveExistingRegularFileInsideRoot(rootDir, packetPath));
+  const reviewerSupport = readJson(resolveExistingRegularFileInsideRoot(rootDir, reviewerSupportPath));
   assertPacketShape(packet);
   assertReviewerSupportShape(reviewerSupport);
   const packetRecord = /** @type {Record<string, unknown>} */ (packet);
@@ -694,8 +754,8 @@ export function buildKoshaExactPromotionReviewTemplate(options) {
     productionCommit,
     evidenceCommits: [
       asString(packetRecord.sourceHead),
-      asString(readJson(resolveInsideRoot(rootDir, DEFAULT_OFFICIAL_PDF_AUDIT_PATH)).sourceHead),
-      asString(readJson(resolveInsideRoot(rootDir, DEFAULT_OFFICIAL_LIFECYCLE_AUDIT_PATH)).sourceHead),
+      asString(readJson(resolveExistingRegularFileInsideRoot(rootDir, DEFAULT_OFFICIAL_PDF_AUDIT_PATH)).sourceHead),
+      asString(readJson(resolveExistingRegularFileInsideRoot(rootDir, DEFAULT_OFFICIAL_LIFECYCLE_AUDIT_PATH)).sourceHead),
       asString(reviewerSupportRecord.sourceHead),
     ],
   });
@@ -1025,8 +1085,7 @@ function parseArgs(args) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const outputDir = resolveInsideRoot(args.rootDir, args.output);
-  fs.mkdirSync(outputDir, { recursive: true });
+  const outputDir = resolveOutputDirectoryInsideRoot(args.rootDir, args.output);
   if (args.writeTemplate) {
     const template = buildKoshaExactPromotionReviewTemplate({
       rootDir: args.rootDir,
@@ -1034,11 +1093,11 @@ async function main() {
       reviewerSupportPath: args.reviewerSupport,
       generatedAt: args.generatedAt || undefined,
     });
-    fs.writeFileSync(path.join(outputDir, "review-template.json"), `${JSON.stringify(template, null, 2)}\n`, "utf8");
-    fs.writeFileSync(
-      path.join(outputDir, "review-template.md"),
+    writeRegularOutputFile(outputDir, "review-template.json", `${JSON.stringify(template, null, 2)}\n`);
+    writeRegularOutputFile(
+      outputDir,
+      "review-template.md",
       renderKoshaExactPromotionReviewTemplateMarkdown(template),
-      "utf8",
     );
     console.log(JSON.stringify({
       output: args.output,
@@ -1057,8 +1116,8 @@ async function main() {
     reviewPath: args.review,
     generatedAt: args.generatedAt || undefined,
   });
-  fs.writeFileSync(path.join(outputDir, "report.json"), `${JSON.stringify(report, null, 2)}\n`, "utf8");
-  fs.writeFileSync(path.join(outputDir, "report.md"), renderMarkdown(report), "utf8");
+  writeRegularOutputFile(outputDir, "report.json", `${JSON.stringify(report, null, 2)}\n`);
+  writeRegularOutputFile(outputDir, "report.md", renderMarkdown(report));
   console.log(JSON.stringify({ output: args.output, verdict: report.verdict, failureCount: report.failures.length }, null, 2));
   if (!report.reviewChecklistComplete) {
     process.exitCode = 2;

@@ -2,8 +2,8 @@
 
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync, statSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, lstatSync, readFileSync, realpathSync } from "node:fs";
+import { isAbsolute, relative, resolve, sep } from "node:path";
 
 const COMMIT_SHA = /^[0-9a-f]{40}$/u;
 
@@ -19,12 +19,80 @@ function git(root, args) {
   }
 }
 
+function gitBlobBatch(root, blobIds) {
+  const uniqueBlobIds = [...new Set(blobIds.filter((value) => /^[0-9a-f]{40}$/u.test(value)))];
+  if (uniqueBlobIds.length === 0) return new Map();
+  try {
+    const output = execFileSync("git", ["cat-file", "--batch"], {
+      cwd: root,
+      input: `${uniqueBlobIds.join("\n")}\n`,
+      maxBuffer: 64 * 1024 * 1024,
+      stdio: ["pipe", "pipe", "ignore"],
+    });
+    const blobs = new Map();
+    let offset = 0;
+    for (const requestedBlob of uniqueBlobIds) {
+      const headerEnd = output.indexOf(10, offset);
+      if (headerEnd < 0) return new Map();
+      const header = output.subarray(offset, headerEnd).toString("utf8");
+      const match = /^([0-9a-f]{40})\s+blob\s+(\d+)$/u.exec(header);
+      if (!match || match[1] !== requestedBlob) return new Map();
+      const size = Number(match[2]);
+      const bodyStart = headerEnd + 1;
+      const bodyEnd = bodyStart + size;
+      if (!Number.isSafeInteger(size) || size < 0 || bodyEnd > output.length) return new Map();
+      blobs.set(requestedBlob, output.subarray(bodyStart, bodyEnd));
+      offset = bodyEnd + 1;
+    }
+    return blobs;
+  } catch {
+    return new Map();
+  }
+}
+
 function normalizeGitPath(relativePath) {
   return relativePath.replaceAll("\\", "/");
 }
 
 function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
+}
+
+function isInsideRoot(rootPath, targetPath) {
+  const relativePath = relative(rootPath, targetPath);
+  return relativePath === ""
+    || (!isAbsolute(relativePath) && relativePath !== ".." && !relativePath.startsWith(`..${sep}`));
+}
+
+function inspectRegularPath(root, relativePath) {
+  const lexicalRoot = resolve(root);
+  const absolutePath = resolve(lexicalRoot, relativePath);
+  if (!isInsideRoot(lexicalRoot, absolutePath)) {
+    return { absolutePath, exists: false, regularFile: false, symlink: false, realPathWithinRoot: false };
+  }
+
+  const relativeSegments = relative(lexicalRoot, absolutePath).split(/[\\/]+/u).filter(Boolean);
+  let cursor = lexicalRoot;
+  for (const segment of relativeSegments) {
+    cursor = resolve(cursor, segment);
+    if (!existsSync(cursor)) {
+      return { absolutePath, exists: false, regularFile: false, symlink: false, realPathWithinRoot: false };
+    }
+    if (lstatSync(cursor).isSymbolicLink()) {
+      return { absolutePath, exists: true, regularFile: false, symlink: true, realPathWithinRoot: false };
+    }
+  }
+
+  const leaf = lstatSync(absolutePath);
+  const realRoot = realpathSync(lexicalRoot);
+  const realPath = realpathSync(absolutePath);
+  return {
+    absolutePath,
+    exists: true,
+    regularFile: leaf.isFile(),
+    symlink: false,
+    realPathWithinRoot: isInsideRoot(realRoot, realPath),
+  };
 }
 
 export function isCommitSha(value) {
@@ -53,28 +121,43 @@ export function buildApprovalEvidenceBinding({ root, inputPaths, productionCommi
   const sourceHead = currentGitHead(root);
   const uniquePaths = [...new Set(inputPaths)].sort((left, right) => left.localeCompare(right));
   const gitPaths = uniquePaths.map(normalizeGitPath);
-  const indexRows = git(root, ["ls-files", "--stage", "--", ...gitPaths]) ?? "";
-  const headBlobs = new Map();
-  for (const line of indexRows.split(/\r?\n/u).filter(Boolean)) {
-    const match = /^\d+\s+([0-9a-f]{40})\s+\d+\t(.+)$/u.exec(line);
-    if (match) headBlobs.set(match[2], match[1]);
+  const treeRows = git(root, ["ls-tree", "-r", "HEAD", "--", ...gitPaths]) ?? "";
+  const headEntries = new Map();
+  for (const line of treeRows.split(/\r?\n/u).filter(Boolean)) {
+    const match = /^(\d+)\s+blob\s+([0-9a-f]{40})\t(.+)$/u.exec(line);
+    if (match) headEntries.set(match[3], { mode: match[1], blob: match[2] });
   }
+  const headBlobBytes = gitBlobBatch(root, [...headEntries.values()].map(({ blob }) => blob));
   const dirtyRows = git(root, ["diff", "HEAD", "--name-only", "--", ...gitPaths]) ?? "";
   const dirtyPaths = new Set(dirtyRows.split(/\r?\n/u).map((value) => value.trim()).filter(Boolean));
   const artifacts = uniquePaths.map((relativePath) => {
-    const absolutePath = resolve(root, relativePath);
     const gitPath = normalizeGitPath(relativePath);
-    const exists = existsSync(absolutePath) && statSync(absolutePath).isFile();
-    const workingSha256 = exists ? sha256(readFileSync(absolutePath)) : null;
-    const headBlobSha1 = headBlobs.get(gitPath) ?? null;
-    const workingTreeMatchesHead = exists && headBlobSha1 !== null && !dirtyPaths.has(gitPath);
+    const pathState = inspectRegularPath(root, relativePath);
+    const headEntry = headEntries.get(gitPath) ?? null;
+    const gitMode = headEntry?.mode ?? null;
+    const gitModeRegular = gitMode === "100644" || gitMode === "100755";
+    const readable = pathState.exists && pathState.regularFile && !pathState.symlink && pathState.realPathWithinRoot;
+    const workingBytes = readable ? readFileSync(pathState.absolutePath) : null;
+    const headBytes = headEntry && gitModeRegular ? headBlobBytes.get(headEntry.blob) ?? null : null;
+    const workingSha256 = workingBytes ? sha256(workingBytes) : null;
+    const headSha256 = headBytes ? sha256(headBytes) : null;
+    const headBlobSha1 = headEntry?.blob ?? null;
+    const workingTreeMatchesHead = workingSha256 !== null
+      && headSha256 !== null
+      && workingSha256 === headSha256
+      && !dirtyPaths.has(gitPath);
     return {
       path: relativePath,
-      bytes: exists ? statSync(absolutePath).size : null,
+      bytes: workingBytes?.byteLength ?? null,
       sha256: workingSha256,
+      headSha256,
+      gitMode,
+      regularFile: pathState.regularFile,
+      symlink: pathState.symlink,
+      realPathWithinRoot: pathState.realPathWithinRoot,
       headBlobSha1,
       workingBlobSha1: workingTreeMatchesHead ? headBlobSha1 : null,
-      trackedAtHead: /^[0-9a-f]{40}$/u.test(headBlobSha1 ?? ""),
+      trackedAtHead: /^[0-9a-f]{40}$/u.test(headBlobSha1 ?? "") && gitModeRegular,
       workingTreeMatchesHead,
     };
   });
@@ -88,6 +171,12 @@ export function buildApprovalEvidenceBinding({ root, inputPaths, productionCommi
     else if (!sourceHead || !isCommitAncestor(root, commit, sourceHead)) failures.push(`evidence-commit-not-ancestor:${commit}`);
   }
   for (const artifact of artifacts) {
+    if (artifact.symlink) failures.push(`input-symlink:${artifact.path}`);
+    if (!artifact.regularFile) failures.push(`input-not-regular:${artifact.path}`);
+    if (!artifact.realPathWithinRoot) failures.push(`input-outside-real-root:${artifact.path}`);
+    if (artifact.gitMode && artifact.gitMode !== "100644" && artifact.gitMode !== "100755") {
+      failures.push(`input-git-mode-not-regular:${artifact.path}:${artifact.gitMode}`);
+    }
     if (!artifact.trackedAtHead) failures.push(`input-not-tracked-at-head:${artifact.path}`);
     else if (!artifact.workingTreeMatchesHead) failures.push(`input-differs-from-head:${artifact.path}`);
     if (!artifact.sha256) failures.push(`input-sha256-missing:${artifact.path}`);
@@ -95,7 +184,13 @@ export function buildApprovalEvidenceBinding({ root, inputPaths, productionCommi
   const packetDigest = sha256(JSON.stringify({
     sourceHead,
     productionCommit: isCommitSha(productionCommit) ? productionCommit : null,
-    artifacts: artifacts.map(({ path, sha256: artifactSha256, headBlobSha1: blob }) => ({ path, sha256: artifactSha256, headBlobSha1: blob })),
+    artifacts: artifacts.map(({ path, sha256: artifactSha256, headSha256, headBlobSha1: blob, gitMode }) => ({
+      path,
+      sha256: artifactSha256,
+      headSha256,
+      headBlobSha1: blob,
+      gitMode,
+    })),
     evidenceCommits: normalizedEvidenceCommits,
   }));
   return {
