@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `01f7dfe54f1f2709d3a1b72a608820a904d2d8e3`
+Source HEAD: `9e235ad9c51f85582b6353b580da6c6063f80d1d`
 
-Production `/api/build-info`: `01f7dfe54f1f2709d3a1b72a608820a904d2d8e3`
+Production `/api/build-info`: `9e235ad9c51f85582b6353b580da6c6063f80d1d`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `01f7dfe54f1f2709d3a1b72a608820a904d2d8e3`
+Live rollup source head: `9e235ad9c51f85582b6353b580da6c6063f80d1d`
 
 Live rollup matches production: `true`
 
@@ -32,7 +32,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 
 ## Proven Current State
 
-- Current launch smoke is `BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH`: raw audit fresh=`true` (no freshness errors), `/api/ask` status `503`, error `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`, admission `distributed/unknown`, demo allowed=`false`, dispatch called=`false`. Distributed admission activation is `OPERATOR_CONFIGURATION_REQUIRED`; exact saved Share remains `MISSING_EVIDENCE`.
+- Current launch smoke is `PASS_LIVE_PRODUCTION_WITH_BOUNDARIES`: raw audit fresh=`true` (no freshness errors), requested mode `template`, `/api/ask` status `200`, error `none`, admission `instance/0`, template demo allowed=`true`, dispatch called=`false`. Enhanced/full distributed admission is `OPERATOR_CONFIGURATION_REQUIRED`; exact saved Share remains `MISSING_EVIDENCE`.
 - Live harness quality is proven.
 - KOSHA exact trust registry is proven for the accepted exact-trust slice.
 - KOSHA next exact candidate audit identifies the 234-item current native technical-support subset and 231 metadata-verified non-exact candidates without mutation.

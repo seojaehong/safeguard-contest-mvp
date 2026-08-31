@@ -1,53 +1,65 @@
 {
-  "schemaVersion": "safeclaw-launch-readiness-current/v5",
-  "generatedAt": "2026-08-28T23:50:40.230Z",
+  "schemaVersion": "safeclaw-launch-readiness-current/v6",
+  "generatedAt": "2026-08-31T08:44:16.874Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "sourceHeadAtGeneration": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
-  "productionCommit": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
-  "runtimeSmokeCommit": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
-  "evidenceHeadBeforeThisReport": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
+  "sourceHeadAtGeneration": "9e235ad9c51f85582b6353b580da6c6063f80d1d",
+  "productionCommit": "9e235ad9c51f85582b6353b580da6c6063f80d1d",
+  "runtimeSmokeCommit": "9e235ad9c51f85582b6353b580da6c6063f80d1d",
+  "evidenceHeadBeforeThisReport": "9e235ad9c51f85582b6353b580da6c6063f80d1d",
   "currentHeadIsEvidenceOnlyPending": false,
-  "verdict": "BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH",
-  "safeLaunchDemoClaimAllowed": false,
-  "guidedPilotClaimAllowed": false,
+  "verdict": "PASS_LIVE_PRODUCTION_WITH_BOUNDARIES",
+  "safeLaunchDemoClaimAllowed": true,
+  "guidedPilotClaimAllowed": true,
   "fullyAutomatedLaunchClaimAllowed": false,
   "selfServeSaasLaunchClaimAllowed": false,
   "providerDispatchLiveClaimed": false,
   "dispatchCalled": false,
   "apiAsk": {
-    "status": 503,
-    "ok": false,
-    "elapsedMs": 1222,
-    "errorCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
-    "error": "요청 보호 서비스를 확인하는 동안 요청을 잠시 처리할 수 없습니다.",
-    "retryAfterSeconds": 5,
-    "rateLimit": "distributed",
-    "workUnit": ""
+    "requestedAiMode": "template",
+    "status": 200,
+    "ok": true,
+    "elapsedMs": 882,
+    "errorCode": "",
+    "error": "",
+    "retryAfterSeconds": null,
+    "rateLimit": "instance",
+    "workUnit": "0"
   },
   "rawAuditFreshness": {
     "ready": true,
-    "auditGeneratedAt": "2026-08-28T23:50:22.281Z",
-    "auditProductionCommit": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
-    "reportGeneratedAt": "2026-08-28T23:50:40.230Z",
-    "ageMs": 17949,
+    "auditGeneratedAt": "2026-08-31T08:44:15.859Z",
+    "auditProductionCommit": "9e235ad9c51f85582b6353b580da6c6063f80d1d",
+    "reportGeneratedAt": "2026-08-31T08:44:16.874Z",
+    "ageMs": 1015,
     "maxAgeMs": 14400000,
     "commitMatchesProduction": true,
     "timestampWithinWindow": true,
     "reasons": []
   },
   "runtimeBoundary": {
-    "distributedAdmissionBlocked": true,
+    "distributedAdmissionBlocked": false,
+    "templateModeOnly": true,
+    "providerBackedModesReady": false,
+    "enhancedFullDistributedAdmissionPending": true,
     "providerWorkExecuted": false,
     "providerDispatchExecuted": false,
     "databaseMutationPerformed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "distributedAdmissionActivation": "OPERATOR_CONFIGURATION_REQUIRED"
   },
-  "scenario": null,
+  "scenario": {
+    "companyName": "도시가스공사",
+    "companyType": "건설업",
+    "siteName": "도시가스공사 열수송관 굴착공사 현장",
+    "workSummary": "도시가스공사 열수송관 굴착공사",
+    "workerCount": 7,
+    "weatherNote": "옥외 굴착 조건, 굴착면 붕괴·매설물 접촉·중장비 작업반경 확인 필요"
+  },
   "documentCoverage": {
     "expectedCount": 12,
-    "presentCount": 0,
-    "missing": [
+    "presentCount": 12,
+    "missing": [],
+    "present": [
       "workpackSummaryDraft",
       "riskAssessmentDraft",
       "workPlanDraft",
@@ -60,14 +72,13 @@
       "foreignWorkerBriefing",
       "foreignWorkerTransmission",
       "kakaoMessage"
-    ],
-    "present": []
+    ]
   },
-  "connectionVerdict": "BLOCKED_BEFORE_CONNECTION_CHECK_NO_DISPATCH",
+  "connectionVerdict": "PASS_TEMPLATE_GENERATION_CONNECTIONS_BOUNDED_NO_DISPATCH",
   "connectionSummary": {
     "connectedCount": 0,
-    "partialCount": 0,
-    "needsCheckCount": 7
+    "partialCount": 3,
+    "needsCheckCount": 4
   },
   "liveConnections": [
     {
@@ -81,7 +92,7 @@
         "안전보건교육",
         "사진/증빙"
       ],
-      "detail": ""
+      "detail": "생성 모드: 템플릿 (외부 호출 없음, 고정 근거 템플릿 계약 적용) / 고정 근거 계약: review_required"
     },
     {
       "name": "Gemini",
@@ -91,7 +102,7 @@
         "핵심 판단",
         "문서팩 본문"
       ],
-      "detail": ""
+      "detail": "실 API 호출은 timeout 20초, 1회 retry, 실패 시 보조 응답 정책을 따릅니다."
     },
     {
       "name": "기상청",
@@ -102,7 +113,7 @@
         "작업계획서",
         "TBM"
       ],
-      "detail": ""
+      "detail": "대표 시나리오 기반 기상 주의 문구"
     },
     {
       "name": "Work24",
@@ -112,40 +123,40 @@
         "안전보건교육",
         "후속 교육"
       ],
-      "detail": ""
+      "detail": "현장 예시 기반 교육 연계 문구"
     },
     {
       "name": "KOSHA 교육",
       "keyPresent": true,
-      "liveStatus": "연결 점검 필요",
+      "liveStatus": "일부 근거 보류",
       "reflectedIn": [
         "안전보건교육",
         "후속 교육"
       ],
-      "detail": ""
+      "detail": "대표 시나리오 기반 KOSHA 교육포털 연계 문구"
     },
     {
       "name": "KOSHA 공식자료",
       "keyPresent": true,
-      "liveStatus": "연결 점검 필요",
+      "liveStatus": "일부 근거 보류",
       "reflectedIn": [
         "위험성평가표",
         "TBM",
         "안전보건교육"
       ],
-      "detail": ""
+      "detail": "대표 시나리오 기반 KOSHA 가이드 보강 문구"
     },
     {
       "name": "KOSHA 재해사례",
       "keyPresent": false,
-      "liveStatus": "연결 점검 필요",
+      "liveStatus": "일부 근거 보류",
       "reflectedIn": [
         "TBM",
         "안전보건교육",
         "비상대응",
         "사진/증빙"
       ],
-      "detail": ""
+      "detail": "대표 시나리오 기반 유사 재해사례 보강 문구"
     },
     {
       "name": "n8n dispatch",
@@ -162,9 +173,9 @@
     "Gemini: 연결 점검 필요",
     "기상청: 연결 점검 필요",
     "Work24: 연결 점검 필요",
-    "KOSHA 교육: 연결 점검 필요",
-    "KOSHA 공식자료: 연결 점검 필요",
-    "KOSHA 재해사례: 연결 점검 필요",
+    "KOSHA 교육: 일부 근거 보류",
+    "KOSHA 공식자료: 일부 근거 보류",
+    "KOSHA 재해사례: 일부 근거 보류",
     "n8n dispatch: 설정 점검만 수행"
   ],
   "currentEvidence": {
@@ -188,7 +199,7 @@
     "noticeCount": 2,
     "fullyAutomatedLaunchClaimAllowed": false,
     "historicalGateSafeLaunchDemoClaimAllowed": true,
-    "safeLaunchDemoClaimAllowed": false,
+    "safeLaunchDemoClaimAllowed": true,
     "notices": [
       {
         "gate": "auth-history-reuse",
@@ -216,8 +227,8 @@
     "verdict": "open"
   },
   "northstarLiveRollupOverall": {
-    "sourceHeadAtGeneration": "ae8bd431ac2dc35673fea9dd50134ff0f074cf89",
-    "liveCommitAtGeneration": "ae8bd431ac2dc35673fea9dd50134ff0f074cf89",
+    "sourceHeadAtGeneration": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
+    "liveCommitAtGeneration": "01f7dfe54f1f2709d3a1b72a608820a904d2d8e3",
     "liveCommitMatchesSourceHead": true
   },
   "approvalGatedBoundaryCount": 8,
@@ -381,10 +392,10 @@
     }
   ],
   "safeClaims": [
-    "The current live launch smoke fails closed before generation while distributed admission is unavailable.",
-    "No provider dispatch or database mutation was executed by the current launch smoke.",
-    "Documents and Share scoped UI evidence remains separate from current live generation availability.",
-    "Exact saved user Share remains MISSING_EVIDENCE."
+    "Live /api/ask in explicit deterministic template mode generated the expected 12-document workpack for the audited construction scenario.",
+    "External connection status remains separately bounded (0 connected, 3 fallback, 4 check-required) and does not claim enhanced/full provider readiness.",
+    "A safe launch demo or guided pilot can be claimed only with all 8 canonical approval boundaries preserved.",
+    "Documents selected-only bounded workbench evidence is current in scoped artifacts; route split alone is not accepted as the UX fix."
   ],
   "forbiddenClaims": [
     "Fully automated self-serve launch readiness is complete.",
@@ -394,7 +405,7 @@
     "Live Supabase RLS tenant isolation is launch-proven.",
     "Exact saved/generated user share session has been reproduced unless a concrete session URL/state is measured.",
     "n8n/provider dispatch was executed in the latest launch-readiness smoke.",
-    "Current live /api/ask generation is available for a launch demo."
+    "Enhanced/full provider-backed generation is production-ready."
   ],
   "uiArchitectureBoundary": {
     "routeSplitAloneAcceptedAsFix": false,
@@ -408,10 +419,10 @@
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "51cbd8662329c0d13e337e5c9310a435b25e8cb0",
+    "commitSha": "9e235ad9c51f85582b6353b580da6c6063f80d1d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-g377fg8ih-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-cop4nf7ax-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   }
 }

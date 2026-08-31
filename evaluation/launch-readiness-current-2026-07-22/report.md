@@ -1,37 +1,39 @@
 # Launch Readiness Current Boundary
 
-Generated: 2026-08-28T23:50:40.230Z
+Generated: 2026-08-31T08:44:16.874Z
 
 Base URL: `https://www.safeclaw.kr`
 
-Source HEAD at generation: `51cbd8662329c0d13e337e5c9310a435b25e8cb0`
+Source HEAD at generation: `9e235ad9c51f85582b6353b580da6c6063f80d1d`
 
-Production runtime smoke commit: `51cbd8662329c0d13e337e5c9310a435b25e8cb0`
+Production runtime smoke commit: `9e235ad9c51f85582b6353b580da6c6063f80d1d`
 
 Current HEAD is evidence-only pending relative to production: `false`
 
 ## Verdict
 
-`BLOCKED_LIVE_PRODUCTION_DISTRIBUTED_ADMISSION_REQUIRED_NO_DISPATCH`
+`PASS_LIVE_PRODUCTION_WITH_BOUNDARIES`
 
-Current live launch demo generation is not allowed while the measured runtime blocker remains active. Fully automated self-serve launch and real provider dispatch readiness are not allowed.
+Safe launch demo / guided pilot wording is allowed for the explicit deterministic template path with the recorded boundaries. Enhanced/full provider-backed generation remains separately approval-gated. Fully automated self-serve launch and real provider dispatch readiness are not allowed.
 
 ## Live Smoke
 
 `scripts/launch_readiness_audit.mjs` was run against production with `SAFETYGUARD_AUDIT_DISPATCH=false`.
 
-- raw audit generated: `2026-08-28T23:50:22.281Z`
-- raw audit production commit: `51cbd8662329c0d13e337e5c9310a435b25e8cb0`
+- raw audit generated: `2026-08-31T08:44:15.859Z`
+- raw audit production commit: `9e235ad9c51f85582b6353b580da6c6063f80d1d`
 - raw audit current for this report: `true`
 - raw audit freshness reasons: `none`
-- `/api/ask`: 503 CHECK
-- error code: `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`
-- admission: `distributed` / `unknown`
-- elapsed: 1222 ms
+- `/api/ask`: 200 OK
+- requested AI mode: `template`
+- error code: `none`
+- admission: `instance` / `0`
+- elapsed: 882 ms
 - dispatch call: not run
-- generated documents: 0 / 12
-- connection verdict: `BLOCKED_BEFORE_CONNECTION_CHECK_NO_DISPATCH` (0 connected, 0 bounded fallback, 7 check-required)
-- scenario: `unknown`
+- generated documents: 12 / 12
+- enhanced/full distributed admission: `OPERATOR_CONFIGURATION_REQUIRED`
+- connection verdict: `PASS_TEMPLATE_GENERATION_CONNECTIONS_BOUNDED_NO_DISPATCH` (0 connected, 3 bounded fallback, 4 check-required)
+- scenario: `도시가스공사 열수송관 굴착공사`
 
 ## Connected Surfaces
 
@@ -39,9 +41,9 @@ Current live launch demo generation is not allowed while the measured runtime bl
 - Gemini: 연결 점검 필요
 - 기상청: 연결 점검 필요
 - Work24: 연결 점검 필요
-- KOSHA 교육: 연결 점검 필요
-- KOSHA 공식자료: 연결 점검 필요
-- KOSHA 재해사례: 연결 점검 필요
+- KOSHA 교육: 일부 근거 보류
+- KOSHA 공식자료: 일부 근거 보류
+- KOSHA 재해사례: 일부 근거 보류
 - n8n dispatch: 설정 점검만 수행
 
 ## Final-99 Notices
@@ -53,10 +55,10 @@ Final-99 remains `pass_with_notice`; 2 notices are carried. These are approval/a
 
 ## Safe Claims
 
-- The current live launch smoke fails closed before generation while distributed admission is unavailable.
-- No provider dispatch or database mutation was executed by the current launch smoke.
-- Documents and Share scoped UI evidence remains separate from current live generation availability.
-- Exact saved user Share remains MISSING_EVIDENCE.
+- Live /api/ask in explicit deterministic template mode generated the expected 12-document workpack for the audited construction scenario.
+- External connection status remains separately bounded (0 connected, 3 fallback, 4 check-required) and does not claim enhanced/full provider readiness.
+- A safe launch demo or guided pilot can be claimed only with all 8 canonical approval boundaries preserved.
+- Documents selected-only bounded workbench evidence is current in scoped artifacts; route split alone is not accepted as the UX fix.
 
 ## UI / IA Boundary
 
@@ -76,7 +78,7 @@ Route/page split alone is not accepted as the UX fix. The accepted structure is 
 - Live Supabase RLS tenant isolation is launch-proven.
 - Exact saved/generated user share session has been reproduced unless a concrete session URL/state is measured.
 - n8n/provider dispatch was executed in the latest launch-readiness smoke.
-- Current live /api/ask generation is available for a launch demo.
+- Enhanced/full provider-backed generation is production-ready.
 
 ## Approval-Gated Boundaries
 
