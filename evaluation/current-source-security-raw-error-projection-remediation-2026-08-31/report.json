@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "safeclaw-current-source-security-raw-error-projection-remediation/v1",
+  "generatedAt": "2026-08-31T04:28:42.8766338Z",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_RAW_ERROR_PROJECTION_CONTRACT",
+  "sourceBaseCommit": "434373ce1be22e2387ea1be300bf9a6f703bda6b",
+  "sourceHead": "856f7e65c33aa71d97277c8abca83864fee8ca47",
+  "productCommit": "856f7e65c33aa71d97277c8abca83864fee8ca47",
+  "productionCommit": "856f7e65c33aa71d97277c8abca83864fee8ca47",
+  "sourceIncludedInProduction": true,
+  "finding": {
+    "scanId": "f6bef30a-7250-428b-9f66-0bad1e42058c",
+    "scanTargetRevision": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+    "sealedFindingCount": 21,
+    "findingId": "csf_7aef114e48b74b34b829e893",
+    "occurrenceId": "occ_fe4f32e7d3d3cdce89f794db",
+    "ruleId": "information-exposure.raw-error-projection",
+    "severity": "medium",
+    "title": "API error responses expose internal database and provider details",
+    "sealedFindingReclassified": false,
+    "freshRescanRequired": true
+  },
+  "remediation": {
+    "stablePublicErrorCodes": [
+      "KNOWLEDGE_MATCH_FAILED",
+      "KNOWLEDGE_INGEST_PERSISTENCE_FAILED",
+      "WORKFLOW_PROVIDER_FAILED",
+      "BRIEFING_GENERATION_FAILED",
+      "PHOTO_ANALYSIS_FAILED"
+    ],
+    "correlationIdGenerated": true,
+    "rawExceptionMessageReturnedPublicly": false,
+    "rawDatabaseErrorReturnedPublicly": false,
+    "failedWebhookResponseBodyReturnedOrThrown": false,
+    "successfulWebhookResponseAllowlisted": true,
+    "photoProviderAndHarnessErrorsReturnedPublicly": false,
+    "invalidPhotoSignatureIoDetailReturnedPublicly": false,
+    "safeServerLogContext": [
+      "correlationId",
+      "errorType",
+      "boundedErrorCode",
+      "integerStatus",
+      "boundedOperationContext"
+    ],
+    "normalProviderAndModelProvenancePreserved": true,
+    "callerCancellationPreserved": true
+  },
+  "verification": {
+    "focusedSecurityTests": {
+      "command": "npm.cmd exec -- vitest run tests/raw-error-projection.test.ts tests/briefing-error-projection.test.ts tests/knowledge-ingest-route.test.ts tests/photo-vision-analysis-route.test.ts tests/workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 5,
+      "testsPassed": 93,
+      "testsFailed": 0
+    },
+    "adjacentRegressionTests": {
+      "command": "npm.cmd exec -- vitest run tests/knowledge-match-request-budget.test.ts tests/photo-vision-analysis.test.ts tests/operation-improvements.test.ts tests/workflow-share-client.test.ts tests/briefing.test.ts tests/briefing-dispatch-truth.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 6,
+      "testsPassed": 122,
+      "testsFailed": 0
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "productionBuild": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 28
+    },
+    "liveDeployment": {
+      "status": "PASS_DEPLOYED_SOURCE_AND_READ_ONLY_PUBLIC_BOUNDARIES",
+      "commitSha": "856f7e65c33aa71d97277c8abca83864fee8ca47",
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-fi88l10w0-seojaehongs-projects.vercel.app",
+      "readOnlyProbes": [
+        {
+          "path": "/api/knowledge/match?question=scaffold&limit=1",
+          "status": 200,
+          "internalErrorDetailExposed": false
+        },
+        {
+          "path": "/api/input-photos/hazard-analysis",
+          "status": 200,
+          "capability": "ready",
+          "internalProviderConfigurationExposed": false
+        },
+        {
+          "path": "/api/workflow/dispatch",
+          "status": 200,
+          "mode": "preview_only",
+          "reason": "persistent_idempotency_unavailable",
+          "providerCalled": false
+        },
+        {
+          "path": "/api/briefing/run",
+          "status": 401,
+          "internalErrorDetailExposed": false
+        }
+      ],
+      "liveFailureInduced": false,
+      "liveFailureInductionReason": "No database, provider, webhook, photo-analysis, or authenticated generation failure was induced in production. Negative failure projection is proven by bounded tests and the deployed source marker."
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "immutableOriginal18FindingBaselinePreserved": true,
+    "sealedCurrentHeadScanPreserved": true,
+    "securityComplete": false,
+    "freshFollowUpSecurityScan": "REQUIRED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedFindingsRemainOpen": true,
+    "liveAfterDeploymentRequired": false
+  }
+}
