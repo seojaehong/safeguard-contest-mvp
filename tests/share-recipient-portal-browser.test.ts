@@ -423,6 +423,7 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
           const notice = document.querySelector<HTMLElement>(".safeclaw-share-recipient-card-notice");
           const taskBody = document.querySelector<HTMLElement>(".safeclaw-share-recipient-task-body");
           const documentsPanel = document.querySelector<HTMLDetailsElement>(".safeclaw-share-recipient-card-documents");
+          const documentsSummary = documentsPanel?.querySelector<HTMLElement>(".safeclaw-share-recipient-documents-summary");
           const previews = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-preview")];
           const documents = [...document.querySelectorAll<HTMLDetailsElement>(".safeclaw-share-recipient-document")];
           const cards = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-card")];
@@ -436,6 +437,9 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
             rootWidthRatio: Number(((rootRect?.width ?? 0) / window.innerWidth).toFixed(2)),
             rootHeight: Math.round(rootRect?.height ?? 0),
             viewportHeight: window.innerHeight,
+            documentsSummaryAffordance: documentsSummary
+              ? window.getComputedStyle(documentsSummary, "::after").content.replaceAll('"', "")
+              : "",
             confirmationBottom: Math.round(confirmButtonRect?.bottom ?? 0),
             confirmationLeft: Math.round(confirmationRect?.left ?? 0),
             confirmationRight: Math.round(confirmationRect?.right ?? 0),
@@ -497,6 +501,7 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
         expect(metrics.taskBodyScrollHeight).toBeGreaterThan(metrics.taskBodyClientHeight);
         expect(metrics.taskBodyClientHeight).toBeLessThanOrEqual(viewport.desktop ? 132 : 112);
         expect(metrics.documentsPanelOpen).toBe(false);
+        expect(metrics.documentsSummaryAffordance).toBe("+");
         expect(metrics.rootHeight).toBeLessThanOrEqual(Math.ceil(metrics.viewportHeight * 1.5));
         if (viewport.desktop) {
           expect(metrics.rootWidth).toBeGreaterThanOrEqual(viewport.minimumRootWidth);
@@ -511,6 +516,9 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
         await expect.poll(() => page.locator(".safeclaw-share-recipient-card-documents").evaluate((item) => (
           item instanceof HTMLDetailsElement && item.open
         ))).toBe(true);
+        await expect.poll(() => page.locator(".safeclaw-share-recipient-documents-summary").evaluate((item) => (
+          window.getComputedStyle(item, "::after").content.replaceAll('"', "")
+        ))).toBe("-");
       } finally {
         await page.close();
       }

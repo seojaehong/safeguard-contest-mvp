@@ -15959,14 +15959,41 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-share-recipient-documents-summary {
   min-height: 44px;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px;
   align-items: center;
+  gap: 12px;
   color: var(--workspace-ink);
   font-size: var(--text-component-title);
   font-weight: 700;
   line-height: var(--leading-component-title);
   letter-spacing: var(--tracking-component-title);
   cursor: pointer;
+  list-style: none;
+}
+
+.safeclaw-share-recipient-documents-summary::-webkit-details-marker {
+  display: none;
+}
+
+.safeclaw-share-recipient-documents-summary::after {
+  content: "+";
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  justify-self: end;
+  border: 1px solid var(--workspace-rule);
+  border-radius: var(--radius-control);
+  background: var(--workspace-surface-2);
+  color: var(--workspace-muted);
+  font-size: var(--text-body);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.safeclaw-share-recipient-card-documents[open] > .safeclaw-share-recipient-documents-summary::after {
+  content: "-";
 }
 
 .safeclaw-share-recipient-document {
