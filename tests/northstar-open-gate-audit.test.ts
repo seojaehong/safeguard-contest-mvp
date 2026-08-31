@@ -63,13 +63,18 @@ type KoshaCurrentGateFixture = {
   };
 };
 
-async function loadAuditModule(): Promise<AuditModule> {
-  const sourcePath = path.resolve("scripts", "northstar_open_gate_audit.mjs");
-  const moduleDir = createTemporaryDirectory("safeclaw-northstar-module-");
-  const modulePath = path.join(moduleDir, "northstar_open_gate_audit.mjs");
-  const source = fs.readFileSync(sourcePath, "utf8").replace(/^#!.*\r?\n/u, "");
-  fs.writeFileSync(modulePath, source, "utf8");
-  return await import(pathToFileURL(modulePath).href) as AuditModule;
+let auditModulePromise: Promise<AuditModule> | null = null;
+
+function loadAuditModule(): Promise<AuditModule> {
+  if (!auditModulePromise) {
+    const sourcePath = path.resolve("scripts", "northstar_open_gate_audit.mjs");
+    const moduleDir = createTemporaryDirectory("safeclaw-northstar-module-");
+    const modulePath = path.join(moduleDir, "northstar_open_gate_audit.mjs");
+    const source = fs.readFileSync(sourcePath, "utf8").replace(/^#!.*\r?\n/u, "");
+    fs.writeFileSync(modulePath, source, "utf8");
+    auditModulePromise = import(pathToFileURL(modulePath).href) as Promise<AuditModule>;
+  }
+  return auditModulePromise;
 }
 
 function writeJson(rootDir: string, relativePath: string, value: unknown): void {
@@ -429,6 +434,59 @@ function currentSourceApprovalFreeSecurityRemediationFixture(): Record<string, u
       llmWikiPublication: "APPROVAL_GATED",
       sifVectorRuntime: "APPROVAL_GATED",
       koshaExactRegistryPromotion: "APPROVAL_GATED",
+    },
+  };
+}
+
+function currentSourcePublicLifetimeRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-current-source-security-public-lifetime-remediation/v1",
+    verdict: "PASS_LIVE_PRODUCTION_PUBLIC_REQUEST_LIFETIME_REMEDIATION_RESCAN_PENDING",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    scan: {
+      scanId: "1e5d68c4-fd86-4df4-bb95-542a9708ffef",
+      findingCount: 19,
+      immutableOriginalFindingCount: 18,
+      immutableOriginalBaselinePreserved: true,
+      sealedScanReclassified: false,
+      freshRescanRequired: true,
+    },
+    findings: [
+      { findingId: "csf_f862edc1756bf16c2655d023" },
+      { findingId: "csf_619758dd4106628fbf7e6b3b" },
+    ],
+    verification: {
+      focusedAndAdjacentTests: { filesPassed: 7, testsPassed: 56, testsFailed: 0 },
+      ontologyBrowser: {
+        testsPassed: 2,
+        validatedLiveTransition: true,
+        malformedPayloadFallback: true,
+      },
+      liveProduction: {
+        buildInfoCommit: "fixture-sha",
+        productCommitIncluded: true,
+        knowledgePrepareUnauthenticatedStatus: 401,
+        knowledgePrepareBodyReadBeforeAuthentication: false,
+        ontologyGraphStatus: 503,
+        ontologyGraphCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+        ontologyGraphProviderOrDbWorkExecuted: false,
+      },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      securityComplete: false,
+      liveAfterDeploymentRequired: false,
+      approvalGatedFindingsRemainOpen: true,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
   };
 }
@@ -1653,7 +1711,10 @@ function createFixtureRoot(): string {
   execFileSync("git", ["config", "gc.auto", "0"], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["config", "maintenance.auto", "false"], { cwd: rootDir, stdio: "ignore" });
   writeText(rootDir, "app/api/knowledge/review/prepare/route.ts", "export const fixture = true;\n");
+  writeText(rootDir, "app/ontology/page.tsx", "export const fixture = true;\n");
+  writeText(rootDir, "app/ontology/OntologyLivePage.tsx", "export const fixture = true;\n");
   writeText(rootDir, "app/knowledge/KnowledgeReviewInbox.tsx", "export const fixture = true;\n");
+  writeText(rootDir, "lib/ontology/schema.ts", "export const fixture = true;\n");
   writeText(rootDir, "lib/api-guard.ts", "export const trustedForwardedIdentity = true;\n");
   writeText(rootDir, "lib/public-distributed-rate-limit.ts", "export const injectedIdentityEnvironment = true;\n");
   writeText(rootDir, "tests/api-guard.test.ts", "export const apiGuardFixture = true;\n");
@@ -5400,6 +5461,11 @@ function createFixtureRoot(): string {
     rootDir,
     path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
     approvalFreeRemediation,
+  );
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-public-lifetime-remediation-2026-09-01", "report.json"),
+    currentSourcePublicLifetimeRemediationFixture(),
   );
   writeJson(
     rootDir,

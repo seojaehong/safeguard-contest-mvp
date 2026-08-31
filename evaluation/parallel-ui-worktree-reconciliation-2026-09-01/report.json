@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "safeclaw-parallel-ui-worktree-reconciliation/v1",
+  "generatedAt": "2026-09-01T07:00:17.3990357+09:00",
+  "authoritativeHead": "d7abe2dd20779f13c5655fb56f044baeeed0b1e8",
+  "verdict": "PASS_READ_ONLY_PARALLEL_UI_RECONCILIATION_NO_SAFE_UNMERGED_WAVE_SELECTED",
+  "worktrees": [
+    {
+      "path": "C:/Users/iceam/OneDrive/.codex-worktrees/safeclaw-docs-share-ia-wave",
+      "branch": "fix/docs-share-viewport-ia",
+      "head": "3fc8ff1276575482caa1fecf99262bbd427597e2",
+      "aheadOfAuthoritative": 0,
+      "behindAuthoritative": 745,
+      "disposition": "already_ancestor_no_unique_change"
+    },
+    {
+      "path": "C:/Users/iceam/dev/safeclaw-document-rail",
+      "branch": "feat/safeclaw-document-rail",
+      "head": "a497c5419fd28f1466725d7cdcea04bf03b2ed5a",
+      "aheadOfAuthoritative": 1,
+      "behindAuthoritative": 2844,
+      "disposition": "stale_base_large_cross_surface_patch_not_selected"
+    },
+    {
+      "path": "C:/Users/iceam/dev/safeclaw-linear-shell",
+      "branch": "feat/safeclaw-linear-shell",
+      "head": "1cd42e3aef6376a124d5bf8c99a93e471f7ec56f",
+      "aheadOfAuthoritative": 1,
+      "behindAuthoritative": 2844,
+      "disposition": "stale_base_large_cross_surface_patch_not_selected"
+    },
+    {
+      "path": "C:/Users/iceam/dev/safeclaw-share-workflow",
+      "branch": "feat/safeclaw-share-workflow",
+      "head": "93fad09338662fb9a65bb3e74e6f14eaea14f44a",
+      "aheadOfAuthoritative": 1,
+      "behindAuthoritative": 2844,
+      "disposition": "stale_base_large_cross_surface_patch_not_selected"
+    },
+    {
+      "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-workspace-viewport-wave7",
+      "branch": "feat/frontend-workspace-viewport-wave7",
+      "head": "7f8aac4684b34e76b32c3f3590b73383225876eb",
+      "aheadOfAuthoritative": 4,
+      "behindAuthoritative": 2577,
+      "dirtyUntrackedReviewDirectory": true,
+      "disposition": "stale_evidence_wave_not_selected"
+    }
+  ],
+  "selectionBoundary": {
+    "wholesaleCssMergePerformed": false,
+    "parallelWorktreeModified": false,
+    "productRuntimeChanged": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  }
+}
