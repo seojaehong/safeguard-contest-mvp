@@ -6,6 +6,8 @@ import path from "node:path";
 import process from "node:process";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
+import { buildApprovalEvidenceBinding, isCommitSha } from "./approval_evidence_binding.mjs";
 
 const SCHEMA_VERSION = "safeclaw-kosha-exact-promotion-review-gate/v1";
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
@@ -145,6 +147,10 @@ function resolveInsideRoot(rootDir, relativePath) {
  */
 function readJson(absolutePath) {
   return JSON.parse(fs.readFileSync(absolutePath, "utf8"));
+}
+
+function sha256File(absolutePath) {
+  return createHash("sha256").update(fs.readFileSync(absolutePath)).digest("hex");
 }
 
 /**
@@ -325,6 +331,38 @@ export function buildKoshaExactPromotionReviewGate(options) {
   const candidateKeySet = new Set(candidates.map(candidateKey).filter(Boolean));
   const failures = [];
   const passed = [];
+  const productionCommit = isRecord(packetRecord.liveBuildInfoAtPacket)
+    ? asString(packetRecord.liveBuildInfoAtPacket.commitSha)
+    : "";
+  const evidenceCommits = [
+    asString(packetRecord.sourceHead),
+    asString(officialPdfAuditRecord.sourceHead),
+    asString(officialLifecycleAuditRecord.sourceHead),
+    asString(reviewerSupportRecord.sourceHead),
+  ];
+  const approvalEvidenceBinding = buildApprovalEvidenceBinding({
+    root: rootDir,
+    inputPaths: [packetPath, officialPdfAuditPath, officialLifecycleAuditPath, reviewerSupportPath],
+    productionCommit,
+    evidenceCommits,
+  });
+  const reviewApprovalEvidence = isRecord(reviewRecord.approvalEvidence)
+    ? reviewRecord.approvalEvidence
+    : null;
+  if (!approvalEvidenceBinding.verified) {
+    failures.push(...approvalEvidenceBinding.failures.map((failure) => `approval-evidence:${failure}`));
+  }
+  if (
+    !reviewApprovalEvidence
+    || asString(reviewApprovalEvidence.sourceHead) !== approvalEvidenceBinding.sourceHead
+    || asString(reviewApprovalEvidence.productionCommit) !== approvalEvidenceBinding.productionCommit
+    || asString(reviewApprovalEvidence.packetDigest) !== approvalEvidenceBinding.packetDigest
+  ) {
+    failures.push("approval-evidence:review-binding-mismatch");
+  }
+  if (!isCommitSha(productionCommit) || evidenceCommits.some((commit) => commit !== evidenceCommits[0])) {
+    failures.push("approval-evidence:mixed-source-or-production-commit");
+  }
 
   if (
     asString(officialPdfAuditRecord.verdict) !== "PASS_OFFICIAL_PDF_AUTHENTICITY_BODY_PAIR_REVIEW_STILL_REQUIRED" ||
@@ -547,6 +585,12 @@ export function buildKoshaExactPromotionReviewGate(options) {
     schemaVersion: SCHEMA_VERSION,
     generatedAt,
     sourceHead: gitHead(rootDir),
+    productionCommit: approvalEvidenceBinding.productionCommit,
+    approvalEvidenceBinding,
+    reviewInput: {
+      path: options.reviewPath,
+      sha256: sha256File(resolveInsideRoot(rootDir, options.reviewPath)),
+    },
     packetPath,
     officialPdfAuditPath,
     officialLifecycleAuditPath,
@@ -636,10 +680,31 @@ export function buildKoshaExactPromotionReviewTemplate(options) {
   ) {
     throw new Error("kosha-review-template-reviewer-support-not-ready");
   }
+  const productionCommit = isRecord(packetRecord.liveBuildInfoAtPacket)
+    ? asString(packetRecord.liveBuildInfoAtPacket.commitSha)
+    : "";
+  const approvalEvidence = buildApprovalEvidenceBinding({
+    root: rootDir,
+    inputPaths: [
+      packetPath,
+      DEFAULT_OFFICIAL_PDF_AUDIT_PATH,
+      DEFAULT_OFFICIAL_LIFECYCLE_AUDIT_PATH,
+      reviewerSupportPath,
+    ],
+    productionCommit,
+    evidenceCommits: [
+      asString(packetRecord.sourceHead),
+      asString(readJson(resolveInsideRoot(rootDir, DEFAULT_OFFICIAL_PDF_AUDIT_PATH)).sourceHead),
+      asString(readJson(resolveInsideRoot(rootDir, DEFAULT_OFFICIAL_LIFECYCLE_AUDIT_PATH)).sourceHead),
+      asString(reviewerSupportRecord.sourceHead),
+    ],
+  });
   return {
     schemaVersion: REVIEW_SCHEMA_VERSION,
     generatedAt: options.generatedAt || new Date().toISOString(),
     sourceHead: gitHead(rootDir),
+    productionCommit: approvalEvidence.productionCommit,
+    approvalEvidence,
     packetPath,
     reviewerSupportPath,
     reviewTemplateOnly: true,

@@ -70,6 +70,7 @@ type ReviewGateReport = {
   };
   failures: string[];
   forbiddenClaims: string[];
+  approvalEvidenceBinding: { verified: boolean; packetDigest: string; failures: string[] };
 };
 
 type ReviewGateModule = {
@@ -93,6 +94,7 @@ type ReviewGateModule = {
     exactPromotionPerformed: boolean;
     machineReviewerSupportIncluded: boolean;
     machineEvidenceReplacesHumanReview: boolean;
+    approvalEvidence: { verified: boolean; sourceHead: string; productionCommit: string; packetDigest: string };
     bodySnapshotId: string;
     bodySourceIdentitySha256: string;
     candidateReviews: Array<{
@@ -145,19 +147,19 @@ type ReviewGateModule = {
 
 async function loadReviewGateModule(): Promise<ReviewGateModule> {
   const sourcePath = path.resolve("scripts", "kosha_exact_promotion_review_gate.mjs");
-  const temporaryPath = path.join(
-    os.tmpdir(),
-    `kosha-review-gate-module-${process.pid}-${Date.now()}.mjs`,
-  );
+  const helperPath = path.resolve("scripts", "approval_evidence_binding.mjs");
+  const temporaryDir = fs.mkdtempSync(path.join(os.tmpdir(), "kosha-review-gate-module-"));
+  const temporaryPath = path.join(temporaryDir, "kosha_exact_promotion_review_gate.mjs");
+  fs.writeFileSync(temporaryPath, fs.readFileSync(sourcePath, "utf8").replaceAll("\r\n", "\n"), "utf8");
   fs.writeFileSync(
-    temporaryPath,
-    fs.readFileSync(sourcePath, "utf8").replaceAll("\r\n", "\n"),
+    path.join(temporaryDir, "approval_evidence_binding.mjs"),
+    fs.readFileSync(helperPath, "utf8").replaceAll("\r\n", "\n"),
     "utf8",
   );
   try {
     return await import(`${pathToFileURL(temporaryPath).href}?v=${Date.now()}`) as ReviewGateModule;
   } finally {
-    fs.rmSync(temporaryPath, { force: true });
+    fs.rmSync(temporaryDir, { recursive: true, force: true });
   }
 }
 
@@ -208,6 +210,8 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
     mutationPerformed: false,
     dbMutationPerformed: false,
     embeddingGenerationPerformed: false,
+    sourceHead: null,
+    liveBuildInfoAtPacket: { commitSha: null },
     candidates,
   });
   writeJson(root, reviewPath, {
@@ -231,6 +235,7 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
     verdict: "PASS_OFFICIAL_PDF_AUTHENTICITY_BODY_PAIR_REVIEW_STILL_REQUIRED",
     exactPromotionPerformed: false,
     separatePromotionApprovalRequired: true,
+    sourceHead: null,
     results: candidates.map((row) => ({
       stableKey: row.stableKey,
       version: row.version,
@@ -252,6 +257,7 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
     titleVariantFindingCount: 0,
     exactPromotionPerformed: false,
     separatePromotionApprovalRequired: true,
+    sourceHead: null,
     reviewChecklistImpact: {
       operatorLifecycleCurrentStatusConfirmed: false,
       humanConfirmationRecorded: false,
@@ -297,6 +303,7 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
     exactPromotionPerformed: false,
     exactRegistryWriteArtifactCreated: false,
     separatePromotionApprovalRequired: true,
+    sourceHead: null,
     results: candidates.map((row) => ({
       stableKey: row.stableKey,
       version: row.version,
@@ -327,6 +334,47 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
       humanConfirmed: false,
     })),
   });
+  execFileSync("git", ["init"], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["config", "user.email", "fixture@example.test"], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["config", "user.name", "Fixture"], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["commit", "-m", "fixture"], { cwd: root, stdio: "ignore" });
+  const productCommit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
+  const packet = JSON.parse(fs.readFileSync(path.join(root, packetPath), "utf8")) as {
+    sourceHead: string | null;
+    liveBuildInfoAtPacket: { commitSha: string | null };
+  };
+  packet.sourceHead = productCommit;
+  packet.liveBuildInfoAtPacket.commitSha = productCommit;
+  writeJson(root, packetPath, packet);
+  for (const relativePath of [
+    "evaluation/kosha-exact-official-pdf-audit-2026-07-25/report.json",
+    "evaluation/kosha-exact-official-lifecycle-audit-2026-07-25/report.json",
+    "evaluation/kosha-exact-promotion-reviewer-support-2026-07-25/report.json",
+  ]) {
+    const report = JSON.parse(fs.readFileSync(path.join(root, relativePath), "utf8")) as { sourceHead: string | null };
+    report.sourceHead = productCommit;
+    writeJson(root, relativePath, report);
+  }
+  execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["commit", "-m", "bind evidence"], { cwd: root, stdio: "ignore" });
+  execFileSync("node", [
+    path.resolve("scripts", "kosha_exact_promotion_review_gate.mjs"),
+    "--root",
+    root,
+    "--packet",
+    packetPath,
+    "--output",
+    "evaluation/generated-review-binding",
+    "--write-template",
+  ], { cwd: process.cwd(), stdio: "ignore" });
+  const generatedTemplate = JSON.parse(fs.readFileSync(
+    path.join(root, "evaluation/generated-review-binding/review-template.json"),
+    "utf8",
+  )) as { approvalEvidence: unknown };
+  const review = JSON.parse(fs.readFileSync(path.join(root, reviewPath), "utf8")) as { approvalEvidence?: unknown };
+  review.approvalEvidence = generatedTemplate.approvalEvidence;
+  writeJson(root, reviewPath, review);
   return { root, packetPath, reviewPath, candidates };
 }
 
@@ -349,6 +397,8 @@ describe("KOSHA exact promotion review gate", () => {
     expect(report.promotionApprovalInputProvided).toBe(false);
     expect(report.reviewCompletionIsPromotionApproval).toBe(false);
     expect(report.exactTrustPromotionApproved).toBe(false);
+    expect(report.approvalEvidenceBinding.verified).toBe(true);
+    expect(report.approvalEvidenceBinding.packetDigest).toMatch(/^[0-9a-f]{64}$/u);
     expect(report.exactRegistryWriteArtifactCreated).toBe(false);
     expect(report.completedReviewCreatesRegistryArtifact).toBe(false);
     expect(report.exactRegistryWriteArtifactPath).toBeNull();
@@ -455,6 +505,22 @@ describe("KOSHA exact promotion review gate", () => {
     expect(() => module.buildKoshaExactPromotionReviewTemplate({ rootDir: root, packetPath })).toThrow(
       "kosha-review-template-reviewer-support-candidate-not-ready:D-C-10",
     );
+  });
+
+  it("fails closed when the human review is bound to a different evidence digest", async () => {
+    const { root, packetPath, reviewPath } = writeFixtureRoot();
+    const review = JSON.parse(fs.readFileSync(path.join(root, reviewPath), "utf8")) as {
+      approvalEvidence: { packetDigest: string };
+    };
+    review.approvalEvidence.packetDigest = "0".repeat(64);
+    writeJson(root, reviewPath, review);
+    const module = await loadReviewGateModule();
+    const report = module.buildKoshaExactPromotionReviewGate({ rootDir: root, packetPath, reviewPath });
+
+    expect(report.verdict).toBe("REVIEW_CHECKLIST_INCOMPLETE_BLOCKED");
+    expect(report.reviewChecklistComplete).toBe(false);
+    expect(report.failures).toContain("approval-evidence:review-binding-mismatch");
+    expect(report.exactPromotionPerformed).toBe(false);
   });
 
   it("fails closed when reviewer support omits a page receipt", async () => {
@@ -821,6 +887,8 @@ describe("KOSHA exact promotion review gate", () => {
     expect(template.exactPromotionPerformed).toBe(false);
     expect(template.machineReviewerSupportIncluded).toBe(true);
     expect(template.machineEvidenceReplacesHumanReview).toBe(false);
+    expect(template.approvalEvidence.verified).toBe(true);
+    expect(template.approvalEvidence.packetDigest).toMatch(/^[0-9a-f]{64}$/u);
     expect(template.bodySnapshotId).toBe("fixture-snapshot");
     expect(template.bodySourceIdentitySha256).toBe("c".repeat(64));
     expect(template.candidateReviews).toHaveLength(2);

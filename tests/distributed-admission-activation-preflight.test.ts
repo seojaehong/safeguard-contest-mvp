@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 
 type ActivationReport = {
   activationPerformed: boolean;
+  approvalEvidenceBinding: { verified: boolean; packetDigest: string; artifacts: Array<{ path: string; sha256: string }> };
   configurationChangeApproved: boolean;
   ephemeralRedisMutationPerformed: boolean;
   failedCheckIds: string[];
@@ -79,6 +80,8 @@ function createFixtureRoot(): string {
       koshaRegistryMutationPerformed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     },
+    sourceHead: null,
+    productionBuild: { commitSha: null },
   });
   writeJson(root, "evaluation/launch-operations-readiness-2026-08-26/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_LAUNCH_OPERATIONS_CONFIGURATION_TRUTH",
@@ -110,6 +113,14 @@ function createFixtureRoot(): string {
   execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
   execFileSync("git", ["commit", "-m", "fixture"], { cwd: root, stdio: "ignore" });
   const sourceSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
+  const readinessPath = join(root, "evaluation/public-search-distributed-rate-limit-readiness-2026-08-02/report.json");
+  const readiness = JSON.parse(readFileSync(readinessPath, "utf8")) as {
+    sourceHead: string | null;
+    productionBuild: { commitSha: string | null };
+  };
+  readiness.sourceHead = sourceSha;
+  readiness.productionBuild.commitSha = sourceSha;
+  writeFileSync(readinessPath, `${JSON.stringify(readiness, null, 2)}\n`, "utf8");
   const operationsPath = join(root, "evaluation/launch-operations-readiness-2026-08-26/report.json");
   const operations = JSON.parse(readFileSync(operationsPath, "utf8")) as {
     sourceHead: string | null;
@@ -120,6 +131,8 @@ function createFixtureRoot(): string {
   operations.productCommit = sourceSha;
   operations.productionBuild.commitSha = sourceSha;
   writeFileSync(operationsPath, `${JSON.stringify(operations, null, 2)}\n`, "utf8");
+  execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["commit", "-m", "bind evidence"], { cwd: root, stdio: "ignore" });
   return root;
 }
 
@@ -143,6 +156,9 @@ describe("distributed admission activation approval preflight", () => {
     expect(report.requestedChange.remoteHermesLedgerModeChangeRequested).toBe(false);
     expect(report.sharedCredentialBoundary.remoteHermesLedgerEnabledByThisChange).toBe(false);
     expect(report.sourceMatchesProduction).toBe(true);
+    expect(report.approvalEvidenceBinding.verified).toBe(true);
+    expect(report.approvalEvidenceBinding.packetDigest).toMatch(/^[0-9a-f]{64}$/u);
+    expect(report.approvalEvidenceBinding.artifacts).toHaveLength(4);
     expect(report.mutationBoundary.exactSavedShareVerdict).toBe("MISSING_EVIDENCE");
     expect(report.failedCheckIds).toEqual([]);
   });
@@ -185,6 +201,17 @@ describe("distributed admission activation approval preflight", () => {
 
     const report = buildDistributedAdmissionActivationPreflight({ root });
     expect(report.failedCheckIds).toContain("launch_operations_evidence_matches_current_head");
+  });
+
+  it("fails closed when a required input differs from the current HEAD", async () => {
+    const { buildDistributedAdmissionActivationPreflight } = await loadModule();
+    const root = createFixtureRoot();
+    write(root, "lib/remote-hermes-upstash-ledger.ts", "SAFEGUARD_REMOTE_HERMES_LEDGER_MODE?.trim() !== \"upstash\"\nsafeclaw:remote-hermes:v1\nchanged\n");
+
+    const report = buildDistributedAdmissionActivationPreflight({ root });
+    expect(report.overall).toBe("blocked_preflight_failed");
+    expect(report.failedCheckIds).toContain("approval_inputs_match_current_head_and_digest_binding");
+    expect(report.approvalEvidenceBinding.verified).toBe(false);
   });
 
   it("renders the approval, behavioral-probe, rollback, and exact Share boundaries", async () => {

@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { execFileSync } from "node:child_process";
+import { buildApprovalEvidenceBinding, isCommitSha } from "./approval_evidence_binding.mjs";
 
 const DEFAULT_OUTPUT_DIR = "evaluation/share-recipient-ack-approval-preflight-current-2026-07-19";
 
@@ -93,6 +94,15 @@ export function buildShareRecipientAckApprovalPreflight({ root }) {
   const managerRoute = readText(root, REQUIRED_FILES.managerShareRoute);
   const authorityTest = readText(root, REQUIRED_FILES.authorityRouteTest);
   const browserTest = readText(root, REQUIRED_FILES.recipientBrowserTest);
+  const shareProductionCommit = currentShareGate.liveBuildInfo?.commitSha;
+  const routeLoopSourceHead = routeLoopGate.baseSourceHead;
+  const currentStateProductionCommit = currentState.productionBuildInfo?.commitSha;
+  const approvalEvidenceBinding = buildApprovalEvidenceBinding({
+    root,
+    inputPaths: Object.values(REQUIRED_FILES),
+    productionCommit: shareProductionCommit,
+    evidenceCommits: [shareProductionCommit, routeLoopSourceHead, currentStateProductionCommit],
+  });
 
   const checks = [
     check(
@@ -165,6 +175,24 @@ export function buildShareRecipientAckApprovalPreflight({ root }) {
         "languageCode: \"vi\""
       ]),
       "Browser test must cover the mobile foreign-worker confirmation surface."
+    ),
+    check(
+      "share_evidence_uses_one_production_commit",
+      isCommitSha(shareProductionCommit)
+        && shareProductionCommit === routeLoopSourceHead
+        && shareProductionCommit === currentStateProductionCommit,
+      "Share surface, route-loop, and current-state evidence must describe one production commit."
+    ),
+    check(
+      "approval_inputs_match_current_head_and_digest_binding",
+      approvalEvidenceBinding.verified,
+      `Every approval input must be tracked at current HEAD and bound by SHA-256 (${approvalEvidenceBinding.failures.join(", ") || "binding failed"}).`
+    ),
+    check(
+      "exact_saved_share_remains_missing_evidence",
+      currentState.exactSavedShareVerdict === "MISSING_EVIDENCE"
+        || currentState.approvalGatedOrIncompleteGates?.exactSavedShare?.state === "MISSING_EVIDENCE",
+      "Exact saved Share must remain MISSING_EVIDENCE in the approval packet."
     )
   ];
 
@@ -173,6 +201,9 @@ export function buildShareRecipientAckApprovalPreflight({ root }) {
     schemaVersion: "safeclaw-share-recipient-ack-approval-preflight/v1",
     generatedAt: new Date().toISOString(),
     sourceSha: currentHead(root),
+    productionCommit: isCommitSha(shareProductionCommit) ? shareProductionCommit : null,
+    exactSavedShareVerdict: "MISSING_EVIDENCE",
+    approvalEvidenceBinding,
     overall: failedChecks.length === 0 ? "approval_ready_open" : "blocked_preflight_failed",
     approvalRequired: true,
     liveDataMutationApproved: false,
@@ -257,6 +288,7 @@ async function main() {
   const report = buildShareRecipientAckApprovalPreflight({ root });
   writeReports(output, report);
   process.stdout.write(`${JSON.stringify({ output, overall: report.overall, failedCheckIds: report.failedCheckIds }, null, 2)}\n`);
+  if (report.overall !== "approval_ready_open") process.exitCode = 1;
 }
 
 if (process.argv[1]?.endsWith("share_recipient_ack_approval_preflight.mjs")) {

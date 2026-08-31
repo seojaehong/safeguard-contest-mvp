@@ -72,9 +72,9 @@ function fixtureRoot(): string {
   writeText(root, "app/api/knowledge/review/route.ts", 'export const boundary = { publicationState: "unpublished", ontologyPublished: false };\n');
   writeJson(root, "evaluation/hermes-knowledge-review-selected-workbench-2026-08-14/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
-    sourceHead: "1111111111111111111111111111111111111111",
-    productCommit: "2222222222222222222222222222222222222222",
-    productionCommit: "3333333333333333333333333333333333333333",
+    sourceHead: null,
+    productCommit: null,
+    productionCommit: null,
     afterLive: {
       verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI",
       viewportCount: 8,
@@ -111,9 +111,9 @@ function fixtureRoot(): string {
   });
   writeJson(root, "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/report.json", {
     verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
-    sourceHead: "4444444444444444444444444444444444444444",
-    productCommit: "5555555555555555555555555555555555555555",
-    productionCommit: "6666666666666666666666666666666666666666",
+    sourceHead: null,
+    productCommit: null,
+    productionCommit: null,
     liveAfterDeploymentRequired: false,
     afterLive: {
       verdict: "PASS_LIVE_PRODUCTION_HERMES_REVIEW_EVIDENCE_INSPECTOR",
@@ -166,6 +166,24 @@ function fixtureRoot(): string {
   writeText(root, "supabase/migrations/008_safety_ontology.sql", "create table safety_ontology_nodes(id text primary key);\n");
   execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
   execFileSync("git", ["commit", "-m", "fixture"], { cwd: root, stdio: "ignore" });
+  const productCommit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
+  for (const relativePath of [
+    "evaluation/hermes-knowledge-review-selected-workbench-2026-08-14/report.json",
+    "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/report.json",
+  ]) {
+    const absolutePath = join(root, relativePath);
+    const report = JSON.parse(readFileSync(absolutePath, "utf8")) as {
+      sourceHead: string | null;
+      productCommit: string | null;
+      productionCommit: string | null;
+    };
+    report.sourceHead = productCommit;
+    report.productCommit = productCommit;
+    report.productionCommit = productCommit;
+    writeFileSync(absolutePath, `${JSON.stringify(report, null, 2)}\n`);
+  }
+  execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["commit", "-m", "bind evidence"], { cwd: root, stdio: "ignore" });
   return root;
 }
 
@@ -238,6 +256,10 @@ describe("RLS / LLM Wiki approval preflight", () => {
         sha256: expect.stringMatching(/^[0-9a-f]{64}$/u),
       }),
     ]));
+    expect(report.approvalEvidenceBinding).toMatchObject({
+      verified: true,
+      packetDigest: expect.stringMatching(/^[0-9a-f]{64}$/u),
+    });
     expect(JSON.stringify(report)).toContain("publication_ddl_rpc");
     expect(report.publicationSurfaceInventory).toMatchObject({
       publicationRpcCallHits: [],
@@ -308,7 +330,10 @@ describe("RLS / LLM Wiki approval preflight", () => {
     const typedReport = report as {
       readonly failedCheckIds: readonly string[];
     };
-    expect(typedReport.failedCheckIds).toEqual(["wiki_sql_design_non_executable"]);
+    expect(typedReport.failedCheckIds).toEqual(expect.arrayContaining([
+      "wiki_sql_design_non_executable",
+      "approval_inputs_match_current_head_and_digest_binding",
+    ]));
   });
 
   it("fails closed when an executable wiki publication RPC migration appears", () => {
@@ -367,6 +392,22 @@ describe("RLS / LLM Wiki approval preflight", () => {
     };
     expect(typedReport.failedCheckIds).toContain("knowledge_candidate_prompt_authority_separation");
     expect(typedReport.failedCheckIds).not.toContain("knowledge_candidate_route_non_publishing");
+  });
+
+  it("fails closed when Hermes evidence mixes source and production commits", () => {
+    const root = fixtureRoot();
+    const reportPath = join(root, "evaluation/hermes-knowledge-review-evidence-inspector-2026-08-14/report.json");
+    const evidence = JSON.parse(readFileSync(reportPath, "utf8")) as { productionCommit: string };
+    evidence.productionCommit = "f".repeat(40);
+    writeFileSync(reportPath, `${JSON.stringify(evidence, null, 2)}\n`);
+
+    const { report, status } = runPreflight(root);
+    expect(status).toBe(1);
+    expect(report.overall).toBe("blocked_preflight_failed");
+    expect(report.failedCheckIds).toEqual(expect.arrayContaining([
+      "hermes_evidence_uses_one_source_live_commit",
+      "approval_inputs_match_current_head_and_digest_binding",
+    ]));
   });
 
   it("fails closed when Hermes reviewer evidence claims publication or RLS completion", () => {
@@ -434,6 +475,8 @@ describe("RLS / LLM Wiki approval preflight", () => {
         { id: "llm_wiki_publication", state: "approval_gated" },
       ],
     });
+    execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
+    execFileSync("git", ["commit", "-m", "prefer current northstar"], { cwd: root, stdio: "ignore" });
 
     const { report, status } = runPreflight(root);
 

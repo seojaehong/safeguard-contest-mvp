@@ -1,6 +1,7 @@
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 
 type ShareRecipientAckApprovalPreflightReport = {
@@ -13,6 +14,8 @@ type ShareRecipientAckApprovalPreflightReport = {
   productionReadConfirmationInserted: boolean;
   failedCheckIds: string[];
   forbiddenBeforeApproval: string[];
+  exactSavedShareVerdict: string;
+  approvalEvidenceBinding: { verified: boolean; packetDigest: string; artifacts: Array<{ path: string }> };
 };
 
 type ShareRecipientAckApprovalPreflightModule = {
@@ -43,7 +46,8 @@ function createFixtureRoot(): string {
     verdict: "pass_current_production_mapped_share_recipient_surface",
     dbSchemaChanged: false,
     supabaseDataChanged: false,
-    providerMessageSent: false
+    providerMessageSent: false,
+    liveBuildInfo: { commitSha: null }
   });
   writeJson(root, "evaluation/share-recipient-route-loop-gate-2026-07-19/report.json", {
     verdict: "pass_non_mutating_route_level_invited_recipient_loop",
@@ -51,14 +55,18 @@ function createFixtureRoot(): string {
       managerStatusReadsBackConfirmation: true,
       productionMutationPerformed: false,
       providerMessageSent: false
-    }
+    },
+    baseSourceHead: null
   });
   writeJson(root, "evaluation/north-star-current-state-2026-07-19/report.json", {
     approvalGatedOrIncompleteGates: {
       realProductionInvitedAck: {
         state: "requires_explicit_live_data_approval"
-      }
-    }
+      },
+      exactSavedShare: { state: "MISSING_EVIDENCE" }
+    },
+    productionBuildInfo: { commitSha: null },
+    exactSavedShareVerdict: "MISSING_EVIDENCE"
   });
   writeText(root, "app/api/share-sessions/[sessionId]/route.ts", [
     "createSupabaseAdminClient",
@@ -88,6 +96,26 @@ function createFixtureRoot(): string {
     "confirmationBody",
     "languageCode: \"vi\""
   ].join("\n"));
+  execFileSync("git", ["init"], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["config", "user.email", "fixture@example.test"], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["config", "user.name", "Fixture"], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["commit", "-m", "fixture"], { cwd: root, stdio: "ignore" });
+  const productCommit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
+  const sharePath = join(root, "evaluation/share-recipient-live-current-2026-07-19/report.json");
+  const share = JSON.parse(readFileSync(sharePath, "utf8")) as { liveBuildInfo: { commitSha: string | null } };
+  share.liveBuildInfo.commitSha = productCommit;
+  writeFileSync(sharePath, `${JSON.stringify(share, null, 2)}\n`, "utf8");
+  const loopPath = join(root, "evaluation/share-recipient-route-loop-gate-2026-07-19/report.json");
+  const loop = JSON.parse(readFileSync(loopPath, "utf8")) as { baseSourceHead: string | null };
+  loop.baseSourceHead = productCommit;
+  writeFileSync(loopPath, `${JSON.stringify(loop, null, 2)}\n`, "utf8");
+  const statePath = join(root, "evaluation/north-star-current-state-2026-07-19/report.json");
+  const state = JSON.parse(readFileSync(statePath, "utf8")) as { productionBuildInfo: { commitSha: string | null } };
+  state.productionBuildInfo.commitSha = productCommit;
+  writeFileSync(statePath, `${JSON.stringify(state, null, 2)}\n`, "utf8");
+  execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
+  execFileSync("git", ["commit", "-m", "bind evidence"], { cwd: root, stdio: "ignore" });
   return root;
 }
 
@@ -104,6 +132,9 @@ describe("share recipient ACK approval preflight", () => {
     expect(report.productionShareSessionCreated).toBe(false);
     expect(report.productionReadConfirmationInserted).toBe(false);
     expect(report.failedCheckIds).toEqual([]);
+    expect(report.exactSavedShareVerdict).toBe("MISSING_EVIDENCE");
+    expect(report.approvalEvidenceBinding.verified).toBe(true);
+    expect(report.approvalEvidenceBinding.packetDigest).toMatch(/^[0-9a-f]{64}$/u);
     expect(report.forbiddenBeforeApproval).toContain("Insert production workpack_read_confirmations rows.");
   });
 
@@ -150,5 +181,15 @@ describe("share recipient ACK approval preflight", () => {
     expect(markdown).toContain("real production invited-recipient ACK canary still requires explicit live-data approval");
     expect(markdown).toContain("Create production workpack_share_sessions rows.");
     expect(markdown).toContain("Insert production workpack_read_confirmations rows.");
+  });
+
+  it("fails closed when a required input differs from current HEAD", async () => {
+    const { buildShareRecipientAckApprovalPreflight } = await loadPreflightModule();
+    const root = createFixtureRoot();
+    writeText(root, "tests/share-recipient-portal-browser.test.ts", "changed after binding\n");
+
+    const report = buildShareRecipientAckApprovalPreflight({ root });
+    expect(report.overall).toBe("blocked_preflight_failed");
+    expect(report.failedCheckIds).toContain("approval_inputs_match_current_head_and_digest_binding");
   });
 });

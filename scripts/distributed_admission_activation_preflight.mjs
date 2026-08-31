@@ -3,6 +3,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { buildApprovalEvidenceBinding, isCommitAncestor, isCommitSha } from "./approval_evidence_binding.mjs";
 
 const DEFAULT_OUTPUT_DIR = "evaluation/distributed-admission-activation-approval-2026-08-29";
 const REQUIRED_FILES = Object.freeze({
@@ -100,6 +101,23 @@ export function buildDistributedAdmissionActivationPreflight({ root }) {
   const operationBoundaries = operations.boundaries ?? {};
   const readinessBoundary = readiness.boundary ?? {};
   const operationRows = Array.isArray(operations.rows) ? operations.rows : [];
+  const readinessSourceHead = readiness.sourceHead;
+  const readinessProductionCommit = readiness.productionBuild?.commitSha;
+  const operationsSourceHead = operations.sourceHead;
+  const operationsProductCommit = operations.productCommit;
+  const operationsProductionCommit = operations.productionBuild?.commitSha;
+  const approvalEvidenceBinding = buildApprovalEvidenceBinding({
+    root,
+    inputPaths: Object.values(REQUIRED_FILES),
+    productionCommit: operationsProductionCommit,
+    evidenceCommits: [
+      readinessSourceHead,
+      readinessProductionCommit,
+      operationsSourceHead,
+      operationsProductCommit,
+      operationsProductionCommit,
+    ],
+  });
 
   const checks = [
     check(
@@ -159,15 +177,28 @@ export function buildDistributedAdmissionActivationPreflight({ root }) {
     check(
       "launch_operations_evidence_matches_current_head",
       sourceSha !== null
-        && operations.sourceHead === sourceSha
-        && operations.productCommit === sourceSha
-        && operations.productionBuild?.commitSha === sourceSha
+        && isCommitSha(operationsSourceHead)
+        && operationsSourceHead === operationsProductCommit
+        && operationsSourceHead === operationsProductionCommit
+        && isCommitAncestor(root, operationsSourceHead, sourceSha)
         && operationRows.length === 4
         && operationRows.every((row) => row.ok === true
           && row.publicAdmission === "unavailable"
           && row.publicAdmissionConfiguration === "absent"
           && row.providerDispatch === "preview_only"),
-      "The approval packet must be bound to the current source/live commit and all four current operations viewports.",
+      "The operations evidence must use one valid source/live tuple that is an ancestor of current HEAD and cover all four current viewports.",
+    ),
+    check(
+      "readiness_and_operations_evidence_share_one_live_commit",
+      isCommitSha(readinessSourceHead)
+        && readinessSourceHead === readinessProductionCommit
+        && readinessProductionCommit === operationsProductionCommit,
+      "Distributed readiness and launch operations evidence must describe the same production commit.",
+    ),
+    check(
+      "approval_inputs_match_current_head_and_digest_binding",
+      approvalEvidenceBinding.verified,
+      `Every approval input must be tracked at current HEAD and bound by SHA-256 (${approvalEvidenceBinding.failures.join(", ") || "binding failed"}).`,
     ),
     check(
       "no_mutation_or_security_completion_overclaim",
@@ -195,7 +226,10 @@ export function buildDistributedAdmissionActivationPreflight({ root }) {
     productionCommit: typeof operations.productionBuild?.commitSha === "string"
       ? operations.productionBuild.commitSha
       : null,
-    sourceMatchesProduction: sourceSha !== null && operations.productionBuild?.commitSha === sourceSha,
+    sourceMatchesProduction: sourceSha !== null
+      && operationsSourceHead === operationsProductionCommit
+      && isCommitAncestor(root, operationsProductionCommit, sourceSha),
+    approvalEvidenceBinding,
     verdict: ready
       ? "APPROVAL_REQUIRED_DISTRIBUTED_ADMISSION_ACTIVATION_NO_MUTATION"
       : "BLOCKED_DISTRIBUTED_ADMISSION_ACTIVATION_PREFLIGHT_FAILED",
@@ -333,6 +367,7 @@ async function main() {
   const report = buildDistributedAdmissionActivationPreflight({ root });
   writeReports(output, report);
   process.stdout.write(`${JSON.stringify({ output, verdict: report.verdict, failedCheckIds: report.failedCheckIds }, null, 2)}\n`);
+  if (report.overall !== "approval_ready_open") process.exitCode = 1;
 }
 
 if (process.argv[1]?.endsWith("distributed_admission_activation_preflight.mjs")) {

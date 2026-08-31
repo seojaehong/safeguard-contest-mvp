@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
+import { buildApprovalEvidenceBinding, isCommitSha } from "./approval_evidence_binding.mjs";
 
 const DEFAULT_OUTPUT_DIR = "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20";
 
@@ -227,6 +228,22 @@ function buildPreflight({ root }) {
   const inspectorMutation = hermesReviewEvidenceInspector.mutationBoundary ?? {};
   const inspectorSecurity = hermesReviewEvidenceInspector.securityBoundary ?? {};
   const inspectorBoundaries = hermesReviewEvidenceInspector.remainingBoundaries ?? {};
+  const hermesCommits = [
+    hermesReviewAuthorityUi.sourceHead,
+    hermesReviewAuthorityUi.productCommit,
+    hermesReviewAuthorityUi.productionCommit,
+    hermesReviewEvidenceInspector.sourceHead,
+    hermesReviewEvidenceInspector.productCommit,
+    hermesReviewEvidenceInspector.productionCommit,
+  ];
+  const hermesProductionCommit = hermesReviewAuthorityUi.productionCommit;
+  const inputPaths = [...Object.values(REQUIRED_FILES), northstarReportPath];
+  const approvalEvidenceBinding = buildApprovalEvidenceBinding({
+    root,
+    inputPaths,
+    productionCommit: hermesProductionCommit,
+    evidenceCommits: hermesCommits,
+  });
 
   const checks = [
     check("rls_status_approval_required", rlsReport.status === "approval_required", "Supabase RLS packet must stay approval_required."),
@@ -412,6 +429,17 @@ function buildPreflight({ root }) {
     ),
     check("northstar_rls_gate_approval_gated", gateState(northstarReport, "supabase_rls_launch_isolation") === "approval_gated", "North Star RLS gate must remain approval_gated."),
     check("northstar_wiki_gate_approval_gated", gateState(northstarReport, "llm_wiki_publication") === "approval_gated", "North Star LLM Wiki gate must remain approval_gated."),
+    check(
+      "hermes_evidence_uses_one_source_live_commit",
+      isCommitSha(hermesProductionCommit)
+        && hermesCommits.every((commit) => commit === hermesProductionCommit),
+      "Hermes authority and evidence-inspector reports must use one source/product/production commit.",
+    ),
+    check(
+      "approval_inputs_match_current_head_and_digest_binding",
+      approvalEvidenceBinding.verified,
+      `Every approval input must be tracked at current HEAD and bound by SHA-256 (${approvalEvidenceBinding.failures.join(", ") || "binding failed"}).`,
+    ),
   ];
 
   const failedChecks = checks.filter((item) => !item.passed);
@@ -447,6 +475,7 @@ function buildPreflight({ root }) {
     ],
     inputs,
     artifactIntegrity: artifactIntegrityRows,
+    approvalEvidenceBinding,
     hermesReviewAuthorityUi: {
       verdict: hermesReviewAuthorityUi.verdict ?? null,
       sourceHead: hermesReviewAuthorityUi.sourceHead ?? null,
