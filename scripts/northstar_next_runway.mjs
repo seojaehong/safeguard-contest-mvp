@@ -59,6 +59,7 @@ const ARTIFACTS = Object.freeze({
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
   currentSourceOntologyErrorProjectionRemediation: path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
   currentSourcePhotoReadinessAuthFanoutRemediation: path.join("evaluation", "current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31", "report.json"),
+  currentSourceMcpGenerationCancellationRemediation: path.join("evaluation", "current-source-security-mcp-generation-cancellation-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
@@ -2546,6 +2547,35 @@ function currentSourcePhotoReadinessAuthFanoutRemediationSummary(report) {
 }
 
 /** @param {unknown} report */
+function currentSourceMcpGenerationCancellationRemediationSummary(report) {
+  if (!isRecord(report)) return {};
+  const finding = isRecord(report.finding) ? report.finding : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedTests) ? verification.focusedTests : {};
+  const adjacent = isRecord(verification.adjacentTests) ? verification.adjacentTests : {};
+  const build = isRecord(verification.productionBuild) ? verification.productionBuild : {};
+  const live = isRecord(verification.liveDeployment) ? verification.liveDeployment : {};
+  const boundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    sourceHead: asString(report.sourceHead),
+    productionCommit: asString(report.productionCommit),
+    findingId: asString(finding.findingId),
+    focusedTestsPassed: typeof focused.testsPassed === "number" ? focused.testsPassed : null,
+    adjacentTestsPassed: typeof adjacent.testsPassed === "number" ? adjacent.testsPassed : null,
+    buildStatus: asString(build.status),
+    plainSignalForwarded: asBoolean(remediation.plainGenerationTransportSignalForwarded),
+    reviewedSignalForwarded: asBoolean(remediation.reviewedGenerationTransportSignalForwarded),
+    persistenceSkippedAfterAbort: asBoolean(remediation.persistenceSkippedAfterAbort),
+    authenticatedRuntimeProbeExecuted: asBoolean(live.authenticatedMcpCancellationProbeExecuted),
+    freshRescanRequired: asBoolean(finding.freshRescanRequired),
+    securityComplete: asBoolean(boundaries.securityComplete),
+    exactSavedShareVerdict: asString(boundaries.exactSavedShareVerdict),
+  };
+}
+
+/** @param {unknown} report */
 function currentSourceSecurityRemediationFollowupSummary(report) {
   if (!isRecord(report)) return {};
   const baseline = isRecord(report.baseline) ? report.baseline : {};
@@ -3725,6 +3755,10 @@ export function buildNorthstarNextRunway(options) {
     options.rootDir,
     ARTIFACTS.currentSourcePhotoReadinessAuthFanoutRemediation,
   );
+  const currentSourceMcpGenerationCancellationRemediation = readOptionalJson(
+    options.rootDir,
+    ARTIFACTS.currentSourceMcpGenerationCancellationRemediation,
+  );
   const currentSourceSecurityRemediationFollowup = readOptionalJson(
     options.rootDir,
     ARTIFACTS.currentSourceSecurityRemediationFollowup,
@@ -3899,6 +3933,9 @@ export function buildNorthstarNextRunway(options) {
   );
   const currentSourcePhotoReadinessAuthFanoutRemediationResult = currentSourcePhotoReadinessAuthFanoutRemediationSummary(
     currentSourcePhotoReadinessAuthFanoutRemediation,
+  );
+  const currentSourceMcpGenerationCancellationRemediationResult = currentSourceMcpGenerationCancellationRemediationSummary(
+    currentSourceMcpGenerationCancellationRemediation,
   );
   const currentSourceSecurityRemediationFollowupResult = currentSourceSecurityRemediationFollowupSummary(
     currentSourceSecurityRemediationFollowup,
@@ -4110,6 +4147,11 @@ export function buildNorthstarNextRunway(options) {
         reason: `live source keeps public photo readiness GET auth-free and coarse: Supabase client=${currentSourcePhotoReadinessAuthFanoutRemediationResult.publicGetCreatesSupabaseAdminClient === true}, auth lookup=${currentSourcePhotoReadinessAuthFanoutRemediationResult.publicGetCallsSupabaseAuthentication === true}, live anonymous/Bearer bodies equal=${currentSourcePhotoReadinessAuthFanoutRemediationResult.responseBodiesEqual === true}, diagnostics exposed=${currentSourcePhotoReadinessAuthFanoutRemediationResult.providerDiagnosticsExposed === true}; ${currentSourcePhotoReadinessAuthFanoutRemediationResult.testsPassed ?? "unknown"} tests and build=${currentSourcePhotoReadinessAuthFanoutRemediationResult.buildStatus || "missing"}. The sealed finding remains fresh-rescan pending=${currentSourcePhotoReadinessAuthFanoutRemediationResult.freshRescanRequired === true}, security-complete=${currentSourcePhotoReadinessAuthFanoutRemediationResult.securityComplete === true}, and exact saved Share remains ${currentSourcePhotoReadinessAuthFanoutRemediationResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
       },
       {
+        gate: "current_source_mcp_generation_cancellation_remediation",
+        state: "notice",
+        reason: `live source threads MCP cancellation through plain/reviewed registration, ontology fetches, runAsk, and QA with persistence skipped=${currentSourceMcpGenerationCancellationRemediationResult.persistenceSkippedAfterAbort === true}; focused/adjacent tests ${currentSourceMcpGenerationCancellationRemediationResult.focusedTestsPassed ?? "unknown"}/${currentSourceMcpGenerationCancellationRemediationResult.adjacentTestsPassed ?? "unknown"}, build=${currentSourceMcpGenerationCancellationRemediationResult.buildStatus || "missing"}. Valid authenticated runtime cancellation probe executed=${currentSourceMcpGenerationCancellationRemediationResult.authenticatedRuntimeProbeExecuted === true}; sealed finding fresh-rescan pending=${currentSourceMcpGenerationCancellationRemediationResult.freshRescanRequired === true}, security-complete=${currentSourceMcpGenerationCancellationRemediationResult.securityComplete === true}, and exact saved Share remains ${currentSourceMcpGenerationCancellationRemediationResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+      },
+      {
         gate: "current_source_security_remediation_followup",
         state: "notice",
         reason: `live product ${currentSourceSecurityRemediationFollowupResult.productionCommit?.slice(0, 8) || "missing"} includes ${currentSourceSecurityRemediationFollowupResult.remediationCount ?? "unknown"} bounded approval-free remediation receipts and KOSHA official PDF verification ${currentSourceSecurityRemediationFollowupResult.koshaMachineVerifiedCount ?? "unknown"}/${currentSourceSecurityRemediationFollowupResult.koshaCandidateCount ?? "unknown"}; the immutable ${currentSourceSecurityRemediationFollowupResult.baselineFindingCount ?? "unknown"}-finding ${currentSourceSecurityRemediationFollowupResult.baselineCoverage || "unknown"}-coverage baseline remains visible, post-fix full scan is ${currentSourceSecurityRemediationFollowupResult.postFixFullRepositoryScan || "PENDING_DESKTOP_SECURITY_SCAN"}, public-catalog RLS is ${currentSourceSecurityRemediationFollowupResult.publicCatalogRls || "APPROVAL_GATED"}, and exact saved Share remains ${currentSourceSecurityRemediationFollowupResult.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
@@ -4306,6 +4348,7 @@ export function buildNorthstarNextRunway(options) {
     currentSourceLogoutStorageRemediation: currentSourceLogoutStorageRemediationResult,
     currentSourceOntologyErrorProjectionRemediation: currentSourceOntologyErrorProjectionRemediationResult,
     currentSourcePhotoReadinessAuthFanoutRemediation: currentSourcePhotoReadinessAuthFanoutRemediationResult,
+    currentSourceMcpGenerationCancellationRemediation: currentSourceMcpGenerationCancellationRemediationResult,
     currentSourceSecurityRemediationFollowup: currentSourceSecurityRemediationFollowupResult,
     currentSecurityGovernedPathCompatibility: currentSecurityGovernedPathCompatibilityResult,
     currentSourceSecurityResidualRemediation: currentSourceSecurityResidualRemediationResult,
@@ -4495,6 +4538,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - Current-source logout storage remediation is \`${report.currentSourceLogoutStorageRemediation.verdict || "missing"}\`: source/live \`${report.currentSourceLogoutStorageRemediation.sourceHead || "missing"}/${report.currentSourceLogoutStorageRemediation.productionCommit || "missing"}\`, exact keys/prefixes/preferences \`${report.currentSourceLogoutStorageRemediation.exactKeyCount ?? "unknown"}/${report.currentSourceLogoutStorageRemediation.clearedPrefixCount ?? "unknown"}/${report.currentSourceLogoutStorageRemediation.preservedPreferenceCount ?? "unknown"}\`, tests \`${report.currentSourceLogoutStorageRemediation.testsPassed ?? "unknown"}\`, build \`${report.currentSourceLogoutStorageRemediation.buildStatus || "missing"}\`, and static violations \`${report.currentSourceLogoutStorageRemediation.staticViolationCount ?? "unknown"}\`. Behavioral logout remains \`${report.currentSourceLogoutStorageRemediation.behavioralLogoutExecuted === true}\`; fresh rescan required remains \`${report.currentSourceLogoutStorageRemediation.freshRescanRequired === true}\`, security-complete remains \`${report.currentSourceLogoutStorageRemediation.securityComplete === true}\`, and exact saved Share remains \`${report.currentSourceLogoutStorageRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Current-source ontology error projection remediation is \`${report.currentSourceOntologyErrorProjectionRemediation.verdict || "missing"}\`: product/live \`${report.currentSourceOntologyErrorProjectionRemediation.sourceHead || "missing"}/${report.currentSourceOntologyErrorProjectionRemediation.productionCommit || "missing"}\`, fixed public codes \`${report.currentSourceOntologyErrorProjectionRemediation.publicErrorCodeCount ?? "unknown"}\`, tests \`${report.currentSourceOntologyErrorProjectionRemediation.testsPassed ?? "unknown"}\`, build \`${report.currentSourceOntologyErrorProjectionRemediation.buildStatus || "missing"}\`, and live admission \`${report.currentSourceOntologyErrorProjectionRemediation.liveProbeCode || "missing"}\`. No provider failure was induced \`${report.currentSourceOntologyErrorProjectionRemediation.upstreamFailureInduced === true}\`; fresh rescan required remains \`${report.currentSourceOntologyErrorProjectionRemediation.freshRescanRequired === true}\`, security-complete remains \`${report.currentSourceOntologyErrorProjectionRemediation.securityComplete === true}\`, and exact saved Share remains \`${report.currentSourceOntologyErrorProjectionRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Current-source photo readiness auth fan-out remediation is \`${report.currentSourcePhotoReadinessAuthFanoutRemediation.verdict || "missing"}\`: product/live \`${report.currentSourcePhotoReadinessAuthFanoutRemediation.sourceHead || "missing"}/${report.currentSourcePhotoReadinessAuthFanoutRemediation.productionCommit || "missing"}\`, tests \`${report.currentSourcePhotoReadinessAuthFanoutRemediation.testsPassed ?? "unknown"}\`, build \`${report.currentSourcePhotoReadinessAuthFanoutRemediation.buildStatus || "missing"}\`, Supabase client/auth fan-out \`${report.currentSourcePhotoReadinessAuthFanoutRemediation.publicGetCreatesSupabaseAdminClient === true}/${report.currentSourcePhotoReadinessAuthFanoutRemediation.publicGetCallsSupabaseAuthentication === true}\`, and identical live anonymous/Bearer responses \`${report.currentSourcePhotoReadinessAuthFanoutRemediation.responseBodiesEqual === true}\`. Fresh rescan required remains \`${report.currentSourcePhotoReadinessAuthFanoutRemediation.freshRescanRequired === true}\`, security-complete remains \`${report.currentSourcePhotoReadinessAuthFanoutRemediation.securityComplete === true}\`, and exact saved Share remains \`${report.currentSourcePhotoReadinessAuthFanoutRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Current-source MCP generation cancellation remediation is \`${report.currentSourceMcpGenerationCancellationRemediation.verdict || "missing"}\`: product/live \`${report.currentSourceMcpGenerationCancellationRemediation.sourceHead || "missing"}/${report.currentSourceMcpGenerationCancellationRemediation.productionCommit || "missing"}\`, focused/adjacent tests \`${report.currentSourceMcpGenerationCancellationRemediation.focusedTestsPassed ?? "unknown"}/${report.currentSourceMcpGenerationCancellationRemediation.adjacentTestsPassed ?? "unknown"}\`, build \`${report.currentSourceMcpGenerationCancellationRemediation.buildStatus || "missing"}\`, plain/reviewed signal forwarding \`${report.currentSourceMcpGenerationCancellationRemediation.plainSignalForwarded === true}/${report.currentSourceMcpGenerationCancellationRemediation.reviewedSignalForwarded === true}\`, and persistence skipped after abort \`${report.currentSourceMcpGenerationCancellationRemediation.persistenceSkippedAfterAbort === true}\`. Authenticated runtime cancellation probe remains \`${report.currentSourceMcpGenerationCancellationRemediation.authenticatedRuntimeProbeExecuted === true}\`, fresh rescan required remains \`${report.currentSourceMcpGenerationCancellationRemediation.freshRescanRequired === true}\`, security-complete remains \`${report.currentSourceMcpGenerationCancellationRemediation.securityComplete === true}\`, and exact saved Share remains \`${report.currentSourceMcpGenerationCancellationRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Current-source security residual remediation is \`${report.currentSourceSecurityResidualRemediation.verdict || "missing"}\`: anchors \`${report.currentSourceSecurityResidualRemediation.residualAnchors?.join(", ") || "missing"}\`, tests \`${(report.currentSourceSecurityResidualRemediation.focusedTests ?? 0) + (report.currentSourceSecurityResidualRemediation.adjacentTests ?? 0)}\`, live evidence \`${report.currentSourceSecurityResidualRemediation.liveStatus || "missing"}\` with behavioral probe \`${report.currentSourceSecurityResidualRemediation.behavioralProbeExecuted === true}\`. The immutable scan remains open, follow-up scan required=\`${report.currentSourceSecurityResidualRemediation.followUpSecurityScanRequired === true}\`, security-complete=\`${report.currentSourceSecurityResidualRemediation.securityCompleteClaimAllowed === true}\`, and exact saved Share remains \`${report.currentSourceSecurityResidualRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Share ACK pre-body admission is \`${report.shareAckPreBodyAdmission.verdict || "missing"}\`: coarse IP rate/body concurrency ordering \`${report.shareAckPreBodyAdmission.coarseIpRateAdmissionBeforeBody === true}/${report.shareAckPreBodyAdmission.coarseBodyConcurrencyLeaseBeforeBody === true}\`, recipient-specific post-parse admission \`${report.shareAckPreBodyAdmission.recipientSpecificAdmissionRetainedAfterParse === true}\`, tests \`${report.shareAckPreBodyAdmission.testsPassed ?? "unknown"}\`, and live \`${report.shareAckPreBodyAdmission.liveStatus ?? "unknown"}/${report.shareAckPreBodyAdmission.liveCode || "missing"}/${report.shareAckPreBodyAdmission.liveRateLimitHeader || "missing"}\`. The sealed finding remains rescan-pending \`${report.shareAckPreBodyAdmission.freshRescanRequired === true}\`; security-complete remains \`${report.shareAckPreBodyAdmission.securityCompleteClaimAllowed === true}\`, recipient ACK is \`${report.shareAckPreBodyAdmission.recipientAckLiveDataApproval || "APPROVAL_GATED"}\`, and exact saved Share remains \`${report.shareAckPreBodyAdmission.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Safety status disconnect lease is \`${report.safetyStatusDisconnectLease.verdict || "missing"}\`: work settlement before abort rejection/lease release \`${report.safetyStatusDisconnectLease.underlyingWorkSettlementPrecedesAbortRejection === true}/${report.safetyStatusDisconnectLease.admissionLeaseHeldUntilUnderlyingSettlement === true}\`, two-disconnect concurrency proof \`${report.safetyStatusDisconnectLease.thirdConcurrentRequestRejectedWhileTwoDisconnectedTasksSettle === true}\`, tests \`${report.safetyStatusDisconnectLease.testsPassed ?? "unknown"}\`, and live \`${report.safetyStatusDisconnectLease.liveStatus ?? "unknown"}/${report.safetyStatusDisconnectLease.liveCode || "missing"}/${report.safetyStatusDisconnectLease.liveWorkUnit || "missing"}\`. The sealed finding remains rescan-pending \`${report.safetyStatusDisconnectLease.freshRescanRequired === true}\`; security-complete remains \`${report.safetyStatusDisconnectLease.securityCompleteClaimAllowed === true}\`, distributed activation is \`${report.safetyStatusDisconnectLease.distributedAdmissionActivation || "OPERATOR_CONFIGURATION_REQUIRED"}\`, and exact saved Share remains \`${report.safetyStatusDisconnectLease.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.

@@ -1,8 +1,8 @@
 # SafeClaw MCP generation cancellation remediation
 
-- Verdict: `PASS_CURRENT_SOURCE_LOCAL_MCP_GENERATION_CANCELLATION_LIVE_PENDING`
+- Verdict: `PASS_LIVE_DEPLOYED_SOURCE_MCP_GENERATION_CANCELLATION_CONTRACT`
 - Product commit: `5ed2558b25a139c32c300163d1386863bbc3589d`
-- Production at verification: `142aec28d545baa563f416ac4072bbfea9e278d7`
+- Production at verification: `5ed2558b25a139c32c300163d1386863bbc3589d`
 - Finding: `csf_c2f6fb44442dee56c0d5c2ed` (`resource-exhaustion.mcp-generation-cancellation-dropped`, medium)
 
 ## Remediation
@@ -18,10 +18,10 @@ Existing direct handler callers remain compatible because execution context is o
 - Negative coverage proves both ontology fetches receive the same signal, plain generation stops before repository lookup, reviewed QA stops before persistence, and both route registrations forward the SDK signal.
 - Strict TypeScript: `npm.cmd run typecheck` PASS.
 - Production build: Next.js `15.5.22`, `28/28` static pages PASS.
-- Production still reports `142aec28`; live-deployed-source evidence remains pending for product commit `5ed2558b`.
+- Production reports product commit `5ed2558b` on `master`. This proves deployed-source parity, not an authenticated runtime cancellation exercise.
 
 ## Boundary
 
-No authenticated MCP generation or provider call was executed for this receipt. It is current-source/local evidence and does not reclassify the sealed finding or rewrite the immutable original 18-finding baseline. A fresh full-repository scan and a separately authorized valid-token runtime cancellation probe remain required for broader closure.
+No authenticated MCP generation or provider call was executed for this receipt. It proves the remediated source is deployed, but does not reclassify the sealed finding or rewrite the immutable original 18-finding baseline. A fresh full-repository scan and a separately authorized valid-token runtime cancellation probe remain required for broader closure.
 
 No database, provider dispatch, Share-session, vector/embedding, Wiki, or KOSHA registry mutation occurred. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`; security-complete remains false.

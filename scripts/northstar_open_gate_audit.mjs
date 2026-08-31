@@ -77,6 +77,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
   currentSourceOntologyErrorProjectionRemediation: path.join("evaluation", "current-source-security-ontology-error-projection-remediation-2026-08-31", "report.json"),
   currentSourcePhotoReadinessAuthFanoutRemediation: path.join("evaluation", "current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31", "report.json"),
+  currentSourceMcpGenerationCancellationRemediation: path.join("evaluation", "current-source-security-mcp-generation-cancellation-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
@@ -7659,7 +7660,8 @@ function evaluateMcpProviderAdmissionGate(rootDir) {
     rootDir,
     "mcp_provider_admission_security",
     MCP_PROVIDER_ADMISSION_PATHS
-  ) || isCurrentSecurityGovernedPathReceiptCurrent(rootDir, MCP_PROVIDER_ADMISSION_PATHS);
+  ) || isCurrentSecurityGovernedPathReceiptCurrent(rootDir, MCP_PROVIDER_ADMISSION_PATHS)
+    || isCurrentMcpGenerationCancellationCompatibility(rootDir, MCP_PROVIDER_ADMISSION_PATHS);
   const pass = readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_DURABLE_MCP_PROVIDER_ADMISSION_RESCAN_PENDING"
     && sourceHead.length > 0
     && sourceHead === readString(report.productCommit)
@@ -9259,6 +9261,125 @@ function evaluateCurrentSourcePhotoReadinessAuthFanoutRemediationGate(rootDir) {
         ]
       : ["Restore auth-free coarse GET behavior, aligned source/live identity, verification counts, fresh-rescan boundary, no-mutation boundary, and exact Share MISSING_EVIDENCE."],
   });
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateCurrentSourceMcpGenerationCancellationRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourceMcpGenerationCancellationRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_source_mcp_generation_cancellation_remediation",
+      label: "Current-source MCP generation cancellation remediation",
+      state: "missing",
+      evidencePath,
+      detail: "The MCP generation cancellation remediation receipt is missing or invalid.",
+      nextActions: ["Restore deployed-source cancellation evidence without reclassifying the sealed finding or closing approval boundaries."],
+    });
+  }
+
+  const finding = isRecord(report.finding) ? report.finding : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const focused = isRecord(verification.focusedTests) ? verification.focusedTests : {};
+  const adjacent = isRecord(verification.adjacentTests) ? verification.adjacentTests : {};
+  const typecheck = isRecord(verification.typecheck) ? verification.typecheck : {};
+  const build = isRecord(verification.productionBuild) ? verification.productionBuild : {};
+  const live = isRecord(verification.liveDeployment) ? verification.liveDeployment : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const boundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const productCommit = readString(report.productCommit);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.mcpGenerationProviderCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaRegistryMutationPerformed === false;
+  const pass = readString(report.schemaVersion) === "safeclaw-current-source-security-mcp-generation-cancellation-remediation/v1"
+    && readString(report.verdict) === "PASS_LIVE_DEPLOYED_SOURCE_MCP_GENERATION_CANCELLATION_CONTRACT"
+    && productCommit !== ""
+    && productCommit === readString(report.sourceHead)
+    && productionCommit === productCommit
+    && productionCommit === readString(live.commitSha)
+    && isGitAncestor(rootDir, productCommit)
+    && readString(live.branch) === "master"
+    && readString(live.environment) === "production"
+    && readString(finding.findingId) === "csf_c2f6fb44442dee56c0d5c2ed"
+    && readString(finding.occurrenceId) === "occ_89f04a2500ced5cf2d9057fe"
+    && readString(finding.ruleId) === "resource-exhaustion.mcp-generation-cancellation-dropped"
+    && finding.sealedFindingReclassified === false
+    && finding.freshRescanRequired === true
+    && remediation.plainGenerationTransportSignalForwarded === true
+    && remediation.reviewedGenerationTransportSignalForwarded === true
+    && remediation.ontologyNodeFetchSignalForwarded === true
+    && remediation.ontologyEdgeFetchSignalForwarded === true
+    && remediation.runAskSignalForwarded === true
+    && remediation.qaReviewSignalForwarded === true
+    && remediation.abortRemainsExceptionalInsteadOfFallback === true
+    && remediation.persistenceSkippedAfterAbort === true
+    && remediation.providerAdmissionReleasedByRejectedWorkFinally === true
+    && remediation.existingDirectHandlerCallsRemainCompatible === true
+    && readNumber(focused.filesPassed) === 5
+    && readNumber(focused.testsPassed) === 54
+    && readNumber(focused.testsFailed) === 0
+    && readNumber(adjacent.filesPassed) === 5
+    && readNumber(adjacent.testsPassed) === 143
+    && readNumber(adjacent.testsFailed) === 0
+    && readString(typecheck.status) === "PASS"
+    && readString(build.status) === "PASS"
+    && readNumber(build.staticPages) === 28
+    && readString(live.status) === "PASS_DEPLOYED_SOURCE_CONTRACT_RUNTIME_CANCELLATION_NOT_PROBED"
+    && live.sourceHeadMatchesProduction === true
+    && live.authenticatedMcpCancellationProbeExecuted === false
+    && noMutation
+    && boundaries.immutableOriginalBaselinePreserved === true
+    && boundaries.sealedCurrentHeadScanPreserved === true
+    && boundaries.securityComplete === false
+    && readString(boundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && boundaries.approvalGatedFindingsRemainOpen === true
+    && boundaries.liveAfterDeploymentRequired === false
+    && boundaries.validAuthenticatedRuntimeCancellationProbeRequired === true;
+
+  return gateResult({
+    id: "current_source_mcp_generation_cancellation_remediation",
+    label: "Current-source MCP generation cancellation remediation",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Current live source threads one MCP transport AbortSignal through plain and reviewed generation, both ontology fetches, runAsk, and QA, then stops before persistence on cancellation. Five focused files / 54 tests plus five adjacent files / 143 tests, typecheck, and the 28-page build pass. No authenticated runtime cancellation probe or provider call was executed; the sealed finding stays open pending a fresh scan, security-complete is false, no mutation occurred, approval-gated findings remain open, and exact saved Share remains MISSING_EVIDENCE."
+      : `MCP cancellation verdict=${readString(report.verdict) || "missing"}, product/live=${productCommit || "missing"}/${productionCommit || "missing"}, tests=${readNumber(focused.testsPassed)}+${readNumber(adjacent.testsPassed)}, signal=${remediation.plainGenerationTransportSignalForwarded === true}/${remediation.reviewedGenerationTransportSignalForwarded === true}/${remediation.runAskSignalForwarded === true}/${remediation.qaReviewSignalForwarded === true}, runtimeProbe=${live.authenticatedMcpCancellationProbeExecuted === true}, freshRescan=${finding.freshRescanRequired === true}, noMutation=${noMutation}, securityComplete=${boundaries.securityComplete === true}, exactShare=${readString(boundaries.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Include the deployed MCP cancellation contract in the next full repository scan before reclassifying the sealed finding.",
+          "Run a valid-token runtime cancellation probe only under a separately approved non-production-safe execution plan; keep exact saved Share and all mutation boundaries open.",
+        ]
+      : ["Restore end-to-end signal propagation, aligned source/live identity, verification counts, fresh-rescan/runtime-probe boundaries, no-mutation, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @param {string[]} governedPaths
+ */
+function isCurrentMcpGenerationCancellationCompatibility(rootDir, governedPaths) {
+  const gate = evaluateCurrentSourceMcpGenerationCancellationRemediationGate(rootDir);
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.currentSourceMcpGenerationCancellationRemediation);
+  const productCommit = isRecord(report) ? readString(report.productCommit) : "";
+  if (gate.state !== "notice" || !productCommit) return false;
+  try {
+    execFileSync("git", ["diff", "--quiet", `${productCommit}..HEAD`, "--", ...governedPaths], {
+      cwd: rootDir,
+      stdio: ["ignore", "ignore", "ignore"],
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -12083,6 +12204,10 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     "mcp_generation_work_budget_security",
     MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS,
   ) || isCurrentSecurityGovernedPathReceiptCurrent(rootDir, MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS);
+  const cancellationCompatibilityPass = isCurrentMcpGenerationCancellationCompatibility(
+    rootDir,
+    MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS,
+  );
   const providerCompanion = readJsonFile(rootDir, EVIDENCE_PATHS.mcpProviderAdmission);
   const companionProduction = isRecord(providerCompanion?.productionBuild)
     ? providerCompanion.productionBuild
@@ -12117,7 +12242,8 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     && companionSourceHead.length > 0
     && companionSourceHead === readString(companionProduction.commitSha)
     && isGitAncestor(rootDir, companionSourceHead)
-    && isEvidenceCurrentForPaths(rootDir, companionSourceHead, MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS)
+    && (isEvidenceCurrentForPaths(rootDir, companionSourceHead, MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS)
+      || cancellationCompatibilityPass)
     && companionPreserved.existingTransportBodyAndAuthenticationBudgetsRetained === true
     && readNumber(companionAdjacent.files) === 8
     && readNumber(companionAdjacent.tests) >= 94
@@ -12198,7 +12324,13 @@ function evaluateMcpGenerationWorkBudgetSecurityGate(rootDir) {
     && currentRefreshBoundarySafe
     && (currentRefreshPass || currentCompatibilityPass || providerCompanionPass);
 
-  const currentProofHead = currentRefreshPass ? currentRefreshSourceHead : companionSourceHead;
+  const cancellationReport = readJsonFile(rootDir, EVIDENCE_PATHS.currentSourceMcpGenerationCancellationRemediation);
+  const cancellationProductCommit = isRecord(cancellationReport) ? readString(cancellationReport.productCommit) : "";
+  const currentProofHead = currentRefreshPass
+    ? currentRefreshSourceHead
+    : cancellationCompatibilityPass && cancellationProductCommit
+      ? cancellationProductCommit
+      : companionSourceHead;
   const currentProofDescription = distributedUnavailableFailClosed && distributedConfigurationAbsent
     ? `Current production ${currentProofHead.slice(0, 8)} proves distributed MCP admission is required but not configured: the readiness endpoint reports configurationState=absent and the pre-auth guard returns 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before authentication, MCP tool dispatch, provider work, or mutation. Current compatibility verification preserves the 96 KiB body contract with ${readNumber(currentRefreshFocused.files)} files / ${readNumber(currentRefreshFocused.tests)} focused tests and ${readNumber(currentRefreshAdjacent.files)} files / ${readNumber(currentRefreshAdjacent.tests)} adjacent MCP tests. Distributed activation, a valid authenticated runtime probe, and a fresh security rescan remain open.`
     : `Current production ${currentProofHead.slice(0, 8)} re-proves MCP invalid-token 401 fail-closed before any MCP tool dispatch, provider call, or mutation. The provider-admission companion preserves the 96 KiB measured body and authentication contracts through ${readNumber(companionAdjacent.tests)} adjacent MCP tests; a valid authenticated runtime probe, distributed activation, and fresh security rescan remain open.`;
@@ -13283,8 +13415,10 @@ function evaluateCurrentSecurityGovernedPathCompatibilityGate(rootDir) {
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "public_provider_admission", PUBLIC_PROVIDER_ADMISSION_PATHS)
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "public_ask_distributed_admission", PUBLIC_ASK_DISTRIBUTED_ADMISSION_PATHS)
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "learning_export_renderer_security", LEARNING_EXPORT_RENDERER_SECURITY_PATHS)
-    && isCurrentSecurityGovernedPathCompatibility(rootDir, "mcp_provider_admission_security", MCP_PROVIDER_ADMISSION_PATHS)
-    && isCurrentSecurityGovernedPathCompatibility(rootDir, "mcp_generation_work_budget_security", MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS)
+    && (isCurrentSecurityGovernedPathCompatibility(rootDir, "mcp_provider_admission_security", MCP_PROVIDER_ADMISSION_PATHS)
+      || isCurrentMcpGenerationCancellationCompatibility(rootDir, MCP_PROVIDER_ADMISSION_PATHS))
+    && (isCurrentSecurityGovernedPathCompatibility(rootDir, "mcp_generation_work_budget_security", MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS)
+      || isCurrentMcpGenerationCancellationCompatibility(rootDir, MCP_GENERATION_WORK_BUDGET_SECURITY_PATHS))
     && isCurrentSecurityGovernedPathCompatibility(rootDir, "security_followup_remediation", ["lib/public-distributed-rate-limit.ts"]);
   const verification = isRecord(report) && isRecord(report.verification) ? report.verification : {};
   const vitest = isRecord(verification.vitest) ? verification.vitest : {};
@@ -13352,6 +13486,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentSourceLogoutStorageRemediationGate(rootDir),
     evaluateCurrentSourceOntologyErrorProjectionRemediationGate(rootDir),
     evaluateCurrentSourcePhotoReadinessAuthFanoutRemediationGate(rootDir),
+    evaluateCurrentSourceMcpGenerationCancellationRemediationGate(rootDir),
     evaluateCurrentSourceSecurityRemediationFollowupGate(rootDir),
     evaluateCurrentSecurityGovernedPathCompatibilityGate(rootDir),
     evaluateCurrentSourceSecurityResidualRemediationGate(rootDir),

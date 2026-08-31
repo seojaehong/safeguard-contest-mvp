@@ -568,6 +568,22 @@ type RollupReport = {
     securityComplete: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceMcpGenerationCancellationRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    findingId: string;
+    focusedTestsPassed: number | null;
+    adjacentTestsPassed: number | null;
+    buildStatus: string;
+    plainSignalForwarded: boolean;
+    reviewedSignalForwarded: boolean;
+    persistenceSkippedAfterAbort: boolean;
+    authenticatedRuntimeProbeExecuted: boolean;
+    freshRescanRequired: boolean;
+    securityComplete: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceSecurityResidualRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1308,6 +1324,33 @@ function currentSourcePhotoReadinessAuthFanoutRemediationFixture(): Record<strin
       focusedTests: { testsPassed: 13 },
       productionBuild: { status: "PASS" },
       liveDeployment: { publicProbe: { responseBodiesEqual: true } },
+    },
+    remainingBoundaries: {
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  };
+}
+
+function currentSourceMcpGenerationCancellationRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_MCP_GENERATION_CANCELLATION_CONTRACT",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    finding: {
+      findingId: "csf_c2f6fb44442dee56c0d5c2ed",
+      freshRescanRequired: true,
+    },
+    remediation: {
+      plainGenerationTransportSignalForwarded: true,
+      reviewedGenerationTransportSignalForwarded: true,
+      persistenceSkippedAfterAbort: true,
+    },
+    verification: {
+      focusedTests: { testsPassed: 54 },
+      adjacentTests: { testsPassed: 143 },
+      productionBuild: { status: "PASS" },
+      liveDeployment: { authenticatedMcpCancellationProbeExecuted: false },
     },
     remainingBoundaries: {
       securityComplete: false,
@@ -2636,6 +2679,7 @@ function createFixtureRoot(): { root: string; head: string } {
   writeJson(root, "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json", currentSourceLogoutStorageRemediationFixture());
   writeJson(root, "evaluation/current-source-security-ontology-error-projection-remediation-2026-08-31/report.json", currentSourceOntologyErrorProjectionRemediationFixture());
   writeJson(root, "evaluation/current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31/report.json", currentSourcePhotoReadinessAuthFanoutRemediationFixture());
+  writeJson(root, "evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.json", currentSourceMcpGenerationCancellationRemediationFixture());
   writeJson(root, "evaluation/current-source-security-residual-remediation-2026-08-28/report.json", currentSourceSecurityResidualRemediationFixture());
   writeJson(root, "evaluation/share-ack-prebody-admission-2026-08-28/report.json", shareAckPreBodyAdmissionFixture());
   writeJson(root, "evaluation/safety-status-disconnect-lease-2026-08-28/report.json", safetyStatusDisconnectLeaseFixture());
@@ -3038,6 +3082,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-ontology-error-projection-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31/report.json",
+    "evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-residual-remediation-2026-08-28/report.json",
     "evaluation/share-ack-prebody-admission-2026-08-28/report.json",
     "evaluation/safety-status-disconnect-lease-2026-08-28/report.json",
@@ -3714,6 +3759,25 @@ describe("northstar live rollup", () => {
       publicGetCreatesSupabaseAdminClient: false,
       publicGetCallsSupabaseAuthentication: false,
       responseBodiesEqual: true,
+      freshRescanRequired: true,
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "current_source_mcp_generation_cancellation_remediation")).toMatchObject({
+      artifact: path.join("evaluation", "current-source-security-mcp-generation-cancellation-remediation-2026-08-31", "report.json"),
+    });
+    expect(report.currentSourceMcpGenerationCancellationRemediation).toMatchObject({
+      verdict: "PASS_LIVE_DEPLOYED_SOURCE_MCP_GENERATION_CANCELLATION_CONTRACT",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      findingId: "csf_c2f6fb44442dee56c0d5c2ed",
+      focusedTestsPassed: 54,
+      adjacentTestsPassed: 143,
+      buildStatus: "PASS",
+      plainSignalForwarded: true,
+      reviewedSignalForwarded: true,
+      persistenceSkippedAfterAbort: true,
+      authenticatedRuntimeProbeExecuted: false,
       freshRescanRequired: true,
       securityComplete: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",

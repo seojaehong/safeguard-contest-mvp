@@ -530,6 +530,67 @@ function currentSourcePhotoReadinessAuthFanoutRemediationFixture(): Record<strin
   };
 }
 
+function currentSourceMcpGenerationCancellationRemediationFixture(): Record<string, unknown> {
+  return {
+    schemaVersion: "safeclaw-current-source-security-mcp-generation-cancellation-remediation/v1",
+    verdict: "PASS_LIVE_DEPLOYED_SOURCE_MCP_GENERATION_CANCELLATION_CONTRACT",
+    sourceHead: "fixture-sha",
+    productCommit: "fixture-sha",
+    productionCommit: "fixture-sha",
+    finding: {
+      findingId: "csf_c2f6fb44442dee56c0d5c2ed",
+      occurrenceId: "occ_89f04a2500ced5cf2d9057fe",
+      ruleId: "resource-exhaustion.mcp-generation-cancellation-dropped",
+      sealedFindingReclassified: false,
+      freshRescanRequired: true,
+    },
+    remediation: {
+      plainGenerationTransportSignalForwarded: true,
+      reviewedGenerationTransportSignalForwarded: true,
+      ontologyNodeFetchSignalForwarded: true,
+      ontologyEdgeFetchSignalForwarded: true,
+      runAskSignalForwarded: true,
+      qaReviewSignalForwarded: true,
+      abortRemainsExceptionalInsteadOfFallback: true,
+      persistenceSkippedAfterAbort: true,
+      providerAdmissionReleasedByRejectedWorkFinally: true,
+      existingDirectHandlerCallsRemainCompatible: true,
+    },
+    verification: {
+      focusedTests: { filesPassed: 5, testsPassed: 54, testsFailed: 0 },
+      adjacentTests: { filesPassed: 5, testsPassed: 143, testsFailed: 0 },
+      typecheck: { status: "PASS" },
+      productionBuild: { status: "PASS", staticPages: 28 },
+      liveDeployment: {
+        status: "PASS_DEPLOYED_SOURCE_CONTRACT_RUNTIME_CANCELLATION_NOT_PROBED",
+        commitSha: "fixture-sha",
+        branch: "master",
+        environment: "production",
+        sourceHeadMatchesProduction: true,
+        authenticatedMcpCancellationProbeExecuted: false,
+      },
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      mcpGenerationProviderCalled: false,
+      shareSessionCreated: false,
+      vectorOrEmbeddingMutationPerformed: false,
+      wikiPublicationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      immutableOriginalBaselinePreserved: true,
+      sealedCurrentHeadScanPreserved: true,
+      securityComplete: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      approvalGatedFindingsRemainOpen: true,
+      liveAfterDeploymentRequired: false,
+      validAuthenticatedRuntimeCancellationProbeRequired: true,
+    },
+  };
+}
+
 function currentSourceSecurityRemediationFollowupFixture(): Record<string, unknown> {
   return {
     verdict: "PASS_LIVE_PRODUCTION_APPROVAL_FREE_SECURITY_REMEDIATIONS_POST_FIX_RESCAN_PENDING",
@@ -4788,6 +4849,11 @@ function createFixtureRoot(): string {
     rootDir,
     path.join("evaluation", "current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31", "report.json"),
     currentSourcePhotoReadinessAuthFanoutRemediationFixture(),
+  );
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-mcp-generation-cancellation-remediation-2026-08-31", "report.json"),
+    currentSourceMcpGenerationCancellationRemediationFixture(),
   );
   for (const receipt of approvalFreeRemediation.receipts as Array<{ evidencePath: string }>) {
     writeJson(rootDir, receipt.evidencePath, { verdict: "PASS_FIXTURE" });
@@ -9206,6 +9272,41 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
     const contradicted = buildNorthstarOpenGateAudit({ rootDir });
     expect(contradicted.gates.find((item) => item.id === "current_source_photo_readiness_auth_fanout_remediation")?.state)
+      .toBe("contradicted");
+  });
+
+  it("records MCP cancellation propagation without claiming a runtime probe or security closure", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-security-mcp-generation-cancellation-remediation-2026-08-31",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_mcp_generation_cancellation_remediation");
+    expect(gate?.state).toBe("notice");
+    expect(gate?.detail).toContain("both ontology fetches, runAsk, and QA");
+    expect(gate?.detail).toContain("54 tests plus five adjacent files / 143 tests");
+    expect(gate?.detail).toContain("No authenticated runtime cancellation probe");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+    expect(audit.gates.find((item) => item.id === "mcp_provider_admission_security")?.state).toBe("notice");
+    expect(audit.gates.find((item) => item.id === "mcp_generation_work_budget_security")?.state).toBe("notice");
+    expect(audit.gates.find((item) => item.id === "current_security_governed_path_compatibility")?.state).toBe("notice");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remediation: { qaReviewSignalForwarded: boolean };
+      mutationBoundary: { mcpGenerationProviderCalled: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.remediation.qaReviewSignalForwarded = false;
+    report.mutationBoundary.mcpGenerationProviderCalled = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((item) => item.id === "current_source_mcp_generation_cancellation_remediation")?.state)
       .toBe("contradicted");
   });
 
