@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-31T03:53:02.738Z",
+  "generatedAt": "2026-08-31T04:05:17.251Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "a6016f6a14a55f87d887c348f0585a9b23012b68",
-  "productionCommit": "a6016f6a14a55f87d887c348f0585a9b23012b68",
+  "sourceHead": "2375ebe8d16274c936aaf980ca072cdbc78953d2",
+  "productionCommit": "2375ebe8d16274c936aaf980ca072cdbc78953d2",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "a6016f6a14a55f87d887c348f0585a9b23012b68",
+    "commitSha": "2375ebe8d16274c936aaf980ca072cdbc78953d2",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-j0mp1yv7g-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-laqq7033z-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "a6016f6a14a55f87d887c348f0585a9b23012b68",
-  "liveRollupLiveCommit": "a6016f6a14a55f87d887c348f0585a9b23012b68",
+  "liveExactEvidenceCommit": "2375ebe8d16274c936aaf980ca072cdbc78953d2",
+  "liveRollupLiveCommit": "2375ebe8d16274c936aaf980ca072cdbc78953d2",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -68,6 +68,7 @@
     "freshCurrentSourceSecurityScan": "evaluation\\current-head-standard-security-scan-2026-08-31-complete\\report.json",
     "completedCurrentHeadStandardSecurityScan": "evaluation\\current-head-standard-security-scan-2026-08-31-9504d8db-complete\\report.json",
     "currentSourceForwardedIdentityRemediation": "evaluation\\current-source-security-forwarded-identity-remediation-2026-08-31\\report.json",
+    "currentSourceTemplateInventoryRemediation": "evaluation\\current-source-security-template-inventory-remediation-2026-08-31\\report.json",
     "currentSourceApprovalFreeSecurityRemediation": "evaluation\\current-source-security-approval-free-remediation-2026-08-31\\report.json",
     "currentSourceSecurityResourceBudgetRemediation": "evaluation\\current-source-security-resource-budget-remediation-2026-08-31\\report.json",
     "currentSourceLogoutStorageRemediation": "evaluation\\current-source-security-logout-storage-remediation-2026-08-31\\report.json",
@@ -221,6 +222,11 @@
       "gate": "current_source_forwarded_identity_remediation",
       "state": "proven",
       "reason": "deployed source e0ee1120 verifies trusted Vercel ingress before using forwarded identity with 7 files / 44 tests; the sealed scan remains immutable, fresh scan is REQUIRED, security-complete is false, and exact saved Share remains MISSING_EVIDENCE"
+    },
+    {
+      "gate": "current_source_template_inventory_remediation",
+      "state": "proven",
+      "reason": "deployed source 8a9269a4 bounds local template inventory before parser initialization with scanner/archive tests 6/5; the sealed scan remains immutable, fresh scan is REQUIRED, security-complete is false, and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "current_source_approval_free_security_remediation",
@@ -1283,6 +1289,21 @@
     "findingRule": "rate-limit-bypass.untrusted-forwarded-identity",
     "testFileCount": 7,
     "testCount": 44,
+    "liveBehavioralProbeExecuted": false,
+    "freshFollowUpSecurityScan": "REQUIRED",
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "currentSourceTemplateInventoryRemediation": {
+    "verdict": "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_BOUNDED_TEMPLATE_INVENTORY_SCAN",
+    "sourceHead": "8a9269a43adf369df3b530d0adad54309f22168a",
+    "productionCommit": "8a9269a43adf369df3b530d0adad54309f22168a",
+    "sourceIncludedInProduction": true,
+    "scanId": "f6bef30a-7250-428b-9f66-0bad1e42058c",
+    "findingId": "csf_4ee29cf0d24bdba57c1518a1",
+    "findingRule": "resource-exhaustion.unbounded-template-inventory",
+    "scannerTestCount": 6,
+    "archiveSafetyTestCount": 5,
     "liveBehavioralProbeExecuted": false,
     "freshFollowUpSecurityScan": "REQUIRED",
     "securityCompleteClaimAllowed": false,

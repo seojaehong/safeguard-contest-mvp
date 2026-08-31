@@ -4,9 +4,9 @@ Checked at: 2026-07-22 KST
 
 Verdict: `OPEN_APPROVAL_GATED`
 
-Source HEAD: `a6016f6a14a55f87d887c348f0585a9b23012b68`
+Source HEAD: `2375ebe8d16274c936aaf980ca072cdbc78953d2`
 
-Production `/api/build-info`: `a6016f6a14a55f87d887c348f0585a9b23012b68`
+Production `/api/build-info`: `2375ebe8d16274c936aaf980ca072cdbc78953d2`
 
 Latest evidence commit live: `true`
 
@@ -20,7 +20,7 @@ Current head is evidence-only pending: `false`
 
 Bounded workbench current live pending: `false`
 
-Live rollup source head: `a6016f6a14a55f87d887c348f0585a9b23012b68`
+Live rollup source head: `2375ebe8d16274c936aaf980ca072cdbc78953d2`
 
 Live rollup matches production: `true`
 
@@ -78,6 +78,7 @@ Live-rollup artifact: `evaluation\northstar-live-rollup-2026-07-20\report.json`
 - Fresh current-source Standard security scan is `NOTICE_CURRENT_HEAD_STANDARD_SCAN_18_FINDINGS_PARTIAL_COVERAGE`: scan `f218c713-1a1c-4f4e-9777-8095926be1df`, findings `18` (medium/low `13/5`), coverage `partial` with `17` recorded surfaces and `19` deferred items. Bounded closures/residuals are `1/8`; database/atomicity and Share capability boundaries remain `9/1`. Scan completion is not security-complete `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Completed current-head Standard security scan is `NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE`: scan `f6bef30a-7250-428b-9f66-0bad1e42058c`, source `9504d8db95fcbc9f37f6c5abc638e9ad0813a325`, findings `21` (medium/low `7/14`), coverage `partial` with `25` recorded rows and `36` deferred rows. The immutable `18`-finding baseline remains preserved; approval-free/database/Share residuals remain `11/9/1`. Security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Verified forwarded identity remediation is `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_VERIFIED_DISTRIBUTED_ADMISSION_IDENTITY`: source/live `e0ee11205043a6155fa7d4f2d9ba13f28599172a/3133218f67a2af790c31ab9ecf8617a5a467ae37`, source included `true`, finding `rate-limit-bypass.untrusted-forwarded-identity`, and tests `7/44`. No live identity-key disclosure probe was executed `false`; fresh scan remains `REQUIRED`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
+- Bounded template inventory remediation is `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_BOUNDED_TEMPLATE_INVENTORY_SCAN`: source/live `8a9269a43adf369df3b530d0adad54309f22168a/8a9269a43adf369df3b530d0adad54309f22168a`, source included `true`, finding `resource-exhaustion.unbounded-template-inventory`, and scanner/archive tests `6/5`. No remote operator-script execution was performed `false`; fresh scan remains `REQUIRED`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source approval-free security remediation is `PASS_LIVE_PRODUCTION_FOUR_APPROVAL_FREE_SECURITY_REMEDIATIONS_RESCAN_PENDING`: bounded source remediation `4/4`, open approval-free source residuals `0`, and sealed scan finding reclassification performed `false`. The fresh full scan remains required `true`, database/RLS/atomicity findings remain `5`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source security resource-budget remediation is `PASS_LIVE_DEPLOYED_SOURCE_APPROVAL_FREE_SECURITY_RESOURCE_BUDGETS_DIRECT_PROBE_ADMISSION_BLOCKED`: source/live `8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f/8aaee8f5f447d0107dd25eb04c1f0fc30bf4de1f`, remediated `5`, canonical findings `10`, manifest `failed`, and approval-gated findings `5`. Direct live provider budget execution remains `false`; security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.
 - Current-source logout storage remediation is `PASS_LIVE_DEPLOYED_SOURCE_LOGOUT_USER_CONTENT_PURGE_CONTRACT`: source/live `e7533365e3ceb9ceef733587e05709cb59860d4f/e7533365e3ceb9ceef733587e05709cb59860d4f`, exact keys/prefixes/preferences `2/3/2`, tests `100`, build `PASS`, and static violations `0`. Behavioral logout remains `false`; fresh rescan required remains `true`, security-complete remains `false`, and exact saved Share remains `MISSING_EVIDENCE`.

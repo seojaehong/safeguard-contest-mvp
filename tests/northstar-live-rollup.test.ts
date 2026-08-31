@@ -534,6 +534,21 @@ type RollupReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  currentSourceTemplateInventoryRemediation: {
+    verdict: string;
+    sourceHead: string;
+    productionCommit: string;
+    sourceIncludedInProduction: boolean;
+    scanId: string;
+    findingId: string;
+    findingRule: string;
+    scannerTestCount: number | null;
+    archiveSafetyTestCount: number | null;
+    liveBehavioralProbeExecuted: boolean;
+    freshFollowUpSecurityScan: string;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceApprovalFreeSecurityRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1289,6 +1304,30 @@ function currentSourceForwardedIdentityRemediationFixture(): Record<string, unkn
     },
     verification: {
       focusedAndAdjacent: { files: 7, tests: 44, status: "PASS" },
+      liveBehavioralProbeExecuted: false,
+    },
+    remainingBoundaries: {
+      freshFollowUpSecurityScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    },
+  };
+}
+
+function currentSourceTemplateInventoryRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_BOUNDED_TEMPLATE_INVENTORY_SCAN",
+    sourceHead: "TO_FILL",
+    productionCommit: "TO_FILL",
+    sourceIncludedInProduction: true,
+    securityBaseline: {
+      scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c",
+      findingId: "csf_4ee29cf0d24bdba57c1518a1",
+      findingRule: "resource-exhaustion.unbounded-template-inventory",
+    },
+    verification: {
+      scannerUnitTests: { tests: 6, status: "PASS" },
+      archiveSafetyTests: { tests: 5, status: "PASS" },
       liveBehavioralProbeExecuted: false,
     },
     remainingBoundaries: {
@@ -2818,6 +2857,7 @@ function createFixtureRoot(): { root: string; head: string } {
   writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/report.json", freshCurrentSourceSecurityScanFixture());
   writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-9504d8db-complete/report.json", completedCurrentHeadStandardSecurityScanFixture());
   writeJson(root, "evaluation/current-source-security-forwarded-identity-remediation-2026-08-31/report.json", currentSourceForwardedIdentityRemediationFixture());
+  writeJson(root, "evaluation/current-source-security-template-inventory-remediation-2026-08-31/report.json", currentSourceTemplateInventoryRemediationFixture());
   writeJson(root, "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json", currentSourceApprovalFreeSecurityRemediationFixture());
   writeJson(root, "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json", currentSourceSecurityResourceBudgetRemediationFixture());
   writeJson(root, "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json", currentSourceLogoutStorageRemediationFixture());
@@ -3224,6 +3264,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/current-head-standard-security-scan-2026-08-31-complete/report.json",
     "evaluation/current-head-standard-security-scan-2026-08-31-9504d8db-complete/report.json",
     "evaluation/current-source-security-forwarded-identity-remediation-2026-08-31/report.json",
+    "evaluation/current-source-security-template-inventory-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json",
@@ -3863,6 +3904,24 @@ describe("northstar live rollup", () => {
       findingRule: "rate-limit-bypass.untrusted-forwarded-identity",
       testFileCount: 7,
       testCount: 44,
+      liveBehavioralProbeExecuted: false,
+      freshFollowUpSecurityScan: "REQUIRED",
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "current_source_template_inventory_remediation")).toMatchObject({
+      artifact: path.join("evaluation", "current-source-security-template-inventory-remediation-2026-08-31", "report.json"),
+    });
+    expect(report.currentSourceTemplateInventoryRemediation).toMatchObject({
+      verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_BOUNDED_TEMPLATE_INVENTORY_SCAN",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      productionCommit: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      sourceIncludedInProduction: true,
+      scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c",
+      findingId: "csf_4ee29cf0d24bdba57c1518a1",
+      findingRule: "resource-exhaustion.unbounded-template-inventory",
+      scannerTestCount: 6,
+      archiveSafetyTestCount: 5,
       liveBehavioralProbeExecuted: false,
       freshFollowUpSecurityScan: "REQUIRED",
       securityCompleteClaimAllowed: false,

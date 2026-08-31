@@ -75,6 +75,7 @@ const EVIDENCE_PATHS = Object.freeze({
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-complete", "report.json"),
   completedCurrentHeadStandardSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-9504d8db-complete", "report.json"),
   currentSourceForwardedIdentityRemediation: path.join("evaluation", "current-source-security-forwarded-identity-remediation-2026-08-31", "report.json"),
+  currentSourceTemplateInventoryRemediation: path.join("evaluation", "current-source-security-template-inventory-remediation-2026-08-31", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
@@ -8790,6 +8791,108 @@ function evaluateCurrentSourceForwardedIdentityRemediationGate(rootDir) {
 
 /**
  * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateCurrentSourceTemplateInventoryRemediationGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.currentSourceTemplateInventoryRemediation;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "current_source_template_inventory_remediation",
+      label: "Current-source template inventory remediation",
+      state: "missing",
+      evidencePath,
+      detail: "The bounded template inventory remediation receipt is missing or invalid.",
+      nextActions: ["Restore the bounded receipt without rewriting the sealed 21-finding scan."],
+    });
+  }
+
+  const baseline = isRecord(report.securityBaseline) ? report.securityBaseline : {};
+  const remediation = isRecord(report.remediation) ? report.remediation : {};
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const scannerTests = isRecord(verification.scannerUnitTests) ? verification.scannerUnitTests : {};
+  const archiveTests = isRecord(verification.archiveSafetyTests) ? verification.archiveSafetyTests : {};
+  const compile = isRecord(verification.pythonCompile) ? verification.pythonCompile : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const governedPaths = [
+    "scripts/scan_industrial_safety_templates.py",
+    "scripts/tests/test_scan_industrial_safety_templates.py",
+  ];
+  const sourceCurrent = /^[0-9a-f]{40}$/u.test(sourceHead)
+    && isGitAncestor(rootDir, sourceHead)
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.embeddingGenerated === false
+    && mutation.vectorUploadPerformed === false
+    && mutation.wikiPublished === false
+    && mutation.exactTrustRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_BOUNDED_TEMPLATE_INVENTORY_SCAN"
+    && /^[0-9a-f]{40}$/u.test(productionCommit)
+    && report.sourceIncludedInProduction === true
+    && isGitAncestorOf(rootDir, sourceHead, productionCommit)
+    && sourceCurrent
+    && readString(baseline.scanId) === "f6bef30a-7250-428b-9f66-0bad1e42058c"
+    && readString(baseline.findingId) === "csf_4ee29cf0d24bdba57c1518a1"
+    && readString(baseline.findingRule) === "resource-exhaustion.unbounded-template-inventory"
+    && readString(baseline.severity) === "medium"
+    && readNumber(baseline.immutableFindingCount) === 21
+    && baseline.findingReclassified === false
+    && remediation.noFollowTraversal === true
+    && remediation.sourceRootSymlinkRejected === true
+    && readNumber(remediation.maxFiles) === 10000
+    && readNumber(remediation.maxTotalBytes) === 4294967296
+    && readNumber(remediation.maxFileBytes) === 134217728
+    && readNumber(remediation.maxParserFiles) === 2000
+    && readNumber(remediation.maxElapsedSeconds) === 900
+    && readNumber(remediation.maxImagePixels) === 80000000
+    && remediation.structuredArchivePreflightBeforeParser === true
+    && readNumber(remediation.maxArchiveMembers) === 4096
+    && readNumber(remediation.maxArchiveMemberBytes) === 67108864
+    && readNumber(remediation.maxArchiveTotalUncompressedBytes) === 536870912
+    && readNumber(remediation.maxArchiveCompressionRatio) === 100
+    && readNumber(remediation.maxArchiveCentralDirectoryBytes) === 16777216
+    && readNumber(remediation.budgetFailureExitCode) === 2
+    && remediation.partialOutputWrittenOnAdmissionFailure === false
+    && remediation.limitsRecordedInSummary === true
+    && readNumber(scannerTests.tests) === 6
+    && readString(scannerTests.status) === "PASS"
+    && readNumber(archiveTests.tests) === 5
+    && readString(archiveTests.status) === "PASS"
+    && readString(compile.status) === "PASS"
+    && readString(verification.cliSuccessAndFailClosedContract) === "PASS"
+    && verification.liveBehavioralProbeExecuted === false
+    && noMutation
+    && readString(remaining.liveDeploymentVerification) === "SOURCE_INCLUDED_OPERATOR_SCRIPT_NOT_REMOTELY_EXECUTED"
+    && readString(remaining.freshFollowUpSecurityScan) === "REQUIRED"
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remaining.databaseSecurityRemediation) === "APPROVAL_GATED"
+    && readString(remaining.providerDispatchPersistence) === "APPROVAL_GATED"
+    && readString(remaining.llmWikiPublication) === "APPROVAL_GATED"
+    && readString(remaining.sifVectorRuntime) === "APPROVAL_GATED"
+    && readString(remaining.koshaExactRegistryPromotion) === "APPROVAL_GATED"
+    && remaining.securityCompleteClaimAllowed === false;
+
+  return gateResult({
+    id: "current_source_template_inventory_remediation",
+    label: "Current-source template inventory remediation",
+    state: pass ? "proven" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? `Deployed product source ${sourceHead.slice(0, 8)} bounds the local template inventory before parser initialization with no-follow traversal, file/byte/parser/time/image/ZIP budgets, and fail-closed code 2 without partial summary output. Scanner 6/6, shared archive safety 5/5, and Python compilation pass. The sealed 21-finding scan is unchanged, fresh rescan remains required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.`
+      : `Template inventory verdict=${readString(report.verdict) || "missing"}, source/live=${sourceHead || "missing"}/${productionCommit || "missing"}, sourceCurrent=${sourceCurrent}, scanner/archive=${readNumber(scannerTests.tests)}/${readNumber(archiveTests.tests)}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? ["Keep the immutable scan open and verify reclassification only through a fresh follow-up Standard scan."]
+      : ["Restore deployed source ancestry, governed-path currentness, parser-admission budgets, verification counts, no-mutation boundaries, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
  * @param {unknown} relativePath
  * @param {unknown} expectedSha256
  */
@@ -13839,6 +13942,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateFreshCurrentSourceSecurityScanGate(rootDir),
     evaluateCompletedCurrentHeadStandardSecurityScanGate(rootDir),
     evaluateCurrentSourceForwardedIdentityRemediationGate(rootDir),
+    evaluateCurrentSourceTemplateInventoryRemediationGate(rootDir),
     evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir),
     evaluateCurrentSourceSecurityResourceBudgetRemediationGate(rootDir),
     evaluateCurrentSourceLogoutStorageRemediationGate(rootDir),

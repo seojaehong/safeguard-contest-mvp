@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T03:52:38.714Z
-Source HEAD at generation: a6016f6a14a55f87d887c348f0585a9b23012b68
-Live commit at generation: a6016f6a14a55f87d887c348f0585a9b23012b68
+Generated at: 2026-08-31T04:04:55.348Z
+Source HEAD at generation: 2375ebe8d16274c936aaf980ca072cdbc78953d2
+Live commit at generation: 2375ebe8d16274c936aaf980ca072cdbc78953d2
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_evidence_missing_or_unknown`
@@ -146,6 +146,11 @@ Overall: `northstar_evidence_missing_or_unknown`
 ## Verified Forwarded Identity Remediation
 - Verdict: `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_VERIFIED_DISTRIBUTED_ADMISSION_IDENTITY`; source/live `e0ee11205043a6155fa7d4f2d9ba13f28599172a/3133218f67a2af790c31ab9ecf8617a5a467ae37`; included=true
 - Finding: rate-limit-bypass.untrusted-forwarded-identity; tests 7 files / 44 cases; live identity-key probe=false
+- Fresh scan: REQUIRED; security-complete=false; exact saved Share=MISSING_EVIDENCE
+
+## Bounded Template Inventory Remediation
+- Verdict: `PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_BOUNDED_TEMPLATE_INVENTORY_SCAN`; source/live `8a9269a43adf369df3b530d0adad54309f22168a/8a9269a43adf369df3b530d0adad54309f22168a`; included=true
+- Finding: resource-exhaustion.unbounded-template-inventory; scanner/archive tests 6/5; remote operator-script probe=false
 - Fresh scan: REQUIRED; security-complete=false; exact saved Share=MISSING_EVIDENCE
 
 ## Current Security Remediation Ledger
@@ -453,6 +458,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | fresh_current_source_security_scan | notice | evaluation\current-head-standard-security-scan-2026-08-31-complete\report.json |
 | completed_current_head_standard_security_scan | notice | evaluation\current-head-standard-security-scan-2026-08-31-9504d8db-complete\report.json |
 | current_source_forwarded_identity_remediation | proven | evaluation\current-source-security-forwarded-identity-remediation-2026-08-31\report.json |
+| current_source_template_inventory_remediation | proven | evaluation\current-source-security-template-inventory-remediation-2026-08-31\report.json |
 | current_source_approval_free_security_remediation | notice | evaluation\current-source-security-approval-free-remediation-2026-08-31\report.json |
 | current_source_security_resource_budget_remediation | proven | evaluation\current-source-security-resource-budget-remediation-2026-08-31\report.json |
 | current_source_logout_storage_remediation | notice | evaluation\current-source-security-logout-storage-remediation-2026-08-31\report.json |
@@ -548,6 +554,7 @@ Overall: `northstar_evidence_missing_or_unknown`
 | fresh_current_source_security_scan | ancestor | missing | evaluation\current-head-standard-security-scan-2026-08-31-complete\report.json |
 | completed_current_head_standard_security_scan | ancestor | missing | evaluation\current-head-standard-security-scan-2026-08-31-9504d8db-complete\report.json |
 | current_source_forwarded_identity_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-forwarded-identity-remediation-2026-08-31\report.json |
+| current_source_template_inventory_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-template-inventory-remediation-2026-08-31\report.json |
 | current_source_approval_free_security_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-approval-free-remediation-2026-08-31\report.json |
 | current_source_security_resource_budget_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-resource-budget-remediation-2026-08-31\report.json |
 | current_source_logout_storage_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-logout-storage-remediation-2026-08-31\report.json |

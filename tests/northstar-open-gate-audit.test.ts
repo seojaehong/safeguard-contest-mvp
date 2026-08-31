@@ -332,6 +332,52 @@ function currentSourceForwardedIdentityRemediationFixture(): Record<string, unkn
   };
 }
 
+function currentSourceTemplateInventoryRemediationFixture(): Record<string, unknown> {
+  return {
+    verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_BOUNDED_TEMPLATE_INVENTORY_SCAN",
+    sourceHead: "fixture-sha",
+    productionCommit: "fixture-sha",
+    sourceIncludedInProduction: true,
+    securityBaseline: {
+      scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c",
+      findingId: "csf_4ee29cf0d24bdba57c1518a1",
+      findingRule: "resource-exhaustion.unbounded-template-inventory",
+      severity: "medium",
+      immutableFindingCount: 21,
+      findingReclassified: false,
+    },
+    remediation: {
+      noFollowTraversal: true, sourceRootSymlinkRejected: true,
+      maxFiles: 10000, maxTotalBytes: 4294967296, maxFileBytes: 134217728,
+      maxParserFiles: 2000, maxElapsedSeconds: 900, maxImagePixels: 80000000,
+      structuredArchivePreflightBeforeParser: true, maxArchiveMembers: 4096,
+      maxArchiveMemberBytes: 67108864, maxArchiveTotalUncompressedBytes: 536870912,
+      maxArchiveCompressionRatio: 100, maxArchiveCentralDirectoryBytes: 16777216,
+      budgetFailureExitCode: 2, partialOutputWrittenOnAdmissionFailure: false,
+      limitsRecordedInSummary: true,
+    },
+    verification: {
+      scannerUnitTests: { tests: 6, status: "PASS" },
+      archiveSafetyTests: { tests: 5, status: "PASS" },
+      pythonCompile: { status: "PASS" },
+      cliSuccessAndFailClosedContract: "PASS",
+      liveBehavioralProbeExecuted: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false,
+      embeddingGenerated: false, vectorUploadPerformed: false, wikiPublished: false,
+      exactTrustRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      liveDeploymentVerification: "SOURCE_INCLUDED_OPERATOR_SCRIPT_NOT_REMOTELY_EXECUTED",
+      freshFollowUpSecurityScan: "REQUIRED", exactSavedShareVerdict: "MISSING_EVIDENCE",
+      databaseSecurityRemediation: "APPROVAL_GATED", providerDispatchPersistence: "APPROVAL_GATED",
+      llmWikiPublication: "APPROVAL_GATED", sifVectorRuntime: "APPROVAL_GATED",
+      koshaExactRegistryPromotion: "APPROVAL_GATED", securityCompleteClaimAllowed: false,
+    },
+  };
+}
+
 function currentSourceApprovalFreeSecurityRemediationFixture(): Record<string, unknown> {
   return {
     schemaVersion: "safeclaw-current-source-security-approval-free-remediation/v1",
@@ -1326,6 +1372,8 @@ function createFixtureRoot(): string {
   writeText(rootDir, "lib/public-distributed-rate-limit.ts", "export const injectedIdentityEnvironment = true;\n");
   writeText(rootDir, "tests/api-guard.test.ts", "export const apiGuardFixture = true;\n");
   writeText(rootDir, "tests/public-distributed-rate-limit.test.ts", "export const distributedLimiterFixture = true;\n");
+  writeText(rootDir, "scripts/scan_industrial_safety_templates.py", "BOUNDED_TEMPLATE_SCAN = True\n");
+  writeText(rootDir, "scripts/tests/test_scan_industrial_safety_templates.py", "BOUNDED_TEMPLATE_SCAN_TEST = True\n");
 
   writeJson(rootDir, path.join("evaluation", "final-99-gate", "report.json"), {
     overall: "pass_with_notice",
@@ -5012,6 +5060,11 @@ function createFixtureRoot(): string {
     rootDir,
     path.join("evaluation", "current-source-security-forwarded-identity-remediation-2026-08-31", "report.json"),
     currentSourceForwardedIdentityRemediationFixture(),
+  );
+  writeJson(
+    rootDir,
+    path.join("evaluation", "current-source-security-template-inventory-remediation-2026-08-31", "report.json"),
+    currentSourceTemplateInventoryRemediationFixture(),
   );
   const approvalFreeRemediation = currentSourceApprovalFreeSecurityRemediationFixture();
   writeJson(
@@ -9386,6 +9439,35 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
     expect(buildNorthstarOpenGateAudit({ rootDir }).gates
       .find((item) => item.id === "current_source_forwarded_identity_remediation")?.state).toBe("contradicted");
+  });
+
+  it("records bounded template inventory scanning without closing scan or approval boundaries", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "current-source-security-template-inventory-remediation-2026-08-31",
+      "report.json",
+    );
+
+    const audit = buildNorthstarOpenGateAudit({ rootDir });
+    const gate = audit.gates.find((item) => item.id === "current_source_template_inventory_remediation");
+    expect(gate?.state).toBe("proven");
+    expect(gate?.detail).toContain("before parser initialization");
+    expect(gate?.detail).toContain("Scanner 6/6");
+    expect(gate?.detail).toContain("fresh rescan remains required");
+    expect(gate?.detail).toContain("MISSING_EVIDENCE");
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      remediation: { partialOutputWrittenOnAdmissionFailure: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.remediation.partialOutputWrittenOnAdmissionFailure = true;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    expect(buildNorthstarOpenGateAudit({ rootDir }).gates
+      .find((item) => item.id === "current_source_template_inventory_remediation")?.state).toBe("contradicted");
   });
 
   it("records all four approval-free scan residuals as source-remediated without reclassifying the sealed scan", async () => {

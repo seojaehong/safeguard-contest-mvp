@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-31T03:52:33.988Z",
-  "sourceSha": "a6016f6a14a55f87d887c348f0585a9b23012b68",
+  "generatedAt": "2026-08-31T04:04:49.823Z",
+  "sourceSha": "2375ebe8d16274c936aaf980ca072cdbc78953d2",
   "overall": "contradicted",
   "gates": [
     {
@@ -353,6 +353,16 @@
       "label": "Current-source forwarded identity remediation",
       "evidencePath": "evaluation\\current-source-security-forwarded-identity-remediation-2026-08-31\\report.json",
       "detail": "Deployed product source e0ee1120 accepts x-vercel-forwarded-for only under verified Vercel production ingress, otherwise collapses unverified identity to the conservative unknown bucket. Seven focused/adjacent files with 44 tests and strict typecheck pass. The sealed 21-finding scan is unchanged, fresh rescan remains required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Keep the immutable scan open and verify reclassification only through a fresh follow-up Standard scan."
+      ]
+    },
+    {
+      "id": "current_source_template_inventory_remediation",
+      "state": "proven",
+      "label": "Current-source template inventory remediation",
+      "evidencePath": "evaluation\\current-source-security-template-inventory-remediation-2026-08-31\\report.json",
+      "detail": "Deployed product source 8a9269a4 bounds the local template inventory before parser initialization with no-follow traversal, file/byte/parser/time/image/ZIP budgets, and fail-closed code 2 without partial summary output. Scanner 6/6, shared archive safety 5/5, and Python compilation pass. The sealed 21-finding scan is unchanged, fresh rescan remains required, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
         "Keep the immutable scan open and verify reclassification only through a fresh follow-up Standard scan."
       ]

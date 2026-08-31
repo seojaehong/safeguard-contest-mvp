@@ -51,6 +51,7 @@ const ARTIFACTS = Object.freeze({
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-complete", "report.json"),
   completedCurrentHeadStandardSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-9504d8db-complete", "report.json"),
   currentSourceForwardedIdentityRemediation: path.join("evaluation", "current-source-security-forwarded-identity-remediation-2026-08-31", "report.json"),
+  currentSourceTemplateInventoryRemediation: path.join("evaluation", "current-source-security-template-inventory-remediation-2026-08-31", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
@@ -586,6 +587,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const freshCurrentSourceSecurityScan = tryReadJson(rootDir, ARTIFACTS.freshCurrentSourceSecurityScan);
   const completedCurrentHeadStandardSecurityScan = tryReadJson(rootDir, ARTIFACTS.completedCurrentHeadStandardSecurityScan);
   const currentSourceForwardedIdentityRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceForwardedIdentityRemediation);
+  const currentSourceTemplateInventoryRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceTemplateInventoryRemediation);
   const currentSourceApprovalFreeSecurityRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceApprovalFreeSecurityRemediation);
   const currentSourceSecurityResourceBudgetRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityResourceBudgetRemediation);
   const currentSourceLogoutStorageRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceLogoutStorageRemediation);
@@ -740,6 +742,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "fresh_current_source_security_scan", ARTIFACTS.freshCurrentSourceSecurityScan, freshCurrentSourceSecurityScan),
     evidenceStatus(rootDir, currentHead, liveCommit, "completed_current_head_standard_security_scan", ARTIFACTS.completedCurrentHeadStandardSecurityScan, completedCurrentHeadStandardSecurityScan),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_forwarded_identity_remediation", ARTIFACTS.currentSourceForwardedIdentityRemediation, currentSourceForwardedIdentityRemediation),
+    evidenceStatus(rootDir, currentHead, liveCommit, "current_source_template_inventory_remediation", ARTIFACTS.currentSourceTemplateInventoryRemediation, currentSourceTemplateInventoryRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_approval_free_security_remediation", ARTIFACTS.currentSourceApprovalFreeSecurityRemediation, currentSourceApprovalFreeSecurityRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_resource_budget_remediation", ARTIFACTS.currentSourceSecurityResourceBudgetRemediation, currentSourceSecurityResourceBudgetRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_logout_storage_remediation", ARTIFACTS.currentSourceLogoutStorageRemediation, currentSourceLogoutStorageRemediation),
@@ -1057,6 +1060,22 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       freshFollowUpSecurityScan: asString(recordAt(currentSourceForwardedIdentityRemediation, "remainingBoundaries")?.freshFollowUpSecurityScan),
       securityCompleteClaimAllowed: recordAt(currentSourceForwardedIdentityRemediation, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
       exactSavedShareVerdict: asString(recordAt(currentSourceForwardedIdentityRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    currentSourceTemplateInventoryRemediation: {
+      artifact: ARTIFACTS.currentSourceTemplateInventoryRemediation,
+      verdict: isRecord(currentSourceTemplateInventoryRemediation) ? asString(currentSourceTemplateInventoryRemediation.verdict) : "missing",
+      sourceHead: isRecord(currentSourceTemplateInventoryRemediation) ? asString(currentSourceTemplateInventoryRemediation.sourceHead) : "",
+      productionCommit: isRecord(currentSourceTemplateInventoryRemediation) ? asString(currentSourceTemplateInventoryRemediation.productionCommit) : "",
+      sourceIncludedInProduction: currentSourceTemplateInventoryRemediation?.sourceIncludedInProduction === true,
+      scanId: asString(recordAt(currentSourceTemplateInventoryRemediation, "securityBaseline")?.scanId),
+      findingId: asString(recordAt(currentSourceTemplateInventoryRemediation, "securityBaseline")?.findingId),
+      findingRule: asString(recordAt(currentSourceTemplateInventoryRemediation, "securityBaseline")?.findingRule),
+      scannerTestCount: asNumber(recordAt(recordAt(currentSourceTemplateInventoryRemediation, "verification"), "scannerUnitTests")?.tests),
+      archiveSafetyTestCount: asNumber(recordAt(recordAt(currentSourceTemplateInventoryRemediation, "verification"), "archiveSafetyTests")?.tests),
+      liveBehavioralProbeExecuted: recordAt(currentSourceTemplateInventoryRemediation, "verification")?.liveBehavioralProbeExecuted === true,
+      freshFollowUpSecurityScan: asString(recordAt(currentSourceTemplateInventoryRemediation, "remainingBoundaries")?.freshFollowUpSecurityScan),
+      securityCompleteClaimAllowed: recordAt(currentSourceTemplateInventoryRemediation, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(currentSourceTemplateInventoryRemediation, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     currentSourceApprovalFreeSecurityRemediation: {
       artifact: ARTIFACTS.currentSourceApprovalFreeSecurityRemediation,
@@ -2618,6 +2637,11 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Verdict: \`${rollup.currentSourceForwardedIdentityRemediation.verdict || "missing"}\`; source/live \`${rollup.currentSourceForwardedIdentityRemediation.sourceHead || "missing"}/${rollup.currentSourceForwardedIdentityRemediation.productionCommit || "missing"}\`; included=${rollup.currentSourceForwardedIdentityRemediation.sourceIncludedInProduction}`,
     `- Finding: ${rollup.currentSourceForwardedIdentityRemediation.findingRule || "missing"}; tests ${rollup.currentSourceForwardedIdentityRemediation.testFileCount ?? "unknown"} files / ${rollup.currentSourceForwardedIdentityRemediation.testCount ?? "unknown"} cases; live identity-key probe=${rollup.currentSourceForwardedIdentityRemediation.liveBehavioralProbeExecuted}`,
     `- Fresh scan: ${rollup.currentSourceForwardedIdentityRemediation.freshFollowUpSecurityScan || "REQUIRED"}; security-complete=${rollup.currentSourceForwardedIdentityRemediation.securityCompleteClaimAllowed}; exact saved Share=${rollup.currentSourceForwardedIdentityRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "",
+    "## Bounded Template Inventory Remediation",
+    `- Verdict: \`${rollup.currentSourceTemplateInventoryRemediation.verdict || "missing"}\`; source/live \`${rollup.currentSourceTemplateInventoryRemediation.sourceHead || "missing"}/${rollup.currentSourceTemplateInventoryRemediation.productionCommit || "missing"}\`; included=${rollup.currentSourceTemplateInventoryRemediation.sourceIncludedInProduction}`,
+    `- Finding: ${rollup.currentSourceTemplateInventoryRemediation.findingRule || "missing"}; scanner/archive tests ${rollup.currentSourceTemplateInventoryRemediation.scannerTestCount ?? "unknown"}/${rollup.currentSourceTemplateInventoryRemediation.archiveSafetyTestCount ?? "unknown"}; remote operator-script probe=${rollup.currentSourceTemplateInventoryRemediation.liveBehavioralProbeExecuted}`,
+    `- Fresh scan: ${rollup.currentSourceTemplateInventoryRemediation.freshFollowUpSecurityScan || "REQUIRED"}; security-complete=${rollup.currentSourceTemplateInventoryRemediation.securityCompleteClaimAllowed}; exact saved Share=${rollup.currentSourceTemplateInventoryRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "",
     "## Current Security Remediation Ledger",
     `- Verdict: \`${rollup.currentSecurityRemediationLedger.verdict}\``,
