@@ -3877,6 +3877,9 @@ function koshaPromotionPacketSummary(koshaPromotionPacket) {
   const reviewReadiness = isRecord(koshaPromotionPacket.operatorReviewReadiness)
     ? koshaPromotionPacket.operatorReviewReadiness
     : {};
+  const corpusBinding = isRecord(koshaPromotionPacket.corpusBinding)
+    ? koshaPromotionPacket.corpusBinding
+    : {};
   return {
     verdict: asString(koshaPromotionPacket.verdict),
     candidateCount: typeof koshaPromotionPacket.candidateCount === "number" ? koshaPromotionPacket.candidateCount : undefined,
@@ -3893,6 +3896,8 @@ function koshaPromotionPacketSummary(koshaPromotionPacket) {
     dbMutationPerformed: asBoolean(koshaPromotionPacket.dbMutationPerformed),
     embeddingGenerationPerformed: asBoolean(koshaPromotionPacket.embeddingGenerationPerformed),
     exactPromotionPerformed: asBoolean(koshaPromotionPacket.exactPromotionPerformed),
+    corpusBindingSchemaVersion: asString(corpusBinding.schemaVersion),
+    corpusBindingSha256: asString(corpusBinding.bindingSha256),
     forbiddenClaims: Array.isArray(koshaPromotionPacket.forbiddenClaims)
       ? koshaPromotionPacket.forbiddenClaims.map(asString).filter(Boolean)
       : [],
@@ -4984,6 +4989,7 @@ ${report.nextSafeWorkWithoutApproval.map((item, index) => `${index + 1}. ${item}
 - Operator-review packet ready: ${report.koshaExactPromotionPacket.packetReadyForReview === true}.
 - Review checklist complete: ${report.koshaExactPromotionPacket.reviewChecklistComplete === true}.
 - Exact-trust promotion blocked until checklist complete: ${report.koshaExactPromotionPacket.exactTrustPromotionBlockedUntilChecklistComplete === true}.
+- Transitive corpus binding: \`${report.koshaExactPromotionPacket.corpusBindingSha256 || "missing"}\` (${report.koshaExactPromotionPacket.corpusBindingSchemaVersion || "missing"}).
 - Mutation performed by candidate audit: ${report.koshaNextExactCandidateAudit.mutationPerformed === true}.
 - Exact promotion performed by packet: ${report.koshaExactPromotionPacket.exactPromotionPerformed === true}.
 - Forbidden claim remains: metadata-verified candidates are not exact production evidence until separately promoted through immutable acquisition/review.

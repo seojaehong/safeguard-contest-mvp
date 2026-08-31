@@ -1096,6 +1096,8 @@ type NextRunwayReport = {
     dbMutationPerformed: boolean;
     embeddingGenerationPerformed: boolean;
     exactPromotionPerformed: boolean;
+    corpusBindingSchemaVersion: string;
+    corpusBindingSha256: string;
     forbiddenClaims: string[];
   };
   uiInterpretation: {
@@ -3107,6 +3109,10 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       exactTrustPromotionBlockedUntilChecklistComplete: true,
       perCandidateRequiredCheckCount: 5,
     },
+    corpusBinding: {
+      schemaVersion: "safeclaw-kosha-corpus-binding/v1",
+      bindingSha256: "b".repeat(64),
+    },
     selectionPolicy: {
       selectedStableKeys: ["D-C-10", "D-C-11", "A-G-1", "A-G-15", "B-E-11", "B-E-9", "D-C-4", "E-G-4"],
     },
@@ -5042,6 +5048,8 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       dbMutationPerformed: false,
       embeddingGenerationPerformed: false,
       exactPromotionPerformed: false,
+      corpusBindingSchemaVersion: "safeclaw-kosha-corpus-binding/v1",
+      corpusBindingSha256: "b".repeat(64),
     });
     expect(report.koshaExactPromotionPacket.forbiddenClaims).toContain(
       "The exact-kosha registry was expanded by this packet.",
