@@ -146,6 +146,71 @@ class SnapshotKoshaGuideCorpusTest(unittest.TestCase):
         payload = json.loads(result.stdout.decode("utf-8"))
         self.assertIn("◦", payload["items"][0]["title"])
 
+    def test_inventory_only_emits_bounded_archive_metadata_without_pdf_extraction(self) -> None:
+        repo_root = Path(__file__).resolve().parents[2]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            technical_folder = Path(temp_dir)
+            zip_path = technical_folder / "technical-guides.zip"
+            with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr("A-G-1-2025 기술지원규정.pdf", b"not-a-valid-pdf")
+                archive.writestr("notes.txt", b"ignored")
+            (technical_folder / "ignored-direct.pdf").write_bytes(b"not-part-of-the-legacy-audit")
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/snapshot_kosha_guide_corpus.py",
+                    "--source",
+                    str(technical_folder),
+                    "--inventory-only",
+                    "--max-member-count",
+                    "4",
+                ],
+                cwd=repo_root,
+                capture_output=True,
+                check=False,
+                timeout=30,
+            )
+
+        stderr = result.stderr.decode("utf-8", errors="replace")
+        self.assertEqual(result.returncode, 0, stderr)
+        payload = json.loads(result.stdout.decode("utf-8"))
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["resourcePolicy"]["max_member_count"], 4)
+        self.assertEqual(payload["sourceIdentity"]["source_member_count"], 2)
+        self.assertEqual(len(payload["entries"]), 1)
+        self.assertEqual(payload["entries"][0]["zipFile"], "technical-guides.zip")
+        self.assertEqual(payload["entries"][0]["itemType"], "technical-support-regulation")
+        self.assertTrue(payload["entries"][0]["crc32"].isdigit())
+
+    def test_inventory_only_fails_closed_before_extraction_when_member_limit_is_exceeded(self) -> None:
+        repo_root = Path(__file__).resolve().parents[2]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            technical_folder = Path(temp_dir)
+            zip_path = technical_folder / "too-many-members.zip"
+            with zipfile.ZipFile(zip_path, "w") as archive:
+                archive.writestr("A-G-1-2025 기술지원규정.pdf", b"first")
+                archive.writestr("A-G-2-2025 기술지원규정.pdf", b"second")
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/snapshot_kosha_guide_corpus.py",
+                    "--source",
+                    str(technical_folder),
+                    "--inventory-only",
+                    "--max-member-count",
+                    "1",
+                ],
+                cwd=repo_root,
+                capture_output=True,
+                check=False,
+                timeout=30,
+            )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("member count exceeds limit", result.stderr.decode("utf-8", errors="replace"))
+
     def test_builds_read_only_snapshot_without_upload_state(self) -> None:
         source = ReferenceSource(
             id="kosha-technical-support-regulations-2025",

@@ -11,7 +11,13 @@ SCRIPTS_DIR = Path(__file__).resolve().parents[1]
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from archive_safety import ArchiveBudgetError, ArchiveLimits, BoundedZipReader
+from archive_safety import (
+    ArchiveBudgetError,
+    ArchiveLimits,
+    BoundedZipReader,
+    EOCD_SIGNATURE,
+    preflight_zip_central_directory,
+)
 
 
 class BoundedZipReaderTest(unittest.TestCase):
@@ -63,6 +69,35 @@ class BoundedZipReaderTest(unittest.TestCase):
             with zipfile.ZipFile(compressed_path) as archive:
                 with self.assertRaisesRegex(ArchiveBudgetError, "compression ratio"):
                     BoundedZipReader(archive, ArchiveLimits(max_compression_ratio=2.0))
+
+    def test_preflights_central_directory_before_zipfile_materialization(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_dir:
+            archive_path = self.write_archive(Path(temporary_dir), {"one": b"1", "two": b"2"})
+
+            self.assertEqual(
+                preflight_zip_central_directory(archive_path, ArchiveLimits(max_member_count=2)),
+                2,
+            )
+            with self.assertRaisesRegex(ArchiveBudgetError, "member count"):
+                preflight_zip_central_directory(archive_path, ArchiveLimits(max_member_count=1))
+            with self.assertRaisesRegex(ArchiveBudgetError, "central directory exceeds limit"):
+                preflight_zip_central_directory(
+                    archive_path,
+                    ArchiveLimits(max_central_directory_bytes=1),
+                )
+
+    def test_rejects_declared_and_actual_central_directory_count_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_dir:
+            archive_path = self.write_archive(Path(temporary_dir), {"one": b"1", "two": b"2"})
+            archive_bytes = bytearray(archive_path.read_bytes())
+            eocd_offset = archive_bytes.rfind(EOCD_SIGNATURE)
+            self.assertGreaterEqual(eocd_offset, 0)
+            archive_bytes[eocd_offset + 8:eocd_offset + 10] = (1).to_bytes(2, "little")
+            archive_bytes[eocd_offset + 10:eocd_offset + 12] = (1).to_bytes(2, "little")
+            archive_path.write_bytes(archive_bytes)
+
+            with self.assertRaisesRegex(ArchiveBudgetError, "count mismatch"):
+                preflight_zip_central_directory(archive_path)
 
 
 if __name__ == "__main__":

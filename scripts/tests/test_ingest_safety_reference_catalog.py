@@ -4,9 +4,11 @@ import csv
 import importlib.util
 import sys
 import unittest
+import zipfile
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import ModuleType
+from unittest.mock import patch
 
 from openpyxl import Workbook
 
@@ -62,6 +64,30 @@ class ParseSifArchiveTest(unittest.TestCase):
 
             with self.assertRaisesRegex(ParserBudgetError, "row cells exceed limit"):
                 ingester.read_csv_dicts(csv_path, budget)
+
+    def test_technical_zip_parser_preflights_member_budget_before_pdf_extraction(self) -> None:
+        ingester = load_ingester()
+        with TemporaryDirectory() as temporary_directory:
+            technical_folder = Path(temporary_directory)
+            archive_path = technical_folder / "technical-guides.zip"
+            with zipfile.ZipFile(archive_path, "w") as archive:
+                archive.writestr("A-G-1-2025 기술지원규정.pdf", b"first-invalid-pdf")
+                archive.writestr("A-G-2-2025 기술지원규정.pdf", b"second-invalid-pdf")
+            strict_limits = ingester.ArchiveLimits(
+                max_member_count=1,
+                max_member_bytes=1024,
+                max_total_uncompressed_bytes=2048,
+                max_compression_ratio=100.0,
+                max_central_directory_bytes=4096,
+            )
+
+            with patch.object(ingester, "TECHNICAL_ARCHIVE_LIMITS", strict_limits):
+                with self.assertRaisesRegex(ValueError, "ZIP member count exceeds limit: 2/1"):
+                    ingester.parse_technical_support_zips(
+                        technical_folder,
+                        max_pdf_pages=3,
+                        priority_only=False,
+                    )
 
 
 if __name__ == "__main__":

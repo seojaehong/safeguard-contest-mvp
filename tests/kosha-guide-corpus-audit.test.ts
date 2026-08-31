@@ -11,6 +11,7 @@ import {
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
+import AdmZip from "adm-zip";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -71,13 +72,14 @@ function reference(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenc
 
 function runKoshaAuditScript(
   arguments_: string[],
-  environment: NodeJS.ProcessEnv = process.env
+  environment: NodeJS.ProcessEnv = process.env,
+  timeoutMs = 30_000
 ) {
   return spawnSync(process.execPath, ["--", "scripts/audit_kosha_guides.mjs", ...arguments_], {
     cwd: process.cwd(),
     encoding: "utf8",
     env: environment,
-    timeout: 30_000,
+    timeout: timeoutMs,
     windowsHide: true
   });
 }
@@ -1165,6 +1167,60 @@ describe("KOSHA GUIDE read-only runner contract", () => {
     expect(script).toContain('localParse: {');
     expect(script).toContain('parseEmptyOutputCount');
   });
+
+  it("uses the bounded Python archive inventory and time-bounds both local helper phases", () => {
+    const script = readFileSync(resolve(process.cwd(), "scripts/audit_kosha_guides.mjs"), "utf8");
+
+    expect(script).not.toContain('from "adm-zip"');
+    expect(script).not.toContain(".getEntries()");
+    expect(script).toContain('"--inventory-only"');
+    expect(script).toContain("KOSHA_LOCAL_ARCHIVE_LIMIT_ARGUMENTS");
+    expect(script).toContain("KOSHA_LOCAL_INVENTORY_TIMEOUT_MS");
+    expect(script).toContain("KOSHA_LOCAL_PARSE_TIMEOUT_MS");
+    expect(script).toContain("timeout,");
+    expect(script).toContain('errorCode === "ETIMEDOUT"');
+    expect(script).toContain("KOSHA_LOCAL_HELPER_MAX_BUFFER_BYTES");
+  });
+
+  it("fails closed on an over-budget ZIP directory before provider or database work", () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), "kosha-bounded-audit-"));
+    const technicalFolder = join(fixtureRoot, "technical");
+    const outputDir = join(fixtureRoot, "output");
+    mkdirSync(technicalFolder, { recursive: true });
+    const archivePath = join(technicalFolder, "technical-guides.zip");
+    const archive = new AdmZip(undefined, { noSort: true });
+    archive.addFile("A-G-1-2025 기술지원규정.pdf", Buffer.from("bounded-fixture", "utf8"));
+    archive.writeZip(archivePath);
+    const tamperedArchive = readFileSync(archivePath);
+    const eocdOffset = tamperedArchive.lastIndexOf(Buffer.from("PK\u0005\u0006", "binary"));
+    expect(eocdOffset).toBeGreaterThanOrEqual(0);
+    tamperedArchive.writeUInt16LE(10_001, eocdOffset + 8);
+    tamperedArchive.writeUInt16LE(10_001, eocdOffset + 10);
+    writeFileSync(archivePath, tamperedArchive);
+
+    try {
+      const result = runKoshaAuditScript(
+        [
+          "--offline",
+          "--technical-folder",
+          technicalFolder,
+          "--output-dir",
+          outputDir,
+        ],
+        process.env,
+        60_000
+      );
+      const output = `${result.stdout}${result.stderr}`;
+      const auditLog = readFileSync(join(outputDir, "audit.log"), "utf8");
+
+      expect(result.status).not.toBe(0);
+      expect(output).toContain("kosha-local-inventory-failed:1");
+      expect(auditLog).toContain("readOnly=true dbMutationPerformed=false uploadPerformed=false");
+      expect(auditLog).not.toContain("productionMode=");
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true });
+    }
+  }, 40_000);
 
   it("keeps the production/local bridge bounded to exact-tuple GET reads", () => {
     const script = readFileSync(resolve(process.cwd(), "scripts/audit_kosha_guides.mjs"), "utf8");

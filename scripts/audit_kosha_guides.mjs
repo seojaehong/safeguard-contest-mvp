@@ -4,7 +4,6 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
-  readdirSync,
   realpathSync,
   statSync,
   writeFileSync
@@ -12,7 +11,6 @@ import {
 import { homedir } from "node:os";
 import { isAbsolute, relative, resolve, sep } from "node:path";
 
-import AdmZip from "adm-zip";
 import { createServer } from "vite";
 
 const OFFICIAL_LIST_URL = "https://portal.kosha.or.kr/archive/resources/tech-support/search/all?page=1&rowsPerPage=10";
@@ -22,6 +20,19 @@ const DEFAULT_TECHNICAL_FOLDER = process.env.KOSHA_TECHNICAL_FOLDER || resolve(h
 const DEFAULT_MANIFEST_PATH = "data/safety-knowledge/kosha-guide-audit-manifest.json";
 const DEFAULT_OUTPUT_DIR = "evaluation/kosha-guide-audit-2026-07-11";
 const OFFICIAL_CATEGORIES = ["A", "B", "C", "D", "E"];
+const KOSHA_LOCAL_INVENTORY_TIMEOUT_MS = 60_000;
+const KOSHA_LOCAL_PARSE_TIMEOUT_MS = 15 * 60_000;
+const KOSHA_LOCAL_HELPER_MAX_BUFFER_BYTES = 64 * 1024 * 1024;
+const KOSHA_LOCAL_ARCHIVE_LIMIT_ARGUMENTS = [
+  "--max-member-count",
+  "10000",
+  "--max-member-bytes",
+  String(64 * 1024 * 1024),
+  "--max-compression-ratio",
+  "100",
+  "--max-total-uncompressed-bytes",
+  String(1024 * 1024 * 1024),
+];
 const AUDIT_USAGE = `Usage: node scripts/audit_kosha_guides.mjs [options]
 
 Production/local bridge options:
@@ -843,54 +854,70 @@ async function runProductionLocalBridgeAudit({
   }, null, 2));
 }
 
-function readLocalArchiveEntries(technicalFolder, decodeKoshaArchiveEntryName) {
-  const zipFiles = readdirSync(technicalFolder)
-    .filter((fileName) => fileName.toLowerCase().endsWith(".zip"))
-    .sort(codepointCompare);
-  const entries = [];
-  for (const zipFile of zipFiles) {
-    const archive = new AdmZip(resolve(technicalFolder, zipFile));
-    for (const entry of archive.getEntries()) {
-      if (entry.isDirectory) continue;
-      const internalPath = decodeKoshaArchiveEntryName(entry.rawEntryName);
-      if (!internalPath.toLowerCase().endsWith(".pdf")) continue;
-      entries.push({
-        zipFile,
-        internalPath,
-        crc32: String(entry.header.crc >>> 0),
-        compressedSize: entry.header.compressedSize,
-        fileSize: entry.header.size,
-        itemType: internalPath.includes("기술지원규정")
-          ? "technical-support-regulation"
-          : "technical-guideline"
-      });
+function runLocalSnapshotHelper(arguments_, timeout, label) {
+  const result = spawnSync(
+    "python",
+    ["scripts/snapshot_kosha_guide_corpus.py", ...arguments_],
+    {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      maxBuffer: KOSHA_LOCAL_HELPER_MAX_BUFFER_BYTES,
+      timeout,
+      windowsHide: true
     }
+  );
+  if (result.error) {
+    const errorCode = result.error && typeof result.error === "object" && "code" in result.error
+      ? String(result.error.code)
+      : "unknown";
+    if (errorCode === "ETIMEDOUT") throw new Error(`kosha-local-${label}-timeout`);
+    throw new Error(`kosha-local-${label}-spawn-failed`);
   }
-  return entries;
+  if (result.status !== 0) {
+    throw new Error(`kosha-local-${label}-failed:${result.status ?? "signal"}`);
+  }
+  return result;
+}
+
+function parseLocalSnapshotOutput(stdout, errorCode) {
+  try {
+    const value = JSON.parse(stdout);
+    if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("not-object");
+    return value;
+  } catch {
+    throw new Error(errorCode);
+  }
+}
+
+function readLocalArchiveEntries(technicalFolder) {
+  const result = runLocalSnapshotHelper(
+    [
+      "--source",
+      technicalFolder,
+      "--inventory-only",
+      ...KOSHA_LOCAL_ARCHIVE_LIMIT_ARGUMENTS
+    ],
+    KOSHA_LOCAL_INVENTORY_TIMEOUT_MS,
+    "inventory"
+  );
+  const payload = parseLocalSnapshotOutput(result.stdout, "kosha-local-inventory-invalid");
+  if (!Array.isArray(payload.entries)) throw new Error("kosha-local-inventory-entries-invalid");
+  return payload.entries;
 }
 
 function readLocalParsedSnapshot(technicalFolder) {
-  const result = spawnSync(
-    "python",
+  const result = runLocalSnapshotHelper(
     [
-      "scripts/snapshot_kosha_guide_corpus.py",
       "--technical-folder",
       technicalFolder,
       "--max-pdf-pages",
       "3"
     ],
-    {
-      cwd: process.cwd(),
-      encoding: "utf8",
-      maxBuffer: 64 * 1024 * 1024,
-      windowsHide: true
-    }
+    KOSHA_LOCAL_PARSE_TIMEOUT_MS,
+    "parse"
   );
-  if (result.status !== 0) {
-    throw new Error(`local snapshot helper failed (${result.status}): ${result.stderr.trim()}`);
-  }
   return {
-    snapshot: JSON.parse(result.stdout),
+    snapshot: parseLocalSnapshotOutput(result.stdout, "kosha-local-parse-output-invalid"),
     notices: result.stderr
       .split(/\r?\n/gu)
       .map((line) => line.trim())
@@ -1506,7 +1533,7 @@ try {
     });
   } else {
     const technicalFolder = resolve(options.technicalFolder);
-  const archiveEntries = readLocalArchiveEntries(technicalFolder, audit.decodeKoshaArchiveEntryName);
+  const archiveEntries = readLocalArchiveEntries(technicalFolder);
   const localArchive = audit.buildKoshaArchiveInventory(archiveEntries);
   const localParsed = readLocalParsedSnapshot(technicalFolder);
   const localRows = Array.isArray(localParsed.snapshot.items) ? localParsed.snapshot.items : [];

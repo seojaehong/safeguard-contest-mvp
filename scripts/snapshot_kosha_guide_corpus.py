@@ -15,6 +15,7 @@ import unicodedata
 import uuid
 import zipfile
 from dataclasses import asdict, dataclass
+from itertools import islice
 from pathlib import Path
 from typing import Callable, Iterable, Iterator, Protocol, Sequence
 
@@ -25,6 +26,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from scripts import recover_kosha_ocr_boundary
+from scripts.archive_safety import ArchiveLimits, open_preflighted_zip
 from scripts.ingest_safety_reference_catalog import (
     ReferenceItem,
     ReferenceSource,
@@ -46,6 +48,7 @@ OFFICIAL_API_URL = "https://portal.kosha.or.kr/api/portal24/bizV/p/VCPDG08009/se
 DATA_FILES = ("items.jsonl", "chunks.jsonl", "failures.jsonl")
 OUTPUT_FILES = (*DATA_FILES, "checkpoint.json")
 OCR_REVIEW_HMAC_KEY_ENV = "KOSHA_OCR_REVIEW_HMAC_KEY"
+MAX_KOSHA_CENTRAL_DIRECTORY_BYTES = 64 * 1024 * 1024
 
 
 class HashDigest(Protocol):
@@ -476,14 +479,26 @@ def _validate_archive_entry_bounds(
 def _discover_entries(
     source: Path,
     limits: ResourceLimits | None = None,
+    *,
+    include_direct_pdfs: bool = True,
 ) -> tuple[list[LocalPdfEntry], list[Path], SourceScanStats]:
     effective_limits = limits or ResourceLimits()
     effective_limits.validate()
     if not source.exists():
         raise FileNotFoundError(f"local source does not exist: {source}")
     if source.is_dir():
-        archives = sorted(source.glob("*.zip"), key=lambda path: path.name)
-        direct_pdfs = sorted(source.glob("*.pdf"), key=lambda path: path.name)
+        archives = sorted(
+            islice(source.glob("*.zip"), effective_limits.max_member_count + 1),
+            key=lambda path: path.name,
+        )
+        direct_pdfs = (
+            sorted(
+                islice(source.glob("*.pdf"), effective_limits.max_member_count + 1),
+                key=lambda path: path.name,
+            )
+            if include_direct_pdfs
+            else []
+        )
         if not archives and not direct_pdfs:
             raise ValueError(f"local source contains no ZIP or PDF files: {source}")
     elif source.suffix.lower() == ".zip":
@@ -494,6 +509,12 @@ def _discover_entries(
         direct_pdfs = [source]
     else:
         raise ValueError(f"local source must be a directory, ZIP, or PDF: {source}")
+    source_file_count = len(archives) + len(direct_pdfs)
+    if source_file_count > effective_limits.max_member_count:
+        raise ResourceLimitError(
+            f"source file count exceeds limit: "
+            f"{source_file_count}/{effective_limits.max_member_count}"
+        )
 
     entries: list[LocalPdfEntry] = []
     total_member_count = 0
@@ -502,9 +523,25 @@ def _discover_entries(
     max_compression_ratio = 0.0
     for archive_path in archives:
         try:
-            with zipfile.ZipFile(archive_path) as archive:
+            archive_limits = ArchiveLimits(
+                max_member_count=effective_limits.max_member_count - total_member_count,
+                max_member_bytes=effective_limits.max_member_bytes,
+                max_total_uncompressed_bytes=effective_limits.max_total_uncompressed_bytes - total_uncompressed,
+                max_compression_ratio=effective_limits.max_compression_ratio,
+                max_central_directory_bytes=MAX_KOSHA_CENTRAL_DIRECTORY_BYTES,
+            )
+            with open_preflighted_zip(archive_path, archive_limits) as (
+                archive,
+                declared_member_count,
+            ):
+                archive_infos = archive.infolist()
+                if len(archive_infos) != declared_member_count:
+                    raise ResourceLimitError(
+                        f"ZIP member count changed after preflight: "
+                        f"{len(archive_infos)}/{declared_member_count}"
+                    )
                 normalized_member_paths: set[str] = set()
-                for info in archive.infolist():
+                for info in archive_infos:
                     total_member_count += 1
                     if total_member_count > effective_limits.max_member_count:
                         raise ResourceLimitError(
@@ -600,6 +637,42 @@ def _discover_entries(
             max_compression_ratio=max_compression_ratio,
         ),
     )
+
+
+def _inventory_payload(
+    source: Path,
+    entries: Sequence[LocalPdfEntry],
+    source_identity: dict[str, object],
+    limits: ResourceLimits,
+) -> dict[str, object]:
+    archive_entries: list[dict[str, object]] = []
+    for entry in entries:
+        if entry.archive_name is None:
+            continue
+        archive_entries.append(
+            {
+                "zipFile": entry.archive_name,
+                "internalPath": entry.member_name,
+                "crc32": str(int(entry.crc32, 16)) if entry.crc32 is not None else "0",
+                "compressedSize": entry.compressed_size,
+                "fileSize": entry.file_size,
+                "itemType": (
+                    "technical-support-regulation"
+                    if "기술지원규정" in entry.member_name
+                    else "technical-guideline"
+                ),
+            }
+        )
+    return {
+        "ok": True,
+        "source": str(source.resolve()),
+        "resourcePolicy": {
+            **limits.as_policy(),
+            "max_central_directory_bytes": MAX_KOSHA_CENTRAL_DIRECTORY_BYTES,
+        },
+        "sourceIdentity": source_identity,
+        "entries": archive_entries,
+    }
 
 
 def _read_entry_bytes(entry: LocalPdfEntry, archive: zipfile.ZipFile | None = None) -> bytes:
@@ -2358,6 +2431,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--report-dir", help="Optional directory for quality report.json and report.md.")
     parser.add_argument("--preflight", action="store_true", help="Validate and identify the local source without extracting PDFs.")
+    parser.add_argument(
+        "--inventory-only",
+        action="store_true",
+        help="Emit bounded archive entry metadata without extracting PDF bodies.",
+    )
     return parser.parse_args()
 
 
@@ -2368,6 +2446,8 @@ def main() -> int:
         sys.stderr.reconfigure(encoding="utf-8")
     args = parse_args()
     try:
+        if args.preflight and args.inventory_only:
+            raise ValueError("--preflight and --inventory-only are mutually exclusive")
         if args.source:
             source = Path(args.source)
             resource_limits = ResourceLimits(
@@ -2378,8 +2458,15 @@ def main() -> int:
                 max_pages_per_pdf=args.max_pages_per_pdf,
                 max_normalized_chars_per_pdf=args.max_normalized_chars_per_pdf,
             )
-            entries, source_files, scan_stats = _discover_entries(source.resolve(), resource_limits)
+            entries, source_files, scan_stats = _discover_entries(
+                source.resolve(),
+                resource_limits,
+                include_direct_pdfs=not args.inventory_only,
+            )
             source_identity = _source_identity(source_files, entries, scan_stats)
+            if args.inventory_only:
+                print(_canonical_json(_inventory_payload(source, entries, source_identity, resource_limits)))
+                return 0
             if args.preflight:
                 print(_canonical_json({"ok": True, "source": str(source.resolve()), "source_identity": source_identity}))
                 return 0
@@ -2440,8 +2527,8 @@ def main() -> int:
                 )
             )
             return 0
-        if args.preflight:
-            raise ValueError("--preflight requires --source")
+        if args.preflight or args.inventory_only:
+            raise ValueError("--preflight and --inventory-only require --source")
         with contextlib.redirect_stdout(sys.stderr):
             snapshot = build_snapshot(Path(args.technical_folder), args.max_pdf_pages)
         print(json.dumps(snapshot, ensure_ascii=False, separators=(",", ":")))

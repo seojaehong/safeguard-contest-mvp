@@ -13,6 +13,7 @@ import time
 import zipfile
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
+from itertools import islice
 from pathlib import Path
 from typing import Iterable, Sequence
 from urllib import error, request
@@ -24,10 +25,17 @@ SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from archive_safety import BoundedZipReader
+from archive_safety import ArchiveLimits, BoundedZipReader, open_preflighted_zip
 from parser_safety import ParserBudget, ParserBudgetError, ParserLimits
 
 DEFAULT_PARSER_LIMITS = ParserLimits()
+TECHNICAL_ARCHIVE_LIMITS = ArchiveLimits(
+    max_member_count=10_000,
+    max_member_bytes=64 * 1024 * 1024,
+    max_total_uncompressed_bytes=1024 * 1024 * 1024,
+    max_compression_ratio=100.0,
+    max_central_directory_bytes=64 * 1024 * 1024,
+)
 
 
 DOCUMENTS_RISK = ["점검결과 요약", "위험성평가표", "작업계획서"]
@@ -458,11 +466,47 @@ def parse_technical_support_zips(
         metadata={"folder": str(folder), "priorityOnly": priority_only},
     )
     items: list[ReferenceItem] = []
-    zip_paths = sorted(folder.glob("*.zip"))
+    zip_paths = sorted(
+        islice(folder.glob("*.zip"), TECHNICAL_ARCHIVE_LIMITS.max_member_count + 1)
+    )
+    if len(zip_paths) > TECHNICAL_ARCHIVE_LIMITS.max_member_count:
+        raise ParserBudgetError(
+            f"technical archive file count exceeds limit: "
+            f"{len(zip_paths)}/{TECHNICAL_ARCHIVE_LIMITS.max_member_count}"
+        )
+    total_archive_bytes = 0
+    total_archive_members = 0
+    total_uncompressed_bytes = 0
     for zip_index, zip_path in enumerate(zip_paths, start=1):
         parser_budget.assert_input_file(zip_path)
-        with zipfile.ZipFile(zip_path) as archive:
-            bounded_archive = BoundedZipReader(archive)
+        total_archive_bytes += zip_path.stat().st_size
+        if total_archive_bytes > TECHNICAL_ARCHIVE_LIMITS.max_total_uncompressed_bytes:
+            raise ParserBudgetError(
+                f"technical archive input bytes exceed limit: "
+                f"{total_archive_bytes}/{TECHNICAL_ARCHIVE_LIMITS.max_total_uncompressed_bytes}"
+            )
+        with open_preflighted_zip(zip_path, TECHNICAL_ARCHIVE_LIMITS) as (
+            archive,
+            declared_member_count,
+        ):
+            bounded_archive = BoundedZipReader(archive, TECHNICAL_ARCHIVE_LIMITS)
+            if len(bounded_archive.infos) != declared_member_count:
+                raise ParserBudgetError(
+                    f"technical archive member count changed after preflight: "
+                    f"{len(bounded_archive.infos)}/{declared_member_count}"
+                )
+            total_archive_members += len(bounded_archive.infos)
+            if total_archive_members > TECHNICAL_ARCHIVE_LIMITS.max_member_count:
+                raise ParserBudgetError(
+                    f"technical archive member count exceeds limit: "
+                    f"{total_archive_members}/{TECHNICAL_ARCHIVE_LIMITS.max_member_count}"
+                )
+            total_uncompressed_bytes += sum(info.file_size for info in bounded_archive.infos)
+            if total_uncompressed_bytes > TECHNICAL_ARCHIVE_LIMITS.max_total_uncompressed_bytes:
+                raise ParserBudgetError(
+                    f"technical archive total uncompressed bytes exceed limit: "
+                    f"{total_uncompressed_bytes}/{TECHNICAL_ARCHIVE_LIMITS.max_total_uncompressed_bytes}"
+                )
             for file_index, info in enumerate(bounded_archive.infos, start=1):
                 parser_budget.check_elapsed()
                 if info.is_dir():
