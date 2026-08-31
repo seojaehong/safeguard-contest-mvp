@@ -190,38 +190,45 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
 
 function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
   return {
-    verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_18_FINDINGS_PARTIAL_COVERAGE",
-    scanId: "f218c713-1a1c-4f4e-9777-8095926be1df",
-    sourceHead: "b5f145120766cd2ef904fce38ef32ed1a9facf74",
-    deployedProductSource: "b5f145120766cd2ef904fce38ef32ed1a9facf74",
+    verdict: "NOTICE_CURRENT_SOURCE_STANDARD_SCAN_14_FINDINGS_PARTIAL_COVERAGE",
+    scanId: "a4044172-9b4b-4e36-84be-a8955d9150ac",
+    sourceHead: "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+    deployedProductSource: "121c8a017c18b58874ef965cece12bc3e0f0df2f",
     scan: {
       status: "completed",
       mode: "standard",
       targetKind: "git_revision",
       coverageCompleteness: "partial",
-      trackedFileCount: 6822,
-      reviewedSurfaceCount: 17,
-      primaryReviewedSurfaceCount: 5,
-      deferredCoverageItemCount: 19,
-      reportableFindingCount: 18,
-      uniqueFindingWriteupCount: 18,
-      severity: { critical: 0, high: 0, medium: 13, low: 5 },
+      trackedFileCount: 6981,
+      reviewWorklistCount: 5,
+      closedReviewWorklistCount: 5,
+      reviewedSurfaceCount: 21,
+      deferredCoverageItemCount: 22,
+      reportableFindingCount: 14,
+      uniqueFindingWriteupCount: 14,
+      severity: { critical: 0, high: 0, medium: 10, low: 4 },
     },
     baseline: { immutableOriginalFindingCount: 18, preserved: true, rewritten: false },
     currentDisposition: {
-      approvalGatedDatabaseOrAtomicityCount: 9,
-      approvalSensitiveShareCapabilityCount: 1,
-      approvalFreeProductSourceResidualCount: 8,
-      fullyClosedBoundedSourceCandidateCount: 1,
+      approvalGatedDatabaseOrAtomicityCount: 7,
+      approvalSensitiveShareCapabilityCount: 0,
+      approvalFreeProductSourceResidualCount: 7,
+      fullyClosedBoundedSourceCandidateCount: 0,
       securityCompleteClaimAllowed: false,
     },
+    postScanRemediation: {
+      browserSessionBindingProductCommit: "e36356d84fa8ac2331f8d0b81229d0532024a876",
+      browserSessionBindingVerdict: "PASS_CURRENT_SOURCE_BROWSER_SESSION_BINDING_LIVE_PENDING",
+      scanFindingReclassified: false,
+      remainingApprovalFreeFindingCount: 6,
+    },
     canonicalArtifacts: {
-      manifest: "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/scan-manifest.json",
-      findings: "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/findings.json",
-      coverage: "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/coverage.json",
-      markdown: "evaluation/current-head-standard-security-scan-2026-08-31-complete/scan-report.md",
-      findingWriteupCount: 18,
-      supportingEvidenceCount: 18,
+      manifest: "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/scan-manifest.json",
+      findings: "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/findings.json",
+      coverage: "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/coverage.json",
+      markdown: "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/scan-report.md",
+      findingWriteupCount: 14,
+      supportingEvidenceCount: 14,
     },
     mutationBoundary: {
       dbMutationPerformed: false,
@@ -5338,7 +5345,7 @@ function createFixtureRoot(): string {
       securityCompleteClaimAllowed: false,
     },
   });
-  const freshScanRoot = path.join("evaluation", "current-head-standard-security-scan-2026-08-31-complete");
+  const freshScanRoot = path.join("evaluation", "current-source-standard-security-scan-2026-08-31-121c8a01-complete");
   writeJson(rootDir, path.join(freshScanRoot, "report.json"), freshCurrentSourceSecurityScanFixture());
   const completedScanRoot = path.join("evaluation", "current-head-standard-security-scan-2026-08-31-9504d8db-complete");
   const completedArtifacts = {
@@ -9729,20 +9736,20 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const reportPath = path.join(
       rootDir,
       "evaluation",
-      "current-head-standard-security-scan-2026-08-31-complete",
+      "current-source-standard-security-scan-2026-08-31-121c8a01-complete",
       "report.json",
     );
 
     const audit = buildNorthstarOpenGateAudit({ rootDir });
     const gate = audit.gates.find((item) => item.id === "fresh_current_source_security_scan");
     expect(gate?.state).toBe("notice");
-    expect(gate?.detail).toContain("18 findings (13 medium, 5 low)");
-    expect(gate?.detail).toContain("18 finding write-ups");
-    expect(gate?.detail).toContain("partial canonical coverage across 17 recorded surface rows");
-    expect(gate?.detail).toContain("19 deferred entries");
-    expect(gate?.detail).toContain("Eight approval-free source findings");
-    expect(gate?.detail).toContain("nine database/RLS/atomicity findings");
-    expect(gate?.detail).toContain("one approval-sensitive Share capability finding");
+    expect(gate?.detail).toContain("14 findings (10 medium, 4 low)");
+    expect(gate?.detail).toContain("14 finding write-ups");
+    expect(gate?.detail).toContain("partial canonical coverage across 21 recorded surface rows");
+    expect(gate?.detail).toContain("22 deferred entries");
+    expect(gate?.detail).toContain("Seven approval-free source findings");
+    expect(gate?.detail).toContain("seven database/RLS/atomicity findings");
+    expect(gate?.detail).toContain("current-source approval-free residual to six");
     expect(gate?.detail).toContain("not security-complete");
     expect(gate?.detail).toContain("MISSING_EVIDENCE");
 

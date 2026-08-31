@@ -1763,20 +1763,21 @@ function documentEditorialReviewCockpitFixture(): Record<string, unknown> {
 
 function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
   return {
-    verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_18_FINDINGS_PARTIAL_COVERAGE",
-    scanId: "f218c713-1a1c-4f4e-9777-8095926be1df",
-    sourceHead: "b5f145120766cd2ef904fce38ef32ed1a9facf74",
-    deployedProductSource: "b5f145120766cd2ef904fce38ef32ed1a9facf74",
-    scan: { status: "completed", mode: "standard", targetKind: "git_revision", coverageCompleteness: "partial", trackedFileCount: 6822, reviewedSurfaceCount: 17, primaryReviewedSurfaceCount: 5, deferredCoverageItemCount: 19, reportableFindingCount: 18, uniqueFindingWriteupCount: 18, severity: { critical: 0, high: 0, medium: 13, low: 5 } },
+    verdict: "NOTICE_CURRENT_SOURCE_STANDARD_SCAN_14_FINDINGS_PARTIAL_COVERAGE",
+    scanId: "a4044172-9b4b-4e36-84be-a8955d9150ac",
+    sourceHead: "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+    deployedProductSource: "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+    scan: { status: "completed", mode: "standard", targetKind: "git_revision", coverageCompleteness: "partial", trackedFileCount: 6981, reviewWorklistCount: 5, closedReviewWorklistCount: 5, reviewedSurfaceCount: 21, deferredCoverageItemCount: 22, reportableFindingCount: 14, uniqueFindingWriteupCount: 14, severity: { critical: 0, high: 0, medium: 10, low: 4 } },
     baseline: { immutableOriginalFindingCount: 18, preserved: true, rewritten: false },
-    currentDisposition: { approvalGatedDatabaseOrAtomicityCount: 9, approvalSensitiveShareCapabilityCount: 1, approvalFreeProductSourceResidualCount: 8, fullyClosedBoundedSourceCandidateCount: 1, securityCompleteClaimAllowed: false },
+    currentDisposition: { approvalGatedDatabaseOrAtomicityCount: 7, approvalSensitiveShareCapabilityCount: 0, approvalFreeProductSourceResidualCount: 7, fullyClosedBoundedSourceCandidateCount: 0, securityCompleteClaimAllowed: false },
+    postScanRemediation: { browserSessionBindingProductCommit: "e36356d84fa8ac2331f8d0b81229d0532024a876", browserSessionBindingVerdict: "PASS_CURRENT_SOURCE_BROWSER_SESSION_BINDING_LIVE_PENDING", scanFindingReclassified: false, remainingApprovalFreeFindingCount: 6 },
     canonicalArtifacts: {
-      manifest: "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/scan-manifest.json",
-      findings: "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/findings.json",
-      coverage: "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/coverage.json",
-      markdown: "evaluation/current-head-standard-security-scan-2026-08-31-complete/scan-report.md",
-      findingWriteupCount: 18,
-      supportingEvidenceCount: 18,
+      manifest: "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/scan-manifest.json",
+      findings: "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/findings.json",
+      coverage: "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/coverage.json",
+      markdown: "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/scan-report.md",
+      findingWriteupCount: 14,
+      supportingEvidenceCount: 14,
     },
     mutationBoundary: {
       dbMutationPerformed: false,
@@ -3738,7 +3739,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
       securityCompleteClaimAllowed: false,
     },
   });
-  writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/report.json", freshCurrentSourceSecurityScanFixture());
+  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/report.json", freshCurrentSourceSecurityScanFixture());
   writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-9504d8db-complete/report.json", completedCurrentHeadStandardSecurityScanFixture());
   writeJson(root, "evaluation/current-source-security-forwarded-identity-remediation-2026-08-31/report.json", currentSourceForwardedIdentityRemediationFixture());
   writeJson(root, "evaluation/current-source-security-template-inventory-remediation-2026-08-31/report.json", currentSourceTemplateInventoryRemediationFixture());
@@ -3751,11 +3752,11 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
   writeJson(root, "evaluation/current-source-security-photo-readiness-auth-fanout-remediation-2026-08-31/report.json", currentSourcePhotoReadinessAuthFanoutRemediationFixture());
   writeJson(root, "evaluation/current-source-security-mcp-generation-cancellation-remediation-2026-08-31/report.json", currentSourceMcpGenerationCancellationRemediationFixture());
   writeJson(root, "evaluation/current-source-security-kosha-archive-preflight-remediation-2026-08-31/report.json", currentSourceKoshaArchivePreflightRemediationFixture());
-  writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/scan-manifest.json", { scan: { status: "completed" } });
-  writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/findings.json", { findings: [] });
-  writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/canonical/coverage.json", { completeness: "partial" });
+  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/scan-manifest.json", { scan: { status: "completed" } });
+  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/findings.json", { findings: [] });
+  writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/coverage.json", { completeness: "partial" });
   fs.writeFileSync(
-    path.join(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/scan-report.md"),
+    path.join(root, "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/scan-report.md"),
     "# sealed fixture\n",
     "utf8",
   );
@@ -5386,7 +5387,7 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "fresh_current_source_security_scan",
       state: "notice",
-      reason: expect.stringContaining("18 open findings"),
+      reason: expect.stringContaining("14 open findings"),
     }));
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "current_source_approval_free_security_remediation",
@@ -5592,22 +5593,22 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       reason: expect.stringContaining("before archive expansion"),
     }));
     expect(report.freshCurrentSourceSecurityScan).toMatchObject({
-      verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_18_FINDINGS_PARTIAL_COVERAGE",
-      scanId: "f218c713-1a1c-4f4e-9777-8095926be1df",
-      sourceHead: "b5f145120766cd2ef904fce38ef32ed1a9facf74",
-      deployedProductSource: "b5f145120766cd2ef904fce38ef32ed1a9facf74",
+      verdict: "NOTICE_CURRENT_SOURCE_STANDARD_SCAN_14_FINDINGS_PARTIAL_COVERAGE",
+      scanId: "a4044172-9b4b-4e36-84be-a8955d9150ac",
+      sourceHead: "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+      deployedProductSource: "121c8a017c18b58874ef965cece12bc3e0f0df2f",
       status: "completed",
       coverageCompleteness: "partial",
-      reviewedSurfaceCount: 17,
-      deferredCoverageItemCount: 19,
-      reportableFindingCount: 18,
-      mediumFindingCount: 13,
-      lowFindingCount: 5,
+      reviewedSurfaceCount: 21,
+      deferredCoverageItemCount: 22,
+      reportableFindingCount: 14,
+      mediumFindingCount: 10,
+      lowFindingCount: 4,
       immutableOriginalFindingCount: 18,
-      approvalGatedDatabaseOrAtomicityCount: 9,
-      approvalSensitiveShareCapabilityCount: 1,
-      approvalFreeProductSourceResidualCount: 8,
-      fullyClosedBoundedSourceCandidateCount: 1,
+      approvalGatedDatabaseOrAtomicityCount: 7,
+      approvalSensitiveShareCapabilityCount: 0,
+      approvalFreeProductSourceResidualCount: 7,
+      fullyClosedBoundedSourceCandidateCount: 0,
       freshFullRepositoryScanCompleted: true,
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
