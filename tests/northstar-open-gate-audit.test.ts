@@ -218,7 +218,8 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
     },
     postScanRemediation: {
       browserSessionBindingProductCommit: "e36356d84fa8ac2331f8d0b81229d0532024a876",
-      browserSessionBindingVerdict: "PASS_CURRENT_SOURCE_BROWSER_SESSION_BINDING_LIVE_PENDING",
+      browserSessionBindingVerdict: "PASS_LIVE_DEPLOYED_SOURCE_BROWSER_SESSION_BINDING_RESCAN_PENDING",
+      browserSessionBindingProductionCommit: "77bcd6ea4ec1ea1914126dd7ba924f788b972602",
       scanFindingReclassified: false,
       remainingApprovalFreeFindingCount: 6,
     },

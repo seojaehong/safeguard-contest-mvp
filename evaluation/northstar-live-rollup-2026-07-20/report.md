@@ -1,11 +1,11 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T13:25:27.512Z
-Source HEAD at generation: df21e60cffb77e7708080f5c937f8b43b109cb67
-Live commit at generation: df21e60cffb77e7708080f5c937f8b43b109cb67
+Generated at: 2026-08-31T14:57:13.144Z
+Source HEAD at generation: 77bcd6ea4ec1ea1914126dd7ba924f788b972602
+Live commit at generation: 77bcd6ea4ec1ea1914126dd7ba924f788b972602
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
-Overall: `northstar_open_approval_gated`
+Overall: `northstar_evidence_missing_or_unknown`
 
 ## Current Workspace Mobile Geometry
 
@@ -438,7 +438,6 @@ Overall: `northstar_open_approval_gated`
 | current_live_document_editorial_runtime | proven | evaluation\live-document-editorial-template-runtime-2026-08-27\report.json |
 | product_capability_truth | proven | evaluation\product-capability-truth-2026-07-25\report.json |
 | ci_supply_chain_full_suite | proven | evaluation\ci-full-suite-remediation-2026-08-29\report.json |
-| knowledge_preparation_capability_truth | notice | evaluation\knowledge-preparation-capability-truth-2026-08-28\report.json |
 | launch_operations_readiness_cockpit | proven | evaluation\launch-operations-readiness-2026-08-26\report.json |
 | document_export_capability_truth | proven | evaluation\document-export-capability-truth-2026-08-17\report.json |
 | ontology_viewport_workbench | proven | evaluation\ontology-viewport-workbench-2026-08-17\report.json |
@@ -455,7 +454,7 @@ Overall: `northstar_open_approval_gated`
 | repository_security_scan_reconciliation | proven | evaluation\repository-security-scan-reconciliation-2026-08-11\report.json |
 | current_security_remediation_ledger | notice | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | notice | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
-| fresh_current_source_security_scan | notice | evaluation\current-head-standard-security-scan-2026-08-31-complete\report.json |
+| fresh_current_source_security_scan | notice | evaluation\current-source-standard-security-scan-2026-08-31-121c8a01-complete\report.json |
 | completed_current_head_standard_security_scan | notice | evaluation\current-head-standard-security-scan-2026-08-31-9504d8db-complete\report.json |
 | current_source_forwarded_identity_remediation | proven | evaluation\current-source-security-forwarded-identity-remediation-2026-08-31\report.json |
 | current_source_template_inventory_remediation | proven | evaluation\current-source-security-template-inventory-remediation-2026-08-31\report.json |
@@ -472,7 +471,6 @@ Overall: `northstar_open_approval_gated`
 | current_source_mcp_generation_cancellation_remediation | notice | evaluation\current-source-security-mcp-generation-cancellation-remediation-2026-08-31\report.json |
 | current_source_kosha_archive_preflight_remediation | notice | evaluation\current-source-security-kosha-archive-preflight-remediation-2026-08-31\report.json |
 | current_source_security_remediation_followup | notice | evaluation\current-source-security-remediation-2026-08-30\report.json |
-| current_security_governed_path_compatibility | notice | evaluation\current-security-governed-path-compatibility-2026-08-30\report.json |
 | stale_approval_evidence_binding_security | proven | evaluation\current-source-security-stale-approval-evidence-binding-remediation-2026-08-31\report.json |
 | current_source_security_residual_remediation | notice | evaluation\current-source-security-residual-remediation-2026-08-28\report.json |
 | share_ack_prebody_admission_security | notice | evaluation\share-ack-prebody-admission-2026-08-28\report.json |
@@ -491,7 +489,6 @@ Overall: `northstar_open_approval_gated`
 | improvement_photo_analysis_budget | notice | evaluation\improvement-photo-analysis-budget-2026-08-11\report.json |
 | public_provider_cancellation | notice | evaluation\public-provider-cancellation-2026-08-11\report.json |
 | public_provider_admission | notice | evaluation\public-provider-admission-2026-08-11\report.json |
-| public_ask_distributed_admission | proven | evaluation\public-ask-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_admission | proven | evaluation\public-search-distributed-admission-2026-08-14\report.json |
 | public_search_distributed_rate_limit_readiness | notice | evaluation\public-search-distributed-rate-limit-readiness-2026-08-02\report.json |
 | public_generation_admission_security | notice | evaluation\security-public-generation-admission-2026-08-04\report.json |
@@ -562,7 +559,7 @@ Overall: `northstar_open_approval_gated`
 | repository_security_scan_reconciliation | missing | missing | evaluation\repository-security-scan-reconciliation-2026-08-11\report.json |
 | current_security_remediation_ledger | ancestor | ancestor_of_head | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
-| fresh_current_source_security_scan | ancestor | missing | evaluation\current-head-standard-security-scan-2026-08-31-complete\report.json |
+| fresh_current_source_security_scan | ancestor | missing | evaluation\current-source-standard-security-scan-2026-08-31-121c8a01-complete\report.json |
 | completed_current_head_standard_security_scan | ancestor | missing | evaluation\current-head-standard-security-scan-2026-08-31-9504d8db-complete\report.json |
 | current_source_forwarded_identity_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-forwarded-identity-remediation-2026-08-31\report.json |
 | current_source_template_inventory_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-template-inventory-remediation-2026-08-31\report.json |

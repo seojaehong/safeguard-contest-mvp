@@ -1770,7 +1770,7 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
     scan: { status: "completed", mode: "standard", targetKind: "git_revision", coverageCompleteness: "partial", trackedFileCount: 6981, reviewWorklistCount: 5, closedReviewWorklistCount: 5, reviewedSurfaceCount: 21, deferredCoverageItemCount: 22, reportableFindingCount: 14, uniqueFindingWriteupCount: 14, severity: { critical: 0, high: 0, medium: 10, low: 4 } },
     baseline: { immutableOriginalFindingCount: 18, preserved: true, rewritten: false },
     currentDisposition: { approvalGatedDatabaseOrAtomicityCount: 7, approvalSensitiveShareCapabilityCount: 0, approvalFreeProductSourceResidualCount: 7, fullyClosedBoundedSourceCandidateCount: 0, securityCompleteClaimAllowed: false },
-    postScanRemediation: { browserSessionBindingProductCommit: "e36356d84fa8ac2331f8d0b81229d0532024a876", browserSessionBindingVerdict: "PASS_CURRENT_SOURCE_BROWSER_SESSION_BINDING_LIVE_PENDING", scanFindingReclassified: false, remainingApprovalFreeFindingCount: 6 },
+    postScanRemediation: { browserSessionBindingProductCommit: "e36356d84fa8ac2331f8d0b81229d0532024a876", browserSessionBindingVerdict: "PASS_LIVE_DEPLOYED_SOURCE_BROWSER_SESSION_BINDING_RESCAN_PENDING", browserSessionBindingProductionCommit: "77bcd6ea4ec1ea1914126dd7ba924f788b972602", scanFindingReclassified: false, remainingApprovalFreeFindingCount: 6 },
     canonicalArtifacts: {
       manifest: "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/scan-manifest.json",
       findings: "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/canonical/findings.json",

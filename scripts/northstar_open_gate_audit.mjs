@@ -8649,7 +8649,8 @@ function evaluateFreshCurrentSourceSecurityScanGate(rootDir) {
     && remaining.freshFullRepositoryScanCompleted === true
     && remaining.securityCompleteClaimAllowed === false
     && readString(postScanRemediation.browserSessionBindingProductCommit) === "e36356d84fa8ac2331f8d0b81229d0532024a876"
-    && readString(postScanRemediation.browserSessionBindingVerdict) === "PASS_CURRENT_SOURCE_BROWSER_SESSION_BINDING_LIVE_PENDING"
+    && readString(postScanRemediation.browserSessionBindingVerdict) === "PASS_LIVE_DEPLOYED_SOURCE_BROWSER_SESSION_BINDING_RESCAN_PENDING"
+    && readString(postScanRemediation.browserSessionBindingProductionCommit) === "77bcd6ea4ec1ea1914126dd7ba924f788b972602"
     && postScanRemediation.scanFindingReclassified === false
     && readNumber(postScanRemediation.remainingApprovalFreeFindingCount) === 6;
 
@@ -8659,7 +8660,7 @@ function evaluateFreshCurrentSourceSecurityScanGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Current Standard scan a4044172 is sealed at source/live 121c8a01 with 14 findings (10 medium, 4 low), 14 finding write-ups, and partial canonical coverage across 21 recorded surface rows with 22 deferred entries in a 6,981-file repository. The immutable original 18-finding baseline and every prior scan remain preserved. Seven approval-free source findings and seven database/RLS/atomicity findings were open at scan time; the separately committed browser-session remediation reduces the current-source approval-free residual to six without rewriting the sealed scan. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      ? "Current Standard scan a4044172 is sealed at source/live 121c8a01 with 14 findings (10 medium, 4 low), 14 finding write-ups, and partial canonical coverage across 21 recorded surface rows with 22 deferred entries in a 6,981-file repository. The immutable original 18-finding baseline and every prior scan remain preserved. Seven approval-free source findings and seven database/RLS/atomicity findings were open at scan time; the separately committed browser-session remediation is deployed in production 77bcd6ea and reduces the current-source approval-free residual to six without rewriting or closing the sealed scan finding. This is not security-complete: no live auth-session mutation occurred, a post-remediation repository rescan remains required, and exact saved Share remains MISSING_EVIDENCE."
       : `Fresh scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(report.scanId) || "missing"}, source=${readString(report.sourceHead) || "missing"}, findings=${readNumber(scan.reportableFindingCount)}, severity=${readNumber(severity.medium)}/${readNumber(severity.low)}, coverage=${readString(scan.coverageCompleteness) || "missing"}/${readNumber(scan.reviewedSurfaceCount)}/${readNumber(scan.deferredCoverageItemCount)}, canonical=${canonicalFilesPresent}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [

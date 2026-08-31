@@ -21,8 +21,9 @@ hashes recorded in `report.json`.
 - The public Share capability candidate was rejected as a distinct finding in
   this scan, but exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
 - Product commit `e36356d8` subsequently remediates the unbound browser
-  URL-fragment session finding in current source. The sealed finding itself is
-  not rewritten; deployment and a later scan are required for reclassification.
+  URL-fragment session finding and is included in production `77bcd6ea`. The
+  sealed finding itself is not rewritten; a later repository rescan is required
+  for reclassification.
 
 ## Boundaries
 

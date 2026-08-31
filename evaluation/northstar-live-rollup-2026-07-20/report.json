@@ -1,23 +1,23 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-08-31T13:25:27.512Z",
-  "head": "df21e60cffb77e7708080f5c937f8b43b109cb67",
+  "generatedAt": "2026-08-31T14:57:13.144Z",
+  "head": "77bcd6ea4ec1ea1914126dd7ba924f788b972602",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "df21e60cffb77e7708080f5c937f8b43b109cb67",
+    "commitSha": "77bcd6ea4ec1ea1914126dd7ba924f788b972602",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-llip6b5sd-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-7mrube1p3-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "overall": "northstar_open_approval_gated",
+  "overall": "northstar_evidence_missing_or_unknown",
   "dbMutationPerformed": false,
   "launchReadiness": false,
   "openGate": {
     "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-    "overall": "open",
+    "overall": "contradicted",
     "gateCount": 101
   },
   "provenGates": [
@@ -104,12 +104,6 @@
       "state": "proven",
       "artifact": "evaluation\\ci-full-suite-remediation-2026-08-29\\report.json",
       "detail": "GitHub CI preserves the immutable 3098-pass/5-fail baseline, upgrades checkout/setup-node to reviewed Node 24 runtime SHAs, disables package-manager caching, and passes 3114/3140 tests with 26 skipped plus typecheck/build on production-aligned 5fcbcbec with zero Node 20 deprecation warnings. This is CI and deployment evidence only: it does not close other security findings or approval-gated work, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
-    },
-    {
-      "id": "knowledge_preparation_capability_truth",
-      "state": "notice",
-      "artifact": "evaluation\\knowledge-preparation-capability-truth-2026-08-28\\report.json",
-      "detail": "Deployed source distinguishes a distributed-configuration lock from temporary load in the knowledge preparation route and review UI, with 117 focused and adjacent tests, strict typecheck, and a 28-page production build. This is marker-only capability truth: enhanced LLM preparation remains blocked, the authenticated preparation probe and Wiki/RLS publication remain approval-gated, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "launch_operations_readiness_cockpit",
@@ -210,8 +204,8 @@
     {
       "id": "fresh_current_source_security_scan",
       "state": "notice",
-      "artifact": "evaluation\\current-head-standard-security-scan-2026-08-31-complete\\report.json",
-      "detail": "Current Standard scan f218c713 is sealed at source/live b5f14512 with 18 findings (13 medium, 5 low), 18 finding write-ups, and partial canonical coverage across 17 recorded surface rows with 19 deferred entries in a 6,822-file repository. The immutable original 18-finding baseline, completed prior scan, and later 9-finding partial scan are preserved. Eight approval-free source findings, nine database/RLS/atomicity findings, and one approval-sensitive Share capability finding remain open. This is not security-complete: no mutation occurred and exact saved Share remains MISSING_EVIDENCE."
+      "artifact": "evaluation\\current-source-standard-security-scan-2026-08-31-121c8a01-complete\\report.json",
+      "detail": "Current Standard scan a4044172 is sealed at source/live 121c8a01 with 14 findings (10 medium, 4 low), 14 finding write-ups, and partial canonical coverage across 21 recorded surface rows with 22 deferred entries in a 6,981-file repository. The immutable original 18-finding baseline and every prior scan remain preserved. Seven approval-free source findings and seven database/RLS/atomicity findings were open at scan time; the separately committed browser-session remediation is deployed in production 77bcd6ea and reduces the current-source approval-free residual to six without rewriting or closing the sealed scan finding. This is not security-complete: no live auth-session mutation occurred, a post-remediation repository rescan remains required, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "completed_current_head_standard_security_scan",
@@ -308,12 +302,6 @@
       "state": "notice",
       "artifact": "evaluation\\current-source-security-remediation-2026-08-30\\report.json",
       "detail": "Production a1a9da9b contains five bounded approval-free remediation receipts covering reviewed-improvement provenance, pre-authentication body admission, KOSHA official PDF redirects/temp identity, and four legacy archive consumers. Focused verification is 79 Vitest plus 11 Python tests, and the official KOSHA PDF audit remains 8/8 with no retained temporary files or exact promotion. The immutable 20-finding partial-coverage baseline is preserved, the post-fix full repository scan remains pending, public-catalog RLS stays approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE. This gate is notice, not security-complete proof."
-    },
-    {
-      "id": "current_security_governed_path_compatibility",
-      "state": "notice",
-      "artifact": "evaluation\\current-security-governed-path-compatibility-2026-08-30\\report.json",
-      "detail": "Current source and production include a shared compatibility receipt for 10 security notices across 27 governed paths. Contract regression passed 22 files / 358 tests; the opt-in recipient browser file and its 7 tests were skipped, so no fresh browser PASS is claimed and prior live browser evidence remains the only browser proof. Sealed full scan f218c713 is complete with 18 open findings and partial coverage; this receipt does not rewrite immutable findings or claim security completion. Distributed admission and public-catalog RLS remain operator/approval-gated, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "stale_approval_evidence_binding_security",
@@ -422,12 +410,6 @@
       "state": "notice",
       "artifact": "evaluation\\public-provider-admission-2026-08-11\\report.json",
       "detail": "Current production enforces mode-weighted provider work units (template 0, enhanced 2, full 12) with completion/cancellation release, 23 files / 215 tests governed-path compatibility, and live no-provider work-budget probes across ask, weather, and knowledge. Production still reports process-instance admission because Upstash is not configured; both canonical medium findings remain immutable, distributed activation and a fresh follow-up scan remain required, no mutation occurred, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
-    },
-    {
-      "id": "public_ask_distributed_admission",
-      "state": "proven",
-      "artifact": "evaluation\\public-ask-distributed-admission-2026-08-14\\report.json",
-      "detail": "Current production keeps template work at zero and fails JSON/SSE enhanced/full closed with DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before provider work when distributed admission is unavailable. The immutable csf_9b3cc6648586dabf4bfa61e9 finding still requires a fresh scan; backend activation is OPERATOR_CONFIGURATION_REQUIRED, no provider or mutation was used, security-complete is false, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "public_search_distributed_admission",
@@ -882,21 +864,21 @@
     "approvalFreeProductSourceRemediation": "LIVE_SOURCE_INCLUDED_FRESH_RESCAN_REQUIRED"
   },
   "freshCurrentSourceSecurityScan": {
-    "artifact": "evaluation\\current-head-standard-security-scan-2026-08-31-complete\\report.json",
-    "verdict": "NOTICE_CURRENT_HEAD_STANDARD_SCAN_18_FINDINGS_PARTIAL_COVERAGE",
-    "scanId": "f218c713-1a1c-4f4e-9777-8095926be1df",
-    "sourceHead": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
-    "deployedProductSource": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
-    "reportableFindingCount": 18,
-    "mediumFindingCount": 13,
-    "lowFindingCount": 5,
+    "artifact": "evaluation\\current-source-standard-security-scan-2026-08-31-121c8a01-complete\\report.json",
+    "verdict": "NOTICE_CURRENT_SOURCE_STANDARD_SCAN_14_FINDINGS_PARTIAL_COVERAGE",
+    "scanId": "a4044172-9b4b-4e36-84be-a8955d9150ac",
+    "sourceHead": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+    "deployedProductSource": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+    "reportableFindingCount": 14,
+    "mediumFindingCount": 10,
+    "lowFindingCount": 4,
     "coverageCompleteness": "partial",
-    "reviewedSurfaceCount": 17,
-    "deferredCoverageItemCount": 19,
-    "approvalGatedDatabaseOrAtomicityCount": 9,
-    "approvalSensitiveShareCapabilityCount": 1,
-    "approvalFreeProductSourceResidualCount": 8,
-    "fullyClosedBoundedSourceCandidateCount": 1,
+    "reviewedSurfaceCount": 21,
+    "deferredCoverageItemCount": 22,
+    "approvalGatedDatabaseOrAtomicityCount": 7,
+    "approvalSensitiveShareCapabilityCount": 0,
+    "approvalFreeProductSourceResidualCount": 7,
+    "fullyClosedBoundedSourceCandidateCount": 0,
     "freshFullRepositoryScanCompleted": true,
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
@@ -2282,9 +2264,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "df21e60cffb77e7708080f5c937f8b43b109cb67",
+      "sourceCommit": "77bcd6ea4ec1ea1914126dd7ba924f788b972602",
       "sourceStatus": "exact",
-      "productionCommit": "df21e60cffb77e7708080f5c937f8b43b109cb67",
+      "productionCommit": "77bcd6ea4ec1ea1914126dd7ba924f788b972602",
       "productionStatus": "matches_live"
     },
     {
@@ -2537,8 +2519,8 @@
     },
     {
       "id": "fresh_current_source_security_scan",
-      "artifact": "evaluation\\current-head-standard-security-scan-2026-08-31-complete\\report.json",
-      "sourceCommit": "b5f145120766cd2ef904fce38ef32ed1a9facf74",
+      "artifact": "evaluation\\current-source-standard-security-scan-2026-08-31-121c8a01-complete\\report.json",
+      "sourceCommit": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
       "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"

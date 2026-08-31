@@ -1,6 +1,6 @@
 {
   "schema": "safeclaw-security-browser-session-binding-remediation/v1",
-  "verdict": "PASS_CURRENT_SOURCE_BROWSER_SESSION_BINDING_LIVE_PENDING",
+  "verdict": "PASS_LIVE_DEPLOYED_SOURCE_BROWSER_SESSION_BINDING_RESCAN_PENDING",
   "generatedAt": "2026-08-31T23:02:37+09:00",
   "sourceHead": "e36356d84fa8ac2331f8d0b81229d0532024a876",
   "productCommit": "e36356d84fa8ac2331f8d0b81229d0532024a876",
@@ -60,18 +60,21 @@
     "diffCheckPassed": true
   },
   "production": {
-    "checkedAt": "2026-08-31T23:02:37+09:00",
-    "commitSha": "121c8a017c18b58874ef965cece12bc3e0f0df2f",
+    "checkedAt": "2026-08-31T23:55:05+09:00",
+    "commitSha": "77bcd6ea4ec1ea1914126dd7ba924f788b972602",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-2ywzc7h9z-seojaehongs-projects.vercel.app",
-    "productCommitLive": false,
-    "liveVerificationPending": true
+    "deploymentUrl": "safeguard-contest-7mrube1p3-seojaehongs-projects.vercel.app",
+    "productCommitLive": true,
+    "deploymentMarkerVerified": true,
+    "liveAuthSessionMutationPerformed": false,
+    "liveVerificationPending": false
   },
   "securityScan": {
     "findingRemediatedInCurrentSource": true,
     "findingClosureClaimed": false,
-    "freshPostDeploymentVerificationRequired": true,
+    "freshPostDeploymentVerificationRequired": false,
+    "freshPostRemediationRepositoryRescanRequired": true,
     "completedBaselineFindingCount": 14
   },
   "mutationBoundary": {

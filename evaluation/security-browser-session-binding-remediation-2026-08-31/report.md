@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_BROWSER_SESSION_BINDING_LIVE_PENDING`
+`PASS_LIVE_DEPLOYED_SOURCE_BROWSER_SESSION_BINDING_RESCAN_PENDING`
 
 Product commit `e36356d8` routes all 11 browser Supabase client surfaces through
 one factory with `detectSessionInUrl: false`. Non-callback pages therefore no
@@ -24,13 +24,14 @@ after consuming the locally initiated `auth_tx` value.
 
 ## Live state
 
-Production reported `121c8a017c18b58874ef965cece12bc3e0f0df2f` when checked.
-That is the completed security-scan baseline, not product commit `e36356d8`.
-The remediation is verified in current source and remains live-pending.
+Production reported `77bcd6ea4ec1ea1914126dd7ba924f788b972602` when rechecked.
+That deployment contains product commit `e36356d8`, so the bounded browser-client
+configuration is source/live aligned. No live login or session mutation was
+performed; this is a deployed-source verification, not a new authenticated-flow scan.
 
 The completed 14-finding Standard scan remains immutable. This artifact does
 not rewrite or close that sealed result; a post-deployment verification is
-required before a live remediation claim.
+required before the sealed scan finding can be reclassified or closed.
 
 ## Preserved boundaries
 
