@@ -2,6 +2,7 @@
 // @ts-check
 
 import fs from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import process from "node:process";
 import { execFileSync } from "node:child_process";
@@ -72,6 +73,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-complete", "report.json"),
+  completedCurrentHeadStandardSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-9504d8db-complete", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
@@ -8605,6 +8607,132 @@ function evaluateFreshCurrentSourceSecurityScanGate(rootDir) {
 
 /**
  * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateCompletedCurrentHeadStandardSecurityScanGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.completedCurrentHeadStandardSecurityScan;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "completed_current_head_standard_security_scan",
+      label: "Completed current-head Standard security scan",
+      state: "missing",
+      evidencePath,
+      detail: "The sealed 9504d8db current-head Standard scan receipt is missing or invalid.",
+      nextActions: ["Restore the sealed scan receipt and canonical artifacts without rewriting the immutable 18-finding baseline."],
+    });
+  }
+
+  const scan = isRecord(report.scan) ? report.scan : {};
+  const severity = isRecord(scan.severity) ? scan.severity : {};
+  const baseline = isRecord(report.baseline) ? report.baseline : {};
+  const disposition = isRecord(report.currentDisposition) ? report.currentDisposition : {};
+  const canonical = isRecord(report.canonicalArtifacts) ? report.canonicalArtifacts : {};
+  const hashes = isRecord(canonical.sha256) ? canonical.sha256 : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const canonicalHashesMatch = evidenceFileMatchesSha256(rootDir, canonical.manifest, hashes.manifest)
+    && evidenceFileMatchesSha256(rootDir, canonical.findings, hashes.findings)
+    && evidenceFileMatchesSha256(rootDir, canonical.coverage, hashes.coverage)
+    && evidenceFileMatchesSha256(rootDir, canonical.markdown, hashes.markdown);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.embeddingGenerated === false
+    && mutation.vectorUploadPerformed === false
+    && mutation.wikiPublished === false
+    && mutation.exactTrustRegistryMutationPerformed === false;
+  const pass = readString(report.verdict) === "NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE"
+    && readString(report.scanId) === "f6bef30a-7250-428b-9f66-0bad1e42058c"
+    && readString(report.sourceHead) === "9504d8db95fcbc9f37f6c5abc638e9ad0813a325"
+    && report.userContextPreserved === true
+    && readString(scan.status) === "completed"
+    && readString(scan.mode) === "standard"
+    && readString(scan.targetKind) === "git_revision"
+    && readString(scan.coverageCompleteness) === "partial"
+    && readNumber(scan.trackedFileCount) === 6881
+    && readNumber(scan.reviewWorklistCount) === 6
+    && readNumber(scan.closedReviewWorklistCount) === 6
+    && readNumber(scan.recordedSurfaceCount) === 25
+    && readNumber(scan.deferredCoverageItemCount) === 36
+    && readNumber(scan.reportableFindingCount) === 21
+    && readNumber(scan.uniqueFindingWriteupCount) === 21
+    && readNumber(severity.critical) === 0
+    && readNumber(severity.high) === 0
+    && readNumber(severity.medium) === 7
+    && readNumber(severity.low) === 14
+    && readNumber(baseline.immutableOriginalFindingCount) === 18
+    && baseline.preserved === true
+    && baseline.rewritten === false
+    && readString(baseline.completedPriorScanId) === "8fe9c06a-018c-446f-aa98-1b37df95287a"
+    && readNumber(disposition.approvalGatedDatabaseOrAtomicityCount) === 9
+    && readNumber(disposition.approvalSensitiveShareCapabilityCount) === 1
+    && readNumber(disposition.approvalFreeProductSourceResidualCount) === 11
+    && disposition.securityCompleteClaimAllowed === false
+    && readNumber(canonical.findingWriteupCount) === 21
+    && readNumber(canonical.supportingEvidenceCount) === 21
+    && canonicalHashesMatch
+    && noMutation
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remaining.databaseSecurityRemediation) === "APPROVAL_GATED"
+    && readString(remaining.providerDispatchPersistence) === "APPROVAL_GATED"
+    && readString(remaining.llmWikiPublication) === "APPROVAL_GATED"
+    && readString(remaining.sifVectorRuntime) === "APPROVAL_GATED"
+    && readString(remaining.koshaExactRegistryPromotion) === "APPROVAL_GATED"
+    && remaining.coverageClosureCompleted === false
+    && readString(remaining.approvalFreeCurrentSourceRemediation) === "OPEN_11_FINDINGS"
+    && remaining.securityCompleteClaimAllowed === false;
+
+  return gateResult({
+    id: "completed_current_head_standard_security_scan",
+    label: "Completed current-head Standard security scan",
+    state: pass ? "notice" : "contradicted",
+    evidencePath,
+    detail: pass
+      ? "Current-head Standard scan f6bef30a is sealed at 9504d8db with 21 findings (7 medium, 14 low), 21 write-ups, and partial coverage. Canonical artifact hashes match. The immutable original 18-finding baseline is preserved; 11 approval-free source findings, nine database/RLS/atomicity findings, and one approval-sensitive Share capability finding remain open. Security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      : `Current-head scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(report.scanId) || "missing"}, source=${readString(report.sourceHead) || "missing"}, findings=${readNumber(scan.reportableFindingCount)}, severity=${readNumber(severity.medium)}/${readNumber(severity.low)}, coverage=${readString(scan.coverageCompleteness) || "missing"}, hashes=${canonicalHashesMatch}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
+    nextActions: pass
+      ? [
+          "Remediate the 11 approval-free source findings in bounded waves and run a fresh follow-up scan.",
+          "Keep database/RLS/atomicity, provider, exact Share, wiki, vector, and KOSHA registry operations on their existing approval paths.",
+        ]
+      : ["Restore the exact scan identity, counts, canonical hashes, immutable baseline, no-mutation boundary, and exact Share MISSING_EVIDENCE."],
+  });
+}
+
+/**
+ * @param {string} rootDir
+ * @param {unknown} relativePath
+ * @param {unknown} expectedSha256
+ */
+function evidenceFileMatchesSha256(rootDir, relativePath, expectedSha256) {
+  const value = readString(relativePath);
+  const expected = readString(expectedSha256).toLowerCase();
+  if (!value || !/^[0-9a-f]{64}$/u.test(expected)) {
+    return false;
+  }
+  try {
+    const absolutePath = path.resolve(rootDir, value);
+    const relativeToRoot = path.relative(rootDir, absolutePath);
+    if (relativeToRoot.startsWith("..") || path.isAbsolute(relativeToRoot)) {
+      return false;
+    }
+    const bytes = fs.readFileSync(absolutePath);
+    const rawHash = createHash("sha256").update(bytes).digest("hex");
+    if (rawHash === expected) {
+      return true;
+    }
+    const normalizedTextHash = createHash("sha256")
+      .update(bytes.toString("utf8").replaceAll("\r\n", "\n"), "utf8")
+      .digest("hex");
+    return normalizedTextHash === expected;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * @param {string} rootDir
  * @param {string} possibleAncestorSha
  * @param {string} descendantSha
  */
@@ -13621,6 +13749,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateCurrentSecurityRemediationLedgerGate(rootDir),
     evaluateCurrentRepositorySecurityRescanGate(rootDir),
     evaluateFreshCurrentSourceSecurityScanGate(rootDir),
+    evaluateCompletedCurrentHeadStandardSecurityScanGate(rootDir),
     evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir),
     evaluateCurrentSourceSecurityResourceBudgetRemediationGate(rootDir),
     evaluateCurrentSourceLogoutStorageRemediationGate(rootDir),

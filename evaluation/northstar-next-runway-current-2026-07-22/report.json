@@ -1,18 +1,18 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-08-31T02:02:56.000Z",
+  "generatedAt": "2026-08-31T03:12:07.605Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "81ca1baeeff78a77d7bdd13376d5e06dfaade500",
-  "productionCommit": "81ca1baeeff78a77d7bdd13376d5e06dfaade500",
+  "sourceHead": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+  "productionCommit": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "81ca1baeeff78a77d7bdd13376d5e06dfaade500",
+    "commitSha": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-q74uk01gr-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-js81zg0hp-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "latestEvidenceCommitLive": true,
@@ -22,8 +22,8 @@
   "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "81ca1baeeff78a77d7bdd13376d5e06dfaade500",
-  "liveRollupLiveCommit": "81ca1baeeff78a77d7bdd13376d5e06dfaade500",
+  "liveExactEvidenceCommit": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+  "liveRollupLiveCommit": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -66,6 +66,7 @@
     "currentSecurityRemediationLedger": "evaluation\\security-current-remediation-ledger-2026-08-13\\report.json",
     "currentRepositorySecurityRescan": "evaluation\\current-full-repository-security-scan-2026-08-27\\report.json",
     "freshCurrentSourceSecurityScan": "evaluation\\current-head-standard-security-scan-2026-08-31-complete\\report.json",
+    "completedCurrentHeadStandardSecurityScan": "evaluation\\current-head-standard-security-scan-2026-08-31-9504d8db-complete\\report.json",
     "currentSourceApprovalFreeSecurityRemediation": "evaluation\\current-source-security-approval-free-remediation-2026-08-31\\report.json",
     "currentSourceSecurityResourceBudgetRemediation": "evaluation\\current-source-security-resource-budget-remediation-2026-08-31\\report.json",
     "currentSourceLogoutStorageRemediation": "evaluation\\current-source-security-logout-storage-remediation-2026-08-31\\report.json",
@@ -209,6 +210,11 @@
       "gate": "fresh_current_source_security_scan",
       "state": "notice",
       "reason": "fresh Standard scan f218c713-1a1c-4f4e-9777-8095926be1df records 18 open findings with partial coverage; 8 approval-free source residuals, 1 separately reportable Share capability findings, and 9 database/RLS/atomicity findings remain open; security-complete is false and exact saved Share remains MISSING_EVIDENCE"
+    },
+    {
+      "gate": "completed_current_head_standard_security_scan",
+      "state": "notice",
+      "reason": "current-head Standard scan f6bef30a-7250-428b-9f66-0bad1e42058c records 21 findings (7 medium, 14 low) with partial coverage; the immutable 18-finding baseline remains preserved, 11 approval-free findings remain open, security-complete is false, and exact saved Share remains MISSING_EVIDENCE"
     },
     {
       "gate": "current_source_approval_free_security_remediation",
@@ -1241,6 +1247,24 @@
     "approvalFreeProductSourceResidualCount": 8,
     "fullyClosedBoundedSourceCandidateCount": 1,
     "freshFullRepositoryScanCompleted": true,
+    "securityCompleteClaimAllowed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "completedCurrentHeadStandardSecurityScan": {
+    "verdict": "NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE",
+    "scanId": "f6bef30a-7250-428b-9f66-0bad1e42058c",
+    "sourceHead": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+    "status": "completed",
+    "coverageCompleteness": "partial",
+    "recordedSurfaceCount": 25,
+    "deferredCoverageItemCount": 36,
+    "reportableFindingCount": 21,
+    "mediumFindingCount": 7,
+    "lowFindingCount": 14,
+    "immutableOriginalFindingCount": 18,
+    "approvalGatedDatabaseOrAtomicityCount": 9,
+    "approvalSensitiveShareCapabilityCount": 1,
+    "approvalFreeProductSourceResidualCount": 11,
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },

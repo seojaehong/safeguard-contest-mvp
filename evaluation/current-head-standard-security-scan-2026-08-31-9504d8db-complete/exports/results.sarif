@@ -1,0 +1,1896 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "automationDetails": {
+        "id": "f6bef30a-7250-428b-9f66-0bad1e42058c"
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "toolExecutionNotifications": [
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Second validation batch pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Discovery receipt complete; validation and deduplication pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Discovery receipt complete; validation and deduplication pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Discovery receipt complete; validation and deduplication pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Discovery receipt complete; validation and deduplication pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Discovery receipt complete; validation and deduplication pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Discovery receipt complete; validation and deduplication pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Discovery receipt complete; validation and deduplication pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Discovery receipt complete; validation and deduplication pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Discovery receipt complete; validation and deduplication pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Discovery receipt complete; validation and deduplication pending."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Pending parent validation"
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Pending parent validation"
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Pending parent validation"
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Pending parent validation"
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Pending parent validation"
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Schema lacks same-tenant tuple constraints, but current application paths add tuple checks and no direct-disclosure path has yet been established."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Independent architecture reviewer is still running."
+              }
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "codexSecurityCoverageCompleteness": "partial",
+        "codexSecuritySchemaVersion": "1.0",
+        "codexSecurityTargetKind": "git_revision"
+      },
+      "results": [
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/mcp-tokens/route.ts"
+                },
+                "region": {
+                  "endLine": 278,
+                  "startLine": 247
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "MCP active-token quota remains non-atomic\n\nToken issuance counts active MCP tokens and inserts the new token in separate operations, so concurrent requests can exceed the configured active-token cap.\n\nSeverity: low\n\nCategory: Race condition quota enforcement\n\nWeaknesses: CWE-362\n\nRemediation:\nEnforce the quota atomically with a database transaction, advisory lock, or per-owner unique slot model, then test simultaneous issuance."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:d081c065cd15bf07d986a9ee6fd8052ea9b7ce215d823be57c607c6952b6f622"
+          },
+          "properties": {
+            "category": "race-condition.quota-enforcement",
+            "confidence": "medium",
+            "findingId": "csf_09001652155a49d6a98b106c",
+            "occurrenceId": "occ_07867f4f7dbd7f70a0f4c4bc",
+            "severity": "low"
+          },
+          "ruleId": "race-condition.quota-enforcement",
+          "ruleIndex": 10
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/knowledge-review.ts"
+                },
+                "region": {
+                  "endLine": 1415,
+                  "startLine": 1285
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Knowledge review transitions are not atomic\n\nReview event rows are updated iteratively before the run state is committed, so errors or concurrent reviewers can leave a partially transitioned run.\n\nSeverity: medium\n\nCategory: Race condition review transition\n\nWeaknesses: CWE-362, CWE-667\n\nRemediation:\nApproval-gated: implement one transactional review-transition RPC with expected-state checks, atomic event updates, and idempotent retry semantics."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:c67341c23ee613b984ebc09581deaee5fd5e049a5ec0d35ec6a01bf877460c49"
+          },
+          "properties": {
+            "category": "race-condition.review-transition",
+            "confidence": "medium",
+            "findingId": "csf_c99d8b37c571732d798966c6",
+            "occurrenceId": "occ_1ca4c2f32ca87995dff0472b",
+            "severity": "medium"
+          },
+          "ruleId": "race-condition.review-transition",
+          "ruleIndex": 11
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/kosha_exact_promotion_review_gate.mjs"
+                },
+                "region": {
+                  "endLine": 304,
+                  "startLine": 293
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/kosha_exact_promotion_review_gate.mjs"
+                },
+                "region": {
+                  "endLine": 555,
+                  "startLine": 539
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/rls_llm_wiki_approval_preflight.mjs"
+                },
+                "region": {
+                  "endLine": 215,
+                  "startLine": 204
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/rls_llm_wiki_approval_preflight.mjs"
+                },
+                "region": {
+                  "endLine": 430,
+                  "startLine": 417
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/distributed_admission_activation_preflight.mjs"
+                },
+                "region": {
+                  "endLine": 100,
+                  "startLine": 85
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/share_recipient_ack_approval_preflight.mjs"
+                },
+                "region": {
+                  "endLine": 98,
+                  "startLine": 80
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Approval gates are not bound to current source and artifact digests\n\nKOSHA review, RLS/Wiki, distributed admission, and recipient ACK preflights consume historical reports without consistently binding sourceHead, productCommit, and input artifact digests to the active HEAD and packet.\n\nSeverity: low\n\nCategory: Approval integrity stale evidence binding\n\nWeaknesses: CWE-345\n\nRemediation:\nRecord and verify current HEAD, production commit, and SHA-256 digests for every required input; fail closed on stale or mixed-source evidence and preserve separate mutation approval."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:3ab476be968538dcefb3f71c50e0fa3eb2971df0d9759d8517485581ee72e3cc"
+          },
+          "properties": {
+            "category": "approval-integrity.stale-evidence-binding",
+            "confidence": "medium",
+            "findingId": "csf_86ec127fb3d5b7d397649611",
+            "occurrenceId": "occ_23bd4bcc20f50a7e11e7bc19",
+            "severity": "low"
+          },
+          "ruleId": "approval-integrity.stale-evidence-binding",
+          "ruleIndex": 1
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/hwpx_template_inventory.mjs"
+                },
+                "region": {
+                  "endLine": 26,
+                  "startLine": 18
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/hwpx_template_inventory.mjs"
+                },
+                "region": {
+                  "endLine": 70,
+                  "startLine": 40
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/hwpx_template_inventory.mjs"
+                },
+                "region": {
+                  "endLine": 118,
+                  "startLine": 105
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "HWPX inventory trusts unbounded file and central-directory metadata\n\nThe HWPX inventory recursively reads each file into memory and trusts EOCD entry count and offsets without validating central-directory bounds, actual entry count, aggregate size, or corpus limits.\n\nSeverity: low\n\nCategory: Resource exhaustion unbounded hwpx inventory\n\nWeaknesses: CWE-400\n\nRemediation:\nReuse the bounded archive preflight before reading full files, cap corpus/file sizes and entry counts, validate central-directory ranges, and reject malformed metadata."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:d23f6f4b5cb382423abaf8ba5b26399bee172cf2cb7c98c77369735b54846fbb"
+          },
+          "properties": {
+            "category": "resource-exhaustion.unbounded-hwpx-inventory",
+            "confidence": "medium",
+            "findingId": "csf_4547b334aef21917c8fae629",
+            "occurrenceId": "occ_42d3f08469a2f0118405a3aa",
+            "severity": "low"
+          },
+          "ruleId": "resource-exhaustion.unbounded-hwpx-inventory",
+          "ruleIndex": 18
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/scan_industrial_safety_templates.py"
+                },
+                "region": {
+                  "endLine": 117,
+                  "startLine": 88
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/scan_industrial_safety_templates.py"
+                },
+                "region": {
+                  "endLine": 188,
+                  "startLine": 151
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/scan_industrial_safety_templates.py"
+                },
+                "region": {
+                  "endLine": 214,
+                  "startLine": 204
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Template inventory scanner parses an unbounded local corpus\n\nThe industrial-safety inventory recursively materializes the full source tree and opens XLSX, PDF, image, and ZIP parsers without file-count, aggregate-byte, elapsed-time, or symlink admission.\n\nSeverity: medium\n\nCategory: Resource exhaustion unbounded template inventory\n\nWeaknesses: CWE-400, CWE-200\n\nRemediation:\nApply no-follow traversal, file-count and aggregate-byte budgets before parser initialization, per-file size/type limits, elapsed deadlines, and bounded metadata output."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:dd6968c68e480d406fa74a1cd6a00d2768f36ea47a6792ef6785e803e548fd97"
+          },
+          "properties": {
+            "category": "resource-exhaustion.unbounded-template-inventory",
+            "confidence": "medium",
+            "findingId": "csf_4ee29cf0d24bdba57c1518a1",
+            "occurrenceId": "occ_4bf29b65db913512d2369116",
+            "severity": "medium"
+          },
+          "ruleId": "resource-exhaustion.unbounded-template-inventory",
+          "ruleIndex": 19
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/public-distributed-rate-limit.ts"
+                },
+                "region": {
+                  "endLine": 540,
+                  "startLine": 455
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/export/xlsx/route.ts"
+                },
+                "region": {
+                  "endLine": 245,
+                  "startLine": 173
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/export/hwp/route.ts"
+                },
+                "region": {
+                  "endLine": 319,
+                  "startLine": 300
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/export/pdf/route.ts"
+                },
+                "region": {
+                  "endLine": 1208,
+                  "startLine": 1136
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/export/hwpx-template/route.ts"
+                },
+                "region": {
+                  "endLine": 61,
+                  "startLine": 25
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Public export work can outlive its distributed admission lease\n\nPublic export routes obtain a 310-second distributed lease but do not propagate request cancellation or enforce a rendering deadline, so disconnected or hung work can continue after admission protection expires.\n\nSeverity: low\n\nCategory: Resource exhaustion export cancellation gap\n\nWeaknesses: CWE-400\n\nRemediation:\nPropagate request.signal, wrap rendering in a deadline shorter than the lease, abort worker processes, and keep the lease alive until termination is confirmed."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:9935b36fb0832903cb7b9354e2c05b20df33c202c8634de582aea5889fb0c0e6"
+          },
+          "properties": {
+            "category": "resource-exhaustion.export-cancellation-gap",
+            "confidence": "medium",
+            "findingId": "csf_08d1b3b1531903861d1ab80f",
+            "occurrenceId": "occ_62fca7dfb1853e788aae4f15",
+            "severity": "low"
+          },
+          "ruleId": "resource-exhaustion.export-cancellation-gap",
+          "ruleIndex": 15
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/sif_embedding_approval_preflight.mjs"
+                },
+                "region": {
+                  "endLine": 356,
+                  "startLine": 340
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/sif_embedding_approval_preflight.mjs"
+                },
+                "region": {
+                  "endLine": 25,
+                  "startLine": 25
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/sif_embedding_approval_preflight.mjs"
+                },
+                "region": {
+                  "endLine": 450,
+                  "startLine": 440
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "SIF approval preflight can skip migration scope validation\n\nThe SIF embedding approval preflight accepts an arbitrary migration path, but checks forbidden non-SIF objects only when the filename contains sif-embedding-only; other filenames receive a passing scope result.\n\nSeverity: low\n\nCategory: Approval integrity sif migration scope bypass\n\nWeaknesses: CWE-20, CWE-807\n\nRemediation:\nValidate an allowlisted SQL object grammar for every migration path and bind the packet to the exact expected migration digest, independent of filename."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:3a4c96cefe6094640edc23804346c3b6965a991140f8f6ca6ef80b2cddb39015"
+          },
+          "properties": {
+            "category": "approval-integrity.sif-migration-scope-bypass",
+            "confidence": "medium",
+            "findingId": "csf_3ca8a70c1e96599ce7b6b795",
+            "occurrenceId": "occ_894f746537e02667f194209a",
+            "severity": "low"
+          },
+          "ruleId": "approval-integrity.sif-migration-scope-bypass",
+          "ruleIndex": 0
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/prod_orchestration_download_smoke.mjs"
+                },
+                "region": {
+                  "endLine": 434,
+                  "startLine": 407
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/final_e2e_matrix_runner.mjs"
+                },
+                "region": {
+                  "endLine": 169,
+                  "startLine": 129
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/final_output_integrity_audit.mjs"
+                },
+                "region": {
+                  "endLine": 321,
+                  "startLine": 294
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Export smoke chain accepts unbounded responses and lacks subprocess deadlines\n\nOperator smoke helpers fully materialize HTTP responses and invoke Chrome or child processes without byte ceilings, AbortSignals, or process deadlines.\n\nSeverity: low\n\nCategory: Resource exhaustion unbounded export smoke harness\n\nWeaknesses: CWE-400\n\nRemediation:\nAdd HTTP deadlines and streaming byte ceilings, process timeouts and termination, and guaranteed temporary-profile cleanup."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:5b0e4866fe383e93453bf6571b0b3ce54d57f2313a6a594aa49356b7fe0f60ff"
+          },
+          "properties": {
+            "category": "resource-exhaustion.unbounded-export-smoke-harness",
+            "confidence": "medium",
+            "findingId": "csf_55bf22e9ff3507c519ffde3b",
+            "occurrenceId": "occ_9f8d2e62d46e1b71aa22f247",
+            "severity": "low"
+          },
+          "ruleId": "resource-exhaustion.unbounded-export-smoke-harness",
+          "ruleIndex": 17
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/issue-mcp-token.mjs"
+                },
+                "region": {
+                  "endLine": 82,
+                  "startLine": 70
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/issue_supabase_auth_token.mjs"
+                },
+                "region": {
+                  "endLine": 28,
+                  "startLine": 18
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Credential issuance CLIs print bearer tokens to stdout\n\nThe MCP token and Supabase authentication issuance scripts print full bearer tokens to stdout, where terminal capture, CI logs, wrappers, or command transcripts can retain them.\n\nSeverity: low\n\nCategory: Credential exposure token stdout\n\nWeaknesses: CWE-532, CWE-522\n\nRemediation:\nRequire an explicit reveal flag on an interactive TTY or write the token to a permission-restricted file/credential store; emit only metadata by default."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:664f79864703475999654d0ef42452bca6b17540bddcf5bd938179ec8d8b5397"
+          },
+          "properties": {
+            "category": "credential-exposure.token-stdout",
+            "confidence": "medium",
+            "findingId": "csf_ad5c841841dbdcc55b2c1d5a",
+            "occurrenceId": "occ_a537b254313fd0a608524cc5",
+            "severity": "low"
+          },
+          "ruleId": "credential-exposure.token-stdout",
+          "ruleIndex": 7
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 190,
+                  "startLine": 149
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/010_commercial_operations.sql"
+                },
+                "region": {
+                  "endLine": 186,
+                  "startLine": 170
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "concrete_implementation"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/share-sessions/%5BsessionId%5D/route.ts"
+                },
+                "region": {
+                  "endLine": 342,
+                  "startLine": 305
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Tenant-writable rows can forge authoritative workflow evidence\n\nOwner FOR ALL policies permit direct Data API writes to workflow evidence, including acknowledgement-style rows, bypassing server routes that enforce recipient contact and lifecycle semantics.\n\nSeverity: low\n\nCategory: Authorization bypass client writable authoritative state\n\nWeaknesses: CWE-602, CWE-862\n\nRemediation:\nApproval-gated: revoke client writes to authoritative evidence tables, expose narrowly scoped server or SECURITY DEFINER transitions, and validate immutable actor and lifecycle fields."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:5db396cc4759bc021d807c1071a143b6c26659b12341ac55efbd0a0951018667"
+          },
+          "properties": {
+            "category": "authorization-bypass.client-writable-authoritative-state",
+            "confidence": "medium",
+            "findingId": "csf_4e273fd457ad373bab92b5a2",
+            "occurrenceId": "occ_a72d08efa815e13b0ec2d6e9",
+            "severity": "low"
+          },
+          "ruleId": "authorization-bypass.client-writable-authoritative-state",
+          "ruleIndex": 2
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/001_init.sql"
+                },
+                "region": {
+                  "endLine": 17,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Legacy document and query tables lack row-level security\n\nMigration 001 creates documents and query_logs without RLS; direct Data API access can cross tenant boundaries if deployed grants expose them.\n\nSeverity: medium\n\nCategory: Authorization bypass missing row level security\n\nWeaknesses: CWE-862\n\nRemediation:\nApproval-gated: enable and force RLS, add tenant ownership or retire the tables, revoke unnecessary grants, and verify direct-role denial."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:4b69ea8a5613550aa39ead853f5fe43a11b1af6844229f67ecf691e1c664f2dc"
+          },
+          "properties": {
+            "category": "authorization-bypass.missing-row-level-security",
+            "confidence": "medium",
+            "findingId": "csf_d31a528eb6e500b89f82e0fe",
+            "occurrenceId": "occ_a7b7b15b99172de95169c0a7",
+            "severity": "medium"
+          },
+          "ruleId": "authorization-bypass.missing-row-level-security",
+          "ruleIndex": 4
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/commit_publish_document_dryrun.sh"
+                },
+                "region": {
+                  "endLine": 24,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Dry-run publication can commit and push pre-existing changes\n\nThe publication script stages broad fixed paths without checking a clean tree or expected diff, then may commit and subtree-push those pre-existing changes when an environment flag is set.\n\nSeverity: low\n\nCategory: Supply chain unbound publication diff\n\nWeaknesses: CWE-494, CWE-829\n\nRemediation:\nRequire a clean starting tree, pin expected HEAD/branch/remote, stage only generated artifacts whose digests are recorded, show the exact diff, and require a separate explicit push approval."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:0ba14040c012bd1f24282ebb2a9dce0a3d466c0130ae87de4cf020025919f4ac"
+          },
+          "properties": {
+            "category": "supply-chain.unbound-publication-diff",
+            "confidence": "medium",
+            "findingId": "csf_f95afe61f821089be16a9597",
+            "occurrenceId": "occ_a97b68814542094abd455220",
+            "severity": "low"
+          },
+          "ruleId": "supply-chain.unbound-publication-diff",
+          "ruleIndex": 20
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/004_safety_reference_catalog.sql"
+                },
+                "region": {
+                  "endLine": 80,
+                  "startLine": 1
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/004_knowledge_review_pipeline.sql"
+                },
+                "region": {
+                  "endLine": 76,
+                  "startLine": 25
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/008_safety_ontology.sql"
+                },
+                "region": {
+                  "endLine": 48,
+                  "startLine": 35
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Public catalog RLS exposes raw safety-reference, ontology, and ingestion metadata\n\nPublic SELECT policies expose raw safety-reference and ingestion records; ontology edges can also reveal relationships whose endpoint publication state is not required.\n\nSeverity: medium\n\nCategory: Information exposure raw corpus\n\nWeaknesses: CWE-200, CWE-862\n\nRemediation:\nApproval-gated: replace raw-table public SELECT with minimal views or RPCs, require published endpoint nodes for graph edges, and revoke underlying anonymous grants."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:096a4eea1fa3a4c901d432004a69949cb4ff4df8b3dac9e7716e99a5ffcddea7"
+          },
+          "properties": {
+            "category": "information-exposure.raw-corpus",
+            "confidence": "medium",
+            "findingId": "csf_09dffd447aef5179315b8a7a",
+            "occurrenceId": "occ_b21067b36a10648f1f403c25",
+            "severity": "medium"
+          },
+          "ruleId": "information-exposure.raw-corpus",
+          "ruleIndex": 8
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 86,
+                  "startLine": 76
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 190,
+                  "startLine": 175
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "NULL-tenant dispatch rows bypass owner-scoped RLS\n\nThe dispatch table permits NULL organization_id values and its owner FOR ALL policy explicitly accepts them, creating tenantless rows outside ordinary ownership.\n\nSeverity: medium\n\nCategory: Authorization bypass null tenant policy\n\nWeaknesses: CWE-862, CWE-639\n\nRemediation:\nApproval-gated: make organization_id non-null, backfill or quarantine legacy rows, replace the NULL branch with strict tenant ownership, and verify direct-role denial."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:e8541ecdcd68f653e8ded6f56616eb9e4848ed81c5cda2da4064761c50014f58"
+          },
+          "properties": {
+            "category": "authorization-bypass.null-tenant-policy",
+            "confidence": "medium",
+            "findingId": "csf_d6d2ac1f6b8952a038280ca8",
+            "occurrenceId": "occ_b3e835dd970547d633bf3fc8",
+            "severity": "medium"
+          },
+          "ruleId": "authorization-bypass.null-tenant-policy",
+          "ruleIndex": 5
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/supabase-admin.ts"
+                },
+                "region": {
+                  "endLine": 716,
+                  "startLine": 645
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Workspace provisioning can create duplicate organizations and sites\n\nDefault workspace provisioning performs lookup and insert as separate operations; concurrent first-use requests can create duplicate organizations or sites before either sees the other.\n\nSeverity: low\n\nCategory: Race condition workspace provisioning\n\nWeaknesses: CWE-362\n\nRemediation:\nAdd deterministic idempotency keys and database uniqueness, then provision through one transaction or conflict-safe upsert."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:307737b122dd051f80aed971fe1353b1ad0537ba5344df68ef97a10ab4d98648"
+          },
+          "properties": {
+            "category": "race-condition.workspace-provisioning",
+            "confidence": "medium",
+            "findingId": "csf_e6a6b86d7455972ad26a8e88",
+            "occurrenceId": "occ_b5f8f833b7fa9979240dfa14",
+            "severity": "low"
+          },
+          "ruleId": "race-condition.workspace-provisioning",
+          "ruleIndex": 13
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/final_output_parser_safety.mjs"
+                },
+                "region": {
+                  "endLine": 75,
+                  "startLine": 45
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/final_output_parser_safety.mjs"
+                },
+                "region": {
+                  "endLine": 132,
+                  "startLine": 95
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/anonymize_hwpx_templates.mjs"
+                },
+                "region": {
+                  "endLine": 158,
+                  "startLine": 110
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Archive and spreadsheet budgets run after expensive parser initialization\n\nAdmZip and ExcelJS parse or materialize attacker-influenced archives and workbooks before entry, expansion, row, cell, and elapsed limits are checked; the HWPX anonymizer has the same ordering.\n\nSeverity: low\n\nCategory: Resource exhaustion late parser admission\n\nWeaknesses: CWE-400\n\nRemediation:\nRun bounded ZIP central-directory and file-size preflight before parser construction; use streaming or sandboxed workbook parsing with hard process memory/time limits."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:d2eb0393bf1b896cf1e7dcbf866abdeab6a28db9ab735a3623b0ef848f280ca7"
+          },
+          "properties": {
+            "category": "resource-exhaustion.late-parser-admission",
+            "confidence": "medium",
+            "findingId": "csf_1243431382737ac444cdb8bb",
+            "occurrenceId": "occ_b72eef701a21fe7a6a38d9cb",
+            "severity": "low"
+          },
+          "ruleId": "resource-exhaustion.late-parser-admission",
+          "ruleIndex": 16
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "entrypoint"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/share-sessions/%5BsessionId%5D/route.ts"
+                },
+                "region": {
+                  "endLine": 213,
+                  "startLine": 113
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "concrete_implementation"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/workpack-commercial-store.ts"
+                },
+                "region": {
+                  "endLine": 452,
+                  "startLine": 320
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Public Share uses database object identifiers as bearer credentials\n\nThe public Share GET accepts sessionId plus workerId as the capability and returns session content without recipient contact verification; leakage or enumeration of both identifiers grants access.\n\nSeverity: medium\n\nCategory: Authorization bypass share object ID\n\nWeaknesses: CWE-639\n\nRemediation:\nUse a dedicated high-entropy, revocable public token stored as a hash, bind it to the intended recipient and expiry, and keep contact verification for acknowledgement writes."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:7ea75c48c04a1ca0242fc3c508897e26fca5070a4b66dbfbb92153bacfb690eb"
+          },
+          "properties": {
+            "category": "authorization-bypass.share-object-id",
+            "confidence": "medium",
+            "findingId": "csf_52d7b24f037bff2bd6738014",
+            "occurrenceId": "occ_c0c7184b7f3217b59112ddf8",
+            "severity": "medium"
+          },
+          "ruleId": "authorization-bypass.share-object-id",
+          "ruleIndex": 6
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 90,
+                  "startLine": 21
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/010_commercial_operations.sql"
+                },
+                "region": {
+                  "endLine": 100,
+                  "startLine": 60
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Related object identifiers are not bound to the same tenant\n\nIndependent foreign keys allow organization, site, workpack, worker, photo, Share, and acknowledgement identifiers from different tenants to coexist; selected application routes compensate but the schema does not enforce the tuple invariant.\n\nSeverity: low\n\nCategory: Authorization bypass cross tenant reference\n\nWeaknesses: CWE-639\n\nRemediation:\nApproval-gated: add composite tenant-scoped keys or constraint triggers, migrate inconsistent rows, and retain application tuple checks as defense in depth."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:427b52f5a807161848be7069ecc97d1936284b1dadead42254e907325de7f692"
+          },
+          "properties": {
+            "category": "authorization-bypass.cross-tenant-reference",
+            "confidence": "medium",
+            "findingId": "csf_dffeae47baef8fd88112ff3b",
+            "occurrenceId": "occ_da47dc5c4e14aa189dc94be8",
+            "severity": "low"
+          },
+          "ruleId": "authorization-bypass.cross-tenant-reference",
+          "ruleIndex": 3
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/api-guard.ts"
+                },
+                "region": {
+                  "endLine": 20,
+                  "startLine": 10
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/public-distributed-rate-limit.ts"
+                },
+                "region": {
+                  "endLine": 149,
+                  "startLine": 147
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "concrete_implementation"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/public-distributed-rate-limit.ts"
+                },
+                "region": {
+                  "endLine": 255,
+                  "startLine": 229
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Distributed admission trusts an unverified forwarded IP header\n\nx-vercel-forwarded-for is accepted before the code establishes that the request traversed a trusted Vercel proxy, and the resulting value becomes the per-client distributed admission key.\n\nSeverity: low\n\nCategory: Rate limit bypass untrusted forwarded identity\n\nWeaknesses: CWE-345\n\nRemediation:\nOnly trust Vercel forwarding headers when the deployment context is verified; otherwise derive identity from a trusted ingress or collapse to a conservative anonymous bucket."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:f3fc04d38111cfb2a828a0e7419d5d0fd0d6f13bbbb0e2f119b97bcf6c7c1ab6"
+          },
+          "properties": {
+            "category": "rate-limit-bypass.untrusted-forwarded-identity",
+            "confidence": "medium",
+            "findingId": "csf_8740306278b530b3891589bb",
+            "occurrenceId": "occ_f2b73c4adc1d42983628d7c2",
+            "severity": "low"
+          },
+          "ruleId": "rate-limit-bypass.untrusted-forwarded-identity",
+          "ruleIndex": 14
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/workers/route.ts"
+                },
+                "region": {
+                  "endLine": 120,
+                  "startLine": 84
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Concurrent worker imports can bypass the site-transfer check\n\nWorker import checks existing site bindings and then performs a separate upsert, allowing concurrent requests to pass the check and race a worker into a different site.\n\nSeverity: medium\n\nCategory: Race condition worker site binding\n\nWeaknesses: CWE-362, CWE-639\n\nRemediation:\nMove the site-transfer invariant into an atomic database function or constraint-backed transaction and test concurrent imports for one organization/external key."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:f5ae78a81e810eba165f166fd25f8d2bf9e2940bd555dbd3565e3d256c967a94"
+          },
+          "properties": {
+            "category": "race-condition.worker-site-binding",
+            "confidence": "medium",
+            "findingId": "csf_31fa4b81b290a0c1cba8d008",
+            "occurrenceId": "occ_fa3f673b94539244ae3aeb8d",
+            "severity": "medium"
+          },
+          "ruleId": "race-condition.worker-site-binding",
+          "ruleIndex": 12
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/knowledge/match/route.ts"
+                },
+                "region": {
+                  "endLine": 80,
+                  "startLine": 62
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/knowledge/ingest/route.ts"
+                },
+                "region": {
+                  "endLine": 347,
+                  "startLine": 335
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/n8n-webhook.ts"
+                },
+                "region": {
+                  "endLine": 102,
+                  "startLine": 79
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/workflow/dispatch/route.ts"
+                },
+                "region": {
+                  "endLine": 578,
+                  "startLine": 567
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/input-photos/hazard-analysis/route.ts"
+                },
+                "region": {
+                  "endLine": 150,
+                  "startLine": 140
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "API error responses expose internal database and provider details\n\nA public knowledge route and several authenticated routes project raw exception, database, webhook response-body, or vision-provider details into client responses.\n\nSeverity: low\n\nCategory: Information exposure raw error projection\n\nWeaknesses: CWE-209\n\nRemediation:\nReturn stable public error codes and generic messages, log detailed causes server-side with redaction, and add regression tests for representative provider and database failures."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:1c8f528121c03e1b340235feb2618b9f8d5b15f89a2eb0589823946717acac2d"
+          },
+          "properties": {
+            "category": "information-exposure.raw-error-projection",
+            "confidence": "medium",
+            "findingId": "csf_7aef114e48b74b34b829e893",
+            "occurrenceId": "occ_fe4f32e7d3d3cdce89f794db",
+            "severity": "low"
+          },
+          "ruleId": "information-exposure.raw-error-projection",
+          "ruleIndex": 9
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "Codex Security",
+          "rules": [
+            {
+              "fullDescription": {
+                "text": "Approval integrity: Sif migration scope bypass. Categories: Approval integrity sif migration scope bypass. Weaknesses: CWE-20, CWE-807."
+              },
+              "help": {
+                "markdown": "Approval integrity: Sif migration scope bypass. Categories: Approval integrity sif migration scope bypass. Weaknesses: CWE-20, CWE-807.\n\n## Remediation\n\nValidate an allowlisted SQL object grammar for every migration path and bind the packet to the exact expected migration digest, independent of filename.",
+                "text": "Approval integrity: Sif migration scope bypass. Categories: Approval integrity sif migration scope bypass. Weaknesses: CWE-20, CWE-807.\n\nRemediation:\n\nValidate an allowlisted SQL object grammar for every migration path and bind the packet to the exact expected migration digest, independent of filename."
+              },
+              "id": "approval-integrity.sif-migration-scope-bypass",
+              "name": "Approval integrity: Sif migration scope bypass",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "approval-integrity.sif-migration-scope-bypass",
+                  "external/cwe/cwe-020",
+                  "external/cwe/cwe-807",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Approval integrity: Sif migration scope bypass"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Approval integrity: Stale evidence binding. Categories: Approval integrity stale evidence binding. Weaknesses: CWE-345."
+              },
+              "help": {
+                "markdown": "Approval integrity: Stale evidence binding. Categories: Approval integrity stale evidence binding. Weaknesses: CWE-345.\n\n## Remediation\n\nRecord and verify current HEAD, production commit, and SHA-256 digests for every required input; fail closed on stale or mixed-source evidence and preserve separate mutation approval.",
+                "text": "Approval integrity: Stale evidence binding. Categories: Approval integrity stale evidence binding. Weaknesses: CWE-345.\n\nRemediation:\n\nRecord and verify current HEAD, production commit, and SHA-256 digests for every required input; fail closed on stale or mixed-source evidence and preserve separate mutation approval."
+              },
+              "id": "approval-integrity.stale-evidence-binding",
+              "name": "Approval integrity: Stale evidence binding",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "approval-integrity.stale-evidence-binding",
+                  "external/cwe/cwe-345",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Approval integrity: Stale evidence binding"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Authorization bypass: Client writable authoritative state. Categories: Authorization bypass client writable authoritative state. Weaknesses: CWE-602, CWE-862."
+              },
+              "help": {
+                "markdown": "Authorization bypass: Client writable authoritative state. Categories: Authorization bypass client writable authoritative state. Weaknesses: CWE-602, CWE-862.\n\n## Remediation\n\nApproval-gated: revoke client writes to authoritative evidence tables, expose narrowly scoped server or SECURITY DEFINER transitions, and validate immutable actor and lifecycle fields.",
+                "text": "Authorization bypass: Client writable authoritative state. Categories: Authorization bypass client writable authoritative state. Weaknesses: CWE-602, CWE-862.\n\nRemediation:\n\nApproval-gated: revoke client writes to authoritative evidence tables, expose narrowly scoped server or SECURITY DEFINER transitions, and validate immutable actor and lifecycle fields."
+              },
+              "id": "authorization-bypass.client-writable-authoritative-state",
+              "name": "Authorization bypass: Client writable authoritative state",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "authorization-bypass.client-writable-authoritative-state",
+                  "external/cwe/cwe-602",
+                  "external/cwe/cwe-862",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Authorization bypass: Client writable authoritative state"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Authorization bypass: Cross tenant reference. Categories: Authorization bypass cross tenant reference. Weaknesses: CWE-639."
+              },
+              "help": {
+                "markdown": "Authorization bypass: Cross tenant reference. Categories: Authorization bypass cross tenant reference. Weaknesses: CWE-639.\n\n## Remediation\n\nApproval-gated: add composite tenant-scoped keys or constraint triggers, migrate inconsistent rows, and retain application tuple checks as defense in depth.",
+                "text": "Authorization bypass: Cross tenant reference. Categories: Authorization bypass cross tenant reference. Weaknesses: CWE-639.\n\nRemediation:\n\nApproval-gated: add composite tenant-scoped keys or constraint triggers, migrate inconsistent rows, and retain application tuple checks as defense in depth."
+              },
+              "id": "authorization-bypass.cross-tenant-reference",
+              "name": "Authorization bypass: Cross tenant reference",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "authorization-bypass.cross-tenant-reference",
+                  "external/cwe/cwe-639",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Authorization bypass: Cross tenant reference"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Authorization bypass: Missing row level security. Categories: Authorization bypass missing row level security. Weaknesses: CWE-862."
+              },
+              "help": {
+                "markdown": "Authorization bypass: Missing row level security. Categories: Authorization bypass missing row level security. Weaknesses: CWE-862.\n\n## Remediation\n\nApproval-gated: enable and force RLS, add tenant ownership or retire the tables, revoke unnecessary grants, and verify direct-role denial.",
+                "text": "Authorization bypass: Missing row level security. Categories: Authorization bypass missing row level security. Weaknesses: CWE-862.\n\nRemediation:\n\nApproval-gated: enable and force RLS, add tenant ownership or retire the tables, revoke unnecessary grants, and verify direct-role denial."
+              },
+              "id": "authorization-bypass.missing-row-level-security",
+              "name": "Authorization bypass: Missing row level security",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "authorization-bypass.missing-row-level-security",
+                  "external/cwe/cwe-862",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Authorization bypass: Missing row level security"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Authorization bypass: Null tenant policy. Categories: Authorization bypass null tenant policy. Weaknesses: CWE-639, CWE-862."
+              },
+              "help": {
+                "markdown": "Authorization bypass: Null tenant policy. Categories: Authorization bypass null tenant policy. Weaknesses: CWE-639, CWE-862.\n\n## Remediation\n\nApproval-gated: make organization_id non-null, backfill or quarantine legacy rows, replace the NULL branch with strict tenant ownership, and verify direct-role denial.",
+                "text": "Authorization bypass: Null tenant policy. Categories: Authorization bypass null tenant policy. Weaknesses: CWE-639, CWE-862.\n\nRemediation:\n\nApproval-gated: make organization_id non-null, backfill or quarantine legacy rows, replace the NULL branch with strict tenant ownership, and verify direct-role denial."
+              },
+              "id": "authorization-bypass.null-tenant-policy",
+              "name": "Authorization bypass: Null tenant policy",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "authorization-bypass.null-tenant-policy",
+                  "external/cwe/cwe-639",
+                  "external/cwe/cwe-862",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Authorization bypass: Null tenant policy"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Authorization bypass: Share object ID. Categories: Authorization bypass share object ID. Weaknesses: CWE-639."
+              },
+              "help": {
+                "markdown": "Authorization bypass: Share object ID. Categories: Authorization bypass share object ID. Weaknesses: CWE-639.\n\n## Remediation\n\nUse a dedicated high-entropy, revocable public token stored as a hash, bind it to the intended recipient and expiry, and keep contact verification for acknowledgement writes.",
+                "text": "Authorization bypass: Share object ID. Categories: Authorization bypass share object ID. Weaknesses: CWE-639.\n\nRemediation:\n\nUse a dedicated high-entropy, revocable public token stored as a hash, bind it to the intended recipient and expiry, and keep contact verification for acknowledgement writes."
+              },
+              "id": "authorization-bypass.share-object-id",
+              "name": "Authorization bypass: Share object ID",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "authorization-bypass.share-object-id",
+                  "external/cwe/cwe-639",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Authorization bypass: Share object ID"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Credential exposure: Token stdout. Categories: Credential exposure token stdout. Weaknesses: CWE-522, CWE-532."
+              },
+              "help": {
+                "markdown": "Credential exposure: Token stdout. Categories: Credential exposure token stdout. Weaknesses: CWE-522, CWE-532.\n\n## Remediation\n\nRequire an explicit reveal flag on an interactive TTY or write the token to a permission-restricted file/credential store; emit only metadata by default.",
+                "text": "Credential exposure: Token stdout. Categories: Credential exposure token stdout. Weaknesses: CWE-522, CWE-532.\n\nRemediation:\n\nRequire an explicit reveal flag on an interactive TTY or write the token to a permission-restricted file/credential store; emit only metadata by default."
+              },
+              "id": "credential-exposure.token-stdout",
+              "name": "Credential exposure: Token stdout",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "credential-exposure.token-stdout",
+                  "external/cwe/cwe-522",
+                  "external/cwe/cwe-532",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Credential exposure: Token stdout"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Information exposure: Raw corpus. Categories: Information exposure raw corpus. Weaknesses: CWE-200, CWE-862."
+              },
+              "help": {
+                "markdown": "Information exposure: Raw corpus. Categories: Information exposure raw corpus. Weaknesses: CWE-200, CWE-862.\n\n## Remediation\n\nApproval-gated: replace raw-table public SELECT with minimal views or RPCs, require published endpoint nodes for graph edges, and revoke underlying anonymous grants.",
+                "text": "Information exposure: Raw corpus. Categories: Information exposure raw corpus. Weaknesses: CWE-200, CWE-862.\n\nRemediation:\n\nApproval-gated: replace raw-table public SELECT with minimal views or RPCs, require published endpoint nodes for graph edges, and revoke underlying anonymous grants."
+              },
+              "id": "information-exposure.raw-corpus",
+              "name": "Information exposure: Raw corpus",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "external/cwe/cwe-200",
+                  "external/cwe/cwe-862",
+                  "information-exposure.raw-corpus",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Information exposure: Raw corpus"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Information exposure: Raw error projection. Categories: Information exposure raw error projection. Weaknesses: CWE-209."
+              },
+              "help": {
+                "markdown": "Information exposure: Raw error projection. Categories: Information exposure raw error projection. Weaknesses: CWE-209.\n\n## Remediation\n\nReturn stable public error codes and generic messages, log detailed causes server-side with redaction, and add regression tests for representative provider and database failures.",
+                "text": "Information exposure: Raw error projection. Categories: Information exposure raw error projection. Weaknesses: CWE-209.\n\nRemediation:\n\nReturn stable public error codes and generic messages, log detailed causes server-side with redaction, and add regression tests for representative provider and database failures."
+              },
+              "id": "information-exposure.raw-error-projection",
+              "name": "Information exposure: Raw error projection",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "external/cwe/cwe-209",
+                  "information-exposure.raw-error-projection",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Information exposure: Raw error projection"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Race condition: Quota enforcement. Categories: Race condition quota enforcement. Weaknesses: CWE-362."
+              },
+              "help": {
+                "markdown": "Race condition: Quota enforcement. Categories: Race condition quota enforcement. Weaknesses: CWE-362.\n\n## Remediation\n\nEnforce the quota atomically with a database transaction, advisory lock, or per-owner unique slot model, then test simultaneous issuance.",
+                "text": "Race condition: Quota enforcement. Categories: Race condition quota enforcement. Weaknesses: CWE-362.\n\nRemediation:\n\nEnforce the quota atomically with a database transaction, advisory lock, or per-owner unique slot model, then test simultaneous issuance."
+              },
+              "id": "race-condition.quota-enforcement",
+              "name": "Race condition: Quota enforcement",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "external/cwe/cwe-362",
+                  "race-condition.quota-enforcement",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Race condition: Quota enforcement"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Race condition: Review transition. Categories: Race condition review transition. Weaknesses: CWE-362, CWE-667."
+              },
+              "help": {
+                "markdown": "Race condition: Review transition. Categories: Race condition review transition. Weaknesses: CWE-362, CWE-667.\n\n## Remediation\n\nApproval-gated: implement one transactional review-transition RPC with expected-state checks, atomic event updates, and idempotent retry semantics.",
+                "text": "Race condition: Review transition. Categories: Race condition review transition. Weaknesses: CWE-362, CWE-667.\n\nRemediation:\n\nApproval-gated: implement one transactional review-transition RPC with expected-state checks, atomic event updates, and idempotent retry semantics."
+              },
+              "id": "race-condition.review-transition",
+              "name": "Race condition: Review transition",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "external/cwe/cwe-362",
+                  "external/cwe/cwe-667",
+                  "race-condition.review-transition",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Race condition: Review transition"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Race condition: Worker site binding. Categories: Race condition worker site binding. Weaknesses: CWE-362, CWE-639."
+              },
+              "help": {
+                "markdown": "Race condition: Worker site binding. Categories: Race condition worker site binding. Weaknesses: CWE-362, CWE-639.\n\n## Remediation\n\nMove the site-transfer invariant into an atomic database function or constraint-backed transaction and test concurrent imports for one organization/external key.",
+                "text": "Race condition: Worker site binding. Categories: Race condition worker site binding. Weaknesses: CWE-362, CWE-639.\n\nRemediation:\n\nMove the site-transfer invariant into an atomic database function or constraint-backed transaction and test concurrent imports for one organization/external key."
+              },
+              "id": "race-condition.worker-site-binding",
+              "name": "Race condition: Worker site binding",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "external/cwe/cwe-362",
+                  "external/cwe/cwe-639",
+                  "race-condition.worker-site-binding",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Race condition: Worker site binding"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Race condition: Workspace provisioning. Categories: Race condition workspace provisioning. Weaknesses: CWE-362."
+              },
+              "help": {
+                "markdown": "Race condition: Workspace provisioning. Categories: Race condition workspace provisioning. Weaknesses: CWE-362.\n\n## Remediation\n\nAdd deterministic idempotency keys and database uniqueness, then provision through one transaction or conflict-safe upsert.",
+                "text": "Race condition: Workspace provisioning. Categories: Race condition workspace provisioning. Weaknesses: CWE-362.\n\nRemediation:\n\nAdd deterministic idempotency keys and database uniqueness, then provision through one transaction or conflict-safe upsert."
+              },
+              "id": "race-condition.workspace-provisioning",
+              "name": "Race condition: Workspace provisioning",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "external/cwe/cwe-362",
+                  "race-condition.workspace-provisioning",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Race condition: Workspace provisioning"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Rate limit bypass: Untrusted forwarded identity. Categories: Rate limit bypass untrusted forwarded identity. Weaknesses: CWE-345."
+              },
+              "help": {
+                "markdown": "Rate limit bypass: Untrusted forwarded identity. Categories: Rate limit bypass untrusted forwarded identity. Weaknesses: CWE-345.\n\n## Remediation\n\nOnly trust Vercel forwarding headers when the deployment context is verified; otherwise derive identity from a trusted ingress or collapse to a conservative anonymous bucket.",
+                "text": "Rate limit bypass: Untrusted forwarded identity. Categories: Rate limit bypass untrusted forwarded identity. Weaknesses: CWE-345.\n\nRemediation:\n\nOnly trust Vercel forwarding headers when the deployment context is verified; otherwise derive identity from a trusted ingress or collapse to a conservative anonymous bucket."
+              },
+              "id": "rate-limit-bypass.untrusted-forwarded-identity",
+              "name": "Rate limit bypass: Untrusted forwarded identity",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "external/cwe/cwe-345",
+                  "rate-limit-bypass.untrusted-forwarded-identity",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Rate limit bypass: Untrusted forwarded identity"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Resource exhaustion: Export cancellation gap. Categories: Resource exhaustion export cancellation gap. Weaknesses: CWE-400."
+              },
+              "help": {
+                "markdown": "Resource exhaustion: Export cancellation gap. Categories: Resource exhaustion export cancellation gap. Weaknesses: CWE-400.\n\n## Remediation\n\nPropagate request.signal, wrap rendering in a deadline shorter than the lease, abort worker processes, and keep the lease alive until termination is confirmed.",
+                "text": "Resource exhaustion: Export cancellation gap. Categories: Resource exhaustion export cancellation gap. Weaknesses: CWE-400.\n\nRemediation:\n\nPropagate request.signal, wrap rendering in a deadline shorter than the lease, abort worker processes, and keep the lease alive until termination is confirmed."
+              },
+              "id": "resource-exhaustion.export-cancellation-gap",
+              "name": "Resource exhaustion: Export cancellation gap",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "external/cwe/cwe-400",
+                  "resource-exhaustion.export-cancellation-gap",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Resource exhaustion: Export cancellation gap"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Resource exhaustion: Late parser admission. Categories: Resource exhaustion late parser admission. Weaknesses: CWE-400."
+              },
+              "help": {
+                "markdown": "Resource exhaustion: Late parser admission. Categories: Resource exhaustion late parser admission. Weaknesses: CWE-400.\n\n## Remediation\n\nRun bounded ZIP central-directory and file-size preflight before parser construction; use streaming or sandboxed workbook parsing with hard process memory/time limits.",
+                "text": "Resource exhaustion: Late parser admission. Categories: Resource exhaustion late parser admission. Weaknesses: CWE-400.\n\nRemediation:\n\nRun bounded ZIP central-directory and file-size preflight before parser construction; use streaming or sandboxed workbook parsing with hard process memory/time limits."
+              },
+              "id": "resource-exhaustion.late-parser-admission",
+              "name": "Resource exhaustion: Late parser admission",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "external/cwe/cwe-400",
+                  "resource-exhaustion.late-parser-admission",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Resource exhaustion: Late parser admission"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Resource exhaustion: Unbounded export smoke harness. Categories: Resource exhaustion unbounded export smoke harness. Weaknesses: CWE-400."
+              },
+              "help": {
+                "markdown": "Resource exhaustion: Unbounded export smoke harness. Categories: Resource exhaustion unbounded export smoke harness. Weaknesses: CWE-400.\n\n## Remediation\n\nAdd HTTP deadlines and streaming byte ceilings, process timeouts and termination, and guaranteed temporary-profile cleanup.",
+                "text": "Resource exhaustion: Unbounded export smoke harness. Categories: Resource exhaustion unbounded export smoke harness. Weaknesses: CWE-400.\n\nRemediation:\n\nAdd HTTP deadlines and streaming byte ceilings, process timeouts and termination, and guaranteed temporary-profile cleanup."
+              },
+              "id": "resource-exhaustion.unbounded-export-smoke-harness",
+              "name": "Resource exhaustion: Unbounded export smoke harness",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "external/cwe/cwe-400",
+                  "resource-exhaustion.unbounded-export-smoke-harness",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Resource exhaustion: Unbounded export smoke harness"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Resource exhaustion: Unbounded hwpx inventory. Categories: Resource exhaustion unbounded hwpx inventory. Weaknesses: CWE-400."
+              },
+              "help": {
+                "markdown": "Resource exhaustion: Unbounded hwpx inventory. Categories: Resource exhaustion unbounded hwpx inventory. Weaknesses: CWE-400.\n\n## Remediation\n\nReuse the bounded archive preflight before reading full files, cap corpus/file sizes and entry counts, validate central-directory ranges, and reject malformed metadata.",
+                "text": "Resource exhaustion: Unbounded hwpx inventory. Categories: Resource exhaustion unbounded hwpx inventory. Weaknesses: CWE-400.\n\nRemediation:\n\nReuse the bounded archive preflight before reading full files, cap corpus/file sizes and entry counts, validate central-directory ranges, and reject malformed metadata."
+              },
+              "id": "resource-exhaustion.unbounded-hwpx-inventory",
+              "name": "Resource exhaustion: Unbounded hwpx inventory",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "external/cwe/cwe-400",
+                  "resource-exhaustion.unbounded-hwpx-inventory",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Resource exhaustion: Unbounded hwpx inventory"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Resource exhaustion: Unbounded template inventory. Categories: Resource exhaustion unbounded template inventory. Weaknesses: CWE-200, CWE-400."
+              },
+              "help": {
+                "markdown": "Resource exhaustion: Unbounded template inventory. Categories: Resource exhaustion unbounded template inventory. Weaknesses: CWE-200, CWE-400.\n\n## Remediation\n\nApply no-follow traversal, file-count and aggregate-byte budgets before parser initialization, per-file size/type limits, elapsed deadlines, and bounded metadata output.",
+                "text": "Resource exhaustion: Unbounded template inventory. Categories: Resource exhaustion unbounded template inventory. Weaknesses: CWE-200, CWE-400.\n\nRemediation:\n\nApply no-follow traversal, file-count and aggregate-byte budgets before parser initialization, per-file size/type limits, elapsed deadlines, and bounded metadata output."
+              },
+              "id": "resource-exhaustion.unbounded-template-inventory",
+              "name": "Resource exhaustion: Unbounded template inventory",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "external/cwe/cwe-200",
+                  "external/cwe/cwe-400",
+                  "resource-exhaustion.unbounded-template-inventory",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Resource exhaustion: Unbounded template inventory"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Supply chain: Unbound publication diff. Categories: Supply chain unbound publication diff. Weaknesses: CWE-494, CWE-829."
+              },
+              "help": {
+                "markdown": "Supply chain: Unbound publication diff. Categories: Supply chain unbound publication diff. Weaknesses: CWE-494, CWE-829.\n\n## Remediation\n\nRequire a clean starting tree, pin expected HEAD/branch/remote, stage only generated artifacts whose digests are recorded, show the exact diff, and require a separate explicit push approval.",
+                "text": "Supply chain: Unbound publication diff. Categories: Supply chain unbound publication diff. Weaknesses: CWE-494, CWE-829.\n\nRemediation:\n\nRequire a clean starting tree, pin expected HEAD/branch/remote, stage only generated artifacts whose digests are recorded, show the exact diff, and require a separate explicit push approval."
+              },
+              "id": "supply-chain.unbound-publication-diff",
+              "name": "Supply chain: Unbound publication diff",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "external/cwe/cwe-494",
+                  "external/cwe/cwe-829",
+                  "security",
+                  "supply-chain.unbound-publication-diff"
+                ]
+              },
+              "shortDescription": {
+                "text": "Supply chain: Unbound publication diff"
+              }
+            }
+          ],
+          "version": "0.1.22"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

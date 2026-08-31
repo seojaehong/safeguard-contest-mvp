@@ -503,6 +503,23 @@ type RollupReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  completedCurrentHeadStandardSecurityScan: {
+    verdict: string;
+    scanId: string;
+    sourceHead: string;
+    reportableFindingCount: number | null;
+    mediumFindingCount: number | null;
+    lowFindingCount: number | null;
+    coverageCompleteness: string;
+    recordedSurfaceCount: number | null;
+    deferredCoverageItemCount: number | null;
+    immutableOriginalFindingCount: number | null;
+    approvalGatedDatabaseOrAtomicityCount: number | null;
+    approvalSensitiveShareCapabilityCount: number | null;
+    approvalFreeProductSourceResidualCount: number | null;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceApprovalFreeSecurityRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1224,6 +1241,25 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
     baseline: { immutableOriginalFindingCount: 18, preserved: true, rewritten: false },
     currentDisposition: { approvalGatedDatabaseOrAtomicityCount: 9, approvalSensitiveShareCapabilityCount: 1, approvalFreeProductSourceResidualCount: 8, fullyClosedBoundedSourceCandidateCount: 1, securityCompleteClaimAllowed: false },
     remainingBoundaries: { exactSavedShareVerdict: "MISSING_EVIDENCE", freshFullRepositoryScanCompleted: true, coverageClosureCompleted: false, securityCompleteClaimAllowed: false },
+  };
+}
+
+function completedCurrentHeadStandardSecurityScanFixture(): Record<string, unknown> {
+  return {
+    verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE",
+    scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c",
+    sourceHead: "TO_FILL",
+    scan: {
+      status: "completed", coverageCompleteness: "partial", recordedSurfaceCount: 25,
+      deferredCoverageItemCount: 36, reportableFindingCount: 21,
+      severity: { medium: 7, low: 14 },
+    },
+    baseline: { immutableOriginalFindingCount: 18 },
+    currentDisposition: {
+      approvalGatedDatabaseOrAtomicityCount: 9, approvalSensitiveShareCapabilityCount: 1,
+      approvalFreeProductSourceResidualCount: 11,
+    },
+    remainingBoundaries: { securityCompleteClaimAllowed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   };
 }
 
@@ -2744,6 +2780,7 @@ function createFixtureRoot(): { root: string; head: string } {
     },
   });
   writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/report.json", freshCurrentSourceSecurityScanFixture());
+  writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-9504d8db-complete/report.json", completedCurrentHeadStandardSecurityScanFixture());
   writeJson(root, "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json", currentSourceApprovalFreeSecurityRemediationFixture());
   writeJson(root, "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json", currentSourceSecurityResourceBudgetRemediationFixture());
   writeJson(root, "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json", currentSourceLogoutStorageRemediationFixture());
@@ -3148,6 +3185,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/security-current-remediation-ledger-2026-08-13/report.json",
     "evaluation/current-full-repository-security-scan-2026-08-27/report.json",
     "evaluation/current-head-standard-security-scan-2026-08-31-complete/report.json",
+    "evaluation/current-head-standard-security-scan-2026-08-31-9504d8db-complete/report.json",
     "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json",
     "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json",
@@ -3752,6 +3790,26 @@ describe("northstar live rollup", () => {
       approvalFreeProductSourceResidualCount: 8,
       fullyClosedBoundedSourceCandidateCount: 1,
       freshFullRepositoryScanCompleted: true,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.evidence.find((item) => item.id === "completed_current_head_standard_security_scan")).toMatchObject({
+      artifact: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-9504d8db-complete", "report.json"),
+    });
+    expect(report.completedCurrentHeadStandardSecurityScan).toMatchObject({
+      verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE",
+      scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c",
+      sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      reportableFindingCount: 21,
+      mediumFindingCount: 7,
+      lowFindingCount: 14,
+      coverageCompleteness: "partial",
+      recordedSurfaceCount: 25,
+      deferredCoverageItemCount: 36,
+      immutableOriginalFindingCount: 18,
+      approvalGatedDatabaseOrAtomicityCount: 9,
+      approvalSensitiveShareCapabilityCount: 1,
+      approvalFreeProductSourceResidualCount: 11,
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });

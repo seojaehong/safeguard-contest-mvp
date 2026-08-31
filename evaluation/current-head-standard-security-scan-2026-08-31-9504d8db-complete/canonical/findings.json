@@ -1,0 +1,3097 @@
+{
+  "documentType": "codex-security.findings",
+  "findings": [
+    {
+      "attackPath": {
+        "impact": {
+          "level": "high",
+          "why": "Migration 001 creates documents and query_logs without RLS; direct Data API access can cross tenant boundaries if deployed grants expose them."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "Effective production grants and live table use were not inspected."
+        },
+        "limitations": [
+          "Effective production grants and live table use were not inspected."
+        ],
+        "summary": "Migration 001 creates documents and query_logs without RLS; direct Data API access can cross tenant boundaries if deployed grants expose them."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Effective production grants and live table use were not inspected."
+      },
+      "findingId": "csf_d31a528eb6e500b89f82e0fe",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:4b69ea8a5613550aa39ead853f5fe43a11b1af6844229f67ecf691e1c664f2dc"
+      },
+      "identity": {
+        "anchor": "legacy-document-and-query-tables-lack-row-level-security"
+      },
+      "locations": [
+        {
+          "endLine": 17,
+          "path": "supabase/migrations/001_init.sql",
+          "role": "root_control",
+          "startLine": 1
+        }
+      ],
+      "occurrenceId": "occ_a7b7b15b99172de95169c0a7",
+      "provenance": {
+        "candidateId": "cand_fresh_001",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "high",
+                "why": "Migration 001 creates documents and query_logs without RLS; direct Data API access can cross tenant boundaries if deployed grants expose them."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "Effective production grants and live table use were not inspected."
+              },
+              "limitations": [
+                "Effective production grants and live table use were not inspected."
+              ],
+              "summary": "Migration 001 creates documents and query_logs without RLS; direct Data API access can cross tenant boundaries if deployed grants expose them."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Effective production grants and live table use were not inspected."
+            },
+            "identity": {
+              "anchor": "legacy-document-and-query-tables-lack-row-level-security"
+            },
+            "locations": [
+              {
+                "endLine": 17,
+                "path": "supabase/migrations/001_init.sql",
+                "role": "root_control",
+                "startLine": 1
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_001",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Approval-gated: enable and force RLS, add tenant ownership or retire the tables, revoke unnecessary grants, and verify direct-role denial.",
+            "rootCause": {
+              "summary": "Migration 001 creates documents and query_logs without RLS; direct Data API access can cross tenant boundaries if deployed grants expose them."
+            },
+            "ruleId": "authorization-bypass.missing-row-level-security",
+            "severity": {
+              "level": "medium",
+              "rationale": "Migration 001 creates documents and query_logs without RLS; direct Data API access can cross tenant boundaries if deployed grants expose them."
+            },
+            "summary": "Migration 001 creates documents and query_logs without RLS; direct Data API access can cross tenant boundaries if deployed grants expose them.",
+            "taxonomy": {
+              "category": "authorization-bypass.missing-row-level-security",
+              "cwe": [
+                "CWE-862"
+              ]
+            },
+            "title": "Legacy document and query tables lack row-level security",
+            "validation": {
+              "limitations": [
+                "Effective production grants and live table use were not inspected."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Approval-gated: enable and force RLS, add tenant ownership or retire the tables, revoke unnecessary grants, and verify direct-role denial.",
+      "rootCause": {
+        "summary": "Migration 001 creates documents and query_logs without RLS; direct Data API access can cross tenant boundaries if deployed grants expose them."
+      },
+      "ruleId": "authorization-bypass.missing-row-level-security",
+      "severity": {
+        "level": "medium",
+        "rationale": "Migration 001 creates documents and query_logs without RLS; direct Data API access can cross tenant boundaries if deployed grants expose them."
+      },
+      "summary": "Migration 001 creates documents and query_logs without RLS; direct Data API access can cross tenant boundaries if deployed grants expose them.",
+      "taxonomy": {
+        "category": "authorization-bypass.missing-row-level-security",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Legacy document and query tables lack row-level security",
+      "validation": {
+        "limitations": [
+          "Effective production grants and live table use were not inspected."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/legacy-tables-missing-rls/legacy-tables-missing-rls.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "high",
+          "why": "The dispatch table permits NULL organization_id values and its owner FOR ALL policy explicitly accepts them, creating tenantless rows outside ordinary ownership."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "Live Data API grants were not mutated or inspected."
+        },
+        "limitations": [
+          "Live Data API grants were not mutated or inspected."
+        ],
+        "summary": "The dispatch table permits NULL organization_id values and its owner FOR ALL policy explicitly accepts them, creating tenantless rows outside ordinary ownership."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Live Data API grants were not mutated or inspected."
+      },
+      "findingId": "csf_d6d2ac1f6b8952a038280ca8",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:e8541ecdcd68f653e8ded6f56616eb9e4848ed81c5cda2da4064761c50014f58"
+      },
+      "identity": {
+        "anchor": "null-tenant-dispatch-rows-bypass-owner-scoped-rls"
+      },
+      "locations": [
+        {
+          "endLine": 86,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 76
+        },
+        {
+          "endLine": 190,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 175
+        }
+      ],
+      "occurrenceId": "occ_b3e835dd970547d633bf3fc8",
+      "provenance": {
+        "candidateId": "cand_fresh_002",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "high",
+                "why": "The dispatch table permits NULL organization_id values and its owner FOR ALL policy explicitly accepts them, creating tenantless rows outside ordinary ownership."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "Live Data API grants were not mutated or inspected."
+              },
+              "limitations": [
+                "Live Data API grants were not mutated or inspected."
+              ],
+              "summary": "The dispatch table permits NULL organization_id values and its owner FOR ALL policy explicitly accepts them, creating tenantless rows outside ordinary ownership."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Live Data API grants were not mutated or inspected."
+            },
+            "identity": {
+              "anchor": "null-tenant-dispatch-rows-bypass-owner-scoped-rls"
+            },
+            "locations": [
+              {
+                "endLine": 86,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 76
+              },
+              {
+                "endLine": 190,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 175
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_002",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Approval-gated: make organization_id non-null, backfill or quarantine legacy rows, replace the NULL branch with strict tenant ownership, and verify direct-role denial.",
+            "rootCause": {
+              "summary": "The dispatch table permits NULL organization_id values and its owner FOR ALL policy explicitly accepts them, creating tenantless rows outside ordinary ownership."
+            },
+            "ruleId": "authorization-bypass.null-tenant-policy",
+            "severity": {
+              "level": "medium",
+              "rationale": "The dispatch table permits NULL organization_id values and its owner FOR ALL policy explicitly accepts them, creating tenantless rows outside ordinary ownership."
+            },
+            "summary": "The dispatch table permits NULL organization_id values and its owner FOR ALL policy explicitly accepts them, creating tenantless rows outside ordinary ownership.",
+            "taxonomy": {
+              "category": "authorization-bypass.null-tenant-policy",
+              "cwe": [
+                "CWE-862",
+                "CWE-639"
+              ]
+            },
+            "title": "NULL-tenant dispatch rows bypass owner-scoped RLS",
+            "validation": {
+              "limitations": [
+                "Live Data API grants were not mutated or inspected."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Approval-gated: make organization_id non-null, backfill or quarantine legacy rows, replace the NULL branch with strict tenant ownership, and verify direct-role denial.",
+      "rootCause": {
+        "summary": "The dispatch table permits NULL organization_id values and its owner FOR ALL policy explicitly accepts them, creating tenantless rows outside ordinary ownership."
+      },
+      "ruleId": "authorization-bypass.null-tenant-policy",
+      "severity": {
+        "level": "medium",
+        "rationale": "The dispatch table permits NULL organization_id values and its owner FOR ALL policy explicitly accepts them, creating tenantless rows outside ordinary ownership."
+      },
+      "summary": "The dispatch table permits NULL organization_id values and its owner FOR ALL policy explicitly accepts them, creating tenantless rows outside ordinary ownership.",
+      "taxonomy": {
+        "category": "authorization-bypass.null-tenant-policy",
+        "cwe": [
+          "CWE-862",
+          "CWE-639"
+        ]
+      },
+      "title": "NULL-tenant dispatch rows bypass owner-scoped RLS",
+      "validation": {
+        "limitations": [
+          "Live Data API grants were not mutated or inspected."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/null-tenant-dispatch-rls/null-tenant-dispatch-rls.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Independent foreign keys allow organization, site, workpack, worker, photo, Share, and acknowledgement identifiers from different tenants to coexist; selected application routes compensate but the schema does not enforce the tuple invariant."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "No live cross-tenant rows were created or queried."
+        },
+        "limitations": [
+          "No live cross-tenant rows were created or queried."
+        ],
+        "summary": "Independent foreign keys allow organization, site, workpack, worker, photo, Share, and acknowledgement identifiers from different tenants to coexist; selected application routes compensate but the schema does not enforce the tuple invariant."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "No live cross-tenant rows were created or queried."
+      },
+      "findingId": "csf_dffeae47baef8fd88112ff3b",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:427b52f5a807161848be7069ecc97d1936284b1dadead42254e907325de7f692"
+      },
+      "identity": {
+        "anchor": "related-object-identifiers-are-not-bound-to-the-same-tenant"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 21
+        },
+        {
+          "endLine": 100,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 60
+        }
+      ],
+      "occurrenceId": "occ_da47dc5c4e14aa189dc94be8",
+      "provenance": {
+        "candidateId": "cand_fresh_003",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "Independent foreign keys allow organization, site, workpack, worker, photo, Share, and acknowledgement identifiers from different tenants to coexist; selected application routes compensate but the schema does not enforce the tuple invariant."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "No live cross-tenant rows were created or queried."
+              },
+              "limitations": [
+                "No live cross-tenant rows were created or queried."
+              ],
+              "summary": "Independent foreign keys allow organization, site, workpack, worker, photo, Share, and acknowledgement identifiers from different tenants to coexist; selected application routes compensate but the schema does not enforce the tuple invariant."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "No live cross-tenant rows were created or queried."
+            },
+            "identity": {
+              "anchor": "related-object-identifiers-are-not-bound-to-the-same-tenant"
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 21
+              },
+              {
+                "endLine": 100,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 60
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_003",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Approval-gated: add composite tenant-scoped keys or constraint triggers, migrate inconsistent rows, and retain application tuple checks as defense in depth.",
+            "rootCause": {
+              "summary": "Independent foreign keys allow organization, site, workpack, worker, photo, Share, and acknowledgement identifiers from different tenants to coexist; selected application routes compensate but the schema does not enforce the tuple invariant."
+            },
+            "ruleId": "authorization-bypass.cross-tenant-reference",
+            "severity": {
+              "level": "low",
+              "rationale": "Independent foreign keys allow organization, site, workpack, worker, photo, Share, and acknowledgement identifiers from different tenants to coexist; selected application routes compensate but the schema does not enforce the tuple invariant."
+            },
+            "summary": "Independent foreign keys allow organization, site, workpack, worker, photo, Share, and acknowledgement identifiers from different tenants to coexist; selected application routes compensate but the schema does not enforce the tuple invariant.",
+            "taxonomy": {
+              "category": "authorization-bypass.cross-tenant-reference",
+              "cwe": [
+                "CWE-639"
+              ]
+            },
+            "title": "Related object identifiers are not bound to the same tenant",
+            "validation": {
+              "limitations": [
+                "No live cross-tenant rows were created or queried."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Approval-gated: add composite tenant-scoped keys or constraint triggers, migrate inconsistent rows, and retain application tuple checks as defense in depth.",
+      "rootCause": {
+        "summary": "Independent foreign keys allow organization, site, workpack, worker, photo, Share, and acknowledgement identifiers from different tenants to coexist; selected application routes compensate but the schema does not enforce the tuple invariant."
+      },
+      "ruleId": "authorization-bypass.cross-tenant-reference",
+      "severity": {
+        "level": "low",
+        "rationale": "Independent foreign keys allow organization, site, workpack, worker, photo, Share, and acknowledgement identifiers from different tenants to coexist; selected application routes compensate but the schema does not enforce the tuple invariant."
+      },
+      "summary": "Independent foreign keys allow organization, site, workpack, worker, photo, Share, and acknowledgement identifiers from different tenants to coexist; selected application routes compensate but the schema does not enforce the tuple invariant.",
+      "taxonomy": {
+        "category": "authorization-bypass.cross-tenant-reference",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Related object identifiers are not bound to the same tenant",
+      "validation": {
+        "limitations": [
+          "No live cross-tenant rows were created or queried."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/cross-tenant-reference-integrity/cross-tenant-reference-integrity.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Owner FOR ALL policies permit direct Data API writes to workflow evidence, including acknowledgement-style rows, bypassing server routes that enforce recipient contact and lifecycle semantics."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "Exploitability depends on effective Data API table grants."
+        },
+        "limitations": [
+          "Exploitability depends on effective Data API table grants."
+        ],
+        "summary": "Owner FOR ALL policies permit direct Data API writes to workflow evidence, including acknowledgement-style rows, bypassing server routes that enforce recipient contact and lifecycle semantics."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Exploitability depends on effective Data API table grants."
+      },
+      "findingId": "csf_4e273fd457ad373bab92b5a2",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:5db396cc4759bc021d807c1071a143b6c26659b12341ac55efbd0a0951018667"
+      },
+      "identity": {
+        "anchor": "tenant-writable-rows-can-forge-authoritative-workflow-evidence"
+      },
+      "locations": [
+        {
+          "endLine": 190,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 149
+        },
+        {
+          "endLine": 186,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 170
+        },
+        {
+          "endLine": 342,
+          "path": "app/api/share-sessions/[sessionId]/route.ts",
+          "role": "concrete_implementation",
+          "startLine": 305
+        }
+      ],
+      "occurrenceId": "occ_a72d08efa815e13b0ec2d6e9",
+      "provenance": {
+        "candidateId": "cand_fresh_004",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "Owner FOR ALL policies permit direct Data API writes to workflow evidence, including acknowledgement-style rows, bypassing server routes that enforce recipient contact and lifecycle semantics."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "Exploitability depends on effective Data API table grants."
+              },
+              "limitations": [
+                "Exploitability depends on effective Data API table grants."
+              ],
+              "summary": "Owner FOR ALL policies permit direct Data API writes to workflow evidence, including acknowledgement-style rows, bypassing server routes that enforce recipient contact and lifecycle semantics."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Exploitability depends on effective Data API table grants."
+            },
+            "identity": {
+              "anchor": "tenant-writable-rows-can-forge-authoritative-workflow-evidence"
+            },
+            "locations": [
+              {
+                "endLine": 190,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 149
+              },
+              {
+                "endLine": 186,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 170
+              },
+              {
+                "endLine": 342,
+                "path": "app/api/share-sessions/[sessionId]/route.ts",
+                "role": "concrete_implementation",
+                "startLine": 305
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_004",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Approval-gated: revoke client writes to authoritative evidence tables, expose narrowly scoped server or SECURITY DEFINER transitions, and validate immutable actor and lifecycle fields.",
+            "rootCause": {
+              "summary": "Owner FOR ALL policies permit direct Data API writes to workflow evidence, including acknowledgement-style rows, bypassing server routes that enforce recipient contact and lifecycle semantics."
+            },
+            "ruleId": "authorization-bypass.client-writable-authoritative-state",
+            "severity": {
+              "level": "low",
+              "rationale": "Owner FOR ALL policies permit direct Data API writes to workflow evidence, including acknowledgement-style rows, bypassing server routes that enforce recipient contact and lifecycle semantics."
+            },
+            "summary": "Owner FOR ALL policies permit direct Data API writes to workflow evidence, including acknowledgement-style rows, bypassing server routes that enforce recipient contact and lifecycle semantics.",
+            "taxonomy": {
+              "category": "authorization-bypass.client-writable-authoritative-state",
+              "cwe": [
+                "CWE-602",
+                "CWE-862"
+              ]
+            },
+            "title": "Tenant-writable rows can forge authoritative workflow evidence",
+            "validation": {
+              "limitations": [
+                "Exploitability depends on effective Data API table grants."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Approval-gated: revoke client writes to authoritative evidence tables, expose narrowly scoped server or SECURITY DEFINER transitions, and validate immutable actor and lifecycle fields.",
+      "rootCause": {
+        "summary": "Owner FOR ALL policies permit direct Data API writes to workflow evidence, including acknowledgement-style rows, bypassing server routes that enforce recipient contact and lifecycle semantics."
+      },
+      "ruleId": "authorization-bypass.client-writable-authoritative-state",
+      "severity": {
+        "level": "low",
+        "rationale": "Owner FOR ALL policies permit direct Data API writes to workflow evidence, including acknowledgement-style rows, bypassing server routes that enforce recipient contact and lifecycle semantics."
+      },
+      "summary": "Owner FOR ALL policies permit direct Data API writes to workflow evidence, including acknowledgement-style rows, bypassing server routes that enforce recipient contact and lifecycle semantics.",
+      "taxonomy": {
+        "category": "authorization-bypass.client-writable-authoritative-state",
+        "cwe": [
+          "CWE-602",
+          "CWE-862"
+        ]
+      },
+      "title": "Tenant-writable rows can forge authoritative workflow evidence",
+      "validation": {
+        "limitations": [
+          "Exploitability depends on effective Data API table grants."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/client-writable-authoritative-state/client-writable-authoritative-state.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Token issuance counts active MCP tokens and inserts the new token in separate operations, so concurrent requests can exceed the configured active-token cap."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "No concurrent mutation was executed."
+        },
+        "limitations": [
+          "No concurrent mutation was executed."
+        ],
+        "summary": "Token issuance counts active MCP tokens and inserts the new token in separate operations, so concurrent requests can exceed the configured active-token cap."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "No concurrent mutation was executed."
+      },
+      "findingId": "csf_09001652155a49d6a98b106c",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:d081c065cd15bf07d986a9ee6fd8052ea9b7ce215d823be57c607c6952b6f622"
+      },
+      "identity": {
+        "anchor": "mcp-active-token-quota-remains-non-atomic"
+      },
+      "locations": [
+        {
+          "endLine": 278,
+          "path": "app/api/mcp-tokens/route.ts",
+          "role": "sink",
+          "startLine": 247
+        }
+      ],
+      "occurrenceId": "occ_07867f4f7dbd7f70a0f4c4bc",
+      "provenance": {
+        "candidateId": "cand_fresh_005",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "Token issuance counts active MCP tokens and inserts the new token in separate operations, so concurrent requests can exceed the configured active-token cap."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "No concurrent mutation was executed."
+              },
+              "limitations": [
+                "No concurrent mutation was executed."
+              ],
+              "summary": "Token issuance counts active MCP tokens and inserts the new token in separate operations, so concurrent requests can exceed the configured active-token cap."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "No concurrent mutation was executed."
+            },
+            "identity": {
+              "anchor": "mcp-active-token-quota-remains-non-atomic"
+            },
+            "locations": [
+              {
+                "endLine": 278,
+                "path": "app/api/mcp-tokens/route.ts",
+                "role": "sink",
+                "startLine": 247
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_005",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Enforce the quota atomically with a database transaction, advisory lock, or per-owner unique slot model, then test simultaneous issuance.",
+            "rootCause": {
+              "summary": "Token issuance counts active MCP tokens and inserts the new token in separate operations, so concurrent requests can exceed the configured active-token cap."
+            },
+            "ruleId": "race-condition.quota-enforcement",
+            "severity": {
+              "level": "low",
+              "rationale": "Token issuance counts active MCP tokens and inserts the new token in separate operations, so concurrent requests can exceed the configured active-token cap."
+            },
+            "summary": "Token issuance counts active MCP tokens and inserts the new token in separate operations, so concurrent requests can exceed the configured active-token cap.",
+            "taxonomy": {
+              "category": "race-condition.quota-enforcement",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "MCP active-token quota remains non-atomic",
+            "validation": {
+              "limitations": [
+                "No concurrent mutation was executed."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Enforce the quota atomically with a database transaction, advisory lock, or per-owner unique slot model, then test simultaneous issuance.",
+      "rootCause": {
+        "summary": "Token issuance counts active MCP tokens and inserts the new token in separate operations, so concurrent requests can exceed the configured active-token cap."
+      },
+      "ruleId": "race-condition.quota-enforcement",
+      "severity": {
+        "level": "low",
+        "rationale": "Token issuance counts active MCP tokens and inserts the new token in separate operations, so concurrent requests can exceed the configured active-token cap."
+      },
+      "summary": "Token issuance counts active MCP tokens and inserts the new token in separate operations, so concurrent requests can exceed the configured active-token cap.",
+      "taxonomy": {
+        "category": "race-condition.quota-enforcement",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "MCP active-token quota remains non-atomic",
+      "validation": {
+        "limitations": [
+          "No concurrent mutation was executed."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/mcp-token-quota-race/mcp-token-quota-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "high",
+          "why": "Public SELECT policies expose raw safety-reference and ingestion records; ontology edges can also reveal relationships whose endpoint publication state is not required."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "Effective production grants and intended public corpus fields were not changed."
+        },
+        "limitations": [
+          "Effective production grants and intended public corpus fields were not changed."
+        ],
+        "summary": "Public SELECT policies expose raw safety-reference and ingestion records; ontology edges can also reveal relationships whose endpoint publication state is not required."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Effective production grants and intended public corpus fields were not changed."
+      },
+      "findingId": "csf_09dffd447aef5179315b8a7a",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:096a4eea1fa3a4c901d432004a69949cb4ff4df8b3dac9e7716e99a5ffcddea7"
+      },
+      "identity": {
+        "anchor": "public-catalog-rls-exposes-raw-safety-reference-ontology-and-ingestion-metadata"
+      },
+      "locations": [
+        {
+          "endLine": 80,
+          "path": "supabase/migrations/004_safety_reference_catalog.sql",
+          "role": "root_control",
+          "startLine": 1
+        },
+        {
+          "endLine": 76,
+          "path": "supabase/migrations/004_knowledge_review_pipeline.sql",
+          "role": "root_control",
+          "startLine": 25
+        },
+        {
+          "endLine": 48,
+          "path": "supabase/migrations/008_safety_ontology.sql",
+          "role": "root_control",
+          "startLine": 35
+        }
+      ],
+      "occurrenceId": "occ_b21067b36a10648f1f403c25",
+      "provenance": {
+        "candidateId": "cand_fresh_006",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "high",
+                "why": "Public SELECT policies expose raw safety-reference and ingestion records; ontology edges can also reveal relationships whose endpoint publication state is not required."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "Effective production grants and intended public corpus fields were not changed."
+              },
+              "limitations": [
+                "Effective production grants and intended public corpus fields were not changed."
+              ],
+              "summary": "Public SELECT policies expose raw safety-reference and ingestion records; ontology edges can also reveal relationships whose endpoint publication state is not required."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Effective production grants and intended public corpus fields were not changed."
+            },
+            "identity": {
+              "anchor": "public-catalog-rls-exposes-raw-safety-reference-ontology-and-ingestion-metadata"
+            },
+            "locations": [
+              {
+                "endLine": 80,
+                "path": "supabase/migrations/004_safety_reference_catalog.sql",
+                "role": "root_control",
+                "startLine": 1
+              },
+              {
+                "endLine": 76,
+                "path": "supabase/migrations/004_knowledge_review_pipeline.sql",
+                "role": "root_control",
+                "startLine": 25
+              },
+              {
+                "endLine": 48,
+                "path": "supabase/migrations/008_safety_ontology.sql",
+                "role": "root_control",
+                "startLine": 35
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_006",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Approval-gated: replace raw-table public SELECT with minimal views or RPCs, require published endpoint nodes for graph edges, and revoke underlying anonymous grants.",
+            "rootCause": {
+              "summary": "Public SELECT policies expose raw safety-reference and ingestion records; ontology edges can also reveal relationships whose endpoint publication state is not required."
+            },
+            "ruleId": "information-exposure.raw-corpus",
+            "severity": {
+              "level": "medium",
+              "rationale": "Public SELECT policies expose raw safety-reference and ingestion records; ontology edges can also reveal relationships whose endpoint publication state is not required."
+            },
+            "summary": "Public SELECT policies expose raw safety-reference and ingestion records; ontology edges can also reveal relationships whose endpoint publication state is not required.",
+            "taxonomy": {
+              "category": "information-exposure.raw-corpus",
+              "cwe": [
+                "CWE-200",
+                "CWE-862"
+              ]
+            },
+            "title": "Public catalog RLS exposes raw safety-reference, ontology, and ingestion metadata",
+            "validation": {
+              "limitations": [
+                "Effective production grants and intended public corpus fields were not changed."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Approval-gated: replace raw-table public SELECT with minimal views or RPCs, require published endpoint nodes for graph edges, and revoke underlying anonymous grants.",
+      "rootCause": {
+        "summary": "Public SELECT policies expose raw safety-reference and ingestion records; ontology edges can also reveal relationships whose endpoint publication state is not required."
+      },
+      "ruleId": "information-exposure.raw-corpus",
+      "severity": {
+        "level": "medium",
+        "rationale": "Public SELECT policies expose raw safety-reference and ingestion records; ontology edges can also reveal relationships whose endpoint publication state is not required."
+      },
+      "summary": "Public SELECT policies expose raw safety-reference and ingestion records; ontology edges can also reveal relationships whose endpoint publication state is not required.",
+      "taxonomy": {
+        "category": "information-exposure.raw-corpus",
+        "cwe": [
+          "CWE-200",
+          "CWE-862"
+        ]
+      },
+      "title": "Public catalog RLS exposes raw safety-reference, ontology, and ingestion metadata",
+      "validation": {
+        "limitations": [
+          "Effective production grants and intended public corpus fields were not changed."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/public-raw-corpus-exposure/public-raw-corpus-exposure.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "high",
+          "why": "The public Share GET accepts sessionId plus workerId as the capability and returns session content without recipient contact verification; leakage or enumeration of both identifiers grants access."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "Exact saved /share/[sessionId] remains MISSING_EVIDENCE and no session was created."
+        },
+        "limitations": [
+          "Exact saved /share/[sessionId] remains MISSING_EVIDENCE and no session was created."
+        ],
+        "summary": "The public Share GET accepts sessionId plus workerId as the capability and returns session content without recipient contact verification; leakage or enumeration of both identifiers grants access."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Exact saved /share/[sessionId] remains MISSING_EVIDENCE and no session was created."
+      },
+      "findingId": "csf_52d7b24f037bff2bd6738014",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:7ea75c48c04a1ca0242fc3c508897e26fca5070a4b66dbfbb92153bacfb690eb"
+      },
+      "identity": {
+        "anchor": "public-share-uses-database-object-identifiers-as-bearer-credentials"
+      },
+      "locations": [
+        {
+          "endLine": 213,
+          "path": "app/api/share-sessions/[sessionId]/route.ts",
+          "role": "entrypoint",
+          "startLine": 113
+        },
+        {
+          "endLine": 452,
+          "path": "lib/workpack-commercial-store.ts",
+          "role": "concrete_implementation",
+          "startLine": 320
+        }
+      ],
+      "occurrenceId": "occ_c0c7184b7f3217b59112ddf8",
+      "provenance": {
+        "candidateId": "cand_fresh_007",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "high",
+                "why": "The public Share GET accepts sessionId plus workerId as the capability and returns session content without recipient contact verification; leakage or enumeration of both identifiers grants access."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "Exact saved /share/[sessionId] remains MISSING_EVIDENCE and no session was created."
+              },
+              "limitations": [
+                "Exact saved /share/[sessionId] remains MISSING_EVIDENCE and no session was created."
+              ],
+              "summary": "The public Share GET accepts sessionId plus workerId as the capability and returns session content without recipient contact verification; leakage or enumeration of both identifiers grants access."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Exact saved /share/[sessionId] remains MISSING_EVIDENCE and no session was created."
+            },
+            "identity": {
+              "anchor": "public-share-uses-database-object-identifiers-as-bearer-credentials"
+            },
+            "locations": [
+              {
+                "endLine": 213,
+                "path": "app/api/share-sessions/[sessionId]/route.ts",
+                "role": "entrypoint",
+                "startLine": 113
+              },
+              {
+                "endLine": 452,
+                "path": "lib/workpack-commercial-store.ts",
+                "role": "concrete_implementation",
+                "startLine": 320
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_007",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Use a dedicated high-entropy, revocable public token stored as a hash, bind it to the intended recipient and expiry, and keep contact verification for acknowledgement writes.",
+            "rootCause": {
+              "summary": "The public Share GET accepts sessionId plus workerId as the capability and returns session content without recipient contact verification; leakage or enumeration of both identifiers grants access."
+            },
+            "ruleId": "authorization-bypass.share-object-id",
+            "severity": {
+              "level": "medium",
+              "rationale": "The public Share GET accepts sessionId plus workerId as the capability and returns session content without recipient contact verification; leakage or enumeration of both identifiers grants access."
+            },
+            "summary": "The public Share GET accepts sessionId plus workerId as the capability and returns session content without recipient contact verification; leakage or enumeration of both identifiers grants access.",
+            "taxonomy": {
+              "category": "authorization-bypass.share-object-id",
+              "cwe": [
+                "CWE-639"
+              ]
+            },
+            "title": "Public Share uses database object identifiers as bearer credentials",
+            "validation": {
+              "limitations": [
+                "Exact saved /share/[sessionId] remains MISSING_EVIDENCE and no session was created."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Use a dedicated high-entropy, revocable public token stored as a hash, bind it to the intended recipient and expiry, and keep contact verification for acknowledgement writes.",
+      "rootCause": {
+        "summary": "The public Share GET accepts sessionId plus workerId as the capability and returns session content without recipient contact verification; leakage or enumeration of both identifiers grants access."
+      },
+      "ruleId": "authorization-bypass.share-object-id",
+      "severity": {
+        "level": "medium",
+        "rationale": "The public Share GET accepts sessionId plus workerId as the capability and returns session content without recipient contact verification; leakage or enumeration of both identifiers grants access."
+      },
+      "summary": "The public Share GET accepts sessionId plus workerId as the capability and returns session content without recipient contact verification; leakage or enumeration of both identifiers grants access.",
+      "taxonomy": {
+        "category": "authorization-bypass.share-object-id",
+        "cwe": [
+          "CWE-639"
+        ]
+      },
+      "title": "Public Share uses database object identifiers as bearer credentials",
+      "validation": {
+        "limitations": [
+          "Exact saved /share/[sessionId] remains MISSING_EVIDENCE and no session was created."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/share-object-id-capability/share-object-id-capability.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "high",
+          "why": "Worker import checks existing site bindings and then performs a separate upsert, allowing concurrent requests to pass the check and race a worker into a different site."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "No concurrent live import was performed."
+        },
+        "limitations": [
+          "No concurrent live import was performed."
+        ],
+        "summary": "Worker import checks existing site bindings and then performs a separate upsert, allowing concurrent requests to pass the check and race a worker into a different site."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "No concurrent live import was performed."
+      },
+      "findingId": "csf_31fa4b81b290a0c1cba8d008",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:f5ae78a81e810eba165f166fd25f8d2bf9e2940bd555dbd3565e3d256c967a94"
+      },
+      "identity": {
+        "anchor": "concurrent-worker-imports-can-bypass-the-site-transfer-check"
+      },
+      "locations": [
+        {
+          "endLine": 120,
+          "path": "app/api/workers/route.ts",
+          "role": "sink",
+          "startLine": 84
+        }
+      ],
+      "occurrenceId": "occ_fa3f673b94539244ae3aeb8d",
+      "provenance": {
+        "candidateId": "cand_fresh_008",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "high",
+                "why": "Worker import checks existing site bindings and then performs a separate upsert, allowing concurrent requests to pass the check and race a worker into a different site."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "No concurrent live import was performed."
+              },
+              "limitations": [
+                "No concurrent live import was performed."
+              ],
+              "summary": "Worker import checks existing site bindings and then performs a separate upsert, allowing concurrent requests to pass the check and race a worker into a different site."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "No concurrent live import was performed."
+            },
+            "identity": {
+              "anchor": "concurrent-worker-imports-can-bypass-the-site-transfer-check"
+            },
+            "locations": [
+              {
+                "endLine": 120,
+                "path": "app/api/workers/route.ts",
+                "role": "sink",
+                "startLine": 84
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_008",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Move the site-transfer invariant into an atomic database function or constraint-backed transaction and test concurrent imports for one organization/external key.",
+            "rootCause": {
+              "summary": "Worker import checks existing site bindings and then performs a separate upsert, allowing concurrent requests to pass the check and race a worker into a different site."
+            },
+            "ruleId": "race-condition.worker-site-binding",
+            "severity": {
+              "level": "medium",
+              "rationale": "Worker import checks existing site bindings and then performs a separate upsert, allowing concurrent requests to pass the check and race a worker into a different site."
+            },
+            "summary": "Worker import checks existing site bindings and then performs a separate upsert, allowing concurrent requests to pass the check and race a worker into a different site.",
+            "taxonomy": {
+              "category": "race-condition.worker-site-binding",
+              "cwe": [
+                "CWE-362",
+                "CWE-639"
+              ]
+            },
+            "title": "Concurrent worker imports can bypass the site-transfer check",
+            "validation": {
+              "limitations": [
+                "No concurrent live import was performed."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Move the site-transfer invariant into an atomic database function or constraint-backed transaction and test concurrent imports for one organization/external key.",
+      "rootCause": {
+        "summary": "Worker import checks existing site bindings and then performs a separate upsert, allowing concurrent requests to pass the check and race a worker into a different site."
+      },
+      "ruleId": "race-condition.worker-site-binding",
+      "severity": {
+        "level": "medium",
+        "rationale": "Worker import checks existing site bindings and then performs a separate upsert, allowing concurrent requests to pass the check and race a worker into a different site."
+      },
+      "summary": "Worker import checks existing site bindings and then performs a separate upsert, allowing concurrent requests to pass the check and race a worker into a different site.",
+      "taxonomy": {
+        "category": "race-condition.worker-site-binding",
+        "cwe": [
+          "CWE-362",
+          "CWE-639"
+        ]
+      },
+      "title": "Concurrent worker imports can bypass the site-transfer check",
+      "validation": {
+        "limitations": [
+          "No concurrent live import was performed."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/worker-site-binding-race/worker-site-binding-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "high",
+          "why": "Review event rows are updated iteratively before the run state is committed, so errors or concurrent reviewers can leave a partially transitioned run."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "Wiki publication and live DB mutation remain approval-gated."
+        },
+        "limitations": [
+          "Wiki publication and live DB mutation remain approval-gated."
+        ],
+        "summary": "Review event rows are updated iteratively before the run state is committed, so errors or concurrent reviewers can leave a partially transitioned run."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Wiki publication and live DB mutation remain approval-gated."
+      },
+      "findingId": "csf_c99d8b37c571732d798966c6",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c67341c23ee613b984ebc09581deaee5fd5e049a5ec0d35ec6a01bf877460c49"
+      },
+      "identity": {
+        "anchor": "knowledge-review-transitions-are-not-atomic"
+      },
+      "locations": [
+        {
+          "endLine": 1415,
+          "path": "lib/knowledge-review.ts",
+          "role": "sink",
+          "startLine": 1285
+        }
+      ],
+      "occurrenceId": "occ_1ca4c2f32ca87995dff0472b",
+      "provenance": {
+        "candidateId": "cand_fresh_009",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "high",
+                "why": "Review event rows are updated iteratively before the run state is committed, so errors or concurrent reviewers can leave a partially transitioned run."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "Wiki publication and live DB mutation remain approval-gated."
+              },
+              "limitations": [
+                "Wiki publication and live DB mutation remain approval-gated."
+              ],
+              "summary": "Review event rows are updated iteratively before the run state is committed, so errors or concurrent reviewers can leave a partially transitioned run."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Wiki publication and live DB mutation remain approval-gated."
+            },
+            "identity": {
+              "anchor": "knowledge-review-transitions-are-not-atomic"
+            },
+            "locations": [
+              {
+                "endLine": 1415,
+                "path": "lib/knowledge-review.ts",
+                "role": "sink",
+                "startLine": 1285
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_009",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Approval-gated: implement one transactional review-transition RPC with expected-state checks, atomic event updates, and idempotent retry semantics.",
+            "rootCause": {
+              "summary": "Review event rows are updated iteratively before the run state is committed, so errors or concurrent reviewers can leave a partially transitioned run."
+            },
+            "ruleId": "race-condition.review-transition",
+            "severity": {
+              "level": "medium",
+              "rationale": "Review event rows are updated iteratively before the run state is committed, so errors or concurrent reviewers can leave a partially transitioned run."
+            },
+            "summary": "Review event rows are updated iteratively before the run state is committed, so errors or concurrent reviewers can leave a partially transitioned run.",
+            "taxonomy": {
+              "category": "race-condition.review-transition",
+              "cwe": [
+                "CWE-362",
+                "CWE-667"
+              ]
+            },
+            "title": "Knowledge review transitions are not atomic",
+            "validation": {
+              "limitations": [
+                "Wiki publication and live DB mutation remain approval-gated."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Approval-gated: implement one transactional review-transition RPC with expected-state checks, atomic event updates, and idempotent retry semantics.",
+      "rootCause": {
+        "summary": "Review event rows are updated iteratively before the run state is committed, so errors or concurrent reviewers can leave a partially transitioned run."
+      },
+      "ruleId": "race-condition.review-transition",
+      "severity": {
+        "level": "medium",
+        "rationale": "Review event rows are updated iteratively before the run state is committed, so errors or concurrent reviewers can leave a partially transitioned run."
+      },
+      "summary": "Review event rows are updated iteratively before the run state is committed, so errors or concurrent reviewers can leave a partially transitioned run.",
+      "taxonomy": {
+        "category": "race-condition.review-transition",
+        "cwe": [
+          "CWE-362",
+          "CWE-667"
+        ]
+      },
+      "title": "Knowledge review transitions are not atomic",
+      "validation": {
+        "limitations": [
+          "Wiki publication and live DB mutation remain approval-gated."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/knowledge-review-transition-race/knowledge-review-transition-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Default workspace provisioning performs lookup and insert as separate operations; concurrent first-use requests can create duplicate organizations or sites before either sees the other."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "Existing live uniqueness constraints were not modified or exercised."
+        },
+        "limitations": [
+          "Existing live uniqueness constraints were not modified or exercised."
+        ],
+        "summary": "Default workspace provisioning performs lookup and insert as separate operations; concurrent first-use requests can create duplicate organizations or sites before either sees the other."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Existing live uniqueness constraints were not modified or exercised."
+      },
+      "findingId": "csf_e6a6b86d7455972ad26a8e88",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:307737b122dd051f80aed971fe1353b1ad0537ba5344df68ef97a10ab4d98648"
+      },
+      "identity": {
+        "anchor": "workspace-provisioning-can-create-duplicate-organizations-and-sites"
+      },
+      "locations": [
+        {
+          "endLine": 716,
+          "path": "lib/supabase-admin.ts",
+          "role": "sink",
+          "startLine": 645
+        }
+      ],
+      "occurrenceId": "occ_b5f8f833b7fa9979240dfa14",
+      "provenance": {
+        "candidateId": "cand_fresh_010",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "Default workspace provisioning performs lookup and insert as separate operations; concurrent first-use requests can create duplicate organizations or sites before either sees the other."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "Existing live uniqueness constraints were not modified or exercised."
+              },
+              "limitations": [
+                "Existing live uniqueness constraints were not modified or exercised."
+              ],
+              "summary": "Default workspace provisioning performs lookup and insert as separate operations; concurrent first-use requests can create duplicate organizations or sites before either sees the other."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Existing live uniqueness constraints were not modified or exercised."
+            },
+            "identity": {
+              "anchor": "workspace-provisioning-can-create-duplicate-organizations-and-sites"
+            },
+            "locations": [
+              {
+                "endLine": 716,
+                "path": "lib/supabase-admin.ts",
+                "role": "sink",
+                "startLine": 645
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_010",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Add deterministic idempotency keys and database uniqueness, then provision through one transaction or conflict-safe upsert.",
+            "rootCause": {
+              "summary": "Default workspace provisioning performs lookup and insert as separate operations; concurrent first-use requests can create duplicate organizations or sites before either sees the other."
+            },
+            "ruleId": "race-condition.workspace-provisioning",
+            "severity": {
+              "level": "low",
+              "rationale": "Default workspace provisioning performs lookup and insert as separate operations; concurrent first-use requests can create duplicate organizations or sites before either sees the other."
+            },
+            "summary": "Default workspace provisioning performs lookup and insert as separate operations; concurrent first-use requests can create duplicate organizations or sites before either sees the other.",
+            "taxonomy": {
+              "category": "race-condition.workspace-provisioning",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "Workspace provisioning can create duplicate organizations and sites",
+            "validation": {
+              "limitations": [
+                "Existing live uniqueness constraints were not modified or exercised."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Add deterministic idempotency keys and database uniqueness, then provision through one transaction or conflict-safe upsert.",
+      "rootCause": {
+        "summary": "Default workspace provisioning performs lookup and insert as separate operations; concurrent first-use requests can create duplicate organizations or sites before either sees the other."
+      },
+      "ruleId": "race-condition.workspace-provisioning",
+      "severity": {
+        "level": "low",
+        "rationale": "Default workspace provisioning performs lookup and insert as separate operations; concurrent first-use requests can create duplicate organizations or sites before either sees the other."
+      },
+      "summary": "Default workspace provisioning performs lookup and insert as separate operations; concurrent first-use requests can create duplicate organizations or sites before either sees the other.",
+      "taxonomy": {
+        "category": "race-condition.workspace-provisioning",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Workspace provisioning can create duplicate organizations and sites",
+      "validation": {
+        "limitations": [
+          "Existing live uniqueness constraints were not modified or exercised."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/workspace-provisioning-race/workspace-provisioning-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "x-vercel-forwarded-for is accepted before the code establishes that the request traversed a trusted Vercel proxy, and the resulting value becomes the per-client distributed admission key."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "Exploitability depends on a direct or self-hosted path that does not sanitize x-vercel-forwarded-for."
+        },
+        "limitations": [
+          "Exploitability depends on a direct or self-hosted path that does not sanitize x-vercel-forwarded-for."
+        ],
+        "summary": "x-vercel-forwarded-for is accepted before the code establishes that the request traversed a trusted Vercel proxy, and the resulting value becomes the per-client distributed admission key."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Exploitability depends on a direct or self-hosted path that does not sanitize x-vercel-forwarded-for."
+      },
+      "findingId": "csf_8740306278b530b3891589bb",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:f3fc04d38111cfb2a828a0e7419d5d0fd0d6f13bbbb0e2f119b97bcf6c7c1ab6"
+      },
+      "identity": {
+        "anchor": "distributed-admission-trusts-an-unverified-forwarded-ip-header"
+      },
+      "locations": [
+        {
+          "endLine": 20,
+          "path": "lib/api-guard.ts",
+          "role": "source",
+          "startLine": 10
+        },
+        {
+          "endLine": 149,
+          "path": "lib/public-distributed-rate-limit.ts",
+          "role": "sink",
+          "startLine": 147
+        },
+        {
+          "endLine": 255,
+          "path": "lib/public-distributed-rate-limit.ts",
+          "role": "concrete_implementation",
+          "startLine": 229
+        }
+      ],
+      "occurrenceId": "occ_f2b73c4adc1d42983628d7c2",
+      "provenance": {
+        "candidateId": "cand_fresh_011",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "x-vercel-forwarded-for is accepted before the code establishes that the request traversed a trusted Vercel proxy, and the resulting value becomes the per-client distributed admission key."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "Exploitability depends on a direct or self-hosted path that does not sanitize x-vercel-forwarded-for."
+              },
+              "limitations": [
+                "Exploitability depends on a direct or self-hosted path that does not sanitize x-vercel-forwarded-for."
+              ],
+              "summary": "x-vercel-forwarded-for is accepted before the code establishes that the request traversed a trusted Vercel proxy, and the resulting value becomes the per-client distributed admission key."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Exploitability depends on a direct or self-hosted path that does not sanitize x-vercel-forwarded-for."
+            },
+            "locations": [
+              {
+                "endLine": 20,
+                "path": "lib/api-guard.ts",
+                "role": "source",
+                "startLine": 10
+              },
+              {
+                "endLine": 149,
+                "path": "lib/public-distributed-rate-limit.ts",
+                "role": "sink",
+                "startLine": 147
+              },
+              {
+                "endLine": 255,
+                "path": "lib/public-distributed-rate-limit.ts",
+                "role": "concrete_implementation",
+                "startLine": 229
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_011",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Only trust Vercel forwarding headers when the deployment context is verified; otherwise derive identity from a trusted ingress or collapse to a conservative anonymous bucket.",
+            "rootCause": {
+              "summary": "x-vercel-forwarded-for is accepted before the code establishes that the request traversed a trusted Vercel proxy, and the resulting value becomes the per-client distributed admission key."
+            },
+            "ruleId": "rate-limit-bypass.untrusted-forwarded-identity",
+            "severity": {
+              "level": "low",
+              "rationale": "x-vercel-forwarded-for is accepted before the code establishes that the request traversed a trusted Vercel proxy, and the resulting value becomes the per-client distributed admission key."
+            },
+            "summary": "x-vercel-forwarded-for is accepted before the code establishes that the request traversed a trusted Vercel proxy, and the resulting value becomes the per-client distributed admission key.",
+            "taxonomy": {
+              "category": "rate-limit-bypass.untrusted-forwarded-identity",
+              "cwe": [
+                "CWE-345"
+              ]
+            },
+            "title": "Distributed admission trusts an unverified forwarded IP header",
+            "validation": {
+              "limitations": [
+                "Exploitability depends on a direct or self-hosted path that does not sanitize x-vercel-forwarded-for."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Only trust Vercel forwarding headers when the deployment context is verified; otherwise derive identity from a trusted ingress or collapse to a conservative anonymous bucket.",
+      "rootCause": {
+        "summary": "x-vercel-forwarded-for is accepted before the code establishes that the request traversed a trusted Vercel proxy, and the resulting value becomes the per-client distributed admission key."
+      },
+      "ruleId": "rate-limit-bypass.untrusted-forwarded-identity",
+      "severity": {
+        "level": "low",
+        "rationale": "x-vercel-forwarded-for is accepted before the code establishes that the request traversed a trusted Vercel proxy, and the resulting value becomes the per-client distributed admission key."
+      },
+      "summary": "x-vercel-forwarded-for is accepted before the code establishes that the request traversed a trusted Vercel proxy, and the resulting value becomes the per-client distributed admission key.",
+      "taxonomy": {
+        "category": "rate-limit-bypass.untrusted-forwarded-identity",
+        "cwe": [
+          "CWE-345"
+        ]
+      },
+      "title": "Distributed admission trusts an unverified forwarded IP header",
+      "validation": {
+        "limitations": [
+          "Exploitability depends on a direct or self-hosted path that does not sanitize x-vercel-forwarded-for."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/untrusted-forwarded-admission-identity/untrusted-forwarded-admission-identity.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Operator smoke helpers fully materialize HTTP responses and invoke Chrome or child processes without byte ceilings, AbortSignals, or process deadlines."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "The attacker must influence an operator or CI-selected base URL or returned payload."
+        },
+        "limitations": [
+          "The attacker must influence an operator or CI-selected base URL or returned payload."
+        ],
+        "summary": "Operator smoke helpers fully materialize HTTP responses and invoke Chrome or child processes without byte ceilings, AbortSignals, or process deadlines."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "The attacker must influence an operator or CI-selected base URL or returned payload."
+      },
+      "findingId": "csf_55bf22e9ff3507c519ffde3b",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:5b0e4866fe383e93453bf6571b0b3ce54d57f2313a6a594aa49356b7fe0f60ff"
+      },
+      "identity": {
+        "anchor": "export-smoke-chain-accepts-unbounded-responses-and-lacks-subprocess-deadlines"
+      },
+      "locations": [
+        {
+          "endLine": 434,
+          "path": "scripts/prod_orchestration_download_smoke.mjs",
+          "role": "sink",
+          "startLine": 407
+        },
+        {
+          "endLine": 169,
+          "path": "scripts/final_e2e_matrix_runner.mjs",
+          "role": "sink",
+          "startLine": 129
+        },
+        {
+          "endLine": 321,
+          "path": "scripts/final_output_integrity_audit.mjs",
+          "role": "sink",
+          "startLine": 294
+        }
+      ],
+      "occurrenceId": "occ_9f8d2e62d46e1b71aa22f247",
+      "provenance": {
+        "candidateId": "cand_fresh_012",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "Operator smoke helpers fully materialize HTTP responses and invoke Chrome or child processes without byte ceilings, AbortSignals, or process deadlines."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "The attacker must influence an operator or CI-selected base URL or returned payload."
+              },
+              "limitations": [
+                "The attacker must influence an operator or CI-selected base URL or returned payload."
+              ],
+              "summary": "Operator smoke helpers fully materialize HTTP responses and invoke Chrome or child processes without byte ceilings, AbortSignals, or process deadlines."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "The attacker must influence an operator or CI-selected base URL or returned payload."
+            },
+            "locations": [
+              {
+                "endLine": 434,
+                "path": "scripts/prod_orchestration_download_smoke.mjs",
+                "role": "sink",
+                "startLine": 407
+              },
+              {
+                "endLine": 169,
+                "path": "scripts/final_e2e_matrix_runner.mjs",
+                "role": "sink",
+                "startLine": 129
+              },
+              {
+                "endLine": 321,
+                "path": "scripts/final_output_integrity_audit.mjs",
+                "role": "sink",
+                "startLine": 294
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_012",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Add HTTP deadlines and streaming byte ceilings, process timeouts and termination, and guaranteed temporary-profile cleanup.",
+            "rootCause": {
+              "summary": "Operator smoke helpers fully materialize HTTP responses and invoke Chrome or child processes without byte ceilings, AbortSignals, or process deadlines."
+            },
+            "ruleId": "resource-exhaustion.unbounded-export-smoke-harness",
+            "severity": {
+              "level": "low",
+              "rationale": "Operator smoke helpers fully materialize HTTP responses and invoke Chrome or child processes without byte ceilings, AbortSignals, or process deadlines."
+            },
+            "summary": "Operator smoke helpers fully materialize HTTP responses and invoke Chrome or child processes without byte ceilings, AbortSignals, or process deadlines.",
+            "taxonomy": {
+              "category": "resource-exhaustion.unbounded-export-smoke-harness",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "Export smoke chain accepts unbounded responses and lacks subprocess deadlines",
+            "validation": {
+              "limitations": [
+                "The attacker must influence an operator or CI-selected base URL or returned payload."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Add HTTP deadlines and streaming byte ceilings, process timeouts and termination, and guaranteed temporary-profile cleanup.",
+      "rootCause": {
+        "summary": "Operator smoke helpers fully materialize HTTP responses and invoke Chrome or child processes without byte ceilings, AbortSignals, or process deadlines."
+      },
+      "ruleId": "resource-exhaustion.unbounded-export-smoke-harness",
+      "severity": {
+        "level": "low",
+        "rationale": "Operator smoke helpers fully materialize HTTP responses and invoke Chrome or child processes without byte ceilings, AbortSignals, or process deadlines."
+      },
+      "summary": "Operator smoke helpers fully materialize HTTP responses and invoke Chrome or child processes without byte ceilings, AbortSignals, or process deadlines.",
+      "taxonomy": {
+        "category": "resource-exhaustion.unbounded-export-smoke-harness",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Export smoke chain accepts unbounded responses and lacks subprocess deadlines",
+      "validation": {
+        "limitations": [
+          "The attacker must influence an operator or CI-selected base URL or returned payload."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/unbounded-export-smoke-harness/unbounded-export-smoke-harness.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "A public knowledge route and several authenticated routes project raw exception, database, webhook response-body, or vision-provider details into client responses."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "The exact contents of production provider errors were not triggered."
+        },
+        "limitations": [
+          "The exact contents of production provider errors were not triggered."
+        ],
+        "summary": "A public knowledge route and several authenticated routes project raw exception, database, webhook response-body, or vision-provider details into client responses."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "The exact contents of production provider errors were not triggered."
+      },
+      "findingId": "csf_7aef114e48b74b34b829e893",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:1c8f528121c03e1b340235feb2618b9f8d5b15f89a2eb0589823946717acac2d"
+      },
+      "identity": {
+        "anchor": "api-error-responses-expose-internal-database-and-provider-details"
+      },
+      "locations": [
+        {
+          "endLine": 80,
+          "path": "app/api/knowledge/match/route.ts",
+          "role": "sink",
+          "startLine": 62
+        },
+        {
+          "endLine": 347,
+          "path": "app/api/knowledge/ingest/route.ts",
+          "role": "sink",
+          "startLine": 335
+        },
+        {
+          "endLine": 102,
+          "path": "lib/n8n-webhook.ts",
+          "role": "source",
+          "startLine": 79
+        },
+        {
+          "endLine": 578,
+          "path": "app/api/workflow/dispatch/route.ts",
+          "role": "sink",
+          "startLine": 567
+        },
+        {
+          "endLine": 150,
+          "path": "app/api/input-photos/hazard-analysis/route.ts",
+          "role": "sink",
+          "startLine": 140
+        }
+      ],
+      "occurrenceId": "occ_fe4f32e7d3d3cdce89f794db",
+      "provenance": {
+        "candidateId": "cand_fresh_013",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "A public knowledge route and several authenticated routes project raw exception, database, webhook response-body, or vision-provider details into client responses."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "The exact contents of production provider errors were not triggered."
+              },
+              "limitations": [
+                "The exact contents of production provider errors were not triggered."
+              ],
+              "summary": "A public knowledge route and several authenticated routes project raw exception, database, webhook response-body, or vision-provider details into client responses."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "The exact contents of production provider errors were not triggered."
+            },
+            "locations": [
+              {
+                "endLine": 80,
+                "path": "app/api/knowledge/match/route.ts",
+                "role": "sink",
+                "startLine": 62
+              },
+              {
+                "endLine": 347,
+                "path": "app/api/knowledge/ingest/route.ts",
+                "role": "sink",
+                "startLine": 335
+              },
+              {
+                "endLine": 102,
+                "path": "lib/n8n-webhook.ts",
+                "role": "source",
+                "startLine": 79
+              },
+              {
+                "endLine": 578,
+                "path": "app/api/workflow/dispatch/route.ts",
+                "role": "sink",
+                "startLine": 567
+              },
+              {
+                "endLine": 150,
+                "path": "app/api/input-photos/hazard-analysis/route.ts",
+                "role": "sink",
+                "startLine": 140
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_013",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Return stable public error codes and generic messages, log detailed causes server-side with redaction, and add regression tests for representative provider and database failures.",
+            "rootCause": {
+              "summary": "A public knowledge route and several authenticated routes project raw exception, database, webhook response-body, or vision-provider details into client responses."
+            },
+            "ruleId": "information-exposure.raw-error-projection",
+            "severity": {
+              "level": "low",
+              "rationale": "A public knowledge route and several authenticated routes project raw exception, database, webhook response-body, or vision-provider details into client responses."
+            },
+            "summary": "A public knowledge route and several authenticated routes project raw exception, database, webhook response-body, or vision-provider details into client responses.",
+            "taxonomy": {
+              "category": "information-exposure.raw-error-projection",
+              "cwe": [
+                "CWE-209"
+              ]
+            },
+            "title": "API error responses expose internal database and provider details",
+            "validation": {
+              "limitations": [
+                "The exact contents of production provider errors were not triggered."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Return stable public error codes and generic messages, log detailed causes server-side with redaction, and add regression tests for representative provider and database failures.",
+      "rootCause": {
+        "summary": "A public knowledge route and several authenticated routes project raw exception, database, webhook response-body, or vision-provider details into client responses."
+      },
+      "ruleId": "information-exposure.raw-error-projection",
+      "severity": {
+        "level": "low",
+        "rationale": "A public knowledge route and several authenticated routes project raw exception, database, webhook response-body, or vision-provider details into client responses."
+      },
+      "summary": "A public knowledge route and several authenticated routes project raw exception, database, webhook response-body, or vision-provider details into client responses.",
+      "taxonomy": {
+        "category": "information-exposure.raw-error-projection",
+        "cwe": [
+          "CWE-209"
+        ]
+      },
+      "title": "API error responses expose internal database and provider details",
+      "validation": {
+        "limitations": [
+          "The exact contents of production provider errors were not triggered."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/raw-api-error-projection/raw-api-error-projection.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "The SIF embedding approval preflight accepts an arbitrary migration path, but checks forbidden non-SIF objects only when the filename contains sif-embedding-only; other filenames receive a passing scope result."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "The preflight does not execute the migration and SIF runtime remains approval-gated."
+        },
+        "limitations": [
+          "The preflight does not execute the migration and SIF runtime remains approval-gated."
+        ],
+        "summary": "The SIF embedding approval preflight accepts an arbitrary migration path, but checks forbidden non-SIF objects only when the filename contains sif-embedding-only; other filenames receive a passing scope result."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "The preflight does not execute the migration and SIF runtime remains approval-gated."
+      },
+      "findingId": "csf_3ca8a70c1e96599ce7b6b795",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:3a4c96cefe6094640edc23804346c3b6965a991140f8f6ca6ef80b2cddb39015"
+      },
+      "identity": {
+        "anchor": "sif-approval-preflight-can-skip-migration-scope-validation"
+      },
+      "locations": [
+        {
+          "endLine": 25,
+          "path": "scripts/sif_embedding_approval_preflight.mjs",
+          "role": "source",
+          "startLine": 25
+        },
+        {
+          "endLine": 356,
+          "path": "scripts/sif_embedding_approval_preflight.mjs",
+          "role": "root_control",
+          "startLine": 340
+        },
+        {
+          "endLine": 450,
+          "path": "scripts/sif_embedding_approval_preflight.mjs",
+          "role": "sink",
+          "startLine": 440
+        }
+      ],
+      "occurrenceId": "occ_894f746537e02667f194209a",
+      "provenance": {
+        "candidateId": "cand_fresh_014",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "The SIF embedding approval preflight accepts an arbitrary migration path, but checks forbidden non-SIF objects only when the filename contains sif-embedding-only; other filenames receive a passing scope result."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "The preflight does not execute the migration and SIF runtime remains approval-gated."
+              },
+              "limitations": [
+                "The preflight does not execute the migration and SIF runtime remains approval-gated."
+              ],
+              "summary": "The SIF embedding approval preflight accepts an arbitrary migration path, but checks forbidden non-SIF objects only when the filename contains sif-embedding-only; other filenames receive a passing scope result."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "The preflight does not execute the migration and SIF runtime remains approval-gated."
+            },
+            "locations": [
+              {
+                "endLine": 25,
+                "path": "scripts/sif_embedding_approval_preflight.mjs",
+                "role": "source",
+                "startLine": 25
+              },
+              {
+                "endLine": 356,
+                "path": "scripts/sif_embedding_approval_preflight.mjs",
+                "role": "root_control",
+                "startLine": 340
+              },
+              {
+                "endLine": 450,
+                "path": "scripts/sif_embedding_approval_preflight.mjs",
+                "role": "sink",
+                "startLine": 440
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_014",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Validate an allowlisted SQL object grammar for every migration path and bind the packet to the exact expected migration digest, independent of filename.",
+            "rootCause": {
+              "summary": "The SIF embedding approval preflight accepts an arbitrary migration path, but checks forbidden non-SIF objects only when the filename contains sif-embedding-only; other filenames receive a passing scope result."
+            },
+            "ruleId": "approval-integrity.sif-migration-scope-bypass",
+            "severity": {
+              "level": "low",
+              "rationale": "The SIF embedding approval preflight accepts an arbitrary migration path, but checks forbidden non-SIF objects only when the filename contains sif-embedding-only; other filenames receive a passing scope result."
+            },
+            "summary": "The SIF embedding approval preflight accepts an arbitrary migration path, but checks forbidden non-SIF objects only when the filename contains sif-embedding-only; other filenames receive a passing scope result.",
+            "taxonomy": {
+              "category": "approval-integrity.sif-migration-scope-bypass",
+              "cwe": [
+                "CWE-20",
+                "CWE-807"
+              ]
+            },
+            "title": "SIF approval preflight can skip migration scope validation",
+            "validation": {
+              "limitations": [
+                "The preflight does not execute the migration and SIF runtime remains approval-gated."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Validate an allowlisted SQL object grammar for every migration path and bind the packet to the exact expected migration digest, independent of filename.",
+      "rootCause": {
+        "summary": "The SIF embedding approval preflight accepts an arbitrary migration path, but checks forbidden non-SIF objects only when the filename contains sif-embedding-only; other filenames receive a passing scope result."
+      },
+      "ruleId": "approval-integrity.sif-migration-scope-bypass",
+      "severity": {
+        "level": "low",
+        "rationale": "The SIF embedding approval preflight accepts an arbitrary migration path, but checks forbidden non-SIF objects only when the filename contains sif-embedding-only; other filenames receive a passing scope result."
+      },
+      "summary": "The SIF embedding approval preflight accepts an arbitrary migration path, but checks forbidden non-SIF objects only when the filename contains sif-embedding-only; other filenames receive a passing scope result.",
+      "taxonomy": {
+        "category": "approval-integrity.sif-migration-scope-bypass",
+        "cwe": [
+          "CWE-20",
+          "CWE-807"
+        ]
+      },
+      "title": "SIF approval preflight can skip migration scope validation",
+      "validation": {
+        "limitations": [
+          "The preflight does not execute the migration and SIF runtime remains approval-gated."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/sif-migration-scope-bypass/sif-migration-scope-bypass.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "The publication script stages broad fixed paths without checking a clean tree or expected diff, then may commit and subtree-push those pre-existing changes when an environment flag is set."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "Requires an operator to run the script with push enabled."
+        },
+        "limitations": [
+          "Requires an operator to run the script with push enabled."
+        ],
+        "summary": "The publication script stages broad fixed paths without checking a clean tree or expected diff, then may commit and subtree-push those pre-existing changes when an environment flag is set."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Requires an operator to run the script with push enabled."
+      },
+      "findingId": "csf_f95afe61f821089be16a9597",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:0ba14040c012bd1f24282ebb2a9dce0a3d466c0130ae87de4cf020025919f4ac"
+      },
+      "identity": {
+        "anchor": "dry-run-publication-can-commit-and-push-pre-existing-changes"
+      },
+      "locations": [
+        {
+          "endLine": 24,
+          "path": "scripts/commit_publish_document_dryrun.sh",
+          "role": "sink",
+          "startLine": 1
+        }
+      ],
+      "occurrenceId": "occ_a97b68814542094abd455220",
+      "provenance": {
+        "candidateId": "cand_fresh_015",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "The publication script stages broad fixed paths without checking a clean tree or expected diff, then may commit and subtree-push those pre-existing changes when an environment flag is set."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "Requires an operator to run the script with push enabled."
+              },
+              "limitations": [
+                "Requires an operator to run the script with push enabled."
+              ],
+              "summary": "The publication script stages broad fixed paths without checking a clean tree or expected diff, then may commit and subtree-push those pre-existing changes when an environment flag is set."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Requires an operator to run the script with push enabled."
+            },
+            "locations": [
+              {
+                "endLine": 24,
+                "path": "scripts/commit_publish_document_dryrun.sh",
+                "role": "sink",
+                "startLine": 1
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_015",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Require a clean starting tree, pin expected HEAD/branch/remote, stage only generated artifacts whose digests are recorded, show the exact diff, and require a separate explicit push approval.",
+            "rootCause": {
+              "summary": "The publication script stages broad fixed paths without checking a clean tree or expected diff, then may commit and subtree-push those pre-existing changes when an environment flag is set."
+            },
+            "ruleId": "supply-chain.unbound-publication-diff",
+            "severity": {
+              "level": "low",
+              "rationale": "The publication script stages broad fixed paths without checking a clean tree or expected diff, then may commit and subtree-push those pre-existing changes when an environment flag is set."
+            },
+            "summary": "The publication script stages broad fixed paths without checking a clean tree or expected diff, then may commit and subtree-push those pre-existing changes when an environment flag is set.",
+            "taxonomy": {
+              "category": "supply-chain.unbound-publication-diff",
+              "cwe": [
+                "CWE-494",
+                "CWE-829"
+              ]
+            },
+            "title": "Dry-run publication can commit and push pre-existing changes",
+            "validation": {
+              "limitations": [
+                "Requires an operator to run the script with push enabled."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Require a clean starting tree, pin expected HEAD/branch/remote, stage only generated artifacts whose digests are recorded, show the exact diff, and require a separate explicit push approval.",
+      "rootCause": {
+        "summary": "The publication script stages broad fixed paths without checking a clean tree or expected diff, then may commit and subtree-push those pre-existing changes when an environment flag is set."
+      },
+      "ruleId": "supply-chain.unbound-publication-diff",
+      "severity": {
+        "level": "low",
+        "rationale": "The publication script stages broad fixed paths without checking a clean tree or expected diff, then may commit and subtree-push those pre-existing changes when an environment flag is set."
+      },
+      "summary": "The publication script stages broad fixed paths without checking a clean tree or expected diff, then may commit and subtree-push those pre-existing changes when an environment flag is set.",
+      "taxonomy": {
+        "category": "supply-chain.unbound-publication-diff",
+        "cwe": [
+          "CWE-494",
+          "CWE-829"
+        ]
+      },
+      "title": "Dry-run publication can commit and push pre-existing changes",
+      "validation": {
+        "limitations": [
+          "Requires an operator to run the script with push enabled."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/unbound-publication-diff/unbound-publication-diff.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "KOSHA review, RLS/Wiki, distributed admission, and recipient ACK preflights consume historical reports without consistently binding sourceHead, productCommit, and input artifact digests to the active HEAD and packet."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "These scripts do not perform the gated mutations themselves."
+        },
+        "limitations": [
+          "These scripts do not perform the gated mutations themselves."
+        ],
+        "summary": "KOSHA review, RLS/Wiki, distributed admission, and recipient ACK preflights consume historical reports without consistently binding sourceHead, productCommit, and input artifact digests to the active HEAD and packet."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "These scripts do not perform the gated mutations themselves."
+      },
+      "findingId": "csf_86ec127fb3d5b7d397649611",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:3ab476be968538dcefb3f71c50e0fa3eb2971df0d9759d8517485581ee72e3cc"
+      },
+      "identity": {
+        "anchor": "approval-gates-are-not-bound-to-current-source-and-artifact-digests"
+      },
+      "locations": [
+        {
+          "endLine": 304,
+          "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+          "role": "source",
+          "startLine": 293
+        },
+        {
+          "endLine": 555,
+          "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+          "role": "sink",
+          "startLine": 539
+        },
+        {
+          "endLine": 215,
+          "path": "scripts/rls_llm_wiki_approval_preflight.mjs",
+          "role": "source",
+          "startLine": 204
+        },
+        {
+          "endLine": 430,
+          "path": "scripts/rls_llm_wiki_approval_preflight.mjs",
+          "role": "sink",
+          "startLine": 417
+        },
+        {
+          "endLine": 100,
+          "path": "scripts/distributed_admission_activation_preflight.mjs",
+          "role": "sink",
+          "startLine": 85
+        },
+        {
+          "endLine": 98,
+          "path": "scripts/share_recipient_ack_approval_preflight.mjs",
+          "role": "sink",
+          "startLine": 80
+        }
+      ],
+      "occurrenceId": "occ_23bd4bcc20f50a7e11e7bc19",
+      "provenance": {
+        "candidateId": "cand_fresh_016",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "KOSHA review, RLS/Wiki, distributed admission, and recipient ACK preflights consume historical reports without consistently binding sourceHead, productCommit, and input artifact digests to the active HEAD and packet."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "These scripts do not perform the gated mutations themselves."
+              },
+              "limitations": [
+                "These scripts do not perform the gated mutations themselves."
+              ],
+              "summary": "KOSHA review, RLS/Wiki, distributed admission, and recipient ACK preflights consume historical reports without consistently binding sourceHead, productCommit, and input artifact digests to the active HEAD and packet."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "These scripts do not perform the gated mutations themselves."
+            },
+            "locations": [
+              {
+                "endLine": 304,
+                "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+                "role": "source",
+                "startLine": 293
+              },
+              {
+                "endLine": 555,
+                "path": "scripts/kosha_exact_promotion_review_gate.mjs",
+                "role": "sink",
+                "startLine": 539
+              },
+              {
+                "endLine": 215,
+                "path": "scripts/rls_llm_wiki_approval_preflight.mjs",
+                "role": "source",
+                "startLine": 204
+              },
+              {
+                "endLine": 430,
+                "path": "scripts/rls_llm_wiki_approval_preflight.mjs",
+                "role": "sink",
+                "startLine": 417
+              },
+              {
+                "endLine": 100,
+                "path": "scripts/distributed_admission_activation_preflight.mjs",
+                "role": "sink",
+                "startLine": 85
+              },
+              {
+                "endLine": 98,
+                "path": "scripts/share_recipient_ack_approval_preflight.mjs",
+                "role": "sink",
+                "startLine": 80
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_016",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Record and verify current HEAD, production commit, and SHA-256 digests for every required input; fail closed on stale or mixed-source evidence and preserve separate mutation approval.",
+            "rootCause": {
+              "summary": "KOSHA review, RLS/Wiki, distributed admission, and recipient ACK preflights consume historical reports without consistently binding sourceHead, productCommit, and input artifact digests to the active HEAD and packet."
+            },
+            "ruleId": "approval-integrity.stale-evidence-binding",
+            "severity": {
+              "level": "low",
+              "rationale": "KOSHA review, RLS/Wiki, distributed admission, and recipient ACK preflights consume historical reports without consistently binding sourceHead, productCommit, and input artifact digests to the active HEAD and packet."
+            },
+            "summary": "KOSHA review, RLS/Wiki, distributed admission, and recipient ACK preflights consume historical reports without consistently binding sourceHead, productCommit, and input artifact digests to the active HEAD and packet.",
+            "taxonomy": {
+              "category": "approval-integrity.stale-evidence-binding",
+              "cwe": [
+                "CWE-345"
+              ]
+            },
+            "title": "Approval gates are not bound to current source and artifact digests",
+            "validation": {
+              "limitations": [
+                "These scripts do not perform the gated mutations themselves."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Record and verify current HEAD, production commit, and SHA-256 digests for every required input; fail closed on stale or mixed-source evidence and preserve separate mutation approval.",
+      "rootCause": {
+        "summary": "KOSHA review, RLS/Wiki, distributed admission, and recipient ACK preflights consume historical reports without consistently binding sourceHead, productCommit, and input artifact digests to the active HEAD and packet."
+      },
+      "ruleId": "approval-integrity.stale-evidence-binding",
+      "severity": {
+        "level": "low",
+        "rationale": "KOSHA review, RLS/Wiki, distributed admission, and recipient ACK preflights consume historical reports without consistently binding sourceHead, productCommit, and input artifact digests to the active HEAD and packet."
+      },
+      "summary": "KOSHA review, RLS/Wiki, distributed admission, and recipient ACK preflights consume historical reports without consistently binding sourceHead, productCommit, and input artifact digests to the active HEAD and packet.",
+      "taxonomy": {
+        "category": "approval-integrity.stale-evidence-binding",
+        "cwe": [
+          "CWE-345"
+        ]
+      },
+      "title": "Approval gates are not bound to current source and artifact digests",
+      "validation": {
+        "limitations": [
+          "These scripts do not perform the gated mutations themselves."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/stale-approval-evidence-binding/stale-approval-evidence-binding.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "The MCP token and Supabase authentication issuance scripts print full bearer tokens to stdout, where terminal capture, CI logs, wrappers, or command transcripts can retain them."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "These are operator tools and no repository CI invocation was established."
+        },
+        "limitations": [
+          "These are operator tools and no repository CI invocation was established."
+        ],
+        "summary": "The MCP token and Supabase authentication issuance scripts print full bearer tokens to stdout, where terminal capture, CI logs, wrappers, or command transcripts can retain them."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "These are operator tools and no repository CI invocation was established."
+      },
+      "findingId": "csf_ad5c841841dbdcc55b2c1d5a",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:664f79864703475999654d0ef42452bca6b17540bddcf5bd938179ec8d8b5397"
+      },
+      "identity": {
+        "anchor": "credential-issuance-clis-print-bearer-tokens-to-stdout"
+      },
+      "locations": [
+        {
+          "endLine": 82,
+          "path": "scripts/issue-mcp-token.mjs",
+          "role": "sink",
+          "startLine": 70
+        },
+        {
+          "endLine": 28,
+          "path": "scripts/issue_supabase_auth_token.mjs",
+          "role": "sink",
+          "startLine": 18
+        }
+      ],
+      "occurrenceId": "occ_a537b254313fd0a608524cc5",
+      "provenance": {
+        "candidateId": "cand_fresh_017",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "The MCP token and Supabase authentication issuance scripts print full bearer tokens to stdout, where terminal capture, CI logs, wrappers, or command transcripts can retain them."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "These are operator tools and no repository CI invocation was established."
+              },
+              "limitations": [
+                "These are operator tools and no repository CI invocation was established."
+              ],
+              "summary": "The MCP token and Supabase authentication issuance scripts print full bearer tokens to stdout, where terminal capture, CI logs, wrappers, or command transcripts can retain them."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "These are operator tools and no repository CI invocation was established."
+            },
+            "locations": [
+              {
+                "endLine": 82,
+                "path": "scripts/issue-mcp-token.mjs",
+                "role": "sink",
+                "startLine": 70
+              },
+              {
+                "endLine": 28,
+                "path": "scripts/issue_supabase_auth_token.mjs",
+                "role": "sink",
+                "startLine": 18
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_017",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Require an explicit reveal flag on an interactive TTY or write the token to a permission-restricted file/credential store; emit only metadata by default.",
+            "rootCause": {
+              "summary": "The MCP token and Supabase authentication issuance scripts print full bearer tokens to stdout, where terminal capture, CI logs, wrappers, or command transcripts can retain them."
+            },
+            "ruleId": "credential-exposure.token-stdout",
+            "severity": {
+              "level": "low",
+              "rationale": "The MCP token and Supabase authentication issuance scripts print full bearer tokens to stdout, where terminal capture, CI logs, wrappers, or command transcripts can retain them."
+            },
+            "summary": "The MCP token and Supabase authentication issuance scripts print full bearer tokens to stdout, where terminal capture, CI logs, wrappers, or command transcripts can retain them.",
+            "taxonomy": {
+              "category": "credential-exposure.token-stdout",
+              "cwe": [
+                "CWE-532",
+                "CWE-522"
+              ]
+            },
+            "title": "Credential issuance CLIs print bearer tokens to stdout",
+            "validation": {
+              "limitations": [
+                "These are operator tools and no repository CI invocation was established."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Require an explicit reveal flag on an interactive TTY or write the token to a permission-restricted file/credential store; emit only metadata by default.",
+      "rootCause": {
+        "summary": "The MCP token and Supabase authentication issuance scripts print full bearer tokens to stdout, where terminal capture, CI logs, wrappers, or command transcripts can retain them."
+      },
+      "ruleId": "credential-exposure.token-stdout",
+      "severity": {
+        "level": "low",
+        "rationale": "The MCP token and Supabase authentication issuance scripts print full bearer tokens to stdout, where terminal capture, CI logs, wrappers, or command transcripts can retain them."
+      },
+      "summary": "The MCP token and Supabase authentication issuance scripts print full bearer tokens to stdout, where terminal capture, CI logs, wrappers, or command transcripts can retain them.",
+      "taxonomy": {
+        "category": "credential-exposure.token-stdout",
+        "cwe": [
+          "CWE-532",
+          "CWE-522"
+        ]
+      },
+      "title": "Credential issuance CLIs print bearer tokens to stdout",
+      "validation": {
+        "limitations": [
+          "These are operator tools and no repository CI invocation was established."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/token-stdout-exposure/token-stdout-exposure.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "high",
+          "why": "The industrial-safety inventory recursively materializes the full source tree and opens XLSX, PDF, image, and ZIP parsers without file-count, aggregate-byte, elapsed-time, or symlink admission."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "The attacker must influence the local corpus supplied to the operator tool."
+        },
+        "limitations": [
+          "The attacker must influence the local corpus supplied to the operator tool."
+        ],
+        "summary": "The industrial-safety inventory recursively materializes the full source tree and opens XLSX, PDF, image, and ZIP parsers without file-count, aggregate-byte, elapsed-time, or symlink admission."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "The attacker must influence the local corpus supplied to the operator tool."
+      },
+      "findingId": "csf_4ee29cf0d24bdba57c1518a1",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:dd6968c68e480d406fa74a1cd6a00d2768f36ea47a6792ef6785e803e548fd97"
+      },
+      "identity": {
+        "anchor": "template-inventory-scanner-parses-an-unbounded-local-corpus"
+      },
+      "locations": [
+        {
+          "endLine": 117,
+          "path": "scripts/scan_industrial_safety_templates.py",
+          "role": "sink",
+          "startLine": 88
+        },
+        {
+          "endLine": 188,
+          "path": "scripts/scan_industrial_safety_templates.py",
+          "role": "sink",
+          "startLine": 151
+        },
+        {
+          "endLine": 214,
+          "path": "scripts/scan_industrial_safety_templates.py",
+          "role": "source",
+          "startLine": 204
+        }
+      ],
+      "occurrenceId": "occ_4bf29b65db913512d2369116",
+      "provenance": {
+        "candidateId": "cand_fresh_018",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "high",
+                "why": "The industrial-safety inventory recursively materializes the full source tree and opens XLSX, PDF, image, and ZIP parsers without file-count, aggregate-byte, elapsed-time, or symlink admission."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "The attacker must influence the local corpus supplied to the operator tool."
+              },
+              "limitations": [
+                "The attacker must influence the local corpus supplied to the operator tool."
+              ],
+              "summary": "The industrial-safety inventory recursively materializes the full source tree and opens XLSX, PDF, image, and ZIP parsers without file-count, aggregate-byte, elapsed-time, or symlink admission."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "The attacker must influence the local corpus supplied to the operator tool."
+            },
+            "locations": [
+              {
+                "endLine": 117,
+                "path": "scripts/scan_industrial_safety_templates.py",
+                "role": "sink",
+                "startLine": 88
+              },
+              {
+                "endLine": 188,
+                "path": "scripts/scan_industrial_safety_templates.py",
+                "role": "sink",
+                "startLine": 151
+              },
+              {
+                "endLine": 214,
+                "path": "scripts/scan_industrial_safety_templates.py",
+                "role": "source",
+                "startLine": 204
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_018",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Apply no-follow traversal, file-count and aggregate-byte budgets before parser initialization, per-file size/type limits, elapsed deadlines, and bounded metadata output.",
+            "rootCause": {
+              "summary": "The industrial-safety inventory recursively materializes the full source tree and opens XLSX, PDF, image, and ZIP parsers without file-count, aggregate-byte, elapsed-time, or symlink admission."
+            },
+            "ruleId": "resource-exhaustion.unbounded-template-inventory",
+            "severity": {
+              "level": "medium",
+              "rationale": "The industrial-safety inventory recursively materializes the full source tree and opens XLSX, PDF, image, and ZIP parsers without file-count, aggregate-byte, elapsed-time, or symlink admission."
+            },
+            "summary": "The industrial-safety inventory recursively materializes the full source tree and opens XLSX, PDF, image, and ZIP parsers without file-count, aggregate-byte, elapsed-time, or symlink admission.",
+            "taxonomy": {
+              "category": "resource-exhaustion.unbounded-template-inventory",
+              "cwe": [
+                "CWE-400",
+                "CWE-200"
+              ]
+            },
+            "title": "Template inventory scanner parses an unbounded local corpus",
+            "validation": {
+              "limitations": [
+                "The attacker must influence the local corpus supplied to the operator tool."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Apply no-follow traversal, file-count and aggregate-byte budgets before parser initialization, per-file size/type limits, elapsed deadlines, and bounded metadata output.",
+      "rootCause": {
+        "summary": "The industrial-safety inventory recursively materializes the full source tree and opens XLSX, PDF, image, and ZIP parsers without file-count, aggregate-byte, elapsed-time, or symlink admission."
+      },
+      "ruleId": "resource-exhaustion.unbounded-template-inventory",
+      "severity": {
+        "level": "medium",
+        "rationale": "The industrial-safety inventory recursively materializes the full source tree and opens XLSX, PDF, image, and ZIP parsers without file-count, aggregate-byte, elapsed-time, or symlink admission."
+      },
+      "summary": "The industrial-safety inventory recursively materializes the full source tree and opens XLSX, PDF, image, and ZIP parsers without file-count, aggregate-byte, elapsed-time, or symlink admission.",
+      "taxonomy": {
+        "category": "resource-exhaustion.unbounded-template-inventory",
+        "cwe": [
+          "CWE-400",
+          "CWE-200"
+        ]
+      },
+      "title": "Template inventory scanner parses an unbounded local corpus",
+      "validation": {
+        "limitations": [
+          "The attacker must influence the local corpus supplied to the operator tool."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/unbounded-template-inventory/unbounded-template-inventory.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "The HWPX inventory recursively reads each file into memory and trusts EOCD entry count and offsets without validating central-directory bounds, actual entry count, aggregate size, or corpus limits."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "This is operator/local corpus tooling."
+        },
+        "limitations": [
+          "This is operator/local corpus tooling."
+        ],
+        "summary": "The HWPX inventory recursively reads each file into memory and trusts EOCD entry count and offsets without validating central-directory bounds, actual entry count, aggregate size, or corpus limits."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "This is operator/local corpus tooling."
+      },
+      "findingId": "csf_4547b334aef21917c8fae629",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:d23f6f4b5cb382423abaf8ba5b26399bee172cf2cb7c98c77369735b54846fbb"
+      },
+      "identity": {
+        "anchor": "hwpx-inventory-trusts-unbounded-file-and-central-directory-metadata"
+      },
+      "locations": [
+        {
+          "endLine": 26,
+          "path": "scripts/hwpx_template_inventory.mjs",
+          "role": "source",
+          "startLine": 18
+        },
+        {
+          "endLine": 70,
+          "path": "scripts/hwpx_template_inventory.mjs",
+          "role": "sink",
+          "startLine": 40
+        },
+        {
+          "endLine": 118,
+          "path": "scripts/hwpx_template_inventory.mjs",
+          "role": "sink",
+          "startLine": 105
+        }
+      ],
+      "occurrenceId": "occ_42d3f08469a2f0118405a3aa",
+      "provenance": {
+        "candidateId": "cand_fresh_019",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "The HWPX inventory recursively reads each file into memory and trusts EOCD entry count and offsets without validating central-directory bounds, actual entry count, aggregate size, or corpus limits."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "This is operator/local corpus tooling."
+              },
+              "limitations": [
+                "This is operator/local corpus tooling."
+              ],
+              "summary": "The HWPX inventory recursively reads each file into memory and trusts EOCD entry count and offsets without validating central-directory bounds, actual entry count, aggregate size, or corpus limits."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "This is operator/local corpus tooling."
+            },
+            "locations": [
+              {
+                "endLine": 26,
+                "path": "scripts/hwpx_template_inventory.mjs",
+                "role": "source",
+                "startLine": 18
+              },
+              {
+                "endLine": 70,
+                "path": "scripts/hwpx_template_inventory.mjs",
+                "role": "sink",
+                "startLine": 40
+              },
+              {
+                "endLine": 118,
+                "path": "scripts/hwpx_template_inventory.mjs",
+                "role": "sink",
+                "startLine": 105
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_019",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Reuse the bounded archive preflight before reading full files, cap corpus/file sizes and entry counts, validate central-directory ranges, and reject malformed metadata.",
+            "rootCause": {
+              "summary": "The HWPX inventory recursively reads each file into memory and trusts EOCD entry count and offsets without validating central-directory bounds, actual entry count, aggregate size, or corpus limits."
+            },
+            "ruleId": "resource-exhaustion.unbounded-hwpx-inventory",
+            "severity": {
+              "level": "low",
+              "rationale": "The HWPX inventory recursively reads each file into memory and trusts EOCD entry count and offsets without validating central-directory bounds, actual entry count, aggregate size, or corpus limits."
+            },
+            "summary": "The HWPX inventory recursively reads each file into memory and trusts EOCD entry count and offsets without validating central-directory bounds, actual entry count, aggregate size, or corpus limits.",
+            "taxonomy": {
+              "category": "resource-exhaustion.unbounded-hwpx-inventory",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "HWPX inventory trusts unbounded file and central-directory metadata",
+            "validation": {
+              "limitations": [
+                "This is operator/local corpus tooling."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Reuse the bounded archive preflight before reading full files, cap corpus/file sizes and entry counts, validate central-directory ranges, and reject malformed metadata.",
+      "rootCause": {
+        "summary": "The HWPX inventory recursively reads each file into memory and trusts EOCD entry count and offsets without validating central-directory bounds, actual entry count, aggregate size, or corpus limits."
+      },
+      "ruleId": "resource-exhaustion.unbounded-hwpx-inventory",
+      "severity": {
+        "level": "low",
+        "rationale": "The HWPX inventory recursively reads each file into memory and trusts EOCD entry count and offsets without validating central-directory bounds, actual entry count, aggregate size, or corpus limits."
+      },
+      "summary": "The HWPX inventory recursively reads each file into memory and trusts EOCD entry count and offsets without validating central-directory bounds, actual entry count, aggregate size, or corpus limits.",
+      "taxonomy": {
+        "category": "resource-exhaustion.unbounded-hwpx-inventory",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "HWPX inventory trusts unbounded file and central-directory metadata",
+      "validation": {
+        "limitations": [
+          "This is operator/local corpus tooling."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/unbounded-hwpx-inventory/unbounded-hwpx-inventory.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "AdmZip and ExcelJS parse or materialize attacker-influenced archives and workbooks before entry, expansion, row, cell, and elapsed limits are checked; the HWPX anonymizer has the same ordering."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "The affected paths are operator document tooling rather than public routes."
+        },
+        "limitations": [
+          "The affected paths are operator document tooling rather than public routes."
+        ],
+        "summary": "AdmZip and ExcelJS parse or materialize attacker-influenced archives and workbooks before entry, expansion, row, cell, and elapsed limits are checked; the HWPX anonymizer has the same ordering."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "The affected paths are operator document tooling rather than public routes."
+      },
+      "findingId": "csf_1243431382737ac444cdb8bb",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:d2eb0393bf1b896cf1e7dcbf866abdeab6a28db9ab735a3623b0ef848f280ca7"
+      },
+      "identity": {
+        "anchor": "archive-and-spreadsheet-budgets-run-after-expensive-parser-initialization"
+      },
+      "locations": [
+        {
+          "endLine": 75,
+          "path": "scripts/final_output_parser_safety.mjs",
+          "role": "sink",
+          "startLine": 45
+        },
+        {
+          "endLine": 132,
+          "path": "scripts/final_output_parser_safety.mjs",
+          "role": "sink",
+          "startLine": 95
+        },
+        {
+          "endLine": 158,
+          "path": "scripts/anonymize_hwpx_templates.mjs",
+          "role": "sink",
+          "startLine": 110
+        }
+      ],
+      "occurrenceId": "occ_b72eef701a21fe7a6a38d9cb",
+      "provenance": {
+        "candidateId": "cand_fresh_020",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "AdmZip and ExcelJS parse or materialize attacker-influenced archives and workbooks before entry, expansion, row, cell, and elapsed limits are checked; the HWPX anonymizer has the same ordering."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "The affected paths are operator document tooling rather than public routes."
+              },
+              "limitations": [
+                "The affected paths are operator document tooling rather than public routes."
+              ],
+              "summary": "AdmZip and ExcelJS parse or materialize attacker-influenced archives and workbooks before entry, expansion, row, cell, and elapsed limits are checked; the HWPX anonymizer has the same ordering."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "The affected paths are operator document tooling rather than public routes."
+            },
+            "locations": [
+              {
+                "endLine": 75,
+                "path": "scripts/final_output_parser_safety.mjs",
+                "role": "sink",
+                "startLine": 45
+              },
+              {
+                "endLine": 132,
+                "path": "scripts/final_output_parser_safety.mjs",
+                "role": "sink",
+                "startLine": 95
+              },
+              {
+                "endLine": 158,
+                "path": "scripts/anonymize_hwpx_templates.mjs",
+                "role": "sink",
+                "startLine": 110
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_020",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Run bounded ZIP central-directory and file-size preflight before parser construction; use streaming or sandboxed workbook parsing with hard process memory/time limits.",
+            "rootCause": {
+              "summary": "AdmZip and ExcelJS parse or materialize attacker-influenced archives and workbooks before entry, expansion, row, cell, and elapsed limits are checked; the HWPX anonymizer has the same ordering."
+            },
+            "ruleId": "resource-exhaustion.late-parser-admission",
+            "severity": {
+              "level": "low",
+              "rationale": "AdmZip and ExcelJS parse or materialize attacker-influenced archives and workbooks before entry, expansion, row, cell, and elapsed limits are checked; the HWPX anonymizer has the same ordering."
+            },
+            "summary": "AdmZip and ExcelJS parse or materialize attacker-influenced archives and workbooks before entry, expansion, row, cell, and elapsed limits are checked; the HWPX anonymizer has the same ordering.",
+            "taxonomy": {
+              "category": "resource-exhaustion.late-parser-admission",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "Archive and spreadsheet budgets run after expensive parser initialization",
+            "validation": {
+              "limitations": [
+                "The affected paths are operator document tooling rather than public routes."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Run bounded ZIP central-directory and file-size preflight before parser construction; use streaming or sandboxed workbook parsing with hard process memory/time limits.",
+      "rootCause": {
+        "summary": "AdmZip and ExcelJS parse or materialize attacker-influenced archives and workbooks before entry, expansion, row, cell, and elapsed limits are checked; the HWPX anonymizer has the same ordering."
+      },
+      "ruleId": "resource-exhaustion.late-parser-admission",
+      "severity": {
+        "level": "low",
+        "rationale": "AdmZip and ExcelJS parse or materialize attacker-influenced archives and workbooks before entry, expansion, row, cell, and elapsed limits are checked; the HWPX anonymizer has the same ordering."
+      },
+      "summary": "AdmZip and ExcelJS parse or materialize attacker-influenced archives and workbooks before entry, expansion, row, cell, and elapsed limits are checked; the HWPX anonymizer has the same ordering.",
+      "taxonomy": {
+        "category": "resource-exhaustion.late-parser-admission",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Archive and spreadsheet budgets run after expensive parser initialization",
+      "validation": {
+        "limitations": [
+          "The affected paths are operator document tooling rather than public routes."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/late-parser-admission/late-parser-admission.md"
+      }
+    },
+    {
+      "attackPath": {
+        "impact": {
+          "level": "medium",
+          "why": "Public export routes obtain a 310-second distributed lease but do not propagate request cancellation or enforce a rendering deadline, so disconnected or hung work can continue after admission protection expires."
+        },
+        "likelihood": {
+          "level": "unknown",
+          "why": "Input and output budgets limit ordinary work; impact requires a slow or hung rendering path."
+        },
+        "limitations": [
+          "Input and output budgets limit ordinary work; impact requires a slow or hung rendering path."
+        ],
+        "summary": "Public export routes obtain a 310-second distributed lease but do not propagate request cancellation or enforce a rendering deadline, so disconnected or hung work can continue after admission protection expires."
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Input and output budgets limit ordinary work; impact requires a slow or hung rendering path."
+      },
+      "findingId": "csf_08d1b3b1531903861d1ab80f",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:9935b36fb0832903cb7b9354e2c05b20df33c202c8634de582aea5889fb0c0e6"
+      },
+      "identity": {
+        "anchor": "public-export-work-can-outlive-its-distributed-admission-lease"
+      },
+      "locations": [
+        {
+          "endLine": 540,
+          "path": "lib/public-distributed-rate-limit.ts",
+          "role": "root_control",
+          "startLine": 455
+        },
+        {
+          "endLine": 245,
+          "path": "app/api/export/xlsx/route.ts",
+          "role": "sink",
+          "startLine": 173
+        },
+        {
+          "endLine": 319,
+          "path": "app/api/export/hwp/route.ts",
+          "role": "sink",
+          "startLine": 300
+        },
+        {
+          "endLine": 1208,
+          "path": "app/api/export/pdf/route.ts",
+          "role": "sink",
+          "startLine": 1136
+        },
+        {
+          "endLine": 61,
+          "path": "app/api/export/hwpx-template/route.ts",
+          "role": "sink",
+          "startLine": 25
+        }
+      ],
+      "occurrenceId": "occ_62fca7dfb1853e788aae4f15",
+      "provenance": {
+        "candidateId": "cand_fresh_021",
+        "previousFindings": [
+          {
+            "attackPath": {
+              "impact": {
+                "level": "medium",
+                "why": "Public export routes obtain a 310-second distributed lease but do not propagate request cancellation or enforce a rendering deadline, so disconnected or hung work can continue after admission protection expires."
+              },
+              "likelihood": {
+                "level": "unknown",
+                "why": "Input and output budgets limit ordinary work; impact requires a slow or hung rendering path."
+              },
+              "limitations": [
+                "Input and output budgets limit ordinary work; impact requires a slow or hung rendering path."
+              ],
+              "summary": "Public export routes obtain a 310-second distributed lease but do not propagate request cancellation or enforce a rendering deadline, so disconnected or hung work can continue after admission protection expires."
+            },
+            "confidence": {
+              "level": "medium",
+              "rationale": "Input and output budgets limit ordinary work; impact requires a slow or hung rendering path."
+            },
+            "locations": [
+              {
+                "endLine": 540,
+                "path": "lib/public-distributed-rate-limit.ts",
+                "role": "root_control",
+                "startLine": 455
+              },
+              {
+                "endLine": 245,
+                "path": "app/api/export/xlsx/route.ts",
+                "role": "sink",
+                "startLine": 173
+              },
+              {
+                "endLine": 319,
+                "path": "app/api/export/hwp/route.ts",
+                "role": "sink",
+                "startLine": 300
+              },
+              {
+                "endLine": 1208,
+                "path": "app/api/export/pdf/route.ts",
+                "role": "sink",
+                "startLine": 1136
+              },
+              {
+                "endLine": 61,
+                "path": "app/api/export/hwpx-template/route.ts",
+                "role": "sink",
+                "startLine": 25
+              }
+            ],
+            "provenance": {
+              "candidateId": "cand_fresh_021",
+              "source": "codex-security-standard-scan"
+            },
+            "remediation": "Propagate request.signal, wrap rendering in a deadline shorter than the lease, abort worker processes, and keep the lease alive until termination is confirmed.",
+            "rootCause": {
+              "summary": "Public export routes obtain a 310-second distributed lease but do not propagate request cancellation or enforce a rendering deadline, so disconnected or hung work can continue after admission protection expires."
+            },
+            "ruleId": "resource-exhaustion.export-cancellation-gap",
+            "severity": {
+              "level": "low",
+              "rationale": "Public export routes obtain a 310-second distributed lease but do not propagate request cancellation or enforce a rendering deadline, so disconnected or hung work can continue after admission protection expires."
+            },
+            "summary": "Public export routes obtain a 310-second distributed lease but do not propagate request cancellation or enforce a rendering deadline, so disconnected or hung work can continue after admission protection expires.",
+            "taxonomy": {
+              "category": "resource-exhaustion.export-cancellation-gap",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "Public export work can outlive its distributed admission lease",
+            "validation": {
+              "limitations": [
+                "Input and output budgets limit ordinary work; impact requires a slow or hung rendering path."
+              ],
+              "method": "Static source-to-sink review at pinned revision 9504d8db",
+              "summary": "Validated against current source and material countercontrols."
+            }
+          }
+        ],
+        "source": "codex-security-standard-scan"
+      },
+      "remediation": "Propagate request.signal, wrap rendering in a deadline shorter than the lease, abort worker processes, and keep the lease alive until termination is confirmed.",
+      "rootCause": {
+        "summary": "Public export routes obtain a 310-second distributed lease but do not propagate request cancellation or enforce a rendering deadline, so disconnected or hung work can continue after admission protection expires."
+      },
+      "ruleId": "resource-exhaustion.export-cancellation-gap",
+      "severity": {
+        "level": "low",
+        "rationale": "Public export routes obtain a 310-second distributed lease but do not propagate request cancellation or enforce a rendering deadline, so disconnected or hung work can continue after admission protection expires."
+      },
+      "summary": "Public export routes obtain a 310-second distributed lease but do not propagate request cancellation or enforce a rendering deadline, so disconnected or hung work can continue after admission protection expires.",
+      "taxonomy": {
+        "category": "resource-exhaustion.export-cancellation-gap",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Public export work can outlive its distributed admission lease",
+      "validation": {
+        "limitations": [
+          "Input and output budgets limit ordinary work; impact requires a slow or hung rendering path."
+        ],
+        "method": "Static source-to-sink review at pinned revision 9504d8db",
+        "summary": "Validated against current source and material countercontrols."
+      },
+      "writeup": {
+        "reportPath": "findings/export-cancellation-gap/export-cancellation-gap.md"
+      }
+    }
+  ],
+  "scanId": "f6bef30a-7250-428b-9f66-0bad1e42058c",
+  "schemaVersion": "1.0"
+}

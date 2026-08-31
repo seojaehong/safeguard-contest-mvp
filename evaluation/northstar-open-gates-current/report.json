@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-31T02:02:35.625Z",
-  "sourceSha": "81ca1baeeff78a77d7bdd13376d5e06dfaade500",
+  "generatedAt": "2026-08-31T03:15:33.170Z",
+  "sourceSha": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
   "overall": "open",
   "gates": [
     {
@@ -334,6 +334,17 @@
       "nextActions": [
         "Remediate the eight approval-free source findings in bounded waves and rerun focused validation.",
         "Keep the nine database/RLS/atomicity findings approval-gated and the Share capability finding separate; do not claim security completion from scan completion."
+      ]
+    },
+    {
+      "id": "completed_current_head_standard_security_scan",
+      "state": "notice",
+      "label": "Completed current-head Standard security scan",
+      "evidencePath": "evaluation\\current-head-standard-security-scan-2026-08-31-9504d8db-complete\\report.json",
+      "detail": "Current-head Standard scan f6bef30a is sealed at 9504d8db with 21 findings (7 medium, 14 low), 21 write-ups, and partial coverage. Canonical artifact hashes match. The immutable original 18-finding baseline is preserved; 11 approval-free source findings, nine database/RLS/atomicity findings, and one approval-sensitive Share capability finding remain open. Security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "nextActions": [
+        "Remediate the 11 approval-free source findings in bounded waves and run a fresh follow-up scan.",
+        "Keep database/RLS/atomicity, provider, exact Share, wiki, vector, and KOSHA registry operations on their existing approval paths."
       ]
     },
     {

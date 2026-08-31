@@ -49,6 +49,7 @@ const ARTIFACTS = Object.freeze({
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-complete", "report.json"),
+  completedCurrentHeadStandardSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-9504d8db-complete", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResourceBudgetRemediation: path.join("evaluation", "current-source-security-resource-budget-remediation-2026-08-31", "report.json"),
   currentSourceLogoutStorageRemediation: path.join("evaluation", "current-source-security-logout-storage-remediation-2026-08-31", "report.json"),
@@ -582,6 +583,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
   const currentSecurityRemediationLedger = tryReadJson(rootDir, ARTIFACTS.currentSecurityRemediationLedger);
   const currentRepositorySecurityRescan = tryReadJson(rootDir, ARTIFACTS.currentRepositorySecurityRescan);
   const freshCurrentSourceSecurityScan = tryReadJson(rootDir, ARTIFACTS.freshCurrentSourceSecurityScan);
+  const completedCurrentHeadStandardSecurityScan = tryReadJson(rootDir, ARTIFACTS.completedCurrentHeadStandardSecurityScan);
   const currentSourceApprovalFreeSecurityRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceApprovalFreeSecurityRemediation);
   const currentSourceSecurityResourceBudgetRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceSecurityResourceBudgetRemediation);
   const currentSourceLogoutStorageRemediation = tryReadJson(rootDir, ARTIFACTS.currentSourceLogoutStorageRemediation);
@@ -734,6 +736,7 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
     evidenceStatus(rootDir, currentHead, liveCommit, "current_security_remediation_ledger", ARTIFACTS.currentSecurityRemediationLedger, currentSecurityRemediationLedger),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_repository_security_rescan", ARTIFACTS.currentRepositorySecurityRescan, currentRepositorySecurityRescan),
     evidenceStatus(rootDir, currentHead, liveCommit, "fresh_current_source_security_scan", ARTIFACTS.freshCurrentSourceSecurityScan, freshCurrentSourceSecurityScan),
+    evidenceStatus(rootDir, currentHead, liveCommit, "completed_current_head_standard_security_scan", ARTIFACTS.completedCurrentHeadStandardSecurityScan, completedCurrentHeadStandardSecurityScan),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_approval_free_security_remediation", ARTIFACTS.currentSourceApprovalFreeSecurityRemediation, currentSourceApprovalFreeSecurityRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_security_resource_budget_remediation", ARTIFACTS.currentSourceSecurityResourceBudgetRemediation, currentSourceSecurityResourceBudgetRemediation),
     evidenceStatus(rootDir, currentHead, liveCommit, "current_source_logout_storage_remediation", ARTIFACTS.currentSourceLogoutStorageRemediation, currentSourceLogoutStorageRemediation),
@@ -1018,6 +1021,24 @@ export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new D
       freshFullRepositoryScanCompleted: recordAt(freshCurrentSourceSecurityScan, "remainingBoundaries")?.freshFullRepositoryScanCompleted === true,
       securityCompleteClaimAllowed: recordAt(freshCurrentSourceSecurityScan, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
       exactSavedShareVerdict: asString(recordAt(freshCurrentSourceSecurityScan, "remainingBoundaries")?.exactSavedShareVerdict),
+    },
+    completedCurrentHeadStandardSecurityScan: {
+      artifact: ARTIFACTS.completedCurrentHeadStandardSecurityScan,
+      verdict: isRecord(completedCurrentHeadStandardSecurityScan) ? asString(completedCurrentHeadStandardSecurityScan.verdict) : "missing",
+      scanId: isRecord(completedCurrentHeadStandardSecurityScan) ? asString(completedCurrentHeadStandardSecurityScan.scanId) : "",
+      sourceHead: isRecord(completedCurrentHeadStandardSecurityScan) ? asString(completedCurrentHeadStandardSecurityScan.sourceHead) : "",
+      reportableFindingCount: asNumber(recordAt(completedCurrentHeadStandardSecurityScan, "scan")?.reportableFindingCount),
+      mediumFindingCount: asNumber(recordAt(recordAt(completedCurrentHeadStandardSecurityScan, "scan"), "severity")?.medium),
+      lowFindingCount: asNumber(recordAt(recordAt(completedCurrentHeadStandardSecurityScan, "scan"), "severity")?.low),
+      coverageCompleteness: asString(recordAt(completedCurrentHeadStandardSecurityScan, "scan")?.coverageCompleteness),
+      recordedSurfaceCount: asNumber(recordAt(completedCurrentHeadStandardSecurityScan, "scan")?.recordedSurfaceCount),
+      deferredCoverageItemCount: asNumber(recordAt(completedCurrentHeadStandardSecurityScan, "scan")?.deferredCoverageItemCount),
+      immutableOriginalFindingCount: asNumber(recordAt(completedCurrentHeadStandardSecurityScan, "baseline")?.immutableOriginalFindingCount),
+      approvalGatedDatabaseOrAtomicityCount: asNumber(recordAt(completedCurrentHeadStandardSecurityScan, "currentDisposition")?.approvalGatedDatabaseOrAtomicityCount),
+      approvalSensitiveShareCapabilityCount: asNumber(recordAt(completedCurrentHeadStandardSecurityScan, "currentDisposition")?.approvalSensitiveShareCapabilityCount),
+      approvalFreeProductSourceResidualCount: asNumber(recordAt(completedCurrentHeadStandardSecurityScan, "currentDisposition")?.approvalFreeProductSourceResidualCount),
+      securityCompleteClaimAllowed: recordAt(completedCurrentHeadStandardSecurityScan, "remainingBoundaries")?.securityCompleteClaimAllowed === true,
+      exactSavedShareVerdict: asString(recordAt(completedCurrentHeadStandardSecurityScan, "remainingBoundaries")?.exactSavedShareVerdict),
     },
     currentSourceApprovalFreeSecurityRemediation: {
       artifact: ARTIFACTS.currentSourceApprovalFreeSecurityRemediation,
@@ -2568,6 +2589,12 @@ export function renderNorthstarLiveRollupMarkdown(rollup) {
     `- Immutable original baseline: ${rollup.securityFollowupRemediation.immutableOriginalBaselineFindingCount ?? "unknown"}; rewritten=${rollup.securityFollowupRemediation.originalBaselineRewritten}`,
     `- Deferred candidates retained: ${rollup.securityFollowupRemediation.deferredCandidateCount ?? "unknown"}; live provider cancellation probe executed=${rollup.securityFollowupRemediation.liveProviderCancellationProbeExecuted}`,
     `- Exact saved Share: ${rollup.securityFollowupRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
+    "",
+    "## Completed Current-head Standard Security Scan",
+    `- Verdict: \`${rollup.completedCurrentHeadStandardSecurityScan.verdict || "missing"}\`; scan \`${rollup.completedCurrentHeadStandardSecurityScan.scanId || "missing"}\`; source \`${rollup.completedCurrentHeadStandardSecurityScan.sourceHead || "missing"}\``,
+    `- Findings: ${rollup.completedCurrentHeadStandardSecurityScan.reportableFindingCount ?? "unknown"} (medium/low ${rollup.completedCurrentHeadStandardSecurityScan.mediumFindingCount ?? "unknown"}/${rollup.completedCurrentHeadStandardSecurityScan.lowFindingCount ?? "unknown"}); coverage ${rollup.completedCurrentHeadStandardSecurityScan.coverageCompleteness || "unknown"}; recorded/deferred rows ${rollup.completedCurrentHeadStandardSecurityScan.recordedSurfaceCount ?? "unknown"}/${rollup.completedCurrentHeadStandardSecurityScan.deferredCoverageItemCount ?? "unknown"}`,
+    `- Immutable baseline: ${rollup.completedCurrentHeadStandardSecurityScan.immutableOriginalFindingCount ?? "unknown"}; approval-free/database/Share residuals ${rollup.completedCurrentHeadStandardSecurityScan.approvalFreeProductSourceResidualCount ?? "unknown"}/${rollup.completedCurrentHeadStandardSecurityScan.approvalGatedDatabaseOrAtomicityCount ?? "unknown"}/${rollup.completedCurrentHeadStandardSecurityScan.approvalSensitiveShareCapabilityCount ?? "unknown"}`,
+    `- Security-complete: ${rollup.completedCurrentHeadStandardSecurityScan.securityCompleteClaimAllowed}; exact saved Share: ${rollup.completedCurrentHeadStandardSecurityScan.exactSavedShareVerdict || "MISSING_EVIDENCE"}`,
     "",
     "## Current Security Remediation Ledger",
     `- Verdict: \`${rollup.currentSecurityRemediationLedger.verdict}\``,

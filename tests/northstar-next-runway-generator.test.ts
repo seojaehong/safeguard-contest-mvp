@@ -584,6 +584,24 @@ type NextRunwayReport = {
     securityCompleteClaimAllowed: boolean;
     exactSavedShareVerdict: string;
   };
+  completedCurrentHeadStandardSecurityScan: {
+    verdict: string;
+    scanId: string;
+    sourceHead: string;
+    status: string;
+    coverageCompleteness: string;
+    recordedSurfaceCount: number | null;
+    deferredCoverageItemCount: number | null;
+    reportableFindingCount: number | null;
+    mediumFindingCount: number | null;
+    lowFindingCount: number | null;
+    immutableOriginalFindingCount: number | null;
+    approvalGatedDatabaseOrAtomicityCount: number | null;
+    approvalSensitiveShareCapabilityCount: number | null;
+    approvalFreeProductSourceResidualCount: number | null;
+    securityCompleteClaimAllowed: boolean;
+    exactSavedShareVerdict: string;
+  };
   currentSourceApprovalFreeSecurityRemediation: {
     verdict: string;
     sourceHead: string;
@@ -1700,6 +1718,25 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
       freshFullRepositoryScanCompleted: true,
       securityCompleteClaimAllowed: false,
     },
+  };
+}
+
+function completedCurrentHeadStandardSecurityScanFixture(): Record<string, unknown> {
+  return {
+    verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE",
+    scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c",
+    sourceHead: "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+    scan: {
+      status: "completed", coverageCompleteness: "partial", recordedSurfaceCount: 25,
+      deferredCoverageItemCount: 36, reportableFindingCount: 21,
+      severity: { medium: 7, low: 14 },
+    },
+    baseline: { immutableOriginalFindingCount: 18 },
+    currentDisposition: {
+      approvalGatedDatabaseOrAtomicityCount: 9, approvalSensitiveShareCapabilityCount: 1,
+      approvalFreeProductSourceResidualCount: 11,
+    },
+    remainingBoundaries: { securityCompleteClaimAllowed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   };
 }
 
@@ -3512,6 +3549,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
   });
   writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-complete/report.json", freshCurrentSourceSecurityScanFixture());
+  writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-9504d8db-complete/report.json", completedCurrentHeadStandardSecurityScanFixture());
   writeJson(root, "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json", currentSourceApprovalFreeSecurityRemediationFixture());
   writeJson(root, "evaluation/current-source-security-resource-budget-remediation-2026-08-31/report.json", currentSourceSecurityResourceBudgetRemediationFixture());
   writeJson(root, "evaluation/current-source-security-logout-storage-remediation-2026-08-31/report.json", currentSourceLogoutStorageRemediationFixture());
@@ -5338,6 +5376,29 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
+    expect(report.completedCurrentHeadStandardSecurityScan).toMatchObject({
+      verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE",
+      scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c",
+      sourceHead: "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+      status: "completed",
+      coverageCompleteness: "partial",
+      recordedSurfaceCount: 25,
+      deferredCoverageItemCount: 36,
+      reportableFindingCount: 21,
+      mediumFindingCount: 7,
+      lowFindingCount: 14,
+      immutableOriginalFindingCount: 18,
+      approvalGatedDatabaseOrAtomicityCount: 9,
+      approvalSensitiveShareCapabilityCount: 1,
+      approvalFreeProductSourceResidualCount: 11,
+      securityCompleteClaimAllowed: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "completed_current_head_standard_security_scan",
+      state: "notice",
+      reason: expect.stringContaining("21 findings"),
+    }));
     expect(report.shareAckPreBodyAdmission).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SHARE_ACK_PREBODY_ADMISSION_SOURCE_REMEDIATED",
       sourceHead: expect.stringMatching(/^[0-9a-f]{40}$/u),

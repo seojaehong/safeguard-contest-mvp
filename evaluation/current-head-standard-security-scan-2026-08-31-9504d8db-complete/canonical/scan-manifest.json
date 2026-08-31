@@ -1,0 +1,98 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "74cfbeb098a83bb78233d52689570865ea1d2111dbc8624286ed69bd82768b4e"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "3d3b72edf51eca6d38d9929fa04adbef3eb8eb1786437e5ea9a5adc538d91789"
+      }
+    ],
+    "completedAt": "2026-08-31T02:28:24.980984Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "f6bef30a-7250-428b-9f66-0bad1e42058c",
+    "preservedSources": {
+      "checkpoints/21d38d165368a2e226b7376403a6b88d9c3672d61b0bdcd5c7b86b056d712a5e.json": "3b9d7f7e542468c0b5eb994afee2b8821d3096bd0fa7e7f1968f7a24200d5300",
+      "checkpoints/3029a3a21a90617f4a343ff39d7dc1a26abe56c2be03c885ea6e579fc952b103.json": "3029a3a21a90617f4a343ff39d7dc1a26abe56c2be03c885ea6e579fc952b103",
+      "checkpoints/6de91f4910724edc6b956a8d342c26c6231a5fbc1c246b4d7a2025165fa54771.json": "2e1c5d4a0736d735bdb512300fec108127c0bcf5aec53f6ff9bdb2777f1e7c06",
+      "checkpoints/7579b17ae7e6dc5c1b31060f0053fee2728b61139203a742f6c39bcdf136b182.json": "ae0fe844d3ee355adb9072b7ea6041eac82bd98096e6fb0a4b5af560d5a64e0f",
+      "checkpoints/b14095ec9ed522599018957ec1f7371aec8d3358dc9c24afb76bed6b7e848082.json": "1197c34df987b0402bedadc60e7c95199c5efed78f9e7214ca3c70b66a84a268",
+      "checkpoints/b25629d4e14e82a59e8fee584db06c0e786c0ed40a15ce6c073ab9dd7861c553.json": "e40c07dca465d96929b39446db562b4cdd4b7d568580fc4cc0c870af12d1f5d4",
+      "checkpoints/d2f71f0cf9596209b4ef9b37c5e59a1a7b00dc3fd4331d180e34a7d9c6ec260f.json": "91a110a68c014a9e48ed16015f52aa4e239149899b8c74f1ccff8f69b1873689"
+    },
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.22"
+    },
+    "scope": {
+      "context": "6881 tracked files were inventoried; six authoritative security review surfaces covered product routes, database migrations, parsers, scripts, client state, tests, CI, and configuration. Generated evidence/data were treated as supporting artifacts.",
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "Live Supabase grants and trusted-proxy behavior were not inspected.",
+        "Exact saved Share session was not available.",
+        "Offline dependency CVE lookup was not performed."
+      ],
+      "runtimeStatus": "No runtime mutation, live exploit, provider delivery, or Share creation.",
+      "summary": "Complete risk-based source review of the full repository at exact revision 9504d8db.",
+      "validationMode": "Offline pinned-revision static source validation with independent baseline and focused investigators."
+    },
+    "sealedAt": "2026-08-31T02:28:24.980984Z",
+    "startedAt": "2026-08-31T02:04:34.159427Z",
+    "status": "completed",
+    "target": {
+      "displayName": "safeclaw-northstar-current",
+      "kind": "git_revision",
+      "revision": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+      "targetId": "target_sha256_59a91dd8129f171a6e0ff82b60460781f1067b1940d76c7a524e5f0e2b7ec5de"
+    },
+    "threatModel": {
+      "assets": [
+        "Tenant, site, worker, and recipient data",
+        "Generated safety documents and evidence",
+        "Bearer and service credentials",
+        "Share sessions and recipient acknowledgements",
+        "KOSHA, SIF, and Wiki trust artifacts"
+      ],
+      "assumptions": [
+        "Exact Git revision 9504d8db95fcbc9f37f6c5abc638e9ad0813a325 is the scan target",
+        "Source review is offline and live Data API grants are not inferred",
+        "Provider dispatch, DB mutation, Share creation, vector/Wiki/KOSHA registry mutation are excluded",
+        "Exact saved /share/[sessionId] remains MISSING_EVIDENCE"
+      ],
+      "attackerCapabilities": [
+        "Unauthenticated public API caller",
+        "Authenticated low-privilege tenant user",
+        "Recipient holding or guessing capability identifiers",
+        "Operator running repository scripts against influenced input",
+        "Malicious or oversized document/corpus supplier"
+      ],
+      "securityObjectives": [
+        "Preserve tenant isolation and object ownership",
+        "Bound public and operator work before expensive parsing or network use",
+        "Keep authoritative state transitions and quotas atomic",
+        "Prevent internal/provider data disclosure",
+        "Bind approval evidence to exact source and artifacts",
+        "Preserve no-mutation approval gates and exact saved Share MISSING_EVIDENCE"
+      ],
+      "summary": "SafeClaw Next.js workbench with public APIs, authenticated workspace flows, MCP tools, document generation/export, public Share capabilities, and approval-gated KOSHA/SIF/Wiki operations.",
+      "trustBoundaries": [
+        "Public HTTP to provider and corpus adapters",
+        "Bearer-authenticated routes to service-role Supabase access",
+        "MCP transport to scoped tools and persisted tenant bindings",
+        "Browser localStorage to authenticated and unauthenticated sessions",
+        "Untrusted document archives to parsers and exporters",
+        "Operator approval artifacts to mutation-capable workflows"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

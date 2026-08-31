@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "safeclaw-current-head-standard-security-scan/v2",
+  "generatedAt": "2026-08-31T02:28:24.980984Z",
+  "verdict": "NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE",
+  "scanId": "f6bef30a-7250-428b-9f66-0bad1e42058c",
+  "sourceHead": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+  "userContextPreserved": true,
+  "scan": {
+    "status": "completed",
+    "mode": "standard",
+    "targetKind": "git_revision",
+    "coverageCompleteness": "partial",
+    "trackedFileCount": 6881,
+    "reviewWorklistCount": 6,
+    "closedReviewWorklistCount": 6,
+    "recordedSurfaceCount": 25,
+    "deferredCoverageItemCount": 36,
+    "reportableFindingCount": 21,
+    "uniqueFindingWriteupCount": 21,
+    "severity": {
+      "critical": 0,
+      "high": 0,
+      "medium": 7,
+      "low": 14
+    },
+    "startedAt": "2026-08-31T02:04:34.159427Z",
+    "sealedAt": "2026-08-31T02:28:24.980984Z"
+  },
+  "baseline": {
+    "immutableOriginalFindingCount": 18,
+    "preserved": true,
+    "rewritten": false,
+    "completedPriorScanId": "8fe9c06a-018c-446f-aa98-1b37df95287a"
+  },
+  "currentDisposition": {
+    "approvalGatedDatabaseOrAtomicityCount": 9,
+    "approvalSensitiveShareCapabilityCount": 1,
+    "approvalFreeProductSourceResidualCount": 11,
+    "securityCompleteClaimAllowed": false,
+    "approvalGatedFindingRules": [
+      "authorization-bypass.missing-row-level-security",
+      "authorization-bypass.null-tenant-policy",
+      "authorization-bypass.cross-tenant-reference",
+      "authorization-bypass.client-writable-authoritative-state",
+      "race-condition.quota-enforcement",
+      "information-exposure.raw-corpus",
+      "race-condition.worker-site-binding",
+      "race-condition.review-transition",
+      "race-condition.workspace-provisioning"
+    ],
+    "approvalSensitiveShareCapabilityRules": [
+      "authorization-bypass.share-object-id"
+    ],
+    "approvalFreeResidualFindingRules": [
+      "rate-limit-bypass.untrusted-forwarded-identity",
+      "resource-exhaustion.unbounded-export-smoke-harness",
+      "information-exposure.raw-error-projection",
+      "approval-integrity.sif-migration-scope-bypass",
+      "supply-chain.unbound-publication-diff",
+      "approval-integrity.stale-evidence-binding",
+      "credential-exposure.token-stdout",
+      "resource-exhaustion.unbounded-template-inventory",
+      "resource-exhaustion.unbounded-hwpx-inventory",
+      "resource-exhaustion.late-parser-admission",
+      "resource-exhaustion.export-cancellation-gap"
+    ]
+  },
+  "canonicalArtifacts": {
+    "manifest": "evaluation/current-head-standard-security-scan-2026-08-31-9504d8db-complete/canonical/scan-manifest.json",
+    "findings": "evaluation/current-head-standard-security-scan-2026-08-31-9504d8db-complete/canonical/findings.json",
+    "coverage": "evaluation/current-head-standard-security-scan-2026-08-31-9504d8db-complete/canonical/coverage.json",
+    "markdown": "evaluation/current-head-standard-security-scan-2026-08-31-9504d8db-complete/scan-report.md",
+    "findingWriteupCount": 21,
+    "supportingEvidenceCount": 21,
+    "sha256": {
+      "manifest": "2c9719549df076edfae12f790344736c7cb9d9bbdf9b0007a49d57b6364d841e",
+      "findings": "74cfbeb098a83bb78233d52689570865ea1d2111dbc8624286ed69bd82768b4e",
+      "coverage": "3d3b72edf51eca6d38d9929fa04adbef3eb8eb1786437e5ea9a5adc538d91789",
+      "markdown": "4d45b0cd0653bd2497f7770d7d23bacb7e74047c0a40abd33be974198dd5cea0"
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "exactTrustRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseSecurityRemediation": "APPROVAL_GATED",
+    "providerDispatchPersistence": "APPROVAL_GATED",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "sifVectorRuntime": "APPROVAL_GATED",
+    "koshaExactRegistryPromotion": "APPROVAL_GATED",
+    "coverageClosureCompleted": false,
+    "approvalFreeCurrentSourceRemediation": "OPEN_11_FINDINGS",
+    "securityCompleteClaimAllowed": false
+  }
+}

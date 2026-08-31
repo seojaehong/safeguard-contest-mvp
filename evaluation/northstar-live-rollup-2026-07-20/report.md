@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T02:02:36.402Z
-Source HEAD at generation: 81ca1baeeff78a77d7bdd13376d5e06dfaade500
-Live commit at generation: 81ca1baeeff78a77d7bdd13376d5e06dfaade500
+Generated at: 2026-08-31T03:11:46.152Z
+Source HEAD at generation: 9504d8db95fcbc9f37f6c5abc638e9ad0813a325
+Live commit at generation: 9504d8db95fcbc9f37f6c5abc638e9ad0813a325
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -136,6 +136,12 @@ Overall: `northstar_open_approval_gated`
 - Immutable original baseline: 18; rewritten=false
 - Deferred candidates retained: 2; live provider cancellation probe executed=false
 - Exact saved Share: MISSING_EVIDENCE
+
+## Completed Current-head Standard Security Scan
+- Verdict: `NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE`; scan `f6bef30a-7250-428b-9f66-0bad1e42058c`; source `9504d8db95fcbc9f37f6c5abc638e9ad0813a325`
+- Findings: 21 (medium/low 7/14); coverage partial; recorded/deferred rows 25/36
+- Immutable baseline: 18; approval-free/database/Share residuals 11/9/1
+- Security-complete: false; exact saved Share: MISSING_EVIDENCE
 
 ## Current Security Remediation Ledger
 - Verdict: `NOTICE_LIVE_DEPLOYED_SOURCE_SECURITY_REMEDIATION_LEDGER_OPEN_BOUNDARIES`
@@ -440,6 +446,7 @@ Overall: `northstar_open_approval_gated`
 | current_security_remediation_ledger | notice | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | notice | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | fresh_current_source_security_scan | notice | evaluation\current-head-standard-security-scan-2026-08-31-complete\report.json |
+| completed_current_head_standard_security_scan | notice | evaluation\current-head-standard-security-scan-2026-08-31-9504d8db-complete\report.json |
 | current_source_approval_free_security_remediation | notice | evaluation\current-source-security-approval-free-remediation-2026-08-31\report.json |
 | current_source_security_resource_budget_remediation | proven | evaluation\current-source-security-resource-budget-remediation-2026-08-31\report.json |
 | current_source_logout_storage_remediation | notice | evaluation\current-source-security-logout-storage-remediation-2026-08-31\report.json |
@@ -538,6 +545,7 @@ Overall: `northstar_open_approval_gated`
 | current_security_remediation_ledger | ancestor | ancestor_of_head | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | fresh_current_source_security_scan | ancestor | missing | evaluation\current-head-standard-security-scan-2026-08-31-complete\report.json |
+| completed_current_head_standard_security_scan | exact | missing | evaluation\current-head-standard-security-scan-2026-08-31-9504d8db-complete\report.json |
 | current_source_approval_free_security_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-approval-free-remediation-2026-08-31\report.json |
 | current_source_security_resource_budget_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-resource-budget-remediation-2026-08-31\report.json |
 | current_source_logout_storage_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-logout-storage-remediation-2026-08-31\report.json |

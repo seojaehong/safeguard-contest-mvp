@@ -1,0 +1,519 @@
+{
+  "completeness": "partial",
+  "deferred": [
+    {
+      "id": "admission-forwarded-ip",
+      "reason": "Second validation batch pending.",
+      "summary": "admission-forwarded-ip"
+    },
+    {
+      "id": "operator-smoke-deadline",
+      "reason": "Second validation batch pending.",
+      "summary": "operator-smoke-deadline"
+    },
+    {
+      "id": "public-error-detail",
+      "reason": "Second validation batch pending.",
+      "summary": "public-error-detail"
+    },
+    {
+      "id": "authenticated-error-detail",
+      "reason": "Second validation batch pending.",
+      "summary": "authenticated-error-detail"
+    },
+    {
+      "id": "share-origin-trust",
+      "reason": "Second validation batch pending.",
+      "summary": "share-origin-trust"
+    },
+    {
+      "id": "public-diagnostics-metadata",
+      "reason": "Second validation batch pending.",
+      "summary": "public-diagnostics-metadata"
+    },
+    {
+      "id": "sif-migration-scope",
+      "reason": "Second validation batch pending.",
+      "summary": "sif-migration-scope"
+    },
+    {
+      "id": "publish-preexisting-changes",
+      "reason": "Second validation batch pending.",
+      "summary": "publish-preexisting-changes"
+    },
+    {
+      "id": "kosha-review-binding",
+      "reason": "Second validation batch pending.",
+      "summary": "kosha-review-binding"
+    },
+    {
+      "id": "approval-evidence-freshness",
+      "reason": "Second validation batch pending.",
+      "summary": "approval-evidence-freshness"
+    },
+    {
+      "id": "token-stdout",
+      "reason": "Second validation batch pending.",
+      "summary": "token-stdout"
+    },
+    {
+      "id": "localstorage-sensitive-workpack",
+      "reason": "Second validation batch pending.",
+      "summary": "localstorage-sensitive-workpack"
+    },
+    {
+      "id": "missing-csp",
+      "reason": "Second validation batch pending.",
+      "summary": "missing-csp"
+    },
+    {
+      "id": "ci-lockfile-drift",
+      "reason": "Second validation batch pending.",
+      "summary": "ci-lockfile-drift"
+    },
+    {
+      "id": "template-scanner-admission",
+      "reason": "Second validation batch pending.",
+      "summary": "template-scanner-admission"
+    },
+    {
+      "id": "hwpx-inventory-admission",
+      "reason": "Second validation batch pending.",
+      "summary": "hwpx-inventory-admission"
+    },
+    {
+      "id": "parser-late-admission",
+      "reason": "Second validation batch pending.",
+      "summary": "parser-late-admission"
+    },
+    {
+      "id": "export-cancellation",
+      "reason": "Second validation batch pending.",
+      "summary": "export-cancellation"
+    },
+    {
+      "id": "share-capability-review",
+      "reason": "Second validation batch pending.",
+      "summary": "share-capability-review"
+    },
+    {
+      "id": "db-legacy-rls",
+      "reason": "Discovery receipt complete; validation and deduplication pending.",
+      "summary": "Legacy query_logs/documents RLS/grants"
+    },
+    {
+      "id": "db-null-tenant-policy",
+      "reason": "Discovery receipt complete; validation and deduplication pending.",
+      "summary": "Nullable dispatch tenant policy"
+    },
+    {
+      "id": "db-client-writable-ack",
+      "reason": "Discovery receipt complete; validation and deduplication pending.",
+      "summary": "Direct owner ACK writes"
+    },
+    {
+      "id": "db-public-ontology-edge",
+      "reason": "Discovery receipt complete; validation and deduplication pending.",
+      "summary": "Public draft ontology edge relationship"
+    },
+    {
+      "id": "db-public-ingestion-details",
+      "reason": "Discovery receipt complete; validation and deduplication pending.",
+      "summary": "Public ingestion operational details"
+    },
+    {
+      "id": "db-cross-tenant-tuples",
+      "reason": "Discovery receipt complete; validation and deduplication pending.",
+      "summary": "Cross-tenant tuple integrity"
+    },
+    {
+      "id": "mcp-token-quota-race",
+      "reason": "Discovery receipt complete; validation and deduplication pending.",
+      "summary": "MCP quota count-then-insert race"
+    },
+    {
+      "id": "knowledge-review-atomicity",
+      "reason": "Discovery receipt complete; validation and deduplication pending.",
+      "summary": "Review transition partial-state race"
+    },
+    {
+      "id": "workspace-provision-race",
+      "reason": "Discovery receipt complete; validation and deduplication pending.",
+      "summary": "Workspace select-then-insert race"
+    },
+    {
+      "id": "share-object-capability",
+      "reason": "Discovery receipt complete; validation and deduplication pending.",
+      "summary": "Share retrieval uses sessionId plus workerId capability"
+    },
+    {
+      "candidate": {
+        "confidence": "high",
+        "paths": [
+          "supabase/migrations/001_init.sql"
+        ],
+        "severity": "medium",
+        "summary": "query_logs and documents are created without cumulative RLS or explicit grant revocation; exploitability depends on effective Data API object privileges.",
+        "title": "Legacy public-schema tables lack RLS"
+      },
+      "candidateId": "db-legacy-tables-no-rls",
+      "id": "db-legacy-tables-no-rls",
+      "reason": "Pending parent validation"
+    },
+    {
+      "candidate": {
+        "confidence": "high",
+        "paths": [
+          "supabase/migrations/002_workspace_productization.sql",
+          "app/api/dispatch-logs/route.ts"
+        ],
+        "severity": "medium",
+        "summary": "FOR ALL RLS permits organization_id IS NULL independently of ownership; route controls do not constrain direct Data API access.",
+        "title": "NULL-tenant dispatch rows have role-agnostic CRUD policy"
+      },
+      "candidateId": "db-null-tenant-dispatch-policy",
+      "id": "db-null-tenant-dispatch-policy",
+      "reason": "Pending parent validation"
+    },
+    {
+      "candidate": {
+        "confidence": "medium",
+        "paths": [
+          "supabase/migrations/010_commercial_operations.sql",
+          "app/api/share-sessions/[sessionId]/route.ts",
+          "app/api/workpacks/[id]/read-confirmations/route.ts"
+        ],
+        "severity": "low",
+        "summary": "Owner FOR ALL policy can directly create button confirmations without public-route contact verification, conditional on table privileges.",
+        "title": "Owner DML can bypass recipient-ACK actor integrity"
+      },
+      "candidateId": "db-recipient-ack-actor-integrity",
+      "id": "db-recipient-ack-actor-integrity",
+      "reason": "Pending parent validation"
+    },
+    {
+      "candidate": {
+        "confidence": "high",
+        "paths": [
+          "supabase/migrations/008_safety_ontology.sql"
+        ],
+        "severity": "low",
+        "summary": "Published-edge SELECT policy does not require src/dst nodes to be published.",
+        "title": "Public ontology edges need not have public endpoints"
+      },
+      "candidateId": "db-public-ontology-edge-draft-reference",
+      "id": "db-public-ontology-edge-draft-reference",
+      "reason": "Pending parent validation"
+    },
+    {
+      "candidate": {
+        "confidence": "high",
+        "paths": [
+          "supabase/migrations/004_safety_reference_catalog.sql"
+        ],
+        "severity": "low",
+        "summary": "Unconditional public SELECT policy covers report_path and details, conditional on object-level grants.",
+        "title": "Ingestion operational details are publicly row-visible"
+      },
+      "candidateId": "db-public-ingestion-operational-details",
+      "id": "db-public-ingestion-operational-details",
+      "reason": "Pending parent validation"
+    },
+    {
+      "candidate": {
+        "paths": [
+          "supabase/migrations/002_workspace_productization.sql",
+          "supabase/migrations/003_knowledge_runtime.sql",
+          "supabase/migrations/010_commercial_operations.sql"
+        ],
+        "title": "Related object identifiers may not be bound to the same tenant"
+      },
+      "candidateId": "db-cross-tenant-related-object-tuples",
+      "id": "db-cross-tenant-related-object-tuples",
+      "reason": "Schema lacks same-tenant tuple constraints, but current application paths add tuple checks and no direct-disclosure path has yet been established."
+    },
+    {
+      "candidateId": "threat-architecture-review",
+      "id": "threat-architecture-review",
+      "reason": "Independent architecture reviewer is still running."
+    }
+  ],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [
+    {
+      "pattern": "Database/schema/data mutation",
+      "reason": "Explicit approval required; source-only validation."
+    },
+    {
+      "pattern": "Provider dispatch and recipient ACK mutation",
+      "reason": "Explicit approval required; preview/read-only boundary preserved."
+    },
+    {
+      "pattern": "Exact saved /share/[sessionId] creation",
+      "reason": "No concrete URL and DB-backed creation is mutation; remains MISSING_EVIDENCE."
+    },
+    {
+      "pattern": "Vector, embedding, Wiki publication, and KOSHA registry mutation",
+      "reason": "Explicit approval required."
+    },
+    {
+      "pattern": "evaluation/**",
+      "reason": "Generated evidence context only."
+    },
+    {
+      "pattern": "output/**",
+      "reason": "Generated outputs."
+    },
+    {
+      "pattern": "public/**",
+      "reason": "Static assets unless needed."
+    },
+    {
+      "pattern": "data/**",
+      "reason": "Large corpora; loaders remain in scope."
+    },
+    {
+      "pattern": "evaluation/**",
+      "reason": "Historical/generated evidence is context, not implementation source coverage."
+    },
+    {
+      "pattern": "output/**",
+      "reason": "Generated outputs excluded unless required by a concrete trace."
+    },
+    {
+      "pattern": "public/**",
+      "reason": "Static assets excluded except when a finding depends on shipped data."
+    },
+    {
+      "pattern": "data/**",
+      "reason": "Large corpora excluded from line-by-line source coverage; loaders remain in scope."
+    }
+  ],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "repository",
+  "mode": "repository",
+  "openQuestions": [
+    {
+      "question": "What anonymous/authenticated Data API grants are active for the legacy and public catalog tables?"
+    },
+    {
+      "question": "Does every deployed ingress strip or overwrite x-vercel-forwarded-for?"
+    },
+    {
+      "question": "Which operator corpus locations can receive untrusted files?"
+    },
+    {
+      "question": "A concrete exact saved Share URL remains unavailable."
+    }
+  ],
+  "scanId": "f6bef30a-7250-428b-9f66-0bad1e42058c",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "reported",
+      "id": "surface_baseline-and-cross-cutting-controls-3",
+      "label": "Baseline and cross-cutting controls",
+      "notes": "Fresh scan retained source-backed approval-gated baseline families and current operator deadline issues; prior sealed scans remain immutable.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_database-rls-tenant-integrity-and-atomicity-3",
+      "label": "Database, RLS, tenant integrity, and atomicity",
+      "notes": "Ten reportable tenant, RLS, capability, and atomicity findings remain; no live DB mutation was attempted.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_public-admission-resource-controls-and-upstream-calls-3",
+      "label": "Public admission, resource controls, and upstream calls",
+      "notes": "Forwarded identity trust and export cancellation are reportable; existing streaming and global lease controls reduce severity.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_authentication-api-authorization-share-and-error-handling-3",
+      "label": "Authentication, API authorization, Share, and error handling",
+      "notes": "Raw error projection and Share object capability remain reportable. Request-derived origin was rejected because provider dispatch is hard-disabled and no current sensitive sink is reachable.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_document-parsers-archives-exports-and-smoke-runners-3",
+      "label": "Document parsers, archives, exports, and smoke runners",
+      "notes": "Four parser/corpus/deadline findings remain; formula neutralization and bounded public document inputs were confirmed.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_approval-scripts-client-persistence-ci-and-configuration-3",
+      "label": "Approval scripts, client persistence, CI, and configuration",
+      "notes": "SIF scope, publication diff, stale evidence binding, and token stdout are reportable.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "rejected",
+      "id": "surface_public-diagnostic-metadata",
+      "label": "Public diagnostic metadata",
+      "notes": "Commit and corpus hashes are intentional live-evidence surfaces; no secret or meaningful capability gain was established.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "rejected",
+      "id": "surface_request-derived-share-origin",
+      "label": "Request-derived Share origin",
+      "notes": "Provider dispatch is hard-disabled by persistent-idempotency policy, so the constructed origin does not reach a current external-delivery sink.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "rejected",
+      "id": "surface_browser-localstorage-persistence",
+      "label": "Browser localStorage persistence",
+      "notes": "Explicit logout cleanup is present and no script-injection or cross-user read primitive was established; persistence alone did not cross a security boundary.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "rejected",
+      "id": "surface_content-security-policy-absence",
+      "label": "Content-Security-Policy absence",
+      "notes": "Defense-in-depth gap only; no independent XSS path was established.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "rejected",
+      "id": "surface_ci-npm-install-behavior",
+      "label": "CI npm install behavior",
+      "notes": "Lockfile drift is hardening debt, but no attacker-controlled dependency resolution or vulnerable package was established.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_previously-remediated-approval-free-families",
+      "label": "Previously remediated approval-free families",
+      "notes": "Current source retained public-status lifetime bounds, ontology error ceilings, photo readiness admission, MCP cancellation, logout cleanup, formula neutralization, and bounded structured export controls.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_baseline-and-cross-cutting-controls-2",
+      "label": "Baseline and cross-cutting controls",
+      "notes": "Prior families reconciled; approval-free remediations checked and remaining candidates continue validation.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_database-rls-tenant-integrity-and-atomicity-2",
+      "label": "Database, RLS, tenant integrity, and atomicity",
+      "notes": "Ten validated findings cover missing and nullable RLS, cross-tenant tuples, client-writable state, quotas, raw corpus, Share capability, worker binding, review transitions, and provisioning.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_public-admission-resource-controls-and-upstream-calls-2",
+      "label": "Public admission, resource controls, and upstream calls",
+      "notes": "Validation pending for forwarded-IP trust and cancellation.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_authentication-api-authorization-share-and-error-handling-2",
+      "label": "Authentication, API authorization, Share, and error handling",
+      "notes": "Validation pending for error projection, origin trust, diagnostics, and current Share boundaries.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_document-parsers-archives-exports-and-smoke-runners-2",
+      "label": "Document parsers, archives, exports, and smoke runners",
+      "notes": "Validation pending for parser admission and runtime deadlines.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_approval-scripts-client-persistence-ci-and-configuration-2",
+      "label": "Approval scripts, client persistence, CI, and configuration",
+      "notes": "Validation pending for approval binding, publication integrity, token handling, persistence, CSP, and lockfile behavior.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_baseline-and-cross-cutting-controls",
+      "label": "Baseline and cross-cutting controls",
+      "notes": "Reviewed 21 high-risk files and prior sealed families; operator smoke deadline and cross-tenant integrity candidates retained.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_database-rls-tenant-integrity-and-atomicity",
+      "label": "Database, RLS, tenant integrity, and atomicity",
+      "notes": "Reviewed all migrations plus commercial/admin routes; RLS, tuple, ACK, quota, transition, and provisioning candidates retained.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_public-admission-resource-controls-and-upstream-calls",
+      "label": "Public admission, resource controls, and upstream calls",
+      "notes": "Reviewed 22 files; forwarded-IP trust and cancellation/fanout candidates retained, bounded streaming controls confirmed.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_authentication-api-authorization-share-and-error-handling",
+      "label": "Authentication, API authorization, Share, and error handling",
+      "notes": "Reviewed all 41 API routes and 25 helpers; raw error, origin trust, diagnostics, and Share capability candidates retained.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_document-parsers-archives-exports-and-smoke-runners",
+      "label": "Document parsers, archives, exports, and smoke runners",
+      "notes": "Reviewed parser/export surfaces; pre-admission corpus/ZIP/parser and runtime cancellation candidates retained; formula neutralization confirmed.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_approval-scripts-client-persistence-ci-and-configuration",
+      "label": "Approval scripts, client persistence, CI, and configuration",
+      "notes": "Reviewed 22 files; SIF/KOSHA/stale evidence, publish integrity, token output, localStorage, CSP, and lockfile candidates retained.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "filesReviewed": 25,
+      "id": "db-rls-tenant-atomicity",
+      "label": "Supabase RLS, tenant binding, recipient ACK, and persistence boundaries",
+      "notes": "Five candidates pending parent validation; ACK idempotency and provider dispatch fail-closed controls reviewed; exact saved Share remains MISSING_EVIDENCE.",
+      "paths": [
+        "supabase/migrations/001_init.sql",
+        "supabase/migrations/002_workspace_productization.sql",
+        "supabase/migrations/003_knowledge_runtime.sql",
+        "supabase/migrations/004_safety_reference_catalog.sql",
+        "supabase/migrations/005_briefing_settings.sql",
+        "supabase/migrations/007_mcp_tokens.sql",
+        "supabase/migrations/008_safety_ontology.sql",
+        "supabase/migrations/009_mcp_token_query_indexes.sql",
+        "supabase/migrations/010_commercial_operations.sql",
+        "lib/workpack-commercial-store.ts",
+        "lib/read-confirmation-idempotency.ts",
+        "lib/server/workflow-dispatch-capability-policy.ts",
+        "lib/server/briefing-dispatch-status.ts",
+        "app/api/share-sessions/[sessionId]/route.ts",
+        "app/api/workpacks/[id]/read-confirmations/route.ts",
+        "app/api/workpacks/[id]/share-sessions/route.ts",
+        "app/api/dispatch-logs/route.ts",
+        "app/api/workers/route.ts",
+        "app/api/workpacks/route.ts",
+        "app/api/mcp-tokens/route.ts",
+        "app/api/mcp-tokens/[id]/route.ts",
+        "app/api/briefing/run/route.ts",
+        "app/api/sif-embedding-gate/status/route.ts",
+        "app/api/sif-embedding-gate/approval-packet/route.ts",
+        "app/api/knowledge/review/route.ts"
+      ],
+      "receiptRefs": []
+    }
+  ]
+}
