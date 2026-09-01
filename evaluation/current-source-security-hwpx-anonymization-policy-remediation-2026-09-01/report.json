@@ -1,0 +1,64 @@
+{
+  "schema": "safeclaw-current-source-security-remediation/v1",
+  "generatedAt": "2026-09-01T14:12:00+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_HWPX_CLEANUP_POLICY_LIVE_PENDING_RESCAN_REQUIRED",
+  "findingId": "data-exposure.hwpx-anonymization-policy",
+  "sourceHead": "fa72b785ca07ad2ea5ae913dbfd0b4a26f1dc00c",
+  "productionBuild": {
+    "commitSha": "9af35696d1c4e70712e02538f12efa332e3f6727",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-6i3ivovow-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": false
+  },
+  "remediation": {
+    "cleanupPolicySchema": "safeclaw-hwpx-cleanup-policy/v1",
+    "requiresNonEmptyCompanyTokens": true,
+    "requiresUniqueCompanyTokens": true,
+    "requiresMatchingPolicySha256": true,
+    "missingOrMalformedPolicyFailsClosed": true,
+    "retainedForbiddenTokenFailsClosed": true,
+    "reportStoresPolicyDigestWithoutPolicyTokens": true,
+    "viteMjsCompatibilityShebangRemoved": true
+  },
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd exec -- vitest run tests\\anonymize-hwpx-templates.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 1,
+      "testsPassed": 6,
+      "testsFailed": 0
+    },
+    "adjacentTests": {
+      "command": "npm.cmd exec -- vitest run tests\\anonymize-hwpx-templates.test.ts tests\\hwpx-template-route.test.ts tests\\final-output-parser-safety.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 3,
+      "testsPassed": 11,
+      "testsFailed": 0
+    },
+    "nodeSyntaxCheck": "PASS",
+    "strictTypecheck": "PASS",
+    "productionBuild": {
+      "status": "PASS",
+      "staticPagesGenerated": 29,
+      "note": "A first Windows build worker exited without a code diagnostic during static generation; a clean .next rebuild passed 29/29."
+    },
+    "gitDiffCheck": "PASS"
+  },
+  "executionBoundary": {
+    "cleanupPolicyFileRead": false,
+    "hwpxTemplateRewriteExecuted": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "scanBoundary": {
+    "immutableCompletedScanPreserved": true,
+    "completedScanSourceHead": "c9b67280a64995b3cd26f243f404623de21a489a",
+    "findingClosedByThisArtifact": false,
+    "freshSecurityRescanRequired": true,
+    "liveAfterDeploymentRequired": true
+  }
+}
