@@ -1,10 +1,11 @@
 {
   "schema": "safeclaw-review-propagation-handoff/v1",
-  "generatedAt": "2026-09-01T09:33:54.4447762+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_REVIEW_PROPAGATION_HANDOFF_LIVE_PENDING",
-  "sourceHead": "4bfcf5163d56e7a7c6f94df331718d2a528a2364",
-  "productionCommit": null,
-  "liveAfterDeploymentPending": true,
+  "generatedAt": "2026-09-01T00:48:10.549Z",
+  "verdict": "PASS_LIVE_PRODUCTION_REVIEW_PROPAGATION_HANDOFF",
+  "sourceHead": "7af241265a21fec02f79830ec8e598c287735db0",
+  "semanticSourceCommit": "4bfcf5163d56e7a7c6f94df331718d2a528a2364",
+  "productionCommit": "7af241265a21fec02f79830ec8e598c287735db0",
+  "liveAfterDeploymentPending": false,
   "semanticContract": {
     "documentHumanReview": {
       "source": "generation-fingerprint-scoped-browser-local-summary",
@@ -29,7 +30,7 @@
       "pageHeight": 723,
       "primaryBottom": 389,
       "previewBottom": 571,
-      "statusRailBottom": 720,
+      "statusRailBottom": 703,
       "statusRailTextIncludes": [
         "문서 검토",
         "Hermes 후보",
@@ -42,9 +43,8 @@
     "workspaceMobileShortDay": {
       "viewport": "390x723",
       "pageHeight": 723,
-      "previewBottom": 577.25,
-      "primaryBottom": 636.25,
-      "configToggleBottom": 695.25,
+      "previewBottom": 659.25,
+      "primaryBottom": 718.25,
       "desktopStatusRailDisplay": "none",
       "horizontalOverflow": 0
     }
@@ -73,13 +73,22 @@
       "verdict": "PASS",
       "nextVersion": "15.5.22",
       "staticPages": 29
+    },
+    "liveProbe": {
+      "verdict": "PASS_LIVE_PRODUCTION_REVIEW_PROPAGATION_HANDOFF",
+      "checksPassed": 10,
+      "checksFailed": 0,
+      "productionCommit": "7af241265a21fec02f79830ec8e598c287735db0"
     }
   },
   "artifacts": {
     "desktopShortDayScreenshot": "evaluation/review-propagation-handoff-2026-09-01/screenshots/desktop-short-day.png",
     "desktopShortNightScreenshot": "evaluation/review-propagation-handoff-2026-09-01/screenshots/desktop-short-night.png",
     "mobileShortDayScreenshot": "evaluation/review-propagation-handoff-2026-09-01/screenshots/mobile-short-day.png",
-    "mobileShortNightScreenshot": "evaluation/review-propagation-handoff-2026-09-01/screenshots/mobile-short-night.png"
+    "mobileShortNightScreenshot": "evaluation/review-propagation-handoff-2026-09-01/screenshots/mobile-short-night.png",
+    "liveReport": "evaluation/review-propagation-handoff-2026-09-01/after-live/report.json",
+    "liveDesktopShortScreenshot": "evaluation/review-propagation-handoff-2026-09-01/after-live/screenshots/share-desktop-short.png",
+    "liveMobileShortScreenshot": "evaluation/review-propagation-handoff-2026-09-01/after-live/screenshots/share-mobile-short.png"
   },
   "mutationBoundary": {
     "dbMutationPerformed": false,
@@ -92,6 +101,6 @@
   "remainingBoundaries": {
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "hermesHumanCandidateReviewCompleted": false,
-    "liveAfterDeploymentRequired": true
+    "liveAfterDeploymentRequired": false
   }
 }

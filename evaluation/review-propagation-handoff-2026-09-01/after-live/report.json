@@ -1,0 +1,176 @@
+{
+  "schema": "safeclaw-review-propagation-handoff-live/v1",
+  "generatedAt": "2026-09-01T00:48:10.549Z",
+  "verdict": "PASS_LIVE_PRODUCTION_REVIEW_PROPAGATION_HANDOFF",
+  "baseUrl": "https://www.safeclaw.kr",
+  "productionBuild": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "7af241265a21fec02f79830ec8e598c287735db0",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-8xxc5awik-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "checks": {
+    "productionContainsProductCommit": true,
+    "documentsDesktopReviewBoundaryVisible": true,
+    "documentsMobileReviewBoundaryAccessible": true,
+    "shareDesktopSemanticRailVisible": true,
+    "shareMobileSemanticHandoffVisible": true,
+    "noHorizontalOverflow": true,
+    "desktopPrimaryInViewport": true,
+    "desktopPreviewInViewport": true,
+    "desktopStatusRailInViewport": true,
+    "mobilePrimaryInViewport": true
+  },
+  "metrics": {
+    "documentsDesktop": {
+      "viewportWidth": 1440,
+      "viewportHeight": 723,
+      "pageHeight": 723,
+      "pageWidth": 1440,
+      "horizontalOverflow": 0,
+      "handoffDisplay": "grid",
+      "handoffText": "문서 사람 검토0/12 · 브라우저 저장Hermes 지식 후보별도 검토 · 문서 승인 아님공유·전송전송 화면에서 별도 확인",
+      "reviewButtonAriaLabel": "문서 사람 검토 0/12, 브라우저 저장, 승인 아님",
+      "reviewButtonRect": {
+        "x": 360.3125,
+        "y": 212,
+        "width": 119.6875,
+        "height": 30,
+        "top": 212,
+        "right": 480,
+        "bottom": 242,
+        "left": 360.3125
+      },
+      "statusRailDisplay": "missing",
+      "statusRailText": "",
+      "statusRailRect": null,
+      "previewRect": null,
+      "primaryRect": null
+    },
+    "shareDesktop": {
+      "viewportWidth": 1440,
+      "viewportHeight": 723,
+      "pageHeight": 723,
+      "pageWidth": 1440,
+      "horizontalOverflow": 0,
+      "handoffDisplay": "none",
+      "handoffText": "문서 사람 검토0/12 · 브라우저 저장 · 승인 아님Hermes 지식 후보별도 검토 · 문서 승인 아님공유·전송첫 전송 전",
+      "statusRailDisplay": "grid",
+      "statusRailText": "전송 상태발송 상태 확인 중대상3명 선택채널메일, 문자언어관리자용 한국어문서 검토0/12 · 승인 아님Hermes 후보별도 검토 · 문서 승인 아님전송 이력편집 후 재검수 필요실행 경계발송 채널 상태를 확인하고 있습니다.현재 전송본은 미리보기로만 확인할 수 있습니다.",
+      "statusRailRect": {
+        "x": 1071,
+        "y": 345,
+        "width": 230,
+        "height": 358,
+        "top": 345,
+        "right": 1301,
+        "bottom": 703,
+        "left": 1071
+      },
+      "previewRect": {
+        "x": 660.1875,
+        "y": 345,
+        "width": 404.8125,
+        "height": 226,
+        "top": 345,
+        "right": 1065,
+        "bottom": 571,
+        "left": 660.1875
+      },
+      "primaryRect": {
+        "x": 139,
+        "y": 345,
+        "width": 515.1875,
+        "height": 44,
+        "top": 345,
+        "right": 654.1875,
+        "bottom": 389,
+        "left": 139
+      }
+    },
+    "documentsMobile": {
+      "viewportWidth": 390,
+      "viewportHeight": 723,
+      "pageHeight": 723,
+      "pageWidth": 390,
+      "horizontalOverflow": 0,
+      "handoffDisplay": "none",
+      "handoffText": "문서 사람 검토0/12 · 브라우저 저장Hermes 지식 후보별도 검토 · 문서 승인 아님공유·전송전송 화면에서 별도 확인",
+      "reviewButtonAriaLabel": "문서 사람 검토 0/12, 브라우저 저장, 승인 아님",
+      "reviewButtonRect": {
+        "x": 225.3125,
+        "y": 256,
+        "width": 119.6875,
+        "height": 44,
+        "top": 256,
+        "right": 345,
+        "bottom": 300,
+        "left": 225.3125
+      },
+      "statusRailDisplay": "missing",
+      "statusRailText": "",
+      "statusRailRect": null,
+      "previewRect": null,
+      "primaryRect": null
+    },
+    "shareMobile": {
+      "viewportWidth": 390,
+      "viewportHeight": 723,
+      "pageHeight": 723,
+      "pageWidth": 390,
+      "horizontalOverflow": 0,
+      "handoffDisplay": "grid",
+      "handoffText": "문서 사람 검토0/12 · 브라우저 저장 · 승인 아님Hermes 지식 후보별도 검토 · 문서 승인 아님공유·전송첫 전송 전",
+      "statusRailDisplay": "none",
+      "statusRailText": "전송 상태발송 상태 확인 중대상3명 선택채널메일, 문자언어관리자용 한국어문서 검토0/12 · 승인 아님Hermes 후보별도 검토 · 문서 승인 아님전송 이력편집 후 재검수 필요실행 경계발송 채널 상태를 확인하고 있습니다.현재 전송본은 미리보기로만 확인할 수 있습니다.",
+      "statusRailRect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "previewRect": {
+        "x": 36,
+        "y": 467.25,
+        "width": 318,
+        "height": 192,
+        "top": 467.25,
+        "right": 354,
+        "bottom": 659.25,
+        "left": 36
+      },
+      "primaryRect": {
+        "x": 45,
+        "y": 674.25,
+        "width": 300,
+        "height": 44,
+        "top": 674.25,
+        "right": 345,
+        "bottom": 718.25,
+        "left": 45
+      }
+    }
+  },
+  "mutationBoundary": {
+    "templateAskExecuted": true,
+    "templateAskProviderCalled": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "hermesHumanCandidateReviewCompleted": false
+  }
+}

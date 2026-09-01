@@ -2,9 +2,9 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_REVIEW_PROPAGATION_HANDOFF_LIVE_PENDING`
+`PASS_LIVE_PRODUCTION_REVIEW_PROPAGATION_HANDOFF`
 
-Product source `4bfcf5163d56e7a7c6f94df331718d2a528a2364` separates three states that were previously easy to conflate:
+Semantic source `4bfcf5163d56e7a7c6f94df331718d2a528a2364` separates three states that were previously easy to conflate. Production commit `7af241265a21fec02f79830ec8e598c287735db0` contains that change and the bounded short-viewport geometry fix:
 
 - **Document human review** is a generation-fingerprint-scoped browser-local receipt. It is not server-recorded approval.
 - **Hermes knowledge candidate review** is a separate knowledge-governance action and is explicitly not document approval.
@@ -19,7 +19,7 @@ The selected 1440x723 Day receipt remains a bounded three-zone workbench:
 - page height `723 / 723`
 - primary action bottom `389`
 - preview bottom `571`
-- status rail bottom `720`
+- status rail bottom `703`
 - configuration card bottoms `535 / 705 / 535`
 - horizontal overflow `0`
 
@@ -28,9 +28,8 @@ The status rail visibly separates `문서 검토`, `Hermes 후보`, `전송 이�
 The selected 390x723 Day receipt remains a mobile cockpit:
 
 - page height `723 / 723`
-- preview bottom `577.25`
-- primary action bottom `636.25`
-- configuration toggle bottom `695.25`
+- preview bottom `659.25`
+- primary action bottom `718.25`
 - desktop status rail hidden
 - horizontal overflow `0`
 
@@ -41,6 +40,7 @@ The selected 390x723 Day receipt remains a mobile cockpit:
 - Semantic and storage contract: `21 / 21` PASS, `0.863s`
 - Strict TypeScript: PASS
 - Next.js `15.5.22` build: PASS, `29 / 29` static pages
+- Live production geometry and semantic probe: `10 / 10` checks PASS
 
 ## Boundaries
 
@@ -51,4 +51,4 @@ The selected 390x723 Day receipt remains a mobile cockpit:
 - No KOSHA registry mutation
 - Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`
 - Hermes human candidate review remains incomplete
-- Live after-deployment verification is still required
+- Live after-deployment verification completed against production `7af241265a21fec02f79830ec8e598c287735db0`
