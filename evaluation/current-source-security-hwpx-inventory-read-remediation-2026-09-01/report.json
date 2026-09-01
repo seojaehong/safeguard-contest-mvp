@@ -1,0 +1,77 @@
+{
+  "schema": "safeclaw-current-source-security-remediation/v1",
+  "generatedAt": "2026-09-01T14:35:00+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_HWPX_INVENTORY_BOUNDED_READ_LIVE_PENDING_RESCAN_REQUIRED",
+  "findingId": "resource-exhaustion.hwpx-inventory-read",
+  "productCommit": "d99c7dd4",
+  "scanBaseline": {
+    "scanId": "392a4135-abb0-412d-9128-0c836c94a5ca",
+    "sourceHead": "c9b67280a64995b3cd26f243f404623de21a489a",
+    "immutableFindingCount": 16,
+    "findingReclassified": false
+  },
+  "remediation": {
+    "governedPath": "scripts/hwpx_template_inventory.mjs",
+    "wholeFileReadRemoved": true,
+    "sameOpenFileHandleForStatAndReads": true,
+    "maxInputBytes": 134217728,
+    "maxEocdSearchBytes": 65557,
+    "maxCentralDirectoryBytes": 1048576,
+    "maxEntryCount": 64,
+    "maxEntryNameBytes": 4096,
+    "zip64Rejected": true,
+    "multiDiskRejected": true,
+    "truncatedOrCountMismatchedDirectoryRejected": true,
+    "malformedCandidateReportedWithoutStoppingRemainingInventory": true
+  },
+  "verification": {
+    "focusedAndAdjacent": {
+      "command": "npm.cmd exec -- vitest run tests\\hwpx-template-inventory.test.ts tests\\anonymize-hwpx-templates.test.ts tests\\document-export-localization.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 3,
+      "testsPassed": 25,
+      "testsFailed": 0
+    },
+    "pythonArchiveSafety": {
+      "command": "python scripts/tests/test_archive_safety.py",
+      "testsPassed": 5,
+      "testsFailed": 0
+    },
+    "nodeSyntaxCheck": "PASS",
+    "strictTypecheck": "PASS",
+    "productionBuild": {
+      "status": "PASS",
+      "staticPagesGenerated": 29
+    },
+    "realDefaultRootCompatibility": {
+      "status": "PASS",
+      "candidateBytes": 16402848,
+      "entryCount": 27,
+      "wholeFileMaterialized": false
+    },
+    "originalWholeFileReadPatternPresent": false,
+    "gitDiffCheck": "PASS"
+  },
+  "review": {
+    "independentInvestigationCompleted": true,
+    "bypassAndRegressionReviewCompleted": true,
+    "reviewerFindingCount": 1,
+    "reviewerFinding": "The initial 8 MiB cap rejected a valid default-root HWPX.",
+    "reviewerFindingResolved": true,
+    "finalInputByteBudget": 134217728
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentRequired": true,
+    "freshSecurityRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "databaseAndAtomicityFindings": "APPROVAL_GATED"
+  }
+}
