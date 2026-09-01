@@ -1,0 +1,87 @@
+{
+  "schema": "safeclaw-current-source-security-remediation/v1",
+  "generatedAt": "2026-09-01T15:23:11+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_RELEASE_SUBPROCESS_BUDGET_LIVE_PENDING_RESCAN_REQUIRED",
+  "findingId": "resource-exhaustion.release-subprocess-timeout",
+  "productCommit": "665761dbe7d22ece85a7d86d063d5d1244ce98f7",
+  "scanBaseline": {
+    "artifactPath": "evaluation/current-head-standard-security-scan-2026-09-01-c9b67280-complete",
+    "sourceHead": "c9b67280a64995b3cd26f243f404623de21a489a",
+    "sealedFindingCount": 16,
+    "originalEighteenFindingBaselinePreserved": true,
+    "findingReclassified": false
+  },
+  "remediation": {
+    "governedPaths": [
+      "scripts/final_release_closeout.mjs",
+      "scripts/publish_reports_wave1_evidence.mjs",
+      "scripts/reports_wave1_publish_support.mjs",
+      "scripts/operator_smoke_resource_budget.mjs"
+    ],
+    "releaseStepTimeoutMs": 600000,
+    "releaseStepMaxBufferBytes": 20971520,
+    "publicationStepTimeoutMs": 600000,
+    "publicationStepMaxBufferBytes": 20971520,
+    "gitIdentityTimeoutMs": 30000,
+    "gitIdentityMaxBufferBytes": 8388608,
+    "windowsDescendantEnumeration": "WMIC_PARENT_PROCESS_SNAPSHOT",
+    "windowsRootKilledBeforeSecondSnapshot": true,
+    "windowsDescendantsKilledLeafFirst": true,
+    "windowsTaskkillTreeFallback": true,
+    "nonWindowsDetachedProcessGroupKill": true,
+    "timeoutTreeCleanup": true,
+    "outputCeilingTreeCleanup": true,
+    "exitedParentPipeDrainCleanup": true,
+    "publicationLiveStdoutPreserved": true,
+    "publicationLiveStderrPreserved": true,
+    "budgetErrorsFailClosedIndependentOfExitStatus": true
+  },
+  "verification": {
+    "focusedAndAdjacent": {
+      "command": "npm.cmd exec -- vitest run tests/operator-smoke-resource-budget.test.ts tests/reports-wave1-publish-support.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 2,
+      "testsPassed": 23,
+      "testsFailed": 0
+    },
+    "windowsProcessTreeCases": [
+      "deadline_with_late_spawned_grandchild",
+      "output_ceiling_with_live_parent",
+      "output_ceiling_after_parent_exit_during_pipe_drain"
+    ],
+    "nodeSyntaxChecks": 4,
+    "strictTypecheck": "PASS",
+    "productionBuild": {
+      "status": "PASS",
+      "staticPagesGenerated": 29
+    },
+    "gitDiffCheck": "PASS"
+  },
+  "review": {
+    "independentInvestigationCompleted": true,
+    "bypassAndRegressionReviewCompleted": true,
+    "reviewerFindingCount": 5,
+    "reviewerFindingsResolved": 5,
+    "unresolvedReviewerFindings": 0,
+    "finalReviewerVerdict": "CLEAN"
+  },
+  "executionBoundary": {
+    "releaseCloseoutExecuted": false,
+    "reportsPublicationExecuted": false,
+    "reason": "The source-level subprocess invariant and isolated child-tree behavior were verified without invoking release or publication workflows."
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentRequired": true,
+    "freshSecurityRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "approvalGatedFindingsOverclaimed": false
+  }
+}
