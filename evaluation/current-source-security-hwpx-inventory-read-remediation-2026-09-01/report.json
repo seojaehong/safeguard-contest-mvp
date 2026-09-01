@@ -1,9 +1,17 @@
 {
   "schema": "safeclaw-current-source-security-remediation/v1",
-  "generatedAt": "2026-09-01T14:35:00+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_HWPX_INVENTORY_BOUNDED_READ_LIVE_PENDING_RESCAN_REQUIRED",
+  "generatedAt": "2026-09-01T14:38:53+09:00",
+  "verdict": "PASS_LIVE_DEPLOYED_HWPX_INVENTORY_BOUNDED_READ_RESCAN_REQUIRED",
   "findingId": "resource-exhaustion.hwpx-inventory-read",
   "productCommit": "d99c7dd4",
+  "evidenceCommit": "2451fe2188ea93ee7606f2eb1d85d78e684996a0",
+  "productionBuild": {
+    "commitSha": "2451fe2188ea93ee7606f2eb1d85d78e684996a0",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-2h0c9s0vt-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true
+  },
   "scanBaseline": {
     "scanId": "392a4135-abb0-412d-9128-0c836c94a5ca",
     "sourceHead": "c9b67280a64995b3cd26f243f404623de21a489a",
@@ -69,7 +77,7 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "remainingBoundaries": {
-    "liveAfterDeploymentRequired": true,
+    "liveAfterDeploymentRequired": false,
     "freshSecurityRescanRequired": true,
     "securityCompleteClaimAllowed": false,
     "databaseAndAtomicityFindings": "APPROVAL_GATED"
