@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "safeclaw-security-remediation-evidence/v1",
+  "generatedAt": "2026-09-01T07:47:02.9000956Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PDF_PARSER_ISOLATED_LIVE_PENDING_RESCAN_REQUIRED",
+  "sourceHead": "6ca006a6f98a5711681767bdc01754ff7c9285e7",
+  "originMaster": "6ca006a6f98a5711681767bdc01754ff7c9285e7",
+  "productionBuild": {
+    "commitSha": "ef9026a1fa8d7f80e98eabcf24a6021f7e3a067c",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-108268ylw-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": false,
+    "liveAfterDeploymentPending": true
+  },
+  "findingBoundary": {
+    "ruleId": "resource-exhaustion.pdf-parser-deadline",
+    "originalTargetRevision": "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
+    "immutableOriginalFindingBaselineCount": 18,
+    "baselineModified": false,
+    "findingReclassified": false,
+    "freshStandardRepositoryRescanRequired": true
+  },
+  "remediation": {
+    "disposableWorker": "scripts/pdf_parser_worker.py",
+    "parentPypdfImports": 0,
+    "boundedSurfaces": [
+      "PDF input bytes",
+      "PDF identity hashing",
+      "PdfReader construction",
+      "total page enumeration",
+      "page text extraction",
+      "recursive image traversal",
+      "worker output protocol"
+    ],
+    "limits": {
+      "wallClockSecondsDefault": 30,
+      "workerMemoryBytesDefault": 536870912,
+      "workerOutputBytesDefault": 33554432,
+      "stderrBytes": 65536,
+      "terminationWaitSecondsPerAttempt": 1,
+      "pageAndTextLimits": "caller-specific fail-closed limits"
+    },
+    "platformControls": {
+      "windows": "Job Object process-memory limit and kill-on-close installed before PDF bytes are written",
+      "posix": "new process group plus RLIMIT_AS before stdin PDF bytes are read",
+      "trustedBootstrapBoundary": "OS process creation and bounded parent protocol decoding remain trusted platform operations outside attacker PDF parser execution"
+    },
+    "immutableSnapshotAndProvenance": {
+      "pathSentToParserChild": false,
+      "bytesSentOverStdin": true,
+      "hashComputedInDisposableWorker": true,
+      "admittedDigestMismatchRejected": true,
+      "koshaSourceIdentityRevalidatedBeforeCurrentPublication": true
+    },
+    "migratedSinks": [
+      "scripts/snapshot_kosha_guide_corpus.py",
+      "scripts/scan_industrial_safety_templates.py",
+      "scripts/ingest_safety_reference_catalog.py",
+      "scripts/prepare_supabase_safety_ingestion.py",
+      "scripts/parse_download_safety_forms.py"
+    ]
+  },
+  "verification": {
+    "pythonSyntax": "PASS",
+    "focusedAndAdjacentPythonTests": {
+      "status": "PASS",
+      "files": 5,
+      "tests": 98,
+      "elapsedSeconds": 161.247,
+      "resourceWarningsTreatedAsErrors": true
+    },
+    "strictTypecheck": "PASS",
+    "nextProductionBuild": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 29
+    },
+    "gitDiffCheck": "PASS",
+    "targetedSecretScan": "PASS",
+    "independentReview": {
+      "status": "PASS_NO_REMAINING_BLOCKER",
+      "cycles": 4,
+      "resolvedFindings": [
+        "parser deadline accounting and bounded teardown",
+        "admitted digest versus parsed snapshot TOCTOU",
+        "in-process pypdf version import",
+        "parent-process PDF identity hashing",
+        "KOSHA source replacement before current publication"
+      ]
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedBoundariesOverclaimed": false,
+    "fullRepositoryRescan": "REQUIRED_AFTER_LIVE_ALIGNMENT"
+  }
+}
