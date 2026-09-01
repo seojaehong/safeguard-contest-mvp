@@ -1,16 +1,16 @@
 {
   "schemaVersion": "safeclaw-security-remediation-evidence/v1",
-  "generatedAt": "2026-09-01T07:47:02.9000956Z",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PDF_PARSER_ISOLATED_LIVE_PENDING_RESCAN_REQUIRED",
+  "generatedAt": "2026-09-01T07:48:35.2601647Z",
+  "verdict": "PASS_LIVE_DEPLOYED_PDF_PARSER_ISOLATED_RESCAN_REQUIRED",
   "sourceHead": "6ca006a6f98a5711681767bdc01754ff7c9285e7",
   "originMaster": "6ca006a6f98a5711681767bdc01754ff7c9285e7",
   "productionBuild": {
-    "commitSha": "ef9026a1fa8d7f80e98eabcf24a6021f7e3a067c",
+    "commitSha": "6ca006a6f98a5711681767bdc01754ff7c9285e7",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-108268ylw-seojaehongs-projects.vercel.app",
-    "sourceHeadMatchesProduction": false,
-    "liveAfterDeploymentPending": true
+    "deploymentUrl": "safeguard-contest-mxyyalnjb-seojaehongs-projects.vercel.app",
+    "sourceHeadMatchesProduction": true,
+    "liveAfterDeploymentPending": false
   },
   "findingBoundary": {
     "ruleId": "resource-exhaustion.pdf-parser-deadline",
@@ -100,6 +100,6 @@
   "remainingBoundaries": {
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedBoundariesOverclaimed": false,
-    "fullRepositoryRescan": "REQUIRED_AFTER_LIVE_ALIGNMENT"
+    "fullRepositoryRescan": "REQUIRED_ON_LIVE_ALIGNED_SOURCE"
   }
 }
