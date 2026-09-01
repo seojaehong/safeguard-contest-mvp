@@ -1,16 +1,16 @@
 {
   "schema": "safeclaw-current-source-security-remediation/v1",
-  "generatedAt": "2026-09-01T15:47:00+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_XLSX_MATERIALIZATION_ISOLATED_LIVE_PENDING_RESCAN_REQUIRED",
+  "generatedAt": "2026-09-01T15:50:00+09:00",
+  "verdict": "PASS_LIVE_DEPLOYED_XLSX_MATERIALIZATION_ISOLATED_RESCAN_REQUIRED",
   "findingId": "resource-exhaustion.xlsx-materialization",
   "productCommit": "dbc65fb49cef5f3d196a58ba01faac932683d599",
-  "evidenceCommit": null,
+  "evidenceCommit": "756e026f9f0dd137534499909fca1ae8bea252a6",
   "productionBuild": {
-    "commitSha": "9e028153f926a931a85c3a3a71736a03c720434f",
+    "commitSha": "dbc65fb49cef5f3d196a58ba01faac932683d599",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-1oso5pvjd-seojaehongs-projects.vercel.app",
-    "sourceProductCommitMatchesProduction": false
+    "deploymentUrl": "safeguard-contest-1dkgnhj2v-seojaehongs-projects.vercel.app",
+    "sourceProductCommitMatchesProduction": true
   },
   "scanBaseline": {
     "artifactPath": "evaluation/current-head-standard-security-scan-2026-09-01-c9b67280-complete",
@@ -90,7 +90,7 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "remainingBoundaries": {
-    "liveAfterDeploymentRequired": true,
+    "liveAfterDeploymentRequired": false,
     "freshSecurityRescanRequired": true,
     "securityCompleteClaimAllowed": false,
     "siblingXlsxEntryPointsReclassified": false,
