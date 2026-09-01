@@ -1,0 +1,75 @@
+{
+  "schema": "safeclaw-current-source-security-remediation/v1",
+  "generatedAt": "2026-09-01T14:47:33+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_INTEGRITY_AUDIT_HTTP_BUDGET_LIVE_PENDING_RESCAN_REQUIRED",
+  "findingId": "resource-exhaustion.audit-http-buffer",
+  "productCommit": "aae3f467f2ec748fb4ce934909c4985c28e4bb6c",
+  "scanBaseline": {
+    "artifactPath": "evaluation/current-head-standard-security-scan-2026-09-01-c9b67280-complete",
+    "sourceHead": "c9b67280a64995b3cd26f243f404623de21a489a",
+    "sealedFindingCount": 16,
+    "originalEighteenFindingBaselinePreserved": true,
+    "findingReclassified": false
+  },
+  "remediation": {
+    "governedPath": "scripts/final_output_integrity_audit.mjs",
+    "directAskEdgesCovered": 3,
+    "sharedBudgetHelper": "scripts/operator_smoke_resource_budget.mjs#fetchBufferWithBudget",
+    "requestTimeoutMs": 30000,
+    "responseMaxBytes": 8388608,
+    "contentLengthPreflight": true,
+    "streamingByteCeiling": true,
+    "responseBodyCancellation": true,
+    "upstreamAbortPropagation": true,
+    "timeoutCoversBodyRead": true,
+    "rawResponseTextReadRemoved": true,
+    "utf8BomCompatibilityPreserved": true,
+    "existingErrorPropagationPreserved": true
+  },
+  "verification": {
+    "focusedAndAdjacent": {
+      "command": "npm.cmd exec -- vitest run tests/operator-smoke-resource-budget.test.ts tests/final-output-parser-safety.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 2,
+      "testsPassed": 10,
+      "testsFailed": 0
+    },
+    "nodeSyntaxCheck": "PASS",
+    "strictTypecheck": "PASS",
+    "productionBuild": {
+      "status": "PASS",
+      "staticPagesGenerated": 29
+    },
+    "gitDiffCheck": "PASS"
+  },
+  "review": {
+    "independentInvestigationCompleted": true,
+    "bypassAndRegressionReviewCompleted": true,
+    "reviewerFindingCount": 3,
+    "reviewerFindings": [
+      "Undeclared oversized response streams were not covered by a regression test.",
+      "The integration assertion checked only for an imported helper name.",
+      "Buffer.toString would not preserve response.text UTF-8 BOM handling."
+    ],
+    "reviewerFindingsResolved": 3,
+    "unresolvedReviewerFindings": 0
+  },
+  "executionBoundary": {
+    "providerBackedOutputIntegrityAuditExecuted": false,
+    "reason": "The finding is a local operator audit harness resource-control defect; provider-backed generation was not required for the bounded source verification and remains outside the no-provider mutation boundary."
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentRequired": true,
+    "freshSecurityRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "approvalGatedFindingsOverclaimed": false
+  }
+}
