@@ -344,6 +344,37 @@ type RollupReport = {
     authorityOrder: string[];
     exactSavedShareVerdict: string;
   };
+  hermesCandidateBodyHazardCoverage: {
+    verdict: string;
+    canonicalHazardCount: number | null;
+    allMatchedHazardsMustAppearInCandidateBody: boolean;
+    metadataTraceAloneCanSatisfyBodyCoverage: boolean;
+    unknownHazardIdsFailClosed: boolean;
+    approvalRequiresCanonicalTraceAndBodyCoverage: boolean;
+    localCaseCount: number | null;
+    localPassed: number | null;
+    localFailed: number | null;
+    matchedHazardCount: number | null;
+    bodyGroundedHazardCount: number | null;
+    bodyHazardCoverageCompleteCount: number | null;
+    multiHazardCaseId: string;
+    multiHazardMatched: number | null;
+    multiHazardGrounded: number | null;
+    multiHazardPassed: boolean;
+    liveCaseCount: number | null;
+    livePassed: number | null;
+    liveFailed: number | null;
+    liveHttpStatus: number | null;
+    liveBlockerCode: string;
+    generationReached: boolean;
+    providerCallPerformed: boolean;
+    dbMutationPerformed: boolean;
+    humanReviewCompleted: boolean;
+    exactSavedShareVerdict: string;
+    llmWikiPublication: string;
+    supabaseRlsLaunchIsolation: string;
+    distributedAdmissionActivation: string;
+  };
   tenantAuthorizationRemediation: {
     verdict: string;
     greenFindings: number | null;
@@ -2423,6 +2454,58 @@ function createFixtureRoot(): { root: string; head: string } {
     mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, ontologyPublicationPerformed: false, vectorOrEmbeddingMutationPerformed: false, koshaRegistryMutationPerformed: false },
     remainingBoundaries: { actualProductionCandidateQueueRead: false, enhancedLlmRuntime: "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION", exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublication: "APPROVAL_GATED", supabaseRlsLaunchIsolation: "APPROVAL_GATED" },
   });
+  writeJson(root, "evaluation/hermes-candidate-body-hazard-coverage-2026-09-01/report.json", {
+    verdict: "PASS_CURRENT_SOURCE_LOCAL_HERMES_CANDIDATE_BODY_HAZARD_COVERAGE_LIVE_BLOCKED_DISTRIBUTED_ADMISSION",
+    productCommit: "TO_FILL",
+    contract: {
+      canonicalHazardCount: 8,
+      allMatchedHazardsMustAppearInCandidateBody: true,
+      metadataTraceAloneCanSatisfyBodyCoverage: false,
+      unknownHazardIdsFailClosed: true,
+      approvalRequiresCanonicalTraceAndBodyCoverage: true,
+    },
+    afterLocal: {
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+      caseCount: 5,
+      passedCount: 5,
+      failedCount: 0,
+      matchedHazardCount: 6,
+      bodyGroundedHazardCount: 6,
+      bodyHazardCoverageCompleteCount: 5,
+      multiHazardCase: { id: "fall-foreign-worker", matchedHazardCount: 2, bodyGroundedHazardCount: 2, passed: true },
+    },
+    afterLive: {
+      verdict: "RED_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+      sourceHead: "TO_FILL",
+      productionCommit: "TO_FILL",
+      sourceProductionAligned: true,
+      caseCount: 5,
+      passedCount: 0,
+      failedCount: 5,
+      httpStatus: 503,
+      blockerCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      generationReached: false,
+      providerCallPerformed: false,
+      dbMutationPerformed: false,
+    },
+    liveRuntimeValidationBlocked: true,
+    humanReviewCompleted: false,
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      wikiPublicationPerformed: false,
+      embeddingOrVectorMutationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      productionAfterDeployment: "SOURCE_ALIGNED_RUNTIME_BLOCKED_DISTRIBUTED_ADMISSION",
+      distributedAdmissionActivation: "APPROVAL_GATED",
+    },
+  });
   writeJson(root, "evaluation/follow-up-full-repository-security-scan-2026-08-02/report.json", {
     verdict: "COMPLETED_FOLLOWUP_REPOSITORY_SECURITY_SCAN_OPEN_FINDINGS_AND_DEFERRED_REVIEW",
     sourceHead: "TO_FILL",
@@ -3354,6 +3437,7 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/llm-wiki-candidate-readiness-2026-08-25/report.json",
     "evaluation/llm-wiki-candidate-content-matrix-2026-08-25/report.json",
     "evaluation/llm-wiki-sif-evidence-matrix-2026-08-26/report.json",
+    "evaluation/hermes-candidate-body-hazard-coverage-2026-09-01/report.json",
     "evaluation/tenant-authorization-boundary-preflight-2026-07-29/report.json",
     "evaluation/spreadsheet-formula-neutralization-2026-08-01/report.json",
     "evaluation/public-provider-work-budget-2026-08-01/report.json",
@@ -3780,6 +3864,38 @@ describe("northstar live rollup", () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.evidence.find((item) => item.id === "llm_wiki_sif_evidence_matrix")?.productionStatus).toBe("ancestor_of_head");
+    expect(report.hermesCandidateBodyHazardCoverage).toMatchObject({
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_HERMES_CANDIDATE_BODY_HAZARD_COVERAGE_LIVE_BLOCKED_DISTRIBUTED_ADMISSION",
+      canonicalHazardCount: 8,
+      allMatchedHazardsMustAppearInCandidateBody: true,
+      metadataTraceAloneCanSatisfyBodyCoverage: false,
+      unknownHazardIdsFailClosed: true,
+      approvalRequiresCanonicalTraceAndBodyCoverage: true,
+      localCaseCount: 5,
+      localPassed: 5,
+      localFailed: 0,
+      matchedHazardCount: 6,
+      bodyGroundedHazardCount: 6,
+      bodyHazardCoverageCompleteCount: 5,
+      multiHazardCaseId: "fall-foreign-worker",
+      multiHazardMatched: 2,
+      multiHazardGrounded: 2,
+      multiHazardPassed: true,
+      liveCaseCount: 5,
+      livePassed: 0,
+      liveFailed: 5,
+      liveHttpStatus: 503,
+      liveBlockerCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      generationReached: false,
+      providerCallPerformed: false,
+      dbMutationPerformed: false,
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      distributedAdmissionActivation: "APPROVAL_GATED",
+    });
+    expect(report.evidence.find((item) => item.id === "hermes_candidate_body_hazard_coverage")?.productionStatus).toBe("ancestor_of_head");
     expect(report.tenantAuthorizationRemediation).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
       greenFindings: 2,

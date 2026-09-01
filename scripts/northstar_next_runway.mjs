@@ -44,6 +44,7 @@ const ARTIFACTS = Object.freeze({
   llmWikiCandidateContentReadiness: path.join("evaluation", "llm-wiki-candidate-readiness-2026-08-25", "report.json"),
   llmWikiCandidateContentMatrix: path.join("evaluation", "llm-wiki-candidate-content-matrix-2026-08-25", "report.json"),
   llmWikiSifEvidenceMatrix: path.join("evaluation", "llm-wiki-sif-evidence-matrix-2026-08-26", "report.json"),
+  hermesCandidateBodyHazardCoverage: path.join("evaluation", "hermes-candidate-body-hazard-coverage-2026-09-01", "report.json"),
   dependencySecurityRemediation: path.join("evaluation", "dependency-security-remediation-2026-07-28", "report.json"),
   tenantAuthorizationRemediation: path.join("evaluation", "tenant-authorization-boundary-preflight-2026-07-29", "report.json"),
   spreadsheetFormulaNeutralization: path.join("evaluation", "spreadsheet-formula-neutralization-2026-08-01", "report.json"),
@@ -2540,6 +2541,109 @@ function currentSourceApprovalFreeSecurityRemediationSummary(report) {
 }
 
 /** @param {unknown} report */
+function hermesCandidateBodyHazardCoverageSummary(report) {
+  if (!isRecord(report)) return {};
+  const contract = isRecord(report.contract) ? report.contract : {};
+  const afterLocal = isRecord(report.afterLocal) ? report.afterLocal : {};
+  const multiHazardCase = isRecord(afterLocal.multiHazardCase) ? afterLocal.multiHazardCase : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  return {
+    verdict: asString(report.verdict),
+    productCommit: asString(report.productCommit),
+    canonicalHazardCount: typeof contract.canonicalHazardCount === "number" ? contract.canonicalHazardCount : 0,
+    allMatchedHazardsMustAppearInCandidateBody: asBoolean(contract.allMatchedHazardsMustAppearInCandidateBody),
+    metadataTraceAloneCanSatisfyBodyCoverage: asBoolean(contract.metadataTraceAloneCanSatisfyBodyCoverage),
+    unknownHazardIdsFailClosed: asBoolean(contract.unknownHazardIdsFailClosed),
+    approvalRequiresCanonicalTraceAndBodyCoverage: asBoolean(contract.approvalRequiresCanonicalTraceAndBodyCoverage),
+    localVerdict: asString(afterLocal.verdict),
+    localCaseCount: typeof afterLocal.caseCount === "number" ? afterLocal.caseCount : 0,
+    localPassed: typeof afterLocal.passedCount === "number" ? afterLocal.passedCount : 0,
+    localFailed: typeof afterLocal.failedCount === "number" ? afterLocal.failedCount : 0,
+    matchedHazardCount: typeof afterLocal.matchedHazardCount === "number" ? afterLocal.matchedHazardCount : 0,
+    bodyGroundedHazardCount: typeof afterLocal.bodyGroundedHazardCount === "number" ? afterLocal.bodyGroundedHazardCount : 0,
+    bodyHazardCoverageCompleteCount: typeof afterLocal.bodyHazardCoverageCompleteCount === "number" ? afterLocal.bodyHazardCoverageCompleteCount : 0,
+    multiHazardCaseId: asString(multiHazardCase.id),
+    multiHazardMatched: typeof multiHazardCase.matchedHazardCount === "number" ? multiHazardCase.matchedHazardCount : 0,
+    multiHazardGrounded: typeof multiHazardCase.bodyGroundedHazardCount === "number" ? multiHazardCase.bodyGroundedHazardCount : 0,
+    multiHazardPassed: asBoolean(multiHazardCase.passed),
+    liveVerdict: asString(afterLive.verdict),
+    sourceHead: asString(afterLive.sourceHead),
+    productionCommit: asString(afterLive.productionCommit),
+    sourceProductionAligned: asBoolean(afterLive.sourceProductionAligned),
+    liveCaseCount: typeof afterLive.caseCount === "number" ? afterLive.caseCount : 0,
+    livePassed: typeof afterLive.passedCount === "number" ? afterLive.passedCount : 0,
+    liveFailed: typeof afterLive.failedCount === "number" ? afterLive.failedCount : 0,
+    liveHttpStatus: typeof afterLive.httpStatus === "number" ? afterLive.httpStatus : 0,
+    liveBlockerCode: asString(afterLive.blockerCode),
+    generationReached: asBoolean(afterLive.generationReached),
+    providerCallPerformed: asBoolean(afterLive.providerCallPerformed),
+    liveDbMutationPerformed: asBoolean(afterLive.dbMutationPerformed),
+    liveRuntimeValidationBlocked: asBoolean(report.liveRuntimeValidationBlocked),
+    humanReviewCompleted: asBoolean(report.humanReviewCompleted),
+    dbMutationPerformed: asBoolean(mutationBoundary.dbMutationPerformed),
+    providerDispatchCalled: asBoolean(mutationBoundary.providerDispatchCalled),
+    shareSessionCreated: asBoolean(mutationBoundary.shareSessionCreated),
+    wikiPublicationPerformed: asBoolean(mutationBoundary.wikiPublicationPerformed),
+    embeddingOrVectorMutationPerformed: asBoolean(mutationBoundary.embeddingOrVectorMutationPerformed),
+    koshaRegistryMutationPerformed: asBoolean(mutationBoundary.koshaRegistryMutationPerformed),
+    exactSavedShareVerdict: asString(remainingBoundaries.exactSavedShareVerdict),
+    llmWikiPublication: asString(remainingBoundaries.llmWikiPublication),
+    supabaseRlsLaunchIsolation: asString(remainingBoundaries.supabaseRlsLaunchIsolation),
+    productionAfterDeployment: asString(remainingBoundaries.productionAfterDeployment),
+    distributedAdmissionActivation: asString(remainingBoundaries.distributedAdmissionActivation),
+  };
+}
+
+/** @param {ReturnType<typeof hermesCandidateBodyHazardCoverageSummary>} summary */
+function hermesCandidateBodyHazardCoverageNotice(summary) {
+  return summary.verdict === "PASS_CURRENT_SOURCE_LOCAL_HERMES_CANDIDATE_BODY_HAZARD_COVERAGE_LIVE_BLOCKED_DISTRIBUTED_ADMISSION"
+    && /^[0-9a-f]{40}$/u.test(summary.productCommit || "")
+    && summary.canonicalHazardCount === 8
+    && summary.allMatchedHazardsMustAppearInCandidateBody === true
+    && summary.metadataTraceAloneCanSatisfyBodyCoverage === false
+    && summary.unknownHazardIdsFailClosed === true
+    && summary.approvalRequiresCanonicalTraceAndBodyCoverage === true
+    && summary.localVerdict === "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX"
+    && summary.localCaseCount === 5
+    && summary.localPassed === 5
+    && summary.localFailed === 0
+    && summary.matchedHazardCount === 6
+    && summary.bodyGroundedHazardCount === 6
+    && summary.bodyHazardCoverageCompleteCount === 5
+    && summary.multiHazardCaseId === "fall-foreign-worker"
+    && summary.multiHazardMatched === 2
+    && summary.multiHazardGrounded === 2
+    && summary.multiHazardPassed === true
+    && summary.liveVerdict === "RED_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX"
+    && /^[0-9a-f]{40}$/u.test(summary.sourceHead || "")
+    && summary.sourceHead === summary.productionCommit
+    && summary.sourceProductionAligned === true
+    && summary.liveCaseCount === 5
+    && summary.livePassed === 0
+    && summary.liveFailed === 5
+    && summary.liveHttpStatus === 503
+    && summary.liveBlockerCode === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+    && summary.generationReached === false
+    && summary.providerCallPerformed === false
+    && summary.liveDbMutationPerformed === false
+    && summary.liveRuntimeValidationBlocked === true
+    && summary.humanReviewCompleted === false
+    && summary.dbMutationPerformed === false
+    && summary.providerDispatchCalled === false
+    && summary.shareSessionCreated === false
+    && summary.wikiPublicationPerformed === false
+    && summary.embeddingOrVectorMutationPerformed === false
+    && summary.koshaRegistryMutationPerformed === false
+    && summary.exactSavedShareVerdict === "MISSING_EVIDENCE"
+    && summary.llmWikiPublication === "APPROVAL_GATED"
+    && summary.supabaseRlsLaunchIsolation === "APPROVAL_GATED"
+    && summary.productionAfterDeployment === "SOURCE_ALIGNED_RUNTIME_BLOCKED_DISTRIBUTED_ADMISSION"
+    && summary.distributedAdmissionActivation === "APPROVAL_GATED";
+}
+
+/** @param {unknown} report */
 function currentSourcePublicLifetimeRemediationSummary(report) {
   if (!isRecord(report)) return {};
   const scan = isRecord(report.scan) ? report.scan : {};
@@ -3960,6 +4064,8 @@ export function buildNorthstarNextRunway(options) {
   const llmWikiCandidateContentMatrixResult = llmWikiCandidateContentMatrixSummary(llmWikiCandidateContentMatrix);
   const llmWikiSifEvidenceMatrix = readOptionalJson(options.rootDir, ARTIFACTS.llmWikiSifEvidenceMatrix);
   const llmWikiSifEvidenceMatrixResult = llmWikiSifEvidenceMatrixSummary(llmWikiSifEvidenceMatrix);
+  const hermesCandidateBodyHazardCoverage = readOptionalJson(options.rootDir, ARTIFACTS.hermesCandidateBodyHazardCoverage);
+  const hermesCandidateBodyHazardCoverageResult = hermesCandidateBodyHazardCoverageSummary(hermesCandidateBodyHazardCoverage);
   const dependencySecurityRemediation = readOptionalJson(options.rootDir, ARTIFACTS.dependencySecurityRemediation);
   const tenantAuthorizationRemediation = readOptionalJson(options.rootDir, ARTIFACTS.tenantAuthorizationRemediation);
   const spreadsheetFormulaNeutralization = readOptionalJson(options.rootDir, ARTIFACTS.spreadsheetFormulaNeutralization);
@@ -4403,6 +4509,13 @@ export function buildNorthstarNextRunway(options) {
       "rls_llm_wiki_approval_preflight_current_source",
     ],
     noticeState: [
+      ...(hermesCandidateBodyHazardCoverageNotice(hermesCandidateBodyHazardCoverageResult)
+        ? [{
+            gate: "hermes_candidate_body_hazard_coverage",
+            state: "notice",
+            detail: "Hermes candidate body hazard coverage passes current-source local 5/5 with matched hazards 6/6 and multi-hazard 2/2, while source-aligned live remains 0/5 HTTP 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before generation; exact saved Share is MISSING_EVIDENCE and Wiki/RLS/distributed admission remain approval-gated.",
+          }]
+        : []),
       {
         gate: "final_99_gate",
         state: "notice",
@@ -4688,6 +4801,7 @@ export function buildNorthstarNextRunway(options) {
     llmWikiCandidateContentReadiness: llmWikiCandidateContentReadinessResult,
     llmWikiCandidateContentMatrix: llmWikiCandidateContentMatrixResult,
     llmWikiSifEvidenceMatrix: llmWikiSifEvidenceMatrixResult,
+    hermesCandidateBodyHazardCoverage: hermesCandidateBodyHazardCoverageResult,
     dependencySecurityRemediation: dependencySecuritySummary,
     tenantAuthorizationRemediation: tenantAuthorizationSummary,
     spreadsheetFormulaNeutralization: spreadsheetFormulaSummary,
@@ -4883,6 +4997,7 @@ Live-rollup artifact: \`evaluation\\northstar-live-rollup-2026-07-20\\report.jso
 - LLM Wiki candidate content readiness is measured separately: \`${report.llmWikiCandidateContentReadiness.verdict || "missing"}\`; local/live viewport rows \`${report.llmWikiCandidateContentReadiness.localPassed ?? 0}/${report.llmWikiCandidateContentReadiness.localViewportCount ?? 0}\` and \`${report.llmWikiCandidateContentReadiness.livePassed ?? 0}/${report.llmWikiCandidateContentReadiness.liveViewportCount ?? 0}\`, required sections \`${report.llmWikiCandidateContentReadiness.requiredSectionCount ?? 0}\`, ready/revision fixtures \`${report.llmWikiCandidateContentReadiness.readyFixtureCount ?? 0}/${report.llmWikiCandidateContentReadiness.revisionRequiredFixtureCount ?? 0}\`, approval fail-closed \`${report.llmWikiCandidateContentReadiness.approvalFailsClosedForRevision === true}\`, human-readable guidance/count/raw-code exposure \`${report.llmWikiCandidateContentReadiness.revisionGuidanceVisible === true}/${report.llmWikiCandidateContentReadiness.revisionIssueCount ?? 0}/${report.llmWikiCandidateContentReadiness.revisionIssueCodesExposed === true}\`, confirmed approval fail-closed \`${report.llmWikiCandidateContentReadiness.approvalFailsClosedAfterConfirmation === true}\`, and site-only/reject availability \`${report.llmWikiCandidateContentReadiness.keepSiteOnlyAvailableForRevision === true}/${report.llmWikiCandidateContentReadiness.rejectAvailableForRevision === true}\`. Human review remains \`${report.llmWikiCandidateContentReadiness.humanReviewCompleted === true}\`, publication remains \`${report.llmWikiCandidateContentReadiness.publicationState || "unpublished"}\` with publishAllowed=\`${report.llmWikiCandidateContentReadiness.publishAllowed === true}\`; exact saved Share remains \`${report.llmWikiCandidateContentReadiness.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, while Wiki publication and Supabase RLS remain \`${report.llmWikiCandidateContentReadiness.llmWikiPublication || "APPROVAL_GATED"}/${report.llmWikiCandidateContentReadiness.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}\`.
 - Wiki candidate generation content is measured separately from that browser fixture: \`${report.llmWikiCandidateContentMatrix.verdict || "missing"}\`; deterministic fallback local/live scenarios \`${report.llmWikiCandidateContentMatrix.localPassed ?? 0}/5\` and \`${report.llmWikiCandidateContentMatrix.livePassed ?? 0}/5\`. Reviewer-visible evidence traces move \`${report.llmWikiCandidateContentMatrix.beforeVisibleEvidenceTraceCount ?? 0}->${report.llmWikiCandidateContentMatrix.liveVisibleEvidenceTraceCount ?? 0}/5\`; live KOSHA technical/official-source and current-law candidate boundaries are \`${report.llmWikiCandidateContentMatrix.liveTechnicalGuidanceBoundaryCount ?? 0}/5\` and \`${report.llmWikiCandidateContentMatrix.liveLawCandidateBoundaryCount ?? 0}/5\`. Explicit safe event semantics move \`${report.llmWikiCandidateContentMatrix.beforeEventSemanticGroundingCount ?? 0}->${report.llmWikiCandidateContentMatrix.liveEventSemanticGroundingCount ?? 0}/5\` with private exposure \`${report.llmWikiCandidateContentMatrix.livePrivateEventExposureCount ?? 0}\`; arbitrary raw payload accepted=\`${report.llmWikiCandidateContentMatrix.arbitraryRawPayloadAcceptedAsReviewFact === true}\`. The enhanced provider remains \`${report.llmWikiCandidateContentMatrix.providerPassed ?? 0}/5\` with blocker \`${report.llmWikiCandidateContentMatrix.providerRuntimeBlocker || "missing"}\`. This does not read the production candidate queue or claim enhanced LLM quality: queueRead=\`${report.llmWikiCandidateContentMatrix.actualProductionCandidateQueueRead === true}\`, fixtureAcceptedAsGenerationProof=\`${report.llmWikiCandidateContentMatrix.routeFixtureAcceptedAsGenerationProof === true}\`, enhancedLive=\`${report.llmWikiCandidateContentMatrix.enhancedLlmGenerationProvenLive === true}\`, humanReviewCompleted=\`${report.llmWikiCandidateContentMatrix.humanReviewCompleted === true}\`, exact saved Share=\`${report.llmWikiCandidateContentMatrix.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`, Wiki/RLS=\`${report.llmWikiCandidateContentMatrix.llmWikiPublication || "APPROVAL_GATED"}/${report.llmWikiCandidateContentMatrix.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}\`.
 - Reviewer-visible SIF evidence is measured by a separate companion matrix: \`${report.llmWikiSifEvidenceMatrix.verdict || "missing"}\`; local/live \`${report.llmWikiSifEvidenceMatrix.localPassed ?? 0}/5\` and \`${report.llmWikiSifEvidenceMatrix.livePassed ?? 0}/5\`, authority order \`${report.llmWikiSifEvidenceMatrix.authorityOrder?.join(" -> ") || "missing"}\`, live SIF/KOSHA/law boundaries \`${report.llmWikiSifEvidenceMatrix.liveSifEvidenceBoundaryCount ?? 0}/${report.llmWikiSifEvidenceMatrix.liveTechnicalGuidanceBoundaryCount ?? 0}/${report.llmWikiSifEvidenceMatrix.liveLawCandidateBoundaryCount ?? 0}\` of 5, event facts \`${report.llmWikiSifEvidenceMatrix.liveEventSemanticGroundingCount ?? 0}/5\`, and private exposure \`${report.llmWikiSifEvidenceMatrix.livePrivateEventExposureCount ?? 0}\`. This does not read the production candidate queue, complete human review, enable enhanced runtime, publish Wiki content, mutate DB/vector/KOSHA registry state, or close exact saved Share \`${report.llmWikiSifEvidenceMatrix.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
+- Hermes candidate body hazard coverage is measured separately as notice \`${report.hermesCandidateBodyHazardCoverage.verdict || "missing"}\`: local \`${report.hermesCandidateBodyHazardCoverage.localPassed ?? 0}/${report.hermesCandidateBodyHazardCoverage.localCaseCount ?? 0}\`, matched/body-grounded hazards \`${report.hermesCandidateBodyHazardCoverage.matchedHazardCount ?? 0}/${report.hermesCandidateBodyHazardCoverage.bodyGroundedHazardCount ?? 0}\`, multi-hazard \`${report.hermesCandidateBodyHazardCoverage.multiHazardMatched ?? 0}/${report.hermesCandidateBodyHazardCoverage.multiHazardGrounded ?? 0}\`; source-aligned live remains \`${report.hermesCandidateBodyHazardCoverage.livePassed ?? 0}/${report.hermesCandidateBodyHazardCoverage.liveCaseCount ?? 0}\`, HTTP \`${report.hermesCandidateBodyHazardCoverage.liveHttpStatus ?? 0}\`, blocker \`${report.hermesCandidateBodyHazardCoverage.liveBlockerCode || "missing"}\` before generation. This is not live quality proof; exact saved Share remains \`${report.hermesCandidateBodyHazardCoverage.exactSavedShareVerdict || "MISSING_EVIDENCE"}\` and Wiki/RLS/distributed admission remain \`${report.hermesCandidateBodyHazardCoverage.llmWikiPublication || "APPROVAL_GATED"}/${report.hermesCandidateBodyHazardCoverage.supabaseRlsLaunchIsolation || "APPROVAL_GATED"}/${report.hermesCandidateBodyHazardCoverage.distributedAdmissionActivation || "APPROVAL_GATED"}\`.
 - Public generation admission security is measured separately: \`${report.publicGenerationAdmissionSecurity.verdict || "missing"}\`, configuration/readiness/response \`${report.publicGenerationAdmissionSecurity.configurationState || "unknown"}/${report.publicGenerationAdmissionSecurity.readinessMode || "unknown"}/${report.publicGenerationAdmissionSecurity.observedResponseMode || "unknown"}\`, production fail-closed observed=\`${report.publicGenerationAdmissionSecurity.productionFailClosedObserved === true}\`, dependency vulnerabilities \`${report.publicGenerationAdmissionSecurity.vulnerabilityCount ?? "unknown"}\`, distributed activation pending=\`${report.publicGenerationAdmissionSecurity.distributedActivationPending === true}\`, and fresh full-repository scan required=\`${report.publicGenerationAdmissionSecurity.freshRescanRequired === true}\`. The response mode header is not proof of configured multi-instance protection. This notice does not close the immutable scan finding, approval-gated operations, or exact saved Share; exact saved Share remains \`${report.publicGenerationAdmissionSecurity.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Security follow-up remediation is separately proven: \`${report.securityFollowupRemediation.verdict || "missing"}\`, sealed findings \`${report.securityFollowupRemediation.sealedFindingCount ?? "unknown"}\`, focused tests \`${report.securityFollowupRemediation.focusedTests ?? "unknown"}\`, and remaining security work \`${report.securityFollowupRemediation.remainingSecurityWorkCount ?? "unknown"}\`. The immutable original baseline remains \`${report.securityFollowupRemediation.immutableOriginalBaselineFindingCount ?? "unknown"}\` findings with rewritten=\`${report.securityFollowupRemediation.originalBaselineRewritten === true}\`; two deferred candidates and the separate public-admission notice remain visible, no live provider cancellation probe is claimed, and exact saved Share remains \`${report.securityFollowupRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.
 - Fresh security resource remediation is scoped rather than security-complete: \`${report.securityResourceRemediation.verdict || "missing"}\`, remediated \`${report.securityResourceRemediation.remediatedFindingCount ?? "unknown"}/${report.securityResourceRemediation.scanFindingCount ?? "unknown"}\`, remaining \`${report.securityResourceRemediation.remainingScanFindings ?? "unknown"}\`, provider persistence \`${report.securityResourceRemediation.providerDispatchPersistence || "unknown"}\`, exact saved Share \`${report.securityResourceRemediation.exactSavedShareVerdict || "MISSING_EVIDENCE"}\`.

@@ -415,6 +415,37 @@ type NextRunwayReport = {
     authorityOrder: string[];
     exactSavedShareVerdict: string;
   };
+  hermesCandidateBodyHazardCoverage: {
+    verdict: string;
+    canonicalHazardCount: number;
+    allMatchedHazardsMustAppearInCandidateBody: boolean;
+    metadataTraceAloneCanSatisfyBodyCoverage: boolean;
+    unknownHazardIdsFailClosed: boolean;
+    approvalRequiresCanonicalTraceAndBodyCoverage: boolean;
+    localCaseCount: number;
+    localPassed: number;
+    localFailed: number;
+    matchedHazardCount: number;
+    bodyGroundedHazardCount: number;
+    bodyHazardCoverageCompleteCount: number;
+    multiHazardCaseId: string;
+    multiHazardMatched: number;
+    multiHazardGrounded: number;
+    multiHazardPassed: boolean;
+    liveCaseCount: number;
+    livePassed: number;
+    liveFailed: number;
+    liveHttpStatus: number;
+    liveBlockerCode: string;
+    generationReached: boolean;
+    providerCallPerformed: boolean;
+    liveDbMutationPerformed: boolean;
+    humanReviewCompleted: boolean;
+    exactSavedShareVerdict: string;
+    llmWikiPublication: string;
+    supabaseRlsLaunchIsolation: string;
+    distributedAdmissionActivation: string;
+  };
   dependencySecurityRemediation: {
     verdict: string;
     beforeVulnerablePackages: number;
@@ -4381,6 +4412,58 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     mutationBoundary: { dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false, ontologyPublicationPerformed: false, vectorOrEmbeddingMutationPerformed: false, koshaRegistryMutationPerformed: false },
     remainingBoundaries: { actualProductionCandidateQueueRead: false, enhancedLlmRuntime: "BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION", exactSavedShareVerdict: "MISSING_EVIDENCE", llmWikiPublication: "APPROVAL_GATED", supabaseRlsLaunchIsolation: "APPROVAL_GATED" },
   });
+  writeJson(root, "evaluation/hermes-candidate-body-hazard-coverage-2026-09-01/report.json", {
+    verdict: "PASS_CURRENT_SOURCE_LOCAL_HERMES_CANDIDATE_BODY_HAZARD_COVERAGE_LIVE_BLOCKED_DISTRIBUTED_ADMISSION",
+    productCommit: firstHead,
+    contract: {
+      canonicalHazardCount: 8,
+      allMatchedHazardsMustAppearInCandidateBody: true,
+      metadataTraceAloneCanSatisfyBodyCoverage: false,
+      unknownHazardIdsFailClosed: true,
+      approvalRequiresCanonicalTraceAndBodyCoverage: true,
+    },
+    afterLocal: {
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+      caseCount: 5,
+      passedCount: 5,
+      failedCount: 0,
+      matchedHazardCount: 6,
+      bodyGroundedHazardCount: 6,
+      bodyHazardCoverageCompleteCount: 5,
+      multiHazardCase: { id: "fall-foreign-worker", matchedHazardCount: 2, bodyGroundedHazardCount: 2, passed: true },
+    },
+    afterLive: {
+      verdict: "RED_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+      sourceHead: firstHead,
+      productionCommit: firstHead,
+      sourceProductionAligned: true,
+      caseCount: 5,
+      passedCount: 0,
+      failedCount: 5,
+      httpStatus: 503,
+      blockerCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      generationReached: false,
+      providerCallPerformed: false,
+      dbMutationPerformed: false,
+    },
+    liveRuntimeValidationBlocked: true,
+    humanReviewCompleted: false,
+    mutationBoundary: {
+      dbMutationPerformed: false,
+      providerDispatchCalled: false,
+      shareSessionCreated: false,
+      wikiPublicationPerformed: false,
+      embeddingOrVectorMutationPerformed: false,
+      koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      productionAfterDeployment: "SOURCE_ALIGNED_RUNTIME_BLOCKED_DISTRIBUTED_ADMISSION",
+      distributedAdmissionActivation: "APPROVAL_GATED",
+    },
+  });
   const liveRollupPath = path.join(root, "evaluation/northstar-live-rollup-2026-07-20/report.json");
   const liveRollup = fs.readFileSync(liveRollupPath, "utf8").replaceAll("TO_FILL", firstHead);
   fs.writeFileSync(liveRollupPath, liveRollup, "utf8");
@@ -4811,6 +4894,44 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
     });
     expect(report.provenCurrentState).toContain("llm_wiki_sif_evidence_matrix");
     expect(markdown).toContain("Reviewer-visible SIF evidence is measured by a separate companion matrix");
+    expect(report.hermesCandidateBodyHazardCoverage).toMatchObject({
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_HERMES_CANDIDATE_BODY_HAZARD_COVERAGE_LIVE_BLOCKED_DISTRIBUTED_ADMISSION",
+      canonicalHazardCount: 8,
+      allMatchedHazardsMustAppearInCandidateBody: true,
+      metadataTraceAloneCanSatisfyBodyCoverage: false,
+      unknownHazardIdsFailClosed: true,
+      approvalRequiresCanonicalTraceAndBodyCoverage: true,
+      localCaseCount: 5,
+      localPassed: 5,
+      localFailed: 0,
+      matchedHazardCount: 6,
+      bodyGroundedHazardCount: 6,
+      bodyHazardCoverageCompleteCount: 5,
+      multiHazardCaseId: "fall-foreign-worker",
+      multiHazardMatched: 2,
+      multiHazardGrounded: 2,
+      multiHazardPassed: true,
+      liveCaseCount: 5,
+      livePassed: 0,
+      liveFailed: 5,
+      liveHttpStatus: 503,
+      liveBlockerCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      generationReached: false,
+      providerCallPerformed: false,
+      liveDbMutationPerformed: false,
+      humanReviewCompleted: false,
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      distributedAdmissionActivation: "APPROVAL_GATED",
+    });
+    expect(report.noticeState).toContainEqual(expect.objectContaining({
+      gate: "hermes_candidate_body_hazard_coverage",
+      state: "notice",
+      detail: expect.stringContaining("DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"),
+    }));
+    expect(report.provenCurrentState).not.toContain("hermes_candidate_body_hazard_coverage");
+    expect(markdown).toContain("Hermes candidate body hazard coverage is measured separately as notice");
     expect(report.hermesOpenclaw).toMatchObject({
       verdict: "adapter_boundary_pass_live_execution_not_claimed",
       trustedTransportWired: true,
@@ -6640,5 +6761,28 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
 
     expect(report.provenCurrentState).not.toContain("llm_wiki_candidate_content_readiness");
     expect(report.llmWikiCandidateContentReadiness.llmWikiPublication).toBe("PASS");
+  }, 90_000);
+
+  it("fails closed when Hermes live generation is claimed past the distributed admission blocker", async () => {
+    const { buildNorthstarNextRunway } = await loadNextRunwayModule();
+    const { root, secondHead } = createFixtureRoot();
+    const reportPath = path.join(root, "evaluation/hermes-candidate-body-hazard-coverage-2026-09-01/report.json");
+    const evidence = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      afterLive: { generationReached: boolean };
+    };
+    evidence.afterLive.generationReached = true;
+    fs.writeFileSync(reportPath, `${JSON.stringify(evidence, null, 2)}\n`, "utf8");
+    pointLiveRollupAt(root, secondHead);
+
+    const report = buildNorthstarNextRunway({
+      rootDir: root,
+      buildInfo: { commitSha: secondHead },
+    });
+
+    expect(report.hermesCandidateBodyHazardCoverage.generationReached).toBe(true);
+    expect(report.noticeState).not.toContainEqual(expect.objectContaining({
+      gate: "hermes_candidate_body_hazard_coverage",
+    }));
+    expect(report.provenCurrentState).not.toContain("hermes_candidate_body_hazard_coverage");
   }, 90_000);
 });
