@@ -16,6 +16,29 @@ function archive(entries: Array<[string, string]>): Buffer {
 }
 
 describe("HWPX anonymization archive admission", () => {
+  it("requires a non-empty digest-bound cleanup policy", async () => {
+    // @ts-expect-error The operator MJS script intentionally has no declaration file.
+    const { cleanupPolicyDigest, HWPX_CLEANUP_POLICY_SCHEMA, parseCleanupPolicy } = await import("../scripts/anonymize_hwpx_templates.mjs");
+    const companyTokens = ["고객사", "협력업체용"];
+    const policySha256 = cleanupPolicyDigest(companyTokens);
+    expect(parseCleanupPolicy(JSON.stringify({
+      schemaVersion: HWPX_CLEANUP_POLICY_SCHEMA,
+      companyTokens,
+      policySha256
+    }))).toEqual({ companyTokens, policySha256 });
+
+    expect(() => parseCleanupPolicy(JSON.stringify({
+      schemaVersion: HWPX_CLEANUP_POLICY_SCHEMA,
+      companyTokens: [],
+      policySha256
+    }))).toThrow("non-empty companyTokens");
+    expect(() => parseCleanupPolicy(JSON.stringify({
+      schemaVersion: HWPX_CLEANUP_POLICY_SCHEMA,
+      companyTokens,
+      policySha256: "0".repeat(64)
+    }))).toThrow("digest mismatch");
+  });
+
   it("transforms text in-process and preserves the mimetype-first contract", () => {
     const input = archive([
       ["Contents/section0.xml", "<hp:t>일반 작업계획</hp:t>"],
@@ -56,5 +79,11 @@ describe("HWPX anonymization archive admission", () => {
 
     expect(input.length).toBeLessThan(HWPX_ANONYMIZATION_BUDGETS.inputBytes);
     expect(() => anonymizeHwpxArchive(input)).toThrow("entry exceeds the uncompressed byte budget");
+  });
+
+  it("fails closed when a replacement policy leaves a forbidden token behind", () => {
+    const input = archive([["Contents/section0.xml", "<hp:t>고객사 작업계획</hp:t>"]]);
+    expect(() => anonymizeHwpxArchive(input, [["고객사", "고객사"]]))
+      .toThrow("retained a forbidden cleanup token");
   });
 });

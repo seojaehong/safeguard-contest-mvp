@@ -1,10 +1,10 @@
-#!/usr/bin/env node
 // Anonymize HWPX templates by replacing company names with placeholders.
 // Reads templates/hwpx-source/*.hwpx (gitignored), writes templates/hwpx/*.hwpx (committed).
 // HWPX requires `mimetype` first and STORED; the in-process archive transform
 // preserves that contract without materializing archive members on disk.
 
 import fs from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import AdmZip from "adm-zip";
@@ -22,24 +22,64 @@ export const HWPX_ANONYMIZATION_BUDGETS = {
   elapsedMs: 10_000
 };
 
-function loadCleanupTokens() {
+export const HWPX_CLEANUP_POLICY_SCHEMA = "safeclaw-hwpx-cleanup-policy/v1";
+
+function normalizedCleanupTokens(value) {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new Error("HWPX cleanup policy requires a non-empty companyTokens array");
+  }
+  const tokens = value.map((token, index) => {
+    if (typeof token !== "string" || !token.trim()) {
+      throw new Error(`HWPX cleanup policy companyTokens[${index}] must be a non-empty string`);
+    }
+    return token.trim();
+  });
+  if (new Set(tokens).size !== tokens.length) {
+    throw new Error("HWPX cleanup policy companyTokens must be unique");
+  }
+  return tokens;
+}
+
+export function cleanupPolicyDigest(companyTokens) {
+  const tokens = normalizedCleanupTokens(companyTokens);
+  return createHash("sha256").update(JSON.stringify({
+    schemaVersion: HWPX_CLEANUP_POLICY_SCHEMA,
+    companyTokens: tokens
+  }), "utf8").digest("hex");
+}
+
+export function parseCleanupPolicy(raw, source = "cleanup policy") {
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch (error) {
+    throw new Error(
+      `Failed to parse HWPX cleanup policy at ${source}: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error(`HWPX cleanup policy at ${source} must be an object`);
+  }
+  if (data.schemaVersion !== HWPX_CLEANUP_POLICY_SCHEMA) {
+    throw new Error(`HWPX cleanup policy at ${source} has an unsupported schemaVersion`);
+  }
+  const companyTokens = normalizedCleanupTokens(data.companyTokens);
+  const expectedDigest = cleanupPolicyDigest(companyTokens);
+  if (typeof data.policySha256 !== "string" || data.policySha256.toLowerCase() !== expectedDigest) {
+    throw new Error(`HWPX cleanup policy digest mismatch at ${source}`);
+  }
+  return { companyTokens, policySha256: expectedDigest };
+}
+
+export function loadCleanupPolicy() {
   const configPath = path.join(srcDir, ".cleanup-tokens.json");
   if (!fs.existsSync(configPath)) {
-    console.warn(
-      `Cleanup tokens config missing at ${configPath}. `
-      + "Create a JSON file with {\"companyTokens\": [\"<name>\", ...]} for build-time anonymization."
+    throw new Error(
+      `HWPX cleanup policy missing at ${configPath}. `
+      + `Create ${HWPX_CLEANUP_POLICY_SCHEMA} with non-empty companyTokens and policySha256.`
     );
-    return [];
   }
-  try {
-    const data = JSON.parse(fs.readFileSync(configPath, "utf8"));
-    return Array.isArray(data.companyTokens)
-      ? data.companyTokens.filter((value) => typeof value === "string" && value.trim())
-      : [];
-  } catch (error) {
-    console.warn("Failed to parse cleanup tokens config:", error instanceof Error ? error.message : String(error));
-    return [];
-  }
+  return parseCleanupPolicy(fs.readFileSync(configPath, "utf8"), configPath);
 }
 
 function injectCompanyPlaceholder(xmlText) {
@@ -169,6 +209,10 @@ export function anonymizeHwpxArchive(inputBuffer, replacementPairs = []) {
       touchedFiles += 1;
       totalReplacements += replacement.hits;
     }
+    const retainedToken = replacementPairs.find(([from]) => next.includes(from));
+    if (retainedToken) {
+      throw new Error(`HWPX anonymization retained a forbidden cleanup token in ${entry.entryName}`);
+    }
   }
 
   const output = archive.toBuffer();
@@ -201,7 +245,8 @@ export function anonymizeHwpxArchive(inputBuffer, replacementPairs = []) {
 
 export function runAnonymization() {
   fs.mkdirSync(outDir, { recursive: true });
-  const replacementPairs = loadCleanupTokens().map((token) => {
+  const cleanupPolicy = loadCleanupPolicy();
+  const replacementPairs = cleanupPolicy.companyTokens.map((token) => {
     if (token.endsWith("용")) return [token, "__COMPANY__용"];
     return [token, "__COMPANY__"];
   });
@@ -231,6 +276,8 @@ export function runAnonymization() {
 
   fs.writeFileSync(path.join(outDir, "anonymization-report.json"), JSON.stringify({
     generatedAt: new Date().toISOString(),
+    cleanupPolicySchema: HWPX_CLEANUP_POLICY_SCHEMA,
+    cleanupPolicySha256: cleanupPolicy.policySha256,
     replacementRuleCount: replacementPairs.length,
     items: summary
   }, null, 2));
