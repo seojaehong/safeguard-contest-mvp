@@ -2,11 +2,13 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_INTEGRITY_AUDIT_HTTP_BUDGET_LIVE_PENDING_RESCAN_REQUIRED`
+`PASS_LIVE_DEPLOYED_INTEGRITY_AUDIT_HTTP_BUDGET_RESCAN_REQUIRED`
 
 Product commit `aae3f467` routes all three direct parent `/api/ask` calls in `final_output_integrity_audit.mjs` through the existing operator smoke HTTP budget. Each request now has a 30-second deadline and an 8 MiB response ceiling enforced both from declared `Content-Length` and from actual streamed bytes. Over-budget streams are canceled, upstream aborts propagate, and the deadline remains active until the response body is consumed.
 
 The response is decoded with `TextDecoder`, preserving the prior `Response.text()` handling of UTF-8 BOM-prefixed JSON. Existing HTTP-status, empty-body, parse-failure, preview, and fail-fast behavior remains unchanged.
+
+Production `/api/build-info` reports product commit `aae3f467f2ec748fb4ce934909c4985c28e4bb6c` on `master`, so the bounded HTTP path is live deployed. Evidence commit `9c17de6b` is recorded separately and does not change runtime behavior.
 
 ## Verification
 
@@ -26,7 +28,7 @@ The independent reviewer reported three gaps in the first patch: missing undecla
 
 ## Boundaries
 
-- This is current-source evidence. Live deployment and a fresh full security rescan remain required.
+- This is source/live-aligned product evidence. A fresh full security rescan remains required.
 - Neither the sealed 16-finding scan nor the immutable original 18-finding baseline is rewritten or reclassified by this receipt.
 - The provider-backed output integrity audit was not executed; the source-level resource invariant and helper behavior were verified without provider work.
 - No database, provider dispatch, Share-session, embedding/vector, Wiki, or KOSHA registry mutation occurred.

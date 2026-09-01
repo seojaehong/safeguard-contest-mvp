@@ -1,9 +1,17 @@
 {
   "schema": "safeclaw-current-source-security-remediation/v1",
-  "generatedAt": "2026-09-01T14:47:33+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_INTEGRITY_AUDIT_HTTP_BUDGET_LIVE_PENDING_RESCAN_REQUIRED",
+  "generatedAt": "2026-09-01T14:50:02+09:00",
+  "verdict": "PASS_LIVE_DEPLOYED_INTEGRITY_AUDIT_HTTP_BUDGET_RESCAN_REQUIRED",
   "findingId": "resource-exhaustion.audit-http-buffer",
   "productCommit": "aae3f467f2ec748fb4ce934909c4985c28e4bb6c",
+  "evidenceCommit": "9c17de6b163af48ed28574525efed3e70e77e5ac",
+  "productionBuild": {
+    "commitSha": "aae3f467f2ec748fb4ce934909c4985c28e4bb6c",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-a2jh4o5hp-seojaehongs-projects.vercel.app",
+    "sourceProductCommitMatchesProduction": true
+  },
   "scanBaseline": {
     "artifactPath": "evaluation/current-head-standard-security-scan-2026-09-01-c9b67280-complete",
     "sourceHead": "c9b67280a64995b3cd26f243f404623de21a489a",
@@ -67,7 +75,7 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "remainingBoundaries": {
-    "liveAfterDeploymentRequired": true,
+    "liveAfterDeploymentRequired": false,
     "freshSecurityRescanRequired": true,
     "securityCompleteClaimAllowed": false,
     "approvalGatedFindingsOverclaimed": false
