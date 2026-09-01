@@ -60,6 +60,7 @@ const EVIDENCE_PATHS = Object.freeze({
   knowledgeMobileTaskRail: path.join("evaluation", "knowledge-mobile-task-rail-2026-08-27", "report.json"),
   llmWikiCandidateContentReadiness: path.join("evaluation", "llm-wiki-candidate-readiness-2026-08-25", "report.json"),
   llmWikiCandidateContentMatrix: path.join("evaluation", "llm-wiki-candidate-content-matrix-2026-08-25", "report.json"),
+  hermesCandidateBodyHazardCoverage: path.join("evaluation", "hermes-candidate-body-hazard-coverage-2026-09-01", "report.json"),
   llmWikiSifEvidenceMatrix: path.join("evaluation", "llm-wiki-sif-evidence-matrix-2026-08-26", "report.json"),
   dispatchEntryCapabilityTruth: path.join("evaluation", "dispatch-entry-capability-truth-2026-07-28", "report.json"),
   landingHumanReviewBoundary: path.join("evaluation", "landing-human-review-boundary-2026-07-28", "report.json"),
@@ -9496,6 +9497,94 @@ function evaluateCurrentSourceApprovalFreeSecurityRemediationGate(rootDir) {
   });
 }
 
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateHermesCandidateBodyHazardCoverageGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.hermesCandidateBodyHazardCoverage;
+  const report = readJsonFile(rootDir, evidencePath);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "hermes_candidate_body_hazard_coverage",
+      label: "Hermes candidate body hazard coverage",
+      state: "missing",
+      evidencePath,
+      detail: "Hermes candidate-body hazard coverage evidence is missing or invalid.",
+      nextActions: ["Run the five-scenario candidate-body coverage matrix against current source and production."],
+    });
+  }
+
+  const contract = isRecord(report.contract) ? report.contract : {};
+  const afterLocal = isRecord(report.afterLocal) ? report.afterLocal : {};
+  const afterLive = isRecord(report.afterLive) ? report.afterLive : {};
+  const mutationBoundary = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remainingBoundaries = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const localPass = readString(afterLocal.verdict) === "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX"
+    && readNumber(afterLocal.caseCount) === 5
+    && readNumber(afterLocal.passedCount) === 5
+    && readNumber(afterLocal.failedCount) === 0
+    && readNumber(afterLocal.matchedHazardCount) === 6
+    && readNumber(afterLocal.bodyGroundedHazardCount) === 6
+    && readNumber(afterLocal.bodyHazardCoverageCompleteCount) === 5
+    && isRecord(afterLocal.multiHazardCase)
+    && readNumber(afterLocal.multiHazardCase.matchedHazardCount) === 2
+    && readNumber(afterLocal.multiHazardCase.bodyGroundedHazardCount) === 2
+    && afterLocal.multiHazardCase.passed === true;
+  const contractPass = readNumber(contract.canonicalHazardCount) === 8
+    && contract.allMatchedHazardsMustAppearInCandidateBody === true
+    && contract.metadataTraceAloneCanSatisfyBodyCoverage === false
+    && contract.unknownHazardIdsFailClosed === true
+    && contract.approvalRequiresCanonicalTraceAndBodyCoverage === true;
+  const liveAdmissionBlocked = readString(afterLive.verdict) === "RED_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX"
+    && afterLive.sourceProductionAligned === true
+    && readNumber(afterLive.caseCount) === 5
+    && readNumber(afterLive.passedCount) === 0
+    && readNumber(afterLive.failedCount) === 5
+    && readNumber(afterLive.httpStatus) === 503
+    && readString(afterLive.blockerCode) === "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE"
+    && afterLive.generationReached === false
+    && afterLive.providerCallPerformed === false
+    && afterLive.dbMutationPerformed === false;
+  const noMutation = mutationBoundary.dbMutationPerformed === false
+    && mutationBoundary.providerDispatchCalled === false
+    && mutationBoundary.shareSessionCreated === false
+    && mutationBoundary.wikiPublicationPerformed === false
+    && mutationBoundary.embeddingOrVectorMutationPerformed === false
+    && mutationBoundary.koshaRegistryMutationPerformed === false;
+  const boundariesPass = report.humanReviewCompleted === false
+    && readString(remainingBoundaries.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && readString(remainingBoundaries.llmWikiPublication) === "APPROVAL_GATED"
+    && readString(remainingBoundaries.supabaseRlsLaunchIsolation) === "APPROVAL_GATED"
+    && readString(remainingBoundaries.distributedAdmissionActivation) === "APPROVAL_GATED";
+  const expectedNotice = readString(report.verdict) === "PASS_CURRENT_SOURCE_LOCAL_HERMES_CANDIDATE_BODY_HAZARD_COVERAGE_LIVE_BLOCKED_DISTRIBUTED_ADMISSION"
+    && localPass
+    && contractPass
+    && liveAdmissionBlocked
+    && noMutation
+    && boundariesPass;
+
+  if (expectedNotice) {
+    return gateResult({
+      id: "hermes_candidate_body_hazard_coverage",
+      label: "Hermes candidate body hazard coverage",
+      state: "notice",
+      evidencePath,
+      detail: "Current-source local Hermes fallback candidates pass 5/5 cases with all 6/6 matched hazards visible in candidate bodies, including the two-hazard fall/foreign-worker case at 2/2. Metadata trace alone cannot satisfy body coverage, unknown hazards fail closed, and approval requires canonical trace plus complete body coverage. Source-aligned production is still blocked 0/5 with HTTP 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before generation; human review is incomplete, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and distributed admission, Wiki publication, and Supabase RLS remain APPROVAL_GATED.",
+      nextActions: ["After operator approval activates distributed admission, rerun the five-scenario live candidate-body coverage matrix without weakening fail-closed admission."],
+    });
+  }
+
+  return gateResult({
+    id: "hermes_candidate_body_hazard_coverage",
+    label: "Hermes candidate body hazard coverage",
+    state: "contradicted",
+    evidencePath,
+    detail: `Candidate body verdict=${readString(report.verdict) || "unknown"}, local=${readNumber(afterLocal.passedCount)}/5, hazards=${readNumber(afterLocal.bodyGroundedHazardCount)}/${readNumber(afterLocal.matchedHazardCount)}, completeCases=${readNumber(afterLocal.bodyHazardCoverageCompleteCount)}/5, contract=${contractPass}, liveBlocked=${liveAdmissionBlocked}, noMutation=${noMutation}, humanReviewCompleted=${report.humanReviewCompleted === true}, exactShare=${readString(remainingBoundaries.exactSavedShareVerdict) || "missing"}, distributed=${readString(remainingBoundaries.distributedAdmissionActivation) || "missing"}.`,
+    nextActions: ["Restore full local body coverage, the source-aligned live admission boundary, no-mutation behavior, and all approval boundaries."],
+  });
+}
+
 const CURRENT_SOURCE_PUBLIC_LIFETIME_PATHS = [
   "app/api/knowledge/review/prepare/route.ts",
   "app/ontology/page.tsx",
@@ -14904,6 +14993,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateKnowledgeViewportWorkbenchGate(rootDir),
     evaluateLlmWikiCandidateContentReadinessGate(rootDir),
     evaluateLlmWikiCandidateContentMatrixGate(rootDir),
+    evaluateHermesCandidateBodyHazardCoverageGate(rootDir),
     evaluateLlmWikiSifEvidenceMatrixGate(rootDir),
     evaluateDependencySecurityRemediationGate(rootDir),
     evaluateTenantAuthorizationRemediationGate(rootDir),

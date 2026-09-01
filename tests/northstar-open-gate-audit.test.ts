@@ -4718,6 +4718,40 @@ function initializeFixtureRoot(rootDir: string): string {
       supabaseRlsLaunchIsolation: "APPROVAL_GATED",
     },
   });
+  writeJson(rootDir, path.join("evaluation", "hermes-candidate-body-hazard-coverage-2026-09-01", "report.json"), {
+    verdict: "PASS_CURRENT_SOURCE_LOCAL_HERMES_CANDIDATE_BODY_HAZARD_COVERAGE_LIVE_BLOCKED_DISTRIBUTED_ADMISSION",
+    humanReviewCompleted: false,
+    contract: {
+      canonicalHazardCount: 8,
+      allMatchedHazardsMustAppearInCandidateBody: true,
+      metadataTraceAloneCanSatisfyBodyCoverage: false,
+      unknownHazardIdsFailClosed: true,
+      approvalRequiresCanonicalTraceAndBodyCoverage: true,
+    },
+    afterLocal: {
+      verdict: "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+      caseCount: 5, passedCount: 5, failedCount: 0,
+      matchedHazardCount: 6, bodyGroundedHazardCount: 6, bodyHazardCoverageCompleteCount: 5,
+      multiHazardCase: { id: "fall-foreign-worker", matchedHazardCount: 2, bodyGroundedHazardCount: 2, passed: true },
+    },
+    afterLive: {
+      verdict: "RED_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+      sourceProductionAligned: true,
+      caseCount: 5, passedCount: 0, failedCount: 5, httpStatus: 503,
+      blockerCode: "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+      generationReached: false, providerCallPerformed: false, dbMutationPerformed: false,
+    },
+    mutationBoundary: {
+      dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false,
+      wikiPublicationPerformed: false, embeddingOrVectorMutationPerformed: false, koshaRegistryMutationPerformed: false,
+    },
+    remainingBoundaries: {
+      exactSavedShareVerdict: "MISSING_EVIDENCE",
+      llmWikiPublication: "APPROVAL_GATED",
+      supabaseRlsLaunchIsolation: "APPROVAL_GATED",
+      distributedAdmissionActivation: "APPROVAL_GATED",
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "llm-wiki-sif-evidence-matrix-2026-08-26", "report.json"), {
     verdict: "PASS_LIVE_PRODUCTION_SIF_KOSHA_LAW_WIKI_CANDIDATE_EVIDENCE",
     productCommit: "fixture-sha", sourceHead: "fixture-sha", productionCommit: "fixture-sha",
@@ -8691,6 +8725,13 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_matrix")?.detail).toContain("blocked 0/5");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_matrix")?.detail).toContain("event review facts separately move 0/5 to 5/5");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_candidate_content_matrix")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
+    expect(audit.gates.find((gate) => gate.id === "hermes_candidate_body_hazard_coverage")).toMatchObject({
+      state: "notice",
+      evidencePath: path.join("evaluation", "hermes-candidate-body-hazard-coverage-2026-09-01", "report.json"),
+    });
+    expect(audit.gates.find((gate) => gate.id === "hermes_candidate_body_hazard_coverage")?.detail).toContain("6/6 matched hazards");
+    expect(audit.gates.find((gate) => gate.id === "hermes_candidate_body_hazard_coverage")?.detail).toContain("503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE");
+    expect(audit.gates.find((gate) => gate.id === "hermes_candidate_body_hazard_coverage")?.detail).toContain("exact saved Share remains MISSING_EVIDENCE");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_sif_evidence_matrix")).toMatchObject({
       state: "proven",
       evidencePath: path.join("evaluation", "llm-wiki-sif-evidence-matrix-2026-08-26", "report.json"),
