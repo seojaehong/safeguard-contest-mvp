@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildDocumentEditorialReviewSummaryStorageKey,
   buildStoredCurrentWorkpack,
   clearStoredSafeClawUserContent,
   CURRENT_WORKPACK_STORAGE_KEY,
+  parseDocumentEditorialReviewSummary,
   parseStoredCurrentWorkpack
 } from "@/lib/current-workpack";
 import { OPERATION_IMPROVEMENTS_STORAGE_KEY } from "@/lib/operation-improvement-history";
@@ -18,6 +20,7 @@ describe("editor-first draft identity", () => {
       ["safeclaw-workpack:tenant:site:question:fingerprint", "generated document draft"],
       ["safeclaw.documentEditorialReview.v1:fingerprint", "review state"],
       ["safeclaw.documentEditorialReviewReviewer.v1:fingerprint", "reviewer name"],
+      [buildDocumentEditorialReviewSummaryStorageKey("fingerprint"), "review handoff summary"],
       ["safeclaw.moduleTheme", "night"],
       ["safeclaw.aiMode", "enhanced"]
     ]);
@@ -35,12 +38,32 @@ describe("editor-first draft identity", () => {
       OPERATION_IMPROVEMENTS_STORAGE_KEY,
       "safeclaw-workpack:tenant:site:question:fingerprint",
       "safeclaw.documentEditorialReview.v1:fingerprint",
-      "safeclaw.documentEditorialReviewReviewer.v1:fingerprint"
+      "safeclaw.documentEditorialReviewReviewer.v1:fingerprint",
+      buildDocumentEditorialReviewSummaryStorageKey("fingerprint")
     ]));
     expect(values).toEqual(new Map([
       ["safeclaw.moduleTheme", "night"],
       ["safeclaw.aiMode", "enhanced"]
     ]));
+  });
+
+  it("parses only local non-approval document review handoff summaries", () => {
+    const summary = {
+      generationFingerprint: "generation-1",
+      reviewedDocumentCount: 7,
+      totalDocumentCount: 12,
+      updatedAt: "2026-09-01T10:30:00.000+09:00",
+      storageScope: "browser-local",
+      serverRecorded: false,
+      approvalGranted: false
+    };
+
+    expect(parseDocumentEditorialReviewSummary(JSON.stringify(summary), "generation-1"))
+      .toEqual(summary);
+    expect(parseDocumentEditorialReviewSummary(JSON.stringify({ ...summary, approvalGranted: true }), "generation-1"))
+      .toBeNull();
+    expect(parseDocumentEditorialReviewSummary(JSON.stringify(summary), "different-generation"))
+      .toBeNull();
   });
 
   it("reports per-key cleanup failures without skipping later user content", () => {

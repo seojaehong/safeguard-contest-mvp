@@ -1264,6 +1264,7 @@ export function FieldOperationsWorkspace({
       <section className="field-workspace field-workspace-share-only workbench-root">
         <WorkflowSharePanel
           data={workspaceData}
+          generationFingerprint={generationFingerprint}
           recipientSuggestions={recipientSuggestions}
           targetWorkers={targetWorkers}
           authToken={session?.access_token}
@@ -1296,6 +1297,7 @@ export function FieldOperationsWorkspace({
       />
       <WorkflowSharePanel
         data={workspaceData}
+        generationFingerprint={generationFingerprint}
         recipientSuggestions={recipientSuggestions}
         targetWorkers={targetWorkers}
         authToken={session?.access_token}

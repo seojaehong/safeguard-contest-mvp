@@ -177,6 +177,18 @@ describe("workspace share simplification", () => {
     expect(wideDesktopBlock).toContain("max-height: calc(100vh - 160px);");
   });
 
+  it("separates browser document review, Hermes candidate review, and dispatch history", () => {
+    expect(sharePanel).toContain('data-review-propagation-handoff');
+    expect(sharePanel).toContain("문서 사람 검토");
+    expect(sharePanel).toContain("브라우저 저장 · 승인 아님");
+    expect(sharePanel).toContain('href="/documents"');
+    expect(sharePanel).toContain("문서 검토 확인 필요");
+    expect(sharePanel).toContain("Hermes 지식 후보");
+    expect(sharePanel).toContain("별도 검토 · 문서 승인 아님");
+    expect(sharePanel).toContain("<dt>전송 이력</dt>");
+    expect(sharePanel).not.toContain("<dt>검수</dt>");
+  });
+
   it("keeps the localized message heading compact on mobile", () => {
     expect(sharePanel).toContain('return "한국어 메시지 미리보기"');
     expect(sharePanel).toContain('`${formatMessageTargetLabel(data, selectedTarget)} 핵심 안전 안내`');

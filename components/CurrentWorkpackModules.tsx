@@ -12,6 +12,7 @@ import {
   type WorkpackDocumentValues
 } from "@/components/WorkpackEditor";
 import {
+  buildDocumentEditorialReviewSummaryStorageKey,
   buildStoredCurrentWorkpack,
   buildWorkpackGenerationFingerprint,
   CURRENT_WORKPACK_STORAGE_KEY,
@@ -1231,11 +1232,26 @@ function DocumentCockpit({
           type="button"
           className="safeclaw-document-review-launch"
           data-testid="document-editorial-review-launch"
+          aria-label={`문서 사람 검토 ${reviewedDocumentCount}/${launchDocuments.length}, 브라우저 저장, 승인 아님`}
           onClick={onOpenEditorialReview}
         >
           <span>문서 사람 검토</span>
           <strong>{reviewedDocumentCount}/{launchDocuments.length}</strong>
         </button>
+        <dl className="review-propagation-handoff" aria-label="검토와 전파 인계 상태" data-review-propagation-handoff>
+          <div>
+            <dt>문서 사람 검토</dt>
+            <dd>{reviewedDocumentCount}/{launchDocuments.length} · 브라우저 저장</dd>
+          </div>
+          <div>
+            <dt>Hermes 지식 후보</dt>
+            <dd>별도 검토 · 문서 승인 아님</dd>
+          </div>
+          <div>
+            <dt>공유·전송</dt>
+            <dd>전송 화면에서 별도 확인</dd>
+          </div>
+        </dl>
       </section>
 
       <aside className="safeclaw-doc-index">
@@ -1361,11 +1377,28 @@ function DocumentEditorialReviewDialog({
   }, [loadedStorageKey, reviewState, reviewer, reviewerStorageKey, storageKey]);
 
   useEffect(() => {
+    if (typeof window === "undefined" || loadedStorageKey !== storageKey) return;
     const reviewedCount = launchDocuments.filter((document) => (
       editorialReviewIsCurrent(data, document.key, reviewState[document.key], findingsByDocument[document.key])
     )).length;
     onReviewedDocumentCountChange(reviewedCount);
-  }, [data, findingsByDocument, onReviewedDocumentCountChange, reviewState]);
+    try {
+      window.localStorage.setItem(
+        buildDocumentEditorialReviewSummaryStorageKey(generationFingerprint),
+        JSON.stringify({
+          generationFingerprint,
+          reviewedDocumentCount: reviewedCount,
+          totalDocumentCount: launchDocuments.length,
+          updatedAt: new Date().toISOString(),
+          storageScope: "browser-local",
+          serverRecorded: false,
+          approvalGranted: false
+        })
+      );
+    } catch (error) {
+      console.warn("document editorial review summary save failed", error);
+    }
+  }, [data, findingsByDocument, generationFingerprint, loadedStorageKey, onReviewedDocumentCountChange, reviewState, storageKey]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -2234,6 +2267,7 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
         {current.isCurrent ? (
           <WorkflowSharePanel
             data={current.data}
+            generationFingerprint={current.generationFingerprint}
             recipientSuggestions={recipientSuggestions}
             targetWorkers={targetWorkers}
           />

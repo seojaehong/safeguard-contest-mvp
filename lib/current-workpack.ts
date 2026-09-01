@@ -11,6 +11,8 @@ import type {
 } from "@/lib/workspace";
 
 export const CURRENT_WORKPACK_STORAGE_KEY = "safeclaw.currentWorkpack.v1";
+export const DOCUMENT_EDITORIAL_REVIEW_SUMMARY_STORAGE_PREFIX =
+  "safeclaw.documentEditorialReviewSummary.v1:";
 
 const USER_CONTENT_STORAGE_KEYS = [
   CURRENT_WORKPACK_STORAGE_KEY,
@@ -20,7 +22,8 @@ const USER_CONTENT_STORAGE_KEYS = [
 const USER_CONTENT_STORAGE_PREFIXES = [
   "safeclaw-workpack:",
   "safeclaw.documentEditorialReview.v1:",
-  "safeclaw.documentEditorialReviewReviewer.v1:"
+  "safeclaw.documentEditorialReviewReviewer.v1:",
+  DOCUMENT_EDITORIAL_REVIEW_SUMMARY_STORAGE_PREFIX
 ] as const;
 
 type UserContentStorage = Pick<Storage, "key" | "length" | "removeItem">;
@@ -29,6 +32,58 @@ export type UserContentStorageCleanup = {
   removedKeys: string[];
   failedKeys: string[];
 };
+
+export type DocumentEditorialReviewSummary = {
+  generationFingerprint: string;
+  reviewedDocumentCount: number;
+  totalDocumentCount: number;
+  updatedAt: string;
+  storageScope: "browser-local";
+  serverRecorded: false;
+  approvalGranted: false;
+};
+
+export function buildDocumentEditorialReviewSummaryStorageKey(generationFingerprint: string): string {
+  return `${DOCUMENT_EDITORIAL_REVIEW_SUMMARY_STORAGE_PREFIX}${generationFingerprint}`;
+}
+
+export function parseDocumentEditorialReviewSummary(
+  raw: string | null,
+  expectedGenerationFingerprint: string
+): DocumentEditorialReviewSummary | null {
+  if (!raw || !expectedGenerationFingerprint) return null;
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) return null;
+    if (
+      parsed.generationFingerprint !== expectedGenerationFingerprint
+      || typeof parsed.reviewedDocumentCount !== "number"
+      || !Number.isInteger(parsed.reviewedDocumentCount)
+      || typeof parsed.totalDocumentCount !== "number"
+      || !Number.isInteger(parsed.totalDocumentCount)
+      || parsed.totalDocumentCount <= 0
+      || parsed.reviewedDocumentCount < 0
+      || parsed.reviewedDocumentCount > parsed.totalDocumentCount
+      || !isRfc3339OffsetTimestamp(parsed.updatedAt)
+      || parsed.storageScope !== "browser-local"
+      || parsed.serverRecorded !== false
+      || parsed.approvalGranted !== false
+    ) return null;
+
+    return {
+      generationFingerprint: expectedGenerationFingerprint,
+      reviewedDocumentCount: parsed.reviewedDocumentCount,
+      totalDocumentCount: parsed.totalDocumentCount,
+      updatedAt: parsed.updatedAt,
+      storageScope: "browser-local",
+      serverRecorded: false,
+      approvalGranted: false
+    };
+  } catch (error) {
+    console.warn("document editorial review summary parse failed", error);
+    return null;
+  }
+}
 
 export function clearStoredSafeClawUserContent(storage: UserContentStorage): UserContentStorageCleanup {
   const keys = new Set<string>(USER_CONTENT_STORAGE_KEYS);

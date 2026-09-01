@@ -5,6 +5,11 @@ import styles from "@/components/WorkflowSharePanel.module.css";
 import type { AskResponse } from "@/lib/types";
 import type { WorkpackReadiness } from "@/lib/workpack-readiness";
 import {
+  buildDocumentEditorialReviewSummaryStorageKey,
+  parseDocumentEditorialReviewSummary,
+  type DocumentEditorialReviewSummary
+} from "@/lib/current-workpack";
+import {
   type RecipientSuggestion,
   type WorkerDispatchTarget
 } from "@/lib/workspace";
@@ -61,6 +66,7 @@ type SessionRevokeState = {
 };
 type WorkflowSharePanelProps = {
   data: AskResponse;
+  generationFingerprint?: string;
   recipientSuggestions?: RecipientSuggestion[];
   targetWorkers?: WorkerDispatchTarget[];
   authToken?: string;
@@ -541,6 +547,7 @@ function formatMessagePreviewHeading(data: AskResponse, selectedTarget: MessageT
 
 export function WorkflowSharePanel({
   data,
+  generationFingerprint,
   recipientSuggestions = [],
   targetWorkers = [],
   authToken,
@@ -559,6 +566,7 @@ export function WorkflowSharePanel({
   const [providerDispatchState, setProviderDispatchState] = useState<ProviderDispatchUiState>({ status: "checking" });
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [mobileConfigExpanded, setMobileConfigExpanded] = useState(false);
+  const [documentReviewSummary, setDocumentReviewSummary] = useState<DocumentEditorialReviewSummary | null>(null);
   const [sessionRevokeState, setSessionRevokeState] = useState<SessionRevokeState>({
     status: "idle",
     sessionId: null,
@@ -568,6 +576,25 @@ export function WorkflowSharePanel({
   const selectedMessage = useMemo(() => {
     return resolveWorkflowMessagePreview(data, selectedMessageTarget);
   }, [data, selectedMessageTarget]);
+  useEffect(() => {
+    if (typeof window === "undefined" || !generationFingerprint) {
+      setDocumentReviewSummary(null);
+      return;
+    }
+    const storageKey = buildDocumentEditorialReviewSummaryStorageKey(generationFingerprint);
+    const readSummary = () => {
+      setDocumentReviewSummary(parseDocumentEditorialReviewSummary(
+        window.localStorage.getItem(storageKey),
+        generationFingerprint
+      ));
+    };
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === storageKey) readSummary();
+    };
+    readSummary();
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [generationFingerprint]);
   const targetSignature = useMemo(
     () => buildWorkflowShareTargetSignature(targetWorkers),
     [targetWorkers]
@@ -1212,6 +1239,24 @@ export function WorkflowSharePanel({
           <span>{providerDispatchUi.canDispatch ? (shareBlocked ? "보완 필요" : sessionReady ? "공유 가능" : storageReady ? "저장 완료" : "전송 준비") : providerDispatchUi.statusLabel}</span>
           <strong>{providerDispatchUi.canDispatch ? (shareBlocked ? readiness?.summary : isSending ? phaseLabel[phase] : statusModel.dispatch.label) : providerDispatchUi.reasonLabel}</strong>
         </div>
+        <dl className="review-propagation-handoff" aria-label="검토와 전파 인계 상태" data-review-propagation-handoff>
+          <div>
+            <dt>문서 사람 검토</dt>
+            <dd>
+              {documentReviewSummary
+                ? `${documentReviewSummary.reviewedDocumentCount}/${documentReviewSummary.totalDocumentCount} · 브라우저 저장 · 승인 아님`
+                : <a href="/documents">문서 검토 확인 필요</a>}
+            </dd>
+          </div>
+          <div>
+            <dt>Hermes 지식 후보</dt>
+            <dd>별도 검토 · 문서 승인 아님</dd>
+          </div>
+          <div>
+            <dt>공유·전송</dt>
+            <dd>{statusModel.dispatch.label}</dd>
+          </div>
+        </dl>
       </header>
 
       <section className="share-mobile-cockpit-summary" aria-label="모바일 전파 요약" data-share-mobile-summary>
@@ -1426,7 +1471,19 @@ export function WorkflowSharePanel({
             <dd>{selectedLanguageLabel}</dd>
           </div>
           <div>
-            <dt>검수</dt>
+            <dt>문서 검토</dt>
+            <dd>
+              {documentReviewSummary
+                ? `${documentReviewSummary.reviewedDocumentCount}/${documentReviewSummary.totalDocumentCount} · 승인 아님`
+                : <a href="/documents">확인 필요</a>}
+            </dd>
+          </div>
+          <div>
+            <dt>Hermes 후보</dt>
+            <dd>별도 검토 · 문서 승인 아님</dd>
+          </div>
+          <div>
+            <dt>전송 이력</dt>
             <dd>{shareBlocked ? readiness?.summary || "보완 필요" : statusModel.dispatch.label}</dd>
           </div>
         </dl>
