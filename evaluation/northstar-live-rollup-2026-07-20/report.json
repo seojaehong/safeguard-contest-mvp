@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-09-01T02:14:40.878Z",
-  "head": "8e3cbd469666a52f4425c1caeca27f3146781ffb",
+  "generatedAt": "2026-09-01T02:38:14.180Z",
+  "head": "341a10eaf2486ae456ed119692ae95a2212e7dc0",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "8e3cbd469666a52f4425c1caeca27f3146781ffb",
+    "commitSha": "4a6bb3026b7a8c49dc9c82834e04e71c4e811071",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-i16rzcco0-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-33t5ojook-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -1931,6 +1931,45 @@
     "llmWikiPublication": "APPROVAL_GATED",
     "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
   },
+  "hermesCandidateBodyHazardCoverage": {
+    "artifact": "evaluation\\hermes-candidate-body-hazard-coverage-2026-09-01\\report.json",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_CANDIDATE_BODY_HAZARD_COVERAGE_LIVE_BLOCKED_DISTRIBUTED_ADMISSION",
+    "productCommit": "6eca935547c5984701a382376801809625dc7091",
+    "canonicalHazardCount": 8,
+    "allMatchedHazardsMustAppearInCandidateBody": true,
+    "metadataTraceAloneCanSatisfyBodyCoverage": false,
+    "unknownHazardIdsFailClosed": true,
+    "approvalRequiresCanonicalTraceAndBodyCoverage": true,
+    "localVerdict": "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+    "localCaseCount": 5,
+    "localPassed": 5,
+    "localFailed": 0,
+    "matchedHazardCount": 6,
+    "bodyGroundedHazardCount": 6,
+    "bodyHazardCoverageCompleteCount": 5,
+    "multiHazardCaseId": "fall-foreign-worker",
+    "multiHazardMatched": 2,
+    "multiHazardGrounded": 2,
+    "multiHazardPassed": true,
+    "liveVerdict": "RED_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+    "sourceHead": "f070e3f317238d9ed47d4daa765dd81d51aceaf3",
+    "productionCommit": "f070e3f317238d9ed47d4daa765dd81d51aceaf3",
+    "sourceProductionAligned": true,
+    "liveCaseCount": 5,
+    "livePassed": 0,
+    "liveFailed": 5,
+    "liveHttpStatus": 503,
+    "liveBlockerCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "generationReached": false,
+    "providerCallPerformed": false,
+    "dbMutationPerformed": false,
+    "liveRuntimeValidationBlocked": true,
+    "humanReviewCompleted": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "distributedAdmissionActivation": "APPROVAL_GATED"
+  },
   "tenantAuthorizationRemediation": {
     "artifact": "evaluation\\tenant-authorization-boundary-preflight-2026-07-29\\report.json",
     "verdict": "PASS_LIVE_PRODUCTION_TENANT_AUTHORIZATION_REMEDIATED_NO_MUTATION",
@@ -2310,10 +2349,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "8e3cbd469666a52f4425c1caeca27f3146781ffb",
+      "sourceCommit": "341a10eaf2486ae456ed119692ae95a2212e7dc0",
       "sourceStatus": "exact",
-      "productionCommit": "8e3cbd469666a52f4425c1caeca27f3146781ffb",
-      "productionStatus": "matches_live"
+      "productionCommit": "341a10eaf2486ae456ed119692ae95a2212e7dc0",
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
@@ -2497,6 +2536,14 @@
       "sourceCommit": "aa4e27df0a917b42556b04f020753bb04dd4c13a",
       "sourceStatus": "ancestor",
       "productionCommit": "aa4e27df0a917b42556b04f020753bb04dd4c13a",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "hermes_candidate_body_hazard_coverage",
+      "artifact": "evaluation\\hermes-candidate-body-hazard-coverage-2026-09-01\\report.json",
+      "sourceCommit": "f070e3f317238d9ed47d4daa765dd81d51aceaf3",
+      "sourceStatus": "ancestor",
+      "productionCommit": "f070e3f317238d9ed47d4daa765dd81d51aceaf3",
       "productionStatus": "ancestor_of_head"
     },
     {

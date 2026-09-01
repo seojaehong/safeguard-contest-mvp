@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-09-01T02:14:40.878Z
-Source HEAD at generation: 8e3cbd469666a52f4425c1caeca27f3146781ffb
-Live commit at generation: 8e3cbd469666a52f4425c1caeca27f3146781ffb
+Generated at: 2026-09-01T02:38:14.180Z
+Source HEAD at generation: 341a10eaf2486ae456ed119692ae95a2212e7dc0
+Live commit at generation: 4a6bb3026b7a8c49dc9c82834e04e71c4e811071
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -338,6 +338,12 @@ Overall: `northstar_open_approval_gated`
 - Reviewer-visible authority order: sif -> kosha -> law; live SIF/KOSHA/law boundaries 5/5/5 of 5; event facts 5/5; private exposure 0.
 - Boundaries: actual production queue read=false; enhanced runtime=BLOCKED_DISTRIBUTED_RATE_LIMIT_CONFIGURATION; human review complete=false; DB/Wiki mutation=false/false; exact saved Share=MISSING_EVIDENCE; Wiki/RLS=APPROVAL_GATED/APPROVAL_GATED.
 
+## Hermes candidate body hazard coverage
+
+- Verdict: `PASS_CURRENT_SOURCE_LOCAL_HERMES_CANDIDATE_BODY_HAZARD_COVERAGE_LIVE_BLOCKED_DISTRIBUTED_ADMISSION`; local cases 5/5, matched/body-grounded hazards 6/6, complete cases 5/5, multi-hazard 2/2.
+- Live runtime remains a notice, not live quality proof: 0/5, HTTP 503, blocker `DISTRIBUTED_RATE_LIMIT_UNAVAILABLE`, generation/provider/DB reached=false/false/false.
+- Boundaries: human review complete=false; exact saved Share=MISSING_EVIDENCE; Wiki/RLS/distributed admission=APPROVAL_GATED/APPROVAL_GATED/APPROVAL_GATED.
+
 ## Live Hermes Reviewer Authority UI
 
 - Verdict: `PASS_LIVE_PRODUCTION_HERMES_REVIEW_AUTHORITY_UI`
@@ -539,7 +545,7 @@ Overall: `northstar_open_approval_gated`
 
 | Evidence | Source | Production | Artifact |
 | --- | --- | --- | --- |
-| open_gate | exact | matches_live | evaluation\northstar-open-gates-current\report.json |
+| open_gate | exact | ancestor_of_head | evaluation\northstar-open-gates-current\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-22\report.json |
 | final_99_12_document_no_mutation | ancestor | ancestor_of_head | evaluation\final-99-12-document-no-mutation-2026-08-17\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
@@ -563,6 +569,7 @@ Overall: `northstar_open_approval_gated`
 | llm_wiki_candidate_content_readiness | ancestor | ancestor_of_head | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |
 | llm_wiki_candidate_content_matrix | ancestor | ancestor_of_head | evaluation\llm-wiki-candidate-content-matrix-2026-08-25\report.json |
 | llm_wiki_sif_evidence_matrix | ancestor | ancestor_of_head | evaluation\llm-wiki-sif-evidence-matrix-2026-08-26\report.json |
+| hermes_candidate_body_hazard_coverage | ancestor | ancestor_of_head | evaluation\hermes-candidate-body-hazard-coverage-2026-09-01\report.json |
 | tenant_authorization_remediation | ancestor | ancestor_of_head | evaluation\tenant-authorization-boundary-preflight-2026-07-29\report.json |
 | spreadsheet_formula_neutralization | ancestor | ancestor_of_head | evaluation\spreadsheet-formula-neutralization-2026-08-01\report.json |
 | public_provider_work_budget | ancestor | ancestor_of_head | evaluation\public-provider-work-budget-2026-08-01\report.json |
