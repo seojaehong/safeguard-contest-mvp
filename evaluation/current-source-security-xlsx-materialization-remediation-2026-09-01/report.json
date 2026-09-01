@@ -1,0 +1,99 @@
+{
+  "schema": "safeclaw-current-source-security-remediation/v1",
+  "generatedAt": "2026-09-01T15:47:00+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_XLSX_MATERIALIZATION_ISOLATED_LIVE_PENDING_RESCAN_REQUIRED",
+  "findingId": "resource-exhaustion.xlsx-materialization",
+  "productCommit": "dbc65fb49cef5f3d196a58ba01faac932683d599",
+  "evidenceCommit": null,
+  "productionBuild": {
+    "commitSha": "9e028153f926a931a85c3a3a71736a03c720434f",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-1oso5pvjd-seojaehongs-projects.vercel.app",
+    "sourceProductCommitMatchesProduction": false
+  },
+  "scanBaseline": {
+    "artifactPath": "evaluation/current-head-standard-security-scan-2026-09-01-c9b67280-complete",
+    "sourceHead": "c9b67280a64995b3cd26f243f404623de21a489a",
+    "sealedFindingCount": 16,
+    "originalEighteenFindingBaselinePreserved": true,
+    "findingReclassified": false
+  },
+  "remediation": {
+    "governedPaths": [
+      "scripts/final_output_parser_safety.mjs",
+      "tests/final-output-parser-safety.test.ts"
+    ],
+    "inputBytes": 16777216,
+    "archiveEntries": 128,
+    "archiveEntryUncompressedBytes": 8388608,
+    "archiveTotalUncompressedBytes": 33554432,
+    "archiveCompressionRatio": 100,
+    "immutableValidatedByteSnapshot": true,
+    "workerThreadIsolation": true,
+    "workerOldGenerationHeapMb": 256,
+    "workerYoungGenerationHeapMb": 32,
+    "workerStackMb": 4,
+    "externalDeadlineMs": 15000,
+    "workerOutputMaxBytes": 16777216,
+    "parentExecArgvInherited": false,
+    "pathReplacementAfterAdmissionIgnored": true,
+    "callerParseFailedSemanticsPreserved": true
+  },
+  "verification": {
+    "focusedAndAdjacent": {
+      "command": "npm.cmd test -- tests/final-output-parser-safety.test.ts tests/operator-smoke-resource-budget.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 2,
+      "testsPassed": 19,
+      "testsFailed": 0
+    },
+    "securityTriggerCases": [
+      "compact_full_grid_merge_is_contained_in_worker",
+      "external_deadline_terminates_worker",
+      "post_admission_path_replacement_cannot_change_parsed_snapshot"
+    ],
+    "legitimateControlCases": [
+      "korean_text",
+      "merged_cells",
+      "formula_object",
+      "rich_text_object",
+      "multiple_sheets",
+      "existing_cell_budget_error"
+    ],
+    "nodeSyntaxCheck": "PASS",
+    "strictTypecheck": "PASS",
+    "productionBuild": {
+      "status": "PASS",
+      "staticPagesGenerated": 29
+    },
+    "gitDiffCheck": "PASS"
+  },
+  "review": {
+    "independentInvestigationCompleted": true,
+    "bypassAndRegressionReviewCompleted": true,
+    "reviewerFindingCount": 1,
+    "reviewerFindingsResolved": 1,
+    "unresolvedReviewerFindings": 0,
+    "resolvedFinding": "The admitted XLSX is now parsed from the same immutable byte snapshot, removing the validation-to-use path replacement race."
+  },
+  "executionBoundary": {
+    "finalOutputIntegrityAuditExecuted": false,
+    "reason": "The isolated parser invariant was verified without invoking remote ask calls or generating a full output-integrity artifact set."
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentRequired": true,
+    "freshSecurityRescanRequired": true,
+    "securityCompleteClaimAllowed": false,
+    "siblingXlsxEntryPointsReclassified": false,
+    "approvalGatedFindingsOverclaimed": false
+  }
+}
