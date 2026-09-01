@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { Worker, isMainThread, parentPort, workerData } from "node:worker_threads";
 import AdmZip from "adm-zip";
 import ExcelJS from "exceljs";
 
@@ -13,8 +14,14 @@ export const FINAL_OUTPUT_PARSER_LIMITS = {
   cellsPerRow: 256,
   totalCells: 500_000,
   extractedTextCharacters: 2_000_000,
-  elapsedMs: 15_000
+  elapsedMs: 15_000,
+  xlsxWorkerHeapMb: 256
 };
+
+const XLSX_WORKER_MODE = "final-output-xlsx-worker";
+const XLSX_WORKER_MIN_HEAP_MB = 32;
+const XLSX_WORKER_MAX_HEAP_MB = 512;
+const XLSX_WORKER_MAX_OUTPUT_BYTES = 16 * 1024 * 1024;
 
 function checkElapsed(startedAt, limits) {
   if (Date.now() - startedAt > limits.elapsedMs) {
@@ -46,8 +53,12 @@ function assertSafeEntry(entry) {
 }
 
 function inspectArchive(filePath, limits) {
-  assertFinalOutputFileBudget(filePath, limits);
-  const archive = new AdmZip(filePath, { noSort: true });
+  const expectedBytes = assertFinalOutputFileBudget(filePath, limits);
+  const bytes = fs.readFileSync(filePath);
+  if (bytes.length !== expectedBytes || bytes.length > limits.inputBytes) {
+    throw new Error(`final output input changed while reading: ${bytes.length}/${expectedBytes}`);
+  }
+  const archive = new AdmZip(bytes, { noSort: true });
   const entries = archive.getEntries();
   if (entries.length > limits.archiveEntries) {
     throw new Error(`final output archive entries exceed budget: ${entries.length}/${limits.archiveEntries}`);
@@ -71,7 +82,7 @@ function inspectArchive(filePath, limits) {
       throw new Error("final output archive expanded bytes exceed total budget");
     }
   }
-  return { archive, entries };
+  return { archive, entries, bytes };
 }
 
 function appendText(parts, value, state, limits) {
@@ -98,11 +109,10 @@ export function extractBudgetedHwpxText(filePath, limits = FINAL_OUTPUT_PARSER_L
   return parts.join("\n").replace(/\s+/gu, " ");
 }
 
-export async function extractBudgetedXlsxText(filePath, limits = FINAL_OUTPUT_PARSER_LIMITS) {
+async function extractXlsxTextInWorker(bytes, limits) {
   const startedAt = Date.now();
-  inspectArchive(filePath, limits);
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.readFile(filePath);
+  await workbook.xlsx.load(bytes);
   if (workbook.worksheets.length > limits.sheetCount) {
     throw new Error(`final output workbook sheets exceed budget: ${workbook.worksheets.length}/${limits.sheetCount}`);
   }
@@ -129,4 +139,82 @@ export async function extractBudgetedXlsxText(filePath, limits = FINAL_OUTPUT_PA
   });
   checkElapsed(startedAt, limits);
   return parts.join("\n");
+}
+
+function boundedXlsxWorkerHeapMb(limits) {
+  const requested = Number(limits.xlsxWorkerHeapMb ?? FINAL_OUTPUT_PARSER_LIMITS.xlsxWorkerHeapMb);
+  if (!Number.isSafeInteger(requested)) return FINAL_OUTPUT_PARSER_LIMITS.xlsxWorkerHeapMb;
+  return Math.max(XLSX_WORKER_MIN_HEAP_MB, Math.min(XLSX_WORKER_MAX_HEAP_MB, requested));
+}
+
+function boundedXlsxWorkerOutputBytes(limits) {
+  const projected = (Number(limits.extractedTextCharacters) * 4)
+    + Number(limits.totalRows)
+    + 64 * 1024;
+  if (!Number.isSafeInteger(projected) || projected <= 0) return XLSX_WORKER_MAX_OUTPUT_BYTES;
+  return Math.min(XLSX_WORKER_MAX_OUTPUT_BYTES, Math.max(64 * 1024, projected));
+}
+
+export async function extractBudgetedXlsxText(filePath, limits = FINAL_OUTPUT_PARSER_LIMITS) {
+  const { bytes } = inspectArchive(filePath, limits);
+  const workerHeapMb = boundedXlsxWorkerHeapMb(limits);
+  const maxOutputBytes = boundedXlsxWorkerOutputBytes(limits);
+  return await new Promise((resolve, reject) => {
+    const worker = new Worker(new URL(import.meta.url), {
+      workerData: { mode: XLSX_WORKER_MODE, bytes, limits },
+      execArgv: [],
+      resourceLimits: {
+        maxOldGenerationSizeMb: workerHeapMb,
+        maxYoungGenerationSizeMb: Math.min(32, workerHeapMb),
+        stackSizeMb: 4
+      }
+    });
+    let settled = false;
+    const finish = (callback) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      callback();
+    };
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      void worker.terminate().finally(() => {
+        reject(new Error("final output workbook exceeded the elapsed-time budget"));
+      });
+    }, limits.elapsedMs);
+
+    worker.once("message", (message) => {
+      finish(() => {
+        if (!message?.ok) {
+          reject(new Error(`final output workbook worker failed: ${String(message?.error || "unknown error")}`));
+          return;
+        }
+        const text = String(message.text ?? "");
+        if (Buffer.byteLength(text, "utf8") > maxOutputBytes) {
+          reject(new Error("final output workbook output exceeds byte budget"));
+          return;
+        }
+        resolve(text);
+      });
+    });
+    worker.once("error", (error) => {
+      finish(() => reject(new Error(`final output workbook worker failed: ${error.message}`)));
+    });
+    worker.once("exit", (status) => {
+      if (status !== 0) {
+        finish(() => reject(new Error(`final output workbook worker failed: exit ${status}`)));
+      }
+    });
+  });
+}
+
+if (!isMainThread && workerData?.mode === XLSX_WORKER_MODE) {
+  try {
+    const { bytes, limits } = workerData;
+    if (!bytes || !limits) throw new Error("final output workbook worker arguments are incomplete");
+    parentPort?.postMessage({ ok: true, text: await extractXlsxTextInWorker(Buffer.from(bytes), limits) });
+  } catch (error) {
+    parentPort?.postMessage({ ok: false, error: error instanceof Error ? error.message : String(error) });
+  }
 }
