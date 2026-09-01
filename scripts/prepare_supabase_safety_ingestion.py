@@ -15,14 +15,13 @@ from typing import Any, Iterable
 from xml.etree import ElementTree
 
 from openpyxl import load_workbook
-from pypdf import PdfReader
-
 SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from archive_safety import BoundedZipReader
 from parser_safety import ParserBudget, ParserBudgetError, ParserLimits
+from pdf_parser_worker import hash_pdf_file_bounded, parse_pdf_file_bounded
 
 DEFAULT_PARSER_LIMITS = ParserLimits()
 
@@ -239,13 +238,31 @@ def find_files(downloads_dir: Path, onedrive_dir: Path, downloads_since: datetim
     return sorted(set(files), key=lambda item: (str(item.parent), item.name))
 
 
-def read_pdf_records(path: Path, max_pages: int, budget: ParserBudget) -> tuple[list[tuple[str, str, str]], str, str | None]:
+def read_pdf_records(
+    path: Path,
+    max_pages: int,
+    budget: ParserBudget,
+    expected_sha256: str | None = None,
+) -> tuple[list[tuple[str, str, str]], str, str | None]:
     try:
-        reader = PdfReader(str(path))
-        records: list[tuple[str, str, str]] = []
-        for index, page in enumerate(reader.pages[:max_pages], start=1):
+        remaining_seconds = budget.limits.max_elapsed_seconds - (
+            time.monotonic() - budget.started_at
+        )
+        if remaining_seconds <= 0:
             budget.check_elapsed()
-            raw_text = page.extract_text() or ""
+        parsed = parse_pdf_file_bounded(
+            path,
+            max_input_bytes=budget.limits.max_input_bytes,
+            extract_pages=max_pages,
+            max_total_pages=2_000,
+            max_text_chars=budget.limits.max_text_chars,
+            timeout_seconds=min(30.0, remaining_seconds),
+            expected_sha256=expected_sha256,
+        )
+        records: list[tuple[str, str, str]] = []
+        for index, page in enumerate(parsed.pages, start=1):
+            budget.check_elapsed()
+            raw_text = page.text
             budget.consume_text(raw_text)
             text = compact_text(raw_text, 2500)
             if text:
@@ -387,6 +404,7 @@ def extract_records(
     max_pdf_pages: int,
     max_sheet_rows: int,
     limits: ParserLimits | None = None,
+    expected_sha256: str | None = None,
 ) -> tuple[list[tuple[str, str, str]], str, str | None]:
     extension = path.suffix.lower()
     budget = ParserBudget(limits)
@@ -395,7 +413,12 @@ def extract_records(
     except Exception as exc:
         return [], "metadata-only", str(exc)
     if extension == ".pdf":
-        return read_pdf_records(path, max_pdf_pages, budget)
+        return read_pdf_records(
+            path,
+            max_pdf_pages,
+            budget,
+            expected_sha256=expected_sha256,
+        )
     if extension == ".hwpx":
         return read_hwpx_records(path, budget)
     if extension == ".xlsx":
@@ -559,6 +582,7 @@ def build_candidates(
     limits: ParserLimits | None = None,
 ) -> list[CandidateFile]:
     path_list = list(paths)
+    effective_limits = limits or DEFAULT_PARSER_LIMITS
     hashes: dict[Path, str] = {}
     admission_failures: dict[Path, str] = {}
     for path in path_list:
@@ -567,7 +591,15 @@ def build_candidates(
         except ParserBudgetError as exc:
             admission_failures[path] = str(exc)
             continue
-        hashes[path] = sha256_file(path)
+        hashes[path] = (
+            hash_pdf_file_bounded(
+                path,
+                max_input_bytes=effective_limits.max_input_bytes,
+                timeout_seconds=min(30.0, effective_limits.max_elapsed_seconds),
+            )
+            if path.suffix.lower() == ".pdf"
+            else sha256_file(path)
+        )
     hash_groups: dict[str, list[Path]] = {}
     title_groups: dict[str, list[Path]] = {}
     for path, digest in hashes.items():
@@ -626,7 +658,13 @@ def build_records(
         parser = "metadata-only"
         failure_reason = candidate.admission_failure
     else:
-        tuples, parser, failure_reason = extract_records(candidate.path, max_pdf_pages, max_sheet_rows, limits)
+        tuples, parser, failure_reason = extract_records(
+            candidate.path,
+            max_pdf_pages,
+            max_sheet_rows,
+            limits,
+            expected_sha256=candidate.sha256,
+        )
     if not tuples:
         tuples = [("file:metadata", candidate.path.stem, "")]
     records: list[CandidateRecord] = []

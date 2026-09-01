@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
-import io
 import json
 import logging
 import os
@@ -19,14 +18,13 @@ from typing import Iterable, Sequence
 from urllib import error, request
 
 from openpyxl import load_workbook
-from pypdf import PdfReader
-
 SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from archive_safety import ArchiveLimits, BoundedZipReader, open_preflighted_zip
 from parser_safety import ParserBudget, ParserBudgetError, ParserLimits
+from pdf_parser_worker import parse_pdf_bytes_bounded
 
 DEFAULT_PARSER_LIMITS = ParserLimits()
 TECHNICAL_ARCHIVE_LIMITS = ArchiveLimits(
@@ -373,13 +371,23 @@ def extract_pdf_text_from_bytes(
 ) -> tuple[str, int]:
     parser_budget = budget or ParserBudget()
     parser_budget.assert_input_bytes(len(data))
-    reader = PdfReader(io.BytesIO(data))
-    parser_budget.check_elapsed()
-    texts: list[str] = []
-    page_count = len(reader.pages)
-    for page in reader.pages[:max_pages]:
+    remaining_seconds = parser_budget.limits.max_elapsed_seconds - (
+        time.monotonic() - parser_budget.started_at
+    )
+    if remaining_seconds <= 0:
         parser_budget.check_elapsed()
-        text = page.extract_text() or ""
+    parsed = parse_pdf_bytes_bounded(
+        data,
+        extract_pages=max_pages,
+        max_total_pages=2_000,
+        max_text_chars=parser_budget.limits.max_text_chars,
+        timeout_seconds=min(30.0, remaining_seconds),
+    )
+    texts: list[str] = []
+    page_count = parsed.page_count
+    for page in parsed.pages:
+        parser_budget.check_elapsed()
+        text = page.text
         parser_budget.consume_text(text)
         texts.append(text)
     return "\n".join(texts).strip(), page_count

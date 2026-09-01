@@ -15,14 +15,13 @@ from typing import Any, Iterable
 from xml.etree import ElementTree
 
 from openpyxl import load_workbook
-from pypdf import PdfReader
-
 SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from archive_safety import BoundedZipReader
 from parser_safety import ParserBudget, ParserBudgetError, ParserLimits
+from pdf_parser_worker import hash_pdf_file_bounded, parse_pdf_file_bounded
 
 DEFAULT_PARSER_LIMITS = ParserLimits()
 
@@ -167,16 +166,33 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def read_pdf(path: Path, max_pages: int, budget: ParserBudget) -> tuple[str, int]:
-    reader = PdfReader(str(path))
-    budget.check_elapsed()
-    texts: list[str] = []
-    for page in reader.pages[:max_pages]:
+def read_pdf(
+    path: Path,
+    max_pages: int,
+    budget: ParserBudget,
+    expected_sha256: str | None = None,
+) -> tuple[str, int, str]:
+    remaining_seconds = budget.limits.max_elapsed_seconds - (
+        time.monotonic() - budget.started_at
+    )
+    if remaining_seconds <= 0:
         budget.check_elapsed()
-        text = page.extract_text() or ""
+    parsed = parse_pdf_file_bounded(
+        path,
+        max_input_bytes=budget.limits.max_input_bytes,
+        extract_pages=max_pages,
+        max_total_pages=2_000,
+        max_text_chars=budget.limits.max_text_chars,
+        timeout_seconds=min(30.0, remaining_seconds),
+        expected_sha256=expected_sha256,
+    )
+    texts: list[str] = []
+    for page in parsed.pages:
+        budget.check_elapsed()
+        text = page.text
         budget.consume_text(text)
         texts.append(text)
-    return "\n".join(texts), len(reader.pages)
+    return "\n".join(texts), parsed.page_count, parsed.input_sha256
 
 
 def read_hwpx(path: Path, budget: ParserBudget) -> tuple[str, int, int]:
@@ -336,7 +352,14 @@ def parse_file(
         budget.assert_input_file(path)
         if extension == ".pdf":
             parser = "pypdf"
-            text, page_count = read_pdf(path, max_pdf_pages, budget)
+            text, page_count, parsed_sha256 = read_pdf(
+                path,
+                max_pdf_pages,
+                budget,
+                expected_sha256=file_sha256,
+            )
+            if file_sha256 is None:
+                file_sha256 = parsed_sha256
         elif extension == ".hwpx":
             parser = "zip+xml"
             text, zip_entry_count, image_count = read_hwpx(path, budget)
@@ -579,6 +602,7 @@ def duplicate_maps(
     dict[Path, str],
 ]:
     path_list = list(paths)
+    effective_limits = limits or DEFAULT_PARSER_LIMITS
     hashes: dict[Path, str] = {}
     admission_failures: dict[Path, str] = {}
     for path in path_list:
@@ -587,7 +611,15 @@ def duplicate_maps(
         except ParserBudgetError as exc:
             admission_failures[path] = str(exc)
             continue
-        hashes[path] = sha256_file(path)
+        hashes[path] = (
+            hash_pdf_file_bounded(
+                path,
+                max_input_bytes=effective_limits.max_input_bytes,
+                timeout_seconds=min(30.0, effective_limits.max_elapsed_seconds),
+            )
+            if path.suffix.lower() == ".pdf"
+            else sha256_file(path)
+        )
     hash_groups: dict[str, list[Path]] = {}
     stem_groups: dict[str, list[Path]] = {}
     for path, digest in hashes.items():

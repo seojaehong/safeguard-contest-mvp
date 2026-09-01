@@ -13,6 +13,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from parser_safety import ParserBudget, ParserLimits
+from pdf_parser_worker import PdfWorkerLimitError
 
 
 def load_script(filename: str) -> ModuleType:
@@ -28,6 +29,36 @@ def load_script(filename: str) -> ModuleType:
 
 
 class ParseDownloadSafetyFormsBudgetTest(unittest.TestCase):
+    def test_pdf_replacement_is_rejected_against_admitted_digest(self) -> None:
+        parser = load_script("parse_download_safety_forms.py")
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "replaced.pdf"
+            path.write_bytes(b"replacement")
+            result = parser.parse_file(
+                path,
+                max_pdf_pages=1,
+                max_sheet_rows=10,
+                file_sha256="0" * 64,
+            )
+
+        self.assertFalse(result.ok)
+        self.assertIn("did not match", result.failure_reason or "")
+
+    def test_pdf_timeout_fails_closed_through_disposable_worker(self) -> None:
+        parser = load_script("parse_download_safety_forms.py")
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "timeout.pdf"
+            path.write_bytes(b"%PDF-timeout")
+            with mock.patch.object(
+                parser,
+                "parse_pdf_file_bounded",
+                side_effect=PdfWorkerLimitError("timeout", "worker deadline exceeded"),
+            ):
+                result = parser.parse_file(path, max_pdf_pages=1, max_sheet_rows=10)
+
+        self.assertFalse(result.ok)
+        self.assertIn("worker deadline exceeded", result.failure_reason or "")
+
     def test_fails_closed_on_byte_text_cell_and_time_limits(self) -> None:
         parser = load_script("parse_download_safety_forms.py")
         with TemporaryDirectory() as temporary_directory:
@@ -70,6 +101,42 @@ class ParseDownloadSafetyFormsBudgetTest(unittest.TestCase):
 
 
 class PrepareSupabaseSafetyIngestionBudgetTest(unittest.TestCase):
+    def test_pdf_replacement_is_rejected_against_candidate_digest(self) -> None:
+        preparer = load_script("prepare_supabase_safety_ingestion.py")
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "replaced.pdf"
+            path.write_bytes(b"replacement")
+            records, parser_name, failure = preparer.read_pdf_records(
+                path,
+                1,
+                ParserBudget(),
+                expected_sha256="0" * 64,
+            )
+
+        self.assertEqual(records, [])
+        self.assertEqual(parser_name, "pypdf")
+        self.assertIn("did not match", failure or "")
+
+    def test_pdf_timeout_returns_no_ingestion_records(self) -> None:
+        preparer = load_script("prepare_supabase_safety_ingestion.py")
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "timeout.pdf"
+            path.write_bytes(b"%PDF-timeout")
+            with mock.patch.object(
+                preparer,
+                "parse_pdf_file_bounded",
+                side_effect=PdfWorkerLimitError("timeout", "worker deadline exceeded"),
+            ):
+                records, parser_name, failure = preparer.read_pdf_records(
+                    path,
+                    1,
+                    ParserBudget(),
+                )
+
+        self.assertEqual(records, [])
+        self.assertEqual(parser_name, "pypdf")
+        self.assertIn("worker deadline exceeded", failure or "")
+
     def test_returns_no_records_when_operator_budget_is_exceeded(self) -> None:
         preparer = load_script("prepare_supabase_safety_ingestion.py")
         with TemporaryDirectory() as temporary_directory:
@@ -117,6 +184,16 @@ class PrepareSupabaseSafetyIngestionBudgetTest(unittest.TestCase):
 
 
 class IngestSafetyReferenceCatalogBudgetTest(unittest.TestCase):
+    def test_pdf_timeout_propagates_without_in_process_parser_fallback(self) -> None:
+        ingester = load_script("ingest_safety_reference_catalog.py")
+        with mock.patch.object(
+            ingester,
+            "parse_pdf_bytes_bounded",
+            side_effect=PdfWorkerLimitError("timeout", "worker deadline exceeded"),
+        ):
+            with self.assertRaisesRegex(PdfWorkerLimitError, "worker deadline exceeded"):
+                ingester.extract_pdf_text_from_bytes(b"%PDF-timeout", 1)
+
     def test_rejects_pdf_bytes_before_parser_allocation(self) -> None:
         ingester = load_script("ingest_safety_reference_catalog.py")
         budget = ParserBudget(ParserLimits(max_input_bytes=2))

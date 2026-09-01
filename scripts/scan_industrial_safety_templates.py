@@ -15,8 +15,6 @@ from xml.etree import ElementTree
 
 from openpyxl import load_workbook
 from PIL import Image
-from pypdf import PdfReader
-
 SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
@@ -27,6 +25,7 @@ from archive_safety import (
     BoundedZipReader,
     preflight_zip_central_directory,
 )
+from pdf_parser_worker import parse_pdf_file_bounded
 
 
 DEFAULT_MAX_FILES = 10_000
@@ -256,13 +255,23 @@ def inspect_pptx(path: Path) -> dict[str, Any]:
     }
 
 
-def inspect_pdf(path: Path) -> dict[str, Any]:
+def inspect_pdf(path: Path, limits: ScanLimits, started: float) -> dict[str, Any]:
     try:
-        reader = PdfReader(str(path))
-        page_count = len(reader.pages)
+        remaining_seconds = limits.max_elapsed_seconds - (time.perf_counter() - started)
+        if remaining_seconds <= 0:
+            raise ScanBudgetError("scan elapsed time exceeds limit before PDF parser")
+        parsed = parse_pdf_file_bounded(
+            path,
+            max_input_bytes=limits.max_file_bytes,
+            extract_pages=5,
+            max_total_pages=2_000,
+            max_text_chars=2_000_000,
+            timeout_seconds=min(30.0, remaining_seconds),
+        )
+        page_count = parsed.page_count
         snippets: list[str] = []
-        for page in reader.pages[:5]:
-            text = page.extract_text() or ""
+        for page in parsed.pages:
+            text = page.text
             for line in text.splitlines():
                 clean = normalize_text(line)
                 if len(clean) >= 3:
@@ -402,7 +411,7 @@ def main() -> int:
         elif suffix == ".hwpx":
             structured_docs["hwpx"].append(inspect_hwpx(path))
         elif suffix == ".pdf":
-            structured_docs["pdf"].append(inspect_pdf(path))
+            structured_docs["pdf"].append(inspect_pdf(path, limits, started))
         elif suffix == ".pptx":
             structured_docs["pptx"].append(inspect_pptx(path))
         _assert_before_deadline(started, limits, f"parser completion for {path.name}")

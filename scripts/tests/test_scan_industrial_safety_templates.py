@@ -16,9 +16,28 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 import scan_industrial_safety_templates as scanner
+from pdf_parser_worker import PdfWorkerLimitError
 
 
 class ScanIndustrialSafetyTemplatesTest(unittest.TestCase):
+    def test_pdf_timeout_is_recorded_without_blocking_the_scan(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "timeout.pdf"
+            path.write_bytes(b"%PDF-timeout")
+            with mock.patch.object(
+                scanner,
+                "parse_pdf_file_bounded",
+                side_effect=PdfWorkerLimitError("timeout", "worker deadline exceeded"),
+            ):
+                result = scanner.inspect_pdf(
+                    path,
+                    scanner.ScanLimits(max_elapsed_seconds=30.0),
+                    time.perf_counter(),
+                )
+
+        self.assertEqual(result["path"], str(path))
+        self.assertIn("worker deadline exceeded", result["error"])
+
     def test_cli_records_limits_and_fails_closed_without_partial_output(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)

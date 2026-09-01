@@ -4,6 +4,7 @@ import argparse
 import contextlib
 import hashlib
 import io
+from importlib.metadata import version as package_version
 import json
 import os
 import re
@@ -19,20 +20,26 @@ from itertools import islice
 from pathlib import Path
 from typing import Callable, Iterable, Iterator, Protocol, Sequence
 
-from pypdf import PdfReader, __version__ as PYPDF_VERSION
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from scripts import recover_kosha_ocr_boundary
 from scripts.archive_safety import ArchiveLimits, open_preflighted_zip
+from scripts.pdf_parser_worker import (
+    PdfWorkerLimitError,
+    hash_pdf_bytes_bounded,
+    hash_pdf_file_bounded,
+    parse_pdf_bytes_bounded,
+)
 from scripts.ingest_safety_reference_catalog import (
     ReferenceItem,
     ReferenceSource,
     decode_zip_name,
     parse_technical_support_zips,
 )
+
+PYPDF_VERSION = package_version("pypdf")
 
 
 TechnicalParser = Callable[[Path, int, bool], tuple[ReferenceSource, list[ReferenceItem]]]
@@ -705,34 +712,6 @@ def _read_entry_bytes(entry: LocalPdfEntry, archive: zipfile.ZipFile | None = No
     raise KeyError(f"ZIP member disappeared after inventory: {entry.key}")
 
 
-def _object_has_image(value: object, seen: set[int]) -> bool:
-    if hasattr(value, "get_object"):
-        value = value.get_object()
-    marker = id(value)
-    if marker in seen:
-        return False
-    seen.add(marker)
-    if not hasattr(value, "get"):
-        return False
-    subtype = value.get("/Subtype")
-    if subtype == "/Image":
-        return True
-    resources = value.get("/Resources")
-    if hasattr(resources, "get_object"):
-        resources = resources.get_object()
-    if resources and hasattr(resources, "get"):
-        xobjects = resources.get("/XObject")
-        if hasattr(xobjects, "get_object"):
-            xobjects = xobjects.get_object()
-        if xobjects and hasattr(xobjects, "values"):
-            return any(_object_has_image(item, seen) for item in xobjects.values())
-    return False
-
-
-def _page_has_image(page: object) -> bool:
-    return _object_has_image(page, set())
-
-
 def _load_provenance(path: Path | None) -> dict[str, object]:
     base: dict[str, object] = {
         "official_list_url": OFFICIAL_LIST_URL,
@@ -912,7 +891,7 @@ def _build_item(
     title = Path(entry.member_name).stem
     version_key = _normalize_version_code(title)
     stable_key = _stable_key(version_key)
-    raw_sha256 = _sha256_bytes(data)
+    raw_sha256 = hash_pdf_bytes_bounded(data)
     item_id = _item_id(entry)
     lineage_map = provenance.get("lineage_by_member")
     lineage = lineage_map.get(entry.member_name) if isinstance(lineage_map, dict) else None
@@ -955,37 +934,22 @@ def _build_item(
         }
         return {**base, "extraction_status": "failure", "page_count": 0, "pages": [], "ocr_candidate": True, "ocr_candidate_reasons": ["zero-byte-pdf"]}, failure
     try:
-        reader = PdfReader(io.BytesIO(data), strict=False)
-        page_count = len(reader.pages)
-        if page_count > resource_limits.max_pages_per_pdf:
-            failure = {
-                "schema_version": CORPUS_SCHEMA_VERSION,
-                "item_id": item_id,
-                "source_key": entry.key,
-                "source_zip": entry.archive_name,
-                "source_member": entry.member_name,
-                "raw_sha256": raw_sha256,
-                "error_code": "resource-limit-pages",
-                "error_type": "ResourceLimitError",
-                "message": (
-                    f"PDF page count exceeds limit: "
-                    f"{page_count}/{resource_limits.max_pages_per_pdf}"
-                ),
-            }
-            return {
-                **base,
-                "extraction_status": "failure",
-                "page_count": page_count,
-                "pages": [],
-                "ocr_candidate": True,
-                "ocr_candidate_reasons": ["resource-limit-pages"],
-            }, failure
+        parsed = parse_pdf_bytes_bounded(
+            data,
+            extract_pages=resource_limits.max_pages_per_pdf,
+            max_total_pages=resource_limits.max_pages_per_pdf,
+            max_text_chars=resource_limits.max_normalized_chars_per_pdf * 8,
+            timeout_seconds=30.0,
+            include_image_flags=True,
+            expected_sha256=raw_sha256,
+        )
+        page_count = parsed.page_count
         page_rows: list[dict[str, object]] = []
         page_texts: list[str] = []
         body_offset = 0
         extracted_normalized_chars = 0
-        for page_number, page in enumerate(reader.pages, start=1):
-            text = _normalize_page_text(page.extract_text() or "")
+        for page_number, page in enumerate(parsed.pages, start=1):
+            text = _normalize_page_text(page.text)
             normalized_count = _normalized_char_count(text)
             extracted_normalized_chars += normalized_count
             if extracted_normalized_chars > resource_limits.max_normalized_chars_per_pdf:
@@ -1012,7 +976,7 @@ def _build_item(
                     "ocr_candidate": True,
                     "ocr_candidate_reasons": ["resource-limit-text"],
                 }, failure
-            has_image = _page_has_image(page)
+            has_image = page.has_image
             page_ocr_candidate = has_image and normalized_count < PAGE_OCR_CHAR_THRESHOLD
             page_start = body_offset
             page_end = page_start + len(text)
@@ -1030,7 +994,34 @@ def _build_item(
                 }
             )
             page_texts.append(text)
-            body_offset = page_end + (1 if page_number < len(reader.pages) else 0)
+            body_offset = page_end + (1 if page_number < page_count else 0)
+    except PdfWorkerLimitError as exc:
+        error_code = (
+            "resource-limit-pages"
+            if exc.code == "page_count_limit"
+            else "resource-limit-text"
+            if exc.code in {"text_chars_limit", "output_bytes_limit"}
+            else "bad-pdf"
+        )
+        failure = {
+            "schema_version": CORPUS_SCHEMA_VERSION,
+            "item_id": item_id,
+            "source_key": entry.key,
+            "source_zip": entry.archive_name,
+            "source_member": entry.member_name,
+            "raw_sha256": raw_sha256,
+            "error_code": error_code,
+            "error_type": type(exc).__name__,
+            "message": str(exc),
+        }
+        return {
+            **base,
+            "extraction_status": "failure",
+            "page_count": exc.page_count or 0,
+            "pages": [],
+            "ocr_candidate": True,
+            "ocr_candidate_reasons": [error_code],
+        }, failure
     except Exception as exc:
         failure = {
             "schema_version": CORPUS_SCHEMA_VERSION,
@@ -1140,10 +1131,15 @@ def _source_identity(
     entries: Sequence[LocalPdfEntry],
     scan_stats: SourceScanStats,
 ) -> dict[str, object]:
-    file_rows = [
-        {"name": path.name, "size": path.stat().st_size, "sha256": _sha256_file(path)}
-        for path in sorted(files, key=lambda value: value.name)
-    ]
+    file_rows = []
+    for path in sorted(files, key=lambda value: value.name):
+        size = path.stat().st_size
+        digest = (
+            hash_pdf_file_bounded(path, max_input_bytes=size)
+            if path.suffix.lower() == ".pdf"
+            else _sha256_file(path)
+        )
+        file_rows.append({"name": path.name, "size": size, "sha256": digest})
     inventory_rows = [
         {
             "source_zip": entry.archive_name,
@@ -1688,6 +1684,7 @@ def _publish_snapshot(
     provenance: dict[str, object],
     counts: dict[str, int],
     publication_hook: Callable[[str], None] | None,
+    source_identity_validator: Callable[[], None],
 ) -> dict[str, object]:
     output_hashes = {
         name: _sha256_file(stage_dir / name)
@@ -1756,6 +1753,7 @@ def _publish_snapshot(
                 _remove_tree_within(snapshots_dir, temporary_snapshot)
     if publication_hook:
         publication_hook("snapshot-ready")
+    source_identity_validator()
     manifest_output = _file_descriptor(final_snapshot / "manifest.json")
     current = {
         "schema_version": CURRENT_SCHEMA_VERSION,
@@ -2013,6 +2011,21 @@ def recover_corpus(
             "checkpoint_output": checkpoint_output,
         }
 
+    def validate_source_identity_unchanged() -> None:
+        fresh_entries, fresh_source_files, fresh_scan_stats = _discover_entries(
+            source.resolve(),
+            effective_limits,
+        )
+        fresh_source_identity = _source_identity(
+            fresh_source_files,
+            fresh_entries,
+            fresh_scan_stats,
+        )
+        if fresh_source_identity != source_identity:
+            raise RuntimeError("source identity changed during PDF extraction")
+
+    validate_source_identity_unchanged()
+
     final_checkpoint = _checkpoint_payload(
         source_identity,
         generation_policy,
@@ -2032,6 +2045,7 @@ def recover_corpus(
         provenance,
         counts,
         publication_hook,
+        validate_source_identity_unchanged,
     )
     published["processed_this_run"] = processed_this_run
     return published

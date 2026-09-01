@@ -26,6 +26,7 @@ from pypdf.generic import (
 from scripts.ingest_safety_reference_catalog import ReferenceItem, ReferenceSource
 from scripts import recover_kosha_ocr_boundary, snapshot_kosha_guide_corpus
 from scripts.snapshot_kosha_guide_corpus import build_snapshot
+from scripts.pdf_parser_worker import PdfWorkerLimitError
 
 
 def build_pdf_bytes(page_texts: list[str], image_pages: set[int] | None = None) -> bytes:
@@ -362,6 +363,34 @@ class SnapshotKoshaGuideCorpusTest(unittest.TestCase):
 
 
 class KoshaBodyRecoveryTest(unittest.TestCase):
+    def test_pdf_worker_timeout_is_preserved_as_bad_pdf_failure(self) -> None:
+        entry = snapshot_kosha_guide_corpus.LocalPdfEntry(
+            archive_path=None,
+            archive_name=None,
+            member_name="A-G-1-2025 기술지원규정.pdf",
+            category="전기안전",
+            file_size=12,
+            compressed_size=12,
+            crc32=None,
+        )
+        with patch.object(
+            snapshot_kosha_guide_corpus,
+            "parse_pdf_bytes_bounded",
+            side_effect=PdfWorkerLimitError("timeout", "worker deadline exceeded"),
+        ):
+            item, failure = snapshot_kosha_guide_corpus._build_item(
+                entry,
+                b"%PDF-timeout",
+                {},
+                snapshot_kosha_guide_corpus.ResourceLimits(),
+            )
+
+        self.assertEqual(item["extraction_status"], "failure")
+        self.assertEqual(item["ocr_candidate_reasons"], ["bad-pdf"])
+        self.assertIsNotNone(failure)
+        self.assertEqual(failure["error_code"], "bad-pdf")
+        self.assertIn("worker deadline exceeded", failure["message"])
+
     def load_corpus_schema(self) -> dict[str, object]:
         schema_path = (
             Path(__file__).resolve().parents[2]
@@ -1448,6 +1477,31 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             resumed = self.run_recovery(source, output_dir, resume=True)
             self.assertEqual(resumed["processed_this_run"], 0)
             self.assertTrue((output_dir / "current.json").is_file())
+
+    def test_source_replacement_after_snapshot_ready_blocks_current_publication(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {"G-1-2025 body.pdf": build_pdf_bytes(["original body"])},
+            )
+            output_dir = root / "output"
+
+            def replace_source(phase: str) -> None:
+                if phase == "snapshot-ready":
+                    self.write_zip(
+                        root,
+                        {"G-1-2025 body.pdf": build_pdf_bytes(["replacement body"])},
+                    )
+
+            with self.assertRaisesRegex(RuntimeError, "source identity changed"):
+                self.run_recovery(
+                    source,
+                    output_dir,
+                    publication_hook=replace_source,
+                )
+
+            self.assertFalse((output_dir / "current.json").exists())
 
     def test_resume_truncates_only_uncheckpointed_tail_after_prefix_validation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
