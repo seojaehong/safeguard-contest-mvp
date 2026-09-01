@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "safeclaw-hermes-share-governed-path-compatibility/v1",
+  "generatedAt": "2026-09-01T11:12:00+09:00",
+  "verdict": "PASS_LIVE_PRODUCTION_HERMES_SHARE_GOVERNED_PATH_COMPATIBILITY_RESCAN_FINDINGS_OPEN",
+  "sourceHead": "8e3cbd469666a52f4425c1caeca27f3146781ffb",
+  "productionCommit": "8e3cbd469666a52f4425c1caeca27f3146781ffb",
+  "productionIncludesSourceHead": true,
+  "production": {
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-i16rzcco0-seojaehongs-projects.vercel.app"
+  },
+  "coveredGateIds": [
+    "knowledge_preparation_capability_truth",
+    "share_session_revocation_security"
+  ],
+  "governedPaths": [
+    "app/api/knowledge/review/prepare/route.ts",
+    "app/knowledge/KnowledgeReviewInbox.tsx",
+    "app/api/workpacks/[id]/share-sessions/route.ts",
+    "components/WorkflowSharePanel.tsx",
+    "lib/workflow-share-client.ts"
+  ],
+  "verification": {
+    "vitest": {
+      "command": "npm.cmd exec -- vitest run tests/knowledge-review-prepare-route.test.ts tests/knowledge-review-prepare.test.ts tests/knowledge-review-inbox-browser.test.ts tests/knowledge-governance.test.ts tests/workflow-share-client.test.ts tests/workpack-share-authority-routes.test.ts tests/workspace-share-simplification.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 7,
+      "testsPassed": 148,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "northstarAudit": {
+      "command": "npm.cmd exec -- vitest run tests/northstar-open-gate-audit.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 1,
+      "testsPassed": 205,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "nextVersion": "15.5.22",
+    "staticPages": 29,
+    "diffCheck": "PASS"
+  },
+  "contracts": {
+    "knowledgeAuthenticationBeforeBodyRead": true,
+    "knowledgeBodyHazardCoverageFailsClosed": true,
+    "shareRevocationContractPreserved": true,
+    "shareReviewPropagationDoesNotApproveDocuments": true,
+    "sealedSecurityFindingsReclassified": false
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerCallPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "shareSessionRevokedForEvidence": false,
+    "readConfirmationCreated": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaExactRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "distributedAdmissionActivation": "OPERATOR_CONFIGURATION_REQUIRED",
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "securityCompleteClaimAllowed": false,
+    "approvalGatedOperationsUnchanged": true,
+    "sealedSecurityFindingsRemainOpenUntilFreshRescan": true
+  }
+}

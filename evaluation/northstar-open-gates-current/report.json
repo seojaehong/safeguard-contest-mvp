@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-08-31T23:37:00.038Z",
-  "sourceSha": "5554d9c6e3be5979de97add26db9a6b5f7c62a5a",
+  "generatedAt": "2026-09-01T02:14:39.378Z",
+  "sourceSha": "8e3cbd469666a52f4425c1caeca27f3146781ffb",
   "overall": "open",
   "gates": [
     {
@@ -222,6 +222,16 @@
       "detail": "Current-source and production stateless fallback candidates pass 5/5 chemical, hot-work, confined-space, forklift, and foreign-worker fall scenarios with four non-empty sections, textual hazard grounding, and reviewer-visible source grounding. Visible evidence roles move 0/5 to 5/5, and explicit safe original-event review facts separately move 0/5 to 5/5 while private event-term exposure remains 0. Arbitrary raw payload is not accepted as reviewer-visible context. The enhanced LLM probe remains explicitly blocked 0/5 by distributed admission before AI generation; this gate does not claim enhanced LLM quality or read the production candidate queue. Human review remains incomplete, publication is disallowed, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and Wiki publication plus Supabase RLS remain APPROVAL_GATED.",
       "nextActions": [
         "Configure distributed provider admission, then rerun the five-scenario provider matrix without weakening fail-closed admission."
+      ]
+    },
+    {
+      "id": "hermes_candidate_body_hazard_coverage",
+      "state": "notice",
+      "label": "Hermes candidate body hazard coverage",
+      "evidencePath": "evaluation\\hermes-candidate-body-hazard-coverage-2026-09-01\\report.json",
+      "detail": "Current-source local Hermes fallback candidates pass 5/5 cases with all 6/6 matched hazards visible in candidate bodies, including the two-hazard fall/foreign-worker case at 2/2. Metadata trace alone cannot satisfy body coverage, unknown hazards fail closed, and approval requires canonical trace plus complete body coverage. Source-aligned production is still blocked 0/5 with HTTP 503 DISTRIBUTED_RATE_LIMIT_UNAVAILABLE before generation; human review is incomplete, no mutation occurred, exact saved Share remains MISSING_EVIDENCE, and distributed admission, Wiki publication, and Supabase RLS remain APPROVAL_GATED.",
+      "nextActions": [
+        "After operator approval activates distributed admission, rerun the five-scenario live candidate-body coverage matrix without weakening fail-closed admission."
       ]
     },
     {

@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-08-31T23:37:05.069Z
-Source HEAD at generation: 5554d9c6e3be5979de97add26db9a6b5f7c62a5a
-Live commit at generation: 5554d9c6e3be5979de97add26db9a6b5f7c62a5a
+Generated at: 2026-09-01T02:14:40.878Z
+Source HEAD at generation: 8e3cbd469666a52f4425c1caeca27f3146781ffb
+Live commit at generation: 8e3cbd469666a52f4425c1caeca27f3146781ffb
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -452,6 +452,7 @@ Overall: `northstar_open_approval_gated`
 | knowledge_viewport_workbench | proven | evaluation\knowledge-mobile-task-rail-2026-08-27\report.json |
 | llm_wiki_candidate_content_readiness | proven | evaluation\llm-wiki-candidate-readiness-2026-08-25\report.json |
 | llm_wiki_candidate_content_matrix | proven | evaluation\llm-wiki-candidate-content-matrix-2026-08-25\report.json |
+| hermes_candidate_body_hazard_coverage | notice | evaluation\hermes-candidate-body-hazard-coverage-2026-09-01\report.json |
 | llm_wiki_sif_evidence_matrix | proven | evaluation\llm-wiki-sif-evidence-matrix-2026-08-26\report.json |
 | dependency_security_remediation | proven | evaluation\dependency-security-remediation-2026-07-28\report.json |
 | tenant_authorization_remediation | proven | evaluation\tenant-authorization-boundary-preflight-2026-07-29\report.json |
