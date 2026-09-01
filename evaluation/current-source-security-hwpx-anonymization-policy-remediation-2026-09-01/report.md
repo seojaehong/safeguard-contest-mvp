@@ -2,11 +2,11 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_HWPX_CLEANUP_POLICY_LIVE_PENDING_RESCAN_REQUIRED`
+`PASS_LIVE_DEPLOYED_HWPX_CLEANUP_POLICY_RESCAN_REQUIRED`
 
 The current source at `fa72b785ca07ad2ea5ae913dbfd0b4a26f1dc00c` fail-closes HWPX anonymization when its cleanup policy is missing, malformed, empty, duplicated, or not bound to the expected SHA-256 digest. It also rejects any transformed text member that still contains a forbidden source token.
 
-The live production marker was still `9af35696d1c4e70712e02538f12efa332e3f6727` when this report was written. This is current-source evidence only; live deployment verification and a fresh security rescan remain required.
+The live production marker is `f2dcf652dc58d4084419477066bc33837974174d`, which contains product commit `fa72b785ca07ad2ea5ae913dbfd0b4a26f1dc00c`. Deployment alignment is proven, but a fresh security rescan remains required before reclassifying the immutable finding.
 
 ## Verification
 

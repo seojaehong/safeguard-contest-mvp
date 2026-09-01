@@ -1,15 +1,16 @@
 {
   "schema": "safeclaw-current-source-security-remediation/v1",
-  "generatedAt": "2026-09-01T14:12:00+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_HWPX_CLEANUP_POLICY_LIVE_PENDING_RESCAN_REQUIRED",
+  "generatedAt": "2026-09-01T14:20:00+09:00",
+  "verdict": "PASS_LIVE_DEPLOYED_HWPX_CLEANUP_POLICY_RESCAN_REQUIRED",
   "findingId": "data-exposure.hwpx-anonymization-policy",
   "sourceHead": "fa72b785ca07ad2ea5ae913dbfd0b4a26f1dc00c",
   "productionBuild": {
-    "commitSha": "9af35696d1c4e70712e02538f12efa332e3f6727",
+    "commitSha": "f2dcf652dc58d4084419477066bc33837974174d",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-6i3ivovow-seojaehongs-projects.vercel.app",
-    "sourceHeadMatchesProduction": false
+    "deploymentUrl": "safeguard-contest-gs0e63hwq-seojaehongs-projects.vercel.app",
+    "productCommit": "fa72b785ca07ad2ea5ae913dbfd0b4a26f1dc00c",
+    "productionContainsProductCommit": true
   },
   "remediation": {
     "cleanupPolicySchema": "safeclaw-hwpx-cleanup-policy/v1",
@@ -59,6 +60,6 @@
     "completedScanSourceHead": "c9b67280a64995b3cd26f243f404623de21a489a",
     "findingClosedByThisArtifact": false,
     "freshSecurityRescanRequired": true,
-    "liveAfterDeploymentRequired": true
+    "liveAfterDeploymentRequired": false
   }
 }
