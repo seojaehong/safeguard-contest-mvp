@@ -1,4 +1,5 @@
 import type {
+  SpawnOptionsWithoutStdio,
   SpawnSyncOptions,
   SpawnSyncOptionsWithStringEncoding,
   SpawnSyncReturns,
@@ -43,3 +44,21 @@ export function spawnSyncWithBudget(
   options?: SpawnSyncOptions,
   budget?: { timeoutMs?: number; maxBufferBytes?: number },
 ): SpawnSyncReturns<Buffer>;
+
+export function spawnWithBudget(
+  command: string,
+  args: readonly string[],
+  options?: SpawnOptionsWithoutStdio,
+  budget?: {
+    timeoutMs?: number;
+    maxBufferBytes?: number;
+    onStdout?: (chunk: Buffer) => void;
+    onStderr?: (chunk: Buffer) => void;
+  },
+): Promise<{
+  status: number | null;
+  signal: NodeJS.Signals | null;
+  stdout: string;
+  stderr: string;
+  error: Error | null;
+}>;

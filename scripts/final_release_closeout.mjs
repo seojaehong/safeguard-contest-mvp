@@ -1,13 +1,15 @@
 #!/usr/bin/env node
-import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { spawnWithBudget } from "./operator_smoke_resource_budget.mjs";
 
 const startedAt = Date.now();
 const rootDir = process.cwd();
 const outDir = path.resolve(process.env.SAFECLAW_RELEASE_CLOSEOUT_OUT_DIR || path.join(rootDir, "evaluation", "final-release-closeout"));
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+const RELEASE_STEP_TIMEOUT_MS = 10 * 60 * 1000;
+const RELEASE_STEP_MAX_BUFFER_BYTES = 20 * 1024 * 1024;
 
 const steps = [
   {
@@ -48,18 +50,20 @@ function writeMarkdown(fileName, content) {
   fs.writeFileSync(path.join(outDir, fileName), `${content.trim()}\n`, "utf8");
 }
 
-function runStep(step, index) {
+async function runStep(step, index) {
   const stepStartedAt = Date.now();
   const command = process.platform === "win32" ? process.env.ComSpec || "cmd.exe" : step.command;
   const args = process.platform === "win32" ? ["/d", "/s", "/c", commandText(step)] : step.args;
-  const result = spawnSync(command, args, {
+  const result = await spawnWithBudget(command, args, {
     cwd: rootDir,
     env: process.env,
     encoding: "utf8",
-    maxBuffer: 20 * 1024 * 1024,
     shell: false,
+  }, {
+    timeoutMs: RELEASE_STEP_TIMEOUT_MS,
+    maxBufferBytes: RELEASE_STEP_MAX_BUFFER_BYTES,
   });
-  const exitCode = typeof result.status === "number" ? result.status : 1;
+  const exitCode = !result.error && typeof result.status === "number" ? result.status : 1;
   const signal = result.signal || null;
   const spawnError = result.error ? `${result.error.name}: ${result.error.message}` : null;
   const elapsedMs = Date.now() - stepStartedAt;
@@ -119,9 +123,12 @@ ${rows}
 `;
 }
 
-function main() {
+async function main() {
   ensureDir(outDir);
-  const results = steps.map((step, index) => runStep(step, index));
+  const results = [];
+  for (const [index, step] of steps.entries()) {
+    results.push(await runStep(step, index));
+  }
   const verdict = results.every((step) => step.verdict === "pass") ? "pass" : "blocked";
   const payload = {
     generatedAt: new Date().toISOString(),
@@ -139,4 +146,4 @@ function main() {
   if (verdict !== "pass") process.exitCode = 1;
 }
 
-main();
+await main();

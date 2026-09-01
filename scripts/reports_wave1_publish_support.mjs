@@ -26,6 +26,8 @@ export const REPORTS_WAVE1_PUBLISHER = "safeclaw-reports-wave1-explicit-publish"
 export const REPORTS_WAVE1_SOURCE_IDENTITY_ALGORITHM = "git-head-runtime-contract-blob-oids-sha256-v2";
 
 const LOCAL_SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".css", ".json"];
+const GIT_EXEC_TIMEOUT_MS = 30_000;
+const GIT_EXEC_MAX_BUFFER_BYTES = 8 * 1024 * 1024;
 const SPECIAL_LOCAL_IMPORTS = new Map([
   [
     "safeclaw-audit-error-escalation",
@@ -51,9 +53,19 @@ function normalizeIdentityRelative(filePath) {
   return normalized;
 }
 
-function resolveGitHeadSha(root) {
-  const sourceSha = execFileSync("git", ["rev-parse", "--verify", "HEAD"], {
+function execGit(root, args, options = {}) {
+  return execFileSync("git", args, {
+    ...options,
     cwd: root,
+    timeout: GIT_EXEC_TIMEOUT_MS,
+    maxBuffer: GIT_EXEC_MAX_BUFFER_BYTES,
+    killSignal: "SIGKILL",
+    windowsHide: true,
+  });
+}
+
+function resolveGitHeadSha(root) {
+  const sourceSha = execGit(root, ["rev-parse", "--verify", "HEAD"], {
     encoding: "utf8",
   }).trim();
   if (!/^[0-9a-f]{40}$/u.test(sourceSha)) {
@@ -63,8 +75,7 @@ function resolveGitHeadSha(root) {
 }
 
 function listGitTree(root, commitSha) {
-  const output = execFileSync("git", ["ls-tree", "-r", "-z", commitSha], {
-    cwd: root,
+  const output = execGit(root, ["ls-tree", "-r", "-z", commitSha], {
     encoding: "utf8",
   });
   const entries = new Map();
@@ -228,10 +239,10 @@ export function collectReportsWave1ProductFiles(root, commitSha = resolveGitHead
 }
 
 function assertIdentityFilesClean(root, relativeFiles) {
-  const status = execFileSync(
-    "git",
+  const status = execGit(
+    root,
     ["status", "--porcelain=v1", "--untracked-files=all", "--", ...relativeFiles],
-    { cwd: root, encoding: "utf8" },
+    { encoding: "utf8" },
   ).trimEnd();
   if (status) {
     throw new Error(`Reports Wave 1 identity files are not clean:\n${status}`);
@@ -251,8 +262,7 @@ function assertCommitContainsFiles(root, commitSha, relativeFiles, label) {
 
 function assertCommitIsAncestorOfHead(root, commitSha, label) {
   try {
-    execFileSync("git", ["merge-base", "--is-ancestor", commitSha, "HEAD"], {
-      cwd: root,
+    execGit(root, ["merge-base", "--is-ancestor", commitSha, "HEAD"], {
       stdio: "ignore",
     });
   } catch {
@@ -261,10 +271,10 @@ function assertCommitIsAncestorOfHead(root, commitSha, label) {
 }
 
 function resolveProductSourceSha(root, sourceFiles) {
-  const sourceSha = execFileSync(
-    "git",
+  const sourceSha = execGit(
+    root,
     ["log", "-n", "1", "--format=%H", "HEAD", "--", ...sourceFiles, ...REPORTS_WAVE1_PUBLISHER_RELATIVE_FILES],
-    { cwd: root, encoding: "utf8" },
+    { encoding: "utf8" },
   ).trim();
   if (!/^[0-9a-f]{40}$/u.test(sourceSha)) {
     throw new Error(`Unable to resolve Reports Wave 1 source commit for ${sourceFiles.join(", ")}`);
