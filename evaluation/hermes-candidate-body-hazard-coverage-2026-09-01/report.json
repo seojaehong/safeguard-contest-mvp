@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "safeclaw-hermes-candidate-body-hazard-coverage/v1",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_CANDIDATE_BODY_HAZARD_COVERAGE_LIVE_PENDING",
+  "checkedAt": "2026-09-01T01:02:51.973Z",
+  "productCommit": "6eca935547c5984701a382376801809625dc7091",
+  "evidenceMode": "current-source-local-production",
+  "contract": {
+    "canonicalHazardCount": 8,
+    "allMatchedHazardsMustAppearInCandidateBody": true,
+    "metadataTraceAloneCanSatisfyBodyCoverage": false,
+    "unknownHazardIdsFailClosed": true,
+    "approvalRequiresCanonicalTraceAndBodyCoverage": true
+  },
+  "afterLocal": {
+    "artifact": "evaluation/hermes-candidate-body-hazard-coverage-2026-09-01/after-local/report.json",
+    "verdict": "PASS_CURRENT_SOURCE_LOCAL_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+    "caseCount": 5,
+    "passedCount": 5,
+    "failedCount": 0,
+    "matchedHazardCount": 6,
+    "bodyGroundedHazardCount": 6,
+    "bodyHazardCoverageCompleteCount": 5,
+    "multiHazardCase": {
+      "id": "fall-foreign-worker",
+      "matchedHazardCount": 2,
+      "bodyGroundedHazardCount": 2,
+      "passed": true
+    },
+    "reviewerEvidenceTraceCount": 5,
+    "sifEvidenceBoundaryCount": 5,
+    "eventSemanticGroundingCount": 5,
+    "privateEventExposureCount": 0
+  },
+  "verification": {
+    "focusedTests": {
+      "files": 5,
+      "tests": 96,
+      "passed": true
+    },
+    "adjacentTests": {
+      "files": 2,
+      "tests": 34,
+      "passed": true
+    },
+    "focusedRerun": {
+      "files": 4,
+      "tests": 77,
+      "passed": true
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 29,
+    "serverLog": "evaluation/hermes-candidate-body-hazard-coverage-2026-09-01/local-server.stdout.log"
+  },
+  "liveAfterDeploymentRequired": true,
+  "humanReviewCompleted": false,
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "wikiPublicationPerformed": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
+    "productionAfterDeployment": "PENDING"
+  }
+}
