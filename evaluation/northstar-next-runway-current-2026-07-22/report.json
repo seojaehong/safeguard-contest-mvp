@@ -1,34 +1,29 @@
 {
   "schemaVersion": "safeclaw-northstar-next-runway/v2",
-  "generatedAt": "2026-09-01T02:38:45.068Z",
+  "generatedAt": "2026-09-01T03:10:20.884Z",
   "checkedAtKst": "2026-07-22",
   "verdict": "OPEN_APPROVAL_GATED",
-  "sourceHead": "341a10eaf2486ae456ed119692ae95a2212e7dc0",
-  "productionCommit": "4a6bb3026b7a8c49dc9c82834e04e71c4e811071",
+  "sourceHead": "3cf023096463fda2e4d0471b02f9c4e0ca1ef3bb",
+  "productionCommit": "3cf023096463fda2e4d0471b02f9c4e0ca1ef3bb",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "4a6bb3026b7a8c49dc9c82834e04e71c4e811071",
+    "commitSha": "3cf023096463fda2e4d0471b02f9c4e0ca1ef3bb",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-33t5ojook-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-hh585adlx-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
-  "latestEvidenceCommitLive": false,
-  "currentHeadIsEvidenceOnlyPending": true,
-  "sourceHeadLivePending": true,
+  "latestEvidenceCommitLive": true,
+  "currentHeadIsEvidenceOnlyPending": false,
+  "sourceHeadLivePending": false,
   "sourceHeadHasProductChanges": false,
-  "sourcePendingChangedPaths": [
-    "scripts/northstar_live_rollup.mjs",
-    "scripts/northstar_next_runway.mjs",
-    "tests/northstar-live-rollup.test.ts",
-    "tests/northstar-next-runway-generator.test.ts"
-  ],
+  "sourcePendingChangedPaths": [],
   "boundedWorkbenchSourceIncludedInLive": true,
   "boundedWorkbenchCurrentLivePending": false,
-  "liveExactEvidenceCommit": "341a10eaf2486ae456ed119692ae95a2212e7dc0",
-  "liveRollupLiveCommit": "4a6bb3026b7a8c49dc9c82834e04e71c4e811071",
+  "liveExactEvidenceCommit": "3cf023096463fda2e4d0471b02f9c4e0ca1ef3bb",
+  "liveRollupLiveCommit": "3cf023096463fda2e4d0471b02f9c4e0ca1ef3bb",
   "liveRollupMatchesProduction": true,
   "artifacts": {
     "openGate": "evaluation\\northstar-open-gates-current\\report.json",
@@ -2745,8 +2740,8 @@
   },
   "boundedWorkbenchCurrent": {
     "verdict": "PASS_LIVE_PRODUCTION_SCOPED_WITH_EXACT_SESSION_GAP",
-    "sourceHead": "44af0108d28eee519e853356830ee70f1117abc7",
-    "productionCommit": "44af0108d28eee519e853356830ee70f1117abc7",
+    "sourceHead": "3cf023096463fda2e4d0471b02f9c4e0ca1ef3bb",
+    "productionCommit": "3cf023096463fda2e4d0471b02f9c4e0ca1ef3bb",
     "routeSplitAloneAcceptedAsFix": false,
     "providerDispatchLiveClaimed": false,
     "externalProviderCalled": false,
@@ -2889,7 +2884,7 @@
         "exactSavedSessionVerdict": "MISSING_EVIDENCE",
         "rootWidthRatio": 0.86,
         "desktopXRegionCount": 2,
-        "primaryBottom": 696
+        "primaryBottom": 718
       },
       {
         "route": "/share/sessionId?workerId=workerId&theme=day",
@@ -2933,7 +2928,7 @@
         "exactSavedSessionVerdict": "MISSING_EVIDENCE",
         "rootWidthRatio": 0.86,
         "desktopXRegionCount": 2,
-        "primaryBottom": 696
+        "primaryBottom": 718
       },
       {
         "route": "/share/sessionId?workerId=workerId&theme=night",
