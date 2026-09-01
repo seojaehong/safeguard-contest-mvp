@@ -15210,13 +15210,6 @@ body:has(.safeclaw-landing) :is(
     display: none;
   }
 
-  .command-center-shell.workspace-page-share .share-desktop-status-rail {
-    max-height: max(240px, calc(100svh - 365px));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable;
-  }
-
   .command-center-shell.workspace-page-share .share-stage-rail {
     gap: 6px;
   }
@@ -24890,6 +24883,13 @@ body:has(.safeclaw-landing) :is(
     height: min(226px, calc(100svh - 352px));
     min-height: 144px;
     max-height: calc(100svh - 320px);
+  }
+
+  .command-center-shell.workspace-page-share .share-desktop-status-rail {
+    max-height: max(240px, calc(100svh - 365px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
   }
 }
 
