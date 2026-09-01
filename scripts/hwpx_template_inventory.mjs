@@ -1,7 +1,7 @@
-#!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { pathToFileURL } from "node:url";
 
 const defaultRoots = [
   { path: "C:\\Users\\iceam\\Downloads", maxDepth: 0 },
@@ -10,6 +10,14 @@ const defaultRoots = [
 
 const outDir = path.resolve(process.env.SAFECLAW_HWPX_INVENTORY_OUT_DIR || path.join(process.cwd(), "evaluation", "hwpx-template-inventory"));
 const excludedFilePatterns = [/급여/, /괴롭힘/, /취업규칙/, /업무분장/, /상담신청서/];
+
+export const HWPX_INVENTORY_BUDGETS = Object.freeze({
+  inputBytes: 128 * 1024 * 1024,
+  archiveEntries: 64,
+  centralDirectoryBytes: 1024 * 1024,
+  fileNameBytes: 4096,
+  eocdSearchBytes: 65_557
+});
 
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
@@ -35,37 +43,123 @@ function readUInt32(buffer, offset) {
 }
 
 function findEndOfCentralDirectory(buffer) {
-  for (let offset = buffer.length - 22; offset >= Math.max(0, buffer.length - 65558); offset -= 1) {
-    if (readUInt32(buffer, offset) === 0x06054b50) return offset;
+  for (let offset = buffer.length - 22; offset >= 0; offset -= 1) {
+    if (readUInt32(buffer, offset) !== 0x06054b50) continue;
+    const commentLength = readUInt16(buffer, offset + 20);
+    if (offset + 22 + commentLength === buffer.length) return offset;
   }
   return -1;
 }
 
-function listZipEntries(filePath) {
-  const buffer = fs.readFileSync(filePath);
-  const eocd = findEndOfCentralDirectory(buffer);
-  if (eocd < 0) {
-    return { ok: false, entries: [], error: "zip central directory not found" };
+function readExactly(fileDescriptor, length, position) {
+  const buffer = Buffer.alloc(length);
+  let offset = 0;
+  while (offset < length) {
+    const bytesRead = fs.readSync(fileDescriptor, buffer, offset, length - offset, position + offset);
+    if (bytesRead === 0) throw new Error("zip central directory is truncated");
+    offset += bytesRead;
   }
+  return buffer;
+}
 
-  const entryCount = readUInt16(buffer, eocd + 10);
-  let offset = readUInt32(buffer, eocd + 16);
+function parseCentralDirectory(buffer, declaredEntryCount) {
+  let offset = 0;
   const entries = [];
 
-  for (let index = 0; index < entryCount; index += 1) {
-    if (readUInt32(buffer, offset) !== 0x02014b50) break;
+  while (offset < buffer.length) {
+    const signature = readUInt32(buffer, offset);
+    if (signature === 0x05054b50) {
+      const signatureLength = readUInt16(buffer, offset + 4);
+      offset += 6 + signatureLength;
+      continue;
+    }
+    if (signature !== 0x02014b50 || offset + 46 > buffer.length) {
+      throw new Error("zip central directory entry is invalid");
+    }
     const compressedSize = readUInt32(buffer, offset + 20);
     const uncompressedSize = readUInt32(buffer, offset + 24);
     const fileNameLength = readUInt16(buffer, offset + 28);
     const extraLength = readUInt16(buffer, offset + 30);
     const commentLength = readUInt16(buffer, offset + 32);
+    if (compressedSize === 0xffffffff || uncompressedSize === 0xffffffff) {
+      throw new Error("zip64 members are not supported");
+    }
+    if (fileNameLength > HWPX_INVENTORY_BUDGETS.fileNameBytes) {
+      throw new Error("zip entry name exceeds the byte budget");
+    }
     const nameStart = offset + 46;
+    const nextOffset = nameStart + fileNameLength + extraLength + commentLength;
+    if (nextOffset > buffer.length) throw new Error("zip central directory entry is truncated");
     const name = buffer.subarray(nameStart, nameStart + fileNameLength).toString("utf8");
     entries.push({ name, compressedSize, uncompressedSize });
-    offset = nameStart + fileNameLength + extraLength + commentLength;
+    if (entries.length > HWPX_INVENTORY_BUDGETS.archiveEntries) {
+      throw new Error("zip entry count exceeds the budget");
+    }
+    offset = nextOffset;
   }
 
-  return { ok: true, entries, error: "" };
+  if (offset !== buffer.length || entries.length !== declaredEntryCount) {
+    throw new Error(`zip central directory count mismatch: ${entries.length}/${declaredEntryCount}`);
+  }
+  return entries;
+}
+
+export function listZipEntries(filePath) {
+  let fileDescriptor;
+  let bytes = 0;
+  let modifiedAt = null;
+  try {
+    fileDescriptor = fs.openSync(filePath, "r");
+    const stat = fs.fstatSync(fileDescriptor);
+    bytes = stat.size;
+    modifiedAt = stat.mtime.toISOString();
+    if (stat.size > HWPX_INVENTORY_BUDGETS.inputBytes) {
+      throw new Error(`hwpx file exceeds the byte budget: ${stat.size}/${HWPX_INVENTORY_BUDGETS.inputBytes}`);
+    }
+    if (stat.size < 22) throw new Error("zip central directory not found");
+
+    const tailSize = Math.min(stat.size, HWPX_INVENTORY_BUDGETS.eocdSearchBytes);
+    const tailStart = stat.size - tailSize;
+    const tail = readExactly(fileDescriptor, tailSize, tailStart);
+    const eocd = findEndOfCentralDirectory(tail);
+    if (eocd < 0) throw new Error("zip central directory not found");
+
+    const diskNumber = readUInt16(tail, eocd + 4);
+    const centralDirectoryDisk = readUInt16(tail, eocd + 6);
+    const diskEntryCount = readUInt16(tail, eocd + 8);
+    const entryCount = readUInt16(tail, eocd + 10);
+    const centralDirectorySize = readUInt32(tail, eocd + 12);
+    const centralDirectoryOffset = readUInt32(tail, eocd + 16);
+    const eocdAbsoluteOffset = tailStart + eocd;
+    if (diskNumber !== 0 || centralDirectoryDisk !== 0 || diskEntryCount !== entryCount) {
+      throw new Error("multi-disk zip archives are not supported");
+    }
+    if (entryCount === 0xffff || centralDirectorySize === 0xffffffff || centralDirectoryOffset === 0xffffffff) {
+      throw new Error("zip64 central directories are not supported");
+    }
+    if (entryCount > HWPX_INVENTORY_BUDGETS.archiveEntries) {
+      throw new Error("zip entry count exceeds the budget");
+    }
+    if (centralDirectorySize > HWPX_INVENTORY_BUDGETS.centralDirectoryBytes) {
+      throw new Error("zip central directory exceeds the byte budget");
+    }
+    if (centralDirectoryOffset + centralDirectorySize > eocdAbsoluteOffset) {
+      throw new Error("zip central directory bounds are invalid");
+    }
+
+    const centralDirectory = readExactly(fileDescriptor, centralDirectorySize, centralDirectoryOffset);
+    return { ok: true, entries: parseCentralDirectory(centralDirectory, entryCount), error: "", bytes, modifiedAt };
+  } catch (error) {
+    return {
+      ok: false,
+      entries: [],
+      error: error instanceof Error ? error.message : String(error),
+      bytes,
+      modifiedAt
+    };
+  } finally {
+    if (fileDescriptor !== undefined) fs.closeSync(fileDescriptor);
+  }
 }
 
 function classifyTemplate(filePath, entries) {
@@ -83,7 +177,6 @@ function classifyTemplate(filePath, entries) {
 }
 
 function summarizeTemplate(filePath) {
-  const stat = fs.statSync(filePath);
   const zip = listZipEntries(filePath);
   const entries = zip.entries;
   const sectionEntries = entries.filter((entry) => /^Contents\/section/i.test(entry.name));
@@ -92,8 +185,8 @@ function summarizeTemplate(filePath) {
   return {
     path: filePath,
     fileName: path.basename(filePath),
-    bytes: stat.size,
-    modifiedAt: stat.mtime.toISOString(),
+    bytes: zip.bytes,
+    modifiedAt: zip.modifiedAt,
     readableZip: zip.ok,
     error: zip.error || null,
     class: classifyTemplate(filePath, entries),
@@ -134,4 +227,6 @@ function main() {
   console.log(JSON.stringify({ outDir, totalFiles: report.totalFiles, readableZipCount: report.readableZipCount, byClass }, null, 2));
 }
 
-main();
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  main();
+}
