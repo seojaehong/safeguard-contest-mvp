@@ -22,10 +22,47 @@ describe("operator smoke resource budgets", () => {
     });
   });
 
+  it("fails closed when an undeclared streamed response exceeds the byte ceiling", async () => {
+    const fetchImpl = async () => new Response(new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(16));
+        controller.enqueue(new Uint8Array(17));
+        controller.close();
+      },
+    }));
+
+    await expect(fetchBufferWithBudget("https://example.invalid", {}, {
+      maxBytes: 32,
+      timeoutMs: 1_000,
+      fetchImpl,
+    })).rejects.toMatchObject({
+      code: "SMOKE_RESPONSE_BUDGET_EXCEEDED",
+    });
+  });
+
   it("aborts a request that exceeds its deadline", async () => {
     const fetchImpl = async (_url: string | URL | Request, init?: RequestInit) => await new Promise<Response>((_resolve, reject) => {
       init?.signal?.addEventListener("abort", () => reject(init.signal?.reason), { once: true });
     });
+
+    await expect(fetchBufferWithBudget("https://example.invalid", {}, {
+      maxBytes: 32,
+      timeoutMs: 10,
+      fetchImpl,
+    })).rejects.toMatchObject({
+      code: "SMOKE_REQUEST_TIMEOUT",
+    });
+  });
+
+  it("keeps the deadline active while a response body stalls", async () => {
+    const fetchImpl = async (_url: string | URL | Request, init?: RequestInit) => new Response(
+      new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new Uint8Array([123]));
+          init?.signal?.addEventListener("abort", () => controller.error(init.signal?.reason), { once: true });
+        },
+      }),
+    );
 
     await expect(fetchBufferWithBudget("https://example.invalid", {}, {
       maxBytes: 32,
@@ -65,6 +102,10 @@ describe("operator smoke resource budgets", () => {
     expect(orchestration).toContain("fs.rmSync(userDataDir, { recursive: true, force: true })");
     expect(matrix).toContain("fetchBufferWithBudget");
     expect(matrix).toContain("spawnSyncWithBudget");
+    expect(integrity).toContain('fetchBufferWithBudget(`${baseUrl}${route}`, init)');
+    expect(integrity).not.toMatch(/\bfetch\(/);
+    expect(integrity).not.toContain("response.text()");
+    expect(integrity).toContain('new TextDecoder().decode(buffer)');
     expect(integrity).toContain("spawnSyncWithBudget");
     expect(submission).toContain("spawnSyncWithBudget");
     expect(final99).toContain("maxBuffer: 8 * 1024 * 1024");

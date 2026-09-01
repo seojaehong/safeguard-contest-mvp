@@ -7,7 +7,10 @@ import {
   extractBudgetedHwpxText,
   extractBudgetedXlsxText
 } from "./final_output_parser_safety.mjs";
-import { spawnSyncWithBudget } from "./operator_smoke_resource_budget.mjs";
+import {
+  fetchBufferWithBudget,
+  spawnSyncWithBudget
+} from "./operator_smoke_resource_budget.mjs";
 
 const startedAt = Date.now();
 const rootDir = process.cwd();
@@ -154,8 +157,8 @@ function summarize(items) {
 
 async function fetchJson(route, init) {
   const started = Date.now();
-  const response = await fetch(`${baseUrl}${route}`, init);
-  const text = await response.text();
+  const { response, buffer } = await fetchBufferWithBudget(`${baseUrl}${route}`, init);
+  const text = new TextDecoder().decode(buffer);
   let parsed = null;
   try {
     parsed = text ? JSON.parse(text) : null;
