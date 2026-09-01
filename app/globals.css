@@ -15210,6 +15210,13 @@ body:has(.safeclaw-landing) :is(
     display: none;
   }
 
+  .command-center-shell.workspace-page-share .share-desktop-status-rail {
+    max-height: max(240px, calc(100svh - 365px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
   .command-center-shell.workspace-page-share .share-stage-rail {
     gap: 6px;
   }
@@ -15684,6 +15691,19 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two > .safeclaw-module-panel a {
     min-height: 44px;
     align-content: center;
+  }
+}
+
+@media (max-width: 720px) and (max-height: 760px) {
+  .command-center-shell.workspace-page-share .review-propagation-handoff > div {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding-block: 0;
+  }
+
+  .command-center-shell.workspace-page-share .review-propagation-handoff dd {
+    flex: 1 1 auto;
   }
 }
 
