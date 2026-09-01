@@ -1,0 +1,4 @@
+Static source trace only. No exploit, provider call, database mutation, or external request was executed.
+Finding: KOSHA corpus bytes can change after identity capture
+Evidence: scripts/snapshot_kosha_guide_corpus.py hashes paths at 1138-1169 and reopens them at 1925-1941 without revalidation.
+

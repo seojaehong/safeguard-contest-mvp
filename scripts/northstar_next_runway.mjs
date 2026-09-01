@@ -55,7 +55,7 @@ const ARTIFACTS = Object.freeze({
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-31-121c8a01-complete", "report.json"),
-  completedCurrentHeadStandardSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-9504d8db-complete", "report.json"),
+  completedCurrentHeadStandardSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-09-01-c9b67280-complete", "report.json"),
   currentSourceForwardedIdentityRemediation: path.join("evaluation", "current-source-security-forwarded-identity-remediation-2026-08-31", "report.json"),
   currentSourceTemplateInventoryRemediation: path.join("evaluation", "current-source-security-template-inventory-remediation-2026-08-31", "report.json"),
   currentSourceApprovalFreeSecurityRemediation: path.join("evaluation", "current-source-security-approval-free-remediation-2026-08-31", "report.json"),

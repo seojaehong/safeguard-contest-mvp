@@ -1,0 +1,149 @@
+{
+  "completeness": "partial",
+  "deferred": [
+    {
+      "id": "deferred-270167f13aae82c5",
+      "label": "13 baseline candidates",
+      "reason": "Pending parent validation and deduplication."
+    },
+    {
+      "id": "deferred-a0388a3367d6d84b",
+      "label": "7 public service candidates",
+      "reason": "Pending parent validation."
+    },
+    {
+      "id": "deferred-e1a5ab8396ec9fee",
+      "label": "4 tenant/MCP candidates",
+      "reason": "Pending parent validation and baseline deduplication."
+    },
+    {
+      "id": "deferred-e1a5ab8396ec9fee-2",
+      "label": "5 operator candidates",
+      "reason": "Pending parent validation and baseline deduplication."
+    },
+    {
+      "id": "deferred-cc4b4a2e225fab8b",
+      "label": "baseline candidates 1-13",
+      "reason": "Pending independent parent validation."
+    },
+    {
+      "id": "deferred-cc4b4a2e225fab8b-2",
+      "label": "public-service candidates 1-7",
+      "reason": "Pending independent parent validation."
+    }
+  ],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [
+    {
+      "pattern": "Live DB/provider/share-session/vector/wiki/embedding/KOSHA registry mutation",
+      "reason": "Explicit no-mutation and approval-gated boundary."
+    },
+    {
+      "pattern": "Live DB/provider/share-session/vector/wiki/embedding/KOSHA registry mutation",
+      "reason": "Explicit no-mutation boundary."
+    },
+    {
+      "pattern": "DB/provider/share-session/vector/wiki/embedding/KOSHA registry mutation",
+      "reason": "Approval-gated mutation prohibited."
+    }
+  ],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "repository",
+  "mode": "repository",
+  "openQuestions": [
+    {
+      "question": "Effective deployed Supabase grants and migration state"
+    },
+    {
+      "question": "Exact saved Share remains MISSING_EVIDENCE"
+    },
+    {
+      "question": "Production runtime proof for operator-only scripts is not applicable"
+    }
+  ],
+  "scanId": "392a4135-abb0-412d-9128-0c836c94a5ca",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "reported",
+      "id": "surface_database-schema-rls-and-tenant-relational-integrity",
+      "label": "Database schema, RLS, and tenant relational integrity",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_authenticated-workpack-review-worker-mcp-share-and-workflow-routes",
+      "label": "Authenticated workpack, review, worker, MCP, Share, and workflow routes",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_public-ask-search-weather-safety-reference-photo-and-export-routes",
+      "label": "Public ask, search, weather, safety-reference, photo, and export routes",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_operator-parsers-archives-release-publication-and-kosha-workflows",
+      "label": "Operator parsers, archives, release, publication, and KOSHA workflows",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "rejected",
+      "id": "surface_vercel-forwarded-identity-assumptions",
+      "label": "Vercel forwarded identity assumptions",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "rejected",
+      "id": "surface_privileged-migration-path-selector",
+      "label": "Privileged migration path selector",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_database-schema-and-tenant-authorization",
+      "label": "Database schema and tenant authorization",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_authenticated-workpack-share-mcp-and-workflow-routes",
+      "label": "Authenticated workpack, Share, MCP, and workflow routes",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_public-ask-search-weather-reference-photo-and-export-routes",
+      "label": "Public ask, search, weather, reference, photo, and export routes",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_baseline-repository-review",
+      "label": "Baseline repository review",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_public-services-and-resource-controls",
+      "label": "Public services and resource controls",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_tenant-mcp-and-share-authorization",
+      "label": "Tenant, MCP, and Share authorization",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "needs_follow_up",
+      "id": "surface_operator-export-and-kosha-workflows",
+      "label": "Operator, export, and KOSHA workflows",
+      "receiptRefs": []
+    }
+  ]
+}

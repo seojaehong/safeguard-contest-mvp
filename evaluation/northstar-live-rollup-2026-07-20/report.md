@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-09-01T03:16:07.880Z
-Source HEAD at generation: f9e09badfcb5e6db24ebb749345c8255e50f3c83
-Live commit at generation: f9e09badfcb5e6db24ebb749345c8255e50f3c83
+Generated at: 2026-09-01T04:56:35.725Z
+Source HEAD at generation: c9b67280a64995b3cd26f243f404623de21a489a
+Live commit at generation: c9b67280a64995b3cd26f243f404623de21a489a
 
 Note: this artifact is generated before it is committed. The containing Git commit and deployed build must be verified through `git log` and `/api/build-info` after push.
 Overall: `northstar_open_approval_gated`
@@ -145,9 +145,9 @@ Overall: `northstar_open_approval_gated`
 - Fresh rescan required: true; security-complete: false; exact saved Share: MISSING_EVIDENCE
 
 ## Completed Current-head Standard Security Scan
-- Verdict: `NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE`; scan `f6bef30a-7250-428b-9f66-0bad1e42058c`; source `9504d8db95fcbc9f37f6c5abc638e9ad0813a325`
-- Findings: 21 (medium/low 7/14); coverage partial; recorded/deferred rows 25/36
-- Immutable baseline: 18; approval-free/database/Share residuals 11/9/1
+- Verdict: `NOTICE_CURRENT_HEAD_STANDARD_SCAN_16_FINDINGS_PARTIAL_COVERAGE`; scan `392a4135-abb0-412d-9128-0c836c94a5ca`; source `c9b67280a64995b3cd26f243f404623de21a489a`
+- Findings: 16 (medium/low 8/8); coverage partial; recorded/deferred rows 13/6
+- Immutable baseline: 18; approval-free/database/Share residuals 9/7/0
 - Security-complete: false; exact saved Share: MISSING_EVIDENCE
 
 ## Verified Forwarded Identity Remediation
@@ -470,7 +470,7 @@ Overall: `northstar_open_approval_gated`
 | current_security_remediation_ledger | notice | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | notice | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | fresh_current_source_security_scan | notice | evaluation\current-source-standard-security-scan-2026-08-31-121c8a01-complete\report.json |
-| completed_current_head_standard_security_scan | notice | evaluation\current-head-standard-security-scan-2026-08-31-9504d8db-complete\report.json |
+| completed_current_head_standard_security_scan | notice | evaluation\current-head-standard-security-scan-2026-09-01-c9b67280-complete\report.json |
 | current_source_forwarded_identity_remediation | proven | evaluation\current-source-security-forwarded-identity-remediation-2026-08-31\report.json |
 | current_source_template_inventory_remediation | proven | evaluation\current-source-security-template-inventory-remediation-2026-08-31\report.json |
 | current_source_export_smoke_resource_remediation | notice | evaluation\current-source-security-export-smoke-resource-remediation-2026-08-31\report.json |
@@ -579,7 +579,7 @@ Overall: `northstar_open_approval_gated`
 | current_security_remediation_ledger | ancestor | ancestor_of_head | evaluation\security-current-remediation-ledger-2026-08-13\report.json |
 | current_repository_security_rescan | ancestor | ancestor_of_head | evaluation\current-full-repository-security-scan-2026-08-27\report.json |
 | fresh_current_source_security_scan | ancestor | missing | evaluation\current-source-standard-security-scan-2026-08-31-121c8a01-complete\report.json |
-| completed_current_head_standard_security_scan | ancestor | missing | evaluation\current-head-standard-security-scan-2026-08-31-9504d8db-complete\report.json |
+| completed_current_head_standard_security_scan | exact | matches_live | evaluation\current-head-standard-security-scan-2026-09-01-c9b67280-complete\report.json |
 | current_source_forwarded_identity_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-forwarded-identity-remediation-2026-08-31\report.json |
 | current_source_template_inventory_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-template-inventory-remediation-2026-08-31\report.json |
 | current_source_approval_free_security_remediation | ancestor | ancestor_of_head | evaluation\current-source-security-approval-free-remediation-2026-08-31\report.json |

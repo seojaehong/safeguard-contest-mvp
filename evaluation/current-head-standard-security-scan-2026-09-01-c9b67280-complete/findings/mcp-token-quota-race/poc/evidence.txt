@@ -1,0 +1,4 @@
+Static source trace only. No exploit, provider call, database mutation, or external request was executed.
+Finding: MCP active-token quota can be exceeded through concurrent issuance
+Evidence: app/api/mcp-tokens/route.ts:247-280 separates the count and insert; migration 009 adds only an index.
+

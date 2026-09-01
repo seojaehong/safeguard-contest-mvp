@@ -1,0 +1,4 @@
+Static source trace only. No exploit, provider call, database mutation, or external request was executed.
+Finding: Public legal-search page loses request-disconnect cancellation
+Evidence: app/search/page.tsx:8-14 and lib/public-search-operation.ts:45-87 use the synthetic Request signal.
+

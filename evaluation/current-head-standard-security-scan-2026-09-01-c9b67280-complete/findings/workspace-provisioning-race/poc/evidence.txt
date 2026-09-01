@@ -1,0 +1,4 @@
+Static source trace only. No exploit, provider call, database mutation, or external request was executed.
+Finding: Concurrent workspace provisioning can create duplicate organizations and sites
+Evidence: lib/supabase-admin.ts:645-716 uses select-then-insert; migration 002 lacks matching uniqueness constraints.
+

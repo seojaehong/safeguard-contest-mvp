@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-09-01T03:16:07.880Z",
-  "head": "f9e09badfcb5e6db24ebb749345c8255e50f3c83",
+  "generatedAt": "2026-09-01T04:56:35.725Z",
+  "head": "c9b67280a64995b3cd26f243f404623de21a489a",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "f9e09badfcb5e6db24ebb749345c8255e50f3c83",
+    "commitSha": "c9b67280a64995b3cd26f243f404623de21a489a",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ipiggvpm2-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-q34hyea0i-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -222,8 +222,8 @@
     {
       "id": "completed_current_head_standard_security_scan",
       "state": "notice",
-      "artifact": "evaluation\\current-head-standard-security-scan-2026-08-31-9504d8db-complete\\report.json",
-      "detail": "Current-head Standard scan f6bef30a is sealed at 9504d8db with 21 findings (7 medium, 14 low), 21 write-ups, and partial coverage. Canonical artifact hashes match. The immutable original 18-finding baseline is preserved; 11 approval-free source findings, nine database/RLS/atomicity findings, and one approval-sensitive Share capability finding remain open. Security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      "artifact": "evaluation\\current-head-standard-security-scan-2026-09-01-c9b67280-complete\\report.json",
+      "detail": "Current-head Standard scan 392a4135 is sealed at source/live c9b67280 with 16 findings (8 medium, 8 low), 16 write-ups, and partial coverage. Canonical artifact hashes match. The immutable original 18-finding baseline and prior scans are preserved; nine approval-free source findings and seven approval-gated database/RLS/atomicity findings remain open. Security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
     },
     {
       "id": "current_source_forwarded_identity_remediation",
@@ -918,20 +918,20 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
   "completedCurrentHeadStandardSecurityScan": {
-    "artifact": "evaluation\\current-head-standard-security-scan-2026-08-31-9504d8db-complete\\report.json",
-    "verdict": "NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE",
-    "scanId": "f6bef30a-7250-428b-9f66-0bad1e42058c",
-    "sourceHead": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
-    "reportableFindingCount": 21,
-    "mediumFindingCount": 7,
-    "lowFindingCount": 14,
+    "artifact": "evaluation\\current-head-standard-security-scan-2026-09-01-c9b67280-complete\\report.json",
+    "verdict": "NOTICE_CURRENT_HEAD_STANDARD_SCAN_16_FINDINGS_PARTIAL_COVERAGE",
+    "scanId": "392a4135-abb0-412d-9128-0c836c94a5ca",
+    "sourceHead": "c9b67280a64995b3cd26f243f404623de21a489a",
+    "reportableFindingCount": 16,
+    "mediumFindingCount": 8,
+    "lowFindingCount": 8,
     "coverageCompleteness": "partial",
-    "recordedSurfaceCount": 25,
-    "deferredCoverageItemCount": 36,
+    "recordedSurfaceCount": 13,
+    "deferredCoverageItemCount": 6,
     "immutableOriginalFindingCount": 18,
-    "approvalGatedDatabaseOrAtomicityCount": 9,
-    "approvalSensitiveShareCapabilityCount": 1,
-    "approvalFreeProductSourceResidualCount": 11,
+    "approvalGatedDatabaseOrAtomicityCount": 7,
+    "approvalSensitiveShareCapabilityCount": 0,
+    "approvalFreeProductSourceResidualCount": 9,
     "securityCompleteClaimAllowed": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
@@ -2349,9 +2349,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "f9e09badfcb5e6db24ebb749345c8255e50f3c83",
+      "sourceCommit": "c9b67280a64995b3cd26f243f404623de21a489a",
       "sourceStatus": "exact",
-      "productionCommit": "f9e09badfcb5e6db24ebb749345c8255e50f3c83",
+      "productionCommit": "c9b67280a64995b3cd26f243f404623de21a489a",
       "productionStatus": "matches_live"
     },
     {
@@ -2620,11 +2620,11 @@
     },
     {
       "id": "completed_current_head_standard_security_scan",
-      "artifact": "evaluation\\current-head-standard-security-scan-2026-08-31-9504d8db-complete\\report.json",
-      "sourceCommit": "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
-      "sourceStatus": "ancestor",
-      "productionCommit": null,
-      "productionStatus": "missing"
+      "artifact": "evaluation\\current-head-standard-security-scan-2026-09-01-c9b67280-complete\\report.json",
+      "sourceCommit": "c9b67280a64995b3cd26f243f404623de21a489a",
+      "sourceStatus": "exact",
+      "productionCommit": "c9b67280a64995b3cd26f243f404623de21a489a",
+      "productionStatus": "matches_live"
     },
     {
       "id": "current_source_forwarded_identity_remediation",

@@ -1,0 +1,2199 @@
+{
+  "documentType": "codex-security.findings",
+  "findings": [
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "Legacy query and document tables lack row-level authorization",
+          "sink": "supabase/config.toml",
+          "source": "supabase/migrations/001_init.sql",
+          "summary": "The public-schema query_logs and documents tables are created without RLS or policies, leaving stored query and document content dependent on unproven external grant hardening.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_3984f4bbad4a3a7d00d110c2",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:754020e9de099f22971b372494a849fafa6724098173b12a2f88a46e50d34e78"
+      },
+      "identity": {
+        "anchor": "legacy-query-and-document-tables-lack-row-level-authorization"
+      },
+      "locations": [
+        {
+          "endLine": 17,
+          "path": "supabase/migrations/001_init.sql",
+          "role": "root_control",
+          "startLine": 1
+        },
+        {
+          "endLine": 18,
+          "path": "supabase/config.toml",
+          "role": "evidence",
+          "startLine": 7
+        }
+      ],
+      "occurrenceId": "occ_dec34cc492facd4ba9f5fb81",
+      "provenance": {
+        "candidateId": "baseline-1",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "medium",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "legacy-query-and-document-tables-lack-row-level-authorization"
+            },
+            "locations": [
+              {
+                "endLine": 17,
+                "path": "supabase/migrations/001_init.sql",
+                "role": "root_control",
+                "startLine": 1
+              },
+              {
+                "endLine": 18,
+                "path": "supabase/config.toml",
+                "role": "evidence",
+                "startLine": 7
+              }
+            ],
+            "provenance": {
+              "candidateId": "baseline-1",
+              "source": "local_plugin"
+            },
+            "remediation": "Enable RLS, revoke unnecessary anon/authenticated grants, and add narrowly scoped policies or service-role-only access; verify effective deployed grants.",
+            "ruleId": "authorization.missing-rls",
+            "severity": {
+              "level": "medium",
+              "rationale": "The public-schema query_logs and documents tables are created without RLS or policies, leaving stored query and document content dependent on unproven external grant hardening."
+            },
+            "summary": "The public-schema query_logs and documents tables are created without RLS or policies, leaving stored query and document content dependent on unproven external grant hardening.",
+            "taxonomy": {
+              "category": "authorization",
+              "cwe": [
+                "CWE-862"
+              ]
+            },
+            "title": "Legacy query and document tables lack row-level authorization",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Enable RLS, revoke unnecessary anon/authenticated grants, add narrowly scoped policies or service-role-only access, and verify effective deployed grants.",
+      "rootCause": "The public-schema query_logs and documents tables are created without RLS or policies, leaving stored query and document content dependent on unproven external grant hardening.",
+      "ruleId": "authorization.missing-rls",
+      "severity": {
+        "level": "medium",
+        "rationale": "A reachable control bypass or unbounded operation can cause tenant-integrity, data-exposure, or sustained resource impact under realistic stated preconditions."
+      },
+      "summary": "The public-schema query_logs and documents tables are created without RLS or policies, leaving stored query and document content dependent on unproven external grant hardening.",
+      "taxonomy": {
+        "category": "authorization",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Legacy query and document tables lack row-level authorization",
+      "validation": {
+        "confidence": "medium",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "The public-schema query_logs and documents tables are created without RLS or policies, leaving stored query and document content dependent on unproven external grant hardening."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/legacy-tables-missing-rls/legacy-tables-missing-rls.md"
+      }
+    },
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "Null-organization dispatch logs are globally readable and mutable under RLS",
+          "sink": "supabase/migrations/002_workspace_productization.sql",
+          "source": "supabase/migrations/002_workspace_productization.sql",
+          "summary": "The dispatch_logs FOR ALL policy authorizes rows whenever organization_id is NULL, exposing any legacy or malformed tenantless receipt to every authenticated Data API user.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "medium",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_0a1ae249ca05ca20ff43c09f",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:a7ff8f51efca4741f1eb323856c51b93d3af247565222c7fc2f06addec65634f"
+      },
+      "identity": {
+        "anchor": "null-organization-dispatch-logs-are-globally-readable-and-mutable-under-rls"
+      },
+      "locations": [
+        {
+          "endLine": 90,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 76
+        },
+        {
+          "endLine": 200,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 183
+        }
+      ],
+      "occurrenceId": "occ_269beae83d9341bd5e88816a",
+      "provenance": {
+        "candidateId": "baseline-2",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "medium",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "null-organization-dispatch-logs-are-globally-readable-and-mutable-under-rls"
+            },
+            "locations": [
+              {
+                "endLine": 90,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "source",
+                "startLine": 76
+              },
+              {
+                "endLine": 200,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 183
+              }
+            ],
+            "provenance": {
+              "candidateId": "baseline-2",
+              "source": "local_plugin"
+            },
+            "remediation": "Backfill or quarantine legacy rows, make organization_id non-null, remove the NULL policy branch, and reserve any global audit rows for service-role access.",
+            "ruleId": "authorization.null-tenant-dispatch",
+            "severity": {
+              "level": "low",
+              "rationale": "The dispatch_logs FOR ALL policy authorizes rows whenever organization_id is NULL, exposing any legacy or malformed tenantless receipt to every authenticated Data API user."
+            },
+            "summary": "The dispatch_logs FOR ALL policy authorizes rows whenever organization_id is NULL, exposing any legacy or malformed tenantless receipt to every authenticated Data API user.",
+            "taxonomy": {
+              "category": "authorization",
+              "cwe": [
+                "CWE-862"
+              ]
+            },
+            "title": "Null-organization dispatch logs are globally readable and mutable under RLS",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Backfill or quarantine legacy rows, make organization_id non-null, remove the NULL policy branch, and reserve global audit rows for service-role access.",
+      "rootCause": "The dispatch_logs FOR ALL policy authorizes rows whenever organization_id is NULL, exposing any legacy or malformed tenantless receipt to every authenticated Data API user.",
+      "ruleId": "authorization.null-tenant-dispatch",
+      "severity": {
+        "level": "low",
+        "rationale": "Impact is constrained to authenticated tenant state, local/operator workflows, races, or bounded availability degradation."
+      },
+      "summary": "The dispatch_logs FOR ALL policy authorizes rows whenever organization_id is NULL, exposing any legacy or malformed tenantless receipt to every authenticated Data API user.",
+      "taxonomy": {
+        "category": "authorization",
+        "cwe": [
+          "CWE-862"
+        ]
+      },
+      "title": "Null-organization dispatch logs are globally readable and mutable under RLS",
+      "validation": {
+        "confidence": "medium",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "The dispatch_logs FOR ALL policy authorizes rows whenever organization_id is NULL, exposing any legacy or malformed tenantless receipt to every authenticated Data API user."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/null-tenant-dispatch-rls/null-tenant-dispatch-rls.md"
+      }
+    },
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "Relational tenant tuples are not enforced by composite constraints",
+          "sink": "supabase/migrations/010_commercial_operations.sql",
+          "source": "supabase/migrations/002_workspace_productization.sql",
+          "summary": "Independent organization, site, workpack, worker, session, and improvement foreign keys plus organization-only RLS permit an authenticated owner with a foreign UUID to create inconsistent cross-tenant relationships.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_2638a5f2c3992249ad19fb21",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:26b64bbcbcbf7065d93056c9d5c1818908ea03205c291d4c9e03abca7ff140f5"
+      },
+      "identity": {
+        "anchor": "relational-tenant-tuples-are-not-enforced-by-composite-constraints"
+      },
+      "locations": [
+        {
+          "endLine": 80,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "source",
+          "startLine": 21
+        },
+        {
+          "endLine": 64,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "source",
+          "startLine": 1
+        },
+        {
+          "endLine": 85,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "sink",
+          "startLine": 21
+        },
+        {
+          "endLine": 227,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 161
+        }
+      ],
+      "occurrenceId": "occ_252f11bf63a8e3518ae1a9ce",
+      "provenance": {
+        "candidateId": "baseline-3",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "relational-tenant-tuples-are-not-enforced-by-composite-constraints"
+            },
+            "locations": [
+              {
+                "endLine": 80,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "source",
+                "startLine": 21
+              },
+              {
+                "endLine": 64,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "source",
+                "startLine": 1
+              },
+              {
+                "endLine": 85,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "sink",
+                "startLine": 21
+              },
+              {
+                "endLine": 227,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 161
+              }
+            ],
+            "provenance": {
+              "candidateId": "baseline-3",
+              "source": "local_plugin"
+            },
+            "remediation": "Add tenant-consistent composite keys and foreign keys, strengthen WITH CHECK predicates, and clean existing inconsistent tuples before enforcement.",
+            "ruleId": "authorization.tenant-tuple-integrity",
+            "severity": {
+              "level": "low",
+              "rationale": "Independent organization, site, workpack, worker, session, and improvement foreign keys plus organization-only RLS permit an authenticated owner with a foreign UUID to create inconsistent cross-tenant relationships."
+            },
+            "summary": "Independent organization, site, workpack, worker, session, and improvement foreign keys plus organization-only RLS permit an authenticated owner with a foreign UUID to create inconsistent cross-tenant relationships.",
+            "taxonomy": {
+              "category": "authorization",
+              "cwe": [
+                "CWE-863"
+              ]
+            },
+            "title": "Relational tenant tuples are not enforced by composite constraints",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Add tenant-consistent composite keys and foreign keys, strengthen WITH CHECK predicates, and clean existing inconsistent tuples before enforcement.",
+      "rootCause": "Independent organization, site, workpack, worker, session, and improvement foreign keys plus organization-only RLS permit an authenticated owner with a foreign UUID to create inconsistent cross-tenant relationships.",
+      "ruleId": "authorization.tenant-tuple-integrity",
+      "severity": {
+        "level": "low",
+        "rationale": "Impact is constrained to authenticated tenant state, local/operator workflows, races, or bounded availability degradation."
+      },
+      "summary": "Independent organization, site, workpack, worker, session, and improvement foreign keys plus organization-only RLS permit an authenticated owner with a foreign UUID to create inconsistent cross-tenant relationships.",
+      "taxonomy": {
+        "category": "authorization",
+        "cwe": [
+          "CWE-863"
+        ]
+      },
+      "title": "Relational tenant tuples are not enforced by composite constraints",
+      "validation": {
+        "confidence": "high",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "Independent organization, site, workpack, worker, session, and improvement foreign keys plus organization-only RLS permit an authenticated owner with a foreign UUID to create inconsistent cross-tenant relationships."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/tenant-tuple-integrity/tenant-tuple-integrity.md"
+      }
+    },
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "Tenant clients can forge server-authoritative workflow state",
+          "sink": "app/api/workpacks/[id]/learning-export/route.ts",
+          "source": "supabase/migrations/003_knowledge_runtime.sql",
+          "summary": "Broad tenant-owner FOR ALL policies allow direct Data API writes to review, approval, provider, recipient-policy, and regeneration state that application routes otherwise validate as authoritative.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_2b903c9415a7cce9272d6286",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:0ecfbda7a5af405d38eeb763c8ffd66f5d03eedf587b3b33c92affe711fb72c4"
+      },
+      "identity": {
+        "anchor": "tenant-clients-can-forge-server-authoritative-workflow-state"
+      },
+      "locations": [
+        {
+          "endLine": 126,
+          "path": "supabase/migrations/003_knowledge_runtime.sql",
+          "role": "root_control",
+          "startLine": 94
+        },
+        {
+          "endLine": 210,
+          "path": "supabase/migrations/010_commercial_operations.sql",
+          "role": "root_control",
+          "startLine": 161
+        },
+        {
+          "endLine": 722,
+          "path": "lib/knowledge-review.ts",
+          "role": "sink",
+          "startLine": 617
+        },
+        {
+          "endLine": 92,
+          "path": "app/api/workpacks/[id]/learning-export/route.ts",
+          "role": "sink",
+          "startLine": 43
+        }
+      ],
+      "occurrenceId": "occ_acf6ab9120c7f16e1c2a4334",
+      "provenance": {
+        "candidateId": "baseline-4",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "tenant-clients-can-forge-server-authoritative-workflow-state"
+            },
+            "locations": [
+              {
+                "endLine": 126,
+                "path": "supabase/migrations/003_knowledge_runtime.sql",
+                "role": "root_control",
+                "startLine": 94
+              },
+              {
+                "endLine": 210,
+                "path": "supabase/migrations/010_commercial_operations.sql",
+                "role": "root_control",
+                "startLine": 161
+              },
+              {
+                "endLine": 722,
+                "path": "lib/knowledge-review.ts",
+                "role": "sink",
+                "startLine": 617
+              },
+              {
+                "endLine": 92,
+                "path": "app/api/workpacks/[id]/learning-export/route.ts",
+                "role": "sink",
+                "startLine": 43
+              }
+            ],
+            "provenance": {
+              "candidateId": "baseline-4",
+              "source": "local_plugin"
+            },
+            "remediation": "Revoke direct client writes to authoritative fields; use server-only transitions or constrained RPCs and immutable, authenticated review receipts.",
+            "ruleId": "authorization.authoritative-state-forgery",
+            "severity": {
+              "level": "medium",
+              "rationale": "Broad tenant-owner FOR ALL policies allow direct Data API writes to review, approval, provider, recipient-policy, and regeneration state that application routes otherwise validate as authoritative."
+            },
+            "summary": "Broad tenant-owner FOR ALL policies allow direct Data API writes to review, approval, provider, recipient-policy, and regeneration state that application routes otherwise validate as authoritative.",
+            "taxonomy": {
+              "category": "authorization",
+              "cwe": [
+                "CWE-602"
+              ]
+            },
+            "title": "Tenant clients can forge server-authoritative workflow state",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Revoke direct client writes to authoritative fields; use server-only transitions or constrained RPCs and immutable authenticated review receipts.",
+      "rootCause": "Broad tenant-owner FOR ALL policies allow direct Data API writes to review, approval, provider, recipient-policy, and regeneration state that application routes otherwise validate as authoritative.",
+      "ruleId": "authorization.authoritative-state-forgery",
+      "severity": {
+        "level": "medium",
+        "rationale": "A reachable control bypass or unbounded operation can cause tenant-integrity, data-exposure, or sustained resource impact under realistic stated preconditions."
+      },
+      "summary": "Broad tenant-owner FOR ALL policies allow direct Data API writes to review, approval, provider, recipient-policy, and regeneration state that application routes otherwise validate as authoritative.",
+      "taxonomy": {
+        "category": "authorization",
+        "cwe": [
+          "CWE-602"
+        ]
+      },
+      "title": "Tenant clients can forge server-authoritative workflow state",
+      "validation": {
+        "confidence": "high",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "Broad tenant-owner FOR ALL policies allow direct Data API writes to review, approval, provider, recipient-policy, and regeneration state that application routes otherwise validate as authoritative."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/authoritative-state-forgery/authoritative-state-forgery.md"
+      }
+    },
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "MCP active-token quota can be exceeded through concurrent issuance",
+          "sink": "supabase/migrations/009_mcp_token_query_indexes.sql",
+          "source": "lib/mcp-token-service.ts",
+          "summary": "Token issuance counts active credentials and inserts in separate operations, so concurrent owner requests can exceed the per-site cap.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_580804e515768b8dd224e232",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:2b063c1db5904ddd580f24649dd14d26e300660fead8d17685535a5afcd50590"
+      },
+      "identity": {
+        "anchor": "mcp-active-token-quota-can-be-exceeded-through-concurrent-issuance"
+      },
+      "locations": [
+        {
+          "endLine": 18,
+          "path": "lib/mcp-token-service.ts",
+          "role": "root_control",
+          "startLine": 14
+        },
+        {
+          "endLine": 280,
+          "path": "app/api/mcp-tokens/route.ts",
+          "role": "sink",
+          "startLine": 247
+        },
+        {
+          "endLine": 21,
+          "path": "supabase/migrations/009_mcp_token_query_indexes.sql",
+          "role": "evidence",
+          "startLine": 19
+        }
+      ],
+      "occurrenceId": "occ_eae92ba81be073572d625f31",
+      "provenance": {
+        "candidateId": "baseline-5",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "mcp-active-token-quota-can-be-exceeded-through-concurrent-issuance"
+            },
+            "locations": [
+              {
+                "endLine": 18,
+                "path": "lib/mcp-token-service.ts",
+                "role": "root_control",
+                "startLine": 14
+              },
+              {
+                "endLine": 280,
+                "path": "app/api/mcp-tokens/route.ts",
+                "role": "sink",
+                "startLine": 247
+              },
+              {
+                "endLine": 21,
+                "path": "supabase/migrations/009_mcp_token_query_indexes.sql",
+                "role": "evidence",
+                "startLine": 19
+              }
+            ],
+            "provenance": {
+              "candidateId": "baseline-5",
+              "source": "local_plugin"
+            },
+            "remediation": "Move count-and-insert into a transactionally locked database function or allocate bounded unique token slots.",
+            "ruleId": "race-condition.mcp-token-quota",
+            "severity": {
+              "level": "low",
+              "rationale": "Token issuance counts active credentials and inserts in separate operations, so concurrent owner requests can exceed the per-site cap."
+            },
+            "summary": "Token issuance counts active credentials and inserts in separate operations, so concurrent owner requests can exceed the per-site cap.",
+            "taxonomy": {
+              "category": "race-condition",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "MCP active-token quota can be exceeded through concurrent issuance",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Move count-and-insert into a transactionally locked database function or allocate bounded unique token slots.",
+      "rootCause": "Token issuance counts active credentials and inserts in separate operations, so concurrent owner requests can exceed the per-site cap.",
+      "ruleId": "race-condition.mcp-token-quota",
+      "severity": {
+        "level": "low",
+        "rationale": "Impact is constrained to authenticated tenant state, local/operator workflows, races, or bounded availability degradation."
+      },
+      "summary": "Token issuance counts active credentials and inserts in separate operations, so concurrent owner requests can exceed the per-site cap.",
+      "taxonomy": {
+        "category": "race-condition",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "MCP active-token quota can be exceeded through concurrent issuance",
+      "validation": {
+        "confidence": "high",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "Token issuance counts active credentials and inserts in separate operations, so concurrent owner requests can exceed the per-site cap."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/mcp-token-quota-race/mcp-token-quota-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "Concurrent worker imports bypass the site-transfer gate",
+          "sink": "supabase/migrations/002_workspace_productization.sql",
+          "source": "app/api/workers/route.ts",
+          "summary": "Worker import checks existing site assignments before an independent upsert keyed only by organization_id and external_key, permitting concurrent cross-site imports to race into silent reassignment.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_bfd9e75de1add6d7f8bc6bbf",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:e3de2b08c9799be79931911894eec5714d91e6830bf3334617be9f6d8b4204f8"
+      },
+      "identity": {
+        "anchor": "concurrent-worker-imports-bypass-the-site-transfer-gate"
+      },
+      "locations": [
+        {
+          "endLine": 120,
+          "path": "app/api/workers/route.ts",
+          "role": "sink",
+          "startLine": 84
+        },
+        {
+          "endLine": 42,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 21
+        }
+      ],
+      "occurrenceId": "occ_162fa1c6aae2d90457741f31",
+      "provenance": {
+        "candidateId": "baseline-6",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "concurrent-worker-imports-bypass-the-site-transfer-gate"
+            },
+            "locations": [
+              {
+                "endLine": 120,
+                "path": "app/api/workers/route.ts",
+                "role": "sink",
+                "startLine": 84
+              },
+              {
+                "endLine": 42,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 21
+              }
+            ],
+            "provenance": {
+              "candidateId": "baseline-6",
+              "source": "local_plugin"
+            },
+            "remediation": "Use a transactional RPC or conditional update that succeeds only when site_id is unchanged and require a separate explicit transfer operation.",
+            "ruleId": "race-condition.worker-site-transfer",
+            "severity": {
+              "level": "medium",
+              "rationale": "Worker import checks existing site assignments before an independent upsert keyed only by organization_id and external_key, permitting concurrent cross-site imports to race into silent reassignment."
+            },
+            "summary": "Worker import checks existing site assignments before an independent upsert keyed only by organization_id and external_key, permitting concurrent cross-site imports to race into silent reassignment.",
+            "taxonomy": {
+              "category": "race-condition",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "Concurrent worker imports bypass the site-transfer gate",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Use a transactional RPC or conditional update that succeeds only when site_id is unchanged and require a separate explicit transfer operation.",
+      "rootCause": "Worker import checks existing site assignments before an independent upsert keyed only by organization_id and external_key, permitting concurrent cross-site imports to race into silent reassignment.",
+      "ruleId": "race-condition.worker-site-transfer",
+      "severity": {
+        "level": "medium",
+        "rationale": "A reachable control bypass or unbounded operation can cause tenant-integrity, data-exposure, or sustained resource impact under realistic stated preconditions."
+      },
+      "summary": "Worker import checks existing site assignments before an independent upsert keyed only by organization_id and external_key, permitting concurrent cross-site imports to race into silent reassignment.",
+      "taxonomy": {
+        "category": "race-condition",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Concurrent worker imports bypass the site-transfer gate",
+      "validation": {
+        "confidence": "high",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "Worker import checks existing site assignments before an independent upsert keyed only by organization_id and external_key, permitting concurrent cross-site imports to race into silent reassignment."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/worker-site-transfer-race/worker-site-transfer-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "Concurrent workspace provisioning can create duplicate organizations and sites",
+          "sink": "supabase/migrations/002_workspace_productization.sql",
+          "source": "lib/supabase-admin.ts",
+          "summary": "First-use provisioning performs select-then-insert for organizations and sites without matching uniqueness constraints, allowing concurrent requests to create duplicates.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_4d4b705d23453081c755b765",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:176049aedffd218a2b78f1fa6d97b4f07a693946ef30fa03986362e443bc5d5f"
+      },
+      "identity": {
+        "anchor": "concurrent-workspace-provisioning-can-create-duplicate-organizations-and-sites"
+      },
+      "locations": [
+        {
+          "endLine": 716,
+          "path": "lib/supabase-admin.ts",
+          "role": "sink",
+          "startLine": 645
+        },
+        {
+          "endLine": 20,
+          "path": "supabase/migrations/002_workspace_productization.sql",
+          "role": "root_control",
+          "startLine": 3
+        }
+      ],
+      "occurrenceId": "occ_864bfb4a4162b7c316e80fa6",
+      "provenance": {
+        "candidateId": "baseline-7",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "concurrent-workspace-provisioning-can-create-duplicate-organizations-and-sites"
+            },
+            "locations": [
+              {
+                "endLine": 716,
+                "path": "lib/supabase-admin.ts",
+                "role": "sink",
+                "startLine": 645
+              },
+              {
+                "endLine": 20,
+                "path": "supabase/migrations/002_workspace_productization.sql",
+                "role": "root_control",
+                "startLine": 3
+              }
+            ],
+            "provenance": {
+              "candidateId": "baseline-7",
+              "source": "local_plugin"
+            },
+            "remediation": "Add owner and organization/name uniqueness constraints and replace select-then-insert with conflict-safe upserts or a transactional provisioning function.",
+            "ruleId": "race-condition.workspace-provisioning",
+            "severity": {
+              "level": "low",
+              "rationale": "First-use provisioning performs select-then-insert for organizations and sites without matching uniqueness constraints, allowing concurrent requests to create duplicates."
+            },
+            "summary": "First-use provisioning performs select-then-insert for organizations and sites without matching uniqueness constraints, allowing concurrent requests to create duplicates.",
+            "taxonomy": {
+              "category": "race-condition",
+              "cwe": [
+                "CWE-362"
+              ]
+            },
+            "title": "Concurrent workspace provisioning can create duplicate organizations and sites",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Add owner and organization/name uniqueness constraints and replace select-then-insert with conflict-safe upserts or a transactional provisioning function.",
+      "rootCause": "First-use provisioning performs select-then-insert for organizations and sites without matching uniqueness constraints, allowing concurrent requests to create duplicates.",
+      "ruleId": "race-condition.workspace-provisioning",
+      "severity": {
+        "level": "low",
+        "rationale": "Impact is constrained to authenticated tenant state, local/operator workflows, races, or bounded availability degradation."
+      },
+      "summary": "First-use provisioning performs select-then-insert for organizations and sites without matching uniqueness constraints, allowing concurrent requests to create duplicates.",
+      "taxonomy": {
+        "category": "race-condition",
+        "cwe": [
+          "CWE-362"
+        ]
+      },
+      "title": "Concurrent workspace provisioning can create duplicate organizations and sites",
+      "validation": {
+        "confidence": "high",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "First-use provisioning performs select-then-insert for organizations and sites without matching uniqueness constraints, allowing concurrent requests to create duplicates."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/workspace-provisioning-race/workspace-provisioning-race.md"
+      }
+    },
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "KOSHA corpus bytes can change after identity capture",
+          "sink": "scripts/snapshot_kosha_guide_corpus.py",
+          "source": "scripts/snapshot_kosha_guide_corpus.py",
+          "summary": "The snapshot workflow hashes and inventories corpus paths, then later reopens ZIPs or direct PDFs without binding parsed bytes to the captured digest and member metadata.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_731dfce06fea0669acffcc3e",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:643824808b66d8a59dad0c947496fb85038391f6f02f5a6421a61bfbd4211255"
+      },
+      "identity": {
+        "anchor": "kosha-corpus-bytes-can-change-after-identity-capture"
+      },
+      "locations": [
+        {
+          "endLine": 590,
+          "path": "scripts/snapshot_kosha_guide_corpus.py",
+          "role": "source",
+          "startLine": 525
+        },
+        {
+          "endLine": 1169,
+          "path": "scripts/snapshot_kosha_guide_corpus.py",
+          "role": "root_control",
+          "startLine": 1138
+        },
+        {
+          "endLine": 1941,
+          "path": "scripts/snapshot_kosha_guide_corpus.py",
+          "role": "sink",
+          "startLine": 1925
+        }
+      ],
+      "occurrenceId": "occ_f40d03d11a2b0135137e3a45",
+      "provenance": {
+        "candidateId": "baseline-8",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "kosha-corpus-bytes-can-change-after-identity-capture"
+            },
+            "locations": [
+              {
+                "endLine": 590,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "source",
+                "startLine": 525
+              },
+              {
+                "endLine": 1169,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "root_control",
+                "startLine": 1138
+              },
+              {
+                "endLine": 1941,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "sink",
+                "startLine": 1925
+              }
+            ],
+            "provenance": {
+              "candidateId": "baseline-8",
+              "source": "local_plugin"
+            },
+            "remediation": "Parse immutable staged copies or retained descriptors; otherwise revalidate file digest and ZIP member CRC/sizes immediately before every read.",
+            "ruleId": "integrity.kosha-source-toctou",
+            "severity": {
+              "level": "medium",
+              "rationale": "The snapshot workflow hashes and inventories corpus paths, then later reopens ZIPs or direct PDFs without binding the parsed bytes to the captured digest and member metadata."
+            },
+            "summary": "The snapshot workflow hashes and inventories corpus paths, then later reopens ZIPs or direct PDFs without binding the parsed bytes to the captured digest and member metadata.",
+            "taxonomy": {
+              "category": "integrity",
+              "cwe": [
+                "CWE-367"
+              ]
+            },
+            "title": "KOSHA corpus bytes can change after identity capture",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Parse immutable staged copies or retained descriptors; otherwise revalidate file digest and ZIP member CRC and sizes immediately before every read.",
+      "rootCause": "The snapshot workflow hashes and inventories corpus paths, then later reopens ZIPs or direct PDFs without binding parsed bytes to the captured digest and member metadata.",
+      "ruleId": "integrity.kosha-source-toctou",
+      "severity": {
+        "level": "medium",
+        "rationale": "A reachable control bypass or unbounded operation can cause tenant-integrity, data-exposure, or sustained resource impact under realistic stated preconditions."
+      },
+      "summary": "The snapshot workflow hashes and inventories corpus paths, then later reopens ZIPs or direct PDFs without binding parsed bytes to the captured digest and member metadata.",
+      "taxonomy": {
+        "category": "integrity",
+        "cwe": [
+          "CWE-367"
+        ]
+      },
+      "title": "KOSHA corpus bytes can change after identity capture",
+      "validation": {
+        "confidence": "high",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "The snapshot workflow hashes and inventories corpus paths, then later reopens ZIPs or direct PDFs without binding parsed bytes to the captured digest and member metadata."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/kosha-source-toctou/kosha-source-toctou.md"
+      }
+    },
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "Operator PDF parsers lack enforceable hard deadlines",
+          "sink": "scripts/scan_industrial_safety_templates.py",
+          "source": "scripts/snapshot_kosha_guide_corpus.py",
+          "summary": "PdfReader construction and extract_text run synchronously in the main process, so elapsed checks and output caps cannot interrupt a parser that hangs or consumes excessive memory.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_e712085e604b1e6e59d073fb",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:78156905bf5278b15533058ce51f0664d52eb37be9cc19ad2f3f663b0c8bb617"
+      },
+      "identity": {
+        "anchor": "operator-pdf-parsers-lack-enforceable-hard-deadlines"
+      },
+      "locations": [
+        {
+          "endLine": 988,
+          "path": "scripts/snapshot_kosha_guide_corpus.py",
+          "role": "sink",
+          "startLine": 958
+        },
+        {
+          "endLine": 275,
+          "path": "scripts/scan_industrial_safety_templates.py",
+          "role": "sink",
+          "startLine": 259
+        },
+        {
+          "endLine": 408,
+          "path": "scripts/scan_industrial_safety_templates.py",
+          "role": "root_control",
+          "startLine": 383
+        }
+      ],
+      "occurrenceId": "occ_075bd450f5d1e0e1ae97f1a8",
+      "provenance": {
+        "candidateId": "baseline-9",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "operator-pdf-parsers-lack-enforceable-hard-deadlines"
+            },
+            "locations": [
+              {
+                "endLine": 988,
+                "path": "scripts/snapshot_kosha_guide_corpus.py",
+                "role": "sink",
+                "startLine": 958
+              },
+              {
+                "endLine": 275,
+                "path": "scripts/scan_industrial_safety_templates.py",
+                "role": "sink",
+                "startLine": 259
+              },
+              {
+                "endLine": 408,
+                "path": "scripts/scan_industrial_safety_templates.py",
+                "role": "root_control",
+                "startLine": 383
+              }
+            ],
+            "provenance": {
+              "candidateId": "baseline-9",
+              "source": "local_plugin"
+            },
+            "remediation": "Run untrusted PDF parsing in disposable worker processes with wall-clock, memory, and output limits and terminate on deadline.",
+            "ruleId": "resource-exhaustion.pdf-parser-deadline",
+            "severity": {
+              "level": "medium",
+              "rationale": "PdfReader construction and extract_text run synchronously in the main process, so elapsed checks and output caps cannot interrupt a parser that hangs or consumes excessive memory."
+            },
+            "summary": "PdfReader construction and extract_text run synchronously in the main process, so elapsed checks and output caps cannot interrupt a parser that hangs or consumes excessive memory.",
+            "taxonomy": {
+              "category": "resource-exhaustion",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "Operator PDF parsers lack enforceable hard deadlines",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Run untrusted PDF parsing in disposable worker processes with wall-clock, memory, and output limits and terminate on deadline.",
+      "rootCause": "PdfReader construction and extract_text run synchronously in the main process, so elapsed checks and output caps cannot interrupt a parser that hangs or consumes excessive memory.",
+      "ruleId": "resource-exhaustion.pdf-parser-deadline",
+      "severity": {
+        "level": "medium",
+        "rationale": "A reachable control bypass or unbounded operation can cause tenant-integrity, data-exposure, or sustained resource impact under realistic stated preconditions."
+      },
+      "summary": "PdfReader construction and extract_text run synchronously in the main process, so elapsed checks and output caps cannot interrupt a parser that hangs or consumes excessive memory.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Operator PDF parsers lack enforceable hard deadlines",
+      "validation": {
+        "confidence": "high",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "PdfReader construction and extract_text run synchronously in the main process, so elapsed checks and output caps cannot interrupt a parser that hangs or consumes excessive memory."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/pdf-parser-hard-deadline/pdf-parser-hard-deadline.md"
+      }
+    },
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "HWPX anonymization succeeds without a valid cleanup policy",
+          "sink": "scripts/anonymize_hwpx_templates.mjs",
+          "source": "scripts/anonymize_hwpx_templates.mjs",
+          "summary": "Missing, malformed, or empty cleanup-token configuration becomes an empty replacement list while outputs are still written with status ok, allowing identifiers to remain in committed templates.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_b6712b40c7102be95df8abd6",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:d779f540208bdb15c25764497f6c5d2f5434b88d079026a2327abc97936f0786"
+      },
+      "identity": {
+        "anchor": "hwpx-anonymization-succeeds-without-a-valid-cleanup-policy"
+      },
+      "locations": [
+        {
+          "endLine": 42,
+          "path": "scripts/anonymize_hwpx_templates.mjs",
+          "role": "root_control",
+          "startLine": 25
+        },
+        {
+          "endLine": 228,
+          "path": "scripts/anonymize_hwpx_templates.mjs",
+          "role": "sink",
+          "startLine": 202
+        }
+      ],
+      "occurrenceId": "occ_532355f7e25f525906fd5c6d",
+      "provenance": {
+        "candidateId": "baseline-10",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "hwpx-anonymization-succeeds-without-a-valid-cleanup-policy"
+            },
+            "locations": [
+              {
+                "endLine": 42,
+                "path": "scripts/anonymize_hwpx_templates.mjs",
+                "role": "root_control",
+                "startLine": 25
+              },
+              {
+                "endLine": 228,
+                "path": "scripts/anonymize_hwpx_templates.mjs",
+                "role": "sink",
+                "startLine": 202
+              }
+            ],
+            "provenance": {
+              "candidateId": "baseline-10",
+              "source": "local_plugin"
+            },
+            "remediation": "Fail closed unless a validated non-empty digest-bound policy is present, then verify configured forbidden identifiers are absent before writing success.",
+            "ruleId": "data-exposure.hwpx-anonymization-policy",
+            "severity": {
+              "level": "medium",
+              "rationale": "Missing, malformed, or empty cleanup-token configuration becomes an empty replacement list while outputs are still written with status ok, allowing identifiers to remain in committed templates."
+            },
+            "summary": "Missing, malformed, or empty cleanup-token configuration becomes an empty replacement list while outputs are still written with status ok, allowing identifiers to remain in committed templates.",
+            "taxonomy": {
+              "category": "data-exposure",
+              "cwe": [
+                "CWE-200"
+              ]
+            },
+            "title": "HWPX anonymization succeeds without a valid cleanup policy",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Fail closed unless a validated non-empty digest-bound policy is present, then verify configured forbidden identifiers are absent before writing success.",
+      "rootCause": "Missing, malformed, or empty cleanup-token configuration becomes an empty replacement list while outputs are still written with status ok, allowing identifiers to remain in committed templates.",
+      "ruleId": "data-exposure.hwpx-anonymization-policy",
+      "severity": {
+        "level": "medium",
+        "rationale": "A reachable control bypass or unbounded operation can cause tenant-integrity, data-exposure, or sustained resource impact under realistic stated preconditions."
+      },
+      "summary": "Missing, malformed, or empty cleanup-token configuration becomes an empty replacement list while outputs are still written with status ok, allowing identifiers to remain in committed templates.",
+      "taxonomy": {
+        "category": "data-exposure",
+        "cwe": [
+          "CWE-200"
+        ]
+      },
+      "title": "HWPX anonymization succeeds without a valid cleanup policy",
+      "validation": {
+        "confidence": "high",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "Missing, malformed, or empty cleanup-token configuration becomes an empty replacement list while outputs are still written with status ok, allowing identifiers to remain in committed templates."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/hwpx-anonymization-policy/hwpx-anonymization-policy.md"
+      }
+    },
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "HWPX inventory reads full files before enforcing a size limit",
+          "sink": "scripts/hwpx_template_inventory.mjs",
+          "source": "scripts/hwpx_template_inventory.mjs",
+          "summary": "The inventory helper reads each candidate HWPX completely into memory before inspecting metadata and has no pre-read byte ceiling.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_199b088ad3aa500c92e1c3a0",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:1ffb34377a7a2ed07ccaf842b3587e4a7e9fd9982db69012c73822d236b833ac"
+      },
+      "identity": {
+        "anchor": "hwpx-inventory-reads-full-files-before-enforcing-a-size-limit"
+      },
+      "locations": [
+        {
+          "endLine": 66,
+          "path": "scripts/hwpx_template_inventory.mjs",
+          "role": "sink",
+          "startLine": 44
+        },
+        {
+          "endLine": 98,
+          "path": "scripts/hwpx_template_inventory.mjs",
+          "role": "source",
+          "startLine": 85
+        }
+      ],
+      "occurrenceId": "occ_632f64f6df98f684f1f9e9ab",
+      "provenance": {
+        "candidateId": "baseline-11",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "hwpx-inventory-reads-full-files-before-enforcing-a-size-limit"
+            },
+            "locations": [
+              {
+                "endLine": 66,
+                "path": "scripts/hwpx_template_inventory.mjs",
+                "role": "sink",
+                "startLine": 44
+              },
+              {
+                "endLine": 98,
+                "path": "scripts/hwpx_template_inventory.mjs",
+                "role": "source",
+                "startLine": 85
+              }
+            ],
+            "provenance": {
+              "candidateId": "baseline-11",
+              "source": "local_plugin"
+            },
+            "remediation": "Stat and reject oversized files before reading, parse only a bounded ZIP tail/central directory, and cap entry counts and directory bytes.",
+            "ruleId": "resource-exhaustion.hwpx-inventory-read",
+            "severity": {
+              "level": "low",
+              "rationale": "The inventory helper reads each candidate HWPX completely into memory before inspecting metadata and has no pre-read byte ceiling."
+            },
+            "summary": "The inventory helper reads each candidate HWPX completely into memory before inspecting metadata and has no pre-read byte ceiling.",
+            "taxonomy": {
+              "category": "resource-exhaustion",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "HWPX inventory reads full files before enforcing a size limit",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Stat and reject oversized files before reading, parse only a bounded ZIP tail or central directory, and cap entry counts and directory bytes.",
+      "rootCause": "The inventory helper reads each candidate HWPX completely into memory before inspecting metadata and has no pre-read byte ceiling.",
+      "ruleId": "resource-exhaustion.hwpx-inventory-read",
+      "severity": {
+        "level": "low",
+        "rationale": "Impact is constrained to authenticated tenant state, local/operator workflows, races, or bounded availability degradation."
+      },
+      "summary": "The inventory helper reads each candidate HWPX completely into memory before inspecting metadata and has no pre-read byte ceiling.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "HWPX inventory reads full files before enforcing a size limit",
+      "validation": {
+        "confidence": "high",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "The inventory helper reads each candidate HWPX completely into memory before inspecting metadata and has no pre-read byte ceiling."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/hwpx-inventory-unbounded-read/hwpx-inventory-unbounded-read.md"
+      }
+    },
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "Workbook budgets apply after ExcelJS materialization",
+          "sink": "scripts/final_output_parser_safety.mjs",
+          "source": "scripts/final_output_parser_safety.mjs",
+          "summary": "The final-output parser preflights the OOXML archive but ExcelJS materializes the entire workbook before sheet, row, cell, and elapsed budgets are enforced.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_25a84dda3fa5d2f8aa43d288",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:148848059237d30fa78cf3b4658fea5ef51c3fd1d5ab5c1f544c9f4d76a66313"
+      },
+      "identity": {
+        "anchor": "workbook-budgets-apply-after-exceljs-materialization"
+      },
+      "locations": [
+        {
+          "endLine": 130,
+          "path": "scripts/final_output_parser_safety.mjs",
+          "role": "sink",
+          "startLine": 101
+        }
+      ],
+      "occurrenceId": "occ_8b9dd5eb7d7115a8e936c6d3",
+      "provenance": {
+        "candidateId": "baseline-12",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "workbook-budgets-apply-after-exceljs-materialization"
+            },
+            "locations": [
+              {
+                "endLine": 130,
+                "path": "scripts/final_output_parser_safety.mjs",
+                "role": "sink",
+                "startLine": 101
+              }
+            ],
+            "provenance": {
+              "candidateId": "baseline-12",
+              "source": "local_plugin"
+            },
+            "remediation": "Parse workbook XML in a bounded streaming worker or enforce projected worksheet/cell limits before ExcelJS allocation, with an external hard deadline and memory cap.",
+            "ruleId": "resource-exhaustion.xlsx-materialization",
+            "severity": {
+              "level": "low",
+              "rationale": "The final-output parser preflights the OOXML archive but ExcelJS materializes the entire workbook before sheet, row, cell, and elapsed budgets are enforced."
+            },
+            "summary": "The final-output parser preflights the OOXML archive but ExcelJS materializes the entire workbook before sheet, row, cell, and elapsed budgets are enforced.",
+            "taxonomy": {
+              "category": "resource-exhaustion",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "Workbook budgets apply after ExcelJS materialization",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Parse workbook XML in a bounded streaming worker or enforce projected worksheet and cell limits before ExcelJS allocation, with an external hard deadline and memory cap.",
+      "rootCause": "The final-output parser preflights the OOXML archive but ExcelJS materializes the entire workbook before sheet, row, cell, and elapsed budgets are enforced.",
+      "ruleId": "resource-exhaustion.xlsx-materialization",
+      "severity": {
+        "level": "low",
+        "rationale": "Impact is constrained to authenticated tenant state, local/operator workflows, races, or bounded availability degradation."
+      },
+      "summary": "The final-output parser preflights the OOXML archive but ExcelJS materializes the entire workbook before sheet, row, cell, and elapsed budgets are enforced.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Workbook budgets apply after ExcelJS materialization",
+      "validation": {
+        "confidence": "high",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "The final-output parser preflights the OOXML archive but ExcelJS materializes the entire workbook before sheet, row, cell, and elapsed budgets are enforced."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/xlsx-pre-materialization-budget/xlsx-pre-materialization-budget.md"
+      }
+    },
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "Final-output integrity audit buffers unbounded HTTP responses",
+          "sink": "scripts/final_output_integrity_audit.mjs",
+          "source": "scripts/final_output_integrity_audit.mjs",
+          "summary": "The audit helper fetches without a timeout and calls response.text before enforcing any response-byte bound, allowing a slow or oversized configured endpoint to exhaust the audit worker.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_dd1f4424d504501f886d5745",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c7e92c31e11b6cbf1239a8d2553b17b055af634232d60642d2a46fff8ffca02a"
+      },
+      "identity": {
+        "anchor": "final-output-integrity-audit-buffers-unbounded-http-responses"
+      },
+      "locations": [
+        {
+          "endLine": 171,
+          "path": "scripts/final_output_integrity_audit.mjs",
+          "role": "sink",
+          "startLine": 155
+        }
+      ],
+      "occurrenceId": "occ_252cb6d23dc176b1c42bb694",
+      "provenance": {
+        "candidateId": "baseline-13",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "final-output-integrity-audit-buffers-unbounded-http-responses"
+            },
+            "locations": [
+              {
+                "endLine": 171,
+                "path": "scripts/final_output_integrity_audit.mjs",
+                "role": "sink",
+                "startLine": 155
+              }
+            ],
+            "provenance": {
+              "candidateId": "baseline-13",
+              "source": "local_plugin"
+            },
+            "remediation": "Use AbortController deadlines and a bounded streaming response reader before JSON parsing or preview capture.",
+            "ruleId": "resource-exhaustion.audit-http-buffer",
+            "severity": {
+              "level": "low",
+              "rationale": "The audit helper fetches without a timeout and calls response.text before enforcing any response-byte bound, allowing a slow or oversized configured endpoint to exhaust the audit worker."
+            },
+            "summary": "The audit helper fetches without a timeout and calls response.text before enforcing any response-byte bound, allowing a slow or oversized configured endpoint to exhaust the audit worker.",
+            "taxonomy": {
+              "category": "resource-exhaustion",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "Final-output integrity audit buffers unbounded HTTP responses",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Use AbortController deadlines and a bounded streaming response reader before JSON parsing or preview capture.",
+      "rootCause": "The audit helper fetches without a timeout and calls response.text before enforcing any response-byte bound, allowing a slow or oversized configured endpoint to exhaust the audit worker.",
+      "ruleId": "resource-exhaustion.audit-http-buffer",
+      "severity": {
+        "level": "low",
+        "rationale": "Impact is constrained to authenticated tenant state, local/operator workflows, races, or bounded availability degradation."
+      },
+      "summary": "The audit helper fetches without a timeout and calls response.text before enforcing any response-byte bound, allowing a slow or oversized configured endpoint to exhaust the audit worker.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Final-output integrity audit buffers unbounded HTTP responses",
+      "validation": {
+        "confidence": "high",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "The audit helper fetches without a timeout and calls response.text before enforcing any response-byte bound, allowing a slow or oversized configured endpoint to exhaust the audit worker."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/audit-http-unbounded-buffer/audit-http-unbounded-buffer.md"
+      }
+    },
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "Public ask page loses request-disconnect cancellation",
+          "sink": "lib/public-ask-operation.ts",
+          "source": "lib/public-page-admission.ts",
+          "summary": "The server page constructs a new header-only Request and runs provider-backed ask work with its fresh signal, so browser disconnects cannot cancel the underlying provider operation.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_d185fe96f82af5c8442fc165",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:b3a421af354424968ec5f245cff341a108b65b58f14d3e9c83a2998231161cde"
+      },
+      "identity": {
+        "anchor": "public-ask-page-loses-request-disconnect-cancellation"
+      },
+      "locations": [
+        {
+          "endLine": 9,
+          "path": "lib/public-page-admission.ts",
+          "role": "root_control",
+          "startLine": 1
+        },
+        {
+          "endLine": 25,
+          "path": "app/ask/page.tsx",
+          "role": "source",
+          "startLine": 16
+        },
+        {
+          "endLine": 108,
+          "path": "lib/public-ask-operation.ts",
+          "role": "sink",
+          "startLine": 94
+        }
+      ],
+      "occurrenceId": "occ_997f3d08cfa1192445107aaa",
+      "provenance": {
+        "candidateId": "public-6",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "public-ask-page-loses-request-disconnect-cancellation"
+            },
+            "locations": [
+              {
+                "endLine": 9,
+                "path": "lib/public-page-admission.ts",
+                "role": "root_control",
+                "startLine": 1
+              },
+              {
+                "endLine": 25,
+                "path": "app/ask/page.tsx",
+                "role": "source",
+                "startLine": 16
+              },
+              {
+                "endLine": 108,
+                "path": "lib/public-ask-operation.ts",
+                "role": "sink",
+                "startLine": 94
+              }
+            ],
+            "provenance": {
+              "candidateId": "public-6",
+              "source": "local_plugin"
+            },
+            "remediation": "Move page generation through the cancellation-aware API or another handler that owns the real request signal and abort provider work when its consumer disconnects.",
+            "ruleId": "resource-exhaustion.ask-page-disconnect",
+            "severity": {
+              "level": "medium",
+              "rationale": "The server page constructs a new header-only Request and runs provider-backed ask work with its fresh signal, so browser disconnects cannot cancel the underlying provider operation."
+            },
+            "summary": "The server page constructs a new header-only Request and runs provider-backed ask work with its fresh signal, so browser disconnects cannot cancel the underlying provider operation.",
+            "taxonomy": {
+              "category": "resource-exhaustion",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "Public ask page loses request-disconnect cancellation",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Move page generation through the cancellation-aware API or another handler that owns the real request signal and abort provider work when its consumer disconnects.",
+      "rootCause": "The server page constructs a new header-only Request and runs provider-backed ask work with its fresh signal, so browser disconnects cannot cancel the underlying provider operation.",
+      "ruleId": "resource-exhaustion.ask-page-disconnect",
+      "severity": {
+        "level": "medium",
+        "rationale": "A reachable control bypass or unbounded operation can cause tenant-integrity, data-exposure, or sustained resource impact under realistic stated preconditions."
+      },
+      "summary": "The server page constructs a new header-only Request and runs provider-backed ask work with its fresh signal, so browser disconnects cannot cancel the underlying provider operation.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Public ask page loses request-disconnect cancellation",
+      "validation": {
+        "confidence": "high",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "The server page constructs a new header-only Request and runs provider-backed ask work with its fresh signal, so browser disconnects cannot cancel the underlying provider operation."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/ask-page-disconnect-cancellation/ask-page-disconnect-cancellation.md"
+      }
+    },
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "Public legal-search page loses request-disconnect cancellation",
+          "sink": "lib/public-search-operation.ts",
+          "source": "lib/public-page-admission.ts",
+          "summary": "The search page passes a synthetic Request to the coalesced provider search, leaving a never-aborted consumer after the real page request disconnects.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_bf28a4c0a2dd846f48d2655e",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:60205702ed5d6e584fa1e6d6190b9c24440cfa0b88f0cb185d7e7992a24178ae"
+      },
+      "identity": {
+        "anchor": "public-legal-search-page-loses-request-disconnect-cancellation"
+      },
+      "locations": [
+        {
+          "endLine": 9,
+          "path": "lib/public-page-admission.ts",
+          "role": "root_control",
+          "startLine": 1
+        },
+        {
+          "endLine": 14,
+          "path": "app/search/page.tsx",
+          "role": "source",
+          "startLine": 8
+        },
+        {
+          "endLine": 87,
+          "path": "lib/public-search-operation.ts",
+          "role": "sink",
+          "startLine": 45
+        },
+        {
+          "endLine": 135,
+          "path": "lib/public-search-operation.ts",
+          "role": "sink",
+          "startLine": 90
+        }
+      ],
+      "occurrenceId": "occ_ad882e88a93a84d257b9d0e3",
+      "provenance": {
+        "candidateId": "public-7",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "public-legal-search-page-loses-request-disconnect-cancellation"
+            },
+            "locations": [
+              {
+                "endLine": 9,
+                "path": "lib/public-page-admission.ts",
+                "role": "root_control",
+                "startLine": 1
+              },
+              {
+                "endLine": 14,
+                "path": "app/search/page.tsx",
+                "role": "source",
+                "startLine": 8
+              },
+              {
+                "endLine": 87,
+                "path": "lib/public-search-operation.ts",
+                "role": "sink",
+                "startLine": 45
+              },
+              {
+                "endLine": 135,
+                "path": "lib/public-search-operation.ts",
+                "role": "sink",
+                "startLine": 90
+              }
+            ],
+            "provenance": {
+              "candidateId": "public-7",
+              "source": "local_plugin"
+            },
+            "remediation": "Route page search through the existing cancellation-aware API or supply a real request-lifetime signal and promptly release coalesced consumers.",
+            "ruleId": "resource-exhaustion.search-page-disconnect",
+            "severity": {
+              "level": "medium",
+              "rationale": "The search page passes a synthetic Request to the coalesced provider search, leaving a never-aborted consumer after the real page request disconnects."
+            },
+            "summary": "The search page passes a synthetic Request to the coalesced provider search, leaving a never-aborted consumer after the real page request disconnects.",
+            "taxonomy": {
+              "category": "resource-exhaustion",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "Public legal-search page loses request-disconnect cancellation",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Route page search through the existing cancellation-aware API or supply a real request-lifetime signal and promptly release coalesced consumers.",
+      "rootCause": "The search page passes a synthetic Request to the coalesced provider search, leaving a never-aborted consumer after the real page request disconnects.",
+      "ruleId": "resource-exhaustion.search-page-disconnect",
+      "severity": {
+        "level": "medium",
+        "rationale": "A reachable control bypass or unbounded operation can cause tenant-integrity, data-exposure, or sustained resource impact under realistic stated preconditions."
+      },
+      "summary": "The search page passes a synthetic Request to the coalesced provider search, leaving a never-aborted consumer after the real page request disconnects.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Public legal-search page loses request-disconnect cancellation",
+      "validation": {
+        "confidence": "high",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "The search page passes a synthetic Request to the coalesced provider search, leaving a never-aborted consumer after the real page request disconnects."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/search-page-disconnect-cancellation/search-page-disconnect-cancellation.md"
+      }
+    },
+    {
+      "attackPath": {
+        "assumptions": [
+          "The stated attacker prerequisite and supported deployment or operator workflow are present."
+        ],
+        "blindspots": [
+          "Effective live Supabase grants and exact saved Share were not exercised."
+        ],
+        "controls": [
+          "Existing authentication, size, concurrency, or route-level controls were considered and do not close this specific path."
+        ],
+        "dataFlow": {
+          "outcome": "Release and publication subprocesses lack execution deadlines",
+          "sink": "scripts/publish_reports_wave1_evidence.mjs",
+          "source": "scripts/final_release_closeout.mjs",
+          "summary": "Two privileged release helpers launch fixed test, build, audit, and browser commands with spawnSync but no timeout, allowing a hanging dependency or build input to occupy CI or operator workers indefinitely.",
+          "transformations": [
+            "Attacker or less-trusted input reaches the stated boundary",
+            "Existing control is absent, non-atomic, post-hoc, or loses cancellation",
+            "The sink accepts, persists, parses, or continues the operation"
+          ]
+        }
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Independent source review and parent validation confirmed the source-to-sink trace; deployment-only uncertainty is retained where applicable."
+      },
+      "findingId": "csf_da0a933d31dab9854839d52d",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:c2be6996ca2a5834b75f894d0cfb4a89c571ccb990721247ae24650da5bb275c"
+      },
+      "identity": {
+        "anchor": "release-and-publication-subprocesses-lack-execution-deadlines"
+      },
+      "locations": [
+        {
+          "endLine": 61,
+          "path": "scripts/final_release_closeout.mjs",
+          "role": "sink",
+          "startLine": 51
+        },
+        {
+          "endLine": 31,
+          "path": "scripts/publish_reports_wave1_evidence.mjs",
+          "role": "sink",
+          "startLine": 21
+        }
+      ],
+      "occurrenceId": "occ_5bdca4c03cb14b7f6b3fe459",
+      "provenance": {
+        "candidateId": "operator-5",
+        "previousFindings": [
+          {
+            "confidence": {
+              "level": "high",
+              "rationale": "Validated by independent source review and parent trace; deployment-only uncertainty is stated in the finding."
+            },
+            "identity": {
+              "anchor": "release-and-publication-subprocesses-lack-execution-deadlines"
+            },
+            "locations": [
+              {
+                "endLine": 61,
+                "path": "scripts/final_release_closeout.mjs",
+                "role": "sink",
+                "startLine": 51
+              },
+              {
+                "endLine": 31,
+                "path": "scripts/publish_reports_wave1_evidence.mjs",
+                "role": "sink",
+                "startLine": 21
+              }
+            ],
+            "provenance": {
+              "candidateId": "operator-5",
+              "source": "local_plugin"
+            },
+            "remediation": "Use the existing bounded subprocess helper with per-step deadlines, bounded output, process-tree termination, and explicit timeout reporting.",
+            "ruleId": "resource-exhaustion.release-subprocess-timeout",
+            "severity": {
+              "level": "low",
+              "rationale": "Two privileged release helpers launch fixed test, build, audit, and browser commands with spawnSync but no timeout, allowing a hanging dependency or build input to occupy CI or operator workers indefinitely."
+            },
+            "summary": "Two privileged release helpers launch fixed test, build, audit, and browser commands with spawnSync but no timeout, allowing a hanging dependency or build input to occupy CI or operator workers indefinitely.",
+            "taxonomy": {
+              "category": "resource-exhaustion",
+              "cwe": [
+                "CWE-400"
+              ]
+            },
+            "title": "Release and publication subprocesses lack execution deadlines",
+            "validation": {
+              "disposition": "reportable",
+              "method": "Independent static source trace with counterevidence review."
+            }
+          }
+        ],
+        "source": "local_plugin"
+      },
+      "remediation": "Use the existing bounded subprocess helper with per-step deadlines, bounded output, process-tree termination, and explicit timeout reporting.",
+      "rootCause": "Two privileged release helpers launch fixed test, build, audit, and browser commands with spawnSync but no timeout, allowing a hanging dependency or build input to occupy CI or operator workers indefinitely.",
+      "ruleId": "resource-exhaustion.release-subprocess-timeout",
+      "severity": {
+        "level": "low",
+        "rationale": "Impact is constrained to authenticated tenant state, local/operator workflows, races, or bounded availability degradation."
+      },
+      "summary": "Two privileged release helpers launch fixed test, build, audit, and browser commands with spawnSync but no timeout, allowing a hanging dependency or build input to occupy CI or operator workers indefinitely.",
+      "taxonomy": {
+        "category": "resource-exhaustion",
+        "cwe": [
+          "CWE-400"
+        ]
+      },
+      "title": "Release and publication subprocesses lack execution deadlines",
+      "validation": {
+        "confidence": "high",
+        "confidence_rationale": "Source locations directly establish the reported control gap.",
+        "counterevidence_or_proof_gap": "No mutation or live database state was exercised; exact saved Share remains MISSING_EVIDENCE.",
+        "disposition": "reportable",
+        "evidence": [
+          "Two privileged release helpers launch fixed test, build, audit, and browser commands with spawnSync but no timeout, allowing a hanging dependency or build input to occupy CI or operator workers indefinitely."
+        ],
+        "method": "Static source trace with attacker preconditions, sink reachability, controls, and counterevidence reviewed.",
+        "rubric": "source-backed exploitability and practical impact"
+      },
+      "writeup": {
+        "reportPath": "findings/release-subprocess-timeouts/release-subprocess-timeouts.md"
+      }
+    }
+  ],
+  "scanId": "392a4135-abb0-412d-9128-0c836c94a5ca",
+  "schemaVersion": "1.0"
+}

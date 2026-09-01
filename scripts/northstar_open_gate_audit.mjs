@@ -74,7 +74,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSecurityRemediationLedger: path.join("evaluation", "security-current-remediation-ledger-2026-08-13", "report.json"),
   currentRepositorySecurityRescan: path.join("evaluation", "current-full-repository-security-scan-2026-08-27", "report.json"),
   freshCurrentSourceSecurityScan: path.join("evaluation", "current-source-standard-security-scan-2026-08-31-121c8a01-complete", "report.json"),
-  completedCurrentHeadStandardSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-08-31-9504d8db-complete", "report.json"),
+  completedCurrentHeadStandardSecurityScan: path.join("evaluation", "current-head-standard-security-scan-2026-09-01-c9b67280-complete", "report.json"),
   currentSourceForwardedIdentityRemediation: path.join("evaluation", "current-source-security-forwarded-identity-remediation-2026-08-31", "report.json"),
   currentSourceTemplateInventoryRemediation: path.join("evaluation", "current-source-security-template-inventory-remediation-2026-08-31", "report.json"),
   currentSourceExportSmokeResourceRemediation: path.join("evaluation", "current-source-security-export-smoke-resource-remediation-2026-08-31", "report.json"),
@@ -8732,7 +8732,7 @@ function evaluateCompletedCurrentHeadStandardSecurityScanGate(rootDir) {
       label: "Completed current-head Standard security scan",
       state: "missing",
       evidencePath,
-      detail: "The sealed 9504d8db current-head Standard scan receipt is missing or invalid.",
+      detail: "The sealed c9b67280 current-head Standard scan receipt is missing or invalid.",
       nextActions: ["Restore the sealed scan receipt and canonical artifacts without rewriting the immutable 18-finding baseline."],
     });
   }
@@ -8756,35 +8756,38 @@ function evaluateCompletedCurrentHeadStandardSecurityScanGate(rootDir) {
     && mutation.vectorUploadPerformed === false
     && mutation.wikiPublished === false
     && mutation.exactTrustRegistryMutationPerformed === false;
-  const pass = readString(report.verdict) === "NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE"
-    && readString(report.scanId) === "f6bef30a-7250-428b-9f66-0bad1e42058c"
-    && readString(report.sourceHead) === "9504d8db95fcbc9f37f6c5abc638e9ad0813a325"
+  const pass = readString(report.verdict) === "NOTICE_CURRENT_HEAD_STANDARD_SCAN_16_FINDINGS_PARTIAL_COVERAGE"
+    && readString(report.scanId) === "392a4135-abb0-412d-9128-0c836c94a5ca"
+    && readString(report.sourceHead) === "c9b67280a64995b3cd26f243f404623de21a489a"
+    && readString(report.productionCommit) === "c9b67280a64995b3cd26f243f404623de21a489a"
+    && report.sourceHeadMatchesProduction === true
     && report.userContextPreserved === true
     && readString(scan.status) === "completed"
     && readString(scan.mode) === "standard"
     && readString(scan.targetKind) === "git_revision"
     && readString(scan.coverageCompleteness) === "partial"
-    && readNumber(scan.trackedFileCount) === 6881
-    && readNumber(scan.reviewWorklistCount) === 6
-    && readNumber(scan.closedReviewWorklistCount) === 6
-    && readNumber(scan.recordedSurfaceCount) === 25
-    && readNumber(scan.deferredCoverageItemCount) === 36
-    && readNumber(scan.reportableFindingCount) === 21
-    && readNumber(scan.uniqueFindingWriteupCount) === 21
+    && readNumber(scan.trackedFileCount) === 7057
+    && readNumber(scan.reviewWorklistCount) === 4
+    && readNumber(scan.closedReviewWorklistCount) === 4
+    && readNumber(scan.recordedSurfaceCount) === 13
+    && readNumber(scan.deferredCoverageItemCount) === 6
+    && readNumber(scan.reportableFindingCount) === 16
+    && readNumber(scan.uniqueFindingWriteupCount) === 16
+    && readNumber(scan.supportingEvidenceCount) === 16
     && readNumber(severity.critical) === 0
     && readNumber(severity.high) === 0
-    && readNumber(severity.medium) === 7
-    && readNumber(severity.low) === 14
+    && readNumber(severity.medium) === 8
+    && readNumber(severity.low) === 8
     && readNumber(baseline.immutableOriginalFindingCount) === 18
     && baseline.preserved === true
     && baseline.rewritten === false
     && readString(baseline.completedPriorScanId) === "8fe9c06a-018c-446f-aa98-1b37df95287a"
-    && readNumber(disposition.approvalGatedDatabaseOrAtomicityCount) === 9
-    && readNumber(disposition.approvalSensitiveShareCapabilityCount) === 1
-    && readNumber(disposition.approvalFreeProductSourceResidualCount) === 11
+    && readNumber(disposition.approvalGatedDatabaseOrAtomicityCount) === 7
+    && readNumber(disposition.approvalSensitiveShareCapabilityCount) === 0
+    && readNumber(disposition.approvalFreeProductSourceResidualCount) === 9
     && disposition.securityCompleteClaimAllowed === false
-    && readNumber(canonical.findingWriteupCount) === 21
-    && readNumber(canonical.supportingEvidenceCount) === 21
+    && readNumber(canonical.findingWriteupCount) === 16
+    && readNumber(canonical.supportingEvidenceCount) === 16
     && canonicalHashesMatch
     && noMutation
     && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
@@ -8794,7 +8797,7 @@ function evaluateCompletedCurrentHeadStandardSecurityScanGate(rootDir) {
     && readString(remaining.sifVectorRuntime) === "APPROVAL_GATED"
     && readString(remaining.koshaExactRegistryPromotion) === "APPROVAL_GATED"
     && remaining.coverageClosureCompleted === false
-    && readString(remaining.approvalFreeCurrentSourceRemediation) === "OPEN_11_FINDINGS"
+    && readString(remaining.approvalFreeCurrentSourceRemediation) === "OPEN_9_FINDINGS"
     && remaining.securityCompleteClaimAllowed === false;
 
   return gateResult({
@@ -8803,11 +8806,11 @@ function evaluateCompletedCurrentHeadStandardSecurityScanGate(rootDir) {
     state: pass ? "notice" : "contradicted",
     evidencePath,
     detail: pass
-      ? "Current-head Standard scan f6bef30a is sealed at 9504d8db with 21 findings (7 medium, 14 low), 21 write-ups, and partial coverage. Canonical artifact hashes match. The immutable original 18-finding baseline is preserved; 11 approval-free source findings, nine database/RLS/atomicity findings, and one approval-sensitive Share capability finding remain open. Security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
+      ? "Current-head Standard scan 392a4135 is sealed at source/live c9b67280 with 16 findings (8 medium, 8 low), 16 write-ups, and partial coverage. Canonical artifact hashes match. The immutable original 18-finding baseline and prior scans are preserved; nine approval-free source findings and seven approval-gated database/RLS/atomicity findings remain open. Security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE."
       : `Current-head scan verdict=${readString(report.verdict) || "missing"}, scan=${readString(report.scanId) || "missing"}, source=${readString(report.sourceHead) || "missing"}, findings=${readNumber(scan.reportableFindingCount)}, severity=${readNumber(severity.medium)}/${readNumber(severity.low)}, coverage=${readString(scan.coverageCompleteness) || "missing"}, hashes=${canonicalHashesMatch}, noMutation=${noMutation}, exactShare=${readString(remaining.exactSavedShareVerdict) || "missing"}.`,
     nextActions: pass
       ? [
-          "Remediate the 11 approval-free source findings in bounded waves and run a fresh follow-up scan.",
+          "Remediate the nine approval-free source findings in bounded waves and run a fresh follow-up scan.",
           "Keep database/RLS/atomicity, provider, exact Share, wiki, vector, and KOSHA registry operations on their existing approval paths.",
         ]
       : ["Restore the exact scan identity, counts, canonical hashes, immutable baseline, no-mutation boundary, and exact Share MISSING_EVIDENCE."],

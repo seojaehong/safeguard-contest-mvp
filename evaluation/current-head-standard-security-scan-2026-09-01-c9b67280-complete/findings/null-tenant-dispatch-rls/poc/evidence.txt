@@ -1,0 +1,4 @@
+Static source trace only. No exploit, provider call, database mutation, or external request was executed.
+Finding: Null-organization dispatch logs are globally readable and mutable under RLS
+Evidence: supabase/migrations/002_workspace_productization.sql:183-200 explicitly accepts organization_id IS NULL in USING and WITH CHECK.
+

@@ -1,0 +1,4 @@
+Static source trace only. No exploit, provider call, database mutation, or external request was executed.
+Finding: HWPX inventory reads full files before enforcing a size limit
+Evidence: scripts/hwpx_template_inventory.mjs:44-66 calls readFileSync before any byte ceiling.
+

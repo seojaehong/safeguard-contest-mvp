@@ -1,0 +1,93 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "f8ce809153482eca62a47a7d9448c74307f46bdfb15c0eb3f4d893c7753b9446"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "05eb723ac848ace200c5087741189ed828da63dc22b244cd0fc4ae59cd394c75"
+      }
+    ],
+    "completedAt": "2026-09-01T04:13:54.117626Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "392a4135-abb0-412d-9128-0c836c94a5ca",
+    "preservedSources": {
+      "checkpoints/13f104faee30dcc72e6a484fae5325c88155ade819fb3f253b02a03feb026bfe.json": "7c69ab0299b560cd5a5a49006611e62b47a55908aaf35458618e66356dfa9937",
+      "checkpoints/2941772d786a90085bb6c5157ed121e34866cbe27737d45c6b32d90f95ec1e80.json": "2941772d786a90085bb6c5157ed121e34866cbe27737d45c6b32d90f95ec1e80",
+      "checkpoints/2a7618b98efa17661cba270f9794d3a4d7e45aac710c7cd6e515354389609084.json": "60f543a2ad001c5b9cd78e34ecb246bb13e3678f846663fb70fde0d503fe0616",
+      "checkpoints/2ce98e5dd2e79783fa1e9e058d5cb32d996536d6c85ace4642fd8f0ae5227575.json": "ce7859809bd2abb2958bc09a1e272258a929f3c4d7398ffe20e39811ba8a6b4b",
+      "checkpoints/64e0419a41854286b00aecfa0b9d64c1aaf858b14dc06f10d0d36f19b32f6112.json": "50ac6de4dea8c899cc1915b5b7d3e15252d7e558d135ae77f8939d282affc76f"
+    },
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.22"
+    },
+    "scope": {
+      "context": "Preserve the immutable original 18-finding baseline, completed scan 8fe9c06a-018c-446f-aa98-1b37df95287a, and every later sealed scan. Run a fresh full-repository Standard scan against current clean source c9b67280a64995b3cd26f243f404623de21a489a, whose product/runtime ancestor f9e09badfcb5e6db24ebb749345c8255e50f3c83 is aligned with production and whose delta is evidence-only. Reassess approval-free source remediations without rewriting prior findings or weakening coverage. Do not perform DB, provider, share-session, vector, wiki, embedding, or KOSHA registry mutation. Exact saved Share remains MISSING_EVIDENCE and approval-gated boundaries must not be overclaimed.",
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "No DB/provider/share-session/vector/wiki/embedding/KOSHA registry mutation or live-state validation.",
+        "Exact saved Share was not reproduced.",
+        "Effective deployed Supabase grants and migration application remain unresolved."
+      ],
+      "runtimeStatus": "reporting",
+      "summary": "Fresh full-repository Standard security audit of c9b67280 with four independent discovery receipts, parent validation, and attack-path review.",
+      "validationMode": "independent static source validation"
+    },
+    "sealedAt": "2026-09-01T04:13:54.117626Z",
+    "startedAt": "2026-09-01T03:44:31.681070Z",
+    "status": "completed",
+    "target": {
+      "displayName": "safeclaw-northstar-current",
+      "kind": "git_revision",
+      "revision": "c9b67280a64995b3cd26f243f404623de21a489a",
+      "targetId": "target_sha256_59a91dd8129f171a6e0ff82b60460781f1067b1940d76c7a524e5f0e2b7ec5de"
+    },
+    "threatModel": {
+      "assets": [
+        "Tenant workpacks, worker and contact data, generated safety documents, dispatch and review state",
+        "Supabase service-role authority, MCP bearer capabilities, provider credentials, generation-evidence authority",
+        "Tenant isolation, exact Share audience and expiry, document and KOSHA provenance"
+      ],
+      "assumptions": [
+        "The c9b67280 source is clean and evidence-only over the supplied live-aligned product ancestor",
+        "Source migrations do not prove current deployed RLS or grants",
+        "Vercel production ingress owns x-vercel-forwarded-for; spoofing claims were suppressed without contrary evidence",
+        "Exact saved Share remains MISSING_EVIDENCE",
+        "Prior sealed scans remain immutable"
+      ],
+      "attackerCapabilities": [
+        "Unauthenticated caller controls request inputs and can disconnect requests",
+        "Authenticated tenant owner controls own objects and may call the Supabase Data API",
+        "Local or CI artifact supplier can influence operator-parsed documents and build inputs",
+        "No assumed access to secrets, service-role credentials, operator host, or approval-gated mutation authority"
+      ],
+      "securityObjectives": [
+        "Bound public work and preserve real disconnect cancellation",
+        "Bind all database relationships and authoritative states to tenant and server transitions",
+        "Enforce atomic token, transfer, and provisioning invariants",
+        "Fail closed on parser, archive, source-identity, anonymization, and response budgets",
+        "Preserve exact Share and approval-gated no-mutation boundaries"
+      ],
+      "summary": "SafeClaw is a Next.js App Router industrial-safety document-pack service with public and authenticated HTTP APIs, MCP, Supabase service-role persistence, external providers, Vercel cron, and privileged local scripts.",
+      "trustBoundaries": [
+        "Unauthenticated caller to public Next routes",
+        "Authenticated bearer to service-role-backed workspace APIs and Data API RLS",
+        "Public Share capability to saved session and acknowledgement persistence",
+        "MCP bearer to tenant-scoped tools",
+        "Server to Supabase and external providers",
+        "Privileged local operator to parsers, release helpers, and migration/publication workflows"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

@@ -1,0 +1,4 @@
+Static source trace only. No exploit, provider call, database mutation, or external request was executed.
+Finding: Workbook budgets apply after ExcelJS materialization
+Evidence: scripts/final_output_parser_safety.mjs:101-130 calls workbook.xlsx.readFile before post-load workbook budgets.
+

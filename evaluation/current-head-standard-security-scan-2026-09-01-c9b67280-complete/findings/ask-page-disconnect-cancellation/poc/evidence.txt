@@ -1,0 +1,4 @@
+Static source trace only. No exploit, provider call, database mutation, or external request was executed.
+Finding: Public ask page loses request-disconnect cancellation
+Evidence: lib/public-page-admission.ts:1-9 creates a synthetic Request; app/ask/page.tsx:16-25 sends it into provider work.
+

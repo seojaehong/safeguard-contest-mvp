@@ -1,0 +1,4 @@
+Static source trace only. No exploit, provider call, database mutation, or external request was executed.
+Finding: Legacy query and document tables lack row-level authorization
+Evidence: supabase/migrations/001_init.sql:1-17 creates query_logs and documents without enabling RLS; supabase/config.toml:7-18 exposes the public schema.
+

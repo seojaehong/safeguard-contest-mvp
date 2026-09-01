@@ -1836,18 +1836,18 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
 
 function completedCurrentHeadStandardSecurityScanFixture(): Record<string, unknown> {
   return {
-    verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE",
-    scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c",
-    sourceHead: "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+    verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_16_FINDINGS_PARTIAL_COVERAGE",
+    scanId: "392a4135-abb0-412d-9128-0c836c94a5ca",
+    sourceHead: "c9b67280a64995b3cd26f243f404623de21a489a",
     scan: {
-      status: "completed", coverageCompleteness: "partial", recordedSurfaceCount: 25,
-      deferredCoverageItemCount: 36, reportableFindingCount: 21,
-      severity: { medium: 7, low: 14 },
+      status: "completed", coverageCompleteness: "partial", recordedSurfaceCount: 13,
+      deferredCoverageItemCount: 6, reportableFindingCount: 16,
+      severity: { medium: 8, low: 8 },
     },
     baseline: { immutableOriginalFindingCount: 18 },
     currentDisposition: {
-      approvalGatedDatabaseOrAtomicityCount: 9, approvalSensitiveShareCapabilityCount: 1,
-      approvalFreeProductSourceResidualCount: 11,
+      approvalGatedDatabaseOrAtomicityCount: 7, approvalSensitiveShareCapabilityCount: 0,
+      approvalFreeProductSourceResidualCount: 9,
     },
     remainingBoundaries: { securityCompleteClaimAllowed: false, exactSavedShareVerdict: "MISSING_EVIDENCE" },
   };
@@ -3777,7 +3777,7 @@ function createFixtureRoot(): { root: string; firstHead: string; secondHead: str
     },
   });
   writeJson(root, "evaluation/current-source-standard-security-scan-2026-08-31-121c8a01-complete/report.json", freshCurrentSourceSecurityScanFixture());
-  writeJson(root, "evaluation/current-head-standard-security-scan-2026-08-31-9504d8db-complete/report.json", completedCurrentHeadStandardSecurityScanFixture());
+  writeJson(root, "evaluation/current-head-standard-security-scan-2026-09-01-c9b67280-complete/report.json", completedCurrentHeadStandardSecurityScanFixture());
   writeJson(root, "evaluation/current-source-security-forwarded-identity-remediation-2026-08-31/report.json", currentSourceForwardedIdentityRemediationFixture());
   writeJson(root, "evaluation/current-source-security-template-inventory-remediation-2026-08-31/report.json", currentSourceTemplateInventoryRemediationFixture());
   writeJson(root, "evaluation/current-source-security-approval-free-remediation-2026-08-31/report.json", currentSourceApprovalFreeSecurityRemediationFixture());
@@ -5763,27 +5763,27 @@ describe("northstar next runway generator", { timeout: 90_000 }, () => {
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.completedCurrentHeadStandardSecurityScan).toMatchObject({
-      verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE",
-      scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c",
-      sourceHead: "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+      verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_16_FINDINGS_PARTIAL_COVERAGE",
+      scanId: "392a4135-abb0-412d-9128-0c836c94a5ca",
+      sourceHead: "c9b67280a64995b3cd26f243f404623de21a489a",
       status: "completed",
       coverageCompleteness: "partial",
-      recordedSurfaceCount: 25,
-      deferredCoverageItemCount: 36,
-      reportableFindingCount: 21,
-      mediumFindingCount: 7,
-      lowFindingCount: 14,
+      recordedSurfaceCount: 13,
+      deferredCoverageItemCount: 6,
+      reportableFindingCount: 16,
+      mediumFindingCount: 8,
+      lowFindingCount: 8,
       immutableOriginalFindingCount: 18,
-      approvalGatedDatabaseOrAtomicityCount: 9,
-      approvalSensitiveShareCapabilityCount: 1,
-      approvalFreeProductSourceResidualCount: 11,
+      approvalGatedDatabaseOrAtomicityCount: 7,
+      approvalSensitiveShareCapabilityCount: 0,
+      approvalFreeProductSourceResidualCount: 9,
       securityCompleteClaimAllowed: false,
       exactSavedShareVerdict: "MISSING_EVIDENCE",
     });
     expect(report.noticeState).toContainEqual(expect.objectContaining({
       gate: "completed_current_head_standard_security_scan",
       state: "notice",
-      reason: expect.stringContaining("21 findings"),
+      reason: expect.stringContaining("16 findings"),
     }));
     expect(report.currentSourceForwardedIdentityRemediation).toMatchObject({
       verdict: "PASS_LIVE_PRODUCTION_SOURCE_INCLUDED_VERIFIED_DISTRIBUTED_ADMISSION_IDENTITY",

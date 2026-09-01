@@ -1,0 +1,4 @@
+Static source trace only. No exploit, provider call, database mutation, or external request was executed.
+Finding: Relational tenant tuples are not enforced by composite constraints
+Evidence: Migrations 002, 003, and 010 use independent foreign keys while RLS checks only the supplied organization_id.
+

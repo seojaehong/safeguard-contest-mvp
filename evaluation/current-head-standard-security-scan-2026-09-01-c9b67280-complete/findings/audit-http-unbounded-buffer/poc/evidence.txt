@@ -1,0 +1,4 @@
+Static source trace only. No exploit, provider call, database mutation, or external request was executed.
+Finding: Final-output integrity audit buffers unbounded HTTP responses
+Evidence: scripts/final_output_integrity_audit.mjs:155-171 fetches without a deadline and calls response.text without a byte cap.
+

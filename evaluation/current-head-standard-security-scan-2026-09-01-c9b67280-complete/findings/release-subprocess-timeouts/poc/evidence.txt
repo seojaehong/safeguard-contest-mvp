@@ -1,0 +1,4 @@
+Static source trace only. No exploit, provider call, database mutation, or external request was executed.
+Finding: Release and publication subprocesses lack execution deadlines
+Evidence: scripts/final_release_closeout.mjs:51-61 and publish_reports_wave1_evidence.mjs:21-31 call spawnSync without timeout.
+

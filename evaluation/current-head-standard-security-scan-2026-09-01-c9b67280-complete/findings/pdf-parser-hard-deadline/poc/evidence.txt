@@ -1,0 +1,4 @@
+Static source trace only. No exploit, provider call, database mutation, or external request was executed.
+Finding: Operator PDF parsers lack enforceable hard deadlines
+Evidence: scripts/snapshot_kosha_guide_corpus.py:958-988 and scan_industrial_safety_templates.py:259-275 call PdfReader and extract_text in-process.
+

@@ -289,30 +289,33 @@ function freshCurrentSourceSecurityScanFixture(): Record<string, unknown> {
 }
 
 function completedCurrentHeadStandardSecurityScanFixture(hashes: Record<string, string>): Record<string, unknown> {
-  const root = "evaluation/current-head-standard-security-scan-2026-08-31-9504d8db-complete";
+  const root = "evaluation/current-head-standard-security-scan-2026-09-01-c9b67280-complete";
   return {
-    verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_21_FINDINGS_PARTIAL_COVERAGE",
-    scanId: "f6bef30a-7250-428b-9f66-0bad1e42058c",
-    sourceHead: "9504d8db95fcbc9f37f6c5abc638e9ad0813a325",
+    verdict: "NOTICE_CURRENT_HEAD_STANDARD_SCAN_16_FINDINGS_PARTIAL_COVERAGE",
+    scanId: "392a4135-abb0-412d-9128-0c836c94a5ca",
+    sourceHead: "c9b67280a64995b3cd26f243f404623de21a489a",
+    productionCommit: "c9b67280a64995b3cd26f243f404623de21a489a",
+    sourceHeadMatchesProduction: true,
     userContextPreserved: true,
     scan: {
       status: "completed", mode: "standard", targetKind: "git_revision", coverageCompleteness: "partial",
-      trackedFileCount: 6881, reviewWorklistCount: 6, closedReviewWorklistCount: 6,
-      recordedSurfaceCount: 25, deferredCoverageItemCount: 36, reportableFindingCount: 21,
-      uniqueFindingWriteupCount: 21, severity: { critical: 0, high: 0, medium: 7, low: 14 },
+      trackedFileCount: 7057, reviewWorklistCount: 4, closedReviewWorklistCount: 4,
+      recordedSurfaceCount: 13, deferredCoverageItemCount: 6, reportableFindingCount: 16,
+      uniqueFindingWriteupCount: 16, supportingEvidenceCount: 16,
+      severity: { critical: 0, high: 0, medium: 8, low: 8 },
     },
     baseline: {
       immutableOriginalFindingCount: 18, preserved: true, rewritten: false,
       completedPriorScanId: "8fe9c06a-018c-446f-aa98-1b37df95287a",
     },
     currentDisposition: {
-      approvalGatedDatabaseOrAtomicityCount: 9, approvalSensitiveShareCapabilityCount: 1,
-      approvalFreeProductSourceResidualCount: 11, securityCompleteClaimAllowed: false,
+      approvalGatedDatabaseOrAtomicityCount: 7, approvalSensitiveShareCapabilityCount: 0,
+      approvalFreeProductSourceResidualCount: 9, securityCompleteClaimAllowed: false,
     },
     canonicalArtifacts: {
       manifest: `${root}/canonical/scan-manifest.json`, findings: `${root}/canonical/findings.json`,
       coverage: `${root}/canonical/coverage.json`, markdown: `${root}/scan-report.md`,
-      findingWriteupCount: 21, supportingEvidenceCount: 21, sha256: hashes,
+      findingWriteupCount: 16, supportingEvidenceCount: 16, sha256: hashes,
     },
     mutationBoundary: {
       dbMutationPerformed: false, providerDispatchCalled: false, shareSessionCreated: false,
@@ -323,7 +326,7 @@ function completedCurrentHeadStandardSecurityScanFixture(hashes: Record<string, 
       exactSavedShareVerdict: "MISSING_EVIDENCE", databaseSecurityRemediation: "APPROVAL_GATED",
       providerDispatchPersistence: "APPROVAL_GATED", llmWikiPublication: "APPROVAL_GATED",
       sifVectorRuntime: "APPROVAL_GATED", koshaExactRegistryPromotion: "APPROVAL_GATED",
-      coverageClosureCompleted: false, approvalFreeCurrentSourceRemediation: "OPEN_11_FINDINGS",
+      coverageClosureCompleted: false, approvalFreeCurrentSourceRemediation: "OPEN_9_FINDINGS",
       securityCompleteClaimAllowed: false,
     },
   };
@@ -5483,7 +5486,7 @@ function initializeFixtureRoot(rootDir: string): string {
   });
   const freshScanRoot = path.join("evaluation", "current-source-standard-security-scan-2026-08-31-121c8a01-complete");
   writeJson(rootDir, path.join(freshScanRoot, "report.json"), freshCurrentSourceSecurityScanFixture());
-  const completedScanRoot = path.join("evaluation", "current-head-standard-security-scan-2026-08-31-9504d8db-complete");
+  const completedScanRoot = path.join("evaluation", "current-head-standard-security-scan-2026-09-01-c9b67280-complete");
   const completedArtifacts = {
     manifest: path.join(completedScanRoot, "canonical", "scan-manifest.json"),
     findings: path.join(completedScanRoot, "canonical", "findings.json"),
@@ -5491,7 +5494,7 @@ function initializeFixtureRoot(rootDir: string): string {
     markdown: path.join(completedScanRoot, "scan-report.md"),
   };
   writeJson(rootDir, completedArtifacts.manifest, { scan: { status: "completed" } });
-  writeJson(rootDir, completedArtifacts.findings, { findings: Array.from({ length: 21 }, (_, index) => ({ id: index + 1 })) });
+  writeJson(rootDir, completedArtifacts.findings, { findings: Array.from({ length: 16 }, (_, index) => ({ id: index + 1 })) });
   writeJson(rootDir, completedArtifacts.coverage, { completeness: "partial" });
   const completedMarkdownPath = path.join(rootDir, completedArtifacts.markdown);
   fs.mkdirSync(path.dirname(completedMarkdownPath), { recursive: true });
@@ -10081,14 +10084,14 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const reportPath = path.join(
       rootDir,
       "evaluation",
-      "current-head-standard-security-scan-2026-08-31-9504d8db-complete",
+      "current-head-standard-security-scan-2026-09-01-c9b67280-complete",
       "report.json",
     );
 
     const audit = buildNorthstarOpenGateAudit({ rootDir });
     const gate = audit.gates.find((item) => item.id === "completed_current_head_standard_security_scan");
     expect(gate?.state).toBe("notice");
-    expect(gate?.detail).toContain("21 findings (7 medium, 14 low)");
+    expect(gate?.detail).toContain("16 findings (8 medium, 8 low)");
     expect(gate?.detail).toContain("Canonical artifact hashes match");
     expect(gate?.detail).toContain("immutable original 18-finding baseline");
     expect(gate?.detail).toContain("MISSING_EVIDENCE");
@@ -10096,7 +10099,7 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     const manifestPath = path.join(
       rootDir,
       "evaluation",
-      "current-head-standard-security-scan-2026-08-31-9504d8db-complete",
+      "current-head-standard-security-scan-2026-09-01-c9b67280-complete",
       "canonical",
       "scan-manifest.json",
     );

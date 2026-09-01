@@ -1,0 +1,4 @@
+Static source trace only. No exploit, provider call, database mutation, or external request was executed.
+Finding: Concurrent worker imports bypass the site-transfer gate
+Evidence: app/api/workers/route.ts:84-120 checks then upserts on organization_id,external_key.
+

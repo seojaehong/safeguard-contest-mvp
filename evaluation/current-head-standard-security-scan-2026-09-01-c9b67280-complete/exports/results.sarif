@@ -1,0 +1,1301 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "automationDetails": {
+        "id": "392a4135-abb0-412d-9128-0c836c94a5ca"
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "toolExecutionNotifications": [
+            {
+              "level": "warning",
+              "message": {
+                "text": "Pending parent validation and deduplication."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Pending parent validation."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Pending parent validation and baseline deduplication."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Pending parent validation and baseline deduplication."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Pending independent parent validation."
+              }
+            },
+            {
+              "level": "warning",
+              "message": {
+                "text": "Pending independent parent validation."
+              }
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "codexSecurityCoverageCompleteness": "partial",
+        "codexSecuritySchemaVersion": "1.0",
+        "codexSecurityTargetKind": "git_revision"
+      },
+      "results": [
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/scan_industrial_safety_templates.py"
+                },
+                "region": {
+                  "endLine": 408,
+                  "startLine": 383
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/snapshot_kosha_guide_corpus.py"
+                },
+                "region": {
+                  "endLine": 988,
+                  "startLine": 958
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/scan_industrial_safety_templates.py"
+                },
+                "region": {
+                  "endLine": 275,
+                  "startLine": 259
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Operator PDF parsers lack enforceable hard deadlines\n\nPdfReader construction and extract_text run synchronously in the main process, so elapsed checks and output caps cannot interrupt a parser that hangs or consumes excessive memory.\n\nSeverity: medium\n\nCategory: Resource exhaustion\n\nWeaknesses: CWE-400\n\nRemediation:\nRun untrusted PDF parsing in disposable worker processes with wall-clock, memory, and output limits and terminate on deadline."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:78156905bf5278b15533058ce51f0664d52eb37be9cc19ad2f3f663b0c8bb617"
+          },
+          "properties": {
+            "category": "resource-exhaustion",
+            "confidence": "high",
+            "findingId": "csf_e712085e604b1e6e59d073fb",
+            "occurrenceId": "occ_075bd450f5d1e0e1ae97f1a8",
+            "severity": "medium"
+          },
+          "ruleId": "resource-exhaustion.pdf-parser-deadline",
+          "ruleIndex": 12
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 42,
+                  "startLine": 21
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/workers/route.ts"
+                },
+                "region": {
+                  "endLine": 120,
+                  "startLine": 84
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Concurrent worker imports bypass the site-transfer gate\n\nWorker import checks existing site assignments before an independent upsert keyed only by organization_id and external_key, permitting concurrent cross-site imports to race into silent reassignment.\n\nSeverity: medium\n\nCategory: Race condition\n\nWeaknesses: CWE-362\n\nRemediation:\nUse a transactional RPC or conditional update that succeeds only when site_id is unchanged and require a separate explicit transfer operation."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:e3de2b08c9799be79931911894eec5714d91e6830bf3334617be9f6d8b4204f8"
+          },
+          "properties": {
+            "category": "race-condition",
+            "confidence": "high",
+            "findingId": "csf_bfd9e75de1add6d7f8bc6bbf",
+            "occurrenceId": "occ_162fa1c6aae2d90457741f31",
+            "severity": "medium"
+          },
+          "ruleId": "race-condition.worker-site-transfer",
+          "ruleIndex": 7
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/final_output_integrity_audit.mjs"
+                },
+                "region": {
+                  "endLine": 171,
+                  "startLine": 155
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Final-output integrity audit buffers unbounded HTTP responses\n\nThe audit helper fetches without a timeout and calls response.text before enforcing any response-byte bound, allowing a slow or oversized configured endpoint to exhaust the audit worker.\n\nSeverity: low\n\nCategory: Resource exhaustion\n\nWeaknesses: CWE-400\n\nRemediation:\nUse AbortController deadlines and a bounded streaming response reader before JSON parsing or preview capture."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:c7e92c31e11b6cbf1239a8d2553b17b055af634232d60642d2a46fff8ffca02a"
+          },
+          "properties": {
+            "category": "resource-exhaustion",
+            "confidence": "high",
+            "findingId": "csf_dd1f4424d504501f886d5745",
+            "occurrenceId": "occ_252cb6d23dc176b1c42bb694",
+            "severity": "low"
+          },
+          "ruleId": "resource-exhaustion.audit-http-buffer",
+          "ruleIndex": 10
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/010_commercial_operations.sql"
+                },
+                "region": {
+                  "endLine": 227,
+                  "startLine": 161
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 80,
+                  "startLine": 21
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/003_knowledge_runtime.sql"
+                },
+                "region": {
+                  "endLine": 64,
+                  "startLine": 1
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/010_commercial_operations.sql"
+                },
+                "region": {
+                  "endLine": 85,
+                  "startLine": 21
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Relational tenant tuples are not enforced by composite constraints\n\nIndependent organization, site, workpack, worker, session, and improvement foreign keys plus organization-only RLS permit an authenticated owner with a foreign UUID to create inconsistent cross-tenant relationships.\n\nSeverity: low\n\nCategory: Authorization\n\nWeaknesses: CWE-863\n\nRemediation:\nAdd tenant-consistent composite keys and foreign keys, strengthen WITH CHECK predicates, and clean existing inconsistent tuples before enforcement."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:26b64bbcbcbf7065d93056c9d5c1818908ea03205c291d4c9e03abca7ff140f5"
+          },
+          "properties": {
+            "category": "authorization",
+            "confidence": "high",
+            "findingId": "csf_2638a5f2c3992249ad19fb21",
+            "occurrenceId": "occ_252f11bf63a8e3518ae1a9ce",
+            "severity": "low"
+          },
+          "ruleId": "authorization.tenant-tuple-integrity",
+          "ruleIndex": 3
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 200,
+                  "startLine": 183
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 90,
+                  "startLine": 76
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Null-organization dispatch logs are globally readable and mutable under RLS\n\nThe dispatch_logs FOR ALL policy authorizes rows whenever organization_id is NULL, exposing any legacy or malformed tenantless receipt to every authenticated Data API user.\n\nSeverity: low\n\nCategory: Authorization\n\nWeaknesses: CWE-862\n\nRemediation:\nBackfill or quarantine legacy rows, make organization_id non-null, remove the NULL policy branch, and reserve global audit rows for service-role access."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:a7ff8f51efca4741f1eb323856c51b93d3af247565222c7fc2f06addec65634f"
+          },
+          "properties": {
+            "category": "authorization",
+            "confidence": "medium",
+            "findingId": "csf_0a1ae249ca05ca20ff43c09f",
+            "occurrenceId": "occ_269beae83d9341bd5e88816a",
+            "severity": "low"
+          },
+          "ruleId": "authorization.null-tenant-dispatch",
+          "ruleIndex": 2
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/anonymize_hwpx_templates.mjs"
+                },
+                "region": {
+                  "endLine": 42,
+                  "startLine": 25
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/anonymize_hwpx_templates.mjs"
+                },
+                "region": {
+                  "endLine": 228,
+                  "startLine": 202
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "HWPX anonymization succeeds without a valid cleanup policy\n\nMissing, malformed, or empty cleanup-token configuration becomes an empty replacement list while outputs are still written with status ok, allowing identifiers to remain in committed templates.\n\nSeverity: medium\n\nCategory: Data exposure\n\nWeaknesses: CWE-200\n\nRemediation:\nFail closed unless a validated non-empty digest-bound policy is present, then verify configured forbidden identifiers are absent before writing success."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:d779f540208bdb15c25764497f6c5d2f5434b88d079026a2327abc97936f0786"
+          },
+          "properties": {
+            "category": "data-exposure",
+            "confidence": "high",
+            "findingId": "csf_b6712b40c7102be95df8abd6",
+            "occurrenceId": "occ_532355f7e25f525906fd5c6d",
+            "severity": "medium"
+          },
+          "ruleId": "data-exposure.hwpx-anonymization-policy",
+          "ruleIndex": 4
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/final_release_closeout.mjs"
+                },
+                "region": {
+                  "endLine": 61,
+                  "startLine": 51
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/publish_reports_wave1_evidence.mjs"
+                },
+                "region": {
+                  "endLine": 31,
+                  "startLine": 21
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Release and publication subprocesses lack execution deadlines\n\nTwo privileged release helpers launch fixed test, build, audit, and browser commands with spawnSync but no timeout, allowing a hanging dependency or build input to occupy CI or operator workers indefinitely.\n\nSeverity: low\n\nCategory: Resource exhaustion\n\nWeaknesses: CWE-400\n\nRemediation:\nUse the existing bounded subprocess helper with per-step deadlines, bounded output, process-tree termination, and explicit timeout reporting."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:c2be6996ca2a5834b75f894d0cfb4a89c571ccb990721247ae24650da5bb275c"
+          },
+          "properties": {
+            "category": "resource-exhaustion",
+            "confidence": "high",
+            "findingId": "csf_da0a933d31dab9854839d52d",
+            "occurrenceId": "occ_5bdca4c03cb14b7f6b3fe459",
+            "severity": "low"
+          },
+          "ruleId": "resource-exhaustion.release-subprocess-timeout",
+          "ruleIndex": 13
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/hwpx_template_inventory.mjs"
+                },
+                "region": {
+                  "endLine": 66,
+                  "startLine": 44
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/hwpx_template_inventory.mjs"
+                },
+                "region": {
+                  "endLine": 98,
+                  "startLine": 85
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "HWPX inventory reads full files before enforcing a size limit\n\nThe inventory helper reads each candidate HWPX completely into memory before inspecting metadata and has no pre-read byte ceiling.\n\nSeverity: low\n\nCategory: Resource exhaustion\n\nWeaknesses: CWE-400\n\nRemediation:\nStat and reject oversized files before reading, parse only a bounded ZIP tail or central directory, and cap entry counts and directory bytes."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:1ffb34377a7a2ed07ccaf842b3587e4a7e9fd9982db69012c73822d236b833ac"
+          },
+          "properties": {
+            "category": "resource-exhaustion",
+            "confidence": "high",
+            "findingId": "csf_199b088ad3aa500c92e1c3a0",
+            "occurrenceId": "occ_632f64f6df98f684f1f9e9ab",
+            "severity": "low"
+          },
+          "ruleId": "resource-exhaustion.hwpx-inventory-read",
+          "ruleIndex": 11
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/002_workspace_productization.sql"
+                },
+                "region": {
+                  "endLine": 20,
+                  "startLine": 3
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/supabase-admin.ts"
+                },
+                "region": {
+                  "endLine": 716,
+                  "startLine": 645
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Concurrent workspace provisioning can create duplicate organizations and sites\n\nFirst-use provisioning performs select-then-insert for organizations and sites without matching uniqueness constraints, allowing concurrent requests to create duplicates.\n\nSeverity: low\n\nCategory: Race condition\n\nWeaknesses: CWE-362\n\nRemediation:\nAdd owner and organization/name uniqueness constraints and replace select-then-insert with conflict-safe upserts or a transactional provisioning function."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:176049aedffd218a2b78f1fa6d97b4f07a693946ef30fa03986362e443bc5d5f"
+          },
+          "properties": {
+            "category": "race-condition",
+            "confidence": "high",
+            "findingId": "csf_4d4b705d23453081c755b765",
+            "occurrenceId": "occ_864bfb4a4162b7c316e80fa6",
+            "severity": "low"
+          },
+          "ruleId": "race-condition.workspace-provisioning",
+          "ruleIndex": 8
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/final_output_parser_safety.mjs"
+                },
+                "region": {
+                  "endLine": 130,
+                  "startLine": 101
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Workbook budgets apply after ExcelJS materialization\n\nThe final-output parser preflights the OOXML archive but ExcelJS materializes the entire workbook before sheet, row, cell, and elapsed budgets are enforced.\n\nSeverity: low\n\nCategory: Resource exhaustion\n\nWeaknesses: CWE-400\n\nRemediation:\nParse workbook XML in a bounded streaming worker or enforce projected worksheet and cell limits before ExcelJS allocation, with an external hard deadline and memory cap."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:148848059237d30fa78cf3b4658fea5ef51c3fd1d5ab5c1f544c9f4d76a66313"
+          },
+          "properties": {
+            "category": "resource-exhaustion",
+            "confidence": "high",
+            "findingId": "csf_25a84dda3fa5d2f8aa43d288",
+            "occurrenceId": "occ_8b9dd5eb7d7115a8e936c6d3",
+            "severity": "low"
+          },
+          "ruleId": "resource-exhaustion.xlsx-materialization",
+          "ruleIndex": 15
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/public-page-admission.ts"
+                },
+                "region": {
+                  "endLine": 9,
+                  "startLine": 1
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/ask/page.tsx"
+                },
+                "region": {
+                  "endLine": 25,
+                  "startLine": 16
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/public-ask-operation.ts"
+                },
+                "region": {
+                  "endLine": 108,
+                  "startLine": 94
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Public ask page loses request-disconnect cancellation\n\nThe server page constructs a new header-only Request and runs provider-backed ask work with its fresh signal, so browser disconnects cannot cancel the underlying provider operation.\n\nSeverity: medium\n\nCategory: Resource exhaustion\n\nWeaknesses: CWE-400\n\nRemediation:\nMove page generation through the cancellation-aware API or another handler that owns the real request signal and abort provider work when its consumer disconnects."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:b3a421af354424968ec5f245cff341a108b65b58f14d3e9c83a2998231161cde"
+          },
+          "properties": {
+            "category": "resource-exhaustion",
+            "confidence": "high",
+            "findingId": "csf_d185fe96f82af5c8442fc165",
+            "occurrenceId": "occ_997f3d08cfa1192445107aaa",
+            "severity": "medium"
+          },
+          "ruleId": "resource-exhaustion.ask-page-disconnect",
+          "ruleIndex": 9
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/003_knowledge_runtime.sql"
+                },
+                "region": {
+                  "endLine": 126,
+                  "startLine": 94
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/010_commercial_operations.sql"
+                },
+                "region": {
+                  "endLine": 210,
+                  "startLine": 161
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/knowledge-review.ts"
+                },
+                "region": {
+                  "endLine": 722,
+                  "startLine": 617
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/workpacks/%5Bid%5D/learning-export/route.ts"
+                },
+                "region": {
+                  "endLine": 92,
+                  "startLine": 43
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Tenant clients can forge server-authoritative workflow state\n\nBroad tenant-owner FOR ALL policies allow direct Data API writes to review, approval, provider, recipient-policy, and regeneration state that application routes otherwise validate as authoritative.\n\nSeverity: medium\n\nCategory: Authorization\n\nWeaknesses: CWE-602\n\nRemediation:\nRevoke direct client writes to authoritative fields; use server-only transitions or constrained RPCs and immutable authenticated review receipts."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:0ecfbda7a5af405d38eeb763c8ffd66f5d03eedf587b3b33c92affe711fb72c4"
+          },
+          "properties": {
+            "category": "authorization",
+            "confidence": "high",
+            "findingId": "csf_2b903c9415a7cce9272d6286",
+            "occurrenceId": "occ_acf6ab9120c7f16e1c2a4334",
+            "severity": "medium"
+          },
+          "ruleId": "authorization.authoritative-state-forgery",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/public-page-admission.ts"
+                },
+                "region": {
+                  "endLine": 9,
+                  "startLine": 1
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/search/page.tsx"
+                },
+                "region": {
+                  "endLine": 14,
+                  "startLine": 8
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/public-search-operation.ts"
+                },
+                "region": {
+                  "endLine": 87,
+                  "startLine": 45
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/public-search-operation.ts"
+                },
+                "region": {
+                  "endLine": 135,
+                  "startLine": 90
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Public legal-search page loses request-disconnect cancellation\n\nThe search page passes a synthetic Request to the coalesced provider search, leaving a never-aborted consumer after the real page request disconnects.\n\nSeverity: medium\n\nCategory: Resource exhaustion\n\nWeaknesses: CWE-400\n\nRemediation:\nRoute page search through the existing cancellation-aware API or supply a real request-lifetime signal and promptly release coalesced consumers."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:60205702ed5d6e584fa1e6d6190b9c24440cfa0b88f0cb185d7e7992a24178ae"
+          },
+          "properties": {
+            "category": "resource-exhaustion",
+            "confidence": "high",
+            "findingId": "csf_bf28a4c0a2dd846f48d2655e",
+            "occurrenceId": "occ_ad882e88a93a84d257b9d0e3",
+            "severity": "medium"
+          },
+          "ruleId": "resource-exhaustion.search-page-disconnect",
+          "ruleIndex": 14
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/001_init.sql"
+                },
+                "region": {
+                  "endLine": 17,
+                  "startLine": 1
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/config.toml"
+                },
+                "region": {
+                  "endLine": 18,
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Legacy query and document tables lack row-level authorization\n\nThe public-schema query_logs and documents tables are created without RLS or policies, leaving stored query and document content dependent on unproven external grant hardening.\n\nSeverity: medium\n\nCategory: Authorization\n\nWeaknesses: CWE-862\n\nRemediation:\nEnable RLS, revoke unnecessary anon/authenticated grants, add narrowly scoped policies or service-role-only access, and verify effective deployed grants."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:754020e9de099f22971b372494a849fafa6724098173b12a2f88a46e50d34e78"
+          },
+          "properties": {
+            "category": "authorization",
+            "confidence": "medium",
+            "findingId": "csf_3984f4bbad4a3a7d00d110c2",
+            "occurrenceId": "occ_dec34cc492facd4ba9f5fb81",
+            "severity": "medium"
+          },
+          "ruleId": "authorization.missing-rls",
+          "ruleIndex": 1
+        },
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/mcp-token-service.ts"
+                },
+                "region": {
+                  "endLine": 18,
+                  "startLine": 14
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/api/mcp-tokens/route.ts"
+                },
+                "region": {
+                  "endLine": 280,
+                  "startLine": 247
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "evidence"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "supabase/migrations/009_mcp_token_query_indexes.sql"
+                },
+                "region": {
+                  "endLine": 21,
+                  "startLine": 19
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "MCP active-token quota can be exceeded through concurrent issuance\n\nToken issuance counts active credentials and inserts in separate operations, so concurrent owner requests can exceed the per-site cap.\n\nSeverity: low\n\nCategory: Race condition\n\nWeaknesses: CWE-362\n\nRemediation:\nMove count-and-insert into a transactionally locked database function or allocate bounded unique token slots."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:2b063c1db5904ddd580f24649dd14d26e300660fead8d17685535a5afcd50590"
+          },
+          "properties": {
+            "category": "race-condition",
+            "confidence": "high",
+            "findingId": "csf_580804e515768b8dd224e232",
+            "occurrenceId": "occ_eae92ba81be073572d625f31",
+            "severity": "low"
+          },
+          "ruleId": "race-condition.mcp-token-quota",
+          "ruleIndex": 6
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/snapshot_kosha_guide_corpus.py"
+                },
+                "region": {
+                  "endLine": 1169,
+                  "startLine": 1138
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "source"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/snapshot_kosha_guide_corpus.py"
+                },
+                "region": {
+                  "endLine": 590,
+                  "startLine": 525
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "sink"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/snapshot_kosha_guide_corpus.py"
+                },
+                "region": {
+                  "endLine": 1941,
+                  "startLine": 1925
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "KOSHA corpus bytes can change after identity capture\n\nThe snapshot workflow hashes and inventories corpus paths, then later reopens ZIPs or direct PDFs without binding parsed bytes to the captured digest and member metadata.\n\nSeverity: medium\n\nCategory: Integrity\n\nWeaknesses: CWE-367\n\nRemediation:\nParse immutable staged copies or retained descriptors; otherwise revalidate file digest and ZIP member CRC and sizes immediately before every read."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:643824808b66d8a59dad0c947496fb85038391f6f02f5a6421a61bfbd4211255"
+          },
+          "properties": {
+            "category": "integrity",
+            "confidence": "high",
+            "findingId": "csf_731dfce06fea0669acffcc3e",
+            "occurrenceId": "occ_f40d03d11a2b0135137e3a45",
+            "severity": "medium"
+          },
+          "ruleId": "integrity.kosha-source-toctou",
+          "ruleIndex": 5
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "Codex Security",
+          "rules": [
+            {
+              "fullDescription": {
+                "text": "Authorization: Authoritative state forgery. Categories: Authorization. Weaknesses: CWE-602."
+              },
+              "help": {
+                "markdown": "Authorization: Authoritative state forgery. Categories: Authorization. Weaknesses: CWE-602.\n\n## Remediation\n\nRevoke direct client writes to authoritative fields; use server-only transitions or constrained RPCs and immutable authenticated review receipts.",
+                "text": "Authorization: Authoritative state forgery. Categories: Authorization. Weaknesses: CWE-602.\n\nRemediation:\n\nRevoke direct client writes to authoritative fields; use server-only transitions or constrained RPCs and immutable authenticated review receipts."
+              },
+              "id": "authorization.authoritative-state-forgery",
+              "name": "Authorization: Authoritative state forgery",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "authorization",
+                  "external/cwe/cwe-602",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Authorization: Authoritative state forgery"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Authorization: Missing rls. Categories: Authorization. Weaknesses: CWE-862."
+              },
+              "help": {
+                "markdown": "Authorization: Missing rls. Categories: Authorization. Weaknesses: CWE-862.\n\n## Remediation\n\nEnable RLS, revoke unnecessary anon/authenticated grants, add narrowly scoped policies or service-role-only access, and verify effective deployed grants.",
+                "text": "Authorization: Missing rls. Categories: Authorization. Weaknesses: CWE-862.\n\nRemediation:\n\nEnable RLS, revoke unnecessary anon/authenticated grants, add narrowly scoped policies or service-role-only access, and verify effective deployed grants."
+              },
+              "id": "authorization.missing-rls",
+              "name": "Authorization: Missing rls",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "authorization",
+                  "external/cwe/cwe-862",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Authorization: Missing rls"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Authorization: Null tenant dispatch. Categories: Authorization. Weaknesses: CWE-862."
+              },
+              "help": {
+                "markdown": "Authorization: Null tenant dispatch. Categories: Authorization. Weaknesses: CWE-862.\n\n## Remediation\n\nBackfill or quarantine legacy rows, make organization_id non-null, remove the NULL policy branch, and reserve global audit rows for service-role access.",
+                "text": "Authorization: Null tenant dispatch. Categories: Authorization. Weaknesses: CWE-862.\n\nRemediation:\n\nBackfill or quarantine legacy rows, make organization_id non-null, remove the NULL policy branch, and reserve global audit rows for service-role access."
+              },
+              "id": "authorization.null-tenant-dispatch",
+              "name": "Authorization: Null tenant dispatch",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "authorization",
+                  "external/cwe/cwe-862",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Authorization: Null tenant dispatch"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Authorization: Tenant tuple integrity. Categories: Authorization. Weaknesses: CWE-863."
+              },
+              "help": {
+                "markdown": "Authorization: Tenant tuple integrity. Categories: Authorization. Weaknesses: CWE-863.\n\n## Remediation\n\nAdd tenant-consistent composite keys and foreign keys, strengthen WITH CHECK predicates, and clean existing inconsistent tuples before enforcement.",
+                "text": "Authorization: Tenant tuple integrity. Categories: Authorization. Weaknesses: CWE-863.\n\nRemediation:\n\nAdd tenant-consistent composite keys and foreign keys, strengthen WITH CHECK predicates, and clean existing inconsistent tuples before enforcement."
+              },
+              "id": "authorization.tenant-tuple-integrity",
+              "name": "Authorization: Tenant tuple integrity",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "authorization",
+                  "external/cwe/cwe-863",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Authorization: Tenant tuple integrity"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Data exposure: Hwpx anonymization policy. Categories: Data exposure. Weaknesses: CWE-200."
+              },
+              "help": {
+                "markdown": "Data exposure: Hwpx anonymization policy. Categories: Data exposure. Weaknesses: CWE-200.\n\n## Remediation\n\nFail closed unless a validated non-empty digest-bound policy is present, then verify configured forbidden identifiers are absent before writing success.",
+                "text": "Data exposure: Hwpx anonymization policy. Categories: Data exposure. Weaknesses: CWE-200.\n\nRemediation:\n\nFail closed unless a validated non-empty digest-bound policy is present, then verify configured forbidden identifiers are absent before writing success."
+              },
+              "id": "data-exposure.hwpx-anonymization-policy",
+              "name": "Data exposure: Hwpx anonymization policy",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "data-exposure",
+                  "external/cwe/cwe-200",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Data exposure: Hwpx anonymization policy"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Integrity: Kosha source toctou. Categories: Integrity. Weaknesses: CWE-367."
+              },
+              "help": {
+                "markdown": "Integrity: Kosha source toctou. Categories: Integrity. Weaknesses: CWE-367.\n\n## Remediation\n\nParse immutable staged copies or retained descriptors; otherwise revalidate file digest and ZIP member CRC and sizes immediately before every read.",
+                "text": "Integrity: Kosha source toctou. Categories: Integrity. Weaknesses: CWE-367.\n\nRemediation:\n\nParse immutable staged copies or retained descriptors; otherwise revalidate file digest and ZIP member CRC and sizes immediately before every read."
+              },
+              "id": "integrity.kosha-source-toctou",
+              "name": "Integrity: Kosha source toctou",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "external/cwe/cwe-367",
+                  "integrity",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Integrity: Kosha source toctou"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Race condition: Mcp token quota. Categories: Race condition. Weaknesses: CWE-362."
+              },
+              "help": {
+                "markdown": "Race condition: Mcp token quota. Categories: Race condition. Weaknesses: CWE-362.\n\n## Remediation\n\nMove count-and-insert into a transactionally locked database function or allocate bounded unique token slots.",
+                "text": "Race condition: Mcp token quota. Categories: Race condition. Weaknesses: CWE-362.\n\nRemediation:\n\nMove count-and-insert into a transactionally locked database function or allocate bounded unique token slots."
+              },
+              "id": "race-condition.mcp-token-quota",
+              "name": "Race condition: Mcp token quota",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "external/cwe/cwe-362",
+                  "race-condition",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Race condition: Mcp token quota"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Race condition: Worker site transfer. Categories: Race condition. Weaknesses: CWE-362."
+              },
+              "help": {
+                "markdown": "Race condition: Worker site transfer. Categories: Race condition. Weaknesses: CWE-362.\n\n## Remediation\n\nUse a transactional RPC or conditional update that succeeds only when site_id is unchanged and require a separate explicit transfer operation.",
+                "text": "Race condition: Worker site transfer. Categories: Race condition. Weaknesses: CWE-362.\n\nRemediation:\n\nUse a transactional RPC or conditional update that succeeds only when site_id is unchanged and require a separate explicit transfer operation."
+              },
+              "id": "race-condition.worker-site-transfer",
+              "name": "Race condition: Worker site transfer",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "external/cwe/cwe-362",
+                  "race-condition",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Race condition: Worker site transfer"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Race condition: Workspace provisioning. Categories: Race condition. Weaknesses: CWE-362."
+              },
+              "help": {
+                "markdown": "Race condition: Workspace provisioning. Categories: Race condition. Weaknesses: CWE-362.\n\n## Remediation\n\nAdd owner and organization/name uniqueness constraints and replace select-then-insert with conflict-safe upserts or a transactional provisioning function.",
+                "text": "Race condition: Workspace provisioning. Categories: Race condition. Weaknesses: CWE-362.\n\nRemediation:\n\nAdd owner and organization/name uniqueness constraints and replace select-then-insert with conflict-safe upserts or a transactional provisioning function."
+              },
+              "id": "race-condition.workspace-provisioning",
+              "name": "Race condition: Workspace provisioning",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "external/cwe/cwe-362",
+                  "race-condition",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Race condition: Workspace provisioning"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Resource exhaustion: Ask page disconnect. Categories: Resource exhaustion. Weaknesses: CWE-400."
+              },
+              "help": {
+                "markdown": "Resource exhaustion: Ask page disconnect. Categories: Resource exhaustion. Weaknesses: CWE-400.\n\n## Remediation\n\nMove page generation through the cancellation-aware API or another handler that owns the real request signal and abort provider work when its consumer disconnects.",
+                "text": "Resource exhaustion: Ask page disconnect. Categories: Resource exhaustion. Weaknesses: CWE-400.\n\nRemediation:\n\nMove page generation through the cancellation-aware API or another handler that owns the real request signal and abort provider work when its consumer disconnects."
+              },
+              "id": "resource-exhaustion.ask-page-disconnect",
+              "name": "Resource exhaustion: Ask page disconnect",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "external/cwe/cwe-400",
+                  "resource-exhaustion",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Resource exhaustion: Ask page disconnect"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Resource exhaustion: Audit HTTP buffer. Categories: Resource exhaustion. Weaknesses: CWE-400."
+              },
+              "help": {
+                "markdown": "Resource exhaustion: Audit HTTP buffer. Categories: Resource exhaustion. Weaknesses: CWE-400.\n\n## Remediation\n\nUse AbortController deadlines and a bounded streaming response reader before JSON parsing or preview capture.",
+                "text": "Resource exhaustion: Audit HTTP buffer. Categories: Resource exhaustion. Weaknesses: CWE-400.\n\nRemediation:\n\nUse AbortController deadlines and a bounded streaming response reader before JSON parsing or preview capture."
+              },
+              "id": "resource-exhaustion.audit-http-buffer",
+              "name": "Resource exhaustion: Audit HTTP buffer",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "external/cwe/cwe-400",
+                  "resource-exhaustion",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Resource exhaustion: Audit HTTP buffer"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Resource exhaustion: Hwpx inventory read. Categories: Resource exhaustion. Weaknesses: CWE-400."
+              },
+              "help": {
+                "markdown": "Resource exhaustion: Hwpx inventory read. Categories: Resource exhaustion. Weaknesses: CWE-400.\n\n## Remediation\n\nStat and reject oversized files before reading, parse only a bounded ZIP tail or central directory, and cap entry counts and directory bytes.",
+                "text": "Resource exhaustion: Hwpx inventory read. Categories: Resource exhaustion. Weaknesses: CWE-400.\n\nRemediation:\n\nStat and reject oversized files before reading, parse only a bounded ZIP tail or central directory, and cap entry counts and directory bytes."
+              },
+              "id": "resource-exhaustion.hwpx-inventory-read",
+              "name": "Resource exhaustion: Hwpx inventory read",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "external/cwe/cwe-400",
+                  "resource-exhaustion",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Resource exhaustion: Hwpx inventory read"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Resource exhaustion: Pdf parser deadline. Categories: Resource exhaustion. Weaknesses: CWE-400."
+              },
+              "help": {
+                "markdown": "Resource exhaustion: Pdf parser deadline. Categories: Resource exhaustion. Weaknesses: CWE-400.\n\n## Remediation\n\nRun untrusted PDF parsing in disposable worker processes with wall-clock, memory, and output limits and terminate on deadline.",
+                "text": "Resource exhaustion: Pdf parser deadline. Categories: Resource exhaustion. Weaknesses: CWE-400.\n\nRemediation:\n\nRun untrusted PDF parsing in disposable worker processes with wall-clock, memory, and output limits and terminate on deadline."
+              },
+              "id": "resource-exhaustion.pdf-parser-deadline",
+              "name": "Resource exhaustion: Pdf parser deadline",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "external/cwe/cwe-400",
+                  "resource-exhaustion",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Resource exhaustion: Pdf parser deadline"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Resource exhaustion: Release subprocess timeout. Categories: Resource exhaustion. Weaknesses: CWE-400."
+              },
+              "help": {
+                "markdown": "Resource exhaustion: Release subprocess timeout. Categories: Resource exhaustion. Weaknesses: CWE-400.\n\n## Remediation\n\nUse the existing bounded subprocess helper with per-step deadlines, bounded output, process-tree termination, and explicit timeout reporting.",
+                "text": "Resource exhaustion: Release subprocess timeout. Categories: Resource exhaustion. Weaknesses: CWE-400.\n\nRemediation:\n\nUse the existing bounded subprocess helper with per-step deadlines, bounded output, process-tree termination, and explicit timeout reporting."
+              },
+              "id": "resource-exhaustion.release-subprocess-timeout",
+              "name": "Resource exhaustion: Release subprocess timeout",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "external/cwe/cwe-400",
+                  "resource-exhaustion",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Resource exhaustion: Release subprocess timeout"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Resource exhaustion: Search page disconnect. Categories: Resource exhaustion. Weaknesses: CWE-400."
+              },
+              "help": {
+                "markdown": "Resource exhaustion: Search page disconnect. Categories: Resource exhaustion. Weaknesses: CWE-400.\n\n## Remediation\n\nRoute page search through the existing cancellation-aware API or supply a real request-lifetime signal and promptly release coalesced consumers.",
+                "text": "Resource exhaustion: Search page disconnect. Categories: Resource exhaustion. Weaknesses: CWE-400.\n\nRemediation:\n\nRoute page search through the existing cancellation-aware API or supply a real request-lifetime signal and promptly release coalesced consumers."
+              },
+              "id": "resource-exhaustion.search-page-disconnect",
+              "name": "Resource exhaustion: Search page disconnect",
+              "properties": {
+                "security-severity": "5.0",
+                "tags": [
+                  "external/cwe/cwe-400",
+                  "resource-exhaustion",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Resource exhaustion: Search page disconnect"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Resource exhaustion: Xlsx materialization. Categories: Resource exhaustion. Weaknesses: CWE-400."
+              },
+              "help": {
+                "markdown": "Resource exhaustion: Xlsx materialization. Categories: Resource exhaustion. Weaknesses: CWE-400.\n\n## Remediation\n\nParse workbook XML in a bounded streaming worker or enforce projected worksheet and cell limits before ExcelJS allocation, with an external hard deadline and memory cap.",
+                "text": "Resource exhaustion: Xlsx materialization. Categories: Resource exhaustion. Weaknesses: CWE-400.\n\nRemediation:\n\nParse workbook XML in a bounded streaming worker or enforce projected worksheet and cell limits before ExcelJS allocation, with an external hard deadline and memory cap."
+              },
+              "id": "resource-exhaustion.xlsx-materialization",
+              "name": "Resource exhaustion: Xlsx materialization",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "external/cwe/cwe-400",
+                  "resource-exhaustion",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Resource exhaustion: Xlsx materialization"
+              }
+            }
+          ],
+          "version": "0.1.22"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

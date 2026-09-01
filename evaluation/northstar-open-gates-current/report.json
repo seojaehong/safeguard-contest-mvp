@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-09-01T03:16:07.412Z",
-  "sourceSha": "f9e09badfcb5e6db24ebb749345c8255e50f3c83",
+  "generatedAt": "2026-09-01T04:56:30.319Z",
+  "sourceSha": "c9b67280a64995b3cd26f243f404623de21a489a",
   "overall": "open",
   "gates": [
     {
@@ -350,10 +350,10 @@
       "id": "completed_current_head_standard_security_scan",
       "state": "notice",
       "label": "Completed current-head Standard security scan",
-      "evidencePath": "evaluation\\current-head-standard-security-scan-2026-08-31-9504d8db-complete\\report.json",
-      "detail": "Current-head Standard scan f6bef30a is sealed at 9504d8db with 21 findings (7 medium, 14 low), 21 write-ups, and partial coverage. Canonical artifact hashes match. The immutable original 18-finding baseline is preserved; 11 approval-free source findings, nine database/RLS/atomicity findings, and one approval-sensitive Share capability finding remain open. Security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
+      "evidencePath": "evaluation\\current-head-standard-security-scan-2026-09-01-c9b67280-complete\\report.json",
+      "detail": "Current-head Standard scan 392a4135 is sealed at source/live c9b67280 with 16 findings (8 medium, 8 low), 16 write-ups, and partial coverage. Canonical artifact hashes match. The immutable original 18-finding baseline and prior scans are preserved; nine approval-free source findings and seven approval-gated database/RLS/atomicity findings remain open. Security-complete is false, no mutation occurred, and exact saved Share remains MISSING_EVIDENCE.",
       "nextActions": [
-        "Remediate the 11 approval-free source findings in bounded waves and run a fresh follow-up scan.",
+        "Remediate the nine approval-free source findings in bounded waves and run a fresh follow-up scan.",
         "Keep database/RLS/atomicity, provider, exact Share, wiki, vector, and KOSHA registry operations on their existing approval paths."
       ]
     },

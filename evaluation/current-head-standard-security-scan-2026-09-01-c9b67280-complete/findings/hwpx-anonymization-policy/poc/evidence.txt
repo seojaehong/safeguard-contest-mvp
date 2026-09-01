@@ -1,0 +1,4 @@
+Static source trace only. No exploit, provider call, database mutation, or external request was executed.
+Finding: HWPX anonymization succeeds without a valid cleanup policy
+Evidence: scripts/anonymize_hwpx_templates.mjs:25-42 returns an empty token list on policy errors and 202-228 still writes status ok.
+
