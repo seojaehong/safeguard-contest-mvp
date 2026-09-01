@@ -1,6 +1,6 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-test-harness/v2",
-  "generatedAt": "2026-09-01T08:32:14.8993680+09:00",
+  "generatedAt": "2026-09-01T09:07:59.2981621+09:00",
   "sourceHeadBeforeMemoryRemediation": "d7abe2dd20779f13c5655fb56f044baeeed0b1e8",
   "sourceHeadBeforeFixtureReuse": "5f6f5e498b80f76b0a52f9140113ff74e39d8f03",
   "productCommit": "a8e337501b71070adb5019188f247f15bb23307e",
@@ -39,6 +39,19 @@
     "priorAbortedRunPrivateMemoryMbApproximate": 3700,
     "priorRunSource": "prior coordination record",
     "memoryComparisonIsSampledNotProfilerPeak": true,
+    "rejectedExperiments": [
+      {
+        "name": "module-level stat-keyed JSON parse cache",
+        "testsPassed": 204,
+        "testsFailed": 0,
+        "durationSeconds": 1234.07,
+        "comparisonDurationSeconds": 1248.99,
+        "savedSeconds": 14.92,
+        "durationReductionPercent": 1.19,
+        "retained": false,
+        "reason": "The small runtime reduction did not justify adding cache invalidation complexity to the production audit module."
+      }
+    ],
     "targetedFixtureIsolation": {
       "command": "npm.cmd exec -- vitest run tests\\northstar-open-gate-audit.test.ts -t fixture-boundary-patterns --maxWorkers=1 --fileParallelism=false",
       "testsPassed": 13,

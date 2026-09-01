@@ -16,4 +16,6 @@ The full 204-test suite dropped from 1789.91 seconds to 1248.99 seconds. A local
 
 The memory value is sampled process telemetry, not a profiler peak. It remains far below the earlier approximately 3.7 GB aborted coordination run. The remaining runtime is dominated by repeated full audit evaluation rather than repository construction.
 
+A follow-up stat-keyed JSON parse-cache experiment also passed 204/204 but completed in 1234.07 seconds, only 14.92 seconds or 1.19% faster than the reusable-pool result. The cache was removed because that gain did not justify cache invalidation complexity in the production audit module. The measured result is retained here to prevent repeating the same low-value optimization.
+
 No gate semantics or product runtime changed. No database, provider, Share-session, vector, Wiki, or KOSHA registry mutation occurred. Exact saved Share remains `MISSING_EVIDENCE`.
