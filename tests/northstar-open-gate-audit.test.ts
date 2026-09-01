@@ -5612,6 +5612,58 @@ function initializeFixtureRoot(rootDir: string): string {
   );
   writeJson(
     rootDir,
+    path.join("evaluation", "hermes-share-governed-path-compatibility-2026-09-01", "report.json"),
+    {
+      verdict: "PASS_LIVE_PRODUCTION_HERMES_SHARE_GOVERNED_PATH_COMPATIBILITY_RESCAN_FINDINGS_OPEN",
+      sourceHead: "fixture-sha",
+      productionCommit: "fixture-sha",
+      productionIncludesSourceHead: true,
+      coveredGateIds: [
+        "knowledge_preparation_capability_truth",
+        "share_session_revocation_security",
+      ],
+      governedPaths: [
+        "app/api/knowledge/review/prepare/route.ts",
+        "app/knowledge/KnowledgeReviewInbox.tsx",
+        "app/api/workpacks/[id]/share-sessions/route.ts",
+        "components/WorkflowSharePanel.tsx",
+        "lib/workflow-share-client.ts",
+      ],
+      verification: {
+        vitest: { filesPassed: 7, testsPassed: 148, failed: 0, status: "PASS" },
+        typecheck: "PASS",
+        build: "PASS",
+        staticPages: 29,
+        diffCheck: "PASS",
+      },
+      contracts: {
+        knowledgeAuthenticationBeforeBodyRead: true,
+        knowledgeBodyHazardCoverageFailsClosed: true,
+        shareRevocationContractPreserved: true,
+        shareReviewPropagationDoesNotApproveDocuments: true,
+        sealedSecurityFindingsReclassified: false,
+      },
+      mutationBoundary: {
+        dbMutationPerformed: false,
+        providerCallPerformed: false,
+        providerDispatchCalled: false,
+        shareSessionCreated: false,
+        shareSessionRevokedForEvidence: false,
+        readConfirmationCreated: false,
+        vectorOrEmbeddingMutationPerformed: false,
+        wikiPublicationPerformed: false,
+        koshaExactRegistryMutationPerformed: false,
+      },
+      remainingBoundaries: {
+        distributedAdmissionActivation: "OPERATOR_CONFIGURATION_REQUIRED",
+        exactSavedShareVerdict: "MISSING_EVIDENCE",
+        securityCompleteClaimAllowed: false,
+        approvalGatedOperationsUnchanged: true,
+      },
+    },
+  );
+  writeJson(
+    rootDir,
     path.join("evaluation", "current-source-security-stale-approval-evidence-binding-remediation-2026-08-31", "report.json"),
     staleApprovalEvidenceBindingRemediationFixture(),
   );
@@ -13661,6 +13713,53 @@ describe("northstar open gate audit", { timeout: 60_000 }, () => {
     });
 
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_promotion_review_gate")?.state).toBe("contradicted");
+  });
+
+  it("keeps Hermes and Share governed-path compatibility bounded and fail-closed", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const changedPaths = [
+      path.join("app", "knowledge", "KnowledgeReviewInbox.tsx"),
+      path.join("components", "WorkflowSharePanel.tsx"),
+    ];
+    for (const changedPath of changedPaths) {
+      writeText(rootDir, changedPath, `export const boundedCompatibility = ${JSON.stringify(changedPath)};\n`);
+    }
+    execFileSync("git", ["add", ...changedPaths.map((item) => item.replaceAll("\\", "/"))], {
+      cwd: rootDir,
+      stdio: "ignore",
+    });
+    execFileSync("git", ["commit", "-m", "refresh Hermes and Share review UI"], { cwd: rootDir, stdio: "ignore" });
+    const currentSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: rootDir, encoding: "utf8" }).trim();
+    const reportPath = path.join(
+      rootDir,
+      "evaluation",
+      "hermes-share-governed-path-compatibility-2026-09-01",
+      "report.json",
+    );
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      sourceHead: string;
+      productionCommit: string;
+      contracts: { shareReviewPropagationDoesNotApproveDocuments: boolean };
+      remainingBoundaries: { exactSavedShareVerdict: string };
+    };
+    report.sourceHead = currentSha;
+    report.productionCommit = currentSha;
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const compatible = buildNorthstarOpenGateAudit({ rootDir });
+    expect(compatible.gates.find((gate) => gate.id === "knowledge_preparation_capability_truth")?.state).toBe("notice");
+    expect(compatible.gates.find((gate) => gate.id === "share_session_revocation_security")?.state).toBe("notice");
+
+    report.contracts.shareReviewPropagationDoesNotApproveDocuments = false;
+    report.remainingBoundaries.exactSavedShareVerdict = "PASS";
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+    const contradicted = buildNorthstarOpenGateAudit({ rootDir });
+    expect(contradicted.gates.find((gate) => gate.id === "knowledge_preparation_capability_truth")?.state)
+      .toBe("contradicted");
+    expect(contradicted.gates.find((gate) => gate.id === "share_session_revocation_security")?.state)
+      .toBe("contradicted");
   });
 
   it("keeps KOSHA human review approval-gated when every companion shares the corpus binding", async () => {

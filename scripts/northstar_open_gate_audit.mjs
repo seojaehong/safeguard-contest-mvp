@@ -92,6 +92,7 @@ const EVIDENCE_PATHS = Object.freeze({
   currentSourceKoshaArchivePreflightRemediation: path.join("evaluation", "current-source-security-kosha-archive-preflight-remediation-2026-08-31", "report.json"),
   currentSourceSecurityRemediationFollowup: path.join("evaluation", "current-source-security-remediation-2026-08-30", "report.json"),
   currentSecurityGovernedPathCompatibility: path.join("evaluation", "current-security-governed-path-compatibility-2026-08-30", "report.json"),
+  hermesShareGovernedPathCompatibility: path.join("evaluation", "hermes-share-governed-path-compatibility-2026-09-01", "report.json"),
   staleApprovalEvidenceBindingRemediation: path.join("evaluation", "current-source-security-stale-approval-evidence-binding-remediation-2026-08-31", "report.json"),
   currentSourceSecurityResidualRemediation: path.join("evaluation", "current-source-security-residual-remediation-2026-08-28", "report.json"),
   shareAckPreBodyAdmission: path.join("evaluation", "share-ack-prebody-admission-2026-08-28", "report.json"),
@@ -1955,6 +1956,11 @@ function evaluateKnowledgePreparationCapabilityTruthGate(rootDir) {
     && productionCommit.length === 40
     && (isEvidenceCurrentForPaths(rootDir, sourceHead, KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_PATHS)
       || isCurrentSecurityGovernedPathCompatibility(
+        rootDir,
+        "knowledge_preparation_capability_truth",
+        KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_PATHS,
+      )
+      || isHermesShareGovernedPathCompatibilityCurrent(
         rootDir,
         "knowledge_preparation_capability_truth",
         KNOWLEDGE_PREPARATION_CAPABILITY_TRUTH_PATHS,
@@ -7332,6 +7338,10 @@ function evaluateShareSessionRevocationSecurityGate(rootDir) {
     rootDir,
     "share_session_revocation_security",
     SHARE_SESSION_REVOCATION_SECURITY_PATHS
+  ) || isHermesShareGovernedPathCompatibilityCurrent(
+    rootDir,
+    "share_session_revocation_security",
+    SHARE_SESSION_REVOCATION_SECURITY_PATHS,
   );
   const pass = readString(report.verdict) === "PASS_LIVE_PRODUCTION_OWNER_SHARE_SESSION_REVOCATION_RESCAN_PENDING"
     && sourceHead.length > 0
@@ -9948,6 +9958,72 @@ function isCurrentSecurityGovernedPathCompatibility(rootDir, gateId, governedPat
     && readString(remaining.recipientAckLiveDataApproval) === "APPROVAL_GATED"
     && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
     && readString(remaining.postFixFullRepositoryScan) === "COMPLETE_SEALED_PARTIAL_COVERAGE_18_FINDINGS_OPEN";
+}
+
+const HERMES_SHARE_GOVERNED_COMPATIBILITY_GATE_IDS = [
+  "knowledge_preparation_capability_truth",
+  "share_session_revocation_security",
+];
+
+/**
+ * Bind the later Hermes body-coverage and Share review-propagation UI changes
+ * to the security contracts they touched without broadening any old receipt.
+ *
+ * @param {string} rootDir
+ * @param {string} gateId
+ * @param {string[]} governedPaths
+ */
+function isHermesShareGovernedPathCompatibilityCurrent(rootDir, gateId, governedPaths) {
+  const report = readJsonFile(rootDir, EVIDENCE_PATHS.hermesShareGovernedPathCompatibility);
+  if (!isRecord(report)) return false;
+  const coveredGateIds = Array.isArray(report.coveredGateIds) ? report.coveredGateIds.map(readString) : [];
+  const coveredPaths = Array.isArray(report.governedPaths) ? report.governedPaths.map(readString) : [];
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const vitest = isRecord(verification.vitest) ? verification.vitest : {};
+  const contracts = isRecord(report.contracts) ? report.contracts : {};
+  const mutation = isRecord(report.mutationBoundary) ? report.mutationBoundary : {};
+  const remaining = isRecord(report.remainingBoundaries) ? report.remainingBoundaries : {};
+  const sourceHead = readString(report.sourceHead);
+  const productionCommit = readString(report.productionCommit);
+  const noMutation = mutation.dbMutationPerformed === false
+    && mutation.providerCallPerformed === false
+    && mutation.providerDispatchCalled === false
+    && mutation.shareSessionCreated === false
+    && mutation.shareSessionRevokedForEvidence === false
+    && mutation.readConfirmationCreated === false
+    && mutation.vectorOrEmbeddingMutationPerformed === false
+    && mutation.wikiPublicationPerformed === false
+    && mutation.koshaExactRegistryMutationPerformed === false;
+  return readString(report.verdict)
+      === "PASS_LIVE_PRODUCTION_HERMES_SHARE_GOVERNED_PATH_COMPATIBILITY_RESCAN_FINDINGS_OPEN"
+    && sourceHead.length === 40
+    && productionCommit.length === 40
+    && isGitAncestor(rootDir, sourceHead)
+    && isGitAncestorOf(rootDir, sourceHead, productionCommit)
+    && report.productionIncludesSourceHead === true
+    && isEvidenceCurrentForPaths(rootDir, sourceHead, governedPaths)
+    && coveredGateIds.length === HERMES_SHARE_GOVERNED_COMPATIBILITY_GATE_IDS.length
+    && HERMES_SHARE_GOVERNED_COMPATIBILITY_GATE_IDS.every((id) => coveredGateIds.includes(id))
+    && coveredGateIds.includes(gateId)
+    && governedPaths.every((pathName) => coveredPaths.includes(pathName))
+    && readNumber(vitest.filesPassed) === 7
+    && readNumber(vitest.testsPassed) === 148
+    && readNumber(vitest.failed) === 0
+    && readString(vitest.status) === "PASS"
+    && verification.typecheck === "PASS"
+    && verification.build === "PASS"
+    && readNumber(verification.staticPages) === 29
+    && verification.diffCheck === "PASS"
+    && contracts.knowledgeAuthenticationBeforeBodyRead === true
+    && contracts.knowledgeBodyHazardCoverageFailsClosed === true
+    && contracts.shareRevocationContractPreserved === true
+    && contracts.shareReviewPropagationDoesNotApproveDocuments === true
+    && contracts.sealedSecurityFindingsReclassified === false
+    && noMutation
+    && readString(remaining.distributedAdmissionActivation) === "OPERATOR_CONFIGURATION_REQUIRED"
+    && readString(remaining.exactSavedShareVerdict) === "MISSING_EVIDENCE"
+    && remaining.securityCompleteClaimAllowed === false
+    && remaining.approvalGatedOperationsUnchanged === true;
 }
 
 /**
