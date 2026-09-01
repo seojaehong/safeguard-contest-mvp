@@ -7,6 +7,7 @@ export type SafetyKnowledgeHazard = {
   id: string;
   title: string;
   keywords: string[];
+  bodyGroundingTerms: string[];
   primaryDocuments: string[];
   controls: string[];
   sourceIds: string[];

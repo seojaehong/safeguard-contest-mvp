@@ -1,5 +1,8 @@
 import { createHash } from "node:crypto";
-import type { KnowledgeRawEvent } from "@/lib/safety-knowledge";
+import {
+  getSafetyKnowledgeHazardsByIds,
+  type KnowledgeRawEvent
+} from "@/lib/safety-knowledge";
 
 const MAX_EVENT_REVIEW_FACTS = 4;
 const MAX_EVENT_REVIEW_FACT_LENGTH = 120;
@@ -233,6 +236,16 @@ export type KnowledgeCandidateContentReadiness = {
   sifProvenancePresent: boolean;
   sifEvidenceVisible: boolean;
   hazardGroundingPresent: boolean;
+  matchedHazardCount: number;
+  bodyGroundedHazardCount: number;
+  bodyHazardCoverageComplete: boolean;
+  missingBodyHazardIds: string[];
+  bodyHazardCoverage: Array<{
+    hazardId: string;
+    hazardTitle: string;
+    grounded: boolean;
+    matchedTerms: string[];
+  }>;
   unresolvedReviewItems: string[];
   humanReviewCompleted: false;
   publicationState: "unpublished";
@@ -260,8 +273,14 @@ const STATUTORY_CLAIM_PATTERNS = [
   /산업안전보건법(?:에|에\s*따라|상)/u,
   /(?:법률|시행령|시행규칙)(?:에|에\s*따라|상)/u
 ] as const;
-const HAZARD_GROUNDING_PATTERN = /추락|끼임|감전|화재|폭발|충돌|전도|질식|양중|화학|유해|고소|굴착|밀폐|산소결핍|누출|지게차/u;
 const SIF_EVIDENCE_PATTERN = /SIF\s*(?:재해|사고)[·ㆍ\s]*(?:통제)?\s*근거/iu;
+const LEGACY_HAZARD_ID_ALIASES = new Map<string, string>([
+  ["hazard-fall", "fall-scaffold"]
+]);
+
+function normalizeHazardGroundingText(value: string): string {
+  return value.toLocaleLowerCase("ko-KR").replace(/\s+/gu, "");
+}
 
 function readKnowledgeCandidateSections(text: string): Map<KnowledgeCandidateRequiredSectionId, string> {
   const labelToId = new Map<string, KnowledgeCandidateRequiredSectionId>(
@@ -304,7 +323,31 @@ export function evaluateKnowledgeCandidateContentReadiness(
   const lawProvenancePresent = candidate.provenance.some((item) => item.authorityId === "law");
   const sifProvenancePresent = candidate.provenance.some((item) => item.authorityId === "sif");
   const sifEvidenceVisible = SIF_EVIDENCE_PATTERN.test(sectionText.get("review_items") ?? "");
-  const hazardGroundingPresent = HAZARD_GROUNDING_PATTERN.test(sectionText.get("hazard_summary") ?? "");
+  const matchedHazardIds = [...new Set(candidate.matchedHazardIds)];
+  const matchedHazards = getSafetyKnowledgeHazardsByIds(matchedHazardIds.map((hazardId) => (
+    LEGACY_HAZARD_ID_ALIASES.get(hazardId) ?? hazardId
+  )));
+  const hazardById = new Map(matchedHazards.map((hazard) => [hazard.id, hazard]));
+  const normalizedHazardSummary = normalizeHazardGroundingText(sectionText.get("hazard_summary") ?? "");
+  const bodyHazardCoverage = matchedHazardIds.map((hazardId) => {
+    const canonicalHazardId = LEGACY_HAZARD_ID_ALIASES.get(hazardId) ?? hazardId;
+    const hazard = hazardById.get(canonicalHazardId);
+    const matchedTerms = hazard?.bodyGroundingTerms.filter((term) => (
+      normalizedHazardSummary.includes(normalizeHazardGroundingText(term))
+    )) ?? [];
+    return {
+      hazardId,
+      hazardTitle: hazard?.title ?? "등록되지 않은 위험요인",
+      grounded: Boolean(hazard && matchedTerms.length > 0),
+      matchedTerms
+    };
+  });
+  const matchedHazardCount = matchedHazardIds.length;
+  const bodyGroundedHazardCount = bodyHazardCoverage.filter((item) => item.grounded).length;
+  const missingBodyHazardIds = bodyHazardCoverage.filter((item) => !item.grounded).map((item) => item.hazardId);
+  const hazardGroundingPresent = bodyGroundedHazardCount > 0;
+  const bodyHazardCoverageComplete = matchedHazardCount > 0
+    && bodyGroundedHazardCount === matchedHazardCount;
   const unresolvedReviewItems = [
     ...sections.filter((section) => !section.present).map((section) => `missing_section:${section.id}`),
     ...sections.filter((section) => section.present && !section.nonEmpty).map((section) => `empty_section:${section.id}`),
@@ -312,7 +355,8 @@ export function evaluateKnowledgeCandidateContentReadiness(
     ...(legalOverclaimFindingCount > 0 ? ["legal_overclaim"] : []),
     ...(statutoryClaimDetected && !lawProvenancePresent ? ["statutory_claim_without_law_provenance"] : []),
     ...(sifProvenancePresent && !sifEvidenceVisible ? ["sif_provenance_not_visible"] : []),
-    ...(!hazardGroundingPresent ? ["hazard_grounding_missing"] : [])
+    ...(!hazardGroundingPresent ? ["hazard_grounding_missing"] : []),
+    ...(hazardGroundingPresent && !bodyHazardCoverageComplete ? ["candidate_body_hazard_coverage_incomplete"] : [])
   ];
 
   return {
@@ -329,6 +373,11 @@ export function evaluateKnowledgeCandidateContentReadiness(
     sifProvenancePresent,
     sifEvidenceVisible,
     hazardGroundingPresent,
+    matchedHazardCount,
+    bodyGroundedHazardCount,
+    bodyHazardCoverageComplete,
+    missingBodyHazardIds,
+    bodyHazardCoverage,
     unresolvedReviewItems,
     humanReviewCompleted: false,
     publicationState: "unpublished",

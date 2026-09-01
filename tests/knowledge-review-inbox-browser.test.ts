@@ -129,6 +129,16 @@ const queueItem = {
     sifProvenancePresent: true,
     sifEvidenceVisible: true,
     hazardGroundingPresent: true,
+    matchedHazardCount: 1,
+    bodyGroundedHazardCount: 1,
+    bodyHazardCoverageComplete: true,
+    missingBodyHazardIds: [] as string[],
+    bodyHazardCoverage: [{
+      hazardId: "fall-scaffold",
+      hazardTitle: "비계·고소작업 추락",
+      grounded: true,
+      matchedTerms: ["추락"]
+    }],
     unresolvedReviewItems: [] as string[],
     humanReviewCompleted: false,
     publicationState: "unpublished",

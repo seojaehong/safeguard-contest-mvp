@@ -418,6 +418,57 @@ describe("knowledge governance contract", () => {
     });
   });
 
+  it("fails closed when a multi-hazard candidate body omits one canonical hazard", () => {
+    const candidate = buildKnowledgeCandidate({
+      question: "추락과 지게차 충돌 위험 통제대책을 검토해줘",
+      rawEvents: [lawEvent],
+      matchedHazardIds: ["fall-scaffold", "forklift-traffic"],
+      generatedText: [
+        "1) 위험요인 요약: 작업발판 단부 추락 위험",
+        "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
+        "3) 통제대책: 안전난간과 작업구역 분리 상태 확인",
+        "4) 검수 필요 항목: 현장 책임자가 적용 상태 확인"
+      ].join("\n"),
+      providerLabel: "Hermes",
+      tenantContext
+    });
+
+    expect(evaluateKnowledgeCandidateContentReadiness(candidate)).toMatchObject({
+      status: "revision_required",
+      hazardGroundingPresent: true,
+      matchedHazardCount: 2,
+      bodyGroundedHazardCount: 1,
+      bodyHazardCoverageComplete: false,
+      missingBodyHazardIds: ["forklift-traffic"],
+      unresolvedReviewItems: ["candidate_body_hazard_coverage_incomplete"]
+    });
+  });
+
+  it("accepts body grounding only when every matched canonical hazard is visible", () => {
+    const candidate = buildKnowledgeCandidate({
+      question: "추락과 지게차 충돌 위험 통제대책을 검토해줘",
+      rawEvents: [lawEvent],
+      matchedHazardIds: ["fall-scaffold", "forklift-traffic"],
+      generatedText: [
+        "1) 위험요인 요약: 작업발판 단부 추락과 지게차·보행자 충돌 위험",
+        "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
+        "3) 통제대책: 안전난간과 지게차 운행구역 분리 상태 확인",
+        "4) 검수 필요 항목: 현장 책임자가 적용 상태 확인"
+      ].join("\n"),
+      providerLabel: "Hermes",
+      tenantContext
+    });
+
+    expect(evaluateKnowledgeCandidateContentReadiness(candidate)).toMatchObject({
+      status: "ready_for_human_review",
+      matchedHazardCount: 2,
+      bodyGroundedHazardCount: 2,
+      bodyHazardCoverageComplete: true,
+      missingBodyHazardIds: [],
+      unresolvedReviewItems: []
+    });
+  });
+
   it("does not treat matched hazard metadata as textual hazard grounding", () => {
     const candidate = buildKnowledgeCandidate({
       question: "현장 지식 후보를 검토해줘",

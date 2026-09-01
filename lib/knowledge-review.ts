@@ -1178,15 +1178,6 @@ export async function applyKnowledgeReviewAction(
       message: "검토 후보가 현재 원본 이벤트 snapshot과 일치하지 않습니다."
     });
   }
-  if (runIsActionable
-    && request.action === "approve_candidate"
-    && evaluateKnowledgeCandidateContentReadiness(currentCandidate).status !== "ready_for_human_review") {
-    throw new KnowledgeReviewError({
-      status: 409,
-      code: "review_candidate_revision_required",
-      message: "필수 섹션과 근거 준비도를 충족한 후보만 승인할 수 있습니다."
-    });
-  }
   if (runIsActionable && request.action === "approve_candidate") {
     const evidenceItems = buildKnowledgeReviewEvidenceItems({
       candidate: currentCandidate,
@@ -1204,6 +1195,13 @@ export async function applyKnowledgeReviewAction(
         status: 409,
         code: "review_candidate_traceability_incomplete",
         message: "위험요인, 통제대책, 반영 문서와 근거 연결이 완성된 후보만 승인할 수 있습니다."
+      });
+    }
+    if (evaluateKnowledgeCandidateContentReadiness(currentCandidate).status !== "ready_for_human_review") {
+      throw new KnowledgeReviewError({
+        status: 409,
+        code: "review_candidate_revision_required",
+        message: "필수 섹션과 근거 준비도를 충족한 후보만 승인할 수 있습니다."
       });
     }
   }

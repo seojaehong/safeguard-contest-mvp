@@ -196,6 +196,14 @@ const queueItem = {
     statutoryClaimDetected: true,
     lawProvenancePresent: true,
     hazardGroundingPresent: true,
+    matchedHazardCount: 2,
+    bodyGroundedHazardCount: 2,
+    bodyHazardCoverageComplete: true,
+    missingBodyHazardIds: [],
+    bodyHazardCoverage: [
+      { hazardId: "fall-scaffold", hazardTitle: "비계·고소작업 추락", grounded: true, matchedTerms: ["추락"] },
+      { hazardId: "forklift-traffic", hazardTitle: "지게차·보행자 동선 충돌", grounded: true, matchedTerms: ["지게차", "보행자"] }
+    ],
     unresolvedReviewItems: [],
     humanReviewCompleted: false,
     publicationState: "unpublished",

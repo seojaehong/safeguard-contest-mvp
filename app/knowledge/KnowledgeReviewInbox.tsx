@@ -52,6 +52,16 @@ type ReviewContentReadiness = {
   sifProvenancePresent: boolean;
   sifEvidenceVisible: boolean;
   hazardGroundingPresent: boolean;
+  matchedHazardCount: number;
+  bodyGroundedHazardCount: number;
+  bodyHazardCoverageComplete: boolean;
+  missingBodyHazardIds: string[];
+  bodyHazardCoverage: Array<{
+    hazardId: string;
+    hazardTitle: string;
+    grounded: boolean;
+    matchedTerms: string[];
+  }>;
   unresolvedReviewItems: string[];
   humanReviewCompleted: false;
   publicationState: "unpublished";
@@ -162,6 +172,7 @@ function describeContentReadinessIssue(issue: string): string {
   if (issue === "statutory_claim_without_law_provenance") return "법적 의무 표현에 공식 법령 근거를 연결하세요.";
   if (issue === "sif_provenance_not_visible") return "SIF 근거가 후보 본문에 보이도록 연결하세요.";
   if (issue === "hazard_grounding_missing") return "현재 위험요인과 후보 문장의 연결을 보완하세요.";
+  if (issue === "candidate_body_hazard_coverage_incomplete") return "연결된 모든 위험요인을 후보 본문에 명시하세요.";
   return "추가 검수 항목을 보완하세요.";
 }
 
@@ -398,8 +409,25 @@ function readContentReadiness(value: unknown): ReviewContentReadiness | null {
     value.presentSectionCount,
     value.nonEmptySectionCount,
     value.placeholderFindingCount,
-    value.legalOverclaimFindingCount
+    value.legalOverclaimFindingCount,
+    value.matchedHazardCount,
+    value.bodyGroundedHazardCount
   ];
+  const bodyHazardCoverage = Array.isArray(value.bodyHazardCoverage)
+    ? value.bodyHazardCoverage.flatMap((item) => {
+      if (!isRecord(item)) return [];
+      const hazardId = readString(item.hazardId, 96);
+      const hazardTitle = readString(item.hazardTitle, 120);
+      const matchedTerms = Array.isArray(item.matchedTerms)
+        ? item.matchedTerms.filter((term): term is string => typeof term === "string" && term.length <= 80).slice(0, 8)
+        : [];
+      if (!hazardId || !hazardTitle || typeof item.grounded !== "boolean") return [];
+      return [{ hazardId, hazardTitle, grounded: item.grounded, matchedTerms }];
+    })
+    : [];
+  const missingBodyHazardIds = Array.isArray(value.missingBodyHazardIds)
+    ? value.missingBodyHazardIds.filter((item): item is string => typeof item === "string" && item.length <= 96)
+    : [];
   const valid = value.contractVersion === "knowledge-candidate-content-readiness.v1"
     && (value.status === "ready_for_human_review" || value.status === "revision_required")
     && value.requiredSectionCount === 4
@@ -411,6 +439,12 @@ function readContentReadiness(value: unknown): ReviewContentReadiness | null {
     && typeof value.statutoryClaimDetected === "boolean"
     && typeof value.lawProvenancePresent === "boolean"
     && typeof value.hazardGroundingPresent === "boolean"
+    && typeof value.bodyHazardCoverageComplete === "boolean"
+    && value.matchedHazardCount === bodyHazardCoverage.length
+    && value.bodyGroundedHazardCount === bodyHazardCoverage.filter((item) => item.grounded).length
+    && missingBodyHazardIds.length === bodyHazardCoverage.filter((item) => !item.grounded).length
+    && missingBodyHazardIds.every((hazardId) => bodyHazardCoverage.some((item) => item.hazardId === hazardId && !item.grounded))
+    && value.bodyHazardCoverageComplete === (bodyHazardCoverage.length > 0 && missingBodyHazardIds.length === 0)
     && value.unresolvedReviewItems.every((item) => typeof item === "string" && item.length <= 96)
     && value.humanReviewCompleted === false
     && value.publicationState === "unpublished"
@@ -430,6 +464,11 @@ function readContentReadiness(value: unknown): ReviewContentReadiness | null {
     sifProvenancePresent: value.sifProvenancePresent === true,
     sifEvidenceVisible: value.sifEvidenceVisible === true,
     hazardGroundingPresent: value.hazardGroundingPresent as boolean,
+    matchedHazardCount: value.matchedHazardCount as number,
+    bodyGroundedHazardCount: value.bodyGroundedHazardCount as number,
+    bodyHazardCoverageComplete: value.bodyHazardCoverageComplete as boolean,
+    missingBodyHazardIds,
+    bodyHazardCoverage,
     unresolvedReviewItems: (value.unresolvedReviewItems as string[]).slice(0, 12),
     humanReviewCompleted: false,
     publicationState: "unpublished",
@@ -947,9 +986,18 @@ export function KnowledgeReviewInbox() {
                               </ul>
                               <p>
                                 placeholder {item.contentReadiness.placeholderFindingCount} · 법적 과장 {item.contentReadiness.legalOverclaimFindingCount}
+                                {` · 본문 위험 연결 ${item.contentReadiness.bodyGroundedHazardCount}/${item.contentReadiness.matchedHazardCount}`}
                                 {item.contentReadiness.statutoryClaimDetected ? ` · 법령 근거 ${item.contentReadiness.lawProvenancePresent ? "확인" : "누락"}` : ""}
                                 {item.contentReadiness.sifProvenancePresent ? ` · SIF 근거 ${item.contentReadiness.sifEvidenceVisible ? "본문 확인" : "본문 누락"}` : ""}
                               </p>
+                              {item.contentReadiness.missingBodyHazardIds.length > 0 ? (
+                                <p data-review-body-hazard-gap="true">
+                                  본문 누락: {item.contentReadiness.bodyHazardCoverage
+                                    .filter((hazard) => !hazard.grounded)
+                                    .map((hazard) => hazard.hazardTitle)
+                                    .join(" · ")}
+                                </p>
+                              ) : null}
                               {item.contentReadiness.unresolvedReviewItems.length > 0 ? (
                                 <section
                                   className={styles.reviewContentIssues}

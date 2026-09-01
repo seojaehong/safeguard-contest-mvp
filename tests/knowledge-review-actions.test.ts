@@ -74,7 +74,7 @@ function makeReviewClient(options: FakeOptions = {}) {
     rawEvents: sourceBinding.rawEvents,
     matchedHazardIds: traceHazardIds,
     generatedText: [
-      "1) 위험요인 요약: 현장 추락 및 충돌 위험",
+      "1) 위험요인 요약: 현장 추락 및 지게차·보행자 충돌 위험",
       "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
       "3) 통제대책: 작업구역을 분리하고 예방조치를 확인",
       "4) 검수 필요 항목: 현장 책임자가 적용 상태 확인"
@@ -1166,6 +1166,30 @@ describe("knowledge review actions", () => {
       ok: true,
       action: "keep_site_only"
     });
+  });
+
+  it("blocks candidate approval when metadata trace is complete but one matched hazard is absent from the body", async () => {
+    const fake = makeReviewClient();
+    const generatedOutput = fake.run.generated_output as {
+      candidate: { generatedText: string };
+    };
+    generatedOutput.candidate.generatedText = [
+      "1) 위험요인 요약: 작업발판 단부 추락 위험",
+      "2) 문서 반영 위치: 위험성평가표와 TBM 브리핑",
+      "3) 통제대책: 안전난간과 작업구역 분리 상태 확인",
+      "4) 검수 필요 항목: 현장 책임자가 적용 상태 확인"
+    ].join("\n");
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    )).rejects.toMatchObject({
+      status: 409,
+      code: "review_candidate_revision_required",
+      compensationRequired: false
+    });
+    expect(fake.updates).toHaveLength(0);
   });
 
   it("fails candidate approval closed when a hazard lacks canonical control and document traceability", async () => {

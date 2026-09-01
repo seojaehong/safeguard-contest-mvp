@@ -10,6 +10,12 @@
       "작업발판",
       "안전대"
     ],
+    "bodyGroundingTerms": [
+      "비계",
+      "추락",
+      "고소",
+      "작업발판"
+    ],
     "primaryDocuments": [
       "riskAssessment",
       "tbmBriefing",
@@ -47,6 +53,11 @@
       "충돌",
       "끼임"
     ],
+    "bodyGroundingTerms": [
+      "지게차",
+      "보행자",
+      "상하차"
+    ],
     "primaryDocuments": [
       "riskAssessment",
       "workPlan",
@@ -82,6 +93,13 @@
       "화기",
       "불티",
       "가연물",
+      "화재감시자"
+    ],
+    "bodyGroundingTerms": [
+      "용접",
+      "절단",
+      "화기",
+      "불티",
       "화재감시자"
     ],
     "primaryDocuments": [
@@ -121,6 +139,12 @@
       "유해가스",
       "환기"
     ],
+    "bodyGroundingTerms": [
+      "밀폐공간",
+      "산소결핍",
+      "유해가스",
+      "맨홀"
+    ],
     "primaryDocuments": [
       "riskAssessment",
       "tbmBriefing",
@@ -157,6 +181,13 @@
       "누출",
       "보호구"
     ],
+    "bodyGroundingTerms": [
+      "화학물질",
+      "세척제",
+      "MSDS",
+      "유해성",
+      "누출"
+    ],
     "primaryDocuments": [
       "riskAssessment",
       "safetyEducation",
@@ -190,6 +221,13 @@
       "우천",
       "폭염",
       "미끄럼",
+      "기상특보",
+      "풍속"
+    ],
+    "bodyGroundingTerms": [
+      "강풍",
+      "우천",
+      "폭염",
       "기상특보",
       "풍속"
     ],
@@ -229,6 +267,14 @@
       "몽골어",
       "태국어"
     ],
+    "bodyGroundingTerms": [
+      "외국인",
+      "다국어",
+      "베트남어",
+      "중국어",
+      "몽골어",
+      "태국어"
+    ],
     "primaryDocuments": [
       "foreignWorkerBriefing",
       "foreignWorkerTransmission",
@@ -263,6 +309,11 @@
       "안전교육",
       "작업 전",
       "기록"
+    ],
+    "bodyGroundingTerms": [
+      "위험성평가",
+      "TBM",
+      "안전교육"
     ],
     "primaryDocuments": [
       "workpackSummary",

@@ -54,6 +54,10 @@ function payload() {
       sifProvenancePresent: true,
       sifEvidenceVisible: true,
       hazardGroundingPresent: true,
+      matchedHazardCount: 1,
+      bodyGroundedHazardCount: 1,
+      bodyHazardCoverageComplete: true,
+      missingBodyHazardIds: [] as string[],
       unresolvedReviewItems: [] as string[],
       humanReviewCompleted: false,
       publicationState: "unpublished",
@@ -102,6 +106,24 @@ describe("knowledge candidate content matrix runner", () => {
     expect(evaluateCandidateMatrixPayload(testCase, 200, unsafe)).toMatchObject({
       ok: false,
       missingTermGroups: [["화학물질", "MSDS"], ["누출", "보호구"]]
+    });
+  });
+
+  it("fails closed when readiness omits one matched hazard from the candidate body", () => {
+    const unsafe = payload();
+    unsafe.candidate.matchedHazardIds = ["chemical-msds", "fall-scaffold"];
+    unsafe.contentReadiness.matchedHazardCount = 2;
+    unsafe.contentReadiness.bodyGroundedHazardCount = 1;
+    unsafe.contentReadiness.bodyHazardCoverageComplete = false;
+    unsafe.contentReadiness.missingBodyHazardIds = ["fall-scaffold"];
+
+    expect(evaluateCandidateMatrixPayload(testCase, 200, unsafe)).toMatchObject({
+      ok: false,
+      failures: expect.arrayContaining([
+        "body_hazard_grounding_incomplete",
+        "body_hazard_coverage_incomplete",
+        "body_hazard_ids_missing"
+      ])
     });
   });
 
