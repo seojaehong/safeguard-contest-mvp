@@ -1,0 +1,103 @@
+{
+  "checkedAt": "2026-09-01T00:27:00.060Z",
+  "route": "/workspace?share",
+  "scenario": {
+    "label": "desktop-short",
+    "width": 1440,
+    "height": 723
+  },
+  "theme": "day",
+  "verdict": "PASS",
+  "metrics": {
+    "viewportHeight": 723,
+    "pageHeight": 723,
+    "previewLeft": 660.1875,
+    "previewRight": 1065,
+    "previewBottom": 571,
+    "primaryRight": 654.1875,
+    "primaryTop": 345,
+    "primaryBottom": 389,
+    "linesClientHeight": 125,
+    "linesScrollHeight": 448,
+    "linesOverflowY": "auto",
+    "lastParagraphBottom": 881,
+    "linesBottom": 558,
+    "previewText": "[SafeClaw]\n\nTiếng Việt\n\n- Trước khi bắt đầu công việc, hãy kiểm tra toàn bộ khu vực nguy hiểm, lối đi bộ, tuyến xe nâng và thiết bị bảo hộ cá nhân.\n\n- Khóa bánh xe của giàn giáo, kiểm tra lan can và tuyệt đối không di chuyển giàn giáo khi vẫn còn người làm việc ở phía trên.\n\n- Nếu gió mạnh hơn, giàn giáo rung hoặc có nguy cơ rơi ngã, hãy dừng công việc ngay và di chuyển đến vị trí an toàn.\n\n- Không đi vào khu vực xe nâng và luôn giữ lối đi bộ tách biệt với tuyến vận chuyển vật liệu trong suốt ca làm việc.\n\n- Mang dây an toàn, mũ, giày và các thiết bị bảo hộ được yêu cầu trước khi bước lên sàn công tác.\n\n- Báo ngay cho quản lý khi phát hiện lan can, bánh xe, sàn thao tác hoặc điểm neo dây an toàn không bảo đảm.\n\n- Chỉ tiếp tục công việc sau khi người quản lý xác nhận rằng biện pháp khắc phục đã hoàn thành và khu vực đã an toàn.\n\n- Nếu chưa hiểu bất kỳ nội dung nào, hãy dừng lại và yêu cầu quản lý hoặc phiên dịch giải thích lại bằng tiếng Việt.",
+    "mobileSummaryText": "대상1명 선택채널메일, 문자언어베트남어(Tiếng Việt)",
+    "mobileSummaryBottom": 0,
+    "mobileConfigToggleText": "대상·채널·언어 상세 설정열기",
+    "mobileConfigToggleBottom": 0,
+    "mobileConfigToggleHeight": 0,
+    "mobileConfigExpanded": false,
+    "desktopStatusRailDisplay": "grid",
+    "desktopStatusRailLeft": 1071,
+    "desktopStatusRailRight": 1301,
+    "desktopStatusRailBottom": 720,
+    "desktopStatusRailText": "전송 상태\n미리보기 전용\n대상\n1명 선택\n문서 검토\n확인 필요\nHermes 후보\n별도 검토 · 문서 승인 아님\n전송 이력\n편집 후 재검수 필요\n실행 경계\n안전한 중복 방지 저장 기능을 준비하고 있습니다.\n\n현재 전송본은 미리보기로만 확인할 수 있습니다.",
+    "stageRailText": "01 대상\n1명 확인\n02 채널\n메일, 문자\n03 언어\n베트남어(Tiếng Việt)\n04 전송\n보완 필요",
+    "stageRailDisplay": "grid",
+    "stageRailBottom": 339,
+    "stageRailWidth": 1162,
+    "stageItemCount": 4,
+    "stageColumns": 4,
+    "workspaceSideNavWidth": 1180,
+    "workspaceStepStatusOverflowCount": 0,
+    "workspaceStepStatusMaxOverflow": 0,
+    "paragraphCount": 10,
+    "primaryCount": 1,
+    "channelCards": [
+      {
+        "width": 162,
+        "height": 56,
+        "label": "메일",
+        "labelLineCount": 1,
+        "labelWhiteSpace": "nowrap"
+      },
+      {
+        "width": 162,
+        "height": 56,
+        "label": "문자",
+        "labelLineCount": 1,
+        "labelWhiteSpace": "nowrap"
+      },
+      {
+        "width": 162,
+        "height": 56,
+        "label": "카카오",
+        "labelLineCount": 1,
+        "labelWhiteSpace": "nowrap"
+      }
+    ],
+    "configCards": [
+      {
+        "display": "grid",
+        "width": 339,
+        "height": 134,
+        "bottom": 535
+      },
+      {
+        "display": "grid",
+        "width": 515,
+        "height": 158,
+        "bottom": 705
+      },
+      {
+        "display": "grid",
+        "width": 164,
+        "height": 134,
+        "bottom": 535
+      }
+    ],
+    "horizontalOverflow": 0,
+    "toggleSizes": [
+      {
+        "width": 50.3125,
+        "height": 44
+      },
+      {
+        "width": 61.96875,
+        "height": 44
+      }
+    ]
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "schema": "safeclaw-review-propagation-handoff/v1",
+  "generatedAt": "2026-09-01T09:33:54.4447762+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_REVIEW_PROPAGATION_HANDOFF_LIVE_PENDING",
+  "sourceHead": "4bfcf5163d56e7a7c6f94df331718d2a528a2364",
+  "productionCommit": null,
+  "liveAfterDeploymentPending": true,
+  "semanticContract": {
+    "documentHumanReview": {
+      "source": "generation-fingerprint-scoped-browser-local-summary",
+      "serverRecorded": false,
+      "approvalGranted": false,
+      "missingStateLabel": "문서 검토 확인 필요"
+    },
+    "hermesKnowledgeCandidate": {
+      "state": "separate_review",
+      "documentApprovalImplied": false,
+      "label": "별도 검토 · 문서 승인 아님"
+    },
+    "dispatch": {
+      "formerAmbiguousLabel": "검수",
+      "currentLabel": "전송 이력",
+      "derivedFrom": "dispatch-history-state"
+    }
+  },
+  "geometry": {
+    "workspaceDesktopShortDay": {
+      "viewport": "1440x723",
+      "pageHeight": 723,
+      "primaryBottom": 389,
+      "previewBottom": 571,
+      "statusRailBottom": 720,
+      "statusRailTextIncludes": [
+        "문서 검토",
+        "Hermes 후보",
+        "전송 이력",
+        "실행 경계"
+      ],
+      "configCardBottoms": [535, 705, 535],
+      "horizontalOverflow": 0
+    },
+    "workspaceMobileShortDay": {
+      "viewport": "390x723",
+      "pageHeight": 723,
+      "previewBottom": 577.25,
+      "primaryBottom": 636.25,
+      "configToggleBottom": 695.25,
+      "desktopStatusRailDisplay": "none",
+      "horizontalOverflow": 0
+    }
+  },
+  "verification": {
+    "documentBrowserContract": {
+      "files": 1,
+      "passed": 44,
+      "failed": 0,
+      "durationSeconds": 180.69
+    },
+    "shareBrowserContract": {
+      "files": 1,
+      "passed": 4,
+      "failed": 0,
+      "durationSeconds": 49.92
+    },
+    "semanticAndStorageContract": {
+      "files": 2,
+      "passed": 21,
+      "failed": 0,
+      "durationSeconds": 0.863
+    },
+    "typecheck": "PASS",
+    "build": {
+      "verdict": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPages": 29
+    }
+  },
+  "artifacts": {
+    "desktopShortDayScreenshot": "evaluation/review-propagation-handoff-2026-09-01/screenshots/desktop-short-day.png",
+    "desktopShortNightScreenshot": "evaluation/review-propagation-handoff-2026-09-01/screenshots/desktop-short-night.png",
+    "mobileShortDayScreenshot": "evaluation/review-propagation-handoff-2026-09-01/screenshots/mobile-short-day.png",
+    "mobileShortNightScreenshot": "evaluation/review-propagation-handoff-2026-09-01/screenshots/mobile-short-night.png"
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "vectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "hermesHumanCandidateReviewCompleted": false,
+    "liveAfterDeploymentRequired": true
+  }
+}
