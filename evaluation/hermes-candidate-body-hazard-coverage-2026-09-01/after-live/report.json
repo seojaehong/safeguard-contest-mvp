@@ -1,0 +1,724 @@
+{
+  "schemaVersion": "safeclaw-llm-wiki-candidate-content-matrix/v1",
+  "verdict": "RED_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+  "checkedAt": "2026-09-01T01:06:17.684Z",
+  "mode": "live-production",
+  "generationMode": "deterministic",
+  "baseUrl": "https://www.safeclaw.kr",
+  "sourceHead": "f070e3f317238d9ed47d4daa765dd81d51aceaf3",
+  "productionBuild": {
+    "status": 200,
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "f070e3f317238d9ed47d4daa765dd81d51aceaf3",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-q8e9hr5lk-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "productionAligned": true,
+  "totalCount": 5,
+  "passedCount": 0,
+  "failedCount": 5,
+  "requiredSectionCount": 4,
+  "matchedHazardCount": 0,
+  "bodyGroundedHazardCount": 0,
+  "bodyHazardCoverageCompleteCount": 0,
+  "reviewerEvidenceTraceCount": 0,
+  "sifEvidenceBoundaryCount": 0,
+  "technicalGuidanceBoundaryCount": 0,
+  "lawCandidateBoundaryCount": 0,
+  "eventSemanticGroundingCount": 0,
+  "privateEventExposureCount": 0,
+  "scenarioCandidateBuildExecuted": 5,
+  "llmGenerationAttempted": false,
+  "actualProductionCandidateQueueRead": false,
+  "routeControlledBrowserFixtureIsNotActualProductionQueue": true,
+  "humanReviewCompleted": false,
+  "publicationState": "unpublished",
+  "publishAllowed": false,
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "ontologyPublicationPerformed": false,
+    "vectorOrEmbeddingMutationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "llmWikiPublication": "APPROVAL_GATED",
+    "supabaseRlsLaunchIsolation": "APPROVAL_GATED"
+  },
+  "results": [
+    {
+      "id": "chemical-cleaning",
+      "ok": false,
+      "responseStatus": 503,
+      "failures": [
+        "http_status:503",
+        "response_not_ok",
+        "deterministic_builder_not_used",
+        "deterministic_fallback_not_reported",
+        "storage_not_stateless",
+        "saved_run_created",
+        "candidate_contract_mismatch",
+        "candidate_not_pending_review",
+        "candidate_publication_state_changed",
+        "candidate_db_mutation_boundary_failed",
+        "candidate_publish_allowed",
+        "human_review_not_required",
+        "machine_evidence_replaces_human_review",
+        "review_contract_mutation_boundary_failed",
+        "readiness_contract_mismatch",
+        "readiness:missing",
+        "required_sections_incomplete",
+        "placeholder_content",
+        "legal_overclaim",
+        "law_provenance_missing",
+        "sif_readiness_provenance_missing",
+        "sif_readiness_evidence_missing",
+        "hazard_grounding_missing",
+        "body_hazard_count_mismatch",
+        "body_hazard_grounding_incomplete",
+        "body_hazard_coverage_incomplete",
+        "human_review_overclaimed",
+        "readiness_publication_boundary_failed",
+        "missing_hazard:chemical-msds",
+        "missing_term_group:화학물질|세척제|MSDS",
+        "missing_term_group:누출|보호구|환기",
+        "missing_evidence_term_group:물질안전보건자료 조회 서비스|안전보건자료 링크 서비스",
+        "missing_evidence_term_group:법제처 국가법령정보 산업안전보건법|산업안전보건법",
+        "missing_sif_evidence_term_group:SIF 화학물질 누출·접촉 사고 통제 사례",
+        "missing_event_fact_group:야간 교대 작업",
+        "missing_event_fact_group:청각 경보 보조수단 필요",
+        "reviewer_evidence_trace_missing",
+        "sif_evidence_boundary_missing",
+        "sif_provenance_missing",
+        "technical_guidance_boundary_missing",
+        "law_candidate_boundary_missing",
+        "event_semantic_grounding_missing"
+      ],
+      "missingHazardIds": [
+        "chemical-msds"
+      ],
+      "missingTermGroups": [
+        [
+          "화학물질",
+          "세척제",
+          "MSDS"
+        ],
+        [
+          "누출",
+          "보호구",
+          "환기"
+        ]
+      ],
+      "missingEvidenceTermGroups": [
+        [
+          "물질안전보건자료 조회 서비스",
+          "안전보건자료 링크 서비스"
+        ],
+        [
+          "법제처 국가법령정보 산업안전보건법",
+          "산업안전보건법"
+        ]
+      ],
+      "missingSifEvidenceTermGroups": [
+        [
+          "SIF 화학물질 누출·접촉 사고 통제 사례"
+        ]
+      ],
+      "missingEventFactGroups": [
+        [
+          "야간 교대 작업"
+        ],
+        [
+          "청각 경보 보조수단 필요"
+        ]
+      ],
+      "exposedForbiddenTerms": [],
+      "matchedHazardIds": [],
+      "reviewerEvidenceTraceVisible": false,
+      "sifEvidenceBoundaryVisible": false,
+      "sifProvenancePresent": false,
+      "technicalGuidanceBoundaryVisible": false,
+      "lawCandidateBoundaryVisible": false,
+      "eventSemanticGroundingVisible": false,
+      "generatedTextLength": 0,
+      "generatedTextExcerpt": "",
+      "readiness": {
+        "status": null,
+        "requiredSectionCount": null,
+        "presentSectionCount": null,
+        "nonEmptySectionCount": null,
+        "placeholderFindingCount": null,
+        "legalOverclaimFindingCount": null,
+        "statutoryClaimDetected": null,
+        "lawProvenancePresent": null,
+        "sifProvenancePresent": null,
+        "sifEvidenceVisible": null,
+        "hazardGroundingPresent": null,
+        "matchedHazardCount": null,
+        "bodyGroundedHazardCount": null,
+        "bodyHazardCoverageComplete": null,
+        "missingBodyHazardIds": [],
+        "unresolvedReviewItems": []
+      },
+      "boundary": {
+        "storageMode": null,
+        "savedRunId": null,
+        "publicationState": null,
+        "dbMutationAllowed": null,
+        "dbMutationPerformed": null,
+        "publishAllowed": null,
+        "humanReviewRequired": null,
+        "machineEvidenceReplacesHumanReview": null
+      },
+      "generation": {
+        "mode": "deterministic",
+        "configured": null,
+        "generatedBy": null,
+        "fallbackUsed": null,
+        "providerLabel": null
+      }
+    },
+    {
+      "id": "hot-work-fire",
+      "ok": false,
+      "responseStatus": 503,
+      "failures": [
+        "http_status:503",
+        "response_not_ok",
+        "deterministic_builder_not_used",
+        "deterministic_fallback_not_reported",
+        "storage_not_stateless",
+        "saved_run_created",
+        "candidate_contract_mismatch",
+        "candidate_not_pending_review",
+        "candidate_publication_state_changed",
+        "candidate_db_mutation_boundary_failed",
+        "candidate_publish_allowed",
+        "human_review_not_required",
+        "machine_evidence_replaces_human_review",
+        "review_contract_mutation_boundary_failed",
+        "readiness_contract_mismatch",
+        "readiness:missing",
+        "required_sections_incomplete",
+        "placeholder_content",
+        "legal_overclaim",
+        "law_provenance_missing",
+        "sif_readiness_provenance_missing",
+        "sif_readiness_evidence_missing",
+        "hazard_grounding_missing",
+        "body_hazard_count_mismatch",
+        "body_hazard_grounding_incomplete",
+        "body_hazard_coverage_incomplete",
+        "human_review_overclaimed",
+        "readiness_publication_boundary_failed",
+        "missing_hazard:hot-work-fire",
+        "missing_term_group:용접|화기",
+        "missing_term_group:화재|불티|가연물",
+        "missing_evidence_term_group:화기작업 화재·폭발 예방 매뉴얼|사고사망 게시판 정보 조회서비스",
+        "missing_evidence_term_group:법제처 국가법령정보 산업안전보건법|산업안전보건법",
+        "missing_sif_evidence_term_group:SIF 용접 불티 화재 사고 통제 사례",
+        "missing_event_fact_group:상부 양중과 하부 화기 동시작업",
+        "missing_event_fact_group:작업 종료 후 30분 잔불 감시",
+        "reviewer_evidence_trace_missing",
+        "sif_evidence_boundary_missing",
+        "sif_provenance_missing",
+        "technical_guidance_boundary_missing",
+        "law_candidate_boundary_missing",
+        "event_semantic_grounding_missing"
+      ],
+      "missingHazardIds": [
+        "hot-work-fire"
+      ],
+      "missingTermGroups": [
+        [
+          "용접",
+          "화기"
+        ],
+        [
+          "화재",
+          "불티",
+          "가연물"
+        ]
+      ],
+      "missingEvidenceTermGroups": [
+        [
+          "화기작업 화재·폭발 예방 매뉴얼",
+          "사고사망 게시판 정보 조회서비스"
+        ],
+        [
+          "법제처 국가법령정보 산업안전보건법",
+          "산업안전보건법"
+        ]
+      ],
+      "missingSifEvidenceTermGroups": [
+        [
+          "SIF 용접 불티 화재 사고 통제 사례"
+        ]
+      ],
+      "missingEventFactGroups": [
+        [
+          "상부 양중과 하부 화기 동시작업"
+        ],
+        [
+          "작업 종료 후 30분 잔불 감시"
+        ]
+      ],
+      "exposedForbiddenTerms": [],
+      "matchedHazardIds": [],
+      "reviewerEvidenceTraceVisible": false,
+      "sifEvidenceBoundaryVisible": false,
+      "sifProvenancePresent": false,
+      "technicalGuidanceBoundaryVisible": false,
+      "lawCandidateBoundaryVisible": false,
+      "eventSemanticGroundingVisible": false,
+      "generatedTextLength": 0,
+      "generatedTextExcerpt": "",
+      "readiness": {
+        "status": null,
+        "requiredSectionCount": null,
+        "presentSectionCount": null,
+        "nonEmptySectionCount": null,
+        "placeholderFindingCount": null,
+        "legalOverclaimFindingCount": null,
+        "statutoryClaimDetected": null,
+        "lawProvenancePresent": null,
+        "sifProvenancePresent": null,
+        "sifEvidenceVisible": null,
+        "hazardGroundingPresent": null,
+        "matchedHazardCount": null,
+        "bodyGroundedHazardCount": null,
+        "bodyHazardCoverageComplete": null,
+        "missingBodyHazardIds": [],
+        "unresolvedReviewItems": []
+      },
+      "boundary": {
+        "storageMode": null,
+        "savedRunId": null,
+        "publicationState": null,
+        "dbMutationAllowed": null,
+        "dbMutationPerformed": null,
+        "publishAllowed": null,
+        "humanReviewRequired": null,
+        "machineEvidenceReplacesHumanReview": null
+      },
+      "generation": {
+        "mode": "deterministic",
+        "configured": null,
+        "generatedBy": null,
+        "fallbackUsed": null,
+        "providerLabel": null
+      }
+    },
+    {
+      "id": "confined-space",
+      "ok": false,
+      "responseStatus": 503,
+      "failures": [
+        "http_status:503",
+        "response_not_ok",
+        "deterministic_builder_not_used",
+        "deterministic_fallback_not_reported",
+        "storage_not_stateless",
+        "saved_run_created",
+        "candidate_contract_mismatch",
+        "candidate_not_pending_review",
+        "candidate_publication_state_changed",
+        "candidate_db_mutation_boundary_failed",
+        "candidate_publish_allowed",
+        "human_review_not_required",
+        "machine_evidence_replaces_human_review",
+        "review_contract_mutation_boundary_failed",
+        "readiness_contract_mismatch",
+        "readiness:missing",
+        "required_sections_incomplete",
+        "placeholder_content",
+        "legal_overclaim",
+        "law_provenance_missing",
+        "sif_readiness_provenance_missing",
+        "sif_readiness_evidence_missing",
+        "hazard_grounding_missing",
+        "body_hazard_count_mismatch",
+        "body_hazard_grounding_incomplete",
+        "body_hazard_coverage_incomplete",
+        "human_review_overclaimed",
+        "readiness_publication_boundary_failed",
+        "missing_hazard:confined-space",
+        "missing_term_group:밀폐공간|탱크",
+        "missing_term_group:산소결핍|유해가스|환기",
+        "missing_evidence_term_group:안전보건법령 스마트검색|국내재해사례 게시판 정보 조회서비스",
+        "missing_evidence_term_group:법제처 국가법령정보 산업안전보건법|산업안전보건법",
+        "missing_sif_evidence_term_group:SIF 밀폐공간 질식 사고 통제 사례",
+        "missing_event_fact_group:입구 감시인 1명 상시 배치",
+        "missing_event_fact_group:구조 삼각대 현장 비치",
+        "reviewer_evidence_trace_missing",
+        "sif_evidence_boundary_missing",
+        "sif_provenance_missing",
+        "technical_guidance_boundary_missing",
+        "law_candidate_boundary_missing",
+        "event_semantic_grounding_missing"
+      ],
+      "missingHazardIds": [
+        "confined-space"
+      ],
+      "missingTermGroups": [
+        [
+          "밀폐공간",
+          "탱크"
+        ],
+        [
+          "산소결핍",
+          "유해가스",
+          "환기"
+        ]
+      ],
+      "missingEvidenceTermGroups": [
+        [
+          "안전보건법령 스마트검색",
+          "국내재해사례 게시판 정보 조회서비스"
+        ],
+        [
+          "법제처 국가법령정보 산업안전보건법",
+          "산업안전보건법"
+        ]
+      ],
+      "missingSifEvidenceTermGroups": [
+        [
+          "SIF 밀폐공간 질식 사고 통제 사례"
+        ]
+      ],
+      "missingEventFactGroups": [
+        [
+          "입구 감시인 1명 상시 배치"
+        ],
+        [
+          "구조 삼각대 현장 비치"
+        ]
+      ],
+      "exposedForbiddenTerms": [],
+      "matchedHazardIds": [],
+      "reviewerEvidenceTraceVisible": false,
+      "sifEvidenceBoundaryVisible": false,
+      "sifProvenancePresent": false,
+      "technicalGuidanceBoundaryVisible": false,
+      "lawCandidateBoundaryVisible": false,
+      "eventSemanticGroundingVisible": false,
+      "generatedTextLength": 0,
+      "generatedTextExcerpt": "",
+      "readiness": {
+        "status": null,
+        "requiredSectionCount": null,
+        "presentSectionCount": null,
+        "nonEmptySectionCount": null,
+        "placeholderFindingCount": null,
+        "legalOverclaimFindingCount": null,
+        "statutoryClaimDetected": null,
+        "lawProvenancePresent": null,
+        "sifProvenancePresent": null,
+        "sifEvidenceVisible": null,
+        "hazardGroundingPresent": null,
+        "matchedHazardCount": null,
+        "bodyGroundedHazardCount": null,
+        "bodyHazardCoverageComplete": null,
+        "missingBodyHazardIds": [],
+        "unresolvedReviewItems": []
+      },
+      "boundary": {
+        "storageMode": null,
+        "savedRunId": null,
+        "publicationState": null,
+        "dbMutationAllowed": null,
+        "dbMutationPerformed": null,
+        "publishAllowed": null,
+        "humanReviewRequired": null,
+        "machineEvidenceReplacesHumanReview": null
+      },
+      "generation": {
+        "mode": "deterministic",
+        "configured": null,
+        "generatedBy": null,
+        "fallbackUsed": null,
+        "providerLabel": null
+      }
+    },
+    {
+      "id": "forklift-traffic",
+      "ok": false,
+      "responseStatus": 503,
+      "failures": [
+        "http_status:503",
+        "response_not_ok",
+        "deterministic_builder_not_used",
+        "deterministic_fallback_not_reported",
+        "storage_not_stateless",
+        "saved_run_created",
+        "candidate_contract_mismatch",
+        "candidate_not_pending_review",
+        "candidate_publication_state_changed",
+        "candidate_db_mutation_boundary_failed",
+        "candidate_publish_allowed",
+        "human_review_not_required",
+        "machine_evidence_replaces_human_review",
+        "review_contract_mutation_boundary_failed",
+        "readiness_contract_mismatch",
+        "readiness:missing",
+        "required_sections_incomplete",
+        "placeholder_content",
+        "legal_overclaim",
+        "law_provenance_missing",
+        "sif_readiness_provenance_missing",
+        "sif_readiness_evidence_missing",
+        "hazard_grounding_missing",
+        "body_hazard_count_mismatch",
+        "body_hazard_grounding_incomplete",
+        "body_hazard_coverage_incomplete",
+        "human_review_overclaimed",
+        "readiness_publication_boundary_failed",
+        "missing_hazard:forklift-traffic",
+        "missing_term_group:지게차",
+        "missing_term_group:보행자|동선|충돌",
+        "missing_term_group:신호수|운행경로|접근금지",
+        "missing_evidence_term_group:지게차의 안전작업계획서 작성지침",
+        "missing_evidence_term_group:법제처 국가법령정보 산업안전보건법|산업안전보건법",
+        "missing_sif_evidence_term_group:SIF 지게차·보행자 충돌 사고 통제 사례",
+        "missing_event_fact_group:북문 상하차 통로 폭 2.4m",
+        "missing_event_fact_group:점심 교대시간 보행자 집중",
+        "reviewer_evidence_trace_missing",
+        "sif_evidence_boundary_missing",
+        "sif_provenance_missing",
+        "technical_guidance_boundary_missing",
+        "law_candidate_boundary_missing",
+        "event_semantic_grounding_missing"
+      ],
+      "missingHazardIds": [
+        "forklift-traffic"
+      ],
+      "missingTermGroups": [
+        [
+          "지게차"
+        ],
+        [
+          "보행자",
+          "동선",
+          "충돌"
+        ],
+        [
+          "신호수",
+          "운행경로",
+          "접근금지"
+        ]
+      ],
+      "missingEvidenceTermGroups": [
+        [
+          "지게차의 안전작업계획서 작성지침"
+        ],
+        [
+          "법제처 국가법령정보 산업안전보건법",
+          "산업안전보건법"
+        ]
+      ],
+      "missingSifEvidenceTermGroups": [
+        [
+          "SIF 지게차·보행자 충돌 사고 통제 사례"
+        ]
+      ],
+      "missingEventFactGroups": [
+        [
+          "북문 상하차 통로 폭 2.4m"
+        ],
+        [
+          "점심 교대시간 보행자 집중"
+        ]
+      ],
+      "exposedForbiddenTerms": [],
+      "matchedHazardIds": [],
+      "reviewerEvidenceTraceVisible": false,
+      "sifEvidenceBoundaryVisible": false,
+      "sifProvenancePresent": false,
+      "technicalGuidanceBoundaryVisible": false,
+      "lawCandidateBoundaryVisible": false,
+      "eventSemanticGroundingVisible": false,
+      "generatedTextLength": 0,
+      "generatedTextExcerpt": "",
+      "readiness": {
+        "status": null,
+        "requiredSectionCount": null,
+        "presentSectionCount": null,
+        "nonEmptySectionCount": null,
+        "placeholderFindingCount": null,
+        "legalOverclaimFindingCount": null,
+        "statutoryClaimDetected": null,
+        "lawProvenancePresent": null,
+        "sifProvenancePresent": null,
+        "sifEvidenceVisible": null,
+        "hazardGroundingPresent": null,
+        "matchedHazardCount": null,
+        "bodyGroundedHazardCount": null,
+        "bodyHazardCoverageComplete": null,
+        "missingBodyHazardIds": [],
+        "unresolvedReviewItems": []
+      },
+      "boundary": {
+        "storageMode": null,
+        "savedRunId": null,
+        "publicationState": null,
+        "dbMutationAllowed": null,
+        "dbMutationPerformed": null,
+        "publishAllowed": null,
+        "humanReviewRequired": null,
+        "machineEvidenceReplacesHumanReview": null
+      },
+      "generation": {
+        "mode": "deterministic",
+        "configured": null,
+        "generatedBy": null,
+        "fallbackUsed": null,
+        "providerLabel": null
+      }
+    },
+    {
+      "id": "fall-foreign-worker",
+      "ok": false,
+      "responseStatus": 503,
+      "failures": [
+        "http_status:503",
+        "response_not_ok",
+        "deterministic_builder_not_used",
+        "deterministic_fallback_not_reported",
+        "storage_not_stateless",
+        "saved_run_created",
+        "candidate_contract_mismatch",
+        "candidate_not_pending_review",
+        "candidate_publication_state_changed",
+        "candidate_db_mutation_boundary_failed",
+        "candidate_publish_allowed",
+        "human_review_not_required",
+        "machine_evidence_replaces_human_review",
+        "review_contract_mutation_boundary_failed",
+        "readiness_contract_mismatch",
+        "readiness:missing",
+        "required_sections_incomplete",
+        "placeholder_content",
+        "legal_overclaim",
+        "law_provenance_missing",
+        "sif_readiness_provenance_missing",
+        "sif_readiness_evidence_missing",
+        "hazard_grounding_missing",
+        "body_hazard_count_mismatch",
+        "body_hazard_grounding_incomplete",
+        "body_hazard_coverage_incomplete",
+        "human_review_overclaimed",
+        "readiness_publication_boundary_failed",
+        "missing_hazard:fall-scaffold",
+        "missing_hazard:foreign-worker-briefing",
+        "missing_term_group:비계|고소작업",
+        "missing_term_group:추락|안전대|안전난간",
+        "missing_term_group:외국인|쉬운 한국어|다국어",
+        "missing_evidence_term_group:KOSHA 위험성평가 사업안내|KOSHA 4M 기법 위험성평가 메뉴얼",
+        "missing_evidence_term_group:법제처 국가법령정보 산업안전보건법|산업안전보건법",
+        "missing_sif_evidence_term_group:SIF 비계 추락 사고 통제 사례",
+        "missing_event_fact_group:베트남어 브리핑 필요",
+        "missing_event_fact_group:오후 돌풍 예보 시 작업 중지",
+        "reviewer_evidence_trace_missing",
+        "sif_evidence_boundary_missing",
+        "sif_provenance_missing",
+        "technical_guidance_boundary_missing",
+        "law_candidate_boundary_missing",
+        "event_semantic_grounding_missing"
+      ],
+      "missingHazardIds": [
+        "fall-scaffold",
+        "foreign-worker-briefing"
+      ],
+      "missingTermGroups": [
+        [
+          "비계",
+          "고소작업"
+        ],
+        [
+          "추락",
+          "안전대",
+          "안전난간"
+        ],
+        [
+          "외국인",
+          "쉬운 한국어",
+          "다국어"
+        ]
+      ],
+      "missingEvidenceTermGroups": [
+        [
+          "KOSHA 위험성평가 사업안내",
+          "KOSHA 4M 기법 위험성평가 메뉴얼"
+        ],
+        [
+          "법제처 국가법령정보 산업안전보건법",
+          "산업안전보건법"
+        ]
+      ],
+      "missingSifEvidenceTermGroups": [
+        [
+          "SIF 비계 추락 사고 통제 사례"
+        ]
+      ],
+      "missingEventFactGroups": [
+        [
+          "베트남어 브리핑 필요"
+        ],
+        [
+          "오후 돌풍 예보 시 작업 중지"
+        ]
+      ],
+      "exposedForbiddenTerms": [],
+      "matchedHazardIds": [],
+      "reviewerEvidenceTraceVisible": false,
+      "sifEvidenceBoundaryVisible": false,
+      "sifProvenancePresent": false,
+      "technicalGuidanceBoundaryVisible": false,
+      "lawCandidateBoundaryVisible": false,
+      "eventSemanticGroundingVisible": false,
+      "generatedTextLength": 0,
+      "generatedTextExcerpt": "",
+      "readiness": {
+        "status": null,
+        "requiredSectionCount": null,
+        "presentSectionCount": null,
+        "nonEmptySectionCount": null,
+        "placeholderFindingCount": null,
+        "legalOverclaimFindingCount": null,
+        "statutoryClaimDetected": null,
+        "lawProvenancePresent": null,
+        "sifProvenancePresent": null,
+        "sifEvidenceVisible": null,
+        "hazardGroundingPresent": null,
+        "matchedHazardCount": null,
+        "bodyGroundedHazardCount": null,
+        "bodyHazardCoverageComplete": null,
+        "missingBodyHazardIds": [],
+        "unresolvedReviewItems": []
+      },
+      "boundary": {
+        "storageMode": null,
+        "savedRunId": null,
+        "publicationState": null,
+        "dbMutationAllowed": null,
+        "dbMutationPerformed": null,
+        "publishAllowed": null,
+        "humanReviewRequired": null,
+        "machineEvidenceReplacesHumanReview": null
+      },
+      "generation": {
+        "mode": "deterministic",
+        "configured": null,
+        "generatedBy": null,
+        "fallbackUsed": null,
+        "providerLabel": null
+      }
+    }
+  ]
+}

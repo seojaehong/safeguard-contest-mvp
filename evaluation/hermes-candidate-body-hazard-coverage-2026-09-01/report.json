@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-hermes-candidate-body-hazard-coverage/v1",
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_CANDIDATE_BODY_HAZARD_COVERAGE_LIVE_PENDING",
-  "checkedAt": "2026-09-01T01:02:51.973Z",
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_HERMES_CANDIDATE_BODY_HAZARD_COVERAGE_LIVE_BLOCKED_DISTRIBUTED_ADMISSION",
+  "checkedAt": "2026-09-01T01:06:17.684Z",
   "productCommit": "6eca935547c5984701a382376801809625dc7091",
   "evidenceMode": "current-source-local-production",
   "contract": {
@@ -31,6 +31,23 @@
     "eventSemanticGroundingCount": 5,
     "privateEventExposureCount": 0
   },
+  "afterLive": {
+    "artifact": "evaluation/hermes-candidate-body-hazard-coverage-2026-09-01/after-live/report.json",
+    "verdict": "RED_LIVE_PRODUCTION_WIKI_CANDIDATE_FALLBACK_CONTENT_MATRIX",
+    "sourceHead": "f070e3f317238d9ed47d4daa765dd81d51aceaf3",
+    "productionCommit": "f070e3f317238d9ed47d4daa765dd81d51aceaf3",
+    "deploymentUrl": "safeguard-contest-q8e9hr5lk-seojaehongs-projects.vercel.app",
+    "sourceProductionAligned": true,
+    "caseCount": 5,
+    "passedCount": 0,
+    "failedCount": 5,
+    "httpStatus": 503,
+    "blockerCode": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "generationReached": false,
+    "providerCallPerformed": false,
+    "dbMutationPerformed": false,
+    "retryAfterSeconds": 5
+  },
   "verification": {
     "focusedTests": {
       "files": 5,
@@ -52,7 +69,8 @@
     "staticPages": 29,
     "serverLog": "evaluation/hermes-candidate-body-hazard-coverage-2026-09-01/local-server.stdout.log"
   },
-  "liveAfterDeploymentRequired": true,
+  "liveAfterDeploymentRequired": false,
+  "liveRuntimeValidationBlocked": true,
   "humanReviewCompleted": false,
   "mutationBoundary": {
     "dbMutationPerformed": false,
@@ -66,6 +84,7 @@
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "llmWikiPublication": "APPROVAL_GATED",
     "supabaseRlsLaunchIsolation": "APPROVAL_GATED",
-    "productionAfterDeployment": "PENDING"
+    "productionAfterDeployment": "SOURCE_ALIGNED_RUNTIME_BLOCKED_DISTRIBUTED_ADMISSION",
+    "distributedAdmissionActivation": "APPROVAL_GATED"
   }
 }
