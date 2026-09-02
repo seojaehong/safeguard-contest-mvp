@@ -4,7 +4,7 @@
 
 `PASS_APPROVAL_FREE_SECURITY_REMEDIATIONS_DATABASE_GATES_REMAIN`
 
-The immutable Codex Security baseline remains the 17 findings produced by scan `8fe9c06a-018c-446f-aa98-1b37df95287a` against `f0c8a7be`. This companion matrix does not rewrite or suppress that baseline.
+The immutable original 18-finding baseline remains historical evidence. Follow-up scan `8fe9c06a-018c-446f-aa98-1b37df95287a` independently reports 17 findings (5 medium, 12 low) against `f0c8a7be`, with one renderer-dependent candidate deferred. This companion matrix does not rewrite or suppress either record.
 
 ## Current classification
 
@@ -19,8 +19,9 @@ The immutable Codex Security baseline remains the 17 findings produced by scan `
 - Next.js 15.5.22 production build: PASS, 29 static pages generated.
 - Dependency tree: `ajv@8.20.0` resolves `fast-uri@3.1.6`.
 - `npm audit`: 0 vulnerabilities after remediation.
-- Remote CI: pending for this branch.
+- Remote master CI run `33679491613`: PASS at merge commit `0127b37d`.
+- Production build marker: `0127b37d` on `master` / `production` (`safeguard-contest-4has91llo-seojaehongs-projects.vercel.app`).
 
 ## Boundaries
 
-No database schema or data mutation, provider dispatch, share-session creation, embedding/vector mutation, wiki publication, or KOSHA registry mutation was performed. Exact saved `/share/[sessionId]` evidence remains `MISSING_EVIDENCE`.
+No database schema or data mutation, provider dispatch, share-session creation, embedding/vector mutation, wiki publication, or KOSHA registry mutation was performed. Exact saved `/share/[sessionId]` evidence remains `MISSING_EVIDENCE`. Thirteen database findings remain approval-gated, so this matrix does not permit a security-complete claim.
