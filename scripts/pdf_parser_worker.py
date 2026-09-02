@@ -14,7 +14,7 @@ import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import BinaryIO, Callable, Sequence
+from typing import BinaryIO, Callable, Mapping, Sequence
 
 
 _PROTOCOL_MAGIC = b"PDFW1\x00"
@@ -230,13 +230,17 @@ def _install_windows_job(
 
 
 def _spawn_worker(
-    command: Sequence[str], memory_limit_bytes: int
+    command: Sequence[str],
+    memory_limit_bytes: int,
+    environment: Mapping[str, str] | None = None,
 ) -> tuple[subprocess.Popen[bytes], _WindowsJob | None]:
     popen_kwargs: dict[str, object] = {
         "stdin": subprocess.PIPE,
         "stdout": subprocess.PIPE,
         "stderr": subprocess.PIPE,
     }
+    if environment is not None:
+        popen_kwargs["env"] = dict(environment)
     if os.name == "posix":
         popen_kwargs["start_new_session"] = True
 
@@ -332,7 +336,10 @@ def _write_stdin(
     except (BrokenPipeError, OSError) as exc:
         failures.append(exc)
     finally:
-        stream.close()
+        try:
+            stream.close()
+        except OSError as exc:
+            failures.append(exc)
 
 
 def _communicate_bounded(

@@ -86,6 +86,34 @@ class BoundedZipReaderTest(unittest.TestCase):
                     ArchiveLimits(max_central_directory_bytes=1),
                 )
 
+    def test_preflight_rejects_expansion_and_compression_ratio_before_zipfile(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_dir:
+            root = Path(temporary_dir)
+            archive_path = self.write_archive(
+                root,
+                {"compressed.bin": b"x" * 20_000},
+                compression=zipfile.ZIP_DEFLATED,
+            )
+
+            with self.assertRaisesRegex(ArchiveBudgetError, "member size"):
+                preflight_zip_central_directory(
+                    archive_path,
+                    ArchiveLimits(max_member_bytes=100),
+                )
+            with self.assertRaisesRegex(ArchiveBudgetError, "compression ratio"):
+                preflight_zip_central_directory(
+                    archive_path,
+                    ArchiveLimits(max_compression_ratio=2.0),
+                )
+            with self.assertRaisesRegex(ArchiveBudgetError, "total uncompressed"):
+                preflight_zip_central_directory(
+                    archive_path,
+                    ArchiveLimits(
+                        max_total_uncompressed_bytes=100,
+                        max_compression_ratio=1_000.0,
+                    ),
+                )
+
     def test_rejects_declared_and_actual_central_directory_count_mismatch(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_dir:
             archive_path = self.write_archive(Path(temporary_dir), {"one": b"1", "two": b"2"})

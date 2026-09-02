@@ -1,0 +1,116 @@
+{
+  "schema": "safeclaw-security-followup-remediation/v1",
+  "generatedAt": "2026-09-03T00:49:41.9663806+09:00",
+  "sourceHead": "10b73e390ec7696046190cefcbfeca0865dfdff2",
+  "branch": "fix/kosha-source-toctou-20260902",
+  "scan": {
+    "scanId": "cfc74160-9955-478f-a437-6fa389dbf3c2",
+    "findingCount": 9,
+    "severityCounts": {
+      "medium": 2,
+      "low": 7
+    },
+    "immutableOriginalBaselinePreserved": true
+  },
+  "remediation": {
+    "fullyRemediatedFindingCount": 7,
+    "partiallyRemediatedFindingCount": 0,
+    "approvalGatedFindingCount": 2,
+    "fullyRemediated": [
+      "legacy_html_xls_formula_neutralization",
+      "cli_cleartext_bearer_transport",
+      "ask_ontology_qa_cancellation",
+      "download_zip_central_directory_preflight",
+      "ingestion_archive_central_directory_preflight",
+      "download_xlsx_preparser",
+      "ingestion_xlsx_preparser"
+    ],
+    "partiallyRemediated": [],
+    "xlsxIsolation": {
+      "sameHandlePreflight": true,
+      "snapshotDigestBound": true,
+      "disposableSubprocess": true,
+      "hardTimeout": true,
+      "windowsJobMemoryCap": true,
+      "posixAddressSpaceCap": true,
+      "boundedOutput": true
+    },
+    "approvalGated": [
+      {
+        "id": "worker_cross_site_upsert_race",
+        "reason": "Requires a transactional database constraint or RPC change."
+      },
+      {
+        "id": "mcp_token_quota_race",
+        "reason": "Requires per-site database serialization and idempotency changes."
+      }
+    ],
+    "additionalDependencyRemediation": {
+      "package": "qs",
+      "before": "6.15.3",
+      "after": "6.16.0",
+      "npmAuditVulnerabilityCount": 0
+    },
+    "additionalXmlDependencyRemediation": {
+      "package": "@xmldom/xmldom",
+      "before": "0.9.10",
+      "after": "0.9.12",
+      "npmAuditVulnerabilityCount": 0
+    }
+  },
+  "verification": {
+    "focusedTypeScript": {
+      "files": 3,
+      "tests": 42,
+      "passed": true
+    },
+    "adjacentCancellation": {
+      "files": 5,
+      "tests": 49,
+      "passed": true
+    },
+    "pythonArchiveSafety": {
+      "tests": 6,
+      "passed": true
+    },
+    "pythonOperatorParserBudgets": {
+      "tests": 15,
+      "passed": true
+    },
+    "pythonXlsxWorker": {
+      "tests": 4,
+      "passed": true
+    },
+    "pythonPdfWorkerRegression": {
+      "tests": 19,
+      "passed": true
+    },
+    "pythonCompile": "PASS",
+    "typecheck": "PASS",
+    "productionBuild": {
+      "status": "PASS",
+      "staticPages": 29
+    },
+    "npmAudit": {
+      "status": "PASS",
+      "vulnerabilityCount": 0
+    },
+    "gitDiffCheck": "PASS",
+    "targetedSecretScanMatches": 0
+  },
+  "mutationBoundary": {
+    "dbSchemaMutation": false,
+    "dbDataMutation": false,
+    "providerDispatch": false,
+    "shareSessionCreation": false,
+    "embeddingOrVectorMutation": false,
+    "wikiPublication": false,
+    "koshaRegistryMutation": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseRaceRemediation": "EXPLICIT_APPROVAL_REQUIRED",
+    "xlsxHardIsolation": "CLOSED"
+  },
+  "verdict": "PASS_APPROVAL_FREE_SECURITY_REMEDIATION_DB_APPROVAL_GATES_REMAIN"
+}

@@ -7,21 +7,20 @@ import json
 import re
 import sys
 import time
-import zipfile
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 from xml.etree import ElementTree
 
-from openpyxl import load_workbook
 SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from archive_safety import BoundedZipReader
+from archive_safety import BoundedZipReader, open_preflighted_archive, open_preflighted_zip
 from parser_safety import ParserBudget, ParserBudgetError, ParserLimits
 from pdf_parser_worker import hash_pdf_file_bounded, parse_pdf_file_bounded
+from xlsx_parser_worker import parse_xlsx_bytes_bounded
 
 DEFAULT_PARSER_LIMITS = ParserLimits()
 
@@ -277,8 +276,10 @@ def read_pdf_records(
 def read_hwpx_records(path: Path, budget: ParserBudget) -> tuple[list[tuple[str, str, str]], str, str | None]:
     try:
         records: list[tuple[str, str, str]] = []
-        with zipfile.ZipFile(path) as archive:
+        with open_preflighted_zip(path) as (archive, declared_member_count):
             bounded_archive = BoundedZipReader(archive)
+            if len(bounded_archive.infos) != declared_member_count:
+                raise RuntimeError("archive member count changed after preflight")
             for info in bounded_archive.infos:
                 budget.check_elapsed()
                 name = info.filename
@@ -299,41 +300,55 @@ def read_hwpx_records(path: Path, budget: ParserBudget) -> tuple[list[tuple[str,
         return [], "zip+xml", str(exc)
 
 
-def read_xlsx_records(path: Path, max_rows: int, budget: ParserBudget) -> tuple[list[tuple[str, str, str]], str, str | None]:
+def read_xlsx_records(
+    path: Path,
+    max_rows: int,
+    budget: ParserBudget,
+    expected_sha256: str | None = None,
+) -> tuple[list[tuple[str, str, str]], str, str | None]:
     try:
-        workbook = load_workbook(path, read_only=True, data_only=True)
-        try:
-            records: list[tuple[str, str, str]] = []
-            for sheet_name in workbook.sheetnames:
-                budget.start_sheet()
-                budget.consume_text(sheet_name)
-                lines: list[str] = []
-                sheet = workbook[sheet_name]
-                for index, row in enumerate(sheet.iter_rows(values_only=True), start=1):
-                    if index > max_rows:
-                        break
-                    budget.consume_row(len(row))
-                    values: list[str] = []
-                    for cell in row:
-                        if cell is None:
-                            continue
-                        raw_value = str(cell)
-                        budget.consume_text(raw_value)
-                        value = compact_text(raw_value, 220)
-                        if value:
-                            values.append(value)
-                    if values:
-                        lines.append(" | ".join(values))
-                text = compact_text("\n".join(lines), 2500)
-                if text:
-                    records.append((f"sheet:{sheet_name}", sheet_name, text))
-            if not records:
-                return [], "openpyxl", "no non-empty sheets"
-            return records, "openpyxl", None
-        finally:
-            workbook.close()
+        with open_preflighted_archive(path) as (archive_file, _):
+            snapshot = archive_file.read(budget.limits.max_input_bytes + 1)
+        budget.assert_input_bytes(len(snapshot))
+        remaining_seconds = budget.limits.max_elapsed_seconds - (
+            time.monotonic() - budget.started_at
+        )
+        if remaining_seconds <= 0:
+            budget.check_elapsed()
+        parsed = parse_xlsx_bytes_bounded(
+            snapshot,
+            max_rows_per_sheet=min(max_rows, budget.limits.max_rows_per_sheet),
+            max_sheet_count=budget.limits.max_sheet_count,
+            max_cells_per_row=budget.limits.max_cells_per_row,
+            max_total_rows=budget.limits.max_total_rows,
+            max_total_cells=budget.limits.max_total_cells,
+            max_text_chars=budget.limits.max_text_chars,
+            timeout_seconds=remaining_seconds,
+            expected_sha256=expected_sha256,
+        )
+        records: list[tuple[str, str, str]] = []
+        for sheet in parsed.sheets:
+            budget.start_sheet()
+            budget.consume_text(sheet.name)
+            lines: list[str] = []
+            for row in sheet.rows:
+                budget.consume_row(len(row))
+                values: list[str] = []
+                for raw_value in row:
+                    budget.consume_text(raw_value)
+                    value = compact_text(raw_value, 220)
+                    if value:
+                        values.append(value)
+                if values:
+                    lines.append(" | ".join(values))
+            text = compact_text("\n".join(lines), 2500)
+            if text:
+                records.append((f"sheet:{sheet.name}", sheet.name, text))
+        if not records:
+            return [], "openpyxl-worker", "no non-empty sheets"
+        return records, "openpyxl-worker", None
     except Exception as exc:
-        return [], "openpyxl", str(exc)
+        return [], "openpyxl-worker", str(exc)
 
 
 def read_csv_records(path: Path, max_rows: int, budget: ParserBudget) -> tuple[list[tuple[str, str, str]], str, str | None]:
@@ -361,8 +376,10 @@ def read_csv_records(path: Path, max_rows: int, budget: ParserBudget) -> tuple[l
 
 def read_zip_records(path: Path, budget: ParserBudget) -> tuple[list[tuple[str, str, str]], str, str | None]:
     try:
-        with zipfile.ZipFile(path) as archive:
+        with open_preflighted_zip(path) as (archive, declared_member_count):
             names = [info.filename for info in BoundedZipReader(archive).infos]
+            if len(names) != declared_member_count:
+                raise RuntimeError("archive member count changed after preflight")
         raw_text = "\n".join(names)
         budget.consume_text(raw_text)
         text = compact_text(raw_text, 2500)
@@ -374,8 +391,10 @@ def read_zip_records(path: Path, budget: ParserBudget) -> tuple[list[tuple[str, 
 def read_pptx_records(path: Path, budget: ParserBudget) -> tuple[list[tuple[str, str, str]], str, str | None]:
     try:
         records: list[tuple[str, str, str]] = []
-        with zipfile.ZipFile(path) as archive:
+        with open_preflighted_zip(path) as (archive, declared_member_count):
             bounded_archive = BoundedZipReader(archive)
+            if len(bounded_archive.infos) != declared_member_count:
+                raise RuntimeError("archive member count changed after preflight")
             slide_infos = sorted(
                 (
                     info for info in bounded_archive.infos
@@ -422,7 +441,12 @@ def extract_records(
     if extension == ".hwpx":
         return read_hwpx_records(path, budget)
     if extension == ".xlsx":
-        return read_xlsx_records(path, max_sheet_rows, budget)
+        return read_xlsx_records(
+            path,
+            max_sheet_rows,
+            budget,
+            expected_sha256=expected_sha256,
+        )
     if extension == ".csv":
         return read_csv_records(path, max_sheet_rows, budget)
     if extension == ".zip":

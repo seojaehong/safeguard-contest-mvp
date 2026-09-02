@@ -85,7 +85,7 @@ const canonicalSurfaceHooks: Record<string, string> = {
   "components/SafeClawModuleShell.tsx": "safeclaw-module-shell",
   "components/V2DemoExperience.tsx": "demo-mode-shell",
   "components/SafeGuardCommandCenter.tsx": "command-center-shell",
-  "app/ask/page.tsx": "SafeClawModuleShell",
+  "app/ask/page.tsx": "AskLivePage",
   "app/auth/callback/page.tsx": "safeclaw-login-page",
   "app/dryrun/page.tsx": "SafeClawModuleShell",
   "app/interpretation/[id]/page.tsx": "container grid",
@@ -95,7 +95,7 @@ const canonicalSurfaceHooks: Record<string, string> = {
   "app/precedent/[id]/page.tsx": "container grid",
   "app/preview/page.tsx": "SafeClawModuleShell",
   "app/roadmap/page.tsx": "SafeClawModuleShell",
-  "app/search/page.tsx": "SafeClawModuleShell",
+  "app/search/page.tsx": "SearchLivePage",
   "app/share/[sessionId]/page.tsx": "safeclaw-share-recipient-page",
   "app/trust/page.tsx": "SafeClawModuleShell",
   "app/why/page.tsx": "SafeClawModuleShell",
@@ -123,6 +123,12 @@ const sharedComponentOwners = {
   "components/V2DemoExperience.tsx": "V2DemoExperience",
   "components/SafeGuardCommandCenter.tsx": "SafeGuardCommandCenter",
 } as const;
+
+const delegatedRouteOwners: Partial<Record<(typeof userVisibleRoutes)[number], string>> = {
+  "/ask": "app/ask/AskLivePage.tsx",
+  "/ontology": "app/ontology/OntologyLivePage.tsx",
+  "/search": "app/search/SearchLivePage.tsx",
+};
 
 function listPageFiles(directory: string): string[] {
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -357,9 +363,11 @@ describe("frontend route classification", () => {
     }
 
     for (const route of userVisibleRoutes) {
-      const pageSource = route === "/ontology"
-        ? `${read(pageFileFromRoute(route))}\n${read("app/ontology/OntologyLivePage.tsx")}`
-        : read(pageFileFromRoute(route));
+      const pageSource = [
+        read(pageFileFromRoute(route)),
+        delegatedRouteOwners[route] ? read(delegatedRouteOwners[route]) : "",
+        delegatedHeadingOwners[route] ? read(delegatedHeadingOwners[route]) : "",
+      ].join("\n");
       const owners = [routeSurfaceOwners[route], delegatedHeadingOwners[route]].filter(
         (owner): owner is string => Boolean(owner),
       );
@@ -1062,7 +1070,9 @@ describe("knowledge and legal route hierarchy", () => {
   it("uses semantic section and result headings on ask and search surfaces", () => {
     const sources = [
       "app/ask/page.tsx",
+      "app/ask/AskLivePage.tsx",
       "app/search/page.tsx",
+      "app/search/SearchLivePage.tsx",
       "components/AnswerPanel.tsx",
       "components/CitationList.tsx",
       "components/ResultCard.tsx",

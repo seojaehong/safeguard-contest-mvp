@@ -27,4 +27,10 @@ describe("CI workflow supply-chain contract", () => {
   it("keeps setup-node package-manager caching explicitly disabled", () => {
     expect(workflow).toContain("          package-manager-cache: false");
   });
+
+  it("checks out complete history for Northstar evidence ancestry", () => {
+    expect(workflow).toMatch(
+      /actions\/checkout@[0-9a-f]{40}[^]*?with:\r?\n\s+#[^\r\n]*Northstar evidence gates[^]*?fetch-depth: 0/u,
+    );
+  });
 });

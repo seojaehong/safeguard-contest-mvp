@@ -1,0 +1,113 @@
+{
+  "schemaVersion": "safeclaw-ci-baseline-remediation/v1",
+  "generatedAt": "2026-09-03T03:48:00+09:00",
+  "verdict": "PASS_REMOTE_REQUIRED_CI_CONTRACTS",
+  "branch": "fix/kosha-source-toctou-20260902",
+  "pullRequest": 91,
+  "baselineCommit": "18a00472368cfc435e863d081e4a5e70989b6c93",
+  "remediationCommit": "7f5dc28d22c323b7775c0875fcef228819f4313b",
+  "originalCiFailureCount": 16,
+  "causes": [
+    {
+      "id": "typography-contract",
+      "classification": "product-css",
+      "remediation": "Restored the required HUD typography tuple and removed an invalid pseudo-element typography override."
+    },
+    {
+      "id": "delegated-route-ownership",
+      "classification": "stale-test-contract",
+      "remediation": "Resolved Ask and Search route ownership through their delegated live-page and shared-shell components."
+    },
+    {
+      "id": "ontology-copy",
+      "classification": "stale-test-contract",
+      "remediation": "Validated current Korean fallback copy in the delegated ontology page."
+    },
+    {
+      "id": "frontend-source-identity",
+      "classification": "stale-generated-audit",
+      "remediation": "Regenerated the static frontend consistency audit with zero violations."
+    },
+    {
+      "id": "knowledge-promotion-auth-order",
+      "classification": "stale-test-contract",
+      "remediation": "Kept authentication before request-body parsing and updated the malformed-command no-mutation assertion."
+    },
+    {
+      "id": "northstar-ancestry",
+      "classification": "ci-checkout-depth",
+      "remediation": "Configured CI checkout with full Git history so historical evidence ancestry can be verified."
+    },
+    {
+      "id": "windows-fixture-timeout",
+      "classification": "test-environment",
+      "remediation": "Applied a 15 second timeout only to the two Git-fixture integration suites that exceed the default on Windows."
+    }
+  ],
+  "verification": {
+    "focusedOriginalFailureSet": {
+      "testFilesPassed": 8,
+      "testsPassed": 92
+    },
+    "northstarOpenGateAudit": {
+      "testFilesPassed": 1,
+      "testsPassed": 205,
+      "durationSeconds": 1897.48
+    },
+    "windowsFixtureSuites": {
+      "testFilesPassed": 2,
+      "testsPassed": 34
+    },
+    "reportsCleanTreeProvenance": {
+      "testFilesPassed": 1,
+      "testsPassed": 12,
+      "durationSeconds": 43.24
+    },
+    "typecheck": "PASS",
+    "frontendStaticAudit": {
+      "status": "pass",
+      "violationCount": 0
+    },
+    "productionBuild": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPagesGenerated": 29
+    },
+    "fullSuiteBeforeFinalClosure": {
+      "testFilesTotal": 280,
+      "testFilesPassed": 266,
+      "testFilesFailed": 3,
+      "testFilesSkipped": 11,
+      "testsTotal": 3313,
+      "testsPassed": 3277,
+      "testsFailed": 9,
+      "testsSkipped": 27,
+      "durationSeconds": 3276.39,
+      "remainingFailureClassification": "Seven default-timeout failures and two dirty-tree provenance failures; each class passed after its bounded closure."
+    },
+    "remoteCi": {
+      "status": "PASS",
+      "runId": 33667725326,
+      "jobId": 100373474833,
+      "durationSeconds": 951,
+      "typecheck": "PASS",
+      "fullTestSuite": "PASS",
+      "productionBuild": "PASS"
+    },
+    "vercelPreview": "PASS"
+  },
+  "mutationBoundary": {
+    "dbSchemaMutationPerformed": false,
+    "dbDataMutationPerformed": false,
+    "providerDispatchPerformed": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedOperationsRemainClosed": true,
+    "remoteCiMustPassBeforeIntegration": false
+  }
+}

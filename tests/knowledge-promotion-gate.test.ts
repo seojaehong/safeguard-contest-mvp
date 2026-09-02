@@ -180,8 +180,8 @@ describe("human-approved ontology promotion command gate", () => {
 
     expect(response.status).toBe(400);
     expect(payload).toMatchObject({ ok: false, code: "invalid_ontology_promotion_command" });
-    expect(routeMocks.createSupabaseAdminClient).not.toHaveBeenCalled();
-    expect(routeMocks.getWorkspaceUser).not.toHaveBeenCalled();
+    expect(routeMocks.createSupabaseAdminClient).toHaveBeenCalledOnce();
+    expect(routeMocks.getWorkspaceUser).toHaveBeenCalledOnce();
     expect(routeMocks.loadOntologyPromotionTrustedContext).not.toHaveBeenCalled();
     expect(routeMocks.applyKnowledgeReviewAction).not.toHaveBeenCalled();
   });

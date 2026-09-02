@@ -70,7 +70,7 @@ describe("web workpack ontology QA", () => {
     const reviewed = await attachWebOntologyQa(response, question);
 
     expect(resolveReviewTaskLabel("일반 작업", question)).toBe("용접");
-    expect(reviewDocpack).toHaveBeenCalledWith("용접", expect.stringContaining("화재감시자"));
+    expect(reviewDocpack).toHaveBeenCalledWith("용접", expect.stringContaining("화재감시자"), undefined);
     expect(reviewed.ontologyQa?.reviewTask).toBe("용접");
     expect(reviewed.ontologyQa?.result.reviewable).toBe(true);
   });
@@ -107,6 +107,28 @@ describe("web workpack ontology QA", () => {
     expect(reviewed.deliverables.riskAssessmentDraft).toContain("[온톨로지 QA 보완 반영 - 위험성평가]");
     expect(reviewed.deliverables.tbmBriefing).toContain("작업 전 확인: 감시인 외부 배치 및 연락설비");
     expect(reviewed.ontologyQa?.result.reviewable && reviewed.ontologyQa.result.verdict).toBe("통과");
+  });
+
+  it("threads request cancellation through review and stops before rereview", async () => {
+    const controller = new AbortController();
+    vi.mocked(reviewDocpack).mockImplementationOnce(async (_task, _document, signal) => {
+      expect(signal).toBe(controller.signal);
+      controller.abort();
+      return qaMissing;
+    });
+    const response = buildMockAskResponse(
+      "부산 지하 기계실 밀폐공간 작업",
+      mockSearchResults.slice(0, 2),
+      "live",
+      "test"
+    );
+
+    await expect(attachWebOntologyQa(
+      response,
+      "부산 지하 기계실 밀폐공간 작업",
+      controller.signal
+    )).rejects.toMatchObject({ name: "AbortError" });
+    expect(reviewDocpack).toHaveBeenCalledTimes(1);
   });
 
   it("does not mutate the source response when applying ontology remediation", () => {

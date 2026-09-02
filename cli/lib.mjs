@@ -134,7 +134,34 @@ export function resolveConfig(env) {
       1
     );
   }
-  const base = (env.SAFECLAW_BASE?.trim() || DEFAULT_BASE).replace(/\/+$/, "");
+  const rawBase = env.SAFECLAW_BASE?.trim() || DEFAULT_BASE;
+  let parsedBase;
+  try {
+    parsedBase = new URL(rawBase);
+  } catch {
+    throw new CliError("SAFECLAW_BASE가 올바른 URL이 아닙니다.", "INVALID_BASE", 1);
+  }
+  if (parsedBase.username || parsedBase.password || parsedBase.search || parsedBase.hash) {
+    throw new CliError(
+      "SAFECLAW_BASE에는 사용자정보, 쿼리 또는 fragment를 넣을 수 없습니다.",
+      "INVALID_BASE",
+      1
+    );
+  }
+  const hostname = parsedBase.hostname.toLowerCase();
+  const loopback = hostname === "localhost" || hostname.endsWith(".localhost") ||
+    hostname === "127.0.0.1" || hostname === "::1";
+  const insecureLoopbackAllowed = env.SAFECLAW_ALLOW_INSECURE_HTTP === "true";
+  if (parsedBase.protocol !== "https:" && !(
+    parsedBase.protocol === "http:" && loopback && insecureLoopbackAllowed
+  )) {
+    throw new CliError(
+      "SAFECLAW_BASE는 HTTPS여야 합니다. 로컬 HTTP는 SAFECLAW_ALLOW_INSECURE_HTTP=true일 때만 허용됩니다.",
+      "INSECURE_BASE",
+      1
+    );
+  }
+  const base = parsedBase.toString().replace(/\/+$/, "");
   return { token, base };
 }
 
@@ -196,6 +223,7 @@ export async function callTool({ base, token, tool, args, timeoutMs, fetchImpl =
   try {
     res = await fetchImpl(`${base}${MCP_PATH}`, {
       method: "POST",
+      redirect: "error",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json, text/event-stream",
@@ -414,6 +442,7 @@ export const HELP_TEXT = `safeclaw — SafeClaw MCP 도구를 커맨드라인에
 환경변수:
   SAFECLAW_TOKEN  (필수) SafeClaw MCP 토큰과 동일한 인증 토큰
   SAFECLAW_BASE   (선택) 기본값 https://www.safeclaw.kr
+  SAFECLAW_ALLOW_INSECURE_HTTP  (선택) true일 때 loopback HTTP만 허용
 
 예시:
   SAFECLAW_TOKEN=sc2_xxx safeclaw weather 서울

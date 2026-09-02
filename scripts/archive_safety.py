@@ -116,6 +116,7 @@ def preflight_open_zip_central_directory(
 
     offset = 0
     actual_entry_count = 0
+    total_uncompressed_size = 0
     while offset < len(central_directory):
         signature = central_directory[offset:offset + 4]
         if signature == CENTRAL_DIRECTORY_DIGITAL_SIGNATURE:
@@ -134,6 +135,27 @@ def preflight_open_zip_central_directory(
             raise ArchiveBudgetError(f"encrypted ZIP members are not allowed: {archive_name}")
         if compressed_size == 0xFFFFFFFF or uncompressed_size == 0xFFFFFFFF:
             raise ArchiveBudgetError(f"ZIP64 members are not supported: {archive_name}")
+        if uncompressed_size > effective_limits.max_member_bytes:
+            raise ArchiveBudgetError(
+                f"archive member size exceeds limit: "
+                f"{uncompressed_size}/{effective_limits.max_member_bytes}"
+            )
+        compression_ratio = (
+            1.0 if uncompressed_size == 0
+            else float("inf") if compressed_size <= 0
+            else uncompressed_size / compressed_size
+        )
+        if compression_ratio > effective_limits.max_compression_ratio:
+            raise ArchiveBudgetError(
+                f"archive member compression ratio exceeds limit: "
+                f"{compression_ratio:.3f}/{effective_limits.max_compression_ratio:.3f}"
+            )
+        total_uncompressed_size += uncompressed_size
+        if total_uncompressed_size > effective_limits.max_total_uncompressed_bytes:
+            raise ArchiveBudgetError(
+                "archive total uncompressed bytes exceed limit: "
+                f"{total_uncompressed_size}/{effective_limits.max_total_uncompressed_bytes}"
+            )
         next_offset = offset + 46 + file_name_length + extra_length + entry_comment_length
         if next_offset > len(central_directory):
             raise ArchiveBudgetError(f"ZIP central directory entry is truncated: {archive_name}")
@@ -153,10 +175,10 @@ def preflight_open_zip_central_directory(
 
 
 @contextmanager
-def open_preflighted_zip(
+def open_preflighted_archive(
     archive_path: Path,
     limits: ArchiveLimits | None = None,
-) -> Iterator[tuple[zipfile.ZipFile, int]]:
+) -> Iterator[tuple[BinaryIO, int]]:
     with archive_path.open("rb") as archive_file:
         declared_member_count = preflight_open_zip_central_directory(
             archive_file,
@@ -164,6 +186,18 @@ def open_preflighted_zip(
             limits,
         )
         archive_file.seek(0)
+        yield archive_file, declared_member_count
+
+
+@contextmanager
+def open_preflighted_zip(
+    archive_path: Path,
+    limits: ArchiveLimits | None = None,
+) -> Iterator[tuple[zipfile.ZipFile, int]]:
+    with open_preflighted_archive(archive_path, limits) as (
+        archive_file,
+        declared_member_count,
+    ):
         with zipfile.ZipFile(archive_file) as archive:
             yield archive, declared_member_count
 
