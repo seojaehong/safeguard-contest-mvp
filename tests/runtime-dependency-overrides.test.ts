@@ -11,7 +11,7 @@ describe("runtime dependency overrides", () => {
     expect(packageJson.overrides).toMatchObject({
       "@hono/node-server": "2.0.12",
       "archiver": "8.0.0",
-      "fast-uri": "3.1.5",
+      "fast-uri": "3.1.6",
       "postcss": "8.5.23",
       "sharp": "0.35.3",
       "unzipper": "0.12.1",
