@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "safeclaw-security-public-page-cancellation-remediation/v1",
+  "generatedAt": "2026-09-03T00:06:00.3479121+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_PUBLIC_PAGE_DISCONNECT_CANCELLATION_LIVE_PENDING",
+  "sourceHead": "8be2c6152b40dbda93b00d5dc57c19fc37022c33",
+  "productionCommit": "d110403bd1aa8e79927f9746c0f1a994fd2bdeaa",
+  "sourceHeadMatchesProduction": false,
+  "findings": [
+    {
+      "ruleId": "resource-exhaustion.public-ask-page-disconnect",
+      "title": "Public Ask page loses request-disconnect cancellation",
+      "currentSourceRemediated": true
+    },
+    {
+      "ruleId": "resource-exhaustion.public-search-page-disconnect",
+      "title": "Public legal-search page loses request-disconnect cancellation",
+      "currentSourceRemediated": true
+    }
+  ],
+  "implementation": {
+    "askPageUsesBrowserApiRequest": true,
+    "searchPageUsesBrowserApiRequest": true,
+    "askUnmountAbortsBrowserRequest": true,
+    "searchUnmountAbortsBrowserRequest": true,
+    "apiAskPropagatesRequestSignal": true,
+    "apiSearchPropagatesRequestSignal": true,
+    "syntheticPageRequestRemovedFromProviderWork": true,
+    "existingAdmissionAndWorkBudgetsPreserved": true
+  },
+  "verification": {
+    "focusedSecurityTests": {
+      "command": "npm.cmd exec -- vitest run tests/public-page-provider-admission.test.ts tests/ask-generation-evidence-routes.test.ts tests/public-search-work-budget.test.ts --maxWorkers=1 --fileParallelism=false",
+      "files": 3,
+      "tests": 30,
+      "passed": 30,
+      "failed": 0,
+      "elapsedSeconds": 3.84
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "productionBuild": {
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "staticPages": 29
+    },
+    "browserDisconnectProbe": {
+      "baseUrl": "http://127.0.0.1:3083",
+      "askRequestStarted": true,
+      "askNavigationFailure": "net::ERR_ABORTED",
+      "searchRequestStarted": true,
+      "searchNavigationFailure": "net::ERR_ABORTED"
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentRequired": true,
+    "freshRepositorySecurityRescanRequired": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedDatabaseFindingsPreserved": true,
+    "securityCompleteClaimAllowed": false
+  }
+}
