@@ -70,14 +70,29 @@ describe("public page provider admission", () => {
 
   it("keeps both public pages on the shared admitted operations", async () => {
     const root = process.cwd();
-    const [askPage, searchPage] = await Promise.all([
+    const [askPage, askLivePage, searchPage, searchLivePage] = await Promise.all([
       readFile(path.join(root, "app/ask/page.tsx"), "utf8"),
+      readFile(path.join(root, "app/ask/AskLivePage.tsx"), "utf8"),
       readFile(path.join(root, "app/search/page.tsx"), "utf8"),
+      readFile(path.join(root, "app/search/SearchLivePage.tsx"), "utf8"),
     ]);
 
-    expect(askPage).toContain("runPublicAskOperation");
+    expect(askPage).toContain("AskLivePage");
+    expect(askPage).not.toContain("createPublicPageAdmissionRequest");
+    expect(askPage).not.toContain("runPublicAskOperation");
     expect(askPage).not.toContain('from "@/lib/search"');
-    expect(searchPage).toContain("runPublicLegalSearchOperation");
+    expect(askLivePage).toContain('fetch("/api/ask"');
+    expect(askLivePage).toContain("new AbortController()");
+    expect(askLivePage).toContain("signal: controller.signal");
+    expect(askLivePage).toContain("return () => controller.abort");
+
+    expect(searchPage).toContain("SearchLivePage");
+    expect(searchPage).not.toContain("createPublicPageAdmissionRequest");
+    expect(searchPage).not.toContain("runPublicLegalSearchOperation");
     expect(searchPage).not.toContain('from "@/lib/search"');
+    expect(searchLivePage).toContain("fetch(`/api/search?q=${encodeURIComponent(query)}`");
+    expect(searchLivePage).toContain("new AbortController()");
+    expect(searchLivePage).toContain("signal: controller.signal");
+    expect(searchLivePage).toContain("return () => controller.abort");
   });
 });
