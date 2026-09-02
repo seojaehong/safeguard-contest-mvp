@@ -3089,7 +3089,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       }
     };
 
-    const withOntologyQa = await attachWebOntologyQa(withMcpDetail, question);
+    const withOntologyQa = await attachWebOntologyQa(withMcpDetail, question, options.signal);
     const finalResponse = applyPhaseAResponseBoundary(
       attachQualityContract(withOntologyQa),
       options.phaseAGrounding,

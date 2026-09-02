@@ -96,8 +96,35 @@ describe("cli/lib.mjs — resolveConfig", () => {
       base: "https://www.safeclaw.kr",
     });
     expect(
-      resolveConfig({ SAFECLAW_TOKEN: "sc2_x", SAFECLAW_BASE: "http://localhost:3000/" })
+      resolveConfig({
+        SAFECLAW_TOKEN: "sc2_x",
+        SAFECLAW_BASE: "http://localhost:3000/",
+        SAFECLAW_ALLOW_INSECURE_HTTP: "true",
+      })
     ).toEqual({ token: "sc2_x", base: "http://localhost:3000" });
+  });
+
+  it("rejects cleartext remote bases and requires an explicit loopback opt-in", () => {
+    expect(() => resolveConfig({
+      SAFECLAW_TOKEN: "sc2_x",
+      SAFECLAW_BASE: "http://safeclaw.example.test",
+      SAFECLAW_ALLOW_INSECURE_HTTP: "true",
+    })).toThrowError(expect.objectContaining({ code: "INSECURE_BASE" }));
+    expect(() => resolveConfig({
+      SAFECLAW_TOKEN: "sc2_x",
+      SAFECLAW_BASE: "http://127.0.0.1:3000",
+    })).toThrowError(expect.objectContaining({ code: "INSECURE_BASE" }));
+  });
+
+  it("rejects credentials, query strings, and fragments in the base URL", () => {
+    for (const base of [
+      "https://user:pass@safeclaw.example.test",
+      "https://safeclaw.example.test?target=other",
+      "https://safeclaw.example.test#fragment",
+    ]) {
+      expect(() => resolveConfig({ SAFECLAW_TOKEN: "sc2_x", SAFECLAW_BASE: base }))
+        .toThrowError(expect.objectContaining({ code: "INVALID_BASE" }));
+    }
   });
 });
 
@@ -130,12 +157,16 @@ describe("cli/lib.mjs — SSE / JSON-RPC transport parsing", () => {
 
 describe("cli/lib.mjs — callTool (injected fetch)", () => {
   it("returns parsed data on a 200 SSE response", async () => {
-    const fetchImpl = async () => ({
+    let requestInit: RequestInit | undefined;
+    const fetchImpl = async (_input: Parameters<typeof fetch>[0], init?: RequestInit) => {
+      requestInit = init;
+      return ({
       ok: true,
       status: 200,
       text: async () =>
         'event: message\ndata: {"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\\"region\\":\\"서울\\"}"}]}}\n\n',
-    });
+      });
+    };
     const { data, isError } = await callTool({
       base: "https://example.test",
       token: "t",
@@ -146,6 +177,7 @@ describe("cli/lib.mjs — callTool (injected fetch)", () => {
     });
     expect(isError).toBe(false);
     expect(data).toEqual({ region: "서울" });
+    expect(requestInit?.redirect).toBe("error");
   });
 
   it("maps HTTP 401 to a CliError with code AUTH", async () => {

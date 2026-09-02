@@ -187,7 +187,12 @@ function qaErrorResult(
   };
 }
 
-export async function attachWebOntologyQa(response: AskResponse, question: string): Promise<AskResponse> {
+export async function attachWebOntologyQa(
+  response: AskResponse,
+  question: string,
+  signal?: AbortSignal
+): Promise<AskResponse> {
+  signal?.throwIfAborted();
   const reviewTask = resolveReviewTaskLabel("일반 작업", question);
   const source = buildOntologyQaSource(response);
 
@@ -201,16 +206,20 @@ export async function attachWebOntologyQa(response: AskResponse, question: strin
   }
 
   try {
-    const result = await reviewDocpack(reviewTask, source.text);
+    const result = await reviewDocpack(reviewTask, source.text, signal);
     if (!needsRemediation(result)) {
       return attachOntologyQaResult(response, reviewTask, result, source.documentKeys);
     }
 
+    signal?.throwIfAborted();
     const remediated = applyOntologyQaRemediation(response, reviewTask, result);
     const remediatedSource = buildOntologyQaSource(remediated);
-    const rereviewed = await reviewDocpack(reviewTask, remediatedSource.text);
+    const rereviewed = await reviewDocpack(reviewTask, remediatedSource.text, signal);
     return attachOntologyQaResult(remediated, reviewTask, rereviewed, remediatedSource.documentKeys);
   } catch (error) {
+    if (signal?.aborted || (error instanceof Error && error.name === "AbortError")) {
+      throw error;
+    }
     log.warn("ontology QA failed", {
       event: ONTOLOGY_QA_FAILURE_CODE,
       errorCode: ONTOLOGY_QA_FAILURE_CODE,

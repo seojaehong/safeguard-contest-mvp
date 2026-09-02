@@ -40,6 +40,19 @@ describe("spreadsheet delimited cell safety", () => {
     expect(source).not.toContain("function escapeCell");
   });
 
+  it("forces text cells in the special-layout legacy XLS branch", () => {
+    const source = fs.readFileSync(
+      path.join(process.cwd(), "components", "WorkpackEditor.tsx"),
+      "utf8"
+    );
+    const specialLayoutBranch = source.slice(
+      source.indexOf('if (profile.layout === "risk"'),
+      source.indexOf("const grouped = rows.reduce")
+    );
+
+    expect(specialLayoutBranch).toContain('th, td { mso-number-format:"\\\\@"; }');
+  });
+
   it("routes orchestration smoke CSV cells through the shared encoder", () => {
     const source = fs.readFileSync(
       path.join(process.cwd(), "scripts", "prod_orchestration_download_smoke.mjs"),

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import inspect
 import sys
 import unittest
 from pathlib import Path
@@ -29,6 +30,13 @@ def load_script(filename: str) -> ModuleType:
 
 
 class ParseDownloadSafetyFormsBudgetTest(unittest.TestCase):
+    def test_structured_archives_are_preflighted_before_parser_initialization(self) -> None:
+        parser = load_script("parse_download_safety_forms.py")
+
+        self.assertNotIn("zipfile.ZipFile(path)", inspect.getsource(parser.read_hwpx))
+        self.assertNotIn("zipfile.ZipFile(path)", inspect.getsource(parser.read_zip_listing))
+        self.assertIn("open_preflighted_archive(path)", inspect.getsource(parser.read_xlsx))
+
     def test_pdf_replacement_is_rejected_against_admitted_digest(self) -> None:
         parser = load_script("parse_download_safety_forms.py")
         with TemporaryDirectory() as temporary_directory:
@@ -101,6 +109,14 @@ class ParseDownloadSafetyFormsBudgetTest(unittest.TestCase):
 
 
 class PrepareSupabaseSafetyIngestionBudgetTest(unittest.TestCase):
+    def test_structured_archives_are_preflighted_before_parser_initialization(self) -> None:
+        preparer = load_script("prepare_supabase_safety_ingestion.py")
+
+        self.assertNotIn("zipfile.ZipFile(path)", inspect.getsource(preparer.read_hwpx_records))
+        self.assertNotIn("zipfile.ZipFile(path)", inspect.getsource(preparer.read_zip_records))
+        self.assertNotIn("zipfile.ZipFile(path)", inspect.getsource(preparer.read_pptx_records))
+        self.assertIn("open_preflighted_archive(path)", inspect.getsource(preparer.read_xlsx_records))
+
     def test_pdf_replacement_is_rejected_against_candidate_digest(self) -> None:
         preparer = load_script("prepare_supabase_safety_ingestion.py")
         with TemporaryDirectory() as temporary_directory:

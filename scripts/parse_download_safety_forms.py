@@ -7,7 +7,6 @@ import json
 import re
 import sys
 import time
-import zipfile
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,7 +18,7 @@ SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from archive_safety import BoundedZipReader
+from archive_safety import BoundedZipReader, open_preflighted_archive, open_preflighted_zip
 from parser_safety import ParserBudget, ParserBudgetError, ParserLimits
 from pdf_parser_worker import hash_pdf_file_bounded, parse_pdf_file_bounded
 
@@ -198,8 +197,10 @@ def read_pdf(
 def read_hwpx(path: Path, budget: ParserBudget) -> tuple[str, int, int]:
     texts: list[str] = []
     image_count = 0
-    with zipfile.ZipFile(path) as archive:
+    with open_preflighted_zip(path) as (archive, declared_member_count):
         bounded_archive = BoundedZipReader(archive)
+        if len(bounded_archive.infos) != declared_member_count:
+            raise RuntimeError("archive member count changed after preflight")
         names = [info.filename for info in bounded_archive.infos]
         for info in bounded_archive.infos:
             budget.check_elapsed()
@@ -224,32 +225,33 @@ def read_hwpx(path: Path, budget: ParserBudget) -> tuple[str, int, int]:
 
 
 def read_xlsx(path: Path, max_rows: int, budget: ParserBudget) -> tuple[str, int]:
-    workbook = load_workbook(path, read_only=True, data_only=True)
-    lines: list[str] = []
-    try:
-        for sheet_name in workbook.sheetnames:
-            budget.start_sheet()
-            sheet = workbook[sheet_name]
-            budget.consume_text(sheet_name)
-            lines.append(f"[sheet] {sheet_name}")
-            for index, row in enumerate(sheet.iter_rows(values_only=True), start=1):
-                if index > max_rows:
-                    break
-                budget.consume_row(len(row))
-                values: list[str] = []
-                for cell in row:
-                    if cell is None:
-                        continue
-                    raw_value = str(cell)
-                    budget.consume_text(raw_value)
-                    value = compact_text(raw_value, 160)
-                    if value:
-                        values.append(value)
-                if values:
-                    lines.append(" | ".join(values))
-        return "\n".join(lines), len(workbook.sheetnames)
-    finally:
-        workbook.close()
+    with open_preflighted_archive(path) as (archive_file, _):
+        workbook = load_workbook(archive_file, read_only=True, data_only=True)
+        lines: list[str] = []
+        try:
+            for sheet_name in workbook.sheetnames:
+                budget.start_sheet()
+                sheet = workbook[sheet_name]
+                budget.consume_text(sheet_name)
+                lines.append(f"[sheet] {sheet_name}")
+                for index, row in enumerate(sheet.iter_rows(values_only=True), start=1):
+                    if index > max_rows:
+                        break
+                    budget.consume_row(len(row))
+                    values: list[str] = []
+                    for cell in row:
+                        if cell is None:
+                            continue
+                        raw_value = str(cell)
+                        budget.consume_text(raw_value)
+                        value = compact_text(raw_value, 160)
+                        if value:
+                            values.append(value)
+                    if values:
+                        lines.append(" | ".join(values))
+            return "\n".join(lines), len(workbook.sheetnames)
+        finally:
+            workbook.close()
 
 
 def read_csv_text(path: Path, max_rows: int, budget: ParserBudget) -> tuple[str, str]:
@@ -273,8 +275,10 @@ def read_csv_text(path: Path, max_rows: int, budget: ParserBudget) -> tuple[str,
 
 
 def read_zip_listing(path: Path, budget: ParserBudget) -> tuple[str, int]:
-    with zipfile.ZipFile(path) as archive:
+    with open_preflighted_zip(path) as (archive, declared_member_count):
         names = [info.filename for info in BoundedZipReader(archive).infos]
+        if len(names) != declared_member_count:
+            raise RuntimeError("archive member count changed after preflight")
     for name in names:
         budget.consume_text(name)
     return "\n".join(names), len(names)

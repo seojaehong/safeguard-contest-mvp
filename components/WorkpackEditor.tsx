@@ -1860,6 +1860,7 @@ function buildExcelHtml(
     ${formCss("18px")}
     body { background: #ffffff; }
     .safety-form-page { box-shadow: none; }
+    th, td { mso-number-format:"\\@"; }
   </style>
 </head>
 <body>
