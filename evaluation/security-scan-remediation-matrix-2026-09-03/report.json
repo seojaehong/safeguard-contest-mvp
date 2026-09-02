@@ -1,14 +1,19 @@
 {
   "schemaVersion": "safeclaw-security-scan-remediation-matrix/v1",
-  "generatedAt": "2026-09-03T04:53:00+09:00",
+  "generatedAt": "2026-09-03T05:47:58+09:00",
   "verdict": "PASS_APPROVAL_FREE_SECURITY_REMEDIATIONS_DATABASE_GATES_REMAIN",
   "scan": {
     "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
-    "immutableBaselineRevision": "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
-    "baselineFindingCount": 17,
-    "baselineMediumCount": 5,
-    "baselineLowCount": 12,
-    "baselineArtifactsModified": false
+    "targetRevision": "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
+    "followUpFindingCount": 17,
+    "followUpMediumCount": 5,
+    "followUpLowCount": 12,
+    "followUpDeferredCandidateCount": 1,
+    "canonicalArtifactsModified": false,
+    "historicalBaseline": {
+      "findingCount": 18,
+      "preserved": true
+    }
   },
   "currentState": {
     "baseProductionCommit": "3f2fce7dec48f55c882e1f31c0a621e9232d8054",
@@ -16,7 +21,9 @@
     "approvalFreeSourceMitigatedCount": 4,
     "approvalGatedDatabaseFindingCount": 13,
     "postScanDependencyAdvisoryFixedCount": 1,
-    "liveDeploymentPending": true
+    "mergedCommit": "0127b37db3d3960dda73cba6b98d24c96c060ab6",
+    "productionCommit": "0127b37db3d3960dda73cba6b98d24c96c060ab6",
+    "liveDeploymentPending": false
   },
   "findings": [
     {
@@ -175,7 +182,18 @@
       "staticPagesGenerated": 29
     },
     "dependencyTree": "fast-uri@3.1.6 overridden under ajv@8.20.0",
-    "remoteCi": "PENDING"
+    "remoteCi": {
+      "status": "PASS",
+      "runId": 33679491613,
+      "headSha": "0127b37db3d3960dda73cba6b98d24c96c060ab6"
+    },
+    "productionBuild": {
+      "status": "PASS",
+      "commitSha": "0127b37db3d3960dda73cba6b98d24c96c060ab6",
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-4has91llo-seojaehongs-projects.vercel.app"
+    }
   },
   "mutationBoundary": {
     "dbSchemaMutationPerformed": false,
@@ -189,6 +207,7 @@
   "remainingBoundaries": {
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "databaseSecurityMigrationApprovalRequired": true,
-    "providerPersistenceApprovalRequired": true
+    "providerPersistenceApprovalRequired": true,
+    "securityCompleteClaimAllowed": false
   }
 }
