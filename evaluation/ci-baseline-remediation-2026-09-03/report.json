@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-ci-baseline-remediation/v1",
-  "generatedAt": "2026-09-03T03:31:00+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_REQUIRED_CI_CONTRACTS_REMOTE_PENDING",
+  "generatedAt": "2026-09-03T03:48:00+09:00",
+  "verdict": "PASS_REMOTE_REQUIRED_CI_CONTRACTS",
   "branch": "fix/kosha-source-toctou-20260902",
   "pullRequest": 91,
   "baselineCommit": "18a00472368cfc435e863d081e4a5e70989b6c93",
@@ -85,7 +85,16 @@
       "durationSeconds": 3276.39,
       "remainingFailureClassification": "Seven default-timeout failures and two dirty-tree provenance failures; each class passed after its bounded closure."
     },
-    "remoteCi": "PENDING"
+    "remoteCi": {
+      "status": "PASS",
+      "runId": 33667725326,
+      "jobId": 100373474833,
+      "durationSeconds": 951,
+      "typecheck": "PASS",
+      "fullTestSuite": "PASS",
+      "productionBuild": "PASS"
+    },
+    "vercelPreview": "PASS"
   },
   "mutationBoundary": {
     "dbSchemaMutationPerformed": false,
@@ -99,6 +108,6 @@
   "remainingBoundaries": {
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedOperationsRemainClosed": true,
-    "remoteCiMustPassBeforeIntegration": true
+    "remoteCiMustPassBeforeIntegration": false
   }
 }

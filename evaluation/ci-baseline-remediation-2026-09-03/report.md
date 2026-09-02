@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_REQUIRED_CI_CONTRACTS_REMOTE_PENDING`
+`PASS_REMOTE_REQUIRED_CI_CONTRACTS`
 
 The 16 PR failures were reproduced and separated into one real CSS typography defect, stale delegated-route and copy assertions, a stale frontend audit, a knowledge-promotion test that conflicted with the established authentication-first boundary, shallow CI history, and Windows-only Git-fixture timing.
 
@@ -25,7 +25,9 @@ The 16 PR failures were reproduced and separated into one real CSS typography de
 - Frontend consistency audit: PASS, 0 violations.
 - Next.js 15.5.22 production build: PASS, 29 static pages generated.
 
-The exact full-suite run before the final closures took 3276.39 seconds. It reported nine failures: seven default-timeout failures and two clean-tree provenance failures caused by the then-uncommitted CSS change. Both classes passed after their bounded fixes. Remote GitHub CI remains the final integration gate.
+The exact full-suite run before the final closures took 3276.39 seconds. It reported nine failures: seven default-timeout failures and two clean-tree provenance failures caused by the then-uncommitted CSS change. Both classes passed after their bounded fixes.
+
+GitHub Actions run `33667725326` then passed checkout, dependency installation, Playwright setup, typecheck, the complete test suite, and the production build in 15 minutes 51 seconds. The Vercel preview also passed. The previous 16-failure required-CI baseline is closed for this branch.
 
 ## Boundaries
 
