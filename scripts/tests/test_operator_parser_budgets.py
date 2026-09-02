@@ -9,12 +9,15 @@ from tempfile import TemporaryDirectory
 from types import ModuleType
 from unittest import mock
 
+from openpyxl import Workbook
+
 SCRIPTS_DIR = Path(__file__).resolve().parents[1]
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from parser_safety import ParserBudget, ParserLimits
 from pdf_parser_worker import PdfWorkerLimitError
+from xlsx_parser_worker import XlsxWorkerLimitError
 
 
 def load_script(filename: str) -> ModuleType:
@@ -29,6 +32,15 @@ def load_script(filename: str) -> ModuleType:
     return module
 
 
+def write_workbook(path: Path) -> None:
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.append(["hazard", "control"])
+    sheet.append(["fall", "guardrail"])
+    workbook.save(path)
+    workbook.close()
+
+
 class ParseDownloadSafetyFormsBudgetTest(unittest.TestCase):
     def test_structured_archives_are_preflighted_before_parser_initialization(self) -> None:
         parser = load_script("parse_download_safety_forms.py")
@@ -36,6 +48,23 @@ class ParseDownloadSafetyFormsBudgetTest(unittest.TestCase):
         self.assertNotIn("zipfile.ZipFile(path)", inspect.getsource(parser.read_hwpx))
         self.assertNotIn("zipfile.ZipFile(path)", inspect.getsource(parser.read_zip_listing))
         self.assertIn("open_preflighted_archive(path)", inspect.getsource(parser.read_xlsx))
+        self.assertIn("parse_xlsx_bytes_bounded", inspect.getsource(parser.read_xlsx))
+        self.assertNotIn("load_workbook", inspect.getsource(parser.read_xlsx))
+
+    def test_xlsx_timeout_fails_closed_without_parser_fallback(self) -> None:
+        parser = load_script("parse_download_safety_forms.py")
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "timeout.xlsx"
+            write_workbook(path)
+            with mock.patch.object(
+                parser,
+                "parse_xlsx_bytes_bounded",
+                side_effect=XlsxWorkerLimitError("timeout", "worker deadline exceeded"),
+            ):
+                result = parser.parse_file(path, max_pdf_pages=1, max_sheet_rows=10)
+
+        self.assertFalse(result.ok)
+        self.assertIn("worker deadline exceeded", result.failure_reason or "")
 
     def test_pdf_replacement_is_rejected_against_admitted_digest(self) -> None:
         parser = load_script("parse_download_safety_forms.py")
@@ -116,6 +145,28 @@ class PrepareSupabaseSafetyIngestionBudgetTest(unittest.TestCase):
         self.assertNotIn("zipfile.ZipFile(path)", inspect.getsource(preparer.read_zip_records))
         self.assertNotIn("zipfile.ZipFile(path)", inspect.getsource(preparer.read_pptx_records))
         self.assertIn("open_preflighted_archive(path)", inspect.getsource(preparer.read_xlsx_records))
+        self.assertIn("parse_xlsx_bytes_bounded", inspect.getsource(preparer.read_xlsx_records))
+        self.assertNotIn("load_workbook", inspect.getsource(preparer.read_xlsx_records))
+
+    def test_xlsx_timeout_returns_no_ingestion_records(self) -> None:
+        preparer = load_script("prepare_supabase_safety_ingestion.py")
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "timeout.xlsx"
+            write_workbook(path)
+            with mock.patch.object(
+                preparer,
+                "parse_xlsx_bytes_bounded",
+                side_effect=XlsxWorkerLimitError("timeout", "worker deadline exceeded"),
+            ):
+                records, parser_name, failure = preparer.read_xlsx_records(
+                    path,
+                    10,
+                    ParserBudget(),
+                )
+
+        self.assertEqual(records, [])
+        self.assertEqual(parser_name, "openpyxl-worker")
+        self.assertIn("worker deadline exceeded", failure or "")
 
     def test_pdf_replacement_is_rejected_against_candidate_digest(self) -> None:
         preparer = load_script("prepare_supabase_safety_ingestion.py")
