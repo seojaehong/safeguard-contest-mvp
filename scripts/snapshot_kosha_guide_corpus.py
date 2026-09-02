@@ -136,6 +136,8 @@ class LocalPdfEntry:
     crc32: str | None
     zip_member_name: str | None = None
     direct_path: Path | None = None
+    source_file_size: int | None = None
+    source_file_sha256: str | None = None
 
     @property
     def key(self) -> str:
@@ -148,6 +150,10 @@ class ReviewedOcrCandidate:
     attestation_sha256: str
     payload: dict[str, object]
     item_id: str
+
+
+class SourceIdentityError(RuntimeError):
+    """Raised when bytes no longer match the captured source identity."""
 
 
 def _sha256_bytes(value: bytes) -> str:
@@ -682,9 +688,80 @@ def _inventory_payload(
     }
 
 
+def _bind_entries_to_source_identity(
+    entries: Sequence[LocalPdfEntry],
+    source_identity: dict[str, object],
+) -> list[LocalPdfEntry]:
+    file_rows = source_identity.get("files")
+    if not isinstance(file_rows, list):
+        raise SourceIdentityError("source identity files are missing")
+    identities: dict[str, tuple[int, str]] = {}
+    for row in file_rows:
+        if not isinstance(row, dict):
+            raise SourceIdentityError("source identity file row is invalid")
+        name = row.get("name")
+        size = row.get("size")
+        digest = row.get("sha256")
+        if not isinstance(name, str) or not isinstance(size, int) or not isinstance(digest, str):
+            raise SourceIdentityError("source identity file descriptor is invalid")
+        identities[name] = (size, digest)
+
+    bound: list[LocalPdfEntry] = []
+    for entry in entries:
+        source_name = entry.archive_name or (entry.direct_path.name if entry.direct_path else None)
+        identity = identities.get(source_name or "")
+        if identity is None:
+            raise SourceIdentityError(f"source identity is missing for entry: {entry.key}")
+        bound.append(
+            LocalPdfEntry(
+                archive_path=entry.archive_path,
+                archive_name=entry.archive_name,
+                member_name=entry.member_name,
+                category=entry.category,
+                file_size=entry.file_size,
+                compressed_size=entry.compressed_size,
+                crc32=entry.crc32,
+                zip_member_name=entry.zip_member_name,
+                direct_path=entry.direct_path,
+                source_file_size=identity[0],
+                source_file_sha256=identity[1],
+            )
+        )
+    return bound
+
+
+@contextlib.contextmanager
+def _open_identity_bound_archive(entry: LocalPdfEntry) -> Iterator[zipfile.ZipFile]:
+    if entry.archive_path is None:
+        raise SourceIdentityError(f"entry has no archive source: {entry.key}")
+    if entry.source_file_size is None or entry.source_file_sha256 is None:
+        raise SourceIdentityError(f"entry has no bound source identity: {entry.key}")
+
+    digest = hashlib.sha256()
+    copied = 0
+    with entry.archive_path.open("rb") as source_file:
+        with tempfile.SpooledTemporaryFile(max_size=8 * 1024 * 1024, mode="w+b") as snapshot:
+            for block in iter(lambda: source_file.read(1024 * 1024), b""):
+                copied += len(block)
+                if copied > entry.source_file_size:
+                    raise SourceIdentityError(f"source archive size changed: {entry.archive_name}")
+                digest.update(block)
+                snapshot.write(block)
+            if copied != entry.source_file_size or digest.hexdigest() != entry.source_file_sha256:
+                raise SourceIdentityError(f"source archive identity changed: {entry.archive_name}")
+            snapshot.seek(0)
+            with zipfile.ZipFile(snapshot) as archive:
+                yield archive
+
+
 def _read_entry_bytes(entry: LocalPdfEntry, archive: zipfile.ZipFile | None = None) -> bytes:
     if entry.direct_path:
-        return entry.direct_path.read_bytes()
+        data = entry.direct_path.read_bytes()
+        if entry.source_file_size is None or entry.source_file_sha256 is None:
+            raise SourceIdentityError(f"entry has no bound source identity: {entry.key}")
+        if len(data) != entry.source_file_size or _sha256_bytes(data) != entry.source_file_sha256:
+            raise SourceIdentityError(f"source PDF identity changed: {entry.member_name}")
+        return data
     if not entry.archive_path:
         raise RuntimeError(f"entry has no readable source: {entry.key}")
     def read_streaming(opened_archive: zipfile.ZipFile) -> bytes:
@@ -1095,7 +1172,7 @@ def _prepare_reviewed_ocr_items(
     entries_by_item_id = {_item_id(entry): entry for entry in entries}
     prepared: dict[str, dict[str, object]] = {}
     open_archives: dict[Path, zipfile.ZipFile] = {}
-    try:
+    with contextlib.ExitStack() as archive_stack:
         for item_id in sorted(candidates):
             candidate = candidates[item_id]
             entry = entries_by_item_id[item_id]
@@ -1103,7 +1180,7 @@ def _prepare_reviewed_ocr_items(
             if entry.archive_path:
                 archive = open_archives.get(entry.archive_path)
                 if archive is None:
-                    archive = zipfile.ZipFile(entry.archive_path)
+                    archive = archive_stack.enter_context(_open_identity_bound_archive(entry))
                     open_archives[entry.archive_path] = archive
             pdf_bytes = _read_entry_bytes(entry, archive)
             native_item, _native_failure = _build_item(
@@ -1120,9 +1197,6 @@ def _prepare_reviewed_ocr_items(
                 review_hmac_key=review_hmac_key,
                 expected_generator_sha256=expected_generator_sha256,
             )
-    finally:
-        for archive in open_archives.values():
-            archive.close()
     return prepared
 
 
@@ -1808,6 +1882,7 @@ def recover_corpus(
     entries, source_files, scan_stats = _discover_entries(source.resolve(), effective_limits)
     provenance = _load_provenance(provenance_path.resolve() if provenance_path else None)
     source_identity = _source_identity(source_files, entries, scan_stats)
+    entries = _bind_entries_to_source_identity(entries, source_identity)
     if category:
         entries = [entry for entry in entries if entry.category == category]
     if state:
@@ -1921,7 +1996,7 @@ def recover_corpus(
     raw_first, text_first = _load_dedupe_maps(stage_dir / "items.jsonl")
     processed_this_run = 0
     open_archives: dict[Path, zipfile.ZipFile] = {}
-    try:
+    with contextlib.ExitStack() as archive_stack:
         for pending_index, entry in enumerate(pending, start=1):
             prepared_item = prepared_reviewed_ocr_items.get(entry.key)
             if prepared_item is not None:
@@ -1933,10 +2008,12 @@ def recover_corpus(
                     if entry.archive_path:
                         archive = open_archives.get(entry.archive_path)
                         if archive is None:
-                            archive = zipfile.ZipFile(entry.archive_path)
+                            archive = archive_stack.enter_context(_open_identity_bound_archive(entry))
                             open_archives[entry.archive_path] = archive
                     data = _read_entry_bytes(entry, archive)
                     item, failure = _build_item(entry, data, provenance, effective_limits)
+                except SourceIdentityError:
+                    raise
                 except Exception as exc:
                     item_id = _item_id(entry)
                     item = {
@@ -1991,9 +2068,6 @@ def recover_corpus(
             processed_this_run += 1
             if progress:
                 progress(pending_index, len(pending), entry.key)
-    finally:
-        for archive in open_archives.values():
-            archive.close()
     if len(completed_source_keys) < len(entries):
         checkpoint_output = _file_descriptor(stage_dir / "checkpoint.json")
         return {

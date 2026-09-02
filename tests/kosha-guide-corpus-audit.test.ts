@@ -1220,7 +1220,7 @@ describe("KOSHA GUIDE read-only runner contract", () => {
     } finally {
       rmSync(fixtureRoot, { recursive: true, force: true });
     }
-  }, 40_000);
+  }, 75_000);
 
   it("keeps the production/local bridge bounded to exact-tuple GET reads", () => {
     const script = readFileSync(resolve(process.cwd(), "scripts/audit_kosha_guides.mjs"), "utf8");

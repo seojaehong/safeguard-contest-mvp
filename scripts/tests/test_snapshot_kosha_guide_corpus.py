@@ -1503,6 +1503,75 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
 
             self.assertFalse((output_dir / "current.json").exists())
 
+    def test_direct_pdf_read_fails_closed_after_identity_capture(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "G-1-2025 body.pdf"
+            source.write_bytes(build_pdf_bytes(["original body"]))
+            entries, source_files, scan_stats = snapshot_kosha_guide_corpus._discover_entries(source)
+            identity = snapshot_kosha_guide_corpus._source_identity(
+                source_files,
+                entries,
+                scan_stats,
+            )
+            bound_entry = snapshot_kosha_guide_corpus._bind_entries_to_source_identity(
+                entries,
+                identity,
+            )[0]
+
+            source.write_bytes(build_pdf_bytes(["replacement body"]))
+
+            with self.assertRaisesRegex(
+                snapshot_kosha_guide_corpus.SourceIdentityError,
+                "source PDF identity changed",
+            ):
+                snapshot_kosha_guide_corpus._read_entry_bytes(bound_entry)
+
+    def test_zip_read_uses_identity_bound_snapshot(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            original_pdf = build_pdf_bytes(["original body"])
+            source = self.write_zip(root, {"G-1-2025 body.pdf": original_pdf})
+            entries, source_files, scan_stats = snapshot_kosha_guide_corpus._discover_entries(source)
+            identity = snapshot_kosha_guide_corpus._source_identity(
+                source_files,
+                entries,
+                scan_stats,
+            )
+            bound_entry = snapshot_kosha_guide_corpus._bind_entries_to_source_identity(
+                entries,
+                identity,
+            )[0]
+
+            with snapshot_kosha_guide_corpus._open_identity_bound_archive(bound_entry) as archive:
+                self.write_zip(root, {"G-1-2025 body.pdf": build_pdf_bytes(["replacement body"])})
+                actual = snapshot_kosha_guide_corpus._read_entry_bytes(bound_entry, archive)
+
+            self.assertEqual(actual, original_pdf)
+
+    def test_zip_open_fails_closed_after_identity_capture(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(root, {"G-1-2025 body.pdf": build_pdf_bytes(["original body"])})
+            entries, source_files, scan_stats = snapshot_kosha_guide_corpus._discover_entries(source)
+            identity = snapshot_kosha_guide_corpus._source_identity(
+                source_files,
+                entries,
+                scan_stats,
+            )
+            bound_entry = snapshot_kosha_guide_corpus._bind_entries_to_source_identity(
+                entries,
+                identity,
+            )[0]
+            self.write_zip(root, {"G-1-2025 body.pdf": build_pdf_bytes(["replacement body"])})
+
+            with self.assertRaisesRegex(
+                snapshot_kosha_guide_corpus.SourceIdentityError,
+                "source archive (?:size|identity) changed",
+            ):
+                with snapshot_kosha_guide_corpus._open_identity_bound_archive(bound_entry):
+                    self.fail("changed archive must not be exposed to the parser")
+
     def test_resume_truncates_only_uncheckpointed_tail_after_prefix_validation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
