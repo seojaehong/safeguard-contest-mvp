@@ -1,0 +1,194 @@
+{
+  "schemaVersion": "safeclaw-security-scan-remediation-matrix/v1",
+  "generatedAt": "2026-09-03T04:53:00+09:00",
+  "verdict": "PASS_APPROVAL_FREE_SECURITY_REMEDIATIONS_DATABASE_GATES_REMAIN",
+  "scan": {
+    "scanId": "8fe9c06a-018c-446f-aa98-1b37df95287a",
+    "immutableBaselineRevision": "f0c8a7be02becd53c21fb80842cf23c571f22b1f",
+    "baselineFindingCount": 17,
+    "baselineMediumCount": 5,
+    "baselineLowCount": 12,
+    "baselineArtifactsModified": false
+  },
+  "currentState": {
+    "baseProductionCommit": "3f2fce7dec48f55c882e1f31c0a621e9232d8054",
+    "sourceCommit": "ea1d961077f2f6a295ad360c6a82a2605b7cc917",
+    "approvalFreeSourceMitigatedCount": 4,
+    "approvalGatedDatabaseFindingCount": 13,
+    "postScanDependencyAdvisoryFixedCount": 1,
+    "liveDeploymentPending": true
+  },
+  "findings": [
+    {
+      "findingId": "csf_e45a58b22598698e0bf4de16",
+      "severity": "medium",
+      "title": "Public legal search can amplify unbounded provider work",
+      "status": "source_mitigated",
+      "evidence": [
+        "app/api/search/route.ts",
+        "lib/public-search-operation.ts",
+        "lib/public-search-admission.ts",
+        "tests/public-search-work-budget.test.ts"
+      ]
+    },
+    {
+      "findingId": "csf_249dcc0898d9d68ffe436ac9",
+      "severity": "medium",
+      "title": "Public safety-reference search lacks request work budgets",
+      "status": "source_mitigated",
+      "evidence": [
+        "app/api/safety-reference/search/route.ts",
+        "lib/public-search-admission.ts",
+        "tests/public-search-work-budget.test.ts"
+      ]
+    },
+    {
+      "findingId": "csf_a034e84fe6f589ab32bc4177",
+      "severity": "medium",
+      "title": "Replayed dispatch-log requests create duplicate audit records",
+      "status": "source_mitigated",
+      "evidence": [
+        "app/api/dispatch-logs/route.ts",
+        "tests/dispatch-logs-tenant-boundary.test.ts"
+      ],
+      "boundary": "Client-supplied provider results are rejected until authoritative server receipt persistence is approved."
+    },
+    {
+      "findingId": "csf_f30faad248ef517b894c8946",
+      "severity": "low",
+      "title": "MCP document generation accepts unbounded authenticated inputs",
+      "status": "source_mitigated",
+      "evidence": [
+        "app/api/mcp/[transport]/implementation.ts",
+        "lib/mcp-work-budget.ts",
+        "tests/mcp-work-budget.test.ts"
+      ]
+    },
+    {
+      "findingId": "csf_ee41220d108de44c10d9b6fb",
+      "severity": "medium",
+      "title": "Documents table is exposed without row-level security",
+      "status": "approval_gated_database_change"
+    },
+    {
+      "findingId": "csf_880b3629ed4b64a56e910b0f",
+      "severity": "medium",
+      "title": "NULL dispatch-log tenants bypass row-level authorization",
+      "status": "approval_gated_database_change"
+    },
+    {
+      "findingId": "csf_9718d797602acba430a08a2c",
+      "severity": "low",
+      "title": "Daily entries can reference another tenant's site or workpack",
+      "status": "approval_gated_database_change"
+    },
+    {
+      "findingId": "csf_37c05b7826908c646c7358fc",
+      "severity": "low",
+      "title": "Education records can bind cross-tenant work objects",
+      "status": "approval_gated_database_change"
+    },
+    {
+      "findingId": "csf_859821028dcfe217e2f9c8bb",
+      "severity": "low",
+      "title": "Improvement photos can bind cross-tenant related objects",
+      "status": "approval_gated_database_change"
+    },
+    {
+      "findingId": "csf_a473fbdc192153aa1bfe7e9a",
+      "severity": "low",
+      "title": "Knowledge events can forge cross-tenant provenance links",
+      "status": "approval_gated_database_change"
+    },
+    {
+      "findingId": "csf_8afd1df3d2ec190e0d19a49a",
+      "severity": "low",
+      "title": "Knowledge regeneration runs can forge cross-tenant relationships",
+      "status": "approval_gated_database_change"
+    },
+    {
+      "findingId": "csf_86e7a213323df30741456ca9",
+      "severity": "low",
+      "title": "Query logs table is exposed without row-level security",
+      "status": "approval_gated_database_change"
+    },
+    {
+      "findingId": "csf_4acfec1a2b24d40f7eecfbc4",
+      "severity": "low",
+      "title": "Read confirmations can bind cross-tenant recipient objects",
+      "status": "approval_gated_database_change"
+    },
+    {
+      "findingId": "csf_3ee601f8b3e9c94e52a05522",
+      "severity": "low",
+      "title": "Share sessions can bind another tenant's site or workpack",
+      "status": "approval_gated_database_change"
+    },
+    {
+      "findingId": "csf_71b78106bcb87a7b3057544a",
+      "severity": "low",
+      "title": "Worker rows can reference another tenant's site",
+      "status": "approval_gated_database_change"
+    },
+    {
+      "findingId": "csf_eac496c48e6c6cd8f0871f4a",
+      "severity": "low",
+      "title": "Workpack improvements can bind cross-tenant workpacks or sites",
+      "status": "approval_gated_database_change"
+    },
+    {
+      "findingId": "csf_f2c907fd607896c985c91ef3",
+      "severity": "low",
+      "title": "Workpacks can reference another tenant's site",
+      "status": "approval_gated_database_change"
+    }
+  ],
+  "postScanDependencyRemediation": {
+    "package": "fast-uri",
+    "previousVersion": "3.1.5",
+    "fixedVersion": "3.1.6",
+    "advisories": [
+      "GHSA-5jgf-p345-68v8",
+      "GHSA-f65p-4m7j-42xc",
+      "GHSA-fph4-wmhf-6fwf",
+      "GHSA-jqff-g426-hqxp"
+    ],
+    "npmAuditBefore": {
+      "highPackageEntries": 2,
+      "totalPackageEntries": 2
+    },
+    "npmAuditAfter": {
+      "highPackageEntries": 0,
+      "totalPackageEntries": 0
+    }
+  },
+  "verification": {
+    "focusedSecurityTests": {
+      "files": 3,
+      "tests": 35,
+      "status": "PASS"
+    },
+    "typecheck": "PASS",
+    "productionBuild": {
+      "status": "PASS",
+      "nextVersion": "15.5.22",
+      "staticPagesGenerated": 29
+    },
+    "dependencyTree": "fast-uri@3.1.6 overridden under ajv@8.20.0",
+    "remoteCi": "PENDING"
+  },
+  "mutationBoundary": {
+    "dbSchemaMutationPerformed": false,
+    "dbDataMutationPerformed": false,
+    "providerDispatchPerformed": false,
+    "shareSessionCreated": false,
+    "embeddingOrVectorMutationPerformed": false,
+    "wikiPublicationPerformed": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "databaseSecurityMigrationApprovalRequired": true,
+    "providerPersistenceApprovalRequired": true
+  }
+}
