@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "safeclaw-security-kosha-source-toctou-remediation/v1",
+  "generatedAt": "2026-09-02T23:52:09.7042901+09:00",
+  "verdict": "PASS_CURRENT_SOURCE_KOSHA_IDENTITY_BOUND_PARSING_LIVE_PENDING",
+  "sourceHead": "a85a64e6b3415870e458c09171703a2639c6527f",
+  "productionCommit": "de6d8db145a8ccdd16f4bd7930b74919a0173164",
+  "sourceHeadMatchesProduction": false,
+  "finding": {
+    "findingId": "csf_731dfce06fea0669acffcc3e",
+    "occurrenceId": "occ_f40d03d11a2b0135137e3a45",
+    "ruleId": "integrity.kosha-source-toctou",
+    "title": "KOSHA corpus bytes can change after identity capture",
+    "sealedFindingReclassified": false,
+    "freshSecurityRescanRequired": true
+  },
+  "implementation": {
+    "directPdfBytesVerifiedAgainstCapturedSizeAndSha256": true,
+    "zipBytesCopiedToPrivateSpoolWhileHashing": true,
+    "zipParserReadsOnlyVerifiedSpool": true,
+    "identityMismatchFailsWholeRun": true,
+    "identityMismatchRecordedAsOrdinaryDocumentFailure": false,
+    "sourceRecheckedBeforePublication": true
+  },
+  "verification": {
+    "pythonCorpusTests": {
+      "command": "python -m unittest scripts.tests.test_snapshot_kosha_guide_corpus",
+      "files": 1,
+      "tests": 61,
+      "passed": 61,
+      "failed": 0,
+      "elapsedSeconds": 124.656
+    },
+    "koshaAuditContract": {
+      "command": "npm.cmd exec -- vitest run tests/kosha-guide-corpus-audit.test.ts --maxWorkers=1 --fileParallelism=false",
+      "files": 1,
+      "tests": 112,
+      "passed": 112,
+      "failed": 0,
+      "elapsedSeconds": 55.79
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    "directTamperedArchiveProbe": {
+      "status": "PASS_FAIL_CLOSED",
+      "processExit": 1,
+      "errorCode": "kosha-local-inventory-failed:1",
+      "auditLogRecorded": true,
+      "providerOrDatabaseWorkObserved": false
+    }
+  },
+  "mutationBoundary": {
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "embeddingGenerated": false,
+    "vectorUploadPerformed": false,
+    "wikiPublished": false,
+    "koshaRegistryMutationPerformed": false
+  },
+  "remainingBoundaries": {
+    "liveAfterDeploymentRequired": true,
+    "freshRepositorySecurityRescanRequired": true,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "approvalGatedDatabaseFindingsPreserved": true,
+    "securityCompleteClaimAllowed": false
+  }
+}
