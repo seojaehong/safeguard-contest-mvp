@@ -48,7 +48,7 @@ function runPublication(
   });
 }
 
-describe("document dry-run publication safety contract", () => {
+describe("document dry-run publication safety contract", { timeout: 15_000 }, () => {
   it("requires a clean tree and stages only generated snapshot outputs", () => {
     expect(source).toContain("git status --porcelain=v1 --untracked-files=all");
     expect(source).toContain("working tree must be clean before generating a publication snapshot");

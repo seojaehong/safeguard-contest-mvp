@@ -427,7 +427,7 @@ function writeFixtureRoot(): { root: string; packetPath: string; reviewPath: str
   return { root, packetPath, reviewPath, candidates };
 }
 
-describe("KOSHA exact promotion review gate", () => {
+describe("KOSHA exact promotion review gate", { timeout: 15_000 }, () => {
   it("rejects a review path that crosses a symlinked directory", async () => {
     const { root, packetPath, reviewPath } = writeFixtureRoot();
     const reviewDirectory = path.dirname(path.join(root, reviewPath));

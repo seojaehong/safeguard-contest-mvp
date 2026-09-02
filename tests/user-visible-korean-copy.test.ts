@@ -138,8 +138,8 @@ describe("user-visible Korean copy contract", () => {
   });
 
   it("uses positive Korean labels on ontology and knowledge surfaces", () => {
-    const ontologyPage = read("app/ontology/page.tsx");
-    for (const label of ["운영 온톨로지", "작업과 근거의 연결.", "그래프를 사용할 수 없음"]) {
+    const ontologyPage = `${read("app/ontology/page.tsx")}\n${read("app/ontology/OntologyLivePage.tsx")}`;
+    for (const label of ["운영 온톨로지", "작업과 근거의 연결.", "내장 검증자료를 표시합니다."]) {
       expect(ontologyPage).toContain(label);
     }
 

@@ -1,13 +1,13 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-31T18:03:43.634Z",
-  "sourceSha": "b983f9f8b7fe9b3aa57b4701bc782fd3799a421c",
-  "sourceIdentity": "62cf14671bd3e23be7436ece2f656fa7a33fff264a78468887b5000afd2f9bcd",
-  "status": "fail",
+  "generatedAt": "2026-09-02T16:46:03.941Z",
+  "sourceSha": "18a00472368cfc435e863d081e4a5e70989b6c93",
+  "sourceIdentity": "6cec06e738f502bcd3d2cc6b086081a8da8c338a4bd1341d74d0d68df569275b",
+  "status": "pass",
   "counts": {
     "pageFiles": 33,
     "componentFiles": 24,
-    "cssLines": 24830,
+    "cssLines": 24912,
     "importantDeclarations": 0
   },
   "coverage": {
@@ -85,19 +85,6 @@
     "unexpectedRoutes": []
   },
   "coverageIssues": 0,
-  "violationCount": 2,
-  "violations": [
-    {
-      "rule": "line-height-tier",
-      "file": "app/globals.css",
-      "line": 15979,
-      "value": "1"
-    },
-    {
-      "rule": "typography-tuple",
-      "file": "app/globals.css",
-      "line": 15979,
-      "value": ".safeclaw-share-recipient-documents-summary::after => body: {\"content\":\"\\\"+\\\"\",\"display\":\"grid\",\"width\":\"32px\",\"height\":\"32px\",\"place-items\":\"center\",\"justify-self\":\"end\",\"border\":\"1px solid var(--workspace-rule)\",\"border-radius\":\"var(--radius-control)\",\"background\":\"var(--workspace-surface-2)\",\"color\":\"var(--workspace-muted)\",\"font-size\":\"var(--text-body)\",\"font-weight\":\"700\",\"line-height\":\"1\"}"
-    }
-  ]
+  "violationCount": 0,
+  "violations": []
 }

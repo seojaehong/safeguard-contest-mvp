@@ -16014,7 +16014,9 @@ body:has(.safeclaw-landing) :is(
   min-width: 0;
   margin: 0;
   overflow: hidden;
+  font-family: var(--font-hud);
   font-size: var(--text-hud);
+  font-weight: 700;
   line-height: var(--leading-hud);
   letter-spacing: var(--tracking-hud);
   text-overflow: ellipsis;
@@ -16063,9 +16065,6 @@ body:has(.safeclaw-landing) :is(
   border-radius: var(--radius-control);
   background: var(--workspace-surface-2);
   color: var(--workspace-muted);
-  font-size: var(--text-body);
-  font-weight: 700;
-  line-height: 1;
 }
 
 .safeclaw-share-recipient-card-documents[open] > .safeclaw-share-recipient-documents-summary::after {
