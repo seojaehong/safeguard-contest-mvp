@@ -1,10 +1,12 @@
 {
   "schemaVersion": "safeclaw-security-public-page-cancellation-remediation/v1",
   "generatedAt": "2026-09-03T00:06:00.3479121+09:00",
-  "verdict": "PASS_CURRENT_SOURCE_PUBLIC_PAGE_DISCONNECT_CANCELLATION_LIVE_PENDING",
+  "verdict": "PASS_LIVE_PRODUCTION_PUBLIC_PAGE_DISCONNECT_CANCELLATION",
   "sourceHead": "8be2c6152b40dbda93b00d5dc57c19fc37022c33",
-  "productionCommit": "d110403bd1aa8e79927f9746c0f1a994fd2bdeaa",
+  "productionCommit": "e9b7c3c6a64aed27fa71f1c3f6b352b627b41426",
   "sourceHeadMatchesProduction": false,
+  "productionIncludesSourceHead": true,
+  "productionDeploymentUrl": "safeguard-contest-2teap8xmx-seojaehongs-projects.vercel.app",
   "findings": [
     {
       "ruleId": "resource-exhaustion.public-ask-page-disconnect",
@@ -51,6 +53,15 @@
       "askNavigationFailure": "net::ERR_ABORTED",
       "searchRequestStarted": true,
       "searchNavigationFailure": "net::ERR_ABORTED"
+    },
+    "liveBrowserDisconnectProbe": {
+      "baseUrl": "https://www.safeclaw.kr",
+      "deployedPageCommit": "e9b7c3c6a64aed27fa71f1c3f6b352b627b41426",
+      "apiRequestsInterceptedBeforeProviderExecution": true,
+      "askRequestStarted": true,
+      "askNavigationFailure": "net::ERR_ABORTED",
+      "searchRequestStarted": true,
+      "searchNavigationFailure": "net::ERR_ABORTED"
     }
   },
   "mutationBoundary": {
@@ -63,7 +74,7 @@
     "koshaRegistryMutationPerformed": false
   },
   "remainingBoundaries": {
-    "liveAfterDeploymentRequired": true,
+    "liveAfterDeploymentRequired": false,
     "freshRepositorySecurityRescanRequired": true,
     "exactSavedShareVerdict": "MISSING_EVIDENCE",
     "approvalGatedDatabaseFindingsPreserved": true,

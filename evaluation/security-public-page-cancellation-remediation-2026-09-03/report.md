@@ -2,9 +2,9 @@
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE_PUBLIC_PAGE_DISCONNECT_CANCELLATION_LIVE_PENDING`
+`PASS_LIVE_PRODUCTION_PUBLIC_PAGE_DISCONNECT_CANCELLATION`
 
-Product commit `8be2c6152b40dbda93b00d5dc57c19fc37022c33` removes the synthetic server-page request boundary from provider-backed Ask and legal-search page loads. Production was still `d110403bd1aa8e79927f9746c0f1a994fd2bdeaa` at verification time, so live closure remains pending.
+Product commit `8be2c6152b40dbda93b00d5dc57c19fc37022c33` removes the synthetic server-page request boundary from provider-backed Ask and legal-search page loads. Production commit `e9b7c3c6a64aed27fa71f1c3f6b352b627b41426` contains the product change, and the deployed page bundles reproduce the expected request cancellation.
 
 ## Security behavior
 
@@ -23,7 +23,9 @@ Product commit `8be2c6152b40dbda93b00d5dc57c19fc37022c33` removes the synthetic 
 | Next.js production build | PASS, 29 static pages |
 | Ask navigation disconnect | `/api/ask` started, then `net::ERR_ABORTED` |
 | Search navigation disconnect | `/api/search` started, then `net::ERR_ABORTED` |
+| Live Ask navigation disconnect | Deployed request intercepted before provider execution, then `net::ERR_ABORTED` |
+| Live Search navigation disconnect | Deployed request intercepted before provider execution, then `net::ERR_ABORTED` |
 
 ## Boundaries
 
-This current-source receipt does not rewrite or reclassify a sealed Codex Security scan. Live-after-deployment verification and a fresh whole-repository security scan remain required. No database, provider, Share-session, embedding, vector, Wiki, or KOSHA registry mutation was performed. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
+This receipt does not rewrite or reclassify a sealed Codex Security scan. A fresh whole-repository security scan remains required. The live browser probes intercepted both API requests before provider execution, so no database, provider, Share-session, embedding, vector, Wiki, or KOSHA registry mutation was performed. Exact saved `/share/[sessionId]` remains `MISSING_EVIDENCE`.
