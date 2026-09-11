@@ -22772,6 +22772,31 @@ body:has(.safeclaw-landing) :is(
   --share-primary: #f5c518;
 }
 
+.safeclaw-module-shell .share-panel.workflow-panel strong {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-module-shell .share-panel.workflow-panel :is(
+  .share-status-pill,
+  .share-stage-rail,
+  .share-desktop-status-rail,
+  .share-form-card-head,
+  .channel-card
+) strong {
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+}
+
+.safeclaw-module-shell .share-panel.workflow-panel :is(
+  .share-workflow-header > div:first-child,
+  .message-preview-panel .compact-head
+) > strong {
+  font-size: var(--text-component-title);
+  line-height: var(--leading-component-title);
+}
+
 .safeclaw-module-shell[data-theme="night"] {
   color-scheme: dark;
   background-color: var(--workspace-canvas);

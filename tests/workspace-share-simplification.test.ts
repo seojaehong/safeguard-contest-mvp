@@ -191,6 +191,9 @@ describe("workspace share simplification", () => {
     expect(css).toContain('[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card strong {');
     expect(css).toContain("font-size: var(--text-caption);");
     expect(css).toContain('[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card em {');
+    expect(css).toContain(".safeclaw-module-shell .share-panel.workflow-panel strong {");
+    expect(css).toContain(".message-preview-panel .compact-head");
+    expect(css).toContain("font-size: var(--text-component-title);");
   });
 
   it("separates browser document review, Hermes candidate review, and dispatch history", () => {

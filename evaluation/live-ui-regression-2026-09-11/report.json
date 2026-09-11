@@ -35,6 +35,8 @@
       "statusBackground": "rgb(255, 255, 255)",
       "statusColor": "rgb(23, 25, 29)",
       "channelLabelFontSize": "12px",
+      "messagePreviewHeadingFontSize": "16px",
+      "oversizedShareStrongCount": 0,
       "horizontalOverflow": 0,
       "bodyHeight": 786,
       "viewportHeight": 720,
