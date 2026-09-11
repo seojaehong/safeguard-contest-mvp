@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "safeclaw-live-ui-regression/v1",
+  "generatedAt": "2026-09-11T18:18:00+09:00",
+  "liveBefore": {
+    "productionCommit": "29c74783bb1aeb92e1f1c9ea35ff628307f80b07",
+    "dispatch": {
+      "route": "/dispatch?theme=day",
+      "viewport": { "width": 1280, "height": 720 },
+      "previewBackground": "rgb(15, 16, 17)",
+      "previewColor": "rgb(247, 248, 248)",
+      "statusBackground": "rgb(15, 16, 17)",
+      "statusColor": "rgb(23, 25, 29)",
+      "channelLabelFontSize": "40px",
+      "channelCardWidth": 137,
+      "result": "RED_DAY_THEME_DARK_SURFACE_AND_CLIPPED_CHANNEL_LABELS"
+    },
+    "documents": {
+      "route": "/documents?theme=day",
+      "viewport": { "width": 1280, "height": 720 },
+      "bodyHeight": 720,
+      "horizontalOverflow": 0,
+      "editorClientHeight": 448,
+      "editorScrollHeight": 832,
+      "supportingDocumentsOpen": false,
+      "firstRiskFieldBottom": 680,
+      "result": "PASS_DEFAULT_PAGE_CONTAINMENT_USER_REPORTED_STATE_NOT_REPRODUCED"
+    }
+  },
+  "currentSourceLocalProduction": {
+    "baseUrl": "http://127.0.0.1:3086",
+    "dispatch": {
+      "previewBackground": "rgb(255, 255, 255)",
+      "previewColor": "rgb(23, 25, 29)",
+      "formCardBackgrounds": ["rgb(255, 255, 255)", "rgb(255, 255, 255)", "rgb(255, 255, 255)"],
+      "statusBackground": "rgb(255, 255, 255)",
+      "statusColor": "rgb(23, 25, 29)",
+      "channelLabelFontSize": "12px",
+      "horizontalOverflow": 0,
+      "bodyHeight": 786,
+      "viewportHeight": 720,
+      "result": "PASS_DAY_THEME_READABILITY_AND_BOUNDED_WORKBENCH"
+    }
+  },
+  "verification": {
+    "sourceContractTestFiles": 2,
+    "sourceContractTestsPassed": 23,
+    "typecheck": "PASS",
+    "build": "PASS",
+    "nextVersion": "15.5.25",
+    "staticPages": 29
+  },
+  "boundaries": {
+    "exactSavedShareVerdict": "MISSING_EVIDENCE",
+    "userReportedDocumentsStateReproduced": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false
+  },
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SHARE_VISUAL_RECOVERY_LIVE_PENDING"
+}

@@ -177,6 +177,22 @@ describe("workspace share simplification", () => {
     expect(wideDesktopBlock).toContain("max-height: calc(100vh - 160px);");
   });
 
+  it("keeps the standalone day share workbench on readable light surfaces", () => {
+    const css = readFileSync(join(root, "app", "globals.css"), "utf8").replace(/\r\n/gu, "\n");
+    const moduleDayShareBlock = css.slice(
+      css.indexOf('.safeclaw-module-shell[data-theme="day"] .share-panel.workflow-panel'),
+      css.indexOf('.safeclaw-module-shell[data-theme="night"]', css.indexOf('.safeclaw-module-shell[data-theme="day"] .share-panel.workflow-panel'))
+    );
+
+    expect(moduleDayShareBlock).toContain("--share-surface: #ffffff;");
+    expect(moduleDayShareBlock).toContain("--share-surface-2: #f5f6f8;");
+    expect(moduleDayShareBlock).toContain("--share-ink: #17191d;");
+    expect(moduleDayShareBlock).toContain("--share-muted: #525a66;");
+    expect(css).toContain('[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card strong {');
+    expect(css).toContain("font-size: var(--text-caption);");
+    expect(css).toContain('[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card em {');
+  });
+
   it("separates browser document review, Hermes candidate review, and dispatch history", () => {
     expect(sharePanel).toContain('data-review-propagation-handoff');
     expect(sharePanel).toContain("문서 사람 검토");

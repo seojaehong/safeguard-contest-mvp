@@ -15545,6 +15545,16 @@ body:has(.safeclaw-landing) :is(
     white-space: nowrap;
   }
 
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card strong {
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    letter-spacing: var(--tracking-body);
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card em {
+    display: none;
+  }
+
   .safeclaw-module-shell[data-module-route="/dispatch"] .share-form-card[data-share-owner="channels"] > .command-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -22747,6 +22757,19 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell[data-theme="day"] {
   color-scheme: light;
   background-color: var(--workspace-canvas);
+}
+
+.safeclaw-module-shell[data-theme="day"] .share-panel.workflow-panel {
+  --share-canvas: #fafafb;
+  --share-surface: #ffffff;
+  --share-surface-2: #f5f6f8;
+  --share-surface-3: #eef1f4;
+  --share-line: #e1e5eb;
+  --share-line-strong: #cfd6df;
+  --share-ink: #17191d;
+  --share-muted: #525a66;
+  --share-soft: #303742;
+  --share-primary: #f5c518;
 }
 
 .safeclaw-module-shell[data-theme="night"] {
