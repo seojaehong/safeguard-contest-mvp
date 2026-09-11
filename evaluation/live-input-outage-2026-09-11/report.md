@@ -1,6 +1,6 @@
 # Live Input Outage Recovery
 
-Verdict: `PASS_LIVE_PRODUCTION_INPUT_RECOVERY_MOBILE_STATUS_PATCH_PENDING`
+Verdict: `PASS_LIVE_PRODUCTION_INPUT_RECOVERY`
 
 ## Failure reproduced
 
@@ -17,6 +17,7 @@ Verdict: `PASS_LIVE_PRODUCTION_INPUT_RECOVERY_MOBILE_STATUS_PATCH_PENDING`
 - Local production-mode browser verification accepted input and completed all 12 generated document surfaces.
 - Live production `29c74783` automatically selected template mode, disabled enhanced/full modes, accepted the field input, and reached `안전 문서팩 3종 준비 완료`.
 - The recovery status exists in the live DOM but the mobile density rule hid generic helpers, so a dedicated admission-status class now keeps this operational boundary visible on small screens.
+- Live production `331dbb65` visibly renders the recovery boundary on the compact input surface.
 
 ## Verification
 

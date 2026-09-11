@@ -35,7 +35,7 @@
     "inputAccepted": true,
     "generationCompleted": true,
     "completionText": "안전 문서팩 3종 준비 완료",
-    "mobileAdmissionStatusVisibilityFixPendingDeployment": true
+    "mobileAdmissionStatusVisible": true
   },
   "verification": {
     "focusedTestFiles": 3,
@@ -58,5 +58,5 @@
     "shareSessionCreated": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
-  "verdict": "PASS_LIVE_PRODUCTION_INPUT_RECOVERY_MOBILE_STATUS_PATCH_PENDING"
+  "verdict": "PASS_LIVE_PRODUCTION_INPUT_RECOVERY"
 }

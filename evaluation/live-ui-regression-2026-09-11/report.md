@@ -1,6 +1,6 @@
 # Live UI Regression Recovery
 
-Verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SHARE_VISUAL_RECOVERY_LIVE_PENDING`
+Verdict: `PASS_LIVE_PRODUCTION_SHARE_VISUAL_RECOVERY`
 
 ## Reproduced
 
@@ -13,6 +13,7 @@ Verdict: `PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SHARE_VISUAL_RECOVERY_LIVE_PENDIN
 - The standalone Day module now supplies the same light Share surface variables as the embedded workspace.
 - Standalone desktop channel labels use compact caption typography, repeated per-channel preview-only text is hidden because the shared status surface already exposes that boundary, and module-wide 40px `strong` inheritance is reset inside the compact Share workbench.
 - Local production verification shows white surfaces, dark readable text, 12px channel labels, and zero horizontal overflow.
+- Live production `dc1b2d22` confirms the same surface colors, 12px channel labels, a 20px preview heading, zero oversized Share `strong` elements, and zero horizontal overflow.
 
 ## Documents check
 

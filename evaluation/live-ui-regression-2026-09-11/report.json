@@ -35,13 +35,31 @@
       "statusBackground": "rgb(255, 255, 255)",
       "statusColor": "rgb(23, 25, 29)",
       "channelLabelFontSize": "12px",
-      "messagePreviewHeadingFontSize": "16px",
+      "messagePreviewHeadingFontSize": "20px",
       "oversizedShareStrongCount": 0,
       "horizontalOverflow": 0,
       "bodyHeight": 786,
       "viewportHeight": 720,
       "result": "PASS_DAY_THEME_READABILITY_AND_BOUNDED_WORKBENCH"
     }
+  },
+  "liveAfter": {
+    "productionCommit": "dc1b2d22317d8a69fdc8216e80fc6c2e6bb28183",
+    "deploymentUrl": "safeguard-contest-k53nimpwh-seojaehongs-projects.vercel.app",
+    "route": "/dispatch?theme=day",
+    "viewport": { "width": 1280, "height": 720 },
+    "previewBackground": "rgb(255, 255, 255)",
+    "previewColor": "rgb(23, 25, 29)",
+    "formCardBackgrounds": ["rgb(255, 255, 255)", "rgb(255, 255, 255)", "rgb(255, 255, 255)"],
+    "statusBackground": "rgb(255, 255, 255)",
+    "statusColor": "rgb(23, 25, 29)",
+    "channelLabelFontSize": "12px",
+    "messagePreviewHeadingFontSize": "20px",
+    "oversizedShareStrongCount": 0,
+    "bodyHeight": 786,
+    "viewportHeight": 720,
+    "horizontalOverflow": 0,
+    "result": "PASS_LIVE_PRODUCTION_SHARE_VISUAL_RECOVERY"
   },
   "verification": {
     "sourceContractTestFiles": 2,
@@ -58,5 +76,5 @@
     "providerDispatchCalled": false,
     "shareSessionCreated": false
   },
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_SHARE_VISUAL_RECOVERY_LIVE_PENDING"
+  "verdict": "PASS_LIVE_PRODUCTION_SHARE_VISUAL_RECOVERY"
 }
