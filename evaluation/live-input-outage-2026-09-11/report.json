@@ -1,6 +1,6 @@
 {
   "schemaVersion": "safeclaw-live-input-outage/v1",
-  "generatedAt": "2026-09-11T08:48:00.000Z",
+  "generatedAt": "2026-09-11T18:05:04.9351562+09:00",
   "liveBefore": {
     "baseUrl": "https://www.safeclaw.kr",
     "productionCommit": "f91a8a52593bc740d8e4acb214b9fb21fdf27e28",
@@ -25,12 +25,30 @@
     "generationCompleted": true,
     "generatedDocumentCount": 12
   },
+  "liveAfter": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "productionCommit": "29c74783bb1aeb92e1f1c9ea35ff628307f80b07",
+    "providerAdmissionState": "unavailable",
+    "selectedMode": "template",
+    "enhancedModeDisabled": true,
+    "fullModeDisabled": true,
+    "inputAccepted": true,
+    "generationCompleted": true,
+    "completionText": "안전 문서팩 3종 준비 완료",
+    "mobileAdmissionStatusVisibilityFixPendingDeployment": true
+  },
   "verification": {
     "focusedTestFiles": 3,
     "focusedTestsPassed": 20,
     "typecheck": "PASS",
     "build": "PASS",
-    "staticPages": 29
+    "staticPages": 29,
+    "nextVersion": "15.5.25",
+    "productionDependencyAudit": {
+      "critical": 0,
+      "high": 0,
+      "moderate": 5
+    }
   },
   "boundaries": {
     "distributedAdmissionActivated": false,
@@ -40,5 +58,5 @@
     "shareSessionCreated": false,
     "exactSavedShareVerdict": "MISSING_EVIDENCE"
   },
-  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_INPUT_RECOVERY_LIVE_PENDING"
+  "verdict": "PASS_LIVE_PRODUCTION_INPUT_RECOVERY_MOBILE_STATUS_PATCH_PENDING"
 }

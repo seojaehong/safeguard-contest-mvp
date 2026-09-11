@@ -24540,6 +24540,12 @@ body:has(.safeclaw-landing) :is(
   color: var(--danger);
 }
 
+.command-center-shell.workspace-theme-day .workspace-input-page .input-helper.input-admission-status,
+.command-center-shell.workspace-theme-night .workspace-input-page .input-helper.input-admission-status {
+  display: block;
+  margin-top: var(--space-2);
+}
+
 .command-center-shell.workspace-theme-day .workspace-input-page .composer-submit-button,
 .command-center-shell.workspace-theme-night .workspace-input-page .composer-submit-button {
   font-weight: 700;

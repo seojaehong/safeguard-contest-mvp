@@ -190,6 +190,7 @@ describe("user-visible Korean copy contract", () => {
 
   it("keeps workspace input usable when provider admission is unavailable", () => {
     const workspace = read("components/SafeGuardCommandCenter.tsx");
+    const styles = read("app/globals.css");
 
     expect(workspace).toContain('fetch("/api/export/pdf"');
     expect(workspace).toContain('setProviderAdmissionState(ready ? "ready" : "unavailable")');
@@ -197,6 +198,9 @@ describe("user-visible Korean copy contract", () => {
     expect(workspace).toContain('disabled={busy || (providerAdmissionState === "checking" && aiMode !== "template")}');
     expect(workspace).toContain('disabled={busy || providerAdmissionState !== "ready"}');
     expect(workspace).toContain("현재 빠른 생성 사용 가능 · 강화/풀 AI는 요청 보호 설정 후 사용할 수 있습니다.");
+    expect(workspace).toContain('className="input-helper input-admission-status"');
     expect(workspace).toContain("setInputError(errorMessage)");
+    expect(styles).toContain(".input-helper.input-admission-status");
+    expect(styles).toContain("display: block;");
   });
 });

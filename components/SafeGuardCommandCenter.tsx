@@ -2155,7 +2155,7 @@ export function SafeGuardCommandCenter({
               </button>
             </div>
             {providerAdmissionState !== "ready" ? (
-              <p className="input-helper" role="status">
+              <p className="input-helper input-admission-status" role="status">
                 {providerAdmissionState === "checking"
                   ? "AI 생성 보호 상태를 확인하고 있습니다. 빠른 생성은 바로 사용할 수 있습니다."
                   : "현재 빠른 생성 사용 가능 · 강화/풀 AI는 요청 보호 설정 후 사용할 수 있습니다."}
