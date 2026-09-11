@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "safeclaw-live-input-outage/v1",
+  "generatedAt": "2026-09-11T08:48:00.000Z",
+  "liveBefore": {
+    "baseUrl": "https://www.safeclaw.kr",
+    "productionCommit": "f91a8a52593bc740d8e4acb214b9fb21fdf27e28",
+    "defaultMode": "enhanced",
+    "generationResult": "blocked",
+    "askError": "DISTRIBUTED_RATE_LIMIT_UNAVAILABLE",
+    "weatherStatus": 503,
+    "admission": {
+      "configurationState": "absent",
+      "mode": "unavailable"
+    },
+    "visibleAlertCount": 0
+  },
+  "currentSourceLocalProduction": {
+    "baseUrl": "http://127.0.0.1:3085",
+    "vercelEnvironment": "production",
+    "providerAdmissionState": "unavailable",
+    "selectedMode": "template",
+    "enhancedModeDisabled": true,
+    "fullModeDisabled": true,
+    "inputAccepted": true,
+    "generationCompleted": true,
+    "generatedDocumentCount": 12
+  },
+  "verification": {
+    "focusedTestFiles": 3,
+    "focusedTestsPassed": 20,
+    "typecheck": "PASS",
+    "build": "PASS",
+    "staticPages": 29
+  },
+  "boundaries": {
+    "distributedAdmissionActivated": false,
+    "productionSecretChanged": false,
+    "dbMutationPerformed": false,
+    "providerDispatchCalled": false,
+    "shareSessionCreated": false,
+    "exactSavedShareVerdict": "MISSING_EVIDENCE"
+  },
+  "verdict": "PASS_CURRENT_SOURCE_LOCAL_PRODUCTION_INPUT_RECOVERY_LIVE_PENDING"
+}

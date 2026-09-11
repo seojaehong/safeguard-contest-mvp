@@ -78,6 +78,7 @@ type WorkspaceTheme = "night" | "day";
 type DocumentSurfaceMode = "review" | "editor";
 
 type GenerationState = "idle" | "generating" | "ready" | "error";
+type ProviderAdmissionState = "checking" | "ready" | "unavailable";
 
 type WorkflowStep = {
   key: WorkspacePage;
@@ -1119,6 +1120,7 @@ export function SafeGuardCommandCenter({
   const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
   const [improvementSaveState, setImprovementSaveState] = useState<ImprovementSaveState>("idle");
   const [activeWorkspaceTheme, setActiveWorkspaceTheme] = useState<WorkspaceTheme>(workspaceTheme);
+  const [providerAdmissionState, setProviderAdmissionState] = useState<ProviderAdmissionState>("checking");
   const [aiMode, setAiMode] = useState<"template" | "enhanced" | "full">(() => {
     if (typeof window === "undefined") return "enhanced";
     const stored = window.localStorage.getItem("safeclaw.aiMode");
@@ -1133,6 +1135,34 @@ export function SafeGuardCommandCenter({
       /* ignore quota */
     }
   }, [aiMode]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/export/pdf", {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        const payload: unknown = await response.json().catch(() => null);
+        const admission = typeof payload === "object" && payload !== null && "admission" in payload
+          ? (payload as { admission?: unknown }).admission
+          : null;
+        const ready = typeof admission === "object"
+          && admission !== null
+          && "ready" in admission
+          && (admission as { ready?: unknown }).ready === true;
+        setProviderAdmissionState(ready ? "ready" : "unavailable");
+        if (!ready) setAiMode("template");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        console.warn("provider admission readiness check failed", error);
+        setProviderAdmissionState("unavailable");
+        setAiMode("template");
+      });
+
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => () => {
     if (beforePhoto) URL.revokeObjectURL(beforePhoto.url);
@@ -1729,9 +1759,13 @@ export function SafeGuardCommandCenter({
         applyGeneratedPayload(payload);
       } catch (error) {
         console.error("workpack generation failed", error);
+        const errorMessage = error instanceof Error
+          ? error.message
+          : "문서팩 생성 중 연결을 확인해야 합니다. 잠시 후 다시 시도해 주세요.";
         setState("error");
         setWorkspacePage(nextWorkspacePageAfterGenerationError());
-        setMessage("문서팩 생성 중 연결을 확인해야 합니다. 잠시 후 다시 시도해 주세요.");
+        setInputError(errorMessage);
+        setMessage(errorMessage);
       }
       return;
     }
@@ -1744,11 +1778,13 @@ export function SafeGuardCommandCenter({
     } catch (streamError) {
       if (!shouldRetryAskViaLegacy(streamError)) {
         console.warn("AI 작업 콘솔 요청이 admission 경계에서 중단됐습니다.", streamError);
+        const errorMessage = streamError instanceof Error
+          ? streamError.message
+          : "문서팩 생성 보호 상태를 확인해야 합니다. 잠시 후 다시 시도해 주세요.";
         setState("error");
         setWorkspacePage(nextWorkspacePageAfterGenerationError());
-        setMessage(streamError instanceof Error
-          ? streamError.message
-          : "문서팩 생성 보호 상태를 확인해야 합니다. 잠시 후 다시 시도해 주세요.");
+        setInputError(errorMessage);
+        setMessage(errorMessage);
         return;
       }
       // Transport failures or streams without a final event can use the
@@ -1767,9 +1803,13 @@ export function SafeGuardCommandCenter({
         applyGeneratedPayload(payload);
       } catch (error) {
         console.error("workpack generation failed", error);
+        const errorMessage = error instanceof Error
+          ? error.message
+          : "문서팩 생성 중 연결을 확인해야 합니다. 잠시 후 다시 시도해 주세요.";
         setState("error");
         setWorkspacePage(nextWorkspacePageAfterGenerationError());
-        setMessage("문서팩 생성 중 연결을 확인해야 합니다. 잠시 후 다시 시도해 주세요.");
+        setInputError(errorMessage);
+        setMessage(errorMessage);
       }
     }
   }
@@ -2104,11 +2144,23 @@ export function SafeGuardCommandCenter({
               <span className="composer-mode-label" aria-label="현재 문서 생성 방식">
                 {aiMode === "template" ? "빠른 생성" : aiMode === "enhanced" ? "강화 모드" : "전체 문서 AI"}
               </span>
-              <button type="submit" className="button command-primary composer-submit-button workbench-primary-action" disabled={busy} aria-busy={busy}>
+              <button
+                type="submit"
+                className="button command-primary composer-submit-button workbench-primary-action"
+                disabled={busy || (providerAdmissionState === "checking" && aiMode !== "template")}
+                aria-busy={busy || providerAdmissionState === "checking"}
+              >
                 {busy ? <span className="button-spinner" aria-hidden="true" /> : null}
                 {busy ? "근거 확인 중" : "안전 문서 생성"}
               </button>
             </div>
+            {providerAdmissionState !== "ready" ? (
+              <p className="input-helper" role="status">
+                {providerAdmissionState === "checking"
+                  ? "AI 생성 보호 상태를 확인하고 있습니다. 빠른 생성은 바로 사용할 수 있습니다."
+                  : "현재 빠른 생성 사용 가능 · 강화/풀 AI는 요청 보호 설정 후 사용할 수 있습니다."}
+              </p>
+            ) : null}
             {hasInputDraft ? (
               <div className="field-brief-chip-row" aria-label="자동 인식 현장 요약">
                 <span>{fieldBrief.siteName}</span>
@@ -2226,11 +2278,13 @@ export function SafeGuardCommandCenter({
                     value="enhanced"
                     checked={aiMode === "enhanced"}
                     onChange={() => setAiMode("enhanced")}
-                    disabled={busy}
+                    disabled={busy || providerAdmissionState !== "ready"}
                   />
                   <span>
-                    <strong>강화 (기본)</strong>
-                    <small>응답 +5–15초 · 위험성평가/TBM 본문 시나리오 맞춤 생성</small>
+                    <strong>강화</strong>
+                    <small>{providerAdmissionState === "ready"
+                      ? "응답 +5–15초 · 위험성평가/TBM 본문 시나리오 맞춤 생성"
+                      : "요청 보호 설정 후 사용 가능"}</small>
                   </span>
                 </label>
                 <label className={`ai-mode-option ${aiMode === "full" ? "selected" : ""}`}>
@@ -2240,7 +2294,7 @@ export function SafeGuardCommandCenter({
                     value="full"
                     checked={aiMode === "full"}
                     onChange={() => setAiMode("full")}
-                    disabled={busy}
+                    disabled={busy || providerAdmissionState !== "ready"}
                   />
                   <span>
                     <strong>풀 AI (전체 문서 생성)</strong>
