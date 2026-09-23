@@ -41,18 +41,47 @@ check("근로기준과-5802 후단 · 2009-07-30 퇴직 시 62일", () => {
   assert.equal(r.total, 62, `기대 62, 실제 ${r.total}`);
 });
 
-// 3) 회계연도가 더 유리한 경우 — 그대로 둔다(정산 대상 아님)
-check("회계연도 69일 > 입사일 62일 → 회계연도 기준 유지", () => {
+// 3) 회계연도가 더 많은 경우 — 취업규칙 재산정 규정이 결과를 가른다
+//    근거: 최영우 『실무노동법』 산정 예 —
+//    "취업규칙에 입사일로부터 재산정하여 지급한다는 규정이 없다면 18.5일,
+//     그러한 규정이 있다면(없더라도 관행적으로 재산정해 지급했다면) 11일로 산정하여 지급"
+check("회계연도 69 > 입사일 62 · 재산정 규정 없음 → 회계연도 유지", () => {
   const s = settleOnTermination({
     hireDate: "2004-08-01",
     endDate: "2009-07-30",
     fiscalGrantedTotal: 69,
     usedOrPaidTotal: 69,
+    hasRecalcClause: false,
   });
   assert.equal(s.hireDateTotal, 62);
-  assert.equal(s.guaranteedTotal, 69, "유리한 쪽(회계연도 69)이 보장선이어야 한다");
+  assert.equal(s.guaranteedTotal, 69, "규정이 없으면 회계연도 부여분을 그대로 둔다");
   assert.equal(s.favourable, "fiscal-year");
   assert.equal(s.verdict, "no-shortfall");
+});
+
+check("회계연도 69 > 입사일 62 · 재산정 규정 있음 → 입사일 기준으로 내려간다", () => {
+  const s = settleOnTermination({
+    hireDate: "2004-08-01",
+    endDate: "2009-07-30",
+    fiscalGrantedTotal: 69,
+    usedOrPaidTotal: 62,
+    hasRecalcClause: true,
+  });
+  assert.equal(s.guaranteedTotal, 62, "재산정 규정이 있으면 입사일 기준이 보장선이 된다");
+  assert.equal(s.verdict, "no-shortfall");
+});
+
+check("게이트: 규정 유무를 모르면 확정하지 않는다", () => {
+  const s = settleOnTermination({
+    hireDate: "2004-08-01",
+    endDate: "2009-07-30",
+    fiscalGrantedTotal: 69,
+    usedOrPaidTotal: 69,
+    // hasRecalcClause 를 주지 않는다
+  });
+  assert.equal(s.verdict, "insufficient-input", "한쪽으로 밀지 않고 확인 불가로 남겨야 한다");
+  assert.ok(Number.isNaN(s.shortfallDays), "정산일수를 만들어내면 안 된다");
+  assert.ok(s.groundNote.includes("취업규칙"), "무엇이 필요한지 알려줘야 한다");
 });
 
 // 4) 입사일 기준이 더 많으면 차액을 정산한다
@@ -87,4 +116,4 @@ if (failures) {
   console.error(`\nleave-ledger.crosscheck: 실패 ${failures}건`);
   process.exit(1);
 }
-console.log("leave-ledger.crosscheck: 5건 통과 (근로기준과-5802 실사례 79일·62일·26일 포함)");
+console.log("leave-ledger.crosscheck: 7건 통과 (근로기준과-5802 실사례 79일·62일·26일 포함)");

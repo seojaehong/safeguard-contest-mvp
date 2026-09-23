@@ -17,6 +17,8 @@ export interface SettlementCase {
   fiscalGrantedTotal: number;
   /** 이미 사용했거나 수당으로 지급한 누계 */
   usedOrPaidTotal: number;
+  /** 취업규칙에 「퇴직 시 입사일 기준 재산정」 규정이 있는가 (없으면 확인 불가로 판정) */
+  hasRecalcClause?: boolean;
   /** 이 사례가 무엇을 보여주는지 */
   point: string;
   /** 출처가 있으면 표시 */
@@ -42,8 +44,9 @@ export const SETTLEMENT_CASES: SettlementCase[] = [
     endDate: "2009-07-30",
     fiscalGrantedTotal: 69,
     usedOrPaidTotal: 69,
+    hasRecalcClause: false,
     point:
-      "회계연도 기준이 더 많은 경우. 이때는 회계연도 기준이 유지되고 정산 대상이 없다.",
+      "회계연도 부여분이 더 많은 경우. 취업규칙에 재산정 규정이 없으면 그대로 유지된다.",
     source: "같은 해석 후단 — 입사일기준 62일 / 회계연도기준 69일",
   },
   {

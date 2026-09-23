@@ -119,6 +119,20 @@ export interface SettlementInput {
   fiscalGrantedTotal: number;
   /** 이미 사용했거나 수당으로 지급한 일수의 합계 */
   usedOrPaidTotal: number;
+  /**
+   * 취업규칙에 「퇴직 시 입사일 기준으로 재산정한다」는 규정이 있는가.
+   *
+   * ★ 이 값이 결과를 가른다. 최영우 교재 산정 예 —
+   *   "취업규칙에 입사일로부터 재산정하여 지급한다는 규정이 없다면 18.5일,
+   *    그러한 규정이 있다면(없더라도 관행적으로 재산정해 지급했다면) 11일로 산정하여 지급"
+   *
+   *   즉 **회계연도 기준이 더 많을 때** 갈린다.
+   *     규정 없음 → 회계연도 부여분을 그대로 둔다(근로자에게 유리한 쪽)
+   *     규정 있음 → 입사일 기준으로 재산정할 수 있다(깎일 수 있다)
+   *
+   *   `undefined` 로 두면 **확인 불가**로 판정하고 한쪽으로 밀지 않는다.
+   */
+  hasRecalcClause?: boolean;
 }
 
 export type SettlementVerdict = "shortfall" | "no-shortfall" | "insufficient-input";
@@ -152,9 +166,8 @@ export interface SettlementResult {
 export function settleOnTermination(input: SettlementInput): SettlementResult {
   const ledger = buildHireDateLedger(input.hireDate, input.endDate);
   const hireDateTotal = ledger.total;
-  const { fiscalGrantedTotal, usedOrPaidTotal } = input;
+  const { fiscalGrantedTotal, usedOrPaidTotal, hasRecalcClause } = input;
 
-  const guaranteedTotal = Math.max(hireDateTotal, fiscalGrantedTotal);
   const favourable =
     hireDateTotal === fiscalGrantedTotal
       ? "equal"
@@ -162,14 +175,39 @@ export function settleOnTermination(input: SettlementInput): SettlementResult {
         ? "hire-date"
         : "fiscal-year";
 
+  // ── 회계연도가 더 많은 경우에만 취업규칙 조항이 결과를 가른다 ──
+  if (favourable === "fiscal-year" && hasRecalcClause === undefined) {
+    // 한쪽으로 밀지 않는다. 확인 불가로 남긴다.
+    return {
+      hireDateTotal,
+      fiscalGrantedTotal,
+      guaranteedTotal: fiscalGrantedTotal,
+      favourable,
+      usedOrPaidTotal,
+      shortfallDays: NaN,
+      verdict: "insufficient-input",
+      ledger: ledger.entries,
+      groundNote:
+        "회계연도 부여분이 입사일 기준보다 많습니다. 이때는 취업규칙에 「퇴직 시 입사일 기준으로 재산정한다」는 규정이 있는지에 따라 결과가 달라집니다(최영우 『실무노동법』 산정 예). 규정 유무가 입력되지 않아 금액을 확정하지 않습니다.",
+    };
+  }
+
+  // 규정이 있으면 입사일 기준으로 재산정할 수 있다 → 보장선이 입사일 기준으로 내려간다
+  const guaranteedTotal =
+    favourable === "fiscal-year" && hasRecalcClause === true
+      ? hireDateTotal
+      : Math.max(hireDateTotal, fiscalGrantedTotal);
+
   const shortfallDays = guaranteedTotal - usedOrPaidTotal;
 
   const groundNote =
-    favourable === "fiscal-year"
-      ? "회계연도 기준이 더 많아 그대로 둡니다. 회계연도 운영이 근로자에게 불리하지 않습니다(근로기준과-5802)."
-      : favourable === "hire-date"
-        ? "입사일 기준이 더 많으므로 그 차이를 정산해야 합니다(근로기준과-5802 — 퇴직시점 총 휴가일수가 입사일 기준에 미달하면 미달분을 미사용수당으로 정산)."
-        : "두 기준이 같습니다.";
+    favourable === "hire-date"
+      ? "입사일 기준이 더 많으므로 그 차이를 정산해야 합니다(근로기준과-5802 · 근기 68207-620 — 퇴직시점 총 휴가일수가 입사일 기준에 미달하면 미달분을 미사용수당으로 정산)."
+      : favourable === "equal"
+        ? "두 기준이 같습니다."
+        : hasRecalcClause
+          ? "회계연도 부여분이 더 많지만, 취업규칙에 퇴직 시 입사일 기준 재산정 규정이 있어 입사일 기준으로 산정했습니다(최영우 산정 예). 실제 적용 가능 여부는 규정 문언과 관행을 확인해야 합니다."
+          : "회계연도 부여분이 더 많고 재산정 규정이 없으므로 그대로 둡니다. 회계연도 운영이 근로자에게 불리하지 않습니다(근로기준과-5802).";
 
   return {
     hireDateTotal,
