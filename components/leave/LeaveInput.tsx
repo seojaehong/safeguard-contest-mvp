@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { compareRow } from "@/lib/annual-leave";
 import { downloadXlsx } from "@/lib/leave-xlsx";
@@ -153,7 +153,11 @@ function toCsv(
 
 export function LeaveInput() {
   const [text, setText] = useState("");
-  const [asOf, setAsOf] = useState(todayLocal());
+  // 기준일은 **마운트 후에** 채운다. SSR 은 서버 시계(UTC)로 렌더하는데,
+  // 프로덕션 React 는 하이드레이션 속성 불일치를 되돌리지 않는 경우가 있어
+  // KST 00~09시에 서버가 찍은 하루 전 날짜가 그대로 굳을 수 있다.
+  const [asOf, setAsOf] = useState("");
+  useEffect(() => setAsOf(todayLocal()), []);
   const [copied, setCopied] = useState(false);
   const [fileNote, setFileNote] = useState<string | null>(null);
   const [reading, setReading] = useState(false);
@@ -251,7 +255,9 @@ export function LeaveInput() {
   const results = useMemo(
     () =>
       rows.map((r) => {
-        if (r.error || !r.hireDate) return { row: r, result: null };
+        // 기준일은 마운트 직후 한 프레임 비어 있다. 그때 계산을 돌리면
+        // 멀쩡한 줄이 "읽지 못함"으로 잘못 찍힌다.
+        if (!asOf || r.error || !r.hireDate) return { row: r, result: null };
         try {
           const cmp = compareRow(
             { name: r.name, hireDate: r.hireDate, recordedDays: r.recordedDays ?? 0 },

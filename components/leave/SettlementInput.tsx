@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { settleOnTermination } from "@/lib/leave-ledger";
 import { downloadXlsx } from "@/lib/leave-xlsx";
@@ -19,6 +19,9 @@ import { StatusBadge } from "@/components/leave/LeaveUI";
 type Clause = "unknown" | "yes" | "no";
 
 export function SettlementInput() {
+  // 퇴사일 상한(오늘)은 마운트 후에 건다 — SSR 은 UTC 라 KST 오전에 하루 전이 된다.
+  const [maxDate, setMaxDate] = useState<string | undefined>(undefined);
+  useEffect(() => setMaxDate(todayLocal()), []);
   const [hireDate, setHireDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [fiscalGranted, setFiscalGranted] = useState("");
@@ -62,7 +65,7 @@ export function SettlementInput() {
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            max={todayLocal()}
+            max={maxDate}
           />
         </label>
         <label className="lv-input__field">
