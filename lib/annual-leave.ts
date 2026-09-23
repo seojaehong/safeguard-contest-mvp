@@ -38,9 +38,29 @@ const MAX_FIRST_YEAR_DAYS = 11;
 const BASE_DAYS = 15;
 const MAX_DAYS = 25;
 
-function parse(date: string): Date {
-  const [y, m, d] = date.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, d));
+function parse(date: string, label: string): Date {
+  const m = date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) {
+    throw new Error(`${label}이 올바른 날짜 형식(YYYY-MM-DD)이 아닙니다`);
+  }
+
+  const [, y, mo, d] = m;
+  const year = Number(y);
+  const month = Number(mo);
+  const day = Number(d);
+  if (month < 1 || month > 12 || day < 1) {
+    throw new Error(`${label}이 올바른 날짜가 아닙니다`);
+  }
+
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  if (
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() !== month - 1 ||
+    parsed.getUTCDate() !== day
+  ) {
+    throw new Error(`${label}이 올바른 날짜가 아닙니다`);
+  }
+  return parsed;
 }
 
 /** 만 나이 계산과 같은 방식 — 기념일이 지났는지로 센다 */
@@ -62,8 +82,8 @@ function completedMonths(from: Date, to: Date): number {
 }
 
 export function calculateEntitlement(input: EntitlementInput): EntitlementResult {
-  const hire = parse(input.hireDate);
-  const asOf = parse(input.asOf);
+  const hire = parse(input.hireDate, "입사일");
+  const asOf = parse(input.asOf, "기준일");
 
   if (asOf < hire) {
     throw new Error("기준일이 입사일보다 빠릅니다");
