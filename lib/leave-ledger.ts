@@ -1,0 +1,185 @@
+/**
+ * 연차 원장(ledger) — 연도별 발생 이력과 누계.
+ *
+ * 왜 필요한가
+ *   `annual-leave.ts` 는 "그 시점의 연간 부여일수" 하나만 낸다.
+ *   퇴직 정산은 **누계 두 개를 비교**하는 일이라 연도별 이력이 있어야 한다.
+ *
+ * 법적 근거 — 고용노동부 근로기준과-5802 (2009-12-31)
+ *   "연차휴가 산정기간을 노무관리의 편의를 위해 회계연도를 기준으로 전 근로자에
+ *    일률적으로 적용하더라도 **근로자에게 불리하지 않아야** 하므로 퇴직시점에서
+ *    총 휴가일수가 근로자의 입사일을 기준으로 산정한 휴가일수에 미달하는 경우에는
+ *    그 미달하는 일수에 대하여 연차유급휴가 미사용수당으로 정산하여 지급하여야"
+ *
+ *   ★ 같은 해석의 후단이 중요하다 — 회계연도 기준이 **더 많은 경우도 있다**.
+ *     "퇴직일이 2009년 7월 30일이라면 … (입사일기준 총 62일, 회계연도기준 총 69일)
+ *      … 회계연도 기준에 따라 연차유급휴가 미사용수당을 지급하여야"
+ *     즉 규칙은 「입사일 기준으로 맞춘다」가 아니라 **「유리한 쪽으로 맞춘다」**이다.
+ *
+ * 검증: 위 해석의 사례(입사 2004-08-01 · 퇴사 2009-09-30)에서 입사일 기준 누계 79일.
+ *       tests/leave-ledger.crosscheck.mts 가 이 값을 고정한다.
+ */
+
+// 같은 디렉터리라 상대경로를 쓴다 — @/ 별칭은 Next 빌드에서만 해석되고
+// node --experimental-strip-types 로 도는 테스트에서는 풀리지 않는다.
+import { calculateEntitlement } from "./annual-leave.ts";
+
+export interface LedgerEntry {
+  /** 이 발생분의 기준 연도 표시 (예: "3년차" 또는 "2026 회계연도") */
+  label: string;
+  /** 발생일 — 이 날짜에 권리가 생긴다 */
+  accruedOn: string;
+  /** 그 해 발생일수 */
+  days: number;
+  /** 누계 */
+  cumulative: number;
+  /** 어떤 규칙이 적용됐는지 */
+  basisLabel: string;
+}
+
+export interface LedgerResult {
+  entries: LedgerEntry[];
+  /** 총 발생일수 */
+  total: number;
+}
+
+function parse(d: string): Date {
+  const [y, m, day] = d.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, day));
+}
+function fmt(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+function addYears(d: Date, n: number): Date {
+  const t = new Date(d);
+  t.setUTCFullYear(t.getUTCFullYear() + n);
+  return t;
+}
+
+/**
+ * 입사일 기준 원장.
+ *
+ * 1년 미만 월차(개월당 1일, 상한 11)는 **별도 권리**라 연차 누계와 섞지 않는다.
+ * 여기서는 기념일마다 발생하는 연차(15일+가산)만 쌓는다.
+ * `includeFirstYearMonthly` 를 켜면 1년 미만 월차도 첫 항목으로 넣는다.
+ */
+export function buildHireDateLedger(
+  hireDate: string,
+  endDate: string,
+  options: { includeFirstYearMonthly?: boolean } = {}
+): LedgerResult {
+  const hire = parse(hireDate);
+  const end = parse(endDate);
+  if (end < hire) throw new Error("종료일이 입사일보다 빠릅니다");
+
+  const entries: LedgerEntry[] = [];
+  let cumulative = 0;
+
+  if (options.includeFirstYearMonthly) {
+    // 1년 미만 구간 — 만 1년이 되기 전까지의 월차
+    const firstAnniv = addYears(hire, 1);
+    const cut = end < firstAnniv ? end : firstAnniv;
+    const r = calculateEntitlement({ hireDate, asOf: fmt(cut) });
+    if (r.serviceYears < 1 && r.days > 0) {
+      cumulative += r.days;
+      entries.push({
+        label: "1년 미만(월차)",
+        accruedOn: fmt(cut),
+        days: r.days,
+        cumulative,
+        basisLabel: r.basisLabel,
+      });
+    }
+  }
+
+  // 기념일마다 발생 — 종료일을 넘지 않는 것만
+  for (let year = 1; ; year += 1) {
+    const anniversary = addYears(hire, year);
+    if (anniversary > end) break;
+    const r = calculateEntitlement({ hireDate, asOf: fmt(anniversary) });
+    cumulative += r.days;
+    entries.push({
+      label: `${year}년차`,
+      accruedOn: fmt(anniversary),
+      days: r.days,
+      cumulative,
+      basisLabel: r.basisLabel,
+    });
+    if (year > 60) break; // 안전장치
+  }
+
+  return { entries, total: cumulative };
+}
+
+export interface SettlementInput {
+  hireDate: string;
+  /** 퇴사일 */
+  endDate: string;
+  /** 회사가 회계연도 기준으로 **실제 부여한** 일수의 합계 */
+  fiscalGrantedTotal: number;
+  /** 이미 사용했거나 수당으로 지급한 일수의 합계 */
+  usedOrPaidTotal: number;
+}
+
+export type SettlementVerdict = "shortfall" | "no-shortfall" | "insufficient-input";
+
+export interface SettlementResult {
+  /** 입사일 기준 누계 */
+  hireDateTotal: number;
+  /** 회계연도 기준 부여 누계(입력값) */
+  fiscalGrantedTotal: number;
+  /** 둘 중 근로자에게 유리한 값 — 이것이 보장선이다 */
+  guaranteedTotal: number;
+  /** 어느 쪽이 유리했는지 */
+  favourable: "hire-date" | "fiscal-year" | "equal";
+  usedOrPaidTotal: number;
+  /** 정산해야 할 일수 (음수면 0으로 보정하지 않고 그대로 둔다 — 판단은 사람이) */
+  shortfallDays: number;
+  verdict: SettlementVerdict;
+  ledger: LedgerEntry[];
+  /** 화면에 그대로 띄울 근거 문장 */
+  groundNote: string;
+}
+
+/**
+ * 퇴직 정산 — 회계연도로 운영한 사업장의 퇴사자 재정산.
+ *
+ * 규칙: `보장선 = max(입사일 기준 누계, 회계연도 부여 누계)`
+ *       `정산 대상 = 보장선 - 이미 사용·지급분`
+ *
+ * ⚠ 이 함수는 **발생일수**만 다룬다. 수당 금액(통상임금 × 일수)은 계산하지 않는다.
+ */
+export function settleOnTermination(input: SettlementInput): SettlementResult {
+  const ledger = buildHireDateLedger(input.hireDate, input.endDate);
+  const hireDateTotal = ledger.total;
+  const { fiscalGrantedTotal, usedOrPaidTotal } = input;
+
+  const guaranteedTotal = Math.max(hireDateTotal, fiscalGrantedTotal);
+  const favourable =
+    hireDateTotal === fiscalGrantedTotal
+      ? "equal"
+      : hireDateTotal > fiscalGrantedTotal
+        ? "hire-date"
+        : "fiscal-year";
+
+  const shortfallDays = guaranteedTotal - usedOrPaidTotal;
+
+  const groundNote =
+    favourable === "fiscal-year"
+      ? "회계연도 기준이 더 많아 그대로 둡니다. 회계연도 운영이 근로자에게 불리하지 않습니다(근로기준과-5802)."
+      : favourable === "hire-date"
+        ? "입사일 기준이 더 많으므로 그 차이를 정산해야 합니다(근로기준과-5802 — 퇴직시점 총 휴가일수가 입사일 기준에 미달하면 미달분을 미사용수당으로 정산)."
+        : "두 기준이 같습니다.";
+
+  return {
+    hireDateTotal,
+    fiscalGrantedTotal,
+    guaranteedTotal,
+    favourable,
+    usedOrPaidTotal,
+    shortfallDays,
+    verdict: shortfallDays > 0 ? "shortfall" : "no-shortfall",
+    ledger: ledger.entries,
+    groundNote,
+  };
+}
