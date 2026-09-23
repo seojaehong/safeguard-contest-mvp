@@ -74,9 +74,34 @@ function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+function toCsv(
+  rows: { row: ParsedRow; result: ReturnType<typeof compareRow> | null }[],
+  asOf: string
+): string {
+  const head = ["이름", "입사일", "기준일", "발생일수", "대장기재", "차이", "판정", "적용근거"];
+  const lines = rows.map(({ row, result }) => {
+    if (!result) return [row.name, row.hireDate, asOf, "", "", "", "읽지 못함", row.error ?? ""];
+    const hasRec = row.recordedDays !== null;
+    return [
+      row.name,
+      row.hireDate,
+      asOf,
+      String(result.calculatedDays),
+      hasRec ? String(row.recordedDays) : "",
+      hasRec ? String(result.diff) : "",
+      hasRec ? (result.verdict === "diff" ? "차이 있음" : "일치") : "대장값 없음",
+      result.basisLabel,
+    ];
+  });
+  return [head, ...lines]
+    .map((cols) => cols.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+    .join("\r\n");
+}
+
 export function LeaveInput() {
   const [text, setText] = useState("");
   const [asOf, setAsOf] = useState(today());
+  const [copied, setCopied] = useState(false);
 
   const rows = useMemo(() => parseLines(text), [text]);
   const results = useMemo(
@@ -106,15 +131,8 @@ export function LeaveInput() {
 
   return (
     <section className="lv-input">
-      <h2 className="lv-input__title">직접 넣어보기</h2>
-      <p className="lv-input__lede">
-        <strong>이름과 입사일</strong>만 있으면 됩니다. 엑셀에서 그대로 복사해 붙여넣으세요.
-        세 번째 칸에 대장의 연차일수를 넣으면 맞는지까지 대조합니다.
-      </p>
-
       <div className="lv-input__privacy">
         🔒 입력한 내용은 <strong>이 브라우저에서만 계산</strong>되며 서버로 전송되지 않습니다.
-        새로고침하면 사라집니다.
       </div>
 
       <div className="lv-input__controls">
@@ -209,6 +227,42 @@ export function LeaveInput() {
                 })}
               </tbody>
             </table>
+          </div>
+
+          <div className="lv-input__export">
+            <button
+              type="button"
+              className="lv-input__btn"
+              onClick={async () => {
+                const csv = toCsv(results, asOf);
+                try {
+                  await navigator.clipboard.writeText(csv.replace(/","/g, "\t").replace(/"/g, ""));
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                } catch {
+                  setCopied(false);
+                }
+              }}
+            >
+              {copied ? "복사했습니다" : "엑셀로 복사"}
+            </button>
+            <button
+              type="button"
+              className="lv-input__btn is-ghost"
+              onClick={() => {
+                const csv = "\uFEFF" + toCsv(results, asOf);
+                const url = URL.createObjectURL(
+                  new Blob([csv], { type: "text/csv;charset=utf-8;" })
+                );
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `연차계산_${asOf}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+            >
+              CSV 내려받기
+            </button>
           </div>
 
           <p className="lv-input__note">
