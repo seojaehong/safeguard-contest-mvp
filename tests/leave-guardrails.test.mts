@@ -14,28 +14,39 @@ const check = (l: string, fn: () => void) => {
 };
 
 // ── A4 연차촉진 ────────────────────────────────────────────────
-check("게이트: 1년 미만 월단위에 일반 규칙을 적용하지 않는다", () => {
+check("최영우 교재 표: 1년 미만은 3개월 전 10일 + 1개월 전 5일 (별도 분기)", () => {
   const r = buildPromotionSchedule({
     usagePeriodEnd: "2026-12-31",
     kind: "monthly-under-1year",
   });
-  assert.equal(r.overall, "out-of-scope", "§61② 는 기간이 달라 범위밖이어야 한다");
-  assert.equal(r.windows.every((w) => w.from === null && w.to === null), true,
-    "날짜를 내면 안 된다 — 추정 금지");
+  // 교재 『연차사용촉진 절차(1.1~12.31 기준)』 1년 미만 근무자
+  //   9일분 1차 10.1~10.10 · 2차 11.30 까지 / 2일분 1차 12.1~12.5 · 2차 12.21 까지
+  const w = r.windows;
+  assert.equal(w[0].from, "2026-10-01", `9일분 1차 시작: ${w[0].from}`);
+  assert.equal(w[0].to, "2026-10-10", `9일분 1차 끝: ${w[0].to}`);
+  assert.equal(w[1].to, "2026-11-30", `9일분 2차: ${w[1].to}`);
+  assert.equal(w[2].from, "2026-12-01", `2일분 1차 시작: ${w[2].from}`);
+  assert.equal(w[2].to, "2026-12-05", `2일분 1차 끝(5일간): ${w[2].to}`);
+  assert.equal(w[3].to, "2026-12-21", `2일분 2차(10일 전): ${w[3].to}`);
+  // §61① 의 6개월·2개월을 그대로 쓰지 않았는지
+  assert.ok(!w.some((x) => x.from === "2026-07-01"), "§61① 기간을 재사용하면 안 된다");
 });
 
 check("게이트: 1차 촉구는 마감일만 주지 않고 시작·끝을 함께 준다", () => {
   const r = buildPromotionSchedule({ usagePeriodEnd: "2026-12-31", kind: "annual-15plus" });
   const first = r.windows[0];
-  // 게이트의 핵심은 "마감일 하나만 보여주지 않는다"이다. 두 값이 모두 있는지만 본다.
   assert.ok(first.from && first.to, "허용 기간의 시작과 끝이 모두 있어야 한다");
-  assert.ok(first.to! > first.from!, "끝이 시작보다 뒤여야 한다");
-  // ⚠️ 「6개월 전」의 정확한 날짜(6-30 인지 7-01 인지)는 역법 계산 해석이 갈린다.
-  //    여기서 특정 날짜를 고정하면 우리가 법 해석을 확정하는 셈이라, 폭만 검사한다.
-  //    확정 전까지 화면에는 「전제: 역법상 6개월 전」을 함께 표시한다. (재홍님 확인 대상)
-  const span =
-    (Date.parse(first.to!) - Date.parse(first.from!)) / 86400000;
-  assert.equal(span, 10, `허용 폭은 10일이어야 한다: ${span}일`);
+  // ★ 최영우 교재 『연차사용촉진 절차(1.1~12.31 기준)』 — 1년 이상 근무자 1차 = 7.1~7.10
+  //   12-31 에서 6개월을 그냥 빼면 6-30 이 나오는데 실무 기준은 7-01 이다(남은 기간이 6개월인 첫날).
+  //   처음에 6-30 으로 구현했다가 교재 표와 대조해 고쳤다.
+  assert.equal(first.from, "2026-07-01", `교재 표 7.1: ${first.from}`);
+  assert.equal(first.to, "2026-07-10", `교재 표 7.10 (10일간): ${first.to}`);
+});
+
+check("최영우 교재 표: 1년 이상 2차 통보는 10.31 까지 (2개월 전)", () => {
+  const r = buildPromotionSchedule({ usagePeriodEnd: "2026-12-31", kind: "annual-15plus" });
+  const second = r.windows[2];
+  assert.equal(second.to, "2026-10-31", `교재 표 10.31: ${second.to}`);
 });
 
 check("게이트: 응답기한은 수령일 기준이다 (발송일 대체 금지)", () => {

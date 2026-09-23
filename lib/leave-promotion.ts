@@ -10,6 +10,7 @@
  *
  * 🔒 제우스 출시 게이트 (2026-09-23) — 아래를 하면 출시 차단
  *   · 1년 미만 발생분에 일반 6개월·2개월 규칙 적용 → 별도 분기 없으면 「지원 범위 밖」
+ *     (2026-09-23 최영우 교재 표로 근거를 확보해 §61② 분기를 구현했다)
  *   · 사용기간 종료일·대상 유형이 불명확한데 확정 일정 출력
  *   · 근로자 응답기한을 촉구 「수령일」이 아니라 발송일로 계산
  *   · 1차 촉구를 마감일 하나만 표시 (허용 기간의 시작·끝을 함께)
@@ -87,9 +88,9 @@ function addMonths(d: Date, n: number): Date {
 /**
  * 촉진 일정 계산.
  *
- * ⚠️ `kind === "monthly-under-1year"` 는 **지원 범위 밖**으로 반환한다.
- *    §61②의 기간이 ①과 다른데 별도 분기를 구현하지 않았기 때문이다.
- *    추정해서 날짜를 내는 것보다 안 내는 쪽이 안전하다(제우스 게이트).
+ * 두 절차를 각각 구현한다 — §61①(1년 이상)과 §61②(1년 미만)는 기간이 다르다.
+ * 근거는 최영우 교재 『연차사용촉진 절차(1.1~12.31 기준)』 표.
+ * 어느 쪽이든 **적법성은 판정하지 않고 날짜만 대조**한다.
  */
 export function buildPromotionSchedule(
   input: PromotionScheduleInput
@@ -106,31 +107,87 @@ export function buildPromotionSchedule(
     };
   }
 
+  // ② 1년 미만 월단위 연차 — §61② (2020-03-31 신설)
+  //
+  // ★ 2026-09-23 — 최영우 교재 표로 근거를 확보해 구현했다.
+  //   『연차사용촉진 절차(1.1~12.31 기준)』
+  //     1년 미만 근무자 · 연차휴가 9일분 → 1차 10.1~10.10 (3개월 전, 10일간) · 2차 11.30 까지 (1개월 전)
+  //                      연차휴가 2일분 → 1차 12.1~12.5  (1개월 전, 5일간)  · 2차 12.21 까지 (10일 전)
+  //   앞의 9일은 최초 1년 근로가 끝나기 3개월 전, 그 뒤 발생한 2일은 1개월 전에 따로 촉구한다.
+  //   (교재 원문에 "11.31"로 적혀 있으나 11월은 30일까지이므로 11-30 으로 둔다)
+  const end = parse(usagePeriodEnd);
+
   if (kind === "monthly-under-1year") {
+    const firstBatchFrom = addDays(addMonths(end, -3), 1); // 10.1
+    const firstBatchTo = addDays(firstBatchFrom, 9); // 10.10
+    const firstBatchSecondNotice = addMonths(end, -1); // 11.30
+    const lateBatchFrom = addDays(addMonths(end, -1), 1); // 12.1
+    const lateBatchTo = addDays(lateBatchFrom, 4); // 12.5 (5일간)
+    const lateBatchSecondNotice = addDays(end, -10); // 12.21
+
+    const sent = input.firstNoticeSentOn;
+    const inFirstBatch =
+      sent && parse(sent) >= firstBatchFrom && parse(sent) <= firstBatchTo;
+    const inLateBatch =
+      sent && parse(sent) >= lateBatchFrom && parse(sent) <= lateBatchTo;
+
     return {
       kind,
       usagePeriodEnd,
       windows: [
         {
-          label: "1년 미만 월단위 연차",
+          label: "1차 촉구 — 먼저 발생한 9일분 (3개월 전, 10일간)",
+          from: fmt(firstBatchFrom),
+          to: fmt(firstBatchTo),
+          actual: sent,
+          status: !sent ? "unknown" : inFirstBatch ? "match" : "diff",
+          note: "최초 1년 근로가 끝나기 3개월 전을 기준으로 10일 이내입니다(§61②).",
+        },
+        {
+          label: "2차 통보 — 9일분",
           from: null,
-          to: null,
-          status: "out-of-scope",
-          note: "근기법 제61조 제2항은 제1항과 기간이 다릅니다. 이 도구는 아직 그 분기를 구현하지 않아 일정을 내지 않습니다.",
+          to: fmt(firstBatchSecondNotice),
+          actual: input.secondNoticeSentOn,
+          status: !input.secondNoticeSentOn
+            ? "unknown"
+            : parse(input.secondNoticeSentOn) <= firstBatchSecondNotice
+              ? "match"
+              : "diff",
+          note: "최초 1년 근로가 끝나기 1개월 전까지입니다.",
+        },
+        {
+          label: "1차 촉구 — 뒤에 발생한 2일분 (1개월 전, 5일간)",
+          from: fmt(lateBatchFrom),
+          to: fmt(lateBatchTo),
+          actual: inLateBatch ? sent : undefined,
+          status: !sent ? "unknown" : inLateBatch ? "match" : "unknown",
+          note: "서면 촉구 후 발생한 휴가는 따로 촉구합니다. 두 묶음을 한 번에 처리할 수 없습니다.",
+        },
+        {
+          label: "2차 통보 — 2일분",
+          from: null,
+          to: fmt(lateBatchSecondNotice),
+          status: "unknown",
+          note: "최초 1년간 근로가 끝나기 10일 전까지입니다. 이 데모는 묶음별 통보 기록을 따로 받지 않습니다.",
         },
       ],
-      overall: "out-of-scope",
+      overall: sent ? (inFirstBatch || inLateBatch ? "match" : "diff") : "unknown",
       disclaimer: DISCLAIMER,
     };
   }
 
-  const end = parse(usagePeriodEnd);
   const windows: ScheduleWindow[] = [];
 
   // ① 1차 촉구 — 「6개월 전 기준 10일 이내」. 시작과 끝을 함께 낸다
-  const sixMonthsBefore = addMonths(end, -6);
-  const firstFrom = sixMonthsBefore;
-  const firstTo = addDays(sixMonthsBefore, 10);
+  //
+  // ★ 2026-09-23 수정 — 「6개월 전」은 종료일에서 6개월을 뺀 날이 아니라 **그 다음날**이다.
+  //   최영우 교재 『연차사용촉진 절차(1.1~12.31 기준)』 표:
+  //     1년 이상 근무자 · 1차 사용촉진 = **7.1 ~ 7.10** (6개월 전, 10일간)
+  //   12-31 에서 6개월을 그냥 빼면 6-30 이 나오는데, 실무 기준은 7-01 이다.
+  //   남은 기간이 정확히 6개월이 되는 첫날이라는 뜻이다.
+  //   (처음에 6-30 으로 구현했다가 교재 표와 대조해 고쳤다)
+  const firstFrom = addDays(addMonths(end, -6), 1);
+  const firstTo = addDays(firstFrom, 9); // 7.1 부터 10일간 = 7.10
   const sent = input.firstNoticeSentOn;
   windows.push({
     label: "1차 촉구 (미사용일수 통지 + 사용시기 지정 요구)",
