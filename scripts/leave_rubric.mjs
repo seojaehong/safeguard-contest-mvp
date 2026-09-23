@@ -106,8 +106,9 @@ score(
   "안전선", "S5", "촉진 적법성을 판정하지 않는다", 6,
   promo.includes("적법성은 확인하지 않았습니다") &&
     promo.includes("일정 대조: 일치") &&
-    promo.includes("out-of-scope"),
-  "1년 미만은 범위밖, 라벨은 「일정 대조」"
+    promo.includes("out-of-scope") &&
+    read("app/tools/leave/advanced/page.tsx").includes("scheduleStatusLabel"),
+  "1년 미만은 범위밖, 라벨은 「일정 대조」, 화면도 같은 라벨을 쓴다"
 );
 
 // ══ 축 3. 사용성·투명성 (20점) ════════════════════════════════
@@ -115,14 +116,16 @@ const pageA = read("app/tools/leave/page.tsx");
 const pageB = read("app/tools/leave/settlement/page.tsx");
 const ui = read("components/leave/LeaveUI.tsx");
 
+const pageC = read("app/tools/leave/advanced/page.tsx");
 score("사용성", "U1", "결론이 화면 최상단에 온다", 5,
-  pageA.includes("ConclusionBanner") && pageB.includes("ConclusionBanner"));
+  pageA.includes("ConclusionBanner") && pageB.includes("ConclusionBanner") &&
+  pageC.includes("ConclusionBanner"));
 
 score("사용성", "U2", "데모 성격을 고정 표시한다", 4,
-  pageA.includes("DemoNotice") && pageB.includes("DemoNotice"));
+  pageA.includes("DemoNotice") && pageB.includes("DemoNotice") && pageC.includes("DemoNotice"));
 
 score("사용성", "U3", "다루지 않는 범위를 먼저 밝힌다", 4,
-  pageA.includes("ScopeNote") && pageB.includes("ScopeNote"));
+  pageA.includes("ScopeNote") && pageB.includes("ScopeNote") && pageC.includes("ScopeNote"));
 
 score("사용성", "U4", "상태를 색만으로 구분하지 않는다(기호 병기)", 4,
   ui.includes("lv-badge__mark") && ui.includes('mark: "≠"'));
@@ -138,6 +141,7 @@ if (BASE_URL) {
     ["/tools/leave", ["가상 데이터 데모", "조건상 일치", "적용 근거"]],
     ["/tools/leave/settlement", ["정산", "근로기준과-5802", "유리한 쪽"]],
     ["/tools/leave/settlement?case=fiscal-favourable", ["회계연도", "재산정"]],
+    ["/tools/leave/advanced", ["사용 단위", "출근율", "비례부여", "사용촉진", "확인 불가"]],
   ];
   for (const [p, musts] of paths) {
     try {
