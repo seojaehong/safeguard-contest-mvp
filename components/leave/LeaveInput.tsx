@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { compareRow } from "@/lib/annual-leave";
+import { downloadXlsx } from "@/lib/leave-xlsx";
 import { StatusBadge } from "@/components/leave/LeaveUI";
 
 /**
@@ -317,20 +318,50 @@ export function LeaveInput() {
             </button>
             <button
               type="button"
-              className="lv-input__btn is-ghost"
+              className="lv-input__btn"
               onClick={() => {
-                const csv = "\uFEFF" + toCsv(results, asOf);
-                const url = URL.createObjectURL(
-                  new Blob([csv], { type: "text/csv;charset=utf-8;" })
-                );
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `연차계산_${asOf}.csv`;
-                a.click();
-                URL.revokeObjectURL(url);
+                void downloadXlsx(`연차계산_${asOf}`, [
+                  {
+                    name: "연차 계산",
+                    title: "연차 발생일수 계산 결과",
+                    subtitle: `기준일 ${asOf} · 입사일 기준 · 근로기준법 제60조`,
+                    header: ["이름", "입사일", "발생일수", "대장 기재", "차이", "판정", "적용 근거"],
+                    widths: [14, 13, 10, 10, 8, 13, 46],
+                    rows: results.map(({ row, result }) =>
+                      !result
+                        ? [row.name || "", row.hireDate || "", "", "", "", "읽지 못함", row.error ?? ""]
+                        : [
+                            row.name,
+                            row.hireDate,
+                            result.calculatedDays,
+                            row.recordedDays ?? "",
+                            row.recordedDays !== null ? result.diff : "",
+                            row.recordedDays === null
+                              ? "대장값 없음"
+                              : result.verdict === "diff"
+                                ? "차이 있음"
+                                : "일치",
+                            result.basisLabel,
+                          ]
+                    ),
+                    emphasizeRows: results
+                      .map((x, i) =>
+                        x.result && x.row.recordedDays !== null && x.result.verdict === "diff"
+                          ? i
+                          : -1
+                      )
+                      .filter((i) => i >= 0),
+                    notes: [
+                      "· 입사일 기준 「발생일수」입니다. 이월·사용분을 뺀 잔여일수와는 다릅니다.",
+                      "· 출근율 80% 미만 구간, 육아휴직 등 특수 출결은 조건이 달라집니다.",
+                      "· 회계연도로 운영하는 사업장의 퇴직 정산은 별도 화면에서 계산합니다.",
+                      "· 개별 사안의 최종 판단은 담당 공인노무사의 검토를 거치시기 바랍니다.",
+                    ],
+                  },
+                ]);
               }}
             >
-              CSV 내려받기
+              엑셀 내려받기
             </button>
           </div>
 

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { settleOnTermination } from "@/lib/leave-ledger";
+import { downloadXlsx } from "@/lib/leave-xlsx";
 import { StatusBadge } from "@/components/leave/LeaveUI";
 
 /**
@@ -243,42 +244,63 @@ export function SettlementInput() {
               type="button"
               className="lv-input__btn"
               onClick={() => {
-                const lines = [
-                  ["구분", "발생일", "발생", "누계", "적용근거"],
-                  ...r.ledger.map((e) => [
-                    e.label,
-                    e.accruedOn,
-                    String(e.days),
-                    String(e.cumulative),
-                    e.basisLabel,
-                  ]),
-                  [],
-                  ["입사일 기준 누계", String(r.hireDateTotal)],
-                  ["회계연도 부여 누계", String(r.fiscalGrantedTotal)],
-                  ["보장선", String(r.guaranteedTotal)],
-                  ["사용·지급", String(r.usedOrPaidTotal)],
-                  [
-                    "정산 대상",
-                    Number.isNaN(r.shortfallDays) ? "확인 필요" : String(Math.max(0, r.shortfallDays)),
-                  ],
-                  ["근거", r.groundNote],
-                ];
-                const csv =
-                  "﻿" +
-                  lines
-                    .map((c) => c.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
-                    .join("\r\n");
-                const url = URL.createObjectURL(
-                  new Blob([csv], { type: "text/csv;charset=utf-8;" })
-                );
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `퇴직연차정산_${endDate}.csv`;
-                a.click();
-                URL.revokeObjectURL(url);
+                const shortfall = Number.isNaN(r.shortfallDays)
+                  ? "확인 필요"
+                  : Math.max(0, r.shortfallDays);
+                void downloadXlsx(`퇴직연차정산_${endDate}`, [
+                  {
+                    name: "정산 요약",
+                    title: "퇴직 연차 정산 결과",
+                    subtitle: `입사 ${hireDate} · 퇴사 ${endDate}`,
+                    header: ["항목", "값"],
+                    widths: [26, 58],
+                    rows: [
+                      ["입사일 기준 누계", r.hireDateTotal],
+                      ["회계연도 부여 누계", r.fiscalGrantedTotal],
+                      [
+                        "보장선(유리한 쪽)",
+                        `${r.guaranteedTotal} (${
+                          r.favourable === "hire-date"
+                            ? "입사일 기준"
+                            : r.favourable === "fiscal-year"
+                              ? "회계연도 기준"
+                              : "두 기준 동일"
+                        })`,
+                      ],
+                      ["이미 사용·지급", r.usedOrPaidTotal],
+                      ["정산 대상 일수", shortfall],
+                      ["취업규칙 재산정 규정", clause === "yes" ? "있음" : clause === "no" ? "없음" : "확인 필요"],
+                      ["판단 근거", r.groundNote],
+                    ],
+                    emphasizeRows: [4],
+                    notes: [
+                      "· 근거 — 고용노동부 근로기준과-5802(2009-12-31), 근기 68207-620(2003-05-23)",
+                      "· 회계연도로 일률 적용하더라도 근로자에게 불리하지 않아야 하므로, 퇴직시점 총 휴가일수가",
+                      "  입사일 기준에 미달하면 그 미달분을 미사용수당으로 정산해야 합니다.",
+                      "· 수당 금액은 산출하지 않습니다 — 통상임금 산입 범위는 그 자체가 다툼의 대상입니다.",
+                      "· 1년 미만 월 단위 연차(11일)는 회계연도 산정과 별개로 발생합니다.",
+                      "· 연차 사용촉진을 적법하게 한 경우, 소멸시효는 별도 검토가 필요합니다.",
+                      "· 개별 사안의 최종 판단은 담당 공인노무사의 검토를 거치시기 바랍니다.",
+                    ],
+                  },
+                  {
+                    name: "연도별 발생내역",
+                    title: "입사일 기준 연도별 연차 발생 내역",
+                    subtitle: `입사 ${hireDate} · 퇴사 ${endDate}`,
+                    header: ["구분", "발생일", "발생", "누계", "적용 근거"],
+                    widths: [16, 13, 8, 8, 46],
+                    rows: r.ledger.map((e) => [
+                      e.label,
+                      e.accruedOn,
+                      e.days,
+                      e.cumulative,
+                      e.basisLabel,
+                    ]),
+                  },
+                ]);
               }}
             >
-              정산 내역 CSV 내려받기
+              엑셀 내려받기
             </button>
           </div>
         </>
