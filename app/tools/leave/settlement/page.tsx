@@ -23,6 +23,11 @@ export default function SettlementPage() {
         </p>
       </header>
 
+      <p className="lv-terms">
+        <strong>무료로 쓰실 수 있습니다.</strong> 법률 자문이 아니라 계산을 도와드리는
+        도구이며, 입력값 기준의 참고 결과입니다.
+      </p>
+
       <SettlementInput />
 
       <section className="lv-how">
@@ -81,7 +86,7 @@ export default function SettlementPage() {
         </ul>
         <p className="lv-scope__footer">
           입력값 기준의 참고 계산입니다. 임금채권 확정이나 분쟁 사안은 별도 검토가 필요합니다.
-        </p>
+         개별 사안의 법적 판단이나 임금채권 확정은 <strong>담당 공인노무사</strong>의 검토를 거치시기 바랍니다.</p>
       </section>
     </main>
   );

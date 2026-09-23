@@ -87,6 +87,45 @@ function parseLines(text: string): ParsedRow[] {
  * toISOString() 은 UTC 라서 KST 오전 9시 이전에는 하루 전 날짜가 나온다.
  * 연차 발생일 당일에는 결과가 달라지므로 반드시 현지 날짜를 쓴다.
  */
+const TEMPLATE_KEY = "safeclaw.leave.template.v1";
+
+type Template = { colName: number; colHire: number; colDays: number | null };
+
+function loadTemplate(): Template | null {
+  try {
+    const raw = localStorage.getItem(TEMPLATE_KEY);
+    return raw ? (JSON.parse(raw) as Template) : null;
+  } catch {
+    return null;
+  }
+}
+function saveTemplate(t: Template): void {
+  try {
+    localStorage.setItem(TEMPLATE_KEY, JSON.stringify(t));
+  } catch {
+    /* 저장 못 해도 계산에는 지장이 없다 */
+  }
+}
+
+/** 엑셀 표 + 열 매핑 → 입력창 텍스트 */
+function buildText(
+  grid: string[][],
+  skipFirst: boolean,
+  cName: number,
+  cHire: number,
+  cDays: number | null
+): string {
+  return grid
+    .slice(skipFirst ? 1 : 0)
+    .map((row) => {
+      const cells = [row[cName] ?? "", row[cHire] ?? ""];
+      if (cDays !== null) cells.push(row[cDays] ?? "");
+      return cells.join("\t");
+    })
+    .filter((l) => l.replace(/\t/g, "").trim() !== "")
+    .join("\n");
+}
+
 function today(): string {
   const d = new Date();
   const y = d.getFullYear();
@@ -125,6 +164,13 @@ export function LeaveInput() {
   const [copied, setCopied] = useState(false);
   const [fileNote, setFileNote] = useState<string | null>(null);
   const [reading, setReading] = useState(false);
+  /** 엑셀에서 읽은 원본 표 — 열 매핑을 다시 할 수 있게 들고 있는다 */
+  const [sheet, setSheet] = useState<string[][] | null>(null);
+  /** 열 매핑 (0-based). null = 안 씀 */
+  const [colName, setColName] = useState(0);
+  const [colHire, setColHire] = useState(1);
+  const [colDays, setColDays] = useState<number | null>(2);
+  const [skipFirst, setSkipFirst] = useState(true);
 
   /**
    * 엑셀 업로드 — **브라우저에서만 읽는다.** 파일을 서버로 보내지 않는다.
@@ -187,10 +233,19 @@ export function LeaveInput() {
         Boolean(normalizeDate(secondCol(lines[1])));
       const body = looksHeader ? lines.slice(1) : lines;
 
-      setText(body.join("\n"));
+      const grid = lines.map((l) => l.split("\t"));
+      setSheet(grid);
+      setSkipFirst(looksHeader);
+      // 저장된 사무소 설정이 있으면 그 열 매핑을 먼저 쓴다
+      const saved = loadTemplate();
+      const cn = saved?.colName ?? 0;
+      const ch = saved?.colHire ?? 1;
+      const cd = saved?.colDays ?? 2;
+      setColName(cn); setColHire(ch); setColDays(cd);
+      setText(buildText(grid, looksHeader, cn, ch, cd));
       setFileNote(
-        `${file.name} — ${body.length}행을 읽었습니다${looksHeader ? " (첫 줄은 제목으로 보고 제외)" : ""}. ` +
-          "아래에서 확인하고 고치실 수 있습니다."
+        `${file.name} — ${grid.length}행을 읽었습니다${looksHeader ? " (첫 줄은 제목으로 보고 제외)" : ""}. ` +
+          "열이 잘못 잡혔으면 아래에서 바꾸세요."
       );
     } catch {
       setFileNote("이 파일은 읽지 못했습니다. xlsx 형식인지 확인하시거나 내용을 붙여넣어 주세요.");
@@ -267,6 +322,69 @@ export function LeaveInput() {
       </div>
 
       {fileNote && <p className="lv-input__filenote">{fileNote}</p>}
+
+      {sheet && (
+        <div className="lv-map">
+          <p className="lv-map__title">어느 열을 쓸까요</p>
+          <div className="lv-map__grid">
+            {(
+              [
+                ["이름", colName, setColName, false],
+                ["입사일", colHire, setColHire, false],
+                ["대장 연차일수", colDays, setColDays, true],
+              ] as [string, number | null, (v: never) => void, boolean][]
+            ).map(([label, val, set, optional]) => (
+              <label key={label} className="lv-input__field">
+                <span>{label}</span>
+                <select
+                  value={val === null ? "" : String(val)}
+                  onChange={(e) => {
+                    const v = e.target.value === "" ? null : Number(e.target.value);
+                    (set as (x: number | null) => void)(v);
+                    const next = {
+                      colName: label === "이름" ? (v as number) : colName,
+                      colHire: label === "입사일" ? (v as number) : colHire,
+                      colDays: label === "대장 연차일수" ? v : colDays,
+                    };
+                    setText(buildText(sheet, skipFirst, next.colName, next.colHire, next.colDays));
+                  }}
+                >
+                  {optional && <option value="">쓰지 않음</option>}
+                  {(sheet[0] ?? []).map((_, i) => (
+                    <option key={i} value={i}>
+                      {String.fromCharCode(65 + i)}열
+                      {sheet[0]?.[i] ? ` · ${sheet[0][i].slice(0, 10)}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </div>
+          <div className="lv-map__foot">
+            <label className="lv-map__check">
+              <input
+                type="checkbox"
+                checked={skipFirst}
+                onChange={(e) => {
+                  setSkipFirst(e.target.checked);
+                  setText(buildText(sheet, e.target.checked, colName, colHire, colDays));
+                }}
+              />
+              첫 줄은 제목이라 제외
+            </label>
+            <button
+              type="button"
+              className="lv-input__btn is-ghost"
+              onClick={() => {
+                saveTemplate({ colName, colHire, colDays });
+                setFileNote("이 열 배치를 기억했습니다. 다음에 파일을 열면 그대로 적용됩니다.");
+              }}
+            >
+              이 배치 기억하기
+            </button>
+          </div>
+        </div>
+      )}
 
       <textarea
         className="lv-input__area"
@@ -429,6 +547,13 @@ export function LeaveInput() {
               }}
             >
               엑셀 내려받기
+            </button>
+            <button
+              type="button"
+              className="lv-input__btn is-ghost lv-print-btn"
+              onClick={() => window.print()}
+            >
+              인쇄 · PDF 저장
             </button>
           </div>
 

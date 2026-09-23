@@ -299,6 +299,13 @@ export function SettlementInput() {
             >
               엑셀 내려받기
             </button>
+            <button
+              type="button"
+              className="lv-input__btn is-ghost lv-print-btn"
+              onClick={() => window.print()}
+            >
+              인쇄 · PDF 저장
+            </button>
           </div>
         </>
       )}

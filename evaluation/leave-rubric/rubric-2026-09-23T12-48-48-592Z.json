@@ -1,0 +1,156 @@
+{
+  "generatedAt": "2026-09-23T12:48:48.592Z",
+  "got": 100,
+  "total": 100,
+  "pct": 100,
+  "results": [
+    {
+      "axis": "법적 정확성",
+      "id": "L1",
+      "label": "발생일수가 Frappe 엔진과 교차 일치(8건)",
+      "weight": 8,
+      "ok": true,
+      "detail": "annual-leave.crosscheck: 8건 TS=PY 일치"
+    },
+    {
+      "axis": "법적 정확성",
+      "id": "L2",
+      "label": "퇴직정산이 근로기준과-5802 본문값과 일치(79/62/26일)",
+      "weight": 12,
+      "ok": true,
+      "detail": "leave-ledger.crosscheck: 7건 통과 (근로기준과-5802 실사례 79일·62일·26일 포함)"
+    },
+    {
+      "axis": "법적 정확성",
+      "id": "L3",
+      "label": "출근율 80%·회계연도 비례(최영우 7.5일)",
+      "weight": 10,
+      "ok": true,
+      "detail": "leave-advanced: 9건 통과 (출근율 4 · 비례부여 3 · 시효가드 2)"
+    },
+    {
+      "axis": "법적 정확성",
+      "id": "L4",
+      "label": "반차·반반차·시간차 환산(소정근로시간 반영)",
+      "weight": 5,
+      "ok": true,
+      "detail": "leave-usage: 8건 통과"
+    },
+    {
+      "axis": "법적 정확성",
+      "id": "L5",
+      "label": "취업규칙 재산정 조항을 입력으로 받는다(최영우 산정 예)",
+      "weight": 5,
+      "ok": true,
+      "detail": "회계연도가 많을 때 조항 유무로 결과가 갈린다"
+    },
+    {
+      "axis": "안전선",
+      "id": "S1",
+      "label": "제우스 출시 게이트 통과(10건)",
+      "weight": 15,
+      "ok": true,
+      "detail": "leave-guardrails: 10건 통과 (제우스 출시 게이트)"
+    },
+    {
+      "axis": "안전선",
+      "id": "S2",
+      "label": "통상임금을 산정하지 않고 입력받는다",
+      "weight": 6,
+      "ok": true,
+      "detail": "단가·출처가 없으면 금액을 내지 않는다"
+    },
+    {
+      "axis": "안전선",
+      "id": "S3",
+      "label": "수당 엔진이 화면·API에 노출되지 않음",
+      "weight": 7,
+      "ok": true,
+      "detail": "노출 0건"
+    },
+    {
+      "axis": "안전선",
+      "id": "S4",
+      "label": "소멸시효를 개별 일수와 연결하지 않는다",
+      "weight": 6,
+      "ok": true,
+      "detail": "가드 함수로 개발 중 실수도 막는다"
+    },
+    {
+      "axis": "안전선",
+      "id": "S5",
+      "label": "촉진 적법성을 판정하지 않는다",
+      "weight": 6,
+      "ok": true,
+      "detail": "1년 미만은 범위밖, 라벨은 「일정 대조」"
+    },
+    {
+      "axis": "사용성",
+      "id": "U1",
+      "label": "결론이 화면 최상단에 온다",
+      "weight": 5,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "axis": "사용성",
+      "id": "U2",
+      "label": "데모 성격을 고정 표시한다",
+      "weight": 4,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "axis": "사용성",
+      "id": "U3",
+      "label": "다루지 않는 범위를 먼저 밝힌다",
+      "weight": 4,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "axis": "사용성",
+      "id": "U4",
+      "label": "상태를 색만으로 구분하지 않는다(기호 병기)",
+      "weight": 4,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "axis": "사용성",
+      "id": "U5",
+      "label": "모바일에서 표가 카드로 무너진다",
+      "weight": 3,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "axis": "E2E",
+      "id": "E1",
+      "label": "라우트 3개가 200 + 필수 문구 포함",
+      "weight": 0,
+      "ok": true,
+      "detail": "[{\"path\":\"/tools/leave\",\"status\":200,\"ok\":true,\"missing\":[]},{\"path\":\"/tools/leave/settlement\",\"status\":200,\"ok\":true,\"missing\":[]},{\"path\":\"/tools/leave/settlement?case=fiscal-favourable\",\"status\":200,\"ok\":true,\"missing\":[]}]"
+    }
+  ],
+  "e2e": [
+    {
+      "path": "/tools/leave",
+      "status": 200,
+      "ok": true,
+      "missing": []
+    },
+    {
+      "path": "/tools/leave/settlement",
+      "status": 200,
+      "ok": true,
+      "missing": []
+    },
+    {
+      "path": "/tools/leave/settlement?case=fiscal-favourable",
+      "status": 200,
+      "ok": true,
+      "missing": []
+    }
+  ]
+}

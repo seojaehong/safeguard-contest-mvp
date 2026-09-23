@@ -28,3 +28,4 @@ progress.txt
 .bkit/
 .worktrees/
 .cache/kosha-review/
+.claude/
