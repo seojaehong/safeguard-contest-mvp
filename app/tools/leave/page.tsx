@@ -48,8 +48,12 @@ export default function LeaveToolPage() {
       </section>
 
       <section className="lv-scope">
-        <h2 className="lv-scope__title">이 화면의 계산 범위</h2>
+        <h2 className="lv-scope__title">이 화면의 계산 범위와 전제</h2>
         <ul className="lv-scope__list">
+          <li>
+            <strong>상시 5인 이상 사업장</strong>의 <strong>1주 소정근로시간 15시간 이상</strong>
+            근로자를 전제로 합니다. 이 전제가 다르면 먼저 적용 여부를 확인해야 합니다
+          </li>
           <li>
             입사일 기준 <strong>발생일수</strong>를 계산합니다. 이월·사용분을 뺀{" "}
             <strong>잔여일수</strong>는 다릅니다
@@ -62,8 +66,8 @@ export default function LeaveToolPage() {
           <li>회사가 법정 기준에 더해 부여한 추가 연차는 반영되지 않습니다</li>
         </ul>
         <p className="lv-scope__footer">
-          계산 결과는 근로기준법과 고용노동부 행정해석을 기준으로 합니다. 개별 사안의 최종
-          판단은 담당 공인노무사의 검토를 거치시기 바랍니다.
+          이 화면은 입력값 기준의 참고 계산입니다. 개별 사안의 법적 판단이나 임금채권 확정은
+          담당 공인노무사 검토를 거치시기 바랍니다.
         </p>
       </section>
 

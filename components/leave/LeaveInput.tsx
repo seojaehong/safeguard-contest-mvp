@@ -20,7 +20,10 @@ import { StatusBadge } from "@/components/leave/LeaveUI";
 type ParsedRow = {
   name: string;
   hireDate: string;
+  /** 대장에 적힌 일수. null = 칸이 비어 있음, NaN 대신 recordedInvalid 로 구분 */
   recordedDays: number | null;
+  /** 숫자가 아닌 값이 적혀 있었다 (예: "미확인") — 0 으로 바꾸지 않는다 */
+  recordedRaw?: string;
   raw: string;
   error?: string;
 };
@@ -61,18 +64,35 @@ function parseLines(text: string): ParsedRow[] {
         return { name, hireDate: "", recordedDays: null, raw: line,
                  error: `입사일을 읽을 수 없습니다: ${cols[1]}` };
       }
-      const recorded = cols[2] !== undefined ? Number(cols[2].replace(/[^\d.-]/g, "")) : NaN;
-      return {
-        name,
-        hireDate,
-        recordedDays: Number.isFinite(recorded) ? recorded : null,
-        raw: line,
-      };
+      // 대장값: 비어 있으면 null, 숫자면 숫자, 그 밖('미확인' 등)이면 원문을 남긴다.
+      // 숫자만 뽑아내면 "미확인"이 0 이 되어 「확인 안 한 값」이 「0일」로 둔갑한다.
+      const rawRecorded = cols[2];
+      let recordedDays: number | null = null;
+      let recordedRaw: string | undefined;
+      if (rawRecorded !== undefined && rawRecorded !== "") {
+        const cleaned = rawRecorded.replace(/일|days?/gi, "").trim();
+        const n = Number(cleaned);
+        if (cleaned !== "" && Number.isFinite(n)) {
+          recordedDays = n;
+        } else {
+          recordedRaw = rawRecorded;
+        }
+      }
+      return { name, hireDate, recordedDays, recordedRaw, raw: line };
     });
 }
 
+/**
+ * 오늘 날짜 — **현지 시각 기준**.
+ * toISOString() 은 UTC 라서 KST 오전 9시 이전에는 하루 전 날짜가 나온다.
+ * 연차 발생일 당일에는 결과가 달라지므로 반드시 현지 날짜를 쓴다.
+ */
 function today(): string {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 function toCsv(
@@ -122,35 +142,56 @@ export function LeaveInput() {
         setFileNote("시트를 찾지 못했습니다.");
         return;
       }
+      // ★ 빈 셀을 건너뛰면 **열 위치가 당겨진다**(B열이 비면 C열 값이 B로 올라온다).
+      //   includeEmpty:true 로 자리를 지키고, 셀 값이 없으면 빈 문자열을 넣는다.
+      const cellText = (v: unknown): string => {
+        if (v == null) return "";
+        if (v instanceof Date) {
+          // 엑셀 날짜는 현지 기준으로 보이므로 현지 날짜로 뽑는다
+          const y = v.getFullYear();
+          const m = String(v.getMonth() + 1).padStart(2, "0");
+          const d = String(v.getDate()).padStart(2, "0");
+          return `${y}-${m}-${d}`;
+        }
+        if (typeof v === "object") {
+          const o = v as { result?: unknown; text?: unknown; richText?: { text: string }[] };
+          if (o.result !== undefined) return String(o.result ?? "");
+          if (Array.isArray(o.richText)) return o.richText.map((t) => t.text).join("");
+          if (o.text !== undefined) return String(o.text ?? "");
+        }
+        return String(v);
+      };
+
       const lines: string[] = [];
       ws.eachRow((row) => {
         const cells: string[] = [];
-        row.eachCell({ includeEmpty: false }, (cell) => {
-          const v = cell.value;
-          if (v == null) return;
-          if (v instanceof Date) {
-            cells.push(v.toISOString().slice(0, 10));
-          } else if (typeof v === "object" && "result" in (v as object)) {
-            cells.push(String((v as { result?: unknown }).result ?? ""));
-          } else if (typeof v === "object" && "text" in (v as object)) {
-            cells.push(String((v as { text?: unknown }).text ?? ""));
-          } else {
-            cells.push(String(v));
-          }
-        });
-        if (cells.length) lines.push(cells.join("\t"));
+        const last = row.cellCount;
+        for (let c = 1; c <= last; c += 1) {
+          cells.push(cellText(row.getCell(c).value).trim());
+        }
+        // 줄 전체가 비었으면 건너뛴다. 중간 빈칸은 살린다.
+        if (cells.some((c) => c !== "")) lines.push(cells.join("\t"));
       });
-      // 헤더로 보이는 첫 줄은 버린다 (둘째 칸이 날짜가 아니면 헤더로 본다)
-      const body =
-        lines.length > 1 && !normalizeDate((lines[0].split("\t")[1] ?? "").trim())
-          ? lines.slice(1)
-          : lines;
-      if (!body.length) {
+
+      if (!lines.length) {
         setFileNote("읽을 수 있는 행이 없습니다. 이름과 입사일 열이 있는지 확인해주세요.");
         return;
       }
+
+      // 헤더 판정 — 첫 줄의 둘째 칸이 날짜가 아니고, **둘째 줄은 날짜일 때만** 헤더로 본다.
+      //   첫 직원의 날짜 오타 때문에 그 사람이 통째로 사라지는 일을 막는다.
+      const secondCol = (l: string) => (l.split("\t")[1] ?? "").trim();
+      const looksHeader =
+        lines.length > 1 &&
+        !normalizeDate(secondCol(lines[0])) &&
+        Boolean(normalizeDate(secondCol(lines[1])));
+      const body = looksHeader ? lines.slice(1) : lines;
+
       setText(body.join("\n"));
-      setFileNote(`${file.name} — ${body.length}행을 읽었습니다. 아래에서 확인하고 고치실 수 있습니다.`);
+      setFileNote(
+        `${file.name} — ${body.length}행을 읽었습니다${looksHeader ? " (첫 줄은 제목으로 보고 제외)" : ""}. ` +
+          "아래에서 확인하고 고치실 수 있습니다."
+      );
     } catch {
       setFileNote("이 파일은 읽지 못했습니다. xlsx 형식인지 확인하시거나 내용을 붙여넣어 주세요.");
     } finally {
@@ -179,10 +220,14 @@ export function LeaveInput() {
     [rows, asOf]
   );
 
-  const usable = results.filter((x) => x.result);
-  const withRecorded = usable.filter((x) => x.row.recordedDays !== null);
+  // ★ compareRow 는 계산 실패 시 verdict "error" 를 돌려준다.
+  //   그것을 "diff 가 아니면 일치" 로 처리하면 **틀린 답을 맞다고 표시**한다.
+  //   (기준일보다 미래 입사 등) → 반드시 따로 센다.
+  const ok = results.filter((x) => x.result && x.result.verdict !== "error");
+  const usable = ok;
+  const withRecorded = ok.filter((x) => x.row.recordedDays !== null);
   const diffs = withRecorded.filter((x) => x.result!.verdict === "diff");
-  const problems = results.filter((x) => !x.result);
+  const problems = results.filter((x) => !x.result || x.result.verdict === "error");
 
   return (
     <section className="lv-input">
@@ -243,7 +288,9 @@ export function LeaveInput() {
                 차이 {diffs.length}명
               </span>
             )}
-            {problems.length > 0 && <span className="is-diff">읽지 못함 {problems.length}줄</span>}
+            {problems.length > 0 && (
+              <span className="is-diff">계산 불가 {problems.length}줄</span>
+            )}
           </div>
 
           <div className="lv-table">
@@ -252,7 +299,7 @@ export function LeaveInput() {
                 <tr>
                   <th>이름</th>
                   <th>입사일</th>
-                  <th className="num">발생일수</th>
+                  <th className="num">부여일수</th>
                   <th className="num">대장</th>
                   <th>판정</th>
                   <th>적용 근거</th>
@@ -273,20 +320,40 @@ export function LeaveInput() {
                     );
                   }
                   const res = x.result;
+                  if (res.verdict === "error") {
+                    return (
+                      <tr key={i} data-diff="true">
+                        <td data-label="이름">{r.name}</td>
+                        <td data-label="입사일">{r.hireDate}</td>
+                        <td className="num" data-label="부여일수">—</td>
+                        <td className="num" data-label="대장">
+                          {r.recordedDays ?? r.recordedRaw ?? "—"}
+                        </td>
+                        <td data-label="판정">
+                          <StatusBadge status="unknown" />
+                        </td>
+                        <td className="basis" data-label="근거">
+                          {res.errorMessage ?? "계산할 수 없습니다"}
+                        </td>
+                      </tr>
+                    );
+                  }
                   const hasRecorded = r.recordedDays !== null;
                   return (
                     <tr key={i} data-diff={hasRecorded && res.verdict === "diff" ? "true" : undefined}>
                       <td data-label="이름">{r.name}</td>
                       <td data-label="입사일">{r.hireDate}</td>
-                      <td className="num" data-label="발생일수">
+                      <td className="num" data-label="부여일수">
                         <strong>{res.calculatedDays}</strong>
                       </td>
                       <td className="num" data-label="대장">
-                        {hasRecorded ? r.recordedDays : "—"}
+                        {hasRecorded ? r.recordedDays : (r.recordedRaw ?? "—")}
                       </td>
                       <td data-label="판정">
                         {hasRecorded ? (
                           <StatusBadge status={res.verdict === "diff" ? "diff" : "match"} />
+                        ) : r.recordedRaw ? (
+                          <StatusBadge status="unknown" />
                         ) : (
                           <span className="lv-input__muted">대장값 없음</span>
                         )}
@@ -352,6 +419,7 @@ export function LeaveInput() {
                       )
                       .filter((i) => i >= 0),
                     notes: [
+                      "· 상시 5인 이상 사업장, 1주 소정근로시간 15시간 이상 근로자를 전제로 한 참고 계산입니다.",
                       "· 입사일 기준 「발생일수」입니다. 이월·사용분을 뺀 잔여일수와는 다릅니다.",
                       "· 출근율 80% 미만 구간, 육아휴직 등 특수 출결은 조건이 달라집니다.",
                       "· 회계연도로 운영하는 사업장의 퇴직 정산은 별도 화면에서 계산합니다.",
@@ -366,8 +434,16 @@ export function LeaveInput() {
           </div>
 
           <p className="lv-input__note">
-            입사일 기준 <strong>발생일수</strong>입니다. 이월·사용분을 뺀 잔여일수, 출근율 80%
-            미만 구간, 회계연도 운영 사업장은 조건이 달라집니다.
+            표시되는 값은 <strong>기준일이 속한 연차년도에 부여되는 일수</strong>입니다(입사일
+            기준). 입사 이후 <strong>누적 발생량이 아닙니다</strong> — 대장과 비교하실 때는 같은
+            기간·같은 기준인지 확인해 주세요.
+            <br />
+            1년 미만은 <strong>1개월 개근 시 1일</strong>, 1년 이상 15일은{" "}
+            <strong>직전 1년 출근율 80% 이상</strong>을 전제로 합니다. 상시 5인 이상 사업장,
+            1주 소정근로시간 15시간 이상 근로자가 대상입니다.
+            <br />
+            이월·사용분을 뺀 잔여일수, 출근율 80% 미만 구간, 회계연도 운영 사업장은 조건이
+            달라집니다. 육아휴직 기간은 법정 출근 간주기간이므로 단순 결근과 다릅니다.
           </p>
         </>
       )}
