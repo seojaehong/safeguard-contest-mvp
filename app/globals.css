@@ -25399,3 +25399,29 @@ body:has(.safeclaw-landing) :is(
   color: var(--accent); background: var(--accent-soft);
   border-radius: var(--radius-sm); padding: 8px 11px;
 }
+/* 퇴직 정산 입력 폼 (2026-09-23) */
+.lv-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.lv-clause {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 13px 15px;
+  margin: 12px 0 0;
+}
+.lv-clause legend { font-size: 13px; font-weight: 650; padding: 0 5px; }
+.lv-clause__opts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.lv-clause__opts label {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  padding: 7px 12px; font-size: 13px; cursor: pointer; background: var(--paper);
+}
+.lv-clause__opts label.is-on { border-color: var(--accent); color: var(--accent); font-weight: 650; }
+.lv-clause__hint { margin: 9px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--muted); }
+/* 섹션 묶음 (2026-09-23) */
+.lv-section { display: flex; flex-direction: column; gap: 10px; }
+.lv-section__title { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -0.015em; }
+.lv-section__lede { margin: 0; font-size: 14px; line-height: 1.66; color: var(--muted); }
+.lv-input__field select {
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  padding: 7px 10px; font-size: 14px; font-family: inherit;
+  background: var(--paper); color: var(--ink);
+}
