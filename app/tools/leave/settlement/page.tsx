@@ -52,29 +52,22 @@ export default function SettlementPage() {
       <section className="lv-scope">
         <h2 className="lv-scope__title">계산 근거</h2>
         <p className="lv-scope__footer" style={{ marginTop: 0 }}>
-          <strong>근로기준과-5802</strong> — 회계연도를 기준으로 일률 적용하더라도 근로자에게
-          불리하지 않아야 하므로, 퇴직시점 총 휴가일수가 입사일 기준에 미달하면 그 미달분을
-          미사용수당으로 정산해야 합니다.
+          회계연도로 부여했더라도 퇴직 시 총 휴가일수가 입사일 기준에 미달하면 부족분을 정산합니다.
+          근거: <strong>근로기준과-5802</strong>, <strong>근기 68207-620</strong>.
         </p>
         <p className="lv-scope__footer">
-          같은 해석은 <strong>회계연도 기준이 더 많은 경우 그쪽으로 지급</strong>한다고도
-          밝히고 있습니다(입사일기준 62일 / 회계연도기준 69일). 그래서 기준은 「입사일로
-          맞춘다」가 아니라 <strong>「유리한 쪽으로 맞춘다」</strong>입니다.
+          기준은 단순히 입사일로 맞추는 것이 아니라 <strong>근로자에게 유리한 쪽</strong>입니다.
         </p>
         <p className="lv-scope__footer">
-          다만 회계연도 부여분이 더 많을 때는{" "}
-          <strong>취업규칙에 퇴직 시 입사일 기준 재산정 규정이 있는지</strong>에 따라 달라집니다.
-          규정이 없으면 부여한 일수를 그대로 두고, 있으면 입사일 기준으로 다시 계산할 수
-          있습니다.
+          회계연도 부여분이 더 많을 때는 <strong>퇴직 시 입사일 기준 재산정 규정</strong> 유무를 함께 봅니다.
         </p>
       </section>
 
       <section className="lv-scope">
-        <h2 className="lv-scope__title">함께 확인이 필요한 항목</h2>
+        <h2 className="lv-scope__title">계산 범위</h2>
         <ul className="lv-scope__list">
           <li>
-            <strong>수당 금액</strong> — 일수까지만 산출합니다. 통상임금 산입 범위는 그 자체가
-            다툼의 대상이라 금액은 담당자가 확정하시도록 남겨둡니다
+            <strong>일수만</strong> 계산합니다. 통상임금 기준의 수당 금액은 포함하지 않습니다
           </li>
           <li>출근율 80% 미만 구간, 육아휴직 등 특수 출결로 발생이 달라지는 경우</li>
           <li>
@@ -87,8 +80,7 @@ export default function SettlementPage() {
           <li>미사용수당 청구권의 소멸시효는 별도 검토가 필요합니다</li>
         </ul>
         <p className="lv-scope__footer">
-          계산 결과는 근로기준법과 고용노동부 행정해석을 기준으로 합니다. 개별 사안의 최종
-          판단은 담당 공인노무사의 검토를 거치시기 바랍니다.
+          입력값 기준의 참고 계산입니다. 임금채권 확정이나 분쟁 사안은 별도 검토가 필요합니다.
         </p>
       </section>
     </main>

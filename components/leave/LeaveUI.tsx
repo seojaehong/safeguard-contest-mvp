@@ -111,12 +111,7 @@ export function DemoNotice({ children }: { children?: ReactNode }) {
   return (
     <div className="lv-demo-notice" role="status">
       <strong>미리보기 화면입니다.</strong>{" "}
-      {children ?? (
-        <>
-          예시 자료로 계산 방식을 보여드립니다. 현재 파일 업로드는 지원하지 않으며, 실제
-          직원 정보를 받지 않습니다.
-        </>
-      )}
+      {children ?? <>예시 자료로 계산 방식을 보여드립니다. 실제 직원 정보는 입력하지 마세요.</>}
     </div>
   );
 }

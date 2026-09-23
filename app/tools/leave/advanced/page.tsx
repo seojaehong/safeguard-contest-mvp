@@ -63,11 +63,10 @@ export default function AdvancedPage() {
       </section>
 
       <section className="lv-scope">
-        <h2 className="lv-scope__title">함께 확인이 필요한 항목</h2>
+        <h2 className="lv-scope__title">계산 범위</h2>
         <ul className="lv-scope__list">
           <li>
-            <strong>촉진의 적법성</strong> — 서면 여부·도달·노무수령 거부까지가 요건입니다. 이
-            화면은 날짜만 대조합니다
+            사용촉진은 날짜만 대조합니다. 서면 여부·도달·노무수령 거부는 별도 확인이 필요합니다
           </li>
           <li>
             근로자 응답기한은 <strong>촉구를 받은 날</strong>부터 셉니다. 수령일을 모르면 기한을
@@ -80,8 +79,7 @@ export default function AdvancedPage() {
           <li>반차·반반차는 법정 제도가 아니라 취업규칙·노사합의 사항입니다</li>
         </ul>
         <p className="lv-scope__footer">
-          계산 결과는 근로기준법과 고용노동부 행정해석을 기준으로 합니다. 개별 사안의 최종
-          판단은 담당 공인노무사의 검토를 거치시기 바랍니다.
+          입력값 기준의 참고 계산입니다. 임금채권 확정이나 분쟁 사안은 별도 검토가 필요합니다.
         </p>
       </section>
     </main>

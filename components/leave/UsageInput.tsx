@@ -87,7 +87,7 @@ export function UsageInput() {
   return (
     <section className="lv-input">
       <div className="lv-input__privacy">
-        🔒 입력한 내용은 <strong>이 브라우저에서만</strong> 계산됩니다.
+        🔒 입력한 내용은 <strong>브라우저 안에서만</strong> 계산됩니다.
       </div>
 
       <div className="lv-input__controls">

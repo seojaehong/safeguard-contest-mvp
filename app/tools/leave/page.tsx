@@ -32,11 +32,8 @@ export default function LeaveToolPage() {
           </p>
         </div>
         <div className="lv-how__item">
-          <span className="lv-how__num">개인정보</span>
-          <p>
-            입력한 내용은 <strong>이 브라우저에서만</strong> 계산됩니다. 서버로 전송하지
-            않고 저장하지도 않습니다
-          </p>
+          <span className="lv-how__num">처리 방식</span>
+          <p>엑셀 붙여넣기와 파일 열기를 지원하며, 결과는 바로 복사하거나 내려받을 수 있습니다</p>
         </div>
         <div className="lv-how__item">
           <span className="lv-how__num">이어서</span>
@@ -48,33 +45,32 @@ export default function LeaveToolPage() {
       </section>
 
       <section className="lv-scope">
-        <h2 className="lv-scope__title">이 화면의 계산 범위와 전제</h2>
+        <h2 className="lv-scope__title">계산 범위</h2>
         <ul className="lv-scope__list">
           <li>
             <strong>상시 5인 이상 사업장</strong>의 <strong>1주 소정근로시간 15시간 이상</strong>
-            근로자를 전제로 합니다. 이 전제가 다르면 먼저 적용 여부를 확인해야 합니다
+            근로자를 전제로 합니다
           </li>
           <li>
-            입사일 기준 <strong>발생일수</strong>를 계산합니다. 이월·사용분을 뺀{" "}
-            <strong>잔여일수</strong>는 다릅니다
+            입사일 기준 <strong>발생일수</strong> 계산입니다. 이월·사용분을 뺀 잔여일수는
+            별도로 봐야 합니다
           </li>
           <li>
             회계연도로 운영하는 사업장의 퇴직 정산은{" "}
             <Link href="/tools/leave/settlement">퇴직자 정산</Link>에서 다룹니다
           </li>
-          <li>출근율 80% 미만, 육아휴직 등 특수 출결은 조건이 달라집니다</li>
+          <li>1년 이상 15일은 직전 1년 출근율 80% 이상을 전제로 합니다</li>
+          <li>출근율 80% 미만, 육아휴직 등 특수 출결은 조건이 달라질 수 있습니다</li>
           <li>회사가 법정 기준에 더해 부여한 추가 연차는 반영되지 않습니다</li>
         </ul>
         <p className="lv-scope__footer">
-          이 화면은 입력값 기준의 참고 계산입니다. 개별 사안의 법적 판단이나 임금채권 확정은
-          담당 공인노무사 검토를 거치시기 바랍니다.
+          입력값 기준의 참고 계산입니다. 임금채권 확정이나 분쟁 사안은 별도 검토가 필요합니다.
         </p>
       </section>
 
       <footer className="lv-foot">
         <p>
-          쓰시는 대장 양식에 맞춰 드립니다. 직원 정보를 지운 빈 양식이나 예시값으로 바꾼
-          파일을 보내주시면 그에 맞춰 준비하겠습니다.
+          개인정보는 브라우저 안에서만 처리됩니다. 파일과 붙여넣은 내용은 서버로 보내지 않습니다.
         </p>
       </footer>
     </main>
