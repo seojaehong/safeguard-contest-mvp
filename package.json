@@ -55,7 +55,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "leave:rubric": "node ./scripts/leave_rubric.mjs",
-    "leave:test": "node --experimental-strip-types tests/annual-leave.crosscheck.mts && node --experimental-strip-types tests/leave-ledger.crosscheck.mts && node --experimental-strip-types tests/leave-usage.test.mts && node --experimental-strip-types tests/leave-advanced.test.mts && node --experimental-strip-types tests/leave-guardrails.test.mts && node --experimental-strip-types tests/leave-adversarial.test.mts"
+    "leave:test": "node --experimental-strip-types tests/annual-leave.crosscheck.mts && node --experimental-strip-types tests/annual-leave-edges.test.mts && node --experimental-strip-types tests/leave-ledger.crosscheck.mts && node --experimental-strip-types tests/leave-usage.test.mts && node --experimental-strip-types tests/leave-advanced.test.mts && node --experimental-strip-types tests/leave-guardrails.test.mts && node --experimental-strip-types tests/leave-adversarial.test.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.109.1",
