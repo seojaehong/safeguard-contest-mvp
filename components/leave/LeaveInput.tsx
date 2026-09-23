@@ -102,6 +102,60 @@ export function LeaveInput() {
   const [text, setText] = useState("");
   const [asOf, setAsOf] = useState(today());
   const [copied, setCopied] = useState(false);
+  const [fileNote, setFileNote] = useState<string | null>(null);
+  const [reading, setReading] = useState(false);
+
+  /**
+   * 엑셀 업로드 — **브라우저에서만 읽는다.** 파일을 서버로 보내지 않는다.
+   * exceljs 를 동적 import 해서 첫 화면 용량에 영향을 주지 않는다.
+   */
+  async function handleFile(file: File) {
+    setReading(true);
+    setFileNote(null);
+    try {
+      const ExcelJS = (await import("exceljs")).default;
+      const wb = new ExcelJS.Workbook();
+      await wb.xlsx.load(await file.arrayBuffer());
+      const ws = wb.worksheets[0];
+      if (!ws) {
+        setFileNote("시트를 찾지 못했습니다.");
+        return;
+      }
+      const lines: string[] = [];
+      ws.eachRow((row) => {
+        const cells: string[] = [];
+        row.eachCell({ includeEmpty: false }, (cell) => {
+          const v = cell.value;
+          if (v == null) return;
+          if (v instanceof Date) {
+            cells.push(v.toISOString().slice(0, 10));
+          } else if (typeof v === "object" && "result" in (v as object)) {
+            cells.push(String((v as { result?: unknown }).result ?? ""));
+          } else if (typeof v === "object" && "text" in (v as object)) {
+            cells.push(String((v as { text?: unknown }).text ?? ""));
+          } else {
+            cells.push(String(v));
+          }
+        });
+        if (cells.length) lines.push(cells.join("\t"));
+      });
+      // 헤더로 보이는 첫 줄은 버린다 (둘째 칸이 날짜가 아니면 헤더로 본다)
+      const body =
+        lines.length > 1 && !normalizeDate((lines[0].split("\t")[1] ?? "").trim())
+          ? lines.slice(1)
+          : lines;
+      if (!body.length) {
+        setFileNote("읽을 수 있는 행이 없습니다. 이름과 입사일 열이 있는지 확인해주세요.");
+        return;
+      }
+      setText(body.join("\n"));
+      setFileNote(`${file.name} — ${body.length}행을 읽었습니다. 아래에서 확인하고 고치실 수 있습니다.`);
+    } catch {
+      setFileNote("이 파일은 읽지 못했습니다. xlsx 형식인지 확인하시거나 내용을 붙여넣어 주세요.");
+    } finally {
+      setReading(false);
+    }
+  }
 
   const rows = useMemo(() => parseLines(text), [text]);
   const results = useMemo(
@@ -132,7 +186,8 @@ export function LeaveInput() {
   return (
     <section className="lv-input">
       <div className="lv-input__privacy">
-        🔒 입력한 내용은 <strong>이 브라우저에서만 계산</strong>되며 서버로 전송되지 않습니다.
+        🔒 붙여넣은 내용도, 여신 엑셀 파일도 <strong>이 브라우저에서만</strong> 처리됩니다.
+        서버로 전송하지 않고 저장하지도 않습니다.
       </div>
 
       <div className="lv-input__controls">
@@ -144,7 +199,19 @@ export function LeaveInput() {
             onChange={(e) => setAsOf(e.target.value || today())}
           />
         </label>
-        <button type="button" className="lv-input__btn" onClick={() => setText(SAMPLE)}>
+        <label className="lv-input__btn lv-input__file">
+          {reading ? "읽는 중…" : "엑셀 파일 열기"}
+          <input
+            type="file"
+            accept=".xlsx,.xlsm"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void handleFile(f);
+              e.target.value = "";
+            }}
+          />
+        </label>
+        <button type="button" className="lv-input__btn is-ghost" onClick={() => setText(SAMPLE)}>
           예시 채우기
         </button>
         {text && (
@@ -153,6 +220,8 @@ export function LeaveInput() {
           </button>
         )}
       </div>
+
+      {fileNote && <p className="lv-input__filenote">{fileNote}</p>}
 
       <textarea
         className="lv-input__area"

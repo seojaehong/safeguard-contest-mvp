@@ -25392,3 +25392,10 @@ body:has(.safeclaw-landing) :is(
 .lv-input__muted { color: var(--muted); font-size: 12.5px; }
 .lv-input__note { margin: 10px 0 0; font-size: 12.5px; line-height: 1.66; color: var(--muted); }
 .lv-input__export { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.lv-input__file { position: relative; overflow: hidden; cursor: pointer; }
+.lv-input__file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.lv-input__filenote {
+  margin: 0 0 8px; font-size: 12.5px; line-height: 1.6;
+  color: var(--accent); background: var(--accent-soft);
+  border-radius: var(--radius-sm); padding: 8px 11px;
+}
