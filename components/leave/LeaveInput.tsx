@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { compareRow } from "@/lib/annual-leave";
 import { downloadXlsx } from "@/lib/leave-xlsx";
+import { todayLocal } from "@/lib/leave-today";
 import { StatusBadge } from "@/components/leave/LeaveUI";
 
 /**
@@ -126,14 +127,6 @@ function buildText(
     .join("\n");
 }
 
-function today(): string {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
 function toCsv(
   rows: { row: ParsedRow; result: ReturnType<typeof compareRow> | null }[],
   asOf: string
@@ -160,7 +153,7 @@ function toCsv(
 
 export function LeaveInput() {
   const [text, setText] = useState("");
-  const [asOf, setAsOf] = useState(today());
+  const [asOf, setAsOf] = useState(todayLocal());
   const [copied, setCopied] = useState(false);
   const [fileNote, setFileNote] = useState<string | null>(null);
   const [reading, setReading] = useState(false);
@@ -296,7 +289,7 @@ export function LeaveInput() {
           <input
             type="date"
             value={asOf}
-            onChange={(e) => setAsOf(e.target.value || today())}
+            onChange={(e) => setAsOf(e.target.value || todayLocal())}
           />
         </label>
         <label className="lv-input__btn lv-input__file">

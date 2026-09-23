@@ -8,8 +8,10 @@
  * 규칙: 새 버그를 찾으면 여기에 케이스를 추가하고 나서 고친다.
  */
 import assert from "node:assert/strict";
+import { readdirSync, readFileSync } from "node:fs";
 import { calculateEntitlement, compareRow } from "../lib/annual-leave.ts";
 import { buildHireDateLedger, settleOnTermination } from "../lib/leave-ledger.ts";
+import { todayLocal } from "../lib/leave-today.ts";
 
 let fail = 0;
 const ck = (l: string, fn: () => void) => {
@@ -80,5 +82,33 @@ ck("대장값 소수 0.5 단위도 대조된다", () => {
   assert.equal(r.diff, -0.5);
 });
 
+
+// ── 외부 검수 지적 ④ 재발 방지 — KST 오전에 날짜가 하루 전으로 찍히던 것.
+//    화면 두 곳(LeaveInput·SettlementInput)에 각자 today() 가 있어 한쪽만 고쳐졌었다.
+//    이제 lib/leave-today.ts 하나만 쓴다. 소스에 toISOString 날짜가 다시 생기면 실패한다.
+ck("todayLocal 은 UTC 가 아니라 현지 날짜를 준다", () => {
+  const got = todayLocal();
+  const d = new Date();
+  const expected = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  assert.equal(got, expected, "현지 달력 날짜와 같아야 한다");
+  // KST(UTC+9) 의 00~09시에는 UTC 날짜가 하루 전이다. 그때 두 값이 갈려야 정상.
+  const utc = new Date().toISOString().slice(0, 10);
+  if (got !== utc) {
+    assert.ok(got > utc, "현지 날짜가 UTC 보다 앞서야 한다 (KST 오전)");
+  }
+});
+
+ck("화면 컴포넌트에 toISOString 날짜 계산이 남아 있지 않다", () => {
+  const dir = new URL("../components/leave/", import.meta.url);
+  for (const f of readdirSync(dir)) {
+    if (!f.endsWith(".tsx")) continue;
+    const src = readFileSync(new URL(f, dir), "utf-8");
+    const offending = src
+      .split("\n")
+      .filter((l) => l.includes("toISOString") && !l.trimStart().startsWith("*") && !l.trimStart().startsWith("//"));
+    assert.equal(offending.length, 0, `${f} 에 toISOString 날짜 계산이 남아 있다: ${offending.join(" / ")}`);
+  }
+});
+
 if (fail) { console.error(`\nleave-adversarial: 실패 ${fail}건`); process.exit(1); }
-console.log("leave-adversarial: 10건 통과 (검수 지적 + 자체 발견 + 경계값)");
+console.log("leave-adversarial: 12건 통과 (검수 지적 + 자체 발견 + 경계값)");

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { settleOnTermination } from "@/lib/leave-ledger";
 import { downloadXlsx } from "@/lib/leave-xlsx";
+import { todayLocal } from "@/lib/leave-today";
 import { StatusBadge } from "@/components/leave/LeaveUI";
 
 /**
@@ -16,10 +17,6 @@ import { StatusBadge } from "@/components/leave/LeaveUI";
  */
 
 type Clause = "unknown" | "yes" | "no";
-
-function today(): string {
-  return new Date().toISOString().slice(0, 10);
-}
 
 export function SettlementInput() {
   const [hireDate, setHireDate] = useState("");
@@ -65,7 +62,7 @@ export function SettlementInput() {
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            max={today()}
+            max={todayLocal()}
           />
         </label>
         <label className="lv-input__field">
