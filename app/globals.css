@@ -24964,219 +24964,312 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
-/* ---------------------------------------------------------------------------
-   연차 대조 데모 (/tools/leave) — 2026-09-23
-   .leave-page 아래로 스코프. 이 레포의 디자인 변수를 그대로 쓴다.
---------------------------------------------------------------------------- */
+/* ===========================================================================
+   연차 도구 UI — 2026-09-23 (PLAN-v2 §2)
+   결론 먼저 · 위계 3단 · 상태는 라벨+기호 병기 · 모바일에서 표는 카드로
+   색은 기존 토큰만 사용 (--accent, --accent-warm, --danger-soft, --line …)
+=========================================================================== */
 
-.leave-page {
-  max-width: 1040px;
+.lv-page {
+  max-width: 980px;
   margin: 0 auto;
-  padding: 32px 20px 72px;
+  padding: 28px 20px 80px;
   display: flex;
   flex-direction: column;
-  gap: 26px;
+  gap: 22px;
   font-family: var(--font-base);
   color: var(--ink);
 }
 
-.leave-page .notice {
+/* --- 데모 고지 (최상단 고정) --- */
+.lv-demo-notice {
   border: 1px solid var(--line-strong);
-  border-left: 5px solid var(--accent-warm);
+  border-left: 4px solid var(--accent-warm);
   background: var(--danger-soft);
   border-radius: var(--radius-md);
-  padding: 14px 18px;
-  font-size: 14px;
-  line-height: 1.65;
+  padding: 12px 16px;
+  font-size: 13.5px;
+  line-height: 1.6;
 }
 
-.leave-page .eyebrow {
+/* --- 헤더 --- */
+.lv-head__eyebrow {
   margin: 0;
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  font-size: 11.5px;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--accent);
-  font-weight: 600;
+  font-weight: 700;
 }
 
-.leave-page .head h1 {
-  margin: 8px 0 12px;
-  font-size: clamp(23px, 4vw, 33px);
-  letter-spacing: -0.02em;
-  line-height: 1.25;
+.lv-head__title {
+  margin: 8px 0 10px;
+  font-size: clamp(24px, 4.2vw, 34px);
+  line-height: 1.22;
+  letter-spacing: -0.022em;
+  font-weight: 700;
 }
 
-.leave-page .lede {
+.lv-head__lede {
   margin: 0;
   font-size: 15px;
-  line-height: 1.7;
+  line-height: 1.72;
   color: var(--muted);
+  max-width: 62ch;
 }
 
-.leave-page .summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.leave-page .stat {
-  border: 1px solid var(--line);
-  background: var(--paper);
+/* --- ① 결론 배너 : 가장 먼저 읽히는 자리 --- */
+.lv-conclusion {
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius-md);
-  padding: 13px 18px;
-  min-width: 124px;
+  padding: 20px 22px;
+  background: var(--paper);
 }
 
-.leave-page .stat--diff,
-.leave-page .stat--error {
-  border-left: 5px solid var(--accent-warm);
+.lv-conclusion--action {
+  border-left: 6px solid var(--accent-warm);
+  background: var(--danger-soft);
 }
 
-.leave-page .stat__num {
-  display: block;
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.15;
+.lv-conclusion--clear {
+  border-left: 6px solid var(--accent);
+  background: var(--accent-soft);
 }
 
-.leave-page .stat__label {
-  display: block;
-  margin-top: 3px;
-  font-size: 13px;
-  color: var(--muted);
+.lv-conclusion--unknown {
+  border-left: 6px solid var(--line-strong);
 }
 
-.leave-page .meta {
+.lv-conclusion__headline {
   margin: 0;
-  font-size: 14px;
+  font-size: clamp(19px, 3.2vw, 25px);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+}
+
+.lv-conclusion__detail {
+  margin: 8px 0 0;
+  font-size: 14.5px;
+  line-height: 1.68;
+  color: var(--ink);
+}
+
+.lv-conclusion__meta {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
   color: var(--muted);
 }
 
-.leave-page .tablewrap {
+/* --- ② 요약 숫자 --- */
+.lv-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 10px;
+}
+
+.lv-stat {
   border: 1px solid var(--line);
   background: var(--panel-strong);
   border-radius: var(--radius-md);
-  overflow-x: auto;
+  padding: 13px 16px;
 }
 
-.leave-page table {
+.lv-stat--emphasis {
+  border-color: var(--accent-warm);
+  background: var(--danger-soft);
+}
+
+.lv-stat__value {
+  display: block;
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1.16;
+  font-variant-numeric: tabular-nums;
+}
+
+.lv-stat__label {
+  display: block;
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* --- ④ 상태 배지 : 색 + 기호 + 라벨 --- */
+.lv-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+
+.lv-badge__mark {
+  font-weight: 800;
+  opacity: 0.75;
+}
+
+.lv-badge.is-match { color: var(--accent); }
+.lv-badge.is-diff { color: var(--accent-warm); }
+.lv-badge.is-unknown { color: var(--muted); }
+.lv-badge.is-out { color: var(--muted); opacity: 0.85; }
+
+/* --- ③ 접힘 : 근거·원장 --- */
+.lv-fold {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+}
+
+.lv-fold__summary {
+  cursor: pointer;
+  padding: 13px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lv-fold__summary::-webkit-details-marker { display: none; }
+
+.lv-fold__summary::before {
+  content: "▸";
+  color: var(--accent);
+  font-size: 12px;
+  transition: transform 0.15s ease;
+}
+
+.lv-fold[open] > .lv-fold__summary::before { transform: rotate(90deg); }
+
+.lv-fold__body {
+  padding: 0 18px 18px;
+}
+
+/* --- 표 : 넓은 화면은 표, 좁은 화면은 카드 --- */
+.lv-table {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--panel-strong);
+  overflow: hidden;
+}
+
+.lv-table table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
-  min-width: 760px;
+  font-size: 13.5px;
 }
 
-.leave-page thead th {
+.lv-table thead th {
   text-align: left;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--line-strong);
+  padding: 11px 14px;
   background: var(--accent-soft);
-  font-weight: 600;
+  border-bottom: 1px solid var(--line-strong);
+  font-weight: 650;
   white-space: nowrap;
+  font-size: 12.5px;
 }
 
-.leave-page tbody td {
-  padding: 12px 14px;
+.lv-table tbody td {
+  padding: 11px 14px;
   border-bottom: 1px solid var(--line);
   vertical-align: top;
 }
 
-.leave-page tbody tr:last-child td {
-  border-bottom: 0;
-}
+.lv-table tbody tr:last-child td { border-bottom: 0; }
+.lv-table tr[data-diff="true"] { background: var(--danger-soft); }
 
-.leave-page .row--diff {
-  background: var(--danger-soft);
-}
-
-.leave-page .num {
+.lv-table .num {
   text-align: right;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-.leave-page .basis {
+.lv-table .basis {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12.5px;
   line-height: 1.55;
 }
 
-.leave-page .tag {
-  display: inline-block;
-  padding: 3px 9px;
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-sm);
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.leave-page .tag--diff,
-.leave-page .tag--error {
-  border-color: var(--accent-warm);
-  color: var(--accent-warm);
-}
-
-.leave-page .scope,
-.leave-page .ask {
+/* --- 범위 고지 --- */
+.lv-scope {
   border: 1px solid var(--line);
-  background: var(--panel);
   border-radius: var(--radius-md);
-  padding: 20px 22px;
+  background: var(--panel);
+  padding: 18px 20px;
 }
 
-.leave-page .scope h2,
-.leave-page .ask h2 {
-  margin: 0 0 10px;
-  font-size: 17px;
+.lv-scope__title { margin: 0 0 10px; font-size: 16px; font-weight: 650; }
+.lv-scope__list { margin: 0; padding-left: 19px; font-size: 13.5px; line-height: 1.78; }
+.lv-scope__footer { margin: 12px 0 0; font-size: 13px; line-height: 1.7; color: var(--muted); }
+
+/* --- 사례 탭 (JS 없이 :target 대신 링크 전환) --- */
+.lv-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 2px;
 }
 
-.leave-page .scope ul {
-  margin: 0;
-  padding-left: 20px;
-  line-height: 1.75;
-  font-size: 14px;
-}
-
-.leave-page .scope__note,
-.leave-page .ask p {
-  font-size: 14px;
-  line-height: 1.7;
+.lv-tab {
+  padding: 9px 14px;
+  border: 1px solid var(--line);
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  font-size: 13.5px;
   color: var(--muted);
+  text-decoration: none;
+  background: var(--panel);
 }
 
-.leave-page .scope__note {
-  margin: 12px 0 0;
+.lv-tab[aria-current="page"] {
+  color: var(--ink);
+  font-weight: 650;
+  background: var(--panel-strong);
+  border-color: var(--line-strong);
+  box-shadow: inset 0 2px 0 var(--accent);
 }
 
-.leave-page .ask__foot {
-  margin: 10px 0 0;
-  font-size: 13px;
-}
+/* --- 푸터 --- */
+.lv-foot { font-size: 12.5px; color: var(--muted); line-height: 1.66; }
+.lv-foot p { margin: 0 0 5px; }
+.lv-foot a { color: var(--accent); }
 
-.leave-page .foot {
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.6;
-}
+/* --- ⑤ 모바일 : 표를 카드로 --- */
+@media (max-width: 680px) {
+  .lv-page { padding: 18px 14px 60px; gap: 18px; }
+  .lv-stats { grid-template-columns: repeat(2, 1fr); }
 
-.leave-page .foot p {
-  margin: 0 0 6px;
-}
-
-.leave-page .foot__verify {
-  font-size: 12px;
-}
-
-@media (max-width: 640px) {
-  .leave-page {
-    padding: 20px 14px 56px;
-    gap: 20px;
+  .lv-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .lv-table tbody tr {
+    display: block;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
   }
-
-  .leave-page .stat {
-    flex: 1 1 calc(50% - 6px);
-    min-width: 0;
+  .lv-table tbody tr:last-child { border-bottom: 0; }
+  .lv-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 4px 0;
+    border: 0;
+    text-align: left;
   }
+  .lv-table tbody td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 12px;
+    flex: 0 0 auto;
+  }
+  .lv-table .num { text-align: right; }
+  .lv-table .basis { text-align: right; }
 }
