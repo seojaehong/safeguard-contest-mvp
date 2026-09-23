@@ -19,9 +19,9 @@ import {
 } from "@/lib/leave-advanced-sample";
 
 export const metadata = {
-  title: "연차 심화 — 사용단위·출근율·비례부여·촉진 | SafeClaw",
+  title: "사용단위·출근율·촉진 점검 | SafeClaw",
   description:
-    "반차·반반차·시간차 환산, 출근율 80% 룰, 회계연도 첫해 비례부여, 연차 사용촉진 일정 대조를 가상 데이터로 보여주는 데모입니다.",
+    "반차·반반차·시간차 환산, 출근율 80% 기준, 회계연도 첫해 비례부여, 연차 사용촉진 일정을 한 화면에서 점검합니다.",
 };
 
 export default function AdvancedPage() {
@@ -49,28 +49,28 @@ export default function AdvancedPage() {
 
       <header className="lv-head">
         <p className="lv-head__eyebrow">SafeClaw · 연차 검증</p>
-        <h1 className="lv-head__title">연차 심화 — 사용단위 · 출근율 · 비례부여 · 촉진</h1>
+        <h1 className="lv-head__title">사용단위 · 출근율 · 촉진 점검</h1>
         <p className="lv-head__lede">
-          실무에서 계산이 갈리는 네 지점입니다. 각 항목은{" "}
-          <strong>모르는 값을 지어내지 않고</strong> 「확인 불가」로 남깁니다.
+          실무에서 계산이 갈리는 네 가지를 한 화면에서 봅니다. 자료가 없는 항목은{" "}
+          <strong>추정하지 않고</strong> 「확인 불가」로 남깁니다.
         </p>
       </header>
 
       <ConclusionBanner
         tone="unknown"
-        headline="네 가지 모두 「계산은 하되 판정은 넘기는」 방식입니다"
+        headline="자료가 있는 항목만 계산하고, 나머지는 확인 대상으로 남깁니다"
         detail={
           <>
-            출근율·통상임금·촉진 적법성처럼 <strong>다툼이 있는 값은 입력받습니다.</strong> 이
-            도구가 정하면 그 숫자가 근거로 쓰이고 책임이 따라오기 때문입니다.
+            출근율·통상임금·촉진 적법성처럼 <strong>사안마다 달라지는 값</strong>은 담당자가
+            입력하거나 확인하시도록 두었습니다.
           </>
         }
-        meta="기준일 2026-09-23 · 가상 표본"
+        meta="기준일 2026-09-23 · 예시 자료"
       />
 
       {/* ── A1 사용 단위 ── */}
       <section className="lv-scope">
-        <h2 className="lv-scope__title">① 사용 단위 — 반차 0.5 · 반반차 0.25 · 시간차</h2>
+        <h2 className="lv-scope__title">① 사용 단위 — 반차 · 반반차 · 시간차</h2>
         <StatGrid>
           <Stat value={formatDays(usage.totalDays)} label="환산 합계" />
           <Stat value={usage.byKind.full.count} label="종일" />
@@ -127,7 +127,7 @@ export default function AdvancedPage() {
 
       {/* ── A2 출근율 ── */}
       <section className="lv-scope">
-        <h2 className="lv-scope__title">② 출근율 80% — 근기법 제60조 제1항·제2항</h2>
+        <h2 className="lv-scope__title">② 출근율 80% 기준</h2>
         <ResponsiveTable>
           <table>
             <thead>
@@ -208,7 +208,7 @@ export default function AdvancedPage() {
 
       {/* ── A4 촉진 일정 ── */}
       <section className="lv-scope">
-        <h2 className="lv-scope__title">④ 연차 사용촉진 — 일정 대조 (근기법 제61조)</h2>
+        <h2 className="lv-scope__title">④ 연차 사용촉진 일정</h2>
         {promotion.map((p) => (
           <Foldable
             key={p.label}
@@ -256,36 +256,36 @@ export default function AdvancedPage() {
       </section>
 
       <ScopeNote
-        title="이 화면이 판정하지 않는 것"
+        title="담당자 확인이 필요한 항목"
         items={[
           <>
-            <strong>촉진의 적법성</strong> — 서면 여부·도달·노무수령 거부까지가 요건입니다. 여기서는
-            날짜만 대조하며, 라벨도 「일정 대조」로 한정합니다.
+            <strong>촉진의 적법성</strong> — 서면 여부·도달·노무수령 거부까지가 요건입니다. 이
+            화면은 날짜만 대조합니다.
           </>,
           <>
             <strong>출근율 산정</strong> — 소정근로일수에서 무엇을 빼는지는 사안마다 다릅니다.
           </>,
           <>
-            <strong>수당 금액</strong> — 통상임금 산입 범위는 그 자체가 다툼의 대상이라 이 화면에
-            금액을 내지 않습니다.
+            <strong>수당 금액</strong> — 통상임금 산입 범위는 그 자체가 다툼의 대상이라 금액은
+            산출하지 않습니다.
           </>,
           <>{PRESCRIPTION_NOTICE}</>,
         ]}
         footer={
           <>
-            <strong>계산은 하되 판정은 넘깁니다.</strong> 정보가 없으면 「확인 불가」로 두고, 임의로
-            한쪽으로 밀어넣지 않습니다.
+            자료가 없으면 <strong>「확인 불가」</strong>로 둡니다. 근거 없이 한쪽으로 단정하지
+            않습니다.
           </>
         }
       />
 
       <footer className="lv-foot">
         <p>
-          <Link href="/tools/leave">연차 발생일수 대조</Link>
+          <Link href="/tools/leave">← 연차 일수 점검</Link>
           {" · "}
-          <Link href="/tools/leave/settlement">퇴직 재정산</Link>
+          <Link href="/tools/leave/settlement">퇴직 정산</Link>
         </p>
-        <p>법적 기준 최종 확인은 공인노무사 검토를 거칩니다.</p>
+        <p>최종 판단은 담당 공인노무사의 검토를 거칩니다.</p>
       </footer>
     </main>
   );

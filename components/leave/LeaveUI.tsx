@@ -103,24 +103,27 @@ export function Foldable({
   );
 }
 
-/** 데모 성격을 화면 최상단에 고정 — 제우스 출시 조건 */
+/**
+ * 미리보기 고지 — 화면 최상단 고정.
+ * 실제 자료를 아직 받지 않는다는 사실을 분명히 한다(법적 안전선).
+ */
 export function DemoNotice({ children }: { children?: ReactNode }) {
   return (
     <div className="lv-demo-notice" role="status">
-      <strong>가상 데이터 데모입니다.</strong>{" "}
+      <strong>미리보기 화면입니다.</strong>{" "}
       {children ?? (
         <>
-          실제 파일 검증은 아직 지원하지 않습니다. 표시된 자료는 행정해석 본문과 가상값이며
-          실제 개인정보가 아닙니다.
+          예시 자료로 계산 방식을 보여드립니다. 현재 파일 업로드는 지원하지 않으며, 실제
+          직원 정보를 받지 않습니다.
         </>
       )}
     </div>
   );
 }
 
-/** 다루지 않는 범위 — 과장 방지. 화면마다 반드시 노출한다 */
+/** 확인이 필요한 항목 — 과장 방지. 화면마다 반드시 노출한다 */
 export function ScopeNote({
-  title = "이 도구가 하지 않는 것",
+  title = "함께 확인이 필요한 항목",
   items,
   footer,
 }: {

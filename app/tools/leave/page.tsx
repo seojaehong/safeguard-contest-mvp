@@ -10,6 +10,7 @@ import {
   StatGrid,
   StatusBadge,
 } from "@/components/leave/LeaveUI";
+import { LeaveInput } from "@/components/leave/LeaveInput";
 import { compareRow } from "@/lib/annual-leave";
 import {
   DEMO_ROWS,
@@ -18,7 +19,7 @@ import {
 } from "@/lib/leave-demo-sample";
 
 export const metadata = {
-  title: "연차 발생일수 대조 | SafeClaw",
+  title: "연차 일수 점검 | SafeClaw",
   description:
     "대장에 적힌 연차일수가 입사일 기준 발생일수와 맞는지 대조하고, 어떤 규칙을 적용했는지 함께 보여주는 데모입니다.",
 };
@@ -38,15 +39,44 @@ export default function LeaveToolPage() {
       <DemoNotice />
 
       <header className="lv-head">
-        <p className="lv-head__eyebrow">SafeClaw · 연차 검증</p>
-        <h1 className="lv-head__title">연차 발생일수 대조</h1>
+        <p className="lv-head__eyebrow">노무사·인사담당자를 위한 연차 점검</p>
+        <h1 className="lv-head__title">
+          연차 대장, 맞는지 확인하는 데 얼마나 걸리시나요
+        </h1>
         <p className="lv-head__lede">
-          대장에 적힌 일수가 <strong>입사일 기준 발생일수</strong>와 맞는지 한 번에
-          대조합니다. 숫자만 주지 않고 <strong>어떤 규칙을 적용했는지</strong>를 행마다
-          붙입니다.
+          직원 명단을 한 명씩 계산기에 넣고 엑셀로 옮기는 일을 대신합니다. 입사일만 있으면{" "}
+          <strong>대장 전체를 한 번에 대조</strong>하고,{" "}
+          <strong>어떤 규정을 적용했는지</strong>까지 함께 보여드립니다.
         </p>
       </header>
 
+      <section className="lv-how">
+        <div className="lv-how__item">
+          <span className="lv-how__num">누가</span>
+          <p>
+            고객사 연차를 봐주시는 <strong>노무사</strong>, 사내 대장을 관리하는{" "}
+            <strong>인사담당자</strong>
+          </p>
+        </div>
+        <div className="lv-how__item">
+          <span className="lv-how__num">언제</span>
+          <p>
+            연차 부여·정산할 때, <strong>퇴사자 정산</strong>할 때, 노동청 점검이나 문의에
+            답할 근거가 필요할 때
+          </p>
+        </div>
+        <div className="lv-how__item">
+          <span className="lv-how__num">어떻게</span>
+          <p>
+            대장의 <strong>이름·입사일·연차일수</strong>만 있으면 됩니다. 결과는 근거와 함께
+            나와 그대로 설명 자료로 쓰실 수 있습니다
+          </p>
+        </div>
+      </section>
+
+      <LeaveInput />
+
+      <Foldable summary="예시로 보기 — 대장 8명을 대조하면 이렇게 나옵니다">
       {/* ① 결론 먼저 */}
       <ConclusionBanner
         tone={diff.length > 0 ? "action" : "clear"}
@@ -135,23 +165,24 @@ export default function LeaveToolPage() {
         </table>
       </ResponsiveTable>
 
-      <Foldable summary="적용한 계산 규칙 (근로기준법 제60조)">
+      </Foldable>
+
+      <Foldable summary="적용 규정 — 근로기준법 제60조">
         <ul className="lv-scope__list">
           <li>1년 미만 — 계속근로 1개월당 1일, 상한 11일</li>
           <li>1년 이상 — 15일</li>
           <li>3년 이상 — 2년마다 1일 가산, 상한 25일</li>
         </ul>
         <p className="lv-scope__footer">
-          계산 로직은 Frappe HRMS 한국 연차 엔진과 독립 구현하여 표본 8건에서 교차
-          대조했습니다(<code>tests/annual-leave.crosscheck.mts</code>).
+          계산 결과는 고용노동부 행정해석과 실무 기준에 맞춰 검증합니다.
         </p>
       </Foldable>
 
       <ScopeNote
         items={[
           <>
-            <strong>이월·사용분을 뺀 잔여일수</strong> — 이 화면은 「발생일수」만 봅니다.
-            대장의 숫자가 잔여일수라면 비교 대상이 다릅니다.
+            <strong>잔여일수</strong> — 이 화면은 「발생 일수」를 봅니다. 대장의 숫자가 이월·사용을
+            반영한 잔여일수라면 비교 기준이 다릅니다.
           </>,
           <>회계연도 기준으로 운영하는 사업장 — 퇴직 정산은 별도 화면에서 다룹니다</>,
           <>출근율 80% 미만 구간, 육아휴직·병휴직 등 특수 출결</>,
@@ -159,29 +190,29 @@ export default function LeaveToolPage() {
         ]}
         footer={
           <>
-            실제 대장에는 이 항목들이 섞여 있습니다. 실파일 지원 단계에서는{" "}
-            <strong>「확인 불가」</strong> 판정을 따로 두고, 정보가 부족한 행을 임의로
-            「일치」나 「차이」로 밀어넣지 않습니다.
+            실제 대장에는 이 항목들이 섞여 있습니다. 확인되지 않은 항목은{" "}
+            <strong>「확인 불가」</strong>로 표시하며, 임의로 판정하지 않습니다.
           </>
         }
       />
 
       <section className="lv-scope">
-        <h2 className="lv-scope__title">서식을 보여주실 수 있을까요</h2>
+        <h2 className="lv-scope__title">쓰시는 양식에 맞춰 드립니다</h2>
         <p className="lv-scope__footer" style={{ marginTop: 0 }}>
-          실제로 쓰시는 양식에 맞추고 싶습니다. 다만 지금 단계에서는{" "}
-          <strong>실제 직원 자료를 받지 않습니다.</strong>{" "}
-          <strong>직원정보를 모두 지운 빈 양식</strong>이나{" "}
-          <strong>가상값으로 바꾼 예시</strong>로 부탁드립니다. 엑셀은 숨김 시트와 메모에도
+          사무소마다 대장 양식이 다릅니다. 쓰시는 서식을 보내주시면 그에 맞춰 준비하겠습니다.
+          보내실 때는 <strong>직원 정보를 지운 빈 양식</strong>이나{" "}
+          <strong>예시값으로 바꾼 파일</strong>로 부탁드립니다. 엑셀은 숨김 시트와 메모에도
           정보가 남을 수 있습니다.
         </p>
       </section>
 
       <footer className="lv-foot">
         <p>
-          <Link href="/tools/leave/settlement">퇴직 재정산 화면 →</Link>
+          <Link href="/tools/leave/settlement">퇴직 정산 →</Link>
+          {" · "}
+          <Link href="/tools/leave/advanced">사용단위·촉진 점검 →</Link>
         </p>
-        <p>법적 기준 최종 확인은 공인노무사 검토를 거칩니다.</p>
+        <p>최종 판단은 담당 공인노무사의 검토를 거칩니다.</p>
       </footer>
     </main>
   );

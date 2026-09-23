@@ -14,7 +14,7 @@ import { settleOnTermination } from "@/lib/leave-ledger";
 import { SETTLEMENT_CASES } from "@/lib/leave-settlement-sample";
 
 export const metadata = {
-  title: "퇴직 연차 재정산 | SafeClaw",
+  title: "퇴직 연차 정산 | SafeClaw",
   description:
     "회계연도로 관리하던 사업장의 퇴사자를 입사일 기준과 대조해 정산 대상 일수를 산출합니다. 근거는 고용노동부 근로기준과-5802.",
 };
@@ -41,11 +41,11 @@ export default async function SettlementPage({ searchParams }: Props) {
 
       <header className="lv-head">
         <p className="lv-head__eyebrow">SafeClaw · 연차 검증</p>
-        <h1 className="lv-head__title">퇴직 연차 재정산</h1>
+        <h1 className="lv-head__title">퇴직 연차 정산</h1>
         <p className="lv-head__lede">
-          회계연도로 연차를 관리하던 사업장에서 직원이 퇴사하면{" "}
-          <strong>입사일 기준으로 계산한 일수와 대조</strong>해야 합니다. 연도별 발생 이력을
-          펼쳐 두 기준의 누계를 비교합니다.
+          회계연도로 연차를 관리하는 사업장에서 직원이 퇴사하면{" "}
+          <strong>입사일 기준으로 다시 계산</strong>해 부족분이 없는지 확인해야 합니다.
+          연도별 발생 내역을 펼쳐 두 기준을 나란히 보여드립니다.
         </p>
       </header>
 
@@ -138,7 +138,7 @@ export default async function SettlementPage({ searchParams }: Props) {
         </ResponsiveTable>
       </Foldable>
 
-      <Foldable summary="적용 규칙과 법적 근거">
+      <Foldable summary="적용 기준과 근거">
         <p className="lv-scope__footer" style={{ marginTop: 0 }}>
           보장선 = <strong>max(입사일 기준 누계, 회계연도 부여 누계)</strong> · 정산 대상 =
           보장선 − 이미 사용·지급한 일수
@@ -154,16 +154,16 @@ export default async function SettlementPage({ searchParams }: Props) {
           맞춘다」가 아니라 <strong>「유리한 쪽으로 맞춘다」</strong>입니다.
         </p>
         <p className="lv-scope__footer">
-          검증 — 그 해석 본문의 사례값(입사일 기준 79일 · 62일 · 정산 26일)을 테스트로
-          고정했습니다(<code>tests/leave-ledger.crosscheck.mts</code>).
+          이 화면의 계산은 위 행정해석 본문에 제시된 사례값(입사일 기준 79일 · 62일 ·
+          정산 26일)과 일치하는지 상시 확인합니다.
         </p>
       </Foldable>
 
       <ScopeNote
         items={[
           <>
-            <strong>수당 금액</strong> — 일수까지만 냅니다. 통상임금을 곱한 금액은 계산하지
-            않습니다. 통상임금 산입 범위는 그 자체가 다툼의 대상입니다.
+            <strong>수당 금액</strong> — 일수까지만 산출합니다. 통상임금 산입 범위는 그 자체가
+            다툼의 대상이라, 금액은 담당자가 확정하시도록 남겨둡니다.
           </>,
           <>출근율 80% 미만 구간 · 육아휴직 등 특수 출결로 발생이 달라지는 경우</>,
           <>회계연도 첫해 비례부여를 회사가 어떻게 했는지 — 여기서는 입력값으로 받습니다</>,
@@ -178,18 +178,19 @@ export default async function SettlementPage({ searchParams }: Props) {
         ]}
         footer={
           <>
-            <strong>계산은 하되 판정은 넘깁니다.</strong> 실파일 지원 단계에서는 확인되지 않은
-            항목을 「확인 불가」로 따로 두고, 임의로 「정산 필요」나 「없음」으로 밀어넣지
-            않습니다.
+            확인되지 않은 항목은 <strong>「확인 불가」</strong>로 남깁니다. 근거가 없는 상태에서
+            「정산 필요」나 「없음」으로 단정하지 않습니다.
           </>
         }
       />
 
       <footer className="lv-foot">
         <p>
-          <Link href="/tools/leave">← 연차 발생일수 대조</Link>
+          <Link href="/tools/leave">← 연차 일수 점검</Link>
+          {" · "}
+          <Link href="/tools/leave/advanced">사용단위·촉진 점검 →</Link>
         </p>
-        <p>법적 기준 최종 확인은 공인노무사 검토를 거칩니다.</p>
+        <p>최종 판단은 담당 공인노무사의 검토를 거칩니다.</p>
       </footer>
     </main>
   );
