@@ -63,6 +63,9 @@ score(
   "회계연도가 많을 때 조항 유무로 결과가 갈린다"
 );
 
+const tAdv = runTest("leave-adversarial.test.mts");
+score("법적 정확성", "L6", "적대적 입력 — 내가 의도하지 않은 값(검수 지적·경계값)", 10, tAdv.ok, tAdv.out);
+
 // ══ 축 2. 안전선 — 넘지 말아야 할 것 (40점) ═══════════════════
 const t5 = runTest("leave-guardrails.test.mts");
 score("안전선", "S1", "제우스 출시 게이트 통과(10건)", 15, t5.ok, t5.out);
@@ -107,32 +110,44 @@ score(
   promo.includes("적법성은 확인하지 않았습니다") &&
     promo.includes("일정 대조: 일치") &&
     promo.includes("out-of-scope") &&
-    read("app/tools/leave/advanced/page.tsx").includes("scheduleStatusLabel"),
+    read("components/leave/PromotionInput.tsx").includes("scheduleStatusLabel"),
   "1년 미만은 범위밖, 라벨은 「일정 대조」, 화면도 같은 라벨을 쓴다"
 );
 
 // ══ 축 3. 사용성·투명성 (20점) ════════════════════════════════
+// 2026-09-23 화면을 서비스로 바꾸면서 구성이 달라졌다(데모 표 → 입력 컴포넌트).
+// 검사 **의도**는 그대로 두고 대상만 현재 구조로 옮긴다.
 const pageA = read("app/tools/leave/page.tsx");
 const pageB = read("app/tools/leave/settlement/page.tsx");
-const ui = read("components/leave/LeaveUI.tsx");
-
 const pageC = read("app/tools/leave/advanced/page.tsx");
-score("사용성", "U1", "결론이 화면 최상단에 온다", 5,
-  pageA.includes("ConclusionBanner") && pageB.includes("ConclusionBanner") &&
-  pageC.includes("ConclusionBanner"));
+const ui = read("components/leave/LeaveUI.tsx");
+const inputA = read("components/leave/LeaveInput.tsx");
+const inputB = read("components/leave/SettlementInput.tsx");
+const inputC = read("components/leave/PromotionInput.tsx");
+const inputD = read("components/leave/UsageInput.tsx");
+const css = read("app/globals.css");
 
-score("사용성", "U2", "데모 성격을 고정 표시한다", 4,
-  pageA.includes("DemoNotice") && pageB.includes("DemoNotice") && pageC.includes("DemoNotice"));
+score("사용성", "U1", "결론이 결과 최상단에 온다", 5,
+  inputB.includes("lv-conclusion__headline") &&
+    inputA.includes("lv-input__summary"),
+  "정산은 결론 배너, 계산은 요약 줄이 표보다 먼저 온다");
 
-score("사용성", "U3", "다루지 않는 범위를 먼저 밝힌다", 4,
-  pageA.includes("ScopeNote") && pageB.includes("ScopeNote") && pageC.includes("ScopeNote"));
+score("사용성", "U2", "입력 성격과 개인정보 처리를 고정 표시한다", 4,
+  [inputA, inputB, inputC, inputD].every((f) => f.includes("lv-input__privacy")),
+  "네 입력 화면 모두 「브라우저에서만 계산」을 고정 노출");
+
+score("사용성", "U3", "계산 범위와 전제를 먼저 밝힌다", 4,
+  [pageA, pageB, pageC].every((f) => f.includes("lv-scope")) &&
+    pageA.includes("상시 5인 이상"),
+  "법적 전제(5인 이상·15시간)까지 명시");
 
 score("사용성", "U4", "상태를 색만으로 구분하지 않는다(기호 병기)", 4,
   ui.includes("lv-badge__mark") && ui.includes('mark: "≠"'));
 
 score("사용성", "U5", "모바일에서 표가 카드로 무너진다", 3,
-  read("app/globals.css").includes("data-label") &&
-    pageA.includes('data-label="입사일"'));
+  css.includes("data-label") &&
+    [inputA, inputB, inputC].every((f) => f.includes("data-label=")),
+  "입력 결과 표에 data-label 이 붙어 있다");
 
 // ══ E2E 드라이런 (서버가 있을 때만) ═══════════════════════════
 const e2e = [];

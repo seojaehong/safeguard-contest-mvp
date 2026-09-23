@@ -166,7 +166,14 @@ export interface SettlementResult {
 export function settleOnTermination(input: SettlementInput): SettlementResult {
   const ledger = buildHireDateLedger(input.hireDate, input.endDate);
   const hireDateTotal = ledger.total;
-  const { fiscalGrantedTotal, usedOrPaidTotal, hasRecalcClause } = input;
+  const { hasRecalcClause } = input;
+
+  // ★ 2026-09-23 — 음수 입력이 정산을 부풀리던 것을 막는다.
+  //   usedOrPaidTotal = -5 면 보장선 114 - (-5) = 119 가 되어
+  //   「이미 지급한 일수」가 음수라는 이유로 정산 대상이 늘어났다.
+  //   일수는 음수가 될 수 없다. 0 으로 바닥을 친다.
+  const fiscalGrantedTotal = Math.max(0, Number(input.fiscalGrantedTotal) || 0);
+  const usedOrPaidTotal = Math.max(0, Number(input.usedOrPaidTotal) || 0);
 
   const favourable =
     hireDateTotal === fiscalGrantedTotal
