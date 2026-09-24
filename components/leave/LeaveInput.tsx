@@ -446,36 +446,10 @@ export function LeaveInput() {
             </table>
           </div>
 
-          {/* ★ 헤드라인은 「이름과 입사일만 붙여넣으세요」다. 그대로 한 사람은
-              대장값이 없어 diffs 가 0 이고, 위 안내가 한 번도 뜨지 않았다.
-              이 경로에는 영업이 아니라 **다음 할 일**을 알려준다. */}
-          {comparedCount === 0 && usable.length > 0 && (
-            <p className="lv-input__note">
-              <strong>{usable.length}명</strong>의 발생일수를 계산했습니다. 대장에 적힌 일수를
-              셋째 칸에 함께 넣으시면 계산값과 대조해 <strong>차이 나는 사람만</strong> 골라
-              보여드립니다. 결과 검토가 필요하시면 내려받은 파일 그대로 보내주세요 —{" "}
-              <a href="mailto:abc@winhr.co.kr" onClick={() => trackLeave("leave_contact")}>
-                노무법인 위너스 abc@winhr.co.kr
-              </a>
-            </p>
-          )}
-
-          {/* ★ 차이가 나온 그 순간에만 띄운다. 차이 0명에 영업 문구를 붙이면
-              신뢰만 깎인다. 무료 도구의 유일한 회수 지점이다. */}
-          {diffs.length > 0 && (
-            <div className="lv-offer">
-              <p className="lv-offer__head">
-                대조한 {comparedCount}명 중 <strong>{diffs.length}명</strong>에서 차이가
-                나왔습니다.
-              </p>
-              <p className="lv-offer__body">
-                이 차이가 미사용수당 청구로 이어지는지, 사용촉진이나 취업규칙 때문에 달라지는지는
-                사안을 봐야 합니다. 내려받은 파일 그대로 보내주시면 검토해 드립니다 —{" "}
-                <strong>노무법인 위너스</strong> 공인노무사 서재홍{" "}
-                <a href="mailto:abc@winhr.co.kr" onClick={() => trackLeave("leave_contact")}>abc@winhr.co.kr</a>
-              </p>
-            </div>
-          )}
+          {/* 2026-09-24 — 재홍님 지시로 화면 연락 안내를 내렸다.
+              「이 차이가 미사용수당 청구로 이어지는지…」 문구가 도구 화면에서
+              영업처럼 읽혔다. 문의 경로 자체는 더 쉬운 방식으로 다시 만든다.
+              (.lv-offer 스타일은 그때 재사용할 수 있게 남겨 둔다) */}
 
           <p className="lv-roster__note" style={{ marginTop: 12 }}>
             읽은 직원 <strong>{usable.length}명</strong>은{" "}
