@@ -446,6 +446,20 @@ export function LeaveInput() {
             </table>
           </div>
 
+          {/* ★ 헤드라인은 「이름과 입사일만 붙여넣으세요」다. 그대로 한 사람은
+              대장값이 없어 diffs 가 0 이고, 위 안내가 한 번도 뜨지 않았다.
+              이 경로에는 영업이 아니라 **다음 할 일**을 알려준다. */}
+          {comparedCount === 0 && usable.length > 0 && (
+            <p className="lv-input__note">
+              <strong>{usable.length}명</strong>의 발생일수를 계산했습니다. 대장에 적힌 일수를
+              셋째 칸에 함께 넣으시면 계산값과 대조해 <strong>차이 나는 사람만</strong> 골라
+              보여드립니다. 결과 검토가 필요하시면 내려받은 파일 그대로 보내주세요 —{" "}
+              <a href="mailto:abc@winhr.co.kr" onClick={() => trackLeave("leave_contact")}>
+                노무법인 위너스 abc@winhr.co.kr
+              </a>
+            </p>
+          )}
+
           {/* ★ 차이가 나온 그 순간에만 띄운다. 차이 0명에 영업 문구를 붙이면
               신뢰만 깎인다. 무료 도구의 유일한 회수 지점이다. */}
           {diffs.length > 0 && (

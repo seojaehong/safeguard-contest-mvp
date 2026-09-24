@@ -59,11 +59,12 @@ export function trackLeave(event: LeaveEvent, tag?: Tag): void {
     if (LEAVE_EXPORT_KINDS.includes(tag.kind)) props = { kind: tag.kind };
   }
 
-  try {
-    void import("@vercel/analytics").then(({ track }) => {
-      track(event, props);
+  // ★ try/catch 는 **동기 호출**만 잡는다. 동적 import 가 거부되면
+  //   (스크립트 차단·해석 실패) unhandled rejection 으로 새어 첫 사용자의
+  //   콘솔에 에러가 찍힌다. 체인에 .catch 를 달아야 한다.
+  void import("@vercel/analytics")
+    .then(({ track }) => track(event, props))
+    .catch(() => {
+      /* 계측 실패는 도구를 막지 않는다 */
     });
-  } catch {
-    /* 계측 실패는 무시한다 */
-  }
 }
