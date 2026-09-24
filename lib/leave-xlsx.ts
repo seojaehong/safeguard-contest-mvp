@@ -24,7 +24,12 @@ export interface SheetSpec {
   notes?: string[];
 }
 
-export async function downloadXlsx(fileName: string, sheets: SheetSpec[]): Promise<void> {
+/**
+ * 시트 명세 → 워크북. **브라우저 API 를 쓰지 않는다.**
+ * 내려받기(Blob/URL)와 분리해 둔 이유: 서식을 만들어 다시 읽어들이는 왕복 검증을
+ * node 에서 돌릴 수 있어야 한다. 엑셀 경로는 이 도구에서 사고가 가장 많은 자리다.
+ */
+export async function buildWorkbook(sheets: SheetSpec[]) {
   const ExcelJS = (await import("exceljs")).default;
   const wb = new ExcelJS.Workbook();
   wb.creator = "SafeClaw";
@@ -107,6 +112,11 @@ export async function downloadXlsx(fileName: string, sheets: SheetSpec[]): Promi
     }
   }
 
+  return wb;
+}
+
+export async function downloadXlsx(fileName: string, sheets: SheetSpec[]): Promise<void> {
+  const wb = await buildWorkbook(sheets);
   const buf = await wb.xlsx.writeBuffer();
   const url = URL.createObjectURL(
     new Blob([buf], {

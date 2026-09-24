@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { compareRow } from "@/lib/annual-leave";
+import { buildText, looksLikeHeader, normalizeDate, parseLines, readGrid } from "@/lib/leave-sheet";
+import type { ParsedRow } from "@/lib/leave-sheet";
 import { downloadXlsx } from "@/lib/leave-xlsx";
+import { downloadLeaveTemplate } from "@/lib/leave-template-xlsx";
 import { todayLocal } from "@/lib/leave-today";
 import { setRoster } from "@/lib/leave-roster";
 import { StatusBadge } from "@/components/leave/LeaveUI";
@@ -19,70 +22,9 @@ import { StatusBadge } from "@/components/leave/LeaveUI";
  * 구분자: 탭 / 쉼표 / 여러 칸 공백 — 엑셀에서 복사하면 탭으로 들어온다.
  */
 
-type ParsedRow = {
-  name: string;
-  hireDate: string;
-  /** 대장에 적힌 일수. null = 칸이 비어 있음, NaN 대신 recordedInvalid 로 구분 */
-  recordedDays: number | null;
-  /** 숫자가 아닌 값이 적혀 있었다 (예: "미확인") — 0 으로 바꾸지 않는다 */
-  recordedRaw?: string;
-  raw: string;
-  error?: string;
-};
-
 const SAMPLE = `홍길동\t2019-03-02\t18
 김영희\t2026-03-16\t15
 박철수\t2024-01-08\t16`;
-
-/** 2026-03-02 · 2026.3.2 · 20260302 · 2026/3/2 를 모두 받는다 */
-function normalizeDate(text: string): string | null {
-  const t = text.trim();
-  let m = t.match(/^(\d{4})[-./](\d{1,2})[-./](\d{1,2})$/);
-  if (!m) m = t.match(/^(\d{4})(\d{2})(\d{2})$/);
-  if (!m) return null;
-  const [, y, mo, d] = m;
-  const yy = Number(y), mm = Number(mo), dd = Number(d);
-  if (mm < 1 || mm > 12 || dd < 1 || dd > 31) return null;
-  const iso = `${yy}-${String(mm).padStart(2, "0")}-${String(dd).padStart(2, "0")}`;
-  const check = new Date(`${iso}T00:00:00Z`);
-  if (Number.isNaN(check.getTime()) || check.getUTCDate() !== dd) return null;
-  return iso;
-}
-
-function parseLines(text: string): ParsedRow[] {
-  return text
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const cols = line.split(/\t|,|\s{2,}/).map((c) => c.trim()).filter(Boolean);
-      if (cols.length < 2) {
-        return { name: cols[0] ?? "", hireDate: "", recordedDays: null, raw: line,
-                 error: "이름과 입사일이 필요합니다" };
-      }
-      const name = cols[0];
-      const hireDate = normalizeDate(cols[1]);
-      if (!hireDate) {
-        return { name, hireDate: "", recordedDays: null, raw: line,
-                 error: `입사일을 읽을 수 없습니다: ${cols[1]}` };
-      }
-      // 대장값: 비어 있으면 null, 숫자면 숫자, 그 밖('미확인' 등)이면 원문을 남긴다.
-      // 숫자만 뽑아내면 "미확인"이 0 이 되어 「확인 안 한 값」이 「0일」로 둔갑한다.
-      const rawRecorded = cols[2];
-      let recordedDays: number | null = null;
-      let recordedRaw: string | undefined;
-      if (rawRecorded !== undefined && rawRecorded !== "") {
-        const cleaned = rawRecorded.replace(/일|days?/gi, "").trim();
-        const n = Number(cleaned);
-        if (cleaned !== "" && Number.isFinite(n)) {
-          recordedDays = n;
-        } else {
-          recordedRaw = rawRecorded;
-        }
-      }
-      return { name, hireDate, recordedDays, recordedRaw, raw: line };
-    });
-}
 
 /**
  * 오늘 날짜 — **현지 시각 기준**.
@@ -107,25 +49,6 @@ function saveTemplate(t: Template): void {
   } catch {
     /* 저장 못 해도 계산에는 지장이 없다 */
   }
-}
-
-/** 엑셀 표 + 열 매핑 → 입력창 텍스트 */
-function buildText(
-  grid: string[][],
-  skipFirst: boolean,
-  cName: number,
-  cHire: number,
-  cDays: number | null
-): string {
-  return grid
-    .slice(skipFirst ? 1 : 0)
-    .map((row) => {
-      const cells = [row[cName] ?? "", row[cHire] ?? ""];
-      if (cDays !== null) cells.push(row[cDays] ?? "");
-      return cells.join("\t");
-    })
-    .filter((l) => l.replace(/\t/g, "").trim() !== "")
-    .join("\n");
 }
 
 function toCsv(
@@ -186,52 +109,13 @@ export function LeaveInput() {
         setFileNote("시트를 찾지 못했습니다.");
         return;
       }
-      // ★ 빈 셀을 건너뛰면 **열 위치가 당겨진다**(B열이 비면 C열 값이 B로 올라온다).
-      //   includeEmpty:true 로 자리를 지키고, 셀 값이 없으면 빈 문자열을 넣는다.
-      const cellText = (v: unknown): string => {
-        if (v == null) return "";
-        if (v instanceof Date) {
-          // 엑셀 날짜는 현지 기준으로 보이므로 현지 날짜로 뽑는다
-          const y = v.getFullYear();
-          const m = String(v.getMonth() + 1).padStart(2, "0");
-          const d = String(v.getDate()).padStart(2, "0");
-          return `${y}-${m}-${d}`;
-        }
-        if (typeof v === "object") {
-          const o = v as { result?: unknown; text?: unknown; richText?: { text: string }[] };
-          if (o.result !== undefined) return String(o.result ?? "");
-          if (Array.isArray(o.richText)) return o.richText.map((t) => t.text).join("");
-          if (o.text !== undefined) return String(o.text ?? "");
-        }
-        return String(v);
-      };
-
-      const lines: string[] = [];
-      ws.eachRow((row) => {
-        const cells: string[] = [];
-        const last = row.cellCount;
-        for (let c = 1; c <= last; c += 1) {
-          cells.push(cellText(row.getCell(c).value).trim());
-        }
-        // 줄 전체가 비었으면 건너뛴다. 중간 빈칸은 살린다.
-        if (cells.some((c) => c !== "")) lines.push(cells.join("\t"));
-      });
-
-      if (!lines.length) {
+      const grid = readGrid(ws);
+      if (!grid.length) {
         setFileNote("읽을 수 있는 행이 없습니다. 이름과 입사일 열이 있는지 확인해주세요.");
         return;
       }
 
-      // 헤더 판정 — 첫 줄의 둘째 칸이 날짜가 아니고, **둘째 줄은 날짜일 때만** 헤더로 본다.
-      //   첫 직원의 날짜 오타 때문에 그 사람이 통째로 사라지는 일을 막는다.
-      const secondCol = (l: string) => (l.split("\t")[1] ?? "").trim();
-      const looksHeader =
-        lines.length > 1 &&
-        !normalizeDate(secondCol(lines[0])) &&
-        Boolean(normalizeDate(secondCol(lines[1])));
-      const body = looksHeader ? lines.slice(1) : lines;
-
-      const grid = lines.map((l) => l.split("\t"));
+      const looksHeader = looksLikeHeader(grid);
       setSheet(grid);
       setSkipFirst(looksHeader);
       // 저장된 사무소 설정이 있으면 그 열 매핑을 먼저 쓴다
@@ -325,6 +209,13 @@ export function LeaveInput() {
             }}
           />
         </label>
+        <button
+          type="button"
+          className="lv-input__btn is-ghost"
+          onClick={() => void downloadLeaveTemplate()}
+        >
+          빈 서식 내려받기
+        </button>
         <button type="button" className="lv-input__btn is-ghost" onClick={() => setText(SAMPLE)}>
           예시 채우기
         </button>
@@ -334,6 +225,21 @@ export function LeaveInput() {
           </button>
         )}
       </div>
+
+      {!text && !sheet && (
+        <p className="lv-input__note">
+          쓰시던 대장을 그대로 올리셔도 됩니다. <strong>열 이름이 달라도</strong> 어느 칸이
+          이름·입사일인지 화면에서 지정하시면 됩니다. 대장이 없으시면{" "}
+          <button
+            type="button"
+            className="lv-linklike"
+            onClick={() => void downloadLeaveTemplate()}
+          >
+            빈 서식
+          </button>
+          을 받아 채워 넣으세요.
+        </p>
+      )}
 
       {fileNote && <p className="lv-input__filenote">{fileNote}</p>}
 
