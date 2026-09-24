@@ -30,6 +30,7 @@ ck("음수 누계가 정산을 부풀리지 않는다", () => {
   const r = settleOnTermination({
     hireDate: "2019-01-01", endDate: "2026-09-23",
     fiscalGrantedTotal: -10, usedOrPaidTotal: -5,
+    includeFirstYearMonthly: false,
   });
   assert.ok(r.shortfallDays <= r.guaranteedTotal,
     `정산(${r.shortfallDays})이 보장선(${r.guaranteedTotal})을 넘었다`);
@@ -64,13 +65,16 @@ ck("원장 안전장치 — 50년이어도 폭주하지 않는다", () => {
 ck("퇴사가 입사보다 빠르면 예외", () => {
   assert.throws(() =>
     settleOnTermination({ hireDate: "2020-01-01", endDate: "2019-01-01",
-      fiscalGrantedTotal: 15, usedOrPaidTotal: 0 }));
+      fiscalGrantedTotal: 15, usedOrPaidTotal: 0,
+      // 2026-09-24 계약 변경 — 1년 이상 근속은 월차 포함 여부를 명시해야 계산된다
+      includeFirstYearMonthly: false }));
 });
 
 ck("초과 지급이면 정산 대상이 음수 — 0으로 숨기지 않는다", () => {
   const r = settleOnTermination({
     hireDate: "2019-01-01", endDate: "2026-09-23",
     fiscalGrantedTotal: 100, usedOrPaidTotal: 200, hasRecalcClause: false,
+    includeFirstYearMonthly: false,
   });
   assert.ok(r.shortfallDays < 0, "이미 더 준 사실이 값에 남아야 한다");
   assert.equal(r.verdict, "no-shortfall");

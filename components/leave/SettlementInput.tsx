@@ -38,6 +38,8 @@ export function SettlementInput() {
   const [fiscalGranted, setFiscalGranted] = useState("");
   const [usedOrPaid, setUsedOrPaid] = useState("");
   const [clause, setClause] = useState<Clause>("unknown");
+  /** 1년 미만 월차(최대 11일)를 입사일 기준 누계에 포함할지 — 모르면 확정하지 않는다 */
+  const [monthly, setMonthly] = useState<Clause>("unknown");
 
   const ready = hireDate && endDate;
 
@@ -47,14 +49,17 @@ export function SettlementInput() {
       return settleOnTermination({
         hireDate,
         endDate,
-        fiscalGrantedTotal: Number(fiscalGranted) || 0,
-        usedOrPaidTotal: Number(usedOrPaid) || 0,
+        // ★ 빈 칸을 0 으로 바꾸지 않는다. 0 은 「한 번도 안 줬다」는 사실이고
+        //   빈 칸은 「아직 모른다」다. 섞으면 없는 정산액이 만들어진다.
+        fiscalGrantedTotal: fiscalGranted.trim() === "" ? undefined : Number(fiscalGranted),
+        usedOrPaidTotal: usedOrPaid.trim() === "" ? undefined : Number(usedOrPaid),
         hasRecalcClause: clause === "unknown" ? undefined : clause === "yes",
+        includeFirstYearMonthly: monthly === "unknown" ? undefined : monthly === "yes",
       });
     } catch (e) {
       return { error: e instanceof Error ? e.message : "계산할 수 없습니다" } as const;
     }
-  }, [ready, hireDate, endDate, fiscalGranted, usedOrPaid, clause]);
+  }, [ready, hireDate, endDate, fiscalGranted, usedOrPaid, clause, monthly]);
 
   const hasError = result && "error" in result;
   const r = result && !hasError ? result : null;
@@ -117,7 +122,7 @@ export function SettlementInput() {
           <input type="date" value={hireDate} onChange={(e) => setHireDate(e.target.value)} />
         </label>
         <label className="lv-input__field">
-          <span>퇴사일</span>
+          <span>퇴사일 (마지막 재직일)</span>
           <input
             type="date"
             value={endDate}
@@ -148,6 +153,37 @@ export function SettlementInput() {
           />
         </label>
       </div>
+
+      <fieldset className="lv-clause">
+        <legend>
+          입사 후 1년 미만 기간에 월 단위로 발생한 연차(최대 11일)를 입사일 기준 누계에
+          포함할까요?
+        </legend>
+        <div className="lv-clause__opts">
+          {(
+            [
+              ["unknown", "모르겠음 / 확인 필요"],
+              ["yes", "포함"],
+              ["no", "제외"],
+            ] as [Clause, string][]
+          ).map(([v, label]) => (
+            <label key={v} className={monthly === v ? "is-on" : undefined}>
+              <input
+                type="radio"
+                name="monthly"
+                checked={monthly === v}
+                onChange={() => setMonthly(v)}
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+        <p className="lv-clause__hint">
+          회계연도로 부여한 누계에 이 일수가 들어가 있다면 <strong>포함</strong>해야 같은
+          기준으로 비교됩니다. 적법한 사용촉진으로 이미 소멸했다면 제외합니다.
+          근속 1년 미만이면 이 선택과 무관하게 항상 포함합니다.
+        </p>
+      </fieldset>
 
       <fieldset className="lv-clause">
         <legend>취업규칙에 「퇴직 시 입사일 기준으로 재산정한다」는 규정이 있습니까?</legend>

@@ -52,6 +52,9 @@ check("회계연도 69 > 입사일 62 · 재산정 규정 없음 → 회계연�
     fiscalGrantedTotal: 69,
     usedOrPaidTotal: 69,
     hasRecalcClause: false,
+    // 이 해석 사례(2004 입사·다년 근속)의 79/62 는 15+15+16+16+17 로, 1년 미만
+    // 월차 11일이 별도로 얹힌 값이 아니다. 그래서 명시적으로 제외한다.
+    includeFirstYearMonthly: false,
   });
   assert.equal(s.hireDateTotal, 62);
   assert.equal(s.guaranteedTotal, 69, "규정이 없으면 회계연도 부여분을 그대로 둔다");
@@ -66,6 +69,9 @@ check("회계연도 69 > 입사일 62 · 재산정 규정 있음 → 입사일 �
     fiscalGrantedTotal: 69,
     usedOrPaidTotal: 62,
     hasRecalcClause: true,
+    // 이 해석 사례(2004 입사·다년 근속)의 79/62 는 15+15+16+16+17 로, 1년 미만
+    // 월차 11일이 별도로 얹힌 값이 아니다. 그래서 명시적으로 제외한다.
+    includeFirstYearMonthly: false,
   });
   assert.equal(s.guaranteedTotal, 62, "재산정 규정이 있으면 입사일 기준이 보장선이 된다");
   assert.equal(s.verdict, "no-shortfall");
@@ -77,7 +83,10 @@ check("게이트: 규정 유무를 모르면 확정하지 않는다", () => {
     endDate: "2009-07-30",
     fiscalGrantedTotal: 69,
     usedOrPaidTotal: 69,
-    // hasRecalcClause 를 주지 않는다
+    // hasRecalcClause 를 주지 않는다,
+    // 이 해석 사례(2004 입사·다년 근속)의 79/62 는 15+15+16+16+17 로, 1년 미만
+    // 월차 11일이 별도로 얹힌 값이 아니다. 그래서 명시적으로 제외한다.
+    includeFirstYearMonthly: false,
   });
   assert.equal(s.verdict, "insufficient-input", "한쪽으로 밀지 않고 확인 불가로 남겨야 한다");
   assert.ok(Number.isNaN(s.shortfallDays), "정산일수를 만들어내면 안 된다");
@@ -90,7 +99,10 @@ check("입사일 79일 > 회계연도 69일 → 차액 정산", () => {
     hireDate: "2004-08-01",
     endDate: "2009-09-30",
     fiscalGrantedTotal: 69,
-    usedOrPaidTotal: 53, // 해석 사례의 "사용하거나 수당으로 지급받은 총 53일"
+    usedOrPaidTotal: 53, // 해석 사례의 "사용하거나 수당으로 지급받은 총 53일",
+    // 이 해석 사례(2004 입사·다년 근속)의 79/62 는 15+15+16+16+17 로, 1년 미만
+    // 월차 11일이 별도로 얹힌 값이 아니다. 그래서 명시적으로 제외한다.
+    includeFirstYearMonthly: false,
   });
   assert.equal(s.hireDateTotal, 79);
   assert.equal(s.guaranteedTotal, 79);
