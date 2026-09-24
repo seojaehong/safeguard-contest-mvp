@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { settleOnTermination } from "@/lib/leave-ledger";
 import { downloadXlsx } from "@/lib/leave-xlsx";
 import { todayLocal } from "@/lib/leave-today";
-import { clearRoster, loadRoster, ROSTER_CHANGED } from "@/lib/leave-roster";
+import { clearRoster, loadRoster, rosterKey, ROSTER_CHANGED } from "@/lib/leave-roster";
 import type { RosterMember } from "@/lib/leave-roster";
 import { StatusBadge } from "@/components/leave/LeaveUI";
 
@@ -81,13 +81,13 @@ export function SettlementInput() {
               onChange={(e) => {
                 const key = e.target.value;
                 setPicked(key);
-                const m = roster.find((x) => `${x.name} ${x.hireDate}` === key);
+                const m = roster.find((x) => rosterKey(x) === key);
                 if (m) setHireDate(m.hireDate);
               }}
             >
               <option value="">직접 입력</option>
               {roster.map((m) => (
-                <option key={`${m.name} ${m.hireDate}`} value={`${m.name} ${m.hireDate}`}>
+                <option key={rosterKey(m)} value={rosterKey(m)}>
                   {m.name} (입사 {m.hireDate})
                 </option>
               ))}

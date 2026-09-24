@@ -24,7 +24,7 @@ const events: string[] = [];
   constructor(t: string) { this.type = t; }
 };
 
-const { loadRoster, mergeRoster, clearRoster, ROSTER_CHANGED } = await import(
+const { loadRoster, setRoster, clearRoster, rosterKey, ROSTER_CHANGED } = await import(
   "../lib/leave-roster.ts"
 );
 
@@ -46,38 +46,76 @@ ck("빈 세션에서는 빈 배열", () => {
 });
 
 ck("넣은 직원을 다시 읽는다", () => {
-  mergeRoster([{ name: "홍길동", hireDate: "2019-03-02", recordedDays: 18 }]);
+  setRoster([{ name: "홍길동", hireDate: "2019-03-02" }]);
   const r = loadRoster();
   assert.equal(r.length, 1);
   assert.equal(r[0].name, "홍길동");
   assert.equal(r[0].hireDate, "2019-03-02");
 });
 
-ck("이름+입사일이 같으면 한 사람 — 뒤에 온 것이 이긴다", () => {
-  mergeRoster([{ name: "홍길동", hireDate: "2019-03-02", recordedDays: 18 }]);
-  mergeRoster([{ name: "홍길동", hireDate: "2019-03-02", recordedDays: 20 }]);
-  const r = loadRoster();
-  assert.equal(r.length, 1, "중복으로 쌓이면 안 된다");
-  assert.equal(r[0].recordedDays, 20, "최근 업로드 값이 남아야 한다");
+ck("한 번에 같은 사람이 두 줄 들어오면 하나로 합친다", () => {
+  setRoster([
+    { name: "홍길동", hireDate: "2019-03-02" },
+    { name: "홍길동", hireDate: "2019-03-02" },
+  ]);
+  assert.equal(loadRoster().length, 1, "중복으로 쌓이면 안 된다");
 });
 
 ck("동명이인은 입사일이 다르면 따로 남는다", () => {
-  mergeRoster([
-    { name: "김영희", hireDate: "2019-03-02", recordedDays: null },
-    { name: "김영희", hireDate: "2024-01-08", recordedDays: null },
+  setRoster([
+    { name: "김영희", hireDate: "2019-03-02" },
+    { name: "김영희", hireDate: "2024-01-08" },
   ]);
   assert.equal(loadRoster().length, 2);
 });
 
-ck("여러 화면에서 올린 것이 합쳐진다", () => {
-  mergeRoster([{ name: "A", hireDate: "2020-01-01", recordedDays: null }]);
-  mergeRoster([{ name: "B", hireDate: "2021-01-01", recordedDays: null }]);
-  assert.deepEqual(loadRoster().map((m) => m.name).sort(), ["A", "B"]);
+// ★ 이것이 이 모듈의 핵심 규칙이다. 합치기로 만들면 드롭다운이 쓰레기로 찬다.
+ck("쓰기는 덮어쓰기다 — 앞의 목록이 남지 않는다", () => {
+  setRoster([{ name: "A", hireDate: "2020-01-01" }]);
+  setRoster([{ name: "B", hireDate: "2021-01-01" }]);
+  assert.deepEqual(loadRoster().map((m) => m.name), ["B"], "A 가 남으면 합치기가 된 것이다");
 });
 
-ck("형식이 깨진 것은 버린다 — 입사일이 날짜가 아니면 넣지 않는다", () => {
-  // @ts-expect-error 의도적으로 잘못된 입력
-  mergeRoster([{ name: "X", hireDate: "몰라요", recordedDays: null }, { name: 1, hireDate: "2020-01-01" }]);
+ck("타이핑 중간 상태가 쌓이지 않는다 (홍 → 홍길 → 홍길동)", () => {
+  // 입력창은 글자 하나 칠 때마다 다시 파싱돼 명부에 쓰인다.
+  for (const name of ["홍", "홍길", "홍길동"]) {
+    setRoster([{ name, hireDate: "2019-03-02" }]);
+  }
+  const r = loadRoster();
+  assert.equal(r.length, 1, `중간 상태가 남았다: ${r.map(rosterKey).join(" / ")}`);
+  assert.equal(r[0].name, "홍길동");
+});
+
+ck("날짜 오타를 고치면 틀린 것이 남지 않는다", () => {
+  setRoster([{ name: "홍길동", hireDate: "2019-03-20" }]); // 오타
+  setRoster([{ name: "홍길동", hireDate: "2019-03-02" }]); // 수정
+  const r = loadRoster();
+  assert.equal(r.length, 1);
+  assert.equal(r[0].hireDate, "2019-03-02");
+});
+
+ck("줄을 지우면 명부에서도 빠진다", () => {
+  setRoster([
+    { name: "A", hireDate: "2020-01-01" },
+    { name: "B", hireDate: "2021-01-01" },
+  ]);
+  setRoster([{ name: "A", hireDate: "2020-01-01" }]); // B 줄 삭제
+  assert.deepEqual(loadRoster().map((m) => m.name), ["A"]);
+});
+
+ck("빈 목록을 넘기면 명부를 비운다", () => {
+  setRoster([{ name: "A", hireDate: "2020-01-01" }]);
+  setRoster([]);
+  assert.deepEqual(loadRoster(), []);
+});
+
+ck("형식이 깨진 것은 버린다 — 입사일이 날짜가 아니거나 이름이 비면 넣지 않는다", () => {
+  setRoster([
+    { name: "X", hireDate: "몰라요" },
+    // @ts-expect-error 의도적으로 잘못된 입력
+    { name: 1, hireDate: "2020-01-01" },
+    { name: "  ", hireDate: "2020-01-01" },
+  ]);
   assert.deepEqual(loadRoster(), [], "검증을 통과한 것만 저장돼야 한다");
 });
 
@@ -87,15 +125,24 @@ ck("저장된 값이 손상돼 있어도 터지지 않는다", () => {
 });
 
 ck("지우면 사라진다", () => {
-  mergeRoster([{ name: "홍길동", hireDate: "2019-03-02", recordedDays: 18 }]);
+  setRoster([{ name: "홍길동", hireDate: "2019-03-02" }]);
   clearRoster();
   assert.deepEqual(loadRoster(), []);
 });
 
 ck("바뀔 때 같은 탭에 알린다 (storage 이벤트는 같은 탭에 안 온다)", () => {
-  mergeRoster([{ name: "홍길동", hireDate: "2019-03-02", recordedDays: 18 }]);
+  setRoster([{ name: "홍길동", hireDate: "2019-03-02" }]);
   clearRoster();
   assert.deepEqual(events, [ROSTER_CHANGED, ROSTER_CHANGED]);
+});
+
+// ── 개인정보 최소화 — 안 쓰는 개인별 값을 들고 있지 않는다
+ck("이름과 입사일만 저장한다 (대장 일수는 담지 않는다)", () => {
+  setRoster([
+    // @ts-expect-error 호출부가 더 넣어도 저장되면 안 된다
+    { name: "홍길동", hireDate: "2019-03-02", recordedDays: 18, 주민번호: "900101-1234567" },
+  ]);
+  assert.deepEqual(Object.keys(loadRoster()[0]).sort(), ["hireDate", "name"]);
 });
 
 // ── 개인정보 범위 가드 — 소스를 직접 본다
@@ -117,4 +164,4 @@ ck("명부 모듈에 서버 전송 코드가 없다", () => {
 });
 
 if (fail) { console.error(`\nleave-roster: 실패 ${fail}건`); process.exit(1); }
-console.log("leave-roster: 11건 통과 (병합·중복·손상내구성 + 개인정보 범위 가드)");
+console.log("leave-roster: 16건 통과 (덮어쓰기·중복·손상내구성 + 개인정보 범위·최소화 가드)");

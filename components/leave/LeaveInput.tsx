@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { compareRow } from "@/lib/annual-leave";
 import { downloadXlsx } from "@/lib/leave-xlsx";
 import { todayLocal } from "@/lib/leave-today";
-import { mergeRoster } from "@/lib/leave-roster";
+import { setRoster } from "@/lib/leave-roster";
 import { StatusBadge } from "@/components/leave/LeaveUI";
 
 /**
@@ -256,11 +256,16 @@ export function LeaveInput() {
 
   // 읽어낸 직원을 세션 명부에 넣는다 — 퇴직정산 화면에서 같은 사람을 다시
   // 입력하지 않게 하기 위해서다. 같은 탭에서만 유지되고 서버로 나가지 않는다.
+  //
+  // ★ 합치지 않고 **덮어쓴다.** 이 입력창의 내용이 곧 명부 전체다.
+  //   합치면 타이핑 중간 상태("홍" → "홍길" → "홍길동")가 전부 남아 드롭다운이
+  //   쓰레기로 찬다. 날짜 오타를 고쳐도 틀린 것이 같이 남는다.
   useEffect(() => {
-    const valid = rows
-      .filter((r) => !r.error && r.hireDate)
-      .map((r) => ({ name: r.name, hireDate: r.hireDate, recordedDays: r.recordedDays }));
-    if (valid.length > 0) mergeRoster(valid);
+    setRoster(
+      rows
+        .filter((r) => !r.error && r.hireDate)
+        .map((r) => ({ name: r.name, hireDate: r.hireDate }))
+    );
   }, [rows]);
   const results = useMemo(
     () =>
