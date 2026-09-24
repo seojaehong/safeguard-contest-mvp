@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { compareRow } from "@/lib/annual-leave";
 import { downloadXlsx } from "@/lib/leave-xlsx";
 import { todayLocal } from "@/lib/leave-today";
+import { mergeRoster } from "@/lib/leave-roster";
 import { StatusBadge } from "@/components/leave/LeaveUI";
 
 /**
@@ -252,6 +253,15 @@ export function LeaveInput() {
   }
 
   const rows = useMemo(() => parseLines(text), [text]);
+
+  // 읽어낸 직원을 세션 명부에 넣는다 — 퇴직정산 화면에서 같은 사람을 다시
+  // 입력하지 않게 하기 위해서다. 같은 탭에서만 유지되고 서버로 나가지 않는다.
+  useEffect(() => {
+    const valid = rows
+      .filter((r) => !r.error && r.hireDate)
+      .map((r) => ({ name: r.name, hireDate: r.hireDate, recordedDays: r.recordedDays }));
+    if (valid.length > 0) mergeRoster(valid);
+  }, [rows]);
   const results = useMemo(
     () =>
       rows.map((r) => {
@@ -481,6 +491,12 @@ export function LeaveInput() {
               </tbody>
             </table>
           </div>
+
+          <p className="lv-roster__note" style={{ marginTop: 12 }}>
+            읽은 직원 <strong>{usable.length}명</strong>은{" "}
+            <a href="/tools/leave/settlement">퇴직 연차 정산</a> 화면에서 골라 쓸 수 있습니다.
+            이 목록은 <strong>이 탭에서만</strong> 유지되고 탭을 닫으면 사라집니다.
+          </p>
 
           <div className="lv-input__export">
             <button

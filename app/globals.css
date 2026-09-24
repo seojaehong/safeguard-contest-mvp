@@ -25435,10 +25435,30 @@ body:has(.safeclaw-landing) :is(
 .lv-map__foot { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 10px; }
 .lv-map__check { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
 
+/* 세션 직원 명부 — 연차 계산 화면에서 읽은 직원을 다른 화면에서 고른다 (2026-09-23) */
+.lv-roster {
+  border: 1px solid var(--accent); border-radius: var(--radius-md);
+  background: var(--accent-soft); padding: 13px 15px; margin-bottom: 12px;
+}
+.lv-roster__pick { max-width: 340px; }
+.lv-roster__note { margin: 9px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--muted); }
+.lv-roster__note strong { color: var(--ink); }
+.lv-roster__clear {
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--paper); color: var(--ink);
+  padding: 3px 9px; font-size: 12px; font-family: inherit; cursor: pointer;
+}
+.lv-roster__clear:hover { border-color: var(--accent); color: var(--accent); }
+.lv-roster__empty {
+  margin: 0 0 12px; padding: 10px 13px; font-size: 12.5px; line-height: 1.6;
+  border: 1px dashed var(--line-strong); border-radius: var(--radius-sm); color: var(--muted);
+}
+
 /* 인쇄 — 결과만 남기고 입력·버튼은 숨긴다 (PDF 로 저장 가능) */
 @media print {
   .lv-nav, .lv-input__controls, .lv-input__area, .lv-input__export,
-  .lv-map, .lv-how, .lv-input__privacy, .lv-input__filenote, .lv-clause { display: none !important; }
+  .lv-map, .lv-how, .lv-input__privacy, .lv-input__filenote, .lv-clause,
+  .lv-roster, .lv-roster__empty { display: none !important; }
   .lv-page { padding: 0; gap: 14px; }
   .lv-input { border: 0; padding: 0; }
   .lv-table { border-color: #ccc; }

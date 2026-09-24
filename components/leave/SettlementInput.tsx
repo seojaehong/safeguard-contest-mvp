@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { settleOnTermination } from "@/lib/leave-ledger";
 import { downloadXlsx } from "@/lib/leave-xlsx";
 import { todayLocal } from "@/lib/leave-today";
+import { clearRoster, loadRoster, ROSTER_CHANGED } from "@/lib/leave-roster";
+import type { RosterMember } from "@/lib/leave-roster";
 import { StatusBadge } from "@/components/leave/LeaveUI";
 
 /**
@@ -24,6 +26,15 @@ export function SettlementInput() {
   useEffect(() => setMaxDate(todayLocal()), []);
   const [hireDate, setHireDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  // 연차 계산 화면에서 올린 직원 명부 — 같은 탭에서만 유지된다.
+  const [roster, setRoster] = useState<RosterMember[]>([]);
+  const [picked, setPicked] = useState("");
+  useEffect(() => {
+    const sync = () => setRoster(loadRoster());
+    sync();
+    window.addEventListener(ROSTER_CHANGED, sync);
+    return () => window.removeEventListener(ROSTER_CHANGED, sync);
+  }, []);
   const [fiscalGranted, setFiscalGranted] = useState("");
   const [usedOrPaid, setUsedOrPaid] = useState("");
   const [clause, setClause] = useState<Clause>("unknown");
@@ -53,6 +64,52 @@ export function SettlementInput() {
       <div className="lv-input__privacy">
         🔒 입력한 내용은 <strong>브라우저 안에서만</strong> 계산됩니다.
       </div>
+
+      {roster.length === 0 && (
+        <p className="lv-roster__empty">
+          여러 명을 정산하신다면 <a href="/tools/leave">연차 일수 계산</a> 화면에서 엑셀을 한 번
+          올려두세요. 그러면 여기서 직원을 골라 입사일을 자동으로 채울 수 있습니다.
+        </p>
+      )}
+
+      {roster.length > 0 && (
+        <div className="lv-roster">
+          <label className="lv-input__field lv-roster__pick">
+            <span>직원 선택</span>
+            <select
+              value={picked}
+              onChange={(e) => {
+                const key = e.target.value;
+                setPicked(key);
+                const m = roster.find((x) => `${x.name} ${x.hireDate}` === key);
+                if (m) setHireDate(m.hireDate);
+              }}
+            >
+              <option value="">직접 입력</option>
+              {roster.map((m) => (
+                <option key={`${m.name} ${m.hireDate}`} value={`${m.name} ${m.hireDate}`}>
+                  {m.name} (입사 {m.hireDate})
+                </option>
+              ))}
+            </select>
+          </label>
+          <p className="lv-roster__note">
+            연차 계산 화면에서 읽은 <strong>{roster.length}명</strong>입니다. 고르면 입사일이
+            자동으로 들어갑니다. 이 목록은 <strong>이 탭에서만</strong> 유지되고 탭을 닫으면
+            사라집니다.{" "}
+            <button
+              type="button"
+              className="lv-roster__clear"
+              onClick={() => {
+                clearRoster();
+                setPicked("");
+              }}
+            >
+              지금 지우기
+            </button>
+          </p>
+        </div>
+      )}
 
       <div className="lv-form">
         <label className="lv-input__field">
