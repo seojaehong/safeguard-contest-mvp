@@ -60,6 +60,12 @@ export interface PromotionScheduleResult {
   disclaimer: string;
 }
 
+/** 창들의 판정에서 전체 판정을 만든다. 하나라도 어긋나면 어긋난 것이다. */
+function rollUp(ws: ScheduleWindow[]): ScheduleStatus {
+  const st = ws.map((w) => w.status);
+  return st.includes("diff") ? "diff" : st.includes("unknown") ? "unknown" : "match";
+}
+
 const DISCLAIMER =
   "입력한 사용기간 종료일과 대상 유형을 전제로 계산한 일정입니다. 서면·도달·실제 사용 보장 등 적법성은 확인하지 않았습니다.";
 
@@ -131,10 +137,11 @@ export function buildPromotionSchedule(
     const inLateBatch =
       sent && parse(sent) >= lateBatchFrom && parse(sent) <= lateBatchTo;
 
+    let windows: ScheduleWindow[];
     return {
       kind,
       usagePeriodEnd,
-      windows: [
+      windows: (windows = [
         {
           label: "1차 촉구 — 먼저 발생한 9일분 (3개월 전, 10일간)",
           from: fmt(firstBatchFrom),
@@ -170,8 +177,16 @@ export function buildPromotionSchedule(
           status: "unknown",
           note: "최초 1년간 근로가 끝나기 10일 전까지입니다. 이 데모는 묶음별 통보 기록을 따로 받지 않습니다.",
         },
-      ],
-      overall: sent ? (inFirstBatch || inLateBatch ? "match" : "diff") : "unknown",
+      ]),
+      // ★ 2026-09-24 — 여기만 창을 보지 않고 한 줄로 단정하고 있었다.
+      //   발송일이 **두 묶음 중 하나**에만 들어가면 「일치」가 나왔다.
+      //   §61② 은 9일분과 2일분을 각각 촉구하게 돼 있고, 바로 아래 note 에도
+      //   "두 묶음을 한 번에 처리할 수 없습니다" 라고 적어 두었다.
+      //   그래서 12-03 발송(2일분 창 안, 9일분 창은 놓침)이 「일정 대조: 일치」로
+      //   떴다 — 표 1단계는 「차이」인데 상단 배지만 「일치」였고, 사용자는
+      //   배지를 믿는다. 늦은 촉구를 적법하다고 읽게 만드는 자리다.
+      //   1년 이상 분기와 같은 규칙(창에서 산출)으로 맞춘다.
+      overall: rollUp(windows),
       disclaimer: DISCLAIMER,
     };
   }

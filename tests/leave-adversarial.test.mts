@@ -12,6 +12,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { calculateEntitlement, compareRow } from "../lib/annual-leave.ts";
 import { buildHireDateLedger, settleOnTermination } from "../lib/leave-ledger.ts";
 import { todayLocal } from "../lib/leave-today.ts";
+import { buildPromotionSchedule } from "../lib/leave-promotion.ts";
 
 let fail = 0;
 const ck = (l: string, fn: () => void) => {
@@ -114,5 +115,31 @@ ck("화면 컴포넌트에 toISOString 날짜 계산이 남아 있지 않다", (
   }
 });
 
+
+// ── 2026-09-24 TF 지적 — 늦은 촉구를 「일치」라고 말하던 것
+//    §61② 은 9일분·2일분을 각각 촉구한다. 발송일이 한 묶음에만 들어가도
+//    「일정 대조: 일치」가 떴고, 표 1단계는 「차이」였다. 배지가 이긴다.
+ck("촉진: 한 묶음만 맞아도 전체를 「일치」라고 하지 않는다", () => {
+  const r = buildPromotionSchedule({
+    usagePeriodEnd: "2026-12-31",
+    kind: "monthly-under-1year",
+    firstNoticeSentOn: "2026-12-03", // 2일분 창 안, 9일분 창은 놓침
+  });
+  assert.equal(r.windows[0].status, "diff", "9일분 창을 놓친 것은 맞다");
+  assert.notEqual(r.overall, "match", "표가 「차이」인데 배지가 「일치」면 안 된다");
+  assert.equal(r.overall, "diff");
+});
+
+ck("촉진: 두 분기의 전체 판정 규칙이 같다", () => {
+  const a = buildPromotionSchedule({ usagePeriodEnd: "2026-12-31", kind: "monthly-under-1year", firstNoticeSentOn: "2026-12-03" });
+  const b = buildPromotionSchedule({ usagePeriodEnd: "2026-12-31", kind: "annual-15plus", firstNoticeSentOn: "2026-12-03" });
+  assert.equal(a.overall, b.overall, "같은 조건에서 분기마다 다른 결론이 나오면 안 된다");
+});
+
+ck("촉진: 아무것도 안 넣으면 「확인 불가」다", () => {
+  const r = buildPromotionSchedule({ usagePeriodEnd: "2026-12-31", kind: "monthly-under-1year" });
+  assert.equal(r.overall, "unknown", "입력이 없는데 일치/차이를 단정하면 안 된다");
+});
+
 if (fail) { console.error(`\nleave-adversarial: 실패 ${fail}건`); process.exit(1); }
-console.log("leave-adversarial: 12건 통과 (검수 지적 + 자체 발견 + 경계값)");
+console.log("leave-adversarial: 15건 통과 (검수 지적 + 자체 발견 + 경계값)");
