@@ -8,7 +8,12 @@ import type { ParsedRow } from "@/lib/leave-sheet";
 import { downloadXlsx } from "@/lib/leave-xlsx";
 import { downloadLeaveTemplate } from "@/lib/leave-template-xlsx";
 import { todayLocal } from "@/lib/leave-today";
-import { setRoster } from "@/lib/leave-roster";
+import {
+  WORKSPACES_CHANGED,
+  getActiveWorkspace,
+  setMembers,
+} from "@/lib/leave-workspaces";
+import type { Workspace } from "@/lib/leave-workspaces";
 import { trackLeave } from "@/lib/leave-analytics";
 import { StatusBadge } from "@/components/leave/LeaveUI";
 
@@ -153,6 +158,14 @@ export function LeaveInput() {
   // 계산 결과가 실제로 나왔는지 — 한 세션에 한 번만 기록한다.
   // 「업로드 시도」와 이 값이 벌어지면 업로드 경로가 실제로 막힌 것이다.
   const [resultTracked, setResultTracked] = useState(false);
+  /** 지금 고른 사업장 — 읽어낸 직원은 여기로 들어간다 */
+  const [ws, setWs] = useState<Workspace | null>(null);
+  useEffect(() => {
+    const sync = () => setWs(getActiveWorkspace());
+    sync();
+    window.addEventListener(WORKSPACES_CHANGED, sync);
+    return () => window.removeEventListener(WORKSPACES_CHANGED, sync);
+  }, []);
 
   // 읽어낸 직원을 세션 명부에 넣는다 — 퇴직정산 화면에서 같은 사람을 다시
   // 입력하지 않게 하기 위해서다. 같은 탭에서만 유지되고 서버로 나가지 않는다.
@@ -161,12 +174,13 @@ export function LeaveInput() {
   //   합치면 타이핑 중간 상태("홍" → "홍길" → "홍길동")가 전부 남아 드롭다운이
   //   쓰레기로 찬다. 날짜 오타를 고쳐도 틀린 것이 같이 남는다.
   useEffect(() => {
-    setRoster(
+    setMembers(
+      ws,
       rows
         .filter((r) => !r.error && r.hireDate)
         .map((r) => ({ name: r.name, hireDate: r.hireDate }))
     );
-  }, [rows]);
+  }, [rows, ws]);
   const results = useMemo(
     () =>
       rows.map((r) => {
@@ -452,9 +466,12 @@ export function LeaveInput() {
               (.lv-offer 스타일은 그때 재사용할 수 있게 남겨 둔다) */}
 
           <p className="lv-roster__note" style={{ marginTop: 12 }}>
-            읽은 직원 <strong>{usable.length}명</strong>은{" "}
+            읽은 직원 <strong>{usable.length}명</strong>을{" "}
+            {ws ? <>「{ws.name}」 명부에 담았습니다. </> : <>명부에 담았습니다. </>}
             <a href="/tools/leave/settlement">퇴직 연차 정산</a> 화면에서 골라 쓸 수 있습니다.
-            이 목록은 <strong>이 탭에서만</strong> 유지되고 탭을 닫으면 사라집니다.
+            {ws?.remember
+              ? " 이 브라우저에 남습니다."
+              : " 탭을 닫으면 사라집니다(위에서 기억하기를 켜면 남습니다)."}
           </p>
 
           <div className="lv-input__export">

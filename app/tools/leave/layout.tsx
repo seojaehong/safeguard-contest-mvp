@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Analytics } from "@vercel/analytics/next";
 
 import { LeaveNav } from "@/components/leave/LeaveNav";
+import { WorkspaceBar } from "@/components/leave/WorkspaceBar";
 
 /**
  * 연차 도구 공통 골격 — 어느 화면에 들어와도 「무엇을 하는 서비스인지」가 보이게 한다.
@@ -14,6 +15,7 @@ export default function LeaveLayout({ children }: { children: ReactNode }) {
   return (
     <div className="lv-shell">
       <LeaveNav />
+      <WorkspaceBar />
       {children}
       <Analytics />
     </div>
