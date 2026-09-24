@@ -65,6 +65,24 @@ await ck("서식을 그대로 올리면 예시 3명이 잡힌다", async () => {
   assert.deepEqual(rows.map((r) => r.hireDate), ["2019-03-02", "2026-03-16", "2024-01-08"]);
 });
 
+// ★ 받자마자 그대로 올려보는 것이 가장 흔한 첫 동작이다. 거기서 경고가 쏟아지면
+//   "이 도구 고장났나" 로 읽힌다. 안내를 둘째 시트로 뺀 이유.
+await ck("서식을 받자마자 그대로 올려도 읽지 못한 줄이 0건", async () => {
+  const grid = await roundTrip();
+  const text = buildText(grid, looksLikeHeader(grid), 0, 1, 2);
+  const bad = parseLines(text).filter((r) => r.error);
+  assert.equal(bad.length, 0, `경고 ${bad.length}건: ${bad.map((b) => b.raw).join(" / ")}`);
+});
+
+await ck("안내는 둘째 시트에 있고 첫 시트에 섞이지 않는다", async () => {
+  const wb = await buildWorkbook(LEAVE_TEMPLATE_SHEETS);
+  assert.equal(wb.worksheets.length, 2, "시트가 둘이어야 한다");
+  assert.equal(wb.worksheets[1].name, "안내");
+  const first = readGrid(wb.worksheets[0]);
+  const joined = first.flat().join(" ");
+  assert.ok(!joined.includes("브라우저 안에서만"), "안내가 첫 시트에 섞였다");
+});
+
 await ck("서식의 제목·안내 줄이 직원으로 잡히지 않는다", async () => {
   const grid = await roundTrip();
   const text = buildText(grid, looksLikeHeader(grid), 0, 1, 2);
@@ -191,4 +209,4 @@ await ck("'미확인' 같은 글자는 0 이 아니라 원문으로 남는다", 
 });
 
 if (fail) { console.error(`\nleave-xlsx-roundtrip: 실패 ${fail}건`); process.exit(1); }
-console.log("leave-xlsx-roundtrip: 14건 통과 (실제 xlsx 바이트 왕복 — 서식·열밀림·날짜셀·빈칸)");
+console.log("leave-xlsx-roundtrip: 16건 통과 (실제 xlsx 바이트 왕복 — 서식·열밀림·날짜셀·빈칸)");
