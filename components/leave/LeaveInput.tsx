@@ -9,6 +9,7 @@ import { downloadXlsx } from "@/lib/leave-xlsx";
 import { downloadLeaveTemplate } from "@/lib/leave-template-xlsx";
 import { todayLocal } from "@/lib/leave-today";
 import { setRoster } from "@/lib/leave-roster";
+import { trackLeave } from "@/lib/leave-analytics";
 import { StatusBadge } from "@/components/leave/LeaveUI";
 
 /**
@@ -64,9 +65,15 @@ function toCsv(
       row.hireDate,
       asOf,
       String(result.calculatedDays),
-      hasRec ? String(row.recordedDays) : "",
+      // ★ 대장에 「미확인」이라고 적혀 있으면 그 원문을 그대로 싣는다.
+      //   「대장값 없음」으로 쓰면 원본 대장을 왜곡한 파일이 사무소를 돈다.
+      hasRec ? String(row.recordedDays) : (row.recordedRaw ?? ""),
       hasRec ? String(result.diff) : "",
-      hasRec ? (result.verdict === "diff" ? "차이 있음" : "일치") : "대장값 없음",
+      hasRec
+        ? (result.verdict === "diff" ? "차이 있음" : "일치")
+        : row.recordedRaw
+          ? "대조 못 함(숫자 아님)"
+          : "대장값 없음",
       result.basisLabel,
     ];
   });
@@ -100,21 +107,25 @@ export function LeaveInput() {
   async function handleFile(file: File) {
     setReading(true);
     setFileNote(null);
+    trackLeave("leave_upload_try");
     try {
       const ExcelJS = (await import("exceljs")).default;
       const wb = new ExcelJS.Workbook();
       await wb.xlsx.load(await file.arrayBuffer());
       const ws = wb.worksheets[0];
       if (!ws) {
+        trackLeave("leave_upload_fail");
         setFileNote("시트를 찾지 못했습니다.");
         return;
       }
       const grid = readGrid(ws);
       if (!grid.length) {
+        trackLeave("leave_upload_fail");
         setFileNote("읽을 수 있는 행이 없습니다. 이름과 입사일 열이 있는지 확인해주세요.");
         return;
       }
 
+      trackLeave("leave_upload_ok");
       const looksHeader = looksLikeHeader(grid);
       setSheet(grid);
       setSkipFirst(looksHeader);
@@ -130,6 +141,7 @@ export function LeaveInput() {
           "열이 잘못 잡혔으면 아래에서 바꾸세요."
       );
     } catch {
+      trackLeave("leave_upload_fail");
       setFileNote("이 파일은 읽지 못했습니다. xlsx 형식인지 확인하시거나 내용을 붙여넣어 주세요.");
     } finally {
       setReading(false);
@@ -137,6 +149,10 @@ export function LeaveInput() {
   }
 
   const rows = useMemo(() => parseLines(text), [text]);
+
+  // 계산 결과가 실제로 나왔는지 — 한 세션에 한 번만 기록한다.
+  // 「업로드 시도」와 이 값이 벌어지면 업로드 경로가 실제로 막힌 것이다.
+  const [resultTracked, setResultTracked] = useState(false);
 
   // 읽어낸 직원을 세션 명부에 넣는다 — 퇴직정산 화면에서 같은 사람을 다시
   // 입력하지 않게 하기 위해서다. 같은 탭에서만 유지되고 서버로 나가지 않는다.
@@ -176,16 +192,33 @@ export function LeaveInput() {
   // ★ compareRow 는 계산 실패 시 verdict "error" 를 돌려준다.
   //   그것을 "diff 가 아니면 일치" 로 처리하면 **틀린 답을 맞다고 표시**한다.
   //   (기준일보다 미래 입사 등) → 반드시 따로 센다.
+  useEffect(() => {
+    if (resultTracked) return;
+    if (results.some((x) => x.result && x.result.verdict !== "error")) {
+      trackLeave("leave_result");
+      setResultTracked(true);
+    }
+  }, [results, resultTracked]);
+
   const ok = results.filter((x) => x.result && x.result.verdict !== "error");
   const usable = ok;
   const withRecorded = ok.filter((x) => x.row.recordedDays !== null);
   const diffs = withRecorded.filter((x) => x.result!.verdict === "diff");
   const problems = results.filter((x) => !x.result || x.result.verdict === "error");
 
+  // ★ 2026-09-24 — 대장 칸에 숫자가 아닌 값(「미확인」·「-」)이 적힌 줄은
+  //   recordedDays 가 null 이라 withRecorded 에서 빠지고, verdict 가 error 도
+  //   아니라 problems 에도 안 들어간다. 그런데 usable(「N명 계산」)에는 들어간다.
+  //   200명 중 20명이 「미확인」이면 「200명 계산 · 차이 3명」이 뜨고 사용자는
+  //   197명이 맞다고 결론 낸다. 실제로 대조된 건 180명이다. 거짓 안심이다.
+  const uncompared = ok.filter((x) => x.row.recordedDays === null && x.row.recordedRaw);
+  const noRecord = ok.filter((x) => x.row.recordedDays === null && !x.row.recordedRaw);
+  const comparedCount = withRecorded.length;
+
   return (
     <section className="lv-input">
       <div className="lv-input__privacy">
-        🔒 붙여넣은 내용과 엑셀 파일은 <strong>브라우저 안에서만</strong> 처리됩니다.
+        🔒 붙여넣은 내용과 엑셀 파일은 <strong>브라우저 안에서만</strong> 처리됩니다 — 서버로 올라가지 않습니다. 페이지 방문·버튼 클릭 횟수만 집계하며 <strong>이름·입사일·파일명은 집계에 포함되지 않습니다.</strong>
       </div>
 
       <div className="lv-input__controls">
@@ -212,7 +245,7 @@ export function LeaveInput() {
         <button
           type="button"
           className="lv-input__btn is-ghost"
-          onClick={() => void downloadLeaveTemplate()}
+          onClick={() => { trackLeave("leave_export", { kind: "template" }); void downloadLeaveTemplate(); }}
         >
           빈 서식 내려받기
         </button>
@@ -233,7 +266,7 @@ export function LeaveInput() {
           <button
             type="button"
             className="lv-linklike"
-            onClick={() => void downloadLeaveTemplate()}
+            onClick={() => { trackLeave("leave_export", { kind: "template" }); void downloadLeaveTemplate(); }}
           >
             빈 서식
           </button>
@@ -320,15 +353,25 @@ export function LeaveInput() {
         <>
           <div className="lv-input__summary">
             <span>{usable.length}명 계산</span>
-            {withRecorded.length > 0 && (
+            {comparedCount > 0 && (
               <span className={diffs.length ? "is-diff" : undefined}>
-                차이 {diffs.length}명
+                대조 {comparedCount}명 중 차이 {diffs.length}명
               </span>
             )}
+            {uncompared.length > 0 && (
+              <span className="is-diff">대조 못 함 {uncompared.length}명</span>
+            )}
+            {noRecord.length > 0 && <span>대장값 없음 {noRecord.length}명</span>}
             {problems.length > 0 && (
               <span className="is-diff">계산 불가 {problems.length}줄</span>
             )}
           </div>
+          {uncompared.length > 0 && (
+            <p className="lv-input__note">
+              대장 칸에 숫자가 아닌 값이 적힌 <strong>{uncompared.length}명</strong>은 계산값과
+              대조하지 못했습니다. 「차이 {diffs.length}명」은 대조한 {comparedCount}명 기준입니다.
+            </p>
+          )}
 
           <div className="lv-table">
             <table>
@@ -403,6 +446,23 @@ export function LeaveInput() {
             </table>
           </div>
 
+          {/* ★ 차이가 나온 그 순간에만 띄운다. 차이 0명에 영업 문구를 붙이면
+              신뢰만 깎인다. 무료 도구의 유일한 회수 지점이다. */}
+          {diffs.length > 0 && (
+            <div className="lv-offer">
+              <p className="lv-offer__head">
+                대조한 {comparedCount}명 중 <strong>{diffs.length}명</strong>에서 차이가
+                나왔습니다.
+              </p>
+              <p className="lv-offer__body">
+                이 차이가 미사용수당 청구로 이어지는지, 사용촉진이나 취업규칙 때문에 달라지는지는
+                사안을 봐야 합니다. 내려받은 파일 그대로 보내주시면 검토해 드립니다 —{" "}
+                <strong>노무법인 위너스</strong> 공인노무사 서재홍{" "}
+                <a href="mailto:abc@winhr.co.kr" onClick={() => trackLeave("leave_contact")}>abc@winhr.co.kr</a>
+              </p>
+            </div>
+          )}
+
           <p className="lv-roster__note" style={{ marginTop: 12 }}>
             읽은 직원 <strong>{usable.length}명</strong>은{" "}
             <a href="/tools/leave/settlement">퇴직 연차 정산</a> 화면에서 골라 쓸 수 있습니다.
@@ -414,6 +474,7 @@ export function LeaveInput() {
               type="button"
               className="lv-input__btn"
               onClick={async () => {
+                trackLeave("leave_export", { kind: "copy" });
                 const csv = toCsv(results, asOf);
                 try {
                   await navigator.clipboard.writeText(csv.replace(/","/g, "\t").replace(/"/g, ""));
@@ -430,6 +491,7 @@ export function LeaveInput() {
               type="button"
               className="lv-input__btn"
               onClick={() => {
+                trackLeave("leave_export", { kind: "xlsx" });
                 void downloadXlsx(`연차계산_${asOf}`, [
                   {
                     name: "연차 계산",
@@ -444,13 +506,17 @@ export function LeaveInput() {
                             row.name,
                             row.hireDate,
                             result.calculatedDays,
-                            row.recordedDays ?? "",
+                            // 대장에 적힌 원문을 보존한다 — 「미확인」을 「대장값 없음」으로
+                            // 바꿔 쓰면 원본을 왜곡한 파일이 사무소 안을 돈다.
+                            row.recordedDays ?? row.recordedRaw ?? "",
                             row.recordedDays !== null ? result.diff : "",
-                            row.recordedDays === null
-                              ? "대장값 없음"
-                              : result.verdict === "diff"
+                            row.recordedDays !== null
+                              ? result.verdict === "diff"
                                 ? "차이 있음"
-                                : "일치",
+                                : "일치"
+                              : row.recordedRaw
+                                ? "대조 못 함(숫자 아님)"
+                                : "대장값 없음",
                             result.basisLabel,
                           ]
                     ),
@@ -462,6 +528,9 @@ export function LeaveInput() {
                       )
                       .filter((i) => i >= 0),
                     notes: [
+                      `· 계산 ${usable.length}명 · 대조 ${comparedCount}명 · 대조 못 함 ${uncompared.length}명 · 대장값 없음 ${noRecord.length}명 · 계산 불가 ${problems.length}줄`,
+                      "· 「대조 못 함」은 대장 칸에 숫자가 아닌 값이 적혀 있어 계산값과 맞대보지 못한 줄입니다. 원문을 그대로 실었습니다.",
+                      "· 계산: safeclaw.kr/tools/leave — 노무법인 위너스 공인노무사 서재홍 · abc@winhr.co.kr",
                       "· 상시 5인 이상 사업장, 1주 소정근로시간 15시간 이상 근로자를 전제로 한 참고 계산입니다.",
                       "· 입사일 기준 「발생일수」입니다. 이월·사용분을 뺀 잔여일수와는 다릅니다.",
                       "· 출근율 80% 미만 구간, 육아휴직 등 특수 출결은 조건이 달라집니다.",
@@ -477,7 +546,7 @@ export function LeaveInput() {
             <button
               type="button"
               className="lv-input__btn is-ghost lv-print-btn"
-              onClick={() => window.print()}
+              onClick={() => { trackLeave("leave_export", { kind: "print" }); window.print(); }}
             >
               인쇄 · PDF 저장
             </button>

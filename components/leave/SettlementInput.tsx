@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { settleOnTermination } from "@/lib/leave-ledger";
 import { downloadXlsx } from "@/lib/leave-xlsx";
 import { todayLocal } from "@/lib/leave-today";
+import { trackLeave } from "@/lib/leave-analytics";
 import { clearRoster, loadRoster, rosterKey, ROSTER_CHANGED } from "@/lib/leave-roster";
 import type { RosterMember } from "@/lib/leave-roster";
 import { StatusBadge } from "@/components/leave/LeaveUI";
@@ -67,7 +68,7 @@ export function SettlementInput() {
   return (
     <section className="lv-input">
       <div className="lv-input__privacy">
-        🔒 입력한 내용은 <strong>브라우저 안에서만</strong> 계산됩니다.
+        🔒 입력한 내용은 <strong>브라우저 안에서만</strong> 계산됩니다 — 서버로 올라가지 않습니다. 페이지 방문·버튼 클릭 횟수만 집계합니다.
       </div>
 
       {roster.length === 0 && (
@@ -339,6 +340,7 @@ export function SettlementInput() {
                 const shortfall = Number.isNaN(r.shortfallDays)
                   ? "확인 필요"
                   : Math.max(0, r.shortfallDays);
+                trackLeave("leave_export", { kind: "xlsx" });
                 void downloadXlsx(`퇴직연차정산_${endDate}`, [
                   {
                     name: "정산 요약",
@@ -366,6 +368,7 @@ export function SettlementInput() {
                     ],
                     emphasizeRows: [4],
                     notes: [
+                      "· 계산: safeclaw.kr/tools/leave — 노무법인 위너스 공인노무사 서재홍 · abc@winhr.co.kr",
                       "· 근거 — 고용노동부 근로기준과-5802(2009-12-31), 근기 68207-620(2003-05-23)",
                       "· 퇴직 시 총 휴가일수가 입사일 기준에 미달하면 부족분을 정산합니다.",
                       "· 수당 금액은 산출하지 않습니다. 통상임금 기준은 별도 확인이 필요합니다.",
@@ -395,7 +398,7 @@ export function SettlementInput() {
             <button
               type="button"
               className="lv-input__btn is-ghost lv-print-btn"
-              onClick={() => window.print()}
+              onClick={() => { trackLeave("leave_export", { kind: "print" }); window.print(); }}
             >
               인쇄 · PDF 저장
             </button>

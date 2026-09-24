@@ -7,6 +7,16 @@ export const metadata = {
   title: "사용촉진 일정 · 반차 환산 | SafeClaw",
   description:
     "연차 사용촉진 일정이 법정 기간에 맞는지 대조하고, 반차·반반차·시간차를 일 단위로 환산합니다.",
+  alternates: { canonical: "https://www.safeclaw.kr/tools/leave/advanced" },
+  openGraph: {
+    title: "연차 사용촉진 · 반차 환산 | SafeClaw",
+    description: "연차 사용촉진 일정을 법정 기간과 대조하고, 반차·반반차·시간차를 일수로 환산합니다.",
+    url: "https://www.safeclaw.kr/tools/leave/advanced",
+    siteName: "SafeClaw",
+    locale: "ko_KR",
+    type: "website",
+  },
+  twitter: { card: "summary", title: "연차 사용촉진 · 반차 환산 | SafeClaw", description: "연차 사용촉진 일정을 법정 기간과 대조하고, 반차·반반차·시간차를 일수로 환산합니다." },
 };
 
 export default function AdvancedPage() {

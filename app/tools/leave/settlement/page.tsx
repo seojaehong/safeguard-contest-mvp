@@ -6,6 +6,16 @@ export const metadata = {
   title: "퇴직 연차 정산 | SafeClaw",
   description:
     "회계연도로 연차를 관리하는 사업장에서 퇴사자가 생기면 입사일 기준으로 다시 계산해 부족분을 확인합니다. 연도별 발생 내역과 근거를 함께 보여드립니다.",
+  alternates: { canonical: "https://www.safeclaw.kr/tools/leave/settlement" },
+  openGraph: {
+    title: "퇴직 연차 정산 | SafeClaw",
+    description: "회계연도로 연차를 관리하는 사업장에서 퇴사자가 생기면 입사일 기준으로 다시 계산해 부족분을 확인합니다.",
+    url: "https://www.safeclaw.kr/tools/leave/settlement",
+    siteName: "SafeClaw",
+    locale: "ko_KR",
+    type: "website",
+  },
+  twitter: { card: "summary", title: "퇴직 연차 정산 | SafeClaw", description: "회계연도로 연차를 관리하는 사업장에서 퇴사자가 생기면 입사일 기준으로 다시 계산해 부족분을 확인합니다." },
 };
 
 export default function SettlementPage() {

@@ -6,6 +6,16 @@ export const metadata = {
   title: "연차 일수 계산 | SafeClaw",
   description:
     "이름과 입사일만 붙여넣으면 입사일 기준 연차 발생일수를 한 번에 계산합니다. 대장 값을 함께 넣으면 차이까지 대조합니다.",
+  alternates: { canonical: "https://www.safeclaw.kr/tools/leave" },
+  openGraph: {
+    title: "연차 일수 계산 | SafeClaw",
+    description: "이름과 입사일만 붙여넣으면 입사일 기준 연차 발생일수를 한 번에 계산합니다. 대장 값을 함께 넣으면 차이까지 대조합니다.",
+    url: "https://www.safeclaw.kr/tools/leave",
+    siteName: "SafeClaw",
+    locale: "ko_KR",
+    type: "website",
+  },
+  twitter: { card: "summary", title: "연차 일수 계산 | SafeClaw", description: "이름과 입사일만 붙여넣으면 입사일 기준 연차 발생일수를 한 번에 계산합니다. 대장 값을 함께 넣으면 차이까지 대조합니다." },
 };
 
 export default function LeaveToolPage() {

@@ -12,6 +12,9 @@ const PUBLIC_PATHS = [
   "/roadmap",
   "/ask",
   "/knowledge",
+  "/tools/leave",
+  "/tools/leave/settlement",
+  "/tools/leave/advanced",
   "/login",
 ] as const;
 

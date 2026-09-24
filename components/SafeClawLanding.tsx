@@ -216,6 +216,7 @@ export function SafeClawLanding() {
           <Link href="/workspace">작업공간</Link>
           <Link href="/documents">문서</Link>
           <Link href="/evidence">근거</Link>
+          <Link href="/tools/leave">연차 점검 도구</Link>
           <Link href="/ops/api">API 상태</Link>
           <Link href="/login">로그인</Link>
         </nav>
