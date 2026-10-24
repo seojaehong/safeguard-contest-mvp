@@ -128,8 +128,9 @@ export type PublicDistributedAdmissionReadiness = {
 };
 
 function readUpstashConfiguration(environment: Environment): UpstashConfiguration {
-  const url = environment.UPSTASH_REDIS_REST_URL?.trim() ?? "";
-  const token = environment.UPSTASH_REDIS_REST_TOKEN?.trim() ?? "";
+  // Vercel Marketplace 의 Upstash 연결은 KV_REST_API_* 이름으로 넣는다.
+  const url = (environment.UPSTASH_REDIS_REST_URL?.trim() || environment.KV_REST_API_URL?.trim()) ?? "";
+  const token = (environment.UPSTASH_REDIS_REST_TOKEN?.trim() || environment.KV_REST_API_TOKEN?.trim()) ?? "";
   if (!url && !token) return { state: "absent" };
   if (!url || !token) return { state: "invalid" };
 

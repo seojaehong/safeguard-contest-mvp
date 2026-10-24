@@ -62,6 +62,23 @@ describe("public distributed rate limit", () => {
     expect(init?.cache).toBe("no-store");
   });
 
+  it("accepts the Vercel Marketplace KV_REST_API_* names when UPSTASH_* are absent", async () => {
+    const fetchImpl = vi.fn(async (_input: string | URL | Request, _init?: RequestInit) =>
+      Response.json({ result: [1, 59_500] }));
+
+    const decision = await checkPublicRateLimit(options({
+      environment: {
+        KV_REST_API_URL: "https://example.upstash.io",
+        KV_REST_API_TOKEN: "kv-token",
+      },
+      fetchImpl,
+    }));
+
+    expect(decision).toEqual({ allowed: true, mode: "distributed", reason: "distributed" });
+    const init = fetchImpl.mock.calls[0]?.[1];
+    expect(new Headers(init?.headers).get("Authorization")).toBe("Bearer kv-token");
+  });
+
   it("collapses spoofed Vercel identity outside verified production ingress", async () => {
     const keys: string[] = [];
     const fetchImpl = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
