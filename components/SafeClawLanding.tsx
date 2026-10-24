@@ -219,6 +219,7 @@ export function SafeClawLanding() {
           <Link href="/tools/leave">연차 점검 도구</Link>
           <Link href="/ops/api">API 상태</Link>
           <Link href="/login">로그인</Link>
+          <a href="https://yellowenvelope.kr" target="_blank" rel="noopener">급여·연차 기준 확인 — 일의 무늬</a>
         </nav>
         <p className="safeclaw-footer-note">© {new Date().getFullYear()} safeclaw · 안전 문서는 사람의 검토를 전제로 합니다.</p>
       </footer>

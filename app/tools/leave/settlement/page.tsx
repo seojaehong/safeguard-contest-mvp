@@ -22,7 +22,7 @@ export default function SettlementPage() {
   return (
     <main className="lv-page">
       <header className="lv-head">
-        <p className="lv-head__eyebrow">노무사·인사담당자를 위한 퇴직 정산</p>
+        <p className="lv-head__eyebrow">인사 담당자를 위한 퇴직 정산</p>
         <h1 className="lv-head__title">
           회계연도로 관리했다면, 퇴사할 때 다시 계산해야 합니다
         </h1>
