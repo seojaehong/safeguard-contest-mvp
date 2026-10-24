@@ -22,7 +22,7 @@ export default function LeaveToolPage() {
   return (
     <main className="lv-page">
       <header className="lv-head">
-        <p className="lv-head__eyebrow">노무사·인사담당자를 위한 연차 계산</p>
+        <p className="lv-head__eyebrow">인사 담당자를 위한 연차 계산</p>
         <h1 className="lv-head__title">이름과 입사일만 붙여넣으세요</h1>
         <p className="lv-head__lede">
           한 명씩 계산기에 넣고 엑셀로 옮기는 일을 없앱니다. 명단을 그대로 붙여넣으면{" "}
@@ -87,6 +87,9 @@ export default function LeaveToolPage() {
       <footer className="lv-foot">
         <p>
           개인정보는 브라우저 안에서만 처리됩니다. 파일과 붙여넣은 내용은 서버로 보내지 않습니다.
+        </p>
+        <p>
+          <a href="https://yellowenvelope.kr" target="_blank" rel="noopener">급여·연차 기준 확인 — 일의 무늬</a>
         </p>
       </footer>
     </main>
