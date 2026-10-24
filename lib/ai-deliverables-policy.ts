@@ -105,7 +105,7 @@ export type ModelAttempt = {
  * configured model. (2026-07-02 prod: Sonnet 5 completed all 7 structured docs
  * in-budget but timed out on free/foreign.)
  */
-export const FAST_ANTHROPIC_MODEL = "claude-haiku-4-5";
+export const FAST_ANTHROPIC_MODEL = "claude-haiku-5-5";
 const HEAVY_OUTPUT_DOCS = new Set(["foreign", "free"]);
 
 /** Heavy grouped/multilingual docs: 90-135s per attempt — never parse-retry these. */

@@ -7,6 +7,7 @@
 // 처리하는 "safeguard.workpack.dispatch" 계약(email 채널)으로 요약 발송.
 // 각 단계는 독립적으로 실패해도 다음 사이트 처리를 막지 않는다 — 무인 실행이 전제이므로.
 
+import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { runAsk } from "@/lib/search";
@@ -41,8 +42,10 @@ function isAuthorized(request: NextRequest): boolean {
   const secret = process.env.CRON_SECRET?.trim();
   if (!secret) return false;
 
-  const header = request.headers.get("authorization") || "";
-  return header === `Bearer ${secret}`;
+  const header = Buffer.from(request.headers.get("authorization") || "", "utf8");
+  const expected = Buffer.from(`Bearer ${secret}`, "utf8");
+  // 길이가 다르면 timingSafeEqual 이 throw 하므로 먼저 거른다(길이 노출은 허용 범위).
+  return header.length === expected.length && timingSafeEqual(header, expected);
 }
 
 /**

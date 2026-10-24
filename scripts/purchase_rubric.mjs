@@ -19,7 +19,7 @@ const inB = read("components/leave/SettlementInput.tsx");
 const inC = read("components/leave/PromotionInput.tsx");
 const inD = read("components/leave/UsageInput.tsx");
 const xlsx = read("lib/leave-xlsx.ts");
-const css = read("app/globals.css");
+const css = read("app/tools/leave/leave.css"); // 2026-10-24 globals.css 에서 분리
 const all = [pageA, pageB, pageC, inA, inB, inC, inD].join("\n");
 
 const items = [

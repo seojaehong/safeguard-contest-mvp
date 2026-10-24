@@ -7,7 +7,7 @@ import { pathToFileURL } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { userVisibleRoutes } from "@/lib/frontend-design-contract";
+import { standaloneToolRoutes, userVisibleRoutes } from "@/lib/frontend-design-contract";
 
 const root = process.cwd();
 
@@ -331,11 +331,17 @@ function familySpacingResiduals(source: string): string[] {
 
 describe("frontend route classification", () => {
   it("discovers every page and assigns each route to exactly one family", () => {
-    const discoveredRoutes = listPageFiles(path.join(root, "app")).map(routeFromPageFile).sort();
+    // 독립 도구 라우트(연차)는 lib/frontend-design-contract.ts 에 명시적 예외로 등록돼 있다.
+    // 등록된 경로만 빼고, 그 경로가 실제로 존재하는지도 함께 확인한다.
+    const allDiscoveredRoutes = listPageFiles(path.join(root, "app")).map(routeFromPageFile).sort();
+    const standaloneRoutes = new Set<string>(standaloneToolRoutes);
+    expect(allDiscoveredRoutes).toEqual(expect.arrayContaining([...standaloneToolRoutes]));
+    const discoveredRoutes = allDiscoveredRoutes.filter((route) => !standaloneRoutes.has(route));
     const contractedRoutes = [...userVisibleRoutes].sort();
     const classifiedRoutes = Object.values(routeFamilies).flat();
 
     expect(discoveredRoutes).toEqual(contractedRoutes);
+    expect(userVisibleRoutes.some((route) => standaloneRoutes.has(route))).toBe(false);
     expect([...classifiedRoutes].sort()).toEqual(discoveredRoutes);
     expect(new Set(classifiedRoutes).size).toBe(classifiedRoutes.length);
   });

@@ -36,6 +36,12 @@ function contractRoutes(source) {
   return [...match[1].matchAll(/"([^"]+)"/g)].map((entry) => entry[1]);
 }
 
+function standaloneContractRoutes(source) {
+  const match = source.match(/export const standaloneToolRoutes = \[([\s\S]*?)\] as const;/);
+  if (!match) throw new Error("standaloneToolRoutes contract was not found");
+  return [...match[1].matchAll(/"([^"]+)"/g)].map((entry) => entry[1]);
+}
+
 function contractLiteral(source, exportName) {
   const sourceFile = ts.createSourceFile(
     contractPath,
@@ -721,9 +727,16 @@ function cssViolations(source) {
 const css = fs.readFileSync(cssPath, "utf8");
 const pageFiles = listFiles(path.join(root, "app"), (filePath) => path.basename(filePath) === "page.tsx");
 const componentFiles = listFiles(path.join(root, "components"), (filePath) => filePath.endsWith(".tsx"));
-const discoveredRoutes = pageFiles.map(toRoute).sort();
+// 독립 도구 라우트(연차)는 lib/frontend-design-contract.ts standaloneToolRoutes 에 명시적 예외로
+// 등록돼 있고 globals.css 계약 밖의 자체 스타일을 쓴다. 등록된 경로만 빼고, 등록됐는데 없는 경로는 누락으로 센다.
+const standaloneRoutes = standaloneContractRoutes(contract).sort();
+const allDiscoveredRoutes = pageFiles.map(toRoute).sort();
+const discoveredRoutes = allDiscoveredRoutes.filter((route) => !standaloneRoutes.includes(route));
 const expectedRoutes = contractRoutes(contract).sort();
-const missingRoutes = expectedRoutes.filter((route) => !discoveredRoutes.includes(route));
+const missingRoutes = [
+  ...expectedRoutes.filter((route) => !discoveredRoutes.includes(route)),
+  ...standaloneRoutes.filter((route) => !allDiscoveredRoutes.includes(route)),
+];
 const unexpectedRoutes = discoveredRoutes.filter((route) => !expectedRoutes.includes(route));
 const violations = cssViolations(css);
 const { sourceIdentity } = canonicalFrontendSourceIdentity(root);
@@ -741,7 +754,7 @@ const report = {
     cssLines: css.split(/\r?\n/).length,
     importantDeclarations: [...css.matchAll(/!important/g)].length,
   },
-  coverage: { expectedRoutes, discoveredRoutes, missingRoutes, unexpectedRoutes },
+  coverage: { expectedRoutes, discoveredRoutes, standaloneRoutes, missingRoutes, unexpectedRoutes },
   coverageIssues: missingRoutes.length + unexpectedRoutes.length,
   violationCount: violations.length,
   violations,

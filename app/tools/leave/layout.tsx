@@ -4,6 +4,9 @@ import { Analytics } from "@vercel/analytics/next";
 import { LeaveNav } from "@/components/leave/LeaveNav";
 import { WorkspaceBar } from "@/components/leave/WorkspaceBar";
 
+// 연차 도구 전용 스타일 — SafeClaw 화면 계약(app/globals.css) 바깥의 독립 도구다.
+import "./leave.css";
+
 /**
  * 연차 도구 공통 골격 — 어느 화면에 들어와도 「무엇을 하는 서비스인지」가 보이게 한다.
  * 도구 화면만 덜렁 열리면 처음 온 사람은 여기가 어디인지 모른다.

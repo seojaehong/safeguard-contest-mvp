@@ -125,7 +125,7 @@ const inputA = read("components/leave/LeaveInput.tsx");
 const inputB = read("components/leave/SettlementInput.tsx");
 const inputC = read("components/leave/PromotionInput.tsx");
 const inputD = read("components/leave/UsageInput.tsx");
-const css = read("app/globals.css");
+const css = read("app/tools/leave/leave.css"); // 2026-10-24 globals.css 에서 분리
 
 score("사용성", "U1", "결론이 결과 최상단에 온다", 5,
   inputB.includes("lv-conclusion__headline") &&

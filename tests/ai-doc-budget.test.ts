@@ -88,12 +88,12 @@ describe("planModelAttempts with a custom fallback cap", () => {
 
 describe("resolveAnthropicModelForDoc", () => {
   test("heavy docs (foreign, free) route to the fast haiku model", () => {
-    expect(resolveAnthropicModelForDoc("foreign", "claude-sonnet-5")).toBe("claude-haiku-4-5");
-    expect(resolveAnthropicModelForDoc("free", "claude-opus-4-8")).toBe("claude-haiku-4-5");
+    expect(resolveAnthropicModelForDoc("foreign", "claude-sonnet-5-5")).toBe("claude-haiku-5-5");
+    expect(resolveAnthropicModelForDoc("free", "claude-opus-4-8")).toBe("claude-haiku-5-5");
   });
 
   test("standard docs keep the configured model", () => {
-    expect(resolveAnthropicModelForDoc("riskAssessment", "claude-sonnet-5")).toBe("claude-sonnet-5");
-    expect(resolveAnthropicModelForDoc("tbmLog", "claude-haiku-4-5")).toBe("claude-haiku-4-5");
+    expect(resolveAnthropicModelForDoc("riskAssessment", "claude-sonnet-5-5")).toBe("claude-sonnet-5-5");
+    expect(resolveAnthropicModelForDoc("tbmLog", "claude-haiku-5-5")).toBe("claude-haiku-5-5");
   });
 });
