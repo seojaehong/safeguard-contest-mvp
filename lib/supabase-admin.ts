@@ -1,3 +1,5 @@
+import "server-only";
+
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];

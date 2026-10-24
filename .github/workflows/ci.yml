@@ -27,4 +27,6 @@ jobs:
       # Browser suites create isolated Next builds; serialize them to avoid
       # shared .next contention on the single GitHub runner.
       - run: npm test -- --maxWorkers=1 --fileParallelism=false
+      # 연차 도구 테스트는 .mts(node --experimental-strip-types)라 vitest include(tests/**/*.test.ts)에 잡히지 않는다.
+      - run: npm run leave:test
       - run: npm run build

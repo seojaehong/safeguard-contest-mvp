@@ -330,7 +330,9 @@ export async function runAgentLoop(deps: RunAgentLoopDeps): Promise<void> {
     const stream = client.messages.stream({
       model,
       max_tokens: CLAW_MAX_TOKENS,
-      thinking: { type: "disabled" },
+      // Sonnet 5.5 는 thinking: { type: "disabled" } 를 400 으로 거절한다.
+      // 생각 끄기 대신 짧은 채팅 답변에 맞춰 effort 를 낮춘다.
+      output_config: { effort: "low" },
       system: systemPrompt,
       tools: CLAW_TOOLS,
       messages,

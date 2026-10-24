@@ -187,6 +187,23 @@ export const userVisibleRoutes = [
   "/workspace",
 ] as const;
 
+/**
+ * SafeClaw 화면 계약의 **명시적 예외** — 독립 도구 라우트.
+ *
+ * 연차 도구(2026-09-23~)는 SafeClaw 작업 화면이 아니라 자체 골격·자체 스타일
+ * (app/tools/leave/layout.tsx · app/tools/leave/leave.css)을 쓰는 별도 도구다.
+ * 그래서 userVisibleRoutes(라우트 가족 분류·브라우저 증빙 111행·의미 역할별
+ * 글자 튜플)에 넣지 않고 여기에 따로 등록한다. 라우트 발견 검사는
+ * 「userVisibleRoutes ∪ standaloneToolRoutes = app/ 의 page.tsx 전부」를 요구하므로
+ * 새 page.tsx 는 어느 쪽에든 반드시 등록돼야 한다(조용히 빠지는 경로는 없다).
+ * 이 도구의 계산·가드레일 검증은 `npm run leave:test` 가 맡는다.
+ */
+export const standaloneToolRoutes = [
+  "/tools/leave",
+  "/tools/leave/advanced",
+  "/tools/leave/settlement",
+] as const;
+
 export const specialSurfaceFiles = [
   "app/not-found.tsx",
   "app/error.tsx",

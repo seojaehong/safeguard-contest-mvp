@@ -124,13 +124,13 @@ describe("deliverables generation trace", () => {
         },
         foreignWorkerBriefing: {
           provider: "anthropic",
-          model: "claude-haiku-4-5",
+          model: "claude-haiku-5-5",
           source: "provider",
           fallbackUsed: false
         },
         foreignWorkerTransmission: {
           provider: "anthropic",
-          model: "claude-haiku-4-5",
+          model: "claude-haiku-5-5",
           source: "provider",
           fallbackUsed: false
         }
@@ -140,7 +140,7 @@ describe("deliverables generation trace", () => {
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("safeclaw_deliverables_trace"));
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"traceId":"trace-anthropic-documents"'));
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"model":"claude-opus-4-8"'));
-    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"model":"claude-haiku-4-5"'));
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"model":"claude-haiku-5-5"'));
   });
 
   test("rejects provider-authored control prose at the Phase A deliverables boundary", async () => {
@@ -276,7 +276,7 @@ describe("deliverables generation trace", () => {
         },
         foreignWorkerBriefing: {
           provider: "anthropic",
-          model: "claude-haiku-4-5"
+          model: "claude-haiku-5-5"
         }
       }
     });
@@ -330,7 +330,7 @@ describe("deliverables generation trace", () => {
         },
         foreignWorkerBriefing: {
           provider: "anthropic",
-          model: "claude-haiku-4-5"
+          model: "claude-haiku-5-5"
         }
       },
       fallbackUsed: true
@@ -364,7 +364,7 @@ describe("deliverables generation trace", () => {
     expect(result.diagnostics.trace.modelPerDocument).toMatchObject({
       foreignWorkerBriefing: {
         provider: "anthropic",
-        model: "claude-haiku-4-5",
+        model: "claude-haiku-5-5",
         source: "provider",
         fallbackUsed: false
       },

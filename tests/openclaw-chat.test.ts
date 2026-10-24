@@ -216,7 +216,7 @@ describe("OpenClaw chat routing", () => {
     const config = resolveOpenClawChatConfig({
       CLAW_CHAT_PROVIDER: "anthropic",
       ANTHROPIC_API_KEY: "anthropic-placeholder",
-      ANTHROPIC_MODEL: "claude-sonnet-5",
+      ANTHROPIC_MODEL: "claude-sonnet-5-5",
       OPENCLAW_PROFILE: "safeclaw",
       OPENCLAW_AGENT: "main",
       OPENCLAW_LOCAL: "1"

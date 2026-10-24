@@ -13,7 +13,7 @@ describe("runtime dependency overrides", () => {
       "archiver": "8.0.0",
       "fast-uri": "3.1.6",
       "postcss": "8.5.23",
-      "sharp": "0.35.3",
+      "sharp": "0.35.4",
       "unzipper": "0.12.1",
       "uuid": "11.1.1"
     });

@@ -5,7 +5,7 @@
 // Vertex stays the default and the runtime fallback — a Claude failure must never
 // degrade below today's behavior.
 
-export const DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-5";
+export const DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-5-5";
 
 export type ProviderDecision = {
   provider: "anthropic" | "vertex";
