@@ -59,7 +59,7 @@ export default function SettlementPage() {
           <span className="lv-how__num">이어서</span>
           <p>
             <Link href="/tools/leave">연차 일수 계산</Link> ·{" "}
-            <Link href="/tools/leave/advanced">반차·출근율·사용촉진</Link>
+            <Link href="/tools/leave/advanced">사용단위·촉진</Link>
           </p>
         </div>
       </section>
@@ -95,8 +95,8 @@ export default function SettlementPage() {
           <li>미사용수당 청구권의 소멸시효는 별도 검토가 필요합니다</li>
         </ul>
         <p className="lv-scope__footer">
-          입력값 기준의 참고 계산입니다. 임금채권 확정이나 분쟁 사안은 별도 검토가 필요합니다.
-         개별 사안의 법적 판단이나 임금채권 확정은 <strong>담당 공인노무사</strong>의 검토를 거치시기 바랍니다.</p>
+          입력값 기준의 참고 계산입니다. 개별 사안은 전문가 검토가 필요합니다.
+        </p>
       </section>
     </main>
   );

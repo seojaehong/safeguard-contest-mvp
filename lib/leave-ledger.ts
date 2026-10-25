@@ -187,7 +187,18 @@ export interface SettlementResult {
   ledger: LedgerEntry[];
   /** 화면에 그대로 띄울 근거 문장 */
   groundNote: string;
+  /**
+   * insufficient-input 의 사유 — 화면 제목을 사유별로 고른다(2026-10-25 LV-4).
+   * 판정이 나면 undefined.
+   */
+  reason?: SettlementInsufficientReason;
+  /** 입력한 회계연도 부여 누계 — 미입력이면 null(화면·엑셀에 0 으로 찍지 않는다) */
+  fiscalGrantedInput: number | null;
+  /** 입력한 사용·지급 누계 — 미입력이면 null */
+  usedOrPaidInput: number | null;
 }
+
+export type SettlementInsufficientReason = "missing-totals" | "monthly-choice" | "recalc-clause";
 
 /**
  * 퇴직 정산 — 회계연도로 운영한 사업장의 퇴사자 재정산.
@@ -225,6 +236,11 @@ export function settleOnTermination(input: SettlementInput): SettlementResult {
   const usedMissing = !isFiniteNumber(input.usedOrPaidTotal);
   const fiscalGrantedTotal = fiscalMissing ? 0 : Math.max(0, Number(input.fiscalGrantedTotal));
   const usedOrPaidTotal = usedMissing ? 0 : Math.max(0, Number(input.usedOrPaidTotal));
+  // 표시용 — 계산은 위의 0 바닥값으로 하되, 미입력은 null 로 따로 돌려준다(LV-4)
+  const inputs = {
+    fiscalGrantedInput: fiscalMissing ? null : fiscalGrantedTotal,
+    usedOrPaidInput: usedMissing ? null : usedOrPaidTotal,
+  };
 
   if (fiscalMissing || usedMissing) {
     const missing = [
@@ -239,6 +255,8 @@ export function settleOnTermination(input: SettlementInput): SettlementResult {
       usedOrPaidTotal,
       shortfallDays: NaN,
       verdict: "insufficient-input",
+      reason: "missing-totals",
+      ...inputs,
       ledger: ledger.entries,
       groundNote: `${missing} 가 입력되지 않았습니다. 빈 칸을 0 으로 보면 「한 번도 부여·사용하지 않았다」가 되어 실제보다 큰 정산액이 나옵니다. 값을 넣어 주세요(0 이라면 0 을 직접 입력).`,
     };
@@ -253,6 +271,8 @@ export function settleOnTermination(input: SettlementInput): SettlementResult {
       usedOrPaidTotal,
       shortfallDays: NaN,
       verdict: "insufficient-input",
+      reason: "monthly-choice",
+      ...inputs,
       ledger: ledger.entries,
       groundNote:
         "입사 후 1년 미만 기간에 월 단위로 발생한 연차(최대 11일)를 입사일 기준 누계에 포함할지 선택해 주세요. 회계연도로 부여한 누계에 그 일수가 들어가 있다면 포함해야 같은 기준으로 비교됩니다(최영우 『실무노동법』 산정 예 — 입사일 기준 11일 / 6일). 적법한 사용촉진으로 이미 소멸한 경우에는 제외합니다.",
@@ -277,6 +297,8 @@ export function settleOnTermination(input: SettlementInput): SettlementResult {
       usedOrPaidTotal,
       shortfallDays: NaN,
       verdict: "insufficient-input",
+      reason: "recalc-clause",
+      ...inputs,
       ledger: ledger.entries,
       groundNote:
         "회계연도 부여분이 입사일 기준보다 많습니다. 이때는 취업규칙에 「퇴직 시 입사일 기준으로 재산정한다」는 규정이 있는지에 따라 결과가 달라집니다(최영우 『실무노동법』 산정 예). 규정 유무가 입력되지 않아 금액을 확정하지 않습니다.",
@@ -308,6 +330,7 @@ export function settleOnTermination(input: SettlementInput): SettlementResult {
     usedOrPaidTotal,
     shortfallDays,
     verdict: shortfallDays > 0 ? "shortfall" : "no-shortfall",
+    ...inputs,
     ledger: ledger.entries,
     groundNote,
   };
