@@ -1322,10 +1322,6 @@ export function buildForeignWorkerLanguageMessage(input: BriefingInput, language
   ].join("\n");
 }
 
-export function getDefaultForeignWorkerLanguages(question: string) {
-  return pickLanguages(question);
-}
-
 /**
  * Reconciles a claimed language list against what actually appears in the
  * generated body text.
