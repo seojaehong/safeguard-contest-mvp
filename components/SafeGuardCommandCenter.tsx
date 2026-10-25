@@ -2368,6 +2368,11 @@ export function SafeGuardCommandCenter({
                 </div>
               </div>
             ) : null}
+            {data?.scenario.taskClassification?.status === "review_required" ? (
+              <p className="input-helper input-helper-error" role="alert" data-task-classification="review_required">
+                <strong>작업 유형 확인 필요</strong> — {data.scenario.taskClassification.reason} 문서팩은 작업 유형이 확인될 때까지 보류됩니다.
+              </p>
+            ) : null}
             {data ? (
               <section className="safety-brief-dashboard" aria-label="Safety Brief Dashboard">
                 <div className="safety-brief-head">

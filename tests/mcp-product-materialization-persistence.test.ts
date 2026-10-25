@@ -284,7 +284,8 @@ describe("MCP Phase A product persistence behavior", () => {
     const handler = createHandler(repository);
 
     const initialResult = await handler(
-      { question: "차량계·기계 인접작업", mode: "template", includeFull: true },
+      // 작업 유형이 없는 질문은 문서를 보류한다(PR-02 결정 1). 같은 chain 의 작업명 별칭으로 행이 있는 작업팩을 연다.
+      { question: "지게차 상하차", mode: "template", includeFull: true },
       TENANT_CONTEXT,
     );
     const initialPayload = parseToolPayload(initialResult);
