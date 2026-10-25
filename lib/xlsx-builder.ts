@@ -465,11 +465,45 @@ function addWorkbookNote(ws: ExcelJS.Worksheet, row: number, note: string): void
   finalizeWorksheet(ws, { lastRow: row, lastColumn: 6, headerRow: 1 });
 }
 
+const EXCEL_SHEET_NAME_MAX_LENGTH = 31;
+// Excel rejects \ / ? * [ ] : in sheet names (ExcelJS throws, which surfaced as a 500).
+// eslint-disable-next-line no-control-regex
+const EXCEL_SHEET_NAME_INVALID_CHARACTERS = /[\\/?*[\]:\u0000-\u001f]/gu;
+
+function truncateSheetName(name: string, maxLength: number): string {
+  return Array.from(name).slice(0, maxLength).join("").trim();
+}
+
+/**
+ * Returns a sheet name Excel accepts: invalid characters replaced, no leading or
+ * trailing apostrophe, not the reserved "History", at most 31 characters, and —
+ * when `usedNames` is given — unique within the workbook (case-insensitive).
+ */
+export function toExcelSheetName(name: string, usedNames?: Set<string>): string {
+  let base = name
+    .replace(EXCEL_SHEET_NAME_INVALID_CHARACTERS, "_")
+    .trim()
+    .replace(/^'+|'+$/gu, "")
+    .trim();
+  if (!base) base = "문서";
+  if (base.toLowerCase() === "history") base = `${base}_`;
+  base = truncateSheetName(base, EXCEL_SHEET_NAME_MAX_LENGTH) || "문서";
+  if (!usedNames) return base;
+
+  let candidate = base;
+  for (let suffixIndex = 2; usedNames.has(candidate.toLowerCase()); suffixIndex += 1) {
+    const suffix = ` (${suffixIndex})`;
+    candidate = `${truncateSheetName(base, EXCEL_SHEET_NAME_MAX_LENGTH - suffix.length)}${suffix}`;
+  }
+  usedNames.add(candidate.toLowerCase());
+  return candidate;
+}
+
 function createStructuredWorkbook(sheetName: string): { wb: ExcelJS.Workbook; ws: ExcelJS.Worksheet } {
   const wb = new ExcelJS.Workbook();
   wb.creator = "SafeClaw";
   wb.created = new Date();
-  const ws = wb.addWorksheet(sheetName.slice(0, 31), {
+  const ws = wb.addWorksheet(toExcelSheetName(sheetName), {
     pageSetup: { paperSize: 9, orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
   });
   ws.columns = STRUCTURED_DOC_COLUMNS;
@@ -1310,7 +1344,7 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   wb.creator = "SafeClaw";
   wb.created = new Date();
 
-  const ws = wb.addWorksheet(title.slice(0, 31), {
+  const ws = wb.addWorksheet(toExcelSheetName(title), {
     pageSetup: { paperSize: 9, orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
   });
 
@@ -1565,8 +1599,9 @@ export async function buildWorkpackXlsx(
   finalizeWorksheet(cover, { lastRow: coverRows.length + 2, lastColumn: 2, headerRow: 1 });
 
   // Document sheets
+  const usedSheetNames = new Set<string>([cover.name.toLowerCase()]);
   for (const doc of documents) {
-    const sheetName = doc.title.replace(/[\\/?*[\]]/g, "_").slice(0, 31);
+    const sheetName = toExcelSheetName(doc.title, usedSheetNames);
     const ws = wb.addWorksheet(sheetName, {
       pageSetup: { paperSize: 9, orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
     });

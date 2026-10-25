@@ -650,11 +650,11 @@ describe("commercial workpack service-role tenant hardening", () => {
     });
   });
 
-  it("fails closed when public share session storage is absent from the PostgREST schema cache", async () => {
+  it("reports missing public share session storage as a 503 server error instead of a 404", async () => {
     const store = await vi.importActual<typeof import("@/lib/workpack-commercial-store")>(
       "@/lib/workpack-commercial-store"
     );
-    const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const client = createQueryErrorClient({
       code: "PGRST205",
       message: "Could not find the table 'public.workpack_share_sessions' in the schema cache"
@@ -667,11 +667,37 @@ describe("commercial workpack service-role tenant hardening", () => {
 
     expect(result).toMatchObject({
       ok: false,
-      status: 404,
-      message: "유효한 공유 세션을 찾지 못했습니다."
+      status: 503
     });
+    expect(result.ok ? "" : result.message).not.toContain("찾지 못했습니다");
     expect(consoleSpy).toHaveBeenCalledWith(
-      "public share session storage is not visible in PostgREST schema cache",
+      "public share session storage table is missing (PGRST205)",
+      expect.objectContaining({ code: "PGRST205" })
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it("reports missing owned share session storage as a 503 server error", async () => {
+    const store = await vi.importActual<typeof import("@/lib/workpack-commercial-store")>(
+      "@/lib/workpack-commercial-store"
+    );
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const client = createQueryErrorClient({
+      code: "PGRST205",
+      message: "Could not find the table 'public.workpack_share_sessions' in the schema cache"
+    });
+
+    const result = await store.loadActiveOwnedShareSession(client as never, {
+      organizationId: "44444444-4444-4444-8444-444444444444",
+      siteId: "55555555-5555-4555-8555-555555555555",
+      workpackId: "66666666-6666-4666-8666-666666666666",
+      shareSessionId: "33333333-3333-4333-8333-333333333333",
+      userId: "77777777-7777-4777-8777-777777777777"
+    });
+
+    expect(result).toMatchObject({ ok: false, status: 503 });
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "owned share session storage table is missing (PGRST205)",
       expect.objectContaining({ code: "PGRST205" })
     );
     consoleSpy.mockRestore();

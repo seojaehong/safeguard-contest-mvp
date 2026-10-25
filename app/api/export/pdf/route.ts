@@ -4,6 +4,7 @@ import {
   withPublicDocumentExportAdmission,
 } from "@/lib/public-distributed-rate-limit";
 import {
+  DOCUMENT_EXPORT_BUDGETS,
   DocumentExportLimitError,
   DocumentExportRequestError,
   readDocumentExportRequestJson,
@@ -31,7 +32,8 @@ import type { AccidentType, FourM } from "@/lib/risk-assessment-schema";
 
 export const dynamic = "force-dynamic";
 
-const MAX_PDF_ROWS = 128;
+const MAX_PDF_ROWS = DOCUMENT_EXPORT_BUDGETS.rows;
+const MAX_PDF_TOTAL_ROWS = DOCUMENT_EXPORT_BUDGETS.totalRows;
 const MAX_PDF_FIELD_CHARACTERS = 4_000;
 const MAX_PDF_RENDER_LINES = 512;
 const MAX_PDF_PAGES = 8;
@@ -280,6 +282,9 @@ function getStructuredRiskRowCandidates(body: Record<string, unknown>): unknown[
   ];
 }
 
+// Each row array keeps the 128-row budget; the request as a whole may carry up to
+// DOCUMENT_EXPORT_BUDGETS.totalRows. Bytes stay capped by requestBytes and render
+// work by MAX_PDF_RENDER_LINES / MAX_PDF_PAGES.
 function assertPdfRowBudget(body: Record<string, unknown>): void {
   const candidates = [body.rows, body.riskRows, ...getStructuredRiskRowCandidates(body)];
   const countedArrays = new Set<unknown[]>();
@@ -287,14 +292,31 @@ function assertPdfRowBudget(body: Record<string, unknown>): void {
   candidates.forEach((candidate) => {
     if (!Array.isArray(candidate) || countedArrays.has(candidate)) return;
     countedArrays.add(candidate);
+    if (candidate.length > MAX_PDF_ROWS) throw new PdfExportLimitError();
     rowCount += candidate.length;
-    if (rowCount > MAX_PDF_ROWS) throw new PdfExportLimitError();
+    if (rowCount > MAX_PDF_TOTAL_ROWS) throw new PdfExportLimitError();
   });
 }
 
 function assertParsedPdfRowBudget(rowGroups: ReadonlyArray<ReadonlyArray<unknown>>): void {
-  const rowCount = rowGroups.reduce((total, rows) => total + rows.length, 0);
-  if (rowCount > MAX_PDF_ROWS) throw new PdfExportLimitError();
+  let rowCount = 0;
+  rowGroups.forEach((rows) => {
+    if (rows.length > MAX_PDF_ROWS) throw new PdfExportLimitError();
+    rowCount += rows.length;
+  });
+  if (rowCount > MAX_PDF_TOTAL_ROWS) throw new PdfExportLimitError();
+}
+
+/**
+ * Drops request fields the renderer never reads for this document, so they cannot
+ * trip the field or row budget: documentText is only a fallback when rows are
+ * absent, and riskRows are only rendered for TBM documents.
+ */
+function selectRenderedPdfFields(body: Record<string, unknown>, kind: PdfDocumentKind): Record<string, unknown> {
+  const rendered: Record<string, unknown> = { ...body };
+  if (Array.isArray(body.rows) && body.rows.length) delete rendered.documentText;
+  if (kind !== "tbm") delete rendered.riskRows;
+  return rendered;
 }
 
 function parseRiskRowsFromBody(body: Record<string, unknown>): StructuredRiskAssessmentRow[] {
@@ -1215,8 +1237,12 @@ async function buildBinaryPdf(
 async function exportPdf(request: NextRequest) {
   try {
     const parsed = await readDocumentExportRequestJson(request);
-    assertPdfFieldBudget(parsed);
-    const body = isRecord(parsed) ? parsed : {};
+    const requestBody = isRecord(parsed) ? parsed : {};
+    const body = selectRenderedPdfFields(
+      requestBody,
+      detectDocumentKind(readString(requestBody.title, "SafeClaw 제출 문서"))
+    );
+    assertPdfFieldBudget(isRecord(parsed) ? body : parsed);
     assertPdfRowBudget(body);
     const title = readString(body.title, "SafeClaw 제출 문서");
     const scenario = parseScenario(body.scenario);
