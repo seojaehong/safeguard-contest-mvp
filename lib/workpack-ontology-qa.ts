@@ -73,6 +73,8 @@ function appendRemediationSection(text: string | undefined, heading: string, lin
   return `${body}\n\n${heading}\n${lines.map((line) => `- ${line}`).join("\n")}`;
 }
 
+const TRAVELING_CRANE_PATTERN = /주행\s*크레인|천장\s*크레인|갠트리\s*크레인|옥외\s*크레인/;
+
 function controlLine(item: MissingControl) {
   // 제140조(폭풍에 의한 이탈 방지)는 옥외에 설치된 주행 크레인 규정이다. 이동식 크레인 작업중지 기준으로
   // 읽히지 않게 적용 범위를 붙인다(EDU-07). 이동식 크레인은 제37조제1항 판단과 장비 정격 풍속을 따른다.
@@ -82,6 +84,24 @@ function controlLine(item: MissingControl) {
   return articles.length
     ? `${item.control} (${articles.join(", ")})`
     : item.control;
+}
+
+const isTravelingCraneArticle = (article: string) => /제140조(?!의)/.test(article);
+
+/**
+ * 옥외 주행 크레인 조문(제140조)은 그 설비가 입력에 없으면 문서팩 어느 문서에도, 화면에 붙는 검수 결과에도
+ * 싣지 않는다(WP-09). 계획서만 거르면 TBM·교육·비상대응·화면이 근로자에게 다른 조치를 전한다.
+ */
+function scopeQaResultToInput<T extends QaReviewResult>(result: T, question: string): T {
+  if (!result.reviewable || TRAVELING_CRANE_PATTERN.test(question)) return result;
+  return {
+    ...result,
+    missing: {
+      ...result.missing,
+      controls: result.missing.controls.filter((control) => !control.articles.some(isTravelingCraneArticle)),
+      articles: result.missing.articles.filter((article) => !isTravelingCraneArticle(article))
+    }
+  };
 }
 
 function needsRemediation(result: QaReviewResult): result is QaReviewFound {
@@ -97,13 +117,17 @@ export function applyOntologyQaRemediation(
   reviewTask: string,
   result: QaReviewFound
 ): AskResponse {
+  const scoped = scopeQaResultToInput(result, response.question);
+  const controls = scoped.missing.controls;
+  const articles = scoped.missing.articles.slice(0, 6);
+
   const missingHazardLines = result.missing.hazards.map((hazard) =>
     `누락 위험요인 확인: ${hazard}`
   );
-  const missingControlLines = result.missing.controls.map((control) =>
+  const missingControlLines = controls.map((control) =>
     `필수 안전조치 반영: ${controlLine(control)}`
   );
-  const missingArticleLines = result.missing.articles.slice(0, 6).map((article) =>
+  const missingArticleLines = articles.map((article) =>
     `관련 조문 확인: ${article}`
   );
   const commonLines = [
@@ -119,9 +143,13 @@ export function applyOntologyQaRemediation(
     ...commonLines,
     "위험성평가 담당자는 현장 여건에 맞는 확인시각·측정값과 잔여 위험을 평가 기록에 남깁니다."
   ];
+  // 작업계획서는 「반영」이라고 표시하지 않는다. 계획서 칸에 들어간 것이 아니므로 담당·확인 시각 칸을 붙인
+  // 「추가 확인 필요」 줄로 둔다(WP-10).
   const planLines = [
-    ...commonLines,
-    "작업계획 승인자는 현장 여건에 맞는 담당자·확인시각·측정값을 계획서 확인란에 기록합니다."
+    `추가 확인 대상 작업: ${reviewTask}`,
+    ...result.missing.hazards.map((hazard) => `추가 확인 필요: ${hazard} 위험 / 담당: (현장 기재) / 확인 시각: (현장 기재)`),
+    ...controls.map((control) => `추가 확인 필요: ${controlLine(control)} / 담당: (현장 기재) / 확인 시각: (현장 기재)`),
+    ...articles.map((article) => `관련 조문 확인: ${article} / 담당: (현장 기재)`)
   ];
   const educationLines = [
     ...commonLines,
@@ -134,12 +162,12 @@ export function applyOntologyQaRemediation(
 
   const tbmLines = [
     `검수 보완 전달: ${reviewTask}`,
-    ...result.missing.controls.map((control) => `작업 전 확인: ${controlLine(control)}`),
+    ...controls.map((control) => `작업 전 확인: ${controlLine(control)}`),
     ...result.missing.hazards.map((hazard) => `작업자 질문: ${hazard} 위험을 확인했습니까?`)
   ];
   const logLines = [
     `검수 보완 확인: ${reviewTask}`,
-    ...result.missing.controls.map((control) => `확인 항목: ${controlLine(control)} / 담당자 확인 필요`)
+    ...controls.map((control) => `확인 항목: ${controlLine(control)} / 담당자 확인 필요`)
   ];
 
   return {
@@ -211,7 +239,7 @@ export async function attachWebOntologyQa(
   }
 
   try {
-    const result = await reviewDocpack(reviewTask, source.text, signal);
+    const result = scopeQaResultToInput(await reviewDocpack(reviewTask, source.text, signal), question);
     if (!needsRemediation(result)) {
       return attachOntologyQaResult(response, reviewTask, result, source.documentKeys);
     }
@@ -219,7 +247,7 @@ export async function attachWebOntologyQa(
     signal?.throwIfAborted();
     const remediated = applyOntologyQaRemediation(response, reviewTask, result);
     const remediatedSource = buildOntologyQaSource(remediated);
-    const rereviewed = await reviewDocpack(reviewTask, remediatedSource.text, signal);
+    const rereviewed = scopeQaResultToInput(await reviewDocpack(reviewTask, remediatedSource.text, signal), question);
     return attachOntologyQaResult(remediated, reviewTask, rereviewed, remediatedSource.documentKeys);
   } catch (error) {
     if (signal?.aborted || (error instanceof Error && error.name === "AbortError")) {

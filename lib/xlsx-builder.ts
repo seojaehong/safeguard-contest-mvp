@@ -684,7 +684,23 @@ function parseWorkPlanStructured(value: StructuredRecord): WorkPlanStructured {
       author: readString(approvers.author, "작성자"),
       reviewer: readString(approvers.reviewer, "검토자"),
       approver: readString(approvers.approver, "승인자")
-    }
+    },
+    applicability: readStringArray(value.applicability),
+    statutorySections: (Array.isArray(value.statutorySections) ? value.statutorySections : [])
+      .flatMap((section): NonNullable<WorkPlanStructured["statutorySections"]> => {
+        if (!isRecord(section)) return [];
+        const items = Array.isArray(section.items) ? section.items : [];
+        const part = readString(section.part, "작업계획");
+        return [{
+          annexItem: typeof section.annexItem === "number" ? section.annexItem : null,
+          title: readString(section.title, "법정 항목"),
+          basis: readString(section.basis, ""),
+          part: part === "사전조사" || part === "기록" ? part : "작업계획",
+          items: items.flatMap((item) => isRecord(item)
+            ? [{ label: readString(item.label, "항목"), entry: readString(item.entry, "(현장 기재)") }]
+            : [])
+        }];
+      })
   };
 }
 
@@ -837,6 +853,8 @@ function parseEducationRecordStructured(value: StructuredRecord): EducationRecor
 
 function readPermitType(value: unknown): PermitInspectionStructured["basicInfo"]["permitType"] {
   const text = readString(value, "일반 위험작업");
+  // 서버 판정값(lib/permit-workplan-forms.ts)을 그대로 통과시킨다. 목록에 없으면 「일반 위험작업」으로 덮이므로
+  // 판정값을 늘리면 여기도 함께 늘린다(EXP-01 재발 방지).
   const allowed: Array<PermitInspectionStructured["basicInfo"]["permitType"]> = [
     "고소작업",
     "화기작업",
@@ -844,7 +862,12 @@ function readPermitType(value: unknown): PermitInspectionStructured["basicInfo"]
     "전기작업",
     "중장비작업",
     "화학물질",
-    "일반 위험작업"
+    "일반 위험작업",
+    "밀폐공간 작업",
+    "화학물질 작업",
+    "중장비 작업",
+    "굴착작업",
+    "설비 정비·격리 작업"
   ];
   return allowed.includes(text as PermitInspectionStructured["basicInfo"]["permitType"])
     ? text as PermitInspectionStructured["basicInfo"]["permitType"]
@@ -875,8 +898,8 @@ function readPermitConditionStatus(value: unknown): PermitInspectionStructured["
 }
 
 function readAttachmentStatus(value: unknown): PermitInspectionStructured["attachments"][number]["status"] {
-  const text = readString(value, "보완 필요");
-  return text === "첨부" || text === "해당 없음" ? text : "보완 필요";
+  const text = readString(value, "확인 전");
+  return text === "첨부" || text === "해당 없음" || text === "보완 필요" ? text : "확인 전";
 }
 
 function readCompletionStatus(value: unknown): PermitInspectionStructured["completionChecks"][number]["status"] {
@@ -915,6 +938,25 @@ function parsePermitInspectionStructured(value: StructuredRecord): PermitInspect
         verification: readString(item.verification, "")
       }];
     }),
+    measurements: (Array.isArray(value.measurements) ? value.measurements : [])
+      .flatMap((item): NonNullable<PermitInspectionStructured["measurements"]> => isRecord(item)
+        ? [{
+            item: readString(item.item, "측정 항목"),
+            standard: readString(item.standard, "(현장 기재)"),
+            value: readString(item.value, "(현장 기재)"),
+            measuredAt: readString(item.measuredAt, "(현장 기재)"),
+            measurer: readString(item.measurer, "(현장 기재)")
+          }]
+        : []),
+    statutoryChecks: (Array.isArray(value.statutoryChecks) ? value.statutoryChecks : [])
+      .flatMap((item): NonNullable<PermitInspectionStructured["statutoryChecks"]> => isRecord(item)
+        ? [{
+            basis: readString(item.basis, ""),
+            item: readString(item.item, "확인 항목"),
+            entry: readString(item.entry, "(현장 기재)"),
+            owner: readString(item.owner, "관리감독자")
+          }]
+        : []),
     attachments: attachments.flatMap((item): PermitInspectionStructured["attachments"] => {
       if (!isRecord(item)) return [];
       return [{
@@ -969,6 +1011,20 @@ export async function buildWorkPlanStructuredXlsx(
     ["작업조건", data.workOverview.condition],
     ["사용장비", data.workOverview.equipment.join(", ") || "장비 확인"]
   ]);
+
+  if (data.applicability?.length) {
+    row += 1;
+    row = addSectionHeader(ws, row, "작업계획서 작성 대상(안전보건규칙 제38조①)");
+    row = addKeyValueRows(ws, row, data.applicability.map((line, index) => [`대상 여부 ${index + 1}`, line]));
+  }
+  for (const section of data.statutorySections ?? []) {
+    row += 1;
+    row = addSectionHeader(ws, row, `${section.title} (${section.basis})`);
+    row = addTableHeader(ws, row, ["No.", "구분", "법정 항목", "기재 내용", "담당", "확인"]);
+    section.items.forEach((item, index) => {
+      row = setRowValues(ws, row, [String(index + 1), section.part, item.label, item.entry, "관리감독자", "□ 확인"]);
+    });
+  }
 
   row += 1;
   row = addSectionHeader(ws, row, "작업단계 및 안전조치");
@@ -1059,6 +1115,38 @@ export async function buildPermitInspectionStructuredXlsx(
       formatRiskRowRef(condition.relatedRiskRowIndex)
     ]);
   });
+
+  if (data.measurements?.length) {
+    row += 1;
+    row = addSectionHeader(ws, row, "산소·유해가스 측정(안전보건규칙 제619조의2, 적정공기 기준 제618조)");
+    row = addTableHeader(ws, row, ["No.", "측정 항목", "기준", "측정값", "측정 시각", "측정자"]);
+    data.measurements.forEach((measurement, index) => {
+      row = setRowValues(ws, row, [
+        String(index + 1),
+        measurement.item,
+        measurement.standard,
+        measurement.value,
+        measurement.measuredAt,
+        measurement.measurer
+      ]);
+    });
+  }
+
+  if (data.statutoryChecks?.length) {
+    row += 1;
+    row = addSectionHeader(ws, row, "법정 확인 항목(안전보건규칙)");
+    row = addTableHeader(ws, row, ["No.", "근거", "확인 항목", "기재 내용", "담당", "확인"]);
+    data.statutoryChecks.forEach((statutoryCheck, index) => {
+      row = setRowValues(ws, row, [
+        String(index + 1),
+        statutoryCheck.basis,
+        statutoryCheck.item,
+        statutoryCheck.entry,
+        statutoryCheck.owner,
+        "□ 확인"
+      ]);
+    });
+  }
 
   row += 1;
   row = addSectionHeader(ws, row, "첨부서류");
@@ -1683,7 +1771,7 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   const note = ws.getCell(row, 1);
   note.value = profile.layout === "risk"
     ? `위험성평가표 — 서명·확인란을 작성한 후 비치합니다. ${RISK_RETENTION_NOTE}`
-    : "안전 문서 — 서명·확인란을 작성한 후 현장에 비치하거나 제출하세요.";
+    : "초안 — (현장 기재) 칸과 법정 항목을 채우고 서명·확인란을 작성한 뒤 현장에 비치하세요.";
   note.font = { name: "Malgun Gothic", size: 10, italic: true, color: { argb: "FF5E6677" } };
   note.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
 
