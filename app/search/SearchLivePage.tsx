@@ -5,9 +5,11 @@ import { ResultCard } from "@/components/ResultCard";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { SearchBox } from "@/components/SearchBox";
 import { readPublicAdmissionMessage } from "@/lib/public-page-admission";
+import { isExampleSource } from "@/lib/public-screen-sample";
 import type { SearchResult } from "@/lib/types";
 
 type SearchLoadState =
+  | { status: "idle" }
   | { status: "loading" }
   | { status: "ready"; results: SearchResult[] }
   | { status: "held"; message: string };
@@ -22,9 +24,15 @@ function readResults(payload: unknown): SearchResult[] {
 }
 
 export function SearchLivePage({ query }: { query: string }) {
-  const [state, setState] = useState<SearchLoadState>({ status: "loading" });
+  const trimmedQuery = query.trim();
+  const [state, setState] = useState<SearchLoadState>(trimmedQuery ? { status: "loading" } : { status: "idle" });
 
   useEffect(() => {
+    // 검색어 없이 열면 검색하지 않는다 — 빈 검색은 언제나 같은 기본 결과를 돌려준다.
+    if (!trimmedQuery) {
+      setState({ status: "idle" });
+      return;
+    }
     const controller = new AbortController();
     setState({ status: "loading" });
     void fetch(`/api/search?q=${encodeURIComponent(query)}`, {
@@ -47,9 +55,10 @@ export function SearchLivePage({ query }: { query: string }) {
       });
     });
     return () => controller.abort(new Error("Search page navigation cancelled provider work"));
-  }, [query]);
+  }, [query, trimmedQuery]);
 
   const results = state.status === "ready" ? state.results : [];
+  const exampleCount = results.filter(isExampleSource).length;
   return (
     <SafeClawModuleShell
       eyebrow="근거 검색"
@@ -62,10 +71,23 @@ export function SearchLivePage({ query }: { query: string }) {
       <SearchBox initialQuery={query} />
       <section className="safeclaw-module-panel">
         <span>검색 결과</span>
-        <h2>{state.status === "ready" ? `${results.length}건` : "확인 중"}</h2>
+        <h2>{state.status === "ready" ? `${results.length}건` : state.status === "idle" ? "검색어 입력 전" : "확인 중"}</h2>
         <p>법제처 법령정보를 우선 확인하고, 설정된 보조 근거가 있으면 판례·해석례를 함께 정리합니다.</p>
+        {exampleCount ? (
+          <p className="muted small" role="status">
+            {exampleCount === results.length
+              ? "법령 원천 연결에 실패해 예시 자료만 표시합니다. 실제 법령·판례가 아닙니다."
+              : `결과 중 ${exampleCount}건은 법령 원천에 연결되지 않은 예시 자료입니다.`}
+          </p>
+        ) : null}
       </section>
-      {state.status === "ready" ? (
+      {state.status === "idle" ? (
+        <section className="safeclaw-module-panel" role="status" aria-live="polite">
+          <span>검색 대기</span>
+          <h2>검색어를 입력해 주세요.</h2>
+          <p>작업명·위험요인·조문 번호로 검색하면 관련 법령·판례·해석례를 찾습니다.</p>
+        </section>
+      ) : state.status === "ready" ? (
         <section className="safeclaw-module-grid two">
           {results.map((item) => <ResultCard key={item.id} item={item} />)}
         </section>

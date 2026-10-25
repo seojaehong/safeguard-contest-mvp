@@ -25,6 +25,7 @@ import {
   type DeliverablePresenceStatus
 } from "@/lib/deliverable-integrity-policy";
 import type { AskResponse } from "@/lib/types";
+import { PUBLIC_SAMPLE_BANNER_LABEL, PUBLIC_SAMPLE_BANNER_TEXT, applyRouteSnapshotUpdate } from "@/lib/public-screen-sample";
 import { formatDispatchProviderStatus } from "@/lib/web-safe-presentation";
 import { applyWorkpackDeliverablesChange } from "@/lib/workpack-readiness";
 import {
@@ -837,43 +838,21 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
     }));
   }, []);
 
+  // 저장된 작업팩이 없는 예시 화면에서 고친 명단·전파 대상은 이 화면에만 두고
+  // currentWorkpack 으로 저장하지 않는다(예시를 「생성된 작업」으로 올리지 않음).
   const updateWorkerSnapshot = useCallback((workerSnapshot: CurrentWorkerSnapshot) => {
     setState((current) => {
-      const nextState: CurrentWorkpackSnapshot = {
-        ...current,
-        isCurrent: true,
-        savedAt: new Date().toISOString(),
-        workerSnapshot
-      };
-      window.localStorage.setItem(
-        CURRENT_WORKPACK_STORAGE_KEY,
-        JSON.stringify(buildStoredCurrentWorkpack(nextState.data, {
-          generationFingerprint: nextState.generationFingerprint,
-          workerSnapshot,
-          dispatchSnapshot: nextState.dispatchSnapshot
-        }))
-      );
-      return nextState;
+      const { next, persist } = applyRouteSnapshotUpdate(current, { workerSnapshot }, new Date().toISOString());
+      if (persist) window.localStorage.setItem(CURRENT_WORKPACK_STORAGE_KEY, JSON.stringify(persist));
+      return next;
     });
   }, []);
 
   const updateDispatchSnapshot = useCallback((dispatchSnapshot: CurrentDispatchSnapshot | undefined) => {
     setState((current) => {
-      const nextState: CurrentWorkpackSnapshot = {
-        ...current,
-        isCurrent: true,
-        savedAt: new Date().toISOString(),
-        dispatchSnapshot
-      };
-      window.localStorage.setItem(
-        CURRENT_WORKPACK_STORAGE_KEY,
-        JSON.stringify(buildStoredCurrentWorkpack(nextState.data, {
-          generationFingerprint: nextState.generationFingerprint,
-          workerSnapshot: nextState.workerSnapshot,
-          dispatchSnapshot
-        }))
-      );
-      return nextState;
+      const { next, persist } = applyRouteSnapshotUpdate(current, { dispatchSnapshot }, new Date().toISOString());
+      if (persist) window.localStorage.setItem(CURRENT_WORKPACK_STORAGE_KEY, JSON.stringify(persist));
+      return next;
     });
   }, []);
 
@@ -921,11 +900,11 @@ function formatSavedAt(savedAt: string | null) {
 function CurrentWorkpackBanner({ isCurrent, savedAt }: { isCurrent: boolean; savedAt: string | null }) {
   return (
     <section className={`safeclaw-current-workpack ${isCurrent ? "live" : "sample"}`} aria-live="polite">
-      <span>{isCurrent ? "현재 작업 연결" : "기본 예시 표시"}</span>
+      <span>{isCurrent ? "현재 작업 연결" : PUBLIC_SAMPLE_BANNER_LABEL}</span>
       <strong>
         {isCurrent
           ? `작업공간에서 생성한 최신 문서팩을 사용합니다${formatSavedAt(savedAt) ? ` · ${formatSavedAt(savedAt)}` : ""}.`
-          : "아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합니다."}
+          : PUBLIC_SAMPLE_BANNER_TEXT}
       </strong>
     </section>
   );
@@ -1962,7 +1941,9 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
     current.updateDispatchSnapshot(dispatchSnapshot);
     setWorkerSaveState({
       status: "local",
-      message: "작업자 명단이 이 브라우저의 현재 작업공간에 반영됐습니다. 전파 화면 수신자에도 함께 적용됩니다."
+      message: current.isCurrent
+        ? "작업자 명단이 이 브라우저의 현재 작업공간에 반영됐습니다. 전파 화면 수신자에도 함께 적용됩니다."
+        : "예시 화면이라 명단을 저장하지 않습니다. 이 화면을 떠나면 사라집니다. 작업공간에서 문서팩을 생성한 뒤 명단을 입력해 주세요."
     });
   }
 

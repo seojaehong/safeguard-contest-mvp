@@ -1,6 +1,7 @@
 import { SearchResult } from "@/lib/types";
 import Link from "next/link";
 import type { Route } from "next";
+import { isExampleSource, sourceBadgeLabel } from "@/lib/public-screen-sample";
 
 const citationGroups: Array<{ type: SearchResult["type"]; label: string }> = [
   { type: "law", label: "법령" },
@@ -45,6 +46,7 @@ function describeRelevance(item: SearchResult, question?: string) {
 function sourceStatusLabel(item: SearchResult) {
   if (item.sourceSystem === "lawgo") return "법제처 인용";
   if (item.sourceSystem === "korean-law-mcp") return "추가 근거";
+  if (isExampleSource(item)) return "예시 · 원천 미연결";
   return "기본 근거";
 }
 
@@ -69,20 +71,35 @@ export function CitationList({ citations, question }: { citations: SearchResult[
               <span className="muted small">{groupItems.length}건</span>
             </div>
             {groupItems.map((c) => {
-              const href = getCitationHref(c);
-              return (
-                <Link key={c.id} href={href} className="list citation-item" target="_blank" rel="noopener noreferrer">
+              const example = isExampleSource(c);
+              const body = (
+                <>
                   <div className="row">
-                    <span className="badge">{c.sourceLabel}</span>
-                    <span className="badge">{evidenceRoleLabel(c)}</span>
+                    <span className="badge">{sourceBadgeLabel(c)}</span>
+                    {example ? null : <span className="badge">{evidenceRoleLabel(c)}</span>}
                     <span className="badge">{sourceStatusLabel(c)}</span>
-                    <span className="badge">새 탭</span>
+                    {example ? null : <span className="badge">새 탭</span>}
                     {c.tags?.some((tag) => tag.includes("작업위험 매핑")) ? <span className="badge">작업위험 매핑</span> : null}
                   </div>
                   <h3 className="h3">{c.title}</h3>
                   <span className="muted">{c.summary}</span>
-                  <span className="small relevance-note">문서 반영 위치: {citationDocumentMap[c.type].join(" · ")}</span>
-                  <span className="small relevance-note">{describeRelevance(c, question)}</span>
+                  {example ? (
+                    <span className="small relevance-note">법령 원천에 연결되지 않은 예시 자료입니다. 문서 근거로 쓰지 말고 실제 법령·판례를 다시 확인해 주세요.</span>
+                  ) : (
+                    <>
+                      <span className="small relevance-note">문서 반영 위치: {citationDocumentMap[c.type].join(" · ")}</span>
+                      <span className="small relevance-note">{describeRelevance(c, question)}</span>
+                    </>
+                  )}
+                </>
+              );
+              // 예시(mock) 근거는 상세 화면이 없으므로 링크하지 않는다.
+              if (example) {
+                return <div key={c.id} className="list citation-item">{body}</div>;
+              }
+              return (
+                <Link key={c.id} href={getCitationHref(c)} className="list citation-item" target="_blank" rel="noopener noreferrer">
+                  {body}
                 </Link>
               );
             })}
