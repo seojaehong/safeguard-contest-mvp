@@ -1231,6 +1231,8 @@ export type AiDeliverablesDiagnostics = {
     status: "grounded" | "review_required";
     sourceIdentity: string;
     rejectedGroups: string[];
+    // 거절된 묶음을 실제로 쓴 제공자. 최종 본문 출처(modelPerDocument)와는 다르다.
+    rejectedAttempts: Array<{ group: string; provider: GenerationDeliverableModelTrace["provider"]; model: string | null }>;
     violations: Array<Pick<GroundingViolation, "code" | "path"> & { group: string }>;
     criticalControls: string[];
   };
@@ -1267,6 +1269,7 @@ export function buildFailedDeliverablesDiagnostics(input: {
       status: "review_required",
       sourceIdentity: input.groundingPacket.sourceIdentity,
       rejectedGroups: input.fallbackUsed ? ["deliverablesPipeline"] : [],
+      rejectedAttempts: [],
       violations: [],
       criticalControls: [...new Set(
         input.groundingPacket.sources.flatMap((source) => source.controls)
@@ -1367,15 +1370,22 @@ export async function generateAllDeliverablesWithDiagnostics(
   const groupResults: AiDeliverablesDiagnostics["groupResults"] = [];
   const rejectedGroundingGroups: string[] = [];
   const groundingViolations: NonNullable<AiDeliverablesDiagnostics["grounding"]>["violations"] = [];
+  const rejectedAttempts: NonNullable<AiDeliverablesDiagnostics["grounding"]>["rejectedAttempts"] = [];
+  const resetRejectedGroup = (name: string) => {
+    const keys = DELIVERABLE_GROUP_DOCUMENT_KEYS[name] || [];
+    const attempt = keys.map((key) => modelPerDocument[key]).find((trace) => trace?.source === "provider");
+    if (attempt) rejectedAttempts.push({ group: name, provider: attempt.provider, model: attempt.model });
+    for (const documentKey of keys) {
+      modelPerDocument[documentKey] = deterministicDocumentTrace(true);
+    }
+  };
 
   const rejectForGrounding = (name: string, value: Partial<AiDeliverables>): boolean => {
     if (opts.phaseAGrounding) {
       const phaseAValidation = validatePhaseAStructuredCitationOutput(value, opts.phaseAGrounding);
       if (phaseAValidation.status === "review_required") {
         rejectedGroundingGroups.push(name);
-        for (const documentKey of DELIVERABLE_GROUP_DOCUMENT_KEYS[name] || []) {
-          modelPerDocument[documentKey] = deterministicDocumentTrace(true);
-        }
+        resetRejectedGroup(name);
         return true;
       }
     }
@@ -1388,9 +1398,7 @@ export async function generateAllDeliverablesWithDiagnostics(
       code: violation.code,
       path: violation.path
     })));
-    for (const documentKey of DELIVERABLE_GROUP_DOCUMENT_KEYS[name] || []) {
-      modelPerDocument[documentKey] = deterministicDocumentTrace(true);
-    }
+    resetRejectedGroup(name);
     return true;
   };
 
@@ -1444,6 +1452,7 @@ export async function generateAllDeliverablesWithDiagnostics(
           : "review_required",
         sourceIdentity: opts.groundingPacket.sourceIdentity,
         rejectedGroups: rejectedGroundingGroups,
+        rejectedAttempts,
         violations: groundingViolations,
         criticalControls: [...new Set(opts.groundingPacket.sources.flatMap((source) => source.controls))].sort()
       } : undefined,

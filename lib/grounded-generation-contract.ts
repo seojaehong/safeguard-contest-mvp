@@ -422,7 +422,8 @@ function isActionableNarrativeSentence(value: string): boolean {
 }
 
 function narrativeSentences(value: string): string[] {
-  return (value.match(/[^.!?\n]+[.!?]?/g) || [])
+  // 「2.5m」처럼 숫자 사이 마침표는 문장 끝이 아니다.
+  return (value.match(/(?:\d\.\d|[^.!?\n])+[.!?]?/g) || [])
     .map((sentence) => sentence.trim())
     .filter(Boolean);
 }

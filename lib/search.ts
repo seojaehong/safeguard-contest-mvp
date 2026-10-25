@@ -266,6 +266,9 @@ function buildGroundingReview(
     sourceIdentity: grounding.sourceIdentity,
     criticalControls: [...grounding.criticalControls],
     rejectedGroups: [...grounding.rejectedGroups],
+    ...(grounding.rejectedAttempts?.length
+      ? { rejectedAttempts: grounding.rejectedAttempts.map((attempt) => ({ ...attempt })) }
+      : {}),
     violations: grounding.violations.map((violation) => ({ ...violation }))
   };
 }
@@ -2736,7 +2739,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       } else if (deliverablesResult) {
         const { deliverables, diagnostics } = deliverablesResult;
         aiBodies = parentlessKoshaReviewRequired ? {} : deliverables;
-        const filled = Object.keys(aiBodies);
+        // 빈 배열·빈 문자열로 돌아온 키(예: 행이 없어 비는 tbmRiskLinks)는 「채움」으로 세지 않는다.
+        const filled = Object.entries(aiBodies)
+          .filter(([, value]) => value !== undefined && value !== null && value !== ""
+            && !(Array.isArray(value) && value.length === 0))
+          .map(([key]) => key);
         const groupBrief = diagnostics.groupResults
           .map((g) => `${g.group}=${g.status === "fulfilled" ? "ok" : "fallback"}`)
           .join(" ");

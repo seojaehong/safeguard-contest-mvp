@@ -673,6 +673,7 @@ export type AskResponse = {
     sourceIdentity: string;
     criticalControls: string[];
     rejectedGroups: string[];
+    rejectedAttempts?: Array<{ group: string; provider: GenerationDeliverableModelTrace["provider"]; model: string | null }>;
     violations: Array<{
       group: string;
       code: "unknown_reference" | "control_provenance_missing" | "control_claim_not_in_packet";

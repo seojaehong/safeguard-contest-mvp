@@ -461,7 +461,8 @@ export async function generateAnswer(
     question,
     citations,
     "live",
-    `Law.go와 ${response.providerLabel} 응답을 결합했습니다.`
+    // 최종 답변은 search.ts 가 DB 하네스 답변으로 교체한다(usedInFinal:false). 결합했다고 쓰지 않는다.
+    "Law.go와 SafeClaw 고정 근거로 답변을 구성했습니다."
   );
   const trace = {
     provider: response.provider,
