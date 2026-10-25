@@ -229,6 +229,8 @@ const approvedSpacingTokens = new Set([
 ]);
 const justifiedSemanticSpacingTokens = new Set(["--os-gutter", "--module-nav-inline", "--decision-header-inline"]);
 const justifiedResponsiveSpacingExpressions = new Set([
+  // IBM Plex Sans KR 글자 상자(1.5em)가 줄높이보다 커서, 글자 2배 확대에서도 눈썹 라벨과 겹치지 않게 글자 크기 비례 여백을 둔다.
+  ".safeclaw-module-shell[data-module-route=\"/reports\"] .safeclaw-page-decision-copy h1|margin-top|0.2em",
   ".safeclaw-landing-nav nav|gap|clamp(var(--space-4), 2.4vw, var(--space-10))",
   ".safeclaw-hero-copy|padding|clamp(var(--space-10), 7vw, var(--space-24))",
   ".safeclaw-hero-console|padding|clamp(32px, 5vw, 64px)",
