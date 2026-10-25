@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
-          cache: npm
+          package-manager-cache: false
       # package-lock.json 은 커밋돼 있다 — lock 그대로 설치한다.
       - run: npm ci
       - run: npx playwright install --with-deps chromium
@@ -28,8 +28,11 @@ jobs:
       # 빌드를 시험보다 먼저 한다. .next/BUILD_ID 가 있어야 prod 모드 브라우저 시험이 돈다
       # (CI 에서는 빌드가 없으면 skip 하지 않고 실패한다).
       - run: npm run build
+      # prod 빌드(.next)를 쓰는 묶음은 전체 시험보다 먼저 돌린다. 전체 시험 중 next dev 를 cwd 에서 띄우는
+      # 묶음(reports-download-center)이 .next 를 dev 산출물로 덮어써 BUILD_ID 가 사라지기 때문이다.
+      - run: npx vitest run tests/north-star-document-ux.test.ts tests/share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false
       # Browser suites create isolated Next builds; serialize them to avoid
       # shared .next contention on the single GitHub runner.
-      - run: npm test -- --maxWorkers=1 --fileParallelism=false
+      - run: npm test -- --maxWorkers=1 --fileParallelism=false --exclude tests/north-star-document-ux.test.ts --exclude tests/share-recipient-portal-browser.test.ts
       # 연차 도구 테스트는 .mts(node --experimental-strip-types)라 vitest include(tests/**/*.test.ts)에 잡히지 않는다.
       - run: npm run leave:test
