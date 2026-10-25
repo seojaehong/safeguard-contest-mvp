@@ -22,6 +22,7 @@ import {
   gateUserOutputText
 } from "@/lib/user-output-gate";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
+import { buildPublicShareDocuments } from "@/lib/workpack-commercial-store";
 
 type OpsCase = {
   question: string;
@@ -188,6 +189,23 @@ describe("기본 틀 생성 — 새 응답의 관리번호", () => {
   }
 });
 
+describe("공유본 읽기 — 옛 저장본의 초안 글", () => {
+  for (const id of CASES) {
+    it(`${id}: 공유 세션 문서의 위험성평가 본문에 RA- 코드가 없다`, () => {
+      const documents = buildPublicShareDocuments({
+        riskAssessmentDraft: ops[id].deliverables.riskAssessmentDraft,
+        tbmBriefing: "오늘 작업 확인",
+        tbmLogDraft: ""
+      });
+      const risk = documents.find((document) => document.key === "riskAssessmentDraft");
+      expect(risk).toBeDefined();
+      expect(risk!.body).not.toMatch(RA_CODE);
+      expect(managementNumberLines(risk!.body)[0]).toBe("위험성평가-01");
+      expect(documents.map((document) => document.key)).toEqual(["riskAssessmentDraft", "tbmBriefing"]);
+    });
+  }
+});
+
 describe("서식 출력(xlsx·pdf·hwp) — 옛 RA- 코드가 든 행", () => {
   const id = "mfg-press";
   const rows = () => ops[id].structured.riskAssessmentRows;
@@ -218,7 +236,7 @@ describe("서식 출력(xlsx·pdf·hwp) — 옛 RA- 코드가 든 행", () => {
       riskLevel: "상",
       riskAssessmentRows: rows(),
       riskReviewItems: [],
-      body: serializeRiskAssessmentRowsToDraft(rows())
+      documentText: serializeRiskAssessmentRowsToDraft(rows())
     }));
     expect(response.status).toBe(200);
     expect(await response.text()).not.toMatch(RA_CODE);
