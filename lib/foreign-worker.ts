@@ -31,6 +31,17 @@ type SafetyKeyword =
   | "crane"
   | "excavation";
 
+// PR-13 결정 6(H7): 외국인 전송본은 검수된 고정 번역표만 쓴다. AI 번역은 쓰지 않는다.
+// 표에 없는 언어·위험·작업명은 그 언어를 전송하지 않고 「전송 금지 · 현장 통역 확인 필수」로 막는다.
+export type TranslationStatus = "verified" | "review_required";
+export type TranslationEntry = { text: string; status: TranslationStatus; source: string };
+
+/** 밀폐공간 등 생명 위험 6키(EF-03). 밀폐가 감지되면 전송되는 모든 언어 블록에 6줄이 전부 있어야 한다. */
+export type LifeSafetyKey = "gasTest" | "attendant" | "airMask" | "noEntry" | "emergencyCall" | "rescue";
+export const LIFE_SAFETY_KEYS: readonly LifeSafetyKey[] = ["gasTest", "attendant", "airMask", "noEntry", "emergencyCall", "rescue"];
+
+export const FOREIGN_WORKER_BLOCK_NOTICE = "전송 금지 · 현장 통역 확인 필수";
+
 type LocalizedPack = {
   work: string;
   risk: string;
@@ -38,8 +49,69 @@ type LocalizedPack = {
   ask: string;
   supervisor: string;
   workLabels: Record<string, string>;
-  hazardLabels: Record<SafetyKeyword, string>;
+  // 기존 팩 문장 = 검수된 문장. 영어 대체값(fallback)을 섞지 않는다(EF-04) — 없는 키는 없는 것이다.
+  hazardLabels: Partial<Record<SafetyKeyword, string>>;
   actionLabels: Partial<Record<SafetyKeyword, string>>;
+};
+
+/** 이번 PR 에서 새로 쓴 문장. 검수 전(review_required)이면 그 언어는 해당 입력에서 전송되지 않는다. */
+type PackAdditions = {
+  workLabels?: Record<string, TranslationEntry>;
+  hazardLabels?: Partial<Record<SafetyKeyword, TranslationEntry>>;
+  lifeSafety: Record<LifeSafetyKey, TranslationEntry>;
+};
+
+/** 위험 키의 한국어 이름(전송 금지 사유 표기용). 영문 키를 사용자 문구에 내지 않는다. */
+const hazardKoreanNames: Record<SafetyKeyword, string> = {
+  fall: "추락",
+  scaffold: "비계",
+  wind: "강풍",
+  forklift: "지게차",
+  chemical: "화학물질",
+  fire: "화재·화기",
+  confined: "밀폐·질식",
+  electric: "감전",
+  heat: "온열",
+  slip: "미끄럼",
+  heavyLoad: "중량물",
+  crane: "크레인",
+  excavation: "굴착"
+};
+
+/** 생명 위험이 큰 키를 앞에 둔다(EF-03). 자르기(slice) 전에 이 순서로 정렬한다. */
+const LIFE_RISK_ORDER: readonly SafetyKeyword[] = [
+  "confined",
+  "electric",
+  "fall",
+  "fire",
+  "excavation",
+  "crane",
+  "chemical",
+  "scaffold",
+  "wind",
+  "forklift",
+  "heat",
+  "heavyLoad",
+  "slip"
+];
+
+function sortByLifeRisk(keywords: SafetyKeyword[]): SafetyKeyword[] {
+  return [...keywords].sort((a, b) => LIFE_RISK_ORDER.indexOf(a) - LIFE_RISK_ORDER.indexOf(b));
+}
+
+/** 작업 유형 선행 분류(#104) taskId → 번역표 작업명 키. 여기 없는 분류 작업은 번역표에 작업명이 없는 것이다. */
+const TASK_WORK_LABEL_KEYS: Record<string, string> = {
+  "forklift-logistics": "forkliftLoading",
+  "manual-loading-heat": "manualHandling",
+  "exterior-painting": "paintingScaffold",
+  hotwork: "hotWork",
+  "floor-cleaning": "chemicalCleaning",
+  "chemical-cleaning": "chemicalCleaning",
+  electrical: "electricalInspection",
+  excavation: "excavation",
+  "pump-confined": "confinedInspection",
+  press: "pressDieChange",
+  "confined-space": "confinedSpaceWork"
 };
 
 const hazardIcons: Record<SafetyKeyword, string> = {
@@ -224,36 +296,48 @@ function detectSafetyKeywords(input: BriefingInput): SafetyKeyword[] {
   return detected.length ? detected : ["fall"];
 }
 
-function detectWorkLabelKey(input: BriefingInput) {
-  const text = `${input.question} ${input.scenario.workSummary}`;
-  if (/정전전로|충전전로|배전반|분전반|수전반|검전|절연보호구|전기/.test(text)) return "electricalInspection";
-  if (/외벽|도장|비계/.test(text)) return "paintingScaffold";
-  if (/지게차|상하차|피킹/.test(text)) return "forkliftLoading";
-  if (/용접|절단|화기/.test(text)) return "hotWork";
-  if (/밀폐|기계실|배수/.test(text)) return "confinedInspection";
-  if (/세척|화학세제|청소/.test(text)) return "chemicalCleaning";
-  if (/박스|적재|운반/.test(text)) return "manualHandling";
-  if (/굴착|열수송관|매설/.test(text)) return "excavation";
-  return "general";
+// EF-02: 작업명은 주 작업 출처에서 받는다. 분류된 작업(taskClassification)이 있으면 그 taskId 로만 고르고,
+// 없을 때만 workSummary(질문 전체가 아니라)에서 보수적으로 고른다. 질문 속 부수 작업(「지게차로 운반」)이
+// 외국어 작업명을 바꾸던 경로(프레스→叉车装卸, 정화조→地下机房检查)를 없앤다.
+type WorkLabelSource =
+  | { kind: "classified"; key: string | null; taskLabel: string | null }
+  | { kind: "unclassified"; key: string };
+
+function resolveWorkLabelSource(input: BriefingInput): WorkLabelSource {
+  const classification = input.scenario.taskClassification;
+  if (classification && classification.status === "classified" && classification.taskId) {
+    return {
+      kind: "classified",
+      key: TASK_WORK_LABEL_KEYS[classification.taskId] ?? null,
+      taskLabel: classification.taskLabel
+    };
+  }
+  const text = input.scenario.workSummary;
+  if (/정전전로|충전전로|배전반|분전반|수전반|검전|절연보호구/.test(text)) return { kind: "unclassified", key: "electricalInspection" };
+  if (/외벽\s*도장/.test(text)) return { kind: "unclassified", key: "paintingScaffold" };
+  if (/용접|절단|화기/.test(text)) return { kind: "unclassified", key: "hotWork" };
+  if (/굴착/.test(text)) return { kind: "unclassified", key: "excavation" };
+  return { kind: "unclassified", key: "general" };
 }
 
-function localizedPacks(): Record<string, LocalizedPack> {
-  const fallbackHazards: Record<SafetyKeyword, string> = {
-    fall: "fall hazard",
-    scaffold: "mobile scaffold movement",
-    wind: "strong wind",
-    forklift: "forklift route conflict",
-    chemical: "chemical exposure",
-    fire: "fire or hot-work hazard",
-    confined: "confined-space hazard",
-    electric: "electric shock",
-    heat: "heat illness",
-    slip: "slip hazard",
-    heavyLoad: "heavy-load handling",
-    crane: "crane or lifting hazard",
-    excavation: "excavation and buried utility hazard"
-  };
+// 영어 팩의 위험명. 다른 언어 팩의 대체값으로 쓰지 않는다(EF-04).
+const fallbackHazards: Record<SafetyKeyword, string> = {
+  fall: "fall hazard",
+  scaffold: "mobile scaffold movement",
+  wind: "strong wind",
+  forklift: "forklift route conflict",
+  chemical: "chemical exposure",
+  fire: "fire or hot-work hazard",
+  confined: "confined-space hazard",
+  electric: "electric shock",
+  heat: "heat illness",
+  slip: "slip hazard",
+  heavyLoad: "heavy-load handling",
+  crane: "crane or lifting hazard",
+  excavation: "excavation and buried utility hazard"
+};
 
+function localizedPacks(): Record<string, LocalizedPack> {
   return {
     en: {
       work: "Today's work",
@@ -307,7 +391,6 @@ function localizedPacks(): Record<string, LocalizedPack> {
         general: "Công việc được quản lý hướng dẫn hôm nay"
       },
       hazardLabels: {
-        ...fallbackHazards,
         fall: "nguy cơ rơi ngã",
         scaffold: "giàn giáo di động rung hoặc lật",
         wind: "gió mạnh",
@@ -356,7 +439,6 @@ function localizedPacks(): Record<string, LocalizedPack> {
         general: "今天现场说明的作业"
       },
       hazardLabels: {
-        ...fallbackHazards,
         fall: "坠落危险",
         scaffold: "移动脚手架晃动或倾倒",
         wind: "强风",
@@ -393,7 +475,6 @@ function localizedPacks(): Record<string, LocalizedPack> {
         general: "งานที่อธิบายในบรีฟวันนี้"
       },
       hazardLabels: {
-        ...fallbackHazards,
         fall: "ความเสี่ยงตกจากที่สูง",
         scaffold: "นั่งร้านเคลื่อนที่สั่นหรือพลิกคว่ำ",
         wind: "ลมแรง",
@@ -430,7 +511,6 @@ function localizedPacks(): Record<string, LocalizedPack> {
         general: "Өнөөдрийн зааварт тайлбарласан ажил"
       },
       hazardLabels: {
-        ...fallbackHazards,
         fall: "өндрөөс унах эрсдэл",
         scaffold: "зөөврийн шат ганхах эсвэл унах",
         wind: "хүчтэй салхи",
@@ -465,7 +545,6 @@ function localizedPacks(): Record<string, LocalizedPack> {
         general: "Bugungi brifingda tushuntirilgan ish"
       },
       hazardLabels: {
-        ...fallbackHazards,
         fall: "balandlikdan yiqilish xavfi",
         scaffold: "ko'chma havoza silkinishi yoki ag'darilishi",
         wind: "kuchli shamol",
@@ -502,7 +581,6 @@ function localizedPacks(): Record<string, LocalizedPack> {
         general: "आजको ब्रिफिङमा वर्णन गरिएको काम"
       },
       hazardLabels: {
-        ...fallbackHazards,
         fall: "खस्ने जोखिम",
         scaffold: "चलायमान स्काफोल्ड हल्लिने वा पल्टिने",
         wind: "बलियो हावा",
@@ -537,7 +615,6 @@ function localizedPacks(): Record<string, LocalizedPack> {
         general: "ការងារដែលបានពន្យល់ក្នុងការណែនាំថ្ងៃនេះ"
       },
       hazardLabels: {
-        ...fallbackHazards,
         fall: "ហានិភ័យធ្លាក់ពីកម្ពស់",
         scaffold: "រន្ទាចល័តរង្គើ ឬដួល",
         wind: "ខ្យល់ខ្លាំង",
@@ -572,7 +649,6 @@ function localizedPacks(): Record<string, LocalizedPack> {
         general: "Pekerjaan yang dijelaskan dalam briefing hari ini"
       },
       hazardLabels: {
-        ...fallbackHazards,
         fall: "risiko jatuh",
         scaffold: "perancah bergerak bergoyang atau terguling",
         wind: "angin kencang",
@@ -607,7 +683,6 @@ function localizedPacks(): Record<string, LocalizedPack> {
         general: "ယနေ့ briefing တွင် ရှင်းပြထားသောလုပ်ငန်း"
       },
       hazardLabels: {
-        ...fallbackHazards,
         fall: "ပြုတ်ကျနိုင်သော အန္တရာယ်",
         scaffold: "ရွှေ့ပြောင်းငြမ်း လှုပ်ခြင်း သို့မဟုတ် လဲခြင်း",
         wind: "လေပြင်း",
@@ -627,9 +702,286 @@ function localizedPacks(): Record<string, LocalizedPack> {
   };
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// PR-13 추가 번역표. 전부 이번 PR 에서 새로 쓴 문장이며 원어민·현장 통역 검수 전이므로
+// status = review_required 다. 검수가 끝난 문장만 verified 로 바꾼다(그 전에는 전송되지 않는다).
+// 베트남어 attendant 는 기존 팩 actionLabels.confined 문장을 그대로 재사용했으므로 verified.
+// ─────────────────────────────────────────────────────────────────────────────
+const PR13_DRAFT = "PR-13 작성 초안(AI) — 원어민·현장 통역 검수 전";
+const EXISTING_PACK = "기존 팩 문장 재사용(actionLabels.confined)";
+
+function draft(text: string): TranslationEntry {
+  return { text, status: "review_required", source: PR13_DRAFT };
+}
+
+const packAdditions: Record<string, PackAdditions> = {
+  en: {
+    workLabels: {
+      pressDieChange: draft("Press die change and press operation"),
+      confinedSpaceWork: draft("Confined-space work (cleaning inside a septic tank, pit, or tank)")
+    },
+    lifeSafety: {
+      gasTest: draft("Before entry, measure oxygen and harmful gas (hydrogen sulfide, carbon monoxide). Do not enter if the reading is not safe."),
+      attendant: draft("An attendant must stay outside the entrance at all times and keep contact with the workers inside."),
+      airMask: draft("If the air cannot be made safe, wear an air-supplied respirator. A dust mask does not protect you."),
+      noEntry: draft("No entry without permission. Only workers on today's entry list may go in."),
+      emergencyCall: draft("If someone collapses inside, call the supervisor and 119 at once."),
+      rescue: draft("Do not go in to rescue anyone without an air-supplied respirator and a lifeline. Wait for the rescue team.")
+    }
+  },
+  vi: {
+    workLabels: {
+      pressDieChange: draft("Thay khuôn máy dập và vận hành máy dập"),
+      confinedSpaceWork: draft("Làm việc trong không gian kín (vệ sinh bên trong bể phốt, hố hoặc bồn chứa)")
+    },
+    lifeSafety: {
+      gasTest: draft("Trước khi vào, phải đo nồng độ oxy và khí độc (H2S, CO). Nếu kết quả không an toàn thì không được vào."),
+      attendant: {
+        text: "Kiểm tra thông gió, nồng độ oxy và bố trí người giám sát bên ngoài trước khi vào khu vực kín.",
+        status: "verified",
+        source: EXISTING_PACK
+      },
+      airMask: draft("Nếu không thể làm cho không khí an toàn, phải đeo mặt nạ cấp khí. Khẩu trang chống bụi không bảo vệ được bạn."),
+      noEntry: draft("Cấm vào khi chưa được phép. Chỉ người có tên trong danh sách vào hôm nay mới được vào."),
+      emergencyCall: draft("Nếu có người ngã xuống bên trong, hãy gọi ngay quản lý và 119."),
+      rescue: draft("Không được vào cứu người khi chưa có mặt nạ cấp khí và dây cứu sinh. Hãy chờ đội cứu hộ.")
+    }
+  },
+  zh: {
+    workLabels: {
+      pressDieChange: draft("冲压模具更换及冲压作业"),
+      confinedSpaceWork: draft("有限空间作业（化粪池、地坑、储罐内部清理）")
+    },
+    hazardLabels: {
+      confined: draft("缺氧或有害气体导致窒息的危险"),
+      heat: draft("中暑等热病危险"),
+      slip: draft("滑倒危险"),
+      heavyLoad: draft("搬运重物时的受伤危险"),
+      crane: draft("起重作业区域内的碰撞危险"),
+      excavation: draft("开挖时塌方或触碰地下埋设物的危险")
+    },
+    lifeSafety: {
+      gasTest: draft("进入前必须测定氧气和有害气体（硫化氢、一氧化碳）浓度。数值不安全时禁止进入。"),
+      attendant: draft("监护人必须始终守在入口外，并与内部作业人员保持联络。"),
+      airMask: draft("无法保证空气安全时，必须佩戴送风式呼吸器。防尘口罩不能保护你。"),
+      noEntry: draft("未经许可禁止进入。只有今天出入名单上的人员才能进入。"),
+      emergencyCall: draft("如有人在内部倒下，请立即联系负责人并拨打119。"),
+      rescue: draft("没有送风式呼吸器和救生索时，禁止进入救人。请等待救援队。")
+    }
+  },
+  th: {
+    workLabels: {
+      pressDieChange: draft("งานเปลี่ยนแม่พิมพ์เครื่องปั๊มและงานปั๊มโลหะ"),
+      confinedSpaceWork: draft("งานในพื้นที่อับอากาศ (ทำความสะอาดภายในบ่อเกรอะ บ่อ หรือถัง)")
+    },
+    hazardLabels: {
+      confined: draft("ความเสี่ยงขาดออกซิเจนหรือหายใจไม่ออกจากก๊าซอันตราย"),
+      heat: draft("ความเสี่ยงโรคลมแดดจากความร้อน"),
+      slip: draft("ความเสี่ยงลื่นล้ม"),
+      heavyLoad: draft("ความเสี่ยงบาดเจ็บจากการยกหรือขนของหนัก"),
+      crane: draft("ความเสี่ยงถูกกระแทกในพื้นที่ยกของ"),
+      excavation: draft("ความเสี่ยงดินถล่มหรือกระแทกสาธารณูปโภคใต้ดินขณะขุด")
+    },
+    lifeSafety: {
+      gasTest: draft("ก่อนเข้า ต้องตรวจวัดออกซิเจนและก๊าซอันตราย (ไฮโดรเจนซัลไฟด์ คาร์บอนมอนอกไซด์) หากค่าไม่ปลอดภัย ห้ามเข้า"),
+      attendant: draft("ต้องมีผู้เฝ้าระวังอยู่หน้าทางเข้าตลอดเวลา และติดต่อกับผู้ที่อยู่ข้างในได้"),
+      airMask: draft("หากทำให้อากาศปลอดภัยไม่ได้ ต้องใส่หน้ากากแบบจ่ายอากาศ หน้ากากกันฝุ่นป้องกันไม่ได้"),
+      noEntry: draft("ห้ามเข้าโดยไม่ได้รับอนุญาต เฉพาะผู้ที่มีชื่อในรายชื่อเข้างานวันนี้เท่านั้น"),
+      emergencyCall: draft("หากมีคนล้มลงข้างใน ให้แจ้งหัวหน้างานและโทร 119 ทันที"),
+      rescue: draft("ห้ามเข้าไปช่วยโดยไม่มีหน้ากากจ่ายอากาศและเชือกนิรภัย ให้รอทีมกู้ภัย")
+    }
+  },
+  uz: {
+    workLabels: {
+      pressDieChange: draft("Press qolipini almashtirish va press ishi"),
+      confinedSpaceWork: draft("Yopiq joyda ishlash (septik, chuqur yoki idish ichini tozalash)")
+    },
+    hazardLabels: {
+      confined: draft("kislorod yetishmasligi yoki zararli gazdan bo'g'ilish xavfi"),
+      heat: draft("issiqlik urishi xavfi"),
+      slip: draft("sirpanib yiqilish xavfi"),
+      heavyLoad: draft("og'ir yukni ko'tarish yoki tashishda jarohat xavfi"),
+      crane: draft("yuk ko'tarish zonasida urilish xavfi"),
+      excavation: draft("qazishda tuproq o'pirilishi yoki yer osti tarmog'iga tegish xavfi")
+    },
+    lifeSafety: {
+      gasTest: draft("Kirishdan oldin kislorod va zararli gaz (vodorod sulfid, uglerod oksidi) miqdorini o'lchang. Ko'rsatkich xavfsiz bo'lmasa, kirmang."),
+      attendant: draft("Kuzatuvchi doimo kirish joyi tashqarisida turishi va ichkaridagi ishchilar bilan aloqada bo'lishi shart."),
+      airMask: draft("Havoni xavfsiz qilish mumkin bo'lmasa, havo bilan ta'minlovchi niqob taqing. Chang niqobi sizni himoya qilmaydi."),
+      noEntry: draft("Ruxsatsiz kirish taqiqlanadi. Faqat bugungi kirish ro'yxatidagi ishchilar kirishi mumkin."),
+      emergencyCall: draft("Ichkarida kimdir yiqilsa, darhol rahbarga va 119 ga xabar bering."),
+      rescue: draft("Havo niqobi va saqlash arqonisiz qutqarish uchun kirmang. Qutqaruv guruhini kuting.")
+    }
+  },
+  mn: {
+    workLabels: {
+      pressDieChange: draft("Пресс хэв солих ба пресс ажил"),
+      confinedSpaceWork: draft("Битүү орчинд ажиллах (септик, нүх, сав дотор цэвэрлэх)")
+    },
+    hazardLabels: {
+      confined: draft("хүчилтөрөгчийн дутагдал буюу хортой хийд амьсгал боогдох эрсдэл"),
+      heat: draft("халуунд цохиулах эрсдэл"),
+      slip: draft("халтирч унах эрсдэл"),
+      heavyLoad: draft("хүнд ачаа өргөх, зөөх үеийн гэмтлийн эрсдэл"),
+      crane: draft("өргөх ажлын бүсэд мөргүүлэх эрсдэл"),
+      excavation: draft("ухалтын үед хөрс нурах буюу далд шугамд хүрэх эрсдэл")
+    },
+    lifeSafety: {
+      gasTest: draft("Орохоос өмнө хүчилтөрөгч ба хортой хий (хүхэрт устөрөгч, нүүрстөрөгчийн дутуу исэл)-н хэмжээг заавал хэмжинэ. Үзүүлэлт аюулгүй биш бол орохгүй."),
+      attendant: draft("Хяналтын хүн орцны гадна байнга байж, доторх ажилчидтай холбоотой байх ёстой."),
+      airMask: draft("Агаарыг аюулгүй болгох боломжгүй бол агаар нийлүүлэх маск зүүнэ. Тоосны маск таныг хамгаалахгүй."),
+      noEntry: draft("Зөвшөөрөлгүй орохыг хориглоно. Өнөөдрийн орох жагсаалтад байгаа хүн л орно."),
+      emergencyCall: draft("Дотор хүн унавал ахлагч болон 119 рүү шууд мэдэгдэнэ."),
+      rescue: draft("Агаар нийлүүлэх маск, аврах олсгүйгээр аврахаар орохгүй. Аврах багийг хүлээнэ.")
+    }
+  },
+  ne: {
+    workLabels: {
+      pressDieChange: draft("प्रेस डाइ परिवर्तन र प्रेस काम"),
+      confinedSpaceWork: draft("बन्द ठाउँमा काम (सेप्टिक ट्याङ्की, खाल्डो वा ट्याङ्की भित्र सफाई)")
+    },
+    hazardLabels: {
+      confined: draft("अक्सिजन अभाव वा हानिकारक ग्यासले निसास्सिने जोखिम"),
+      heat: draft("गर्मीले लाग्ने रोगको जोखिम"),
+      slip: draft("चिप्लेर लड्ने जोखिम"),
+      heavyLoad: draft("गह्रौं सामान उठाउँदा वा बोक्दा चोट लाग्ने जोखिम"),
+      crane: draft("उठाउने क्षेत्रभित्र ठोक्किने जोखिम"),
+      excavation: draft("खन्दा माटो खस्ने वा भूमिगत लाइनमा ठोक्किने जोखिम")
+    },
+    lifeSafety: {
+      gasTest: draft("भित्र जानु अघि अक्सिजन र हानिकारक ग्यास (हाइड्रोजन सल्फाइड, कार्बन मोनोक्साइड) नाप्नुहोस्। मान सुरक्षित नभए भित्र नजानुहोस्।"),
+      attendant: draft("निगरानी गर्ने व्यक्ति सधैं प्रवेशद्वार बाहिर बस्नुपर्छ र भित्रका कामदारसँग सम्पर्कमा रहनुपर्छ।"),
+      airMask: draft("हावा सुरक्षित बनाउन नसकिए हावा आपूर्ति गर्ने मास्क लगाउनुहोस्। धुलोको मास्कले तपाईंलाई जोगाउँदैन।"),
+      noEntry: draft("अनुमति बिना प्रवेश निषेध। आजको प्रवेश सूचीमा नाम भएका कामदार मात्र भित्र जान सक्छन्।"),
+      emergencyCall: draft("भित्र कोही ढलेमा तुरुन्त सुपरभाइजर र ११९ मा खबर गर्नुहोस्।"),
+      rescue: draft("हावा आपूर्ति मास्क र जीवनरक्षक डोरी बिना उद्धार गर्न भित्र नजानुहोस्। उद्धार टोली पर्खनुहोस्।")
+    }
+  },
+  km: {
+    workLabels: {
+      pressDieChange: draft("ប្តូរពុម្ពម៉ាស៉ីនចុច និងការងារម៉ាស៉ីនចុច"),
+      confinedSpaceWork: draft("ការងារក្នុងកន្លែងបិទជិត (សម្អាតខាងក្នុងអាងសេបទិក រណ្តៅ ឬធុង)")
+    },
+    hazardLabels: {
+      confined: draft("ហានិភ័យខ្វះអុកស៉ីសែន ឬស្ទះដង្ហើមដោយឧស្ម័នពុល"),
+      heat: draft("ហានិភ័យជំងឺកម្ដៅ"),
+      slip: draft("ហានិភ័យរអិលដួល"),
+      heavyLoad: draft("ហានិភ័យរបួសពេលលើក ឬដឹករបស់ធ្ងន់"),
+      crane: draft("ហានិភ័យបុកក្នុងតំបន់លើកទម្ងន់"),
+      excavation: draft("ហានិភ័យដីរអិលបាក់ ឬបុកបណ្តាញក្រោមដីពេលជីក")
+    },
+    lifeSafety: {
+      gasTest: draft("មុនចូល ត្រូវវាស់អុកស៉ីសែន និងឧស្ម័នពុល (អ៉ីដ្រូសែនស៉ុលហ្វីត កាបូនម៉ូណូអុកស៉ីត)។ បើតម្លៃមិនមានសុវត្ថិភាព ហាមចូល។"),
+      attendant: draft("អ្នកយាមត្រូវនៅខាងក្រៅច្រកចូលជានិច្ច និងទាក់ទងជាមួយអ្នកនៅខាងក្នុង។"),
+      airMask: draft("បើមិនអាចធ្វើឱ្យខ្យល់មានសុវត្ថិភាពបានទេ ត្រូវពាក់ម៉ាសផ្គត់ផ្គង់ខ្យល់។ ម៉ាសការពារធូលីមិនអាចការពារអ្នកបានទេ។"),
+      noEntry: draft("ហាមចូលដោយគ្មានការអនុញ្ញាត។ មានតែអ្នកដែលមានឈ្មោះក្នុងបញ្ជីចូលថ្ងៃនេះប៉ុណ្ណោះ។"),
+      emergencyCall: draft("បើមានអ្នកដួលនៅខាងក្នុង សូមទូរស័ព្ទទៅអ្នកគ្រប់គ្រង និង 119 ភ្លាមៗ។"),
+      rescue: draft("ហាមចូលជួយសង្គ្រោះដោយគ្មានម៉ាសផ្គត់ផ្គង់ខ្យល់ និងខ្សែសុវត្ថិភាព។ សូមរង់ចាំក្រុមសង្គ្រោះ។")
+    }
+  },
+  id: {
+    workLabels: {
+      pressDieChange: draft("Penggantian cetakan mesin press dan pekerjaan press"),
+      confinedSpaceWork: draft("Pekerjaan ruang terbatas (pembersihan bagian dalam septic tank, lubang, atau tangki)")
+    },
+    hazardLabels: {
+      confined: draft("risiko kekurangan oksigen atau sesak napas akibat gas berbahaya"),
+      heat: draft("risiko penyakit akibat panas"),
+      slip: draft("risiko terpeleset dan jatuh"),
+      heavyLoad: draft("risiko cedera saat mengangkat atau membawa beban berat"),
+      crane: draft("risiko tertabrak di area pengangkatan"),
+      excavation: draft("risiko longsor atau menyentuh utilitas bawah tanah saat menggali")
+    },
+    lifeSafety: {
+      gasTest: draft("Sebelum masuk, ukur kadar oksigen dan gas berbahaya (hidrogen sulfida, karbon monoksida). Jika hasilnya tidak aman, jangan masuk."),
+      attendant: draft("Petugas pengawas harus selalu berada di luar pintu masuk dan tetap berkomunikasi dengan pekerja di dalam."),
+      airMask: draft("Jika udara tidak dapat dibuat aman, pakai respirator suplai udara. Masker debu tidak melindungi Anda."),
+      noEntry: draft("Dilarang masuk tanpa izin. Hanya pekerja yang ada dalam daftar masuk hari ini yang boleh masuk."),
+      emergencyCall: draft("Jika ada yang pingsan di dalam, segera hubungi supervisor dan 119."),
+      rescue: draft("Jangan masuk untuk menolong tanpa respirator suplai udara dan tali pengaman. Tunggu tim penyelamat.")
+    }
+  },
+  my: {
+    workLabels: {
+      pressDieChange: draft("ပရက်စ်ပုံသွင်းကိရိယာ ပြောင်းခြင်းနှင့် ပရက်စ်လုပ်ငန်း"),
+      confinedSpaceWork: draft("ပိတ်ထားသောနေရာ လုပ်ငန်း (ဆက်ပ်တစ်ကန်၊ တွင်း သို့မဟုတ် ကန်အတွင်း သန့်ရှင်းရေး)")
+    },
+    hazardLabels: {
+      confined: draft("အောက်ဆီဂျင် မလုံလောက်ခြင်း သို့မဟုတ် အန္တရာယ်ရှိဓာတ်ငွေ့ကြောင့် အသက်ရှူကြပ်နိုင်သော အန္တရာယ်"),
+      heat: draft("အပူဒဏ်ကြောင့် ဖျားနာနိုင်သော အန္တရာယ်"),
+      slip: draft("ချော်လဲနိုင်သော အန္တရာယ်"),
+      heavyLoad: draft("လေးသောပစ္စည်း မခြင်း သို့မဟုတ် သယ်ခြင်းကြောင့် ထိခိုက်နိုင်သော အန္တရာယ်"),
+      crane: draft("မခြင်းလုပ်ငန်းနေရာအတွင်း ထိခိုက်နိုင်သော အန္တရာယ်"),
+      excavation: draft("တူးဖော်စဉ် မြေပြိုခြင်း သို့မဟုတ် မြေအောက်လိုင်းကို ထိမိနိုင်သော အန္တရာယ်")
+    },
+    lifeSafety: {
+      gasTest: draft("မဝင်မီ အောက်ဆီဂျင်နှင့် အန္တရာယ်ရှိဓာတ်ငွေ့ (ဟိုက်ဒရိုဂျင်ဆာလ်ဖိုက်၊ ကာဗွန်မိုနောက်ဆိုက်) ကို တိုင်းတာပါ။ တန်ဖိုး မလုံခြုံပါက မဝင်ပါနှင့်။"),
+      attendant: draft("အစောင့်သည် ဝင်ပေါက်အပြင်တွင် အမြဲရှိနေပြီး အတွင်းရှိ အလုပ်သမားများနှင့် အဆက်အသွယ်ရှိရမည်။"),
+      airMask: draft("လေကို လုံခြုံအောင် မလုပ်နိုင်ပါက လေပေးသွင်းသော အသက်ရှူကိရိယာ ဝတ်ပါ။ ဖုန်ကာမျက်နှာဖုံးသည် သင့်ကို မကာကွယ်နိုင်ပါ။"),
+      noEntry: draft("ခွင့်ပြုချက်မရှိဘဲ မဝင်ရ။ ယနေ့ ဝင်ခွင့်စာရင်းတွင် ပါသူသာ ဝင်နိုင်သည်။"),
+      emergencyCall: draft("အတွင်းတွင် တစ်ဦးဦး လဲကျပါက ကြီးကြပ်သူနှင့် 119 ကို ချက်ချင်း ခေါ်ပါ။"),
+      rescue: draft("လေပေးသွင်းကိရိယာနှင့် အသက်ကယ်ကြိုး မရှိဘဲ ကယ်ဆယ်ရန် မဝင်ပါနှင့်။ ကယ်ဆယ်ရေးအဖွဲ့ကို စောင့်ပါ။")
+    }
+  }
+};
+
 function getPack(language: ForeignWorkerLanguage): LocalizedPack {
   const packs = localizedPacks();
   return packs[language.code] || packs.en;
+}
+
+function getAdditions(language: ForeignWorkerLanguage): PackAdditions | undefined {
+  return packAdditions[language.code];
+}
+
+const VERIFIED_PACK = "기존 팩 문장";
+
+function verifiedEntry(text: string): TranslationEntry {
+  return { text, status: "verified", source: VERIFIED_PACK };
+}
+
+/** 작업명 항목: 기존 팩(검수됨) → 추가표(검수 상태 그대로) → 없음. */
+function resolveWorkLabel(language: ForeignWorkerLanguage, key: string): TranslationEntry | null {
+  const base = getPack(language).workLabels[key];
+  if (base) return verifiedEntry(base);
+  return getAdditions(language)?.workLabels?.[key] ?? null;
+}
+
+function resolveHazardLabel(language: ForeignWorkerLanguage, key: SafetyKeyword): TranslationEntry | null {
+  const base = getPack(language).hazardLabels[key];
+  if (base) return verifiedEntry(base);
+  return getAdditions(language)?.hazardLabels?.[key] ?? null;
+}
+
+function resolveLifeSafety(language: ForeignWorkerLanguage, key: LifeSafetyKey): TranslationEntry | null {
+  return getAdditions(language)?.lifeSafety[key] ?? null;
+}
+
+/** 시험·검수용 번역표 조회. 기존 팩과 추가표를 합쳐 언어별로 돌려준다. */
+export function getForeignWorkerTranslationTable() {
+  const packs = localizedPacks();
+  const merged: Record<string, {
+    workLabels: Record<string, string>;
+    hazardLabels: Partial<Record<SafetyKeyword, string>>;
+    actionLabels: Partial<Record<SafetyKeyword, string>>;
+    lifeSafety: Record<LifeSafetyKey, TranslationEntry>;
+  }> = {};
+  for (const [code, pack] of Object.entries(packs)) {
+    const additions = packAdditions[code];
+    const workLabels = { ...pack.workLabels };
+    for (const [key, entry] of Object.entries(additions?.workLabels ?? {})) workLabels[key] = entry.text;
+    const hazardLabels: Partial<Record<SafetyKeyword, string>> = { ...pack.hazardLabels };
+    for (const [key, entry] of Object.entries(additions?.hazardLabels ?? {})) {
+      if (entry) hazardLabels[key as SafetyKeyword] = entry.text;
+    }
+    merged[code] = {
+      workLabels,
+      hazardLabels,
+      actionLabels: { ...pack.actionLabels },
+      lifeSafety: additions?.lifeSafety ?? ({} as Record<LifeSafetyKey, TranslationEntry>)
+    };
+  }
+  return { fallbackHazardsEn: fallbackHazards, packs: merged };
 }
 
 function buildVisualCueLine(language: ForeignWorkerLanguage, keywords: SafetyKeyword[]) {
@@ -666,33 +1018,133 @@ function buildWorkerMediaSupportLine(language: ForeignWorkerLanguage) {
   return workerMediaSupportLines[language.code] || null;
 }
 
-function buildTaskSpecificLines(input: BriefingInput, language: ForeignWorkerLanguage) {
-  const pack = getPack(language);
-  const keywords = detectSafetyKeywords(input);
-  const workLabel = pack.workLabels[detectWorkLabelKey(input)] || pack.workLabels.general;
-  const hazards = keywords.map((keyword) => pack.hazardLabels[keyword]).filter(Boolean).slice(0, 5);
-  const actions = keywords
-    .map((keyword) => pack.actionLabels[keyword])
-    .filter((line): line is string => Boolean(line))
-    .slice(0, 3);
-  // Note: previously fell back to input.riskSummary.immediateActions (raw
-  // Korean scenario text) when a language pack had no actionLabels entry for
-  // a detected keyword (e.g. heavyLoad/crane/excavation/confined/electric/
-  // heat/slip are only localized for a subset of languages). That leaked
-  // untranslated Korean sentences into non-Korean language blocks (prod
-  // evidence, 2026-07). Fall back to the language template's own localized
-  // generic safety lines instead — never to unlocalized Korean text.
+type LanguagePlan =
+  | { status: "emitted"; lines: string[] }
+  | { status: "blocked"; reasons: string[] };
 
-  return [
+/**
+ * 언어 하나의 블록을 고정 번역표로만 짠다. 작업명·위험명·(밀폐 시) 생명 위험 6줄 가운데 하나라도
+ * 검수된 문장이 없으면 그 언어는 전송하지 않는다(결정 6). 조치 문장은 없으면 그 언어의 일반 안전
+ * 문장(languageTemplates.lines)으로 채운다 — 한국어 원문을 섞지 않는다(2026-07 운영 증거).
+ */
+function planLanguageLines(input: BriefingInput, language: ForeignWorkerLanguage): LanguagePlan {
+  const pack = getPack(language);
+  const keywords = sortByLifeRisk(detectSafetyKeywords(input));
+  const confinedDetected = keywords.includes("confined");
+  const scaffoldDetected = keywords.includes("scaffold");
+  const reasons: string[] = [];
+  const missingHazards: SafetyKeyword[] = [];
+  const unverifiedHazards: SafetyKeyword[] = [];
+
+  // 작업명(EF-02)
+  const workSource = resolveWorkLabelSource(input);
+  let workLabel: string | null = null;
+  if (workSource.kind === "classified") {
+    const entry = workSource.key ? resolveWorkLabel(language, workSource.key) : null;
+    if (!entry) reasons.push("작업명 번역 없음");
+    else if (entry.status !== "verified") reasons.push("작업명 번역 확인 전");
+    else workLabel = entry.text;
+  } else {
+    const entry = resolveWorkLabel(language, workSource.key) ?? resolveWorkLabel(language, "general");
+    if (!entry || entry.status !== "verified") reasons.push("작업명 번역 없음");
+    else workLabel = entry.text;
+  }
+
+  // 위험명(EF-03 정렬 · EF-04 영어 대체 금지)
+  const hazards: string[] = [];
+  for (const keyword of keywords.slice(0, 5)) {
+    const entry = resolveHazardLabel(language, keyword);
+    if (!entry) missingHazards.push(keyword);
+    else if (entry.status !== "verified") unverifiedHazards.push(keyword);
+    else hazards.push(entry.text);
+  }
+  if (missingHazards.length) reasons.push(`위험요인(${missingHazards.map((key) => hazardKoreanNames[key]).join("·")}) 번역 없음`);
+  if (unverifiedHazards.length) reasons.push(`위험요인(${unverifiedHazards.map((key) => hazardKoreanNames[key]).join("·")}) 번역 확인 전`);
+
+  // 생명 위험 6줄(EF-03) — 밀폐가 감지되면 전부 있어야 한다
+  const lifeSafetyLines: string[] = [];
+  if (confinedDetected) {
+    let lifeMissing = false;
+    let lifeUnverified = false;
+    for (const key of LIFE_SAFETY_KEYS) {
+      const entry = resolveLifeSafety(language, key);
+      if (!entry) lifeMissing = true;
+      else if (entry.status !== "verified") lifeUnverified = true;
+      else lifeSafetyLines.push(entry.text);
+    }
+    if (lifeMissing) reasons.push("밀폐공간 안내 번역 없음");
+    if (lifeUnverified) reasons.push("밀폐공간 안내 번역 확인 전");
+  }
+
+  if (reasons.length) return { status: "blocked", reasons };
+
+  // 조치 문장. EF-05: 강풍 조치 문장은 비계를 전제로 쓰였으므로 비계가 없으면 내지 않는다.
+  // 밀폐 조치(actionLabels.confined)는 생명 위험 6줄이 대신한다.
+  const actions = keywords
+    .filter((keyword) => !(keyword === "wind" && !scaffoldDetected))
+    .filter((keyword) => !(keyword === "confined" && confinedDetected))
+    .map((keyword) => pack.actionLabels[keyword])
+    .filter((line): line is string => Boolean(line));
+  const actionLines = confinedDetected
+    ? [...lifeSafetyLines, ...actions.slice(0, 2)]
+    : actions.slice(0, 3);
+  while (actionLines.length < 3) {
+    const generic = language.lines[actionLines.length] ?? language.lines[language.lines.length - 1];
+    if (!generic || actionLines.includes(generic)) break;
+    actionLines.push(generic);
+  }
+
+  const [firstAction, ...restActions] = actionLines;
+  const lines = [
     `${pack.work}: ${workLabel}`,
     `${pack.risk}: ${hazards.join(", ")}`,
     buildVisualCueLine(language, keywords),
-    `${pack.actions}: ${actions[0] || language.lines[0]}`,
-    actions[1] || language.lines[1],
-    actions[2] || language.lines[2],
+    `${pack.actions}: ${firstAction}`,
+    ...restActions,
     pack.ask,
     buildWorkerMediaSupportLine(language)
   ].filter((line): line is string => Boolean(line));
+  return { status: "emitted", lines };
+}
+
+export type ForeignWorkerTransmissionPlan = {
+  emitted: ForeignWorkerLanguage[];
+  blocked: Array<{ language: ForeignWorkerLanguage; reasons: string[] }>;
+  /** 한국어 머리 구간에 병기하는 대조용 작업명(분류된 작업일 때만). */
+  workLabelReference: string | null;
+};
+
+/** 어떤 언어를 전송하고 어떤 언어를 막는지 한 번에 결정한다(전송본·안내문·카톡 요약·TBM 언어 줄이 같은 결과를 본다). */
+export function buildForeignWorkerTransmissionPlan(input: BriefingInput): ForeignWorkerTransmissionPlan {
+  const emitted: ForeignWorkerLanguage[] = [];
+  const blocked: ForeignWorkerTransmissionPlan["blocked"] = [];
+  for (const language of pickLanguages(input.question)) {
+    const plan = planLanguageLines(input, language);
+    if (plan.status === "emitted") emitted.push({ ...language, lines: plan.lines });
+    else blocked.push({ language, reasons: plan.reasons });
+  }
+  const workSource = resolveWorkLabelSource(input);
+  return {
+    emitted,
+    blocked,
+    workLabelReference: workSource.kind === "classified" ? workSource.taskLabel : null
+  };
+}
+
+/** 같은 사유의 언어는 묶어서 한 번만 적는다(언어 8개가 같은 사유로 막히면 한 묶음). */
+function formatBlockedNotice(plan: ForeignWorkerTransmissionPlan): string[] {
+  if (!plan.blocked.length) return [];
+  const groups = new Map<string, string[]>();
+  for (const { language, reasons } of plan.blocked) {
+    const key = reasons.join(", ");
+    groups.set(key, [...(groups.get(key) ?? []), language.label]);
+  }
+  const items = Array.from(groups.entries()).map(([reasonText, labels]) => `${labels.join("·")} — ${reasonText}`);
+  return [`${FOREIGN_WORKER_BLOCK_NOTICE}: ${items.join(" / ")}`];
+}
+
+function formatWorkLabelReference(plan: ForeignWorkerTransmissionPlan): string[] {
+  return plan.workLabelReference ? [`외국어 안내 작업명 기준: ${plan.workLabelReference}`] : [];
 }
 
 function hasRainCondition(question: string): boolean {
@@ -713,11 +1165,9 @@ function buildKoreanContextLines(input: BriefingInput): string[] {
   return lines;
 }
 
+/** 실제로 전송되는 언어만 돌려준다(TBM-11: 전송본에 없는 언어가 TBM 「외국어 3종」으로 나가지 않는다). */
 export function buildForeignWorkerLanguages(input: BriefingInput) {
-  return pickLanguages(input.question).map((language) => ({
-    ...language,
-    lines: buildTaskSpecificLines(input, language)
-  }));
+  return buildForeignWorkerTransmissionPlan(input).emitted;
 }
 
 function buildEasyKoreanLines(input: BriefingInput) {
@@ -743,8 +1193,8 @@ function buildEasyKoreanLines(input: BriefingInput) {
 }
 
 export function buildForeignWorkerBriefing(input: BriefingInput) {
-  const languages = buildForeignWorkerLanguages(input);
-  const languageSections = languages.map((language) => [
+  const plan = buildForeignWorkerTransmissionPlan(input);
+  const languageSections = plan.emitted.map((language) => [
     `[${language.label} / ${language.nativeLabel}]`,
     `- ${language.rationale}`,
     ...language.lines.map((line) => `- ${line}`)
@@ -752,8 +1202,10 @@ export function buildForeignWorkerBriefing(input: BriefingInput) {
 
   return [
     ...buildEasyKoreanLines(input),
+    ...formatWorkLabelReference(plan),
     "",
     "[다국어 기본팩]",
+    ...formatBlockedNotice(plan).map((line) => `- ${line}`),
     ...languageSections,
     "",
     "[사용 전 확인]",
@@ -764,9 +1216,9 @@ export function buildForeignWorkerBriefing(input: BriefingInput) {
 }
 
 export function buildForeignWorkerTransmission(input: BriefingInput) {
-  const languages = buildForeignWorkerLanguages(input);
+  const plan = buildForeignWorkerTransmissionPlan(input);
   const safetyKeywords = detectSafetyKeywords(input);
-  const languageDigest = languages.slice(0, hasForeignWorkerContext(input.question) ? 10 : 5)
+  const languageDigest = plan.emitted
     .map((language) => buildForeignWorkerLanguageMessage(input, language))
     .join("\n\n");
 
@@ -774,6 +1226,7 @@ export function buildForeignWorkerTransmission(input: BriefingInput) {
     `[SafeClaw 외국인 근로자 안전공지] ${formatCompanyName(input.scenario.companyName)}`,
     `현장: ${input.scenario.siteName}`,
     `오늘 작업: ${input.scenario.workSummary}`,
+    ...formatWorkLabelReference(plan),
     ...buildKoreanContextLines(input),
     `⚠️ 핵심 위험: ${input.riskSummary.topRisk}`,
     "",
@@ -784,11 +1237,47 @@ export function buildForeignWorkerTransmission(input: BriefingInput) {
       ? ["🌡️ 더위·자외선 작업에서는 물, 그늘, 휴식 시간을 먼저 확인하세요."]
       : []),
     "⚠️ 이해하지 못하면 작업을 시작하지 말고 관리자에게 다시 설명을 요청하세요.",
-    "",
-    languageDigest,
+    ...(plan.blocked.length ? ["", ...formatBlockedNotice(plan)] : []),
+    ...(languageDigest ? ["", languageDigest] : []),
     "",
     "관리자 확인: 이 문구는 현장 통역 또는 관리자 확인 후 전송하세요."
   ].join("\n"), input);
+}
+
+/**
+ * 카톡 「[외국인 근로자 공지]」 요약(EF-06). 전송본의 한국어 머리 구간(첫 언어 블록 앞)을 통째로 담는다.
+ * 예전 「앞 8줄」 자르기는 「쉬운 한국어:」 제목 줄에서 끊겼다.
+ */
+export function buildForeignWorkerKakaoDigest(transmissionText: string): string {
+  const lines = transmissionText.split(/\r?\n/);
+  const firstBlock = lines.findIndex((line) => /^\[SafeClaw (?!외국인)/u.test(line.trim()));
+  const head = (firstBlock >= 0 ? lines.slice(0, firstBlock) : lines)
+    .filter((line) => !/^관리자 확인:/u.test(line.trim()));
+  while (head.length && !head[head.length - 1].trim()) head.pop();
+  while (head.length && /:\s*$/u.test(head[head.length - 1].trim())) head.pop();
+  return head.join("\n");
+}
+
+/** 외국어 문장 검증(H7). 측정·감시인·보호구를 생략하라는 뜻의 문장이 보이면 review_required. */
+const FOREIGN_UNSAFE_PATTERNS: ReadonlyArray<{ rule: string; pattern: RegExp }> = [
+  { rule: "en: 측정 없이 진입", pattern: /without\s+(?:a\s+|an\s+|the\s+)?(?:gas|oxygen|air|atmosphere)\s+(?:test|check|measurement|monitoring)/iu },
+  { rule: "en: 측정 불필요", pattern: /\bno\s+need\s+to\s+(?:measure|test|check|monitor|wear)\b/iu },
+  { rule: "en: 측정·보호구 생략", pattern: /\b(?:do\s+not|don't|doesn't|does\s+not)\s+(?:need|have)\s+to\s+(?:measure|test|check|wear)\b/iu },
+  { rule: "en: 측정 건너뜀", pattern: /\bskip\s+(?:the\s+)?(?:gas|oxygen|air)\s+(?:test|check|measurement)\b/iu },
+  { rule: "en: 단독 진입", pattern: /\b(?:enter|go\s+in|work)\s+alone\b/iu },
+  { rule: "en: 감시인 없이", pattern: /\bwithout\s+(?:a\s+|an\s+)?(?:watcher|attendant|lookout)\b/iu },
+  { rule: "vi: 측정 불필요", pattern: /không\s+cần\s+(?:đo|kiểm\s+tra)/iu },
+  { rule: "vi: 단독 진입", pattern: /vào\s+một\s+mình/iu },
+  { rule: "zh: 측정 불필요", pattern: /(?:不需要|无需|不用|不必)(?:测|测量|检测|佩戴)/u },
+  { rule: "zh: 단독 진입", pattern: /单独(?:进入|作业)/u },
+  { rule: "th: 측정 불필요", pattern: /ไม่ต้อง(?:วัด|ตรวจ|ใส่)/u },
+  { rule: "id: 측정 불필요", pattern: /tidak\s+perlu\s+(?:mengukur|memeriksa|memakai)/iu },
+  { rule: "uz: 측정 불필요", pattern: /o'lchash\s+shart\s+emas|tekshirish\s+shart\s+emas/iu }
+];
+
+export function verifyForeignWorkerText(text: string): { status: "ok" | "review_required"; reasons: string[] } {
+  const reasons = FOREIGN_UNSAFE_PATTERNS.filter(({ pattern }) => pattern.test(text)).map(({ rule }) => rule);
+  return { status: reasons.length ? "review_required" : "ok", reasons };
 }
 
 export function ensureForeignWorkerTransmissionContext(text: string, input: BriefingInput) {
@@ -821,7 +1310,7 @@ export function ensureForeignWorkerTransmissionContext(text: string, input: Brie
 
 export function buildForeignWorkerLanguageMessage(input: BriefingInput, language: ForeignWorkerLanguage) {
   const pack = getPack(language);
-  const keywords = detectSafetyKeywords(input);
+  const keywords = sortByLifeRisk(detectSafetyKeywords(input));
   return [
     `[SafeClaw ${language.nativeLabel}]`,
     language.nativeLabel,
@@ -831,10 +1320,6 @@ export function buildForeignWorkerLanguageMessage(input: BriefingInput, language
     "",
     pack.supervisor
   ].join("\n");
-}
-
-export function getDefaultForeignWorkerLanguages(question: string) {
-  return pickLanguages(question);
 }
 
 /**

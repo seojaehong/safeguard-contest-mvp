@@ -984,7 +984,20 @@ function getSafetyFormProfile(key: DocumentKey): SafetyFormProfile {
     };
   }
 
-  if (key === "safetyEducationRecordDraft" || key === "foreignWorkerBriefing") {
+  // COPY-14: 외국인 안내문은 교육기록 서식 코드(SC-EDU-01)를 빌려 쓰지 않는다.
+  if (key === "foreignWorkerBriefing") {
+    return {
+      code: "SC-FW-01",
+      subtitle: "외국인 근로자 안전 안내문",
+      layout: "education",
+      primaryColumn: "안내 항목",
+      actionColumn: "안내 내용 / 확인 방법",
+      confirmationRows: ["대상 언어 확인", "쉬운 한국어 안내", "통역·관리자 확인", "이해 확인"],
+      approvalLabels: ["작성", "확인자", "보관"]
+    };
+  }
+
+  if (key === "safetyEducationRecordDraft") {
     return {
       code: "SC-EDU-01",
       subtitle: "안전보건교육 실시 및 이해 확인서",

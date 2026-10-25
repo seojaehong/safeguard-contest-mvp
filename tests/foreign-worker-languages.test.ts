@@ -168,18 +168,26 @@ describe("buildForeignWorkerLanguageMessage", () => {
         ]
       }
     };
+    // PR-13 결정 6: 산소농도·질식이 감지되면 밀폐공간 생명 위험 6줄이 전부 검수된 언어만 전송한다.
+    // 베트남어가 전송되면 6줄이 전부 베트남어로 있어야 하고, 막히면 블록 대신 전송 금지 안내만 남는다.
+    // 어느 쪽이든 영어 대체 문구는 어디에도 없다.
     const vietnamese = buildForeignWorkerLanguages(input).find((language) => language.code === "vi");
-    if (!vietnamese) throw new Error("Vietnamese language template is required");
-    const message = buildForeignWorkerLanguageMessage(input, vietnamese);
+    const transmission = buildForeignWorkerTransmission(input);
 
-    expect(message).toContain("Tiếng Việt");
-    expect(message).toContain("hàn/cắt");
-    expect(message).toContain("thông gió");
-    expect(message).toContain("say nóng");
-    expect(message).not.toMatch(/[가-힣]/u);
-    expect(message).not.toContain("confined-space hazard");
-    expect(message).not.toContain("heat illness");
-    expect(message).not.toContain("fire or hot-work hazard");
+    if (vietnamese) {
+      const message = buildForeignWorkerLanguageMessage(input, vietnamese);
+      expect(message).toContain("hàn/cắt");
+      expect(message).toContain("say nóng");
+      expect(message).toContain("oxy");
+      expect(message).not.toMatch(/[가-힣]/u);
+    } else {
+      expect(transmission).toContain("전송 금지 · 현장 통역 확인 필수");
+      expect(transmission).toContain("베트남어");
+      expect(transmission).not.toContain("[SafeClaw Tiếng Việt]");
+    }
+    expect(transmission).not.toContain("confined-space hazard");
+    expect(transmission).not.toContain("heat illness");
+    expect(transmission).not.toContain("fire or hot-work hazard");
   });
 });
 
