@@ -249,8 +249,8 @@ describe("/api/export/xlsx structured contract", () => {
     expect(readWorksheetText(workbook, "위험성평가표")).toContain("기타");
     expect(readWorksheetText(workbook, "위험성평가표")).toContain("예정");
     expect(worksheet.pageSetup.paperSize).toBe(8);
-    expect(worksheet.pageSetup.fitToWidth).toBe(2);
-    expect(worksheet.pageSetup.printArea).toMatch(/^A1:S\d+$/);
+    expect(worksheet.pageSetup.fitToWidth).toBe(1); // 한 행이 가로 2쪽으로 갈리지 않게(EXP-06)
+    expect(worksheet.pageSetup.printArea).toMatch(/^A1:U\d+$/); // 이행 결과·잔여 위험성 열 추가(RA-02·09)
     expect(worksheet.pageSetup.printTitlesRow).toMatch(/^\d+:\d+$/);
     expect(worksheet.views[0]).toMatchObject({ state: "frozen", ySplit: expect.any(Number) });
 
@@ -299,8 +299,8 @@ describe("/api/export/xlsx structured contract", () => {
       const confirmationRow = firstCell.row;
 
       for (let itemIndex = 0; itemIndex < itemCount; itemIndex += 1) {
-        const startColumn = Math.floor((itemIndex * 19) / itemCount) + 1;
-        const endColumn = Math.floor(((itemIndex + 1) * 19) / itemCount);
+        const startColumn = Math.floor((itemIndex * 21) / itemCount) + 1;
+        const endColumn = Math.floor(((itemIndex + 1) * 21) / itemCount);
         const master = worksheet.getCell(confirmationRow, startColumn);
         expect(master.text).toBe(`□ 확인 ${itemIndex + 1}`);
         expect(master.alignment).toMatchObject({ vertical: "middle", horizontal: "center", wrapText: true });
@@ -311,7 +311,7 @@ describe("/api/export/xlsx structured contract", () => {
         }
       }
       expect(worksheet.getCell(confirmationRow, 1).master.address).toBe(firstCell.address);
-      expect(worksheet.getCell(confirmationRow, 19).master.text).toBe(`□ 확인 ${itemCount}`);
+      expect(worksheet.getCell(confirmationRow, 21).master.text).toBe(`□ 확인 ${itemCount}`);
     }
   });
 

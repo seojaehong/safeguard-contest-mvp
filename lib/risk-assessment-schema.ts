@@ -48,7 +48,17 @@ export type RiskAssessmentRow = {
   whyLikelihood: string;
   whySeverity: string;
   evidenceRefs: string[];
+  /** 제37조의3제2호·제37조의4: 개선대책 이행 결과. 현장에서 적는 칸이며 생성기는 채우지 않는다. */
+  implementationResult?: string;
+  /** 감소대책 실행 뒤 다시 평가한 위험성(잔여위험). 현장에서 적는 칸이며 생성기는 채우지 않는다. */
+  residualLikelihood?: number;
+  residualSeverity?: number;
+  residualRiskLevel?: RiskLevel;
 };
+
+/** 생성 프롬프트 스키마에 싣지 않는 현장 기록 칸(생성기가 지어내지 않게 한다). */
+export type RiskAssessmentFieldRecordKey = "implementationResult" | "residualLikelihood" | "residualSeverity" | "residualRiskLevel";
+type RiskAssessmentGeneratedField = Exclude<keyof RiskAssessmentRow, RiskAssessmentFieldRecordKey>;
 
 export type RiskAssessmentValidationIssue = {
   rowIndex: number;
@@ -75,7 +85,7 @@ type JsonSchemaProperty = {
 type JsonSchema = {
   type: "object";
   required: readonly string[];
-  properties: Record<keyof RiskAssessmentRow, JsonSchemaProperty>;
+  properties: Record<RiskAssessmentGeneratedField, JsonSchemaProperty>;
   additionalProperties: false;
 };
 
@@ -86,7 +96,7 @@ export type FormSchemaRegistryEntry = {
   rowSchema: JsonSchema;
 };
 
-const REQUIRED_FIELDS: readonly (keyof RiskAssessmentRow)[] = [
+const REQUIRED_FIELDS: readonly RiskAssessmentGeneratedField[] = [
   "location",
   "process",
   "task",
@@ -193,13 +203,17 @@ function parseRiskAssessmentRow(value: unknown, rowIndex: number): { row: RiskAs
     }
   }
 
+  // 장비·현재 안전조치는 입력에 없으면 빈칸으로 둔다(지어내지 않음, 2026-10-25 결정). 문자열이기만 하면 된다.
+  for (const field of ["equipment", "currentControls"] as const) {
+    if (typeof value[field] !== "string") {
+      issues.push({ rowIndex, field, message: "must be a string (may be empty)" });
+    }
+  }
   const stringFields = [
     "location",
     "process",
     "task",
-    "equipment",
     "hazard",
-    "currentControls",
     "additionalControls",
     "owner",
     "due",
@@ -286,7 +300,11 @@ function parseRiskAssessmentRow(value: unknown, rowIndex: number): { row: RiskAs
       verificationChecker: String(value.verificationChecker).trim(),
       whyLikelihood: String(value.whyLikelihood).trim(),
       whySeverity: String(value.whySeverity).trim(),
-      evidenceRefs
+      evidenceRefs,
+      ...(isNonEmptyString(value.implementationResult) ? { implementationResult: value.implementationResult.trim() } : {}),
+      ...(isRiskScale(value.residualLikelihood) ? { residualLikelihood: value.residualLikelihood } : {}),
+      ...(isRiskScale(value.residualSeverity) ? { residualSeverity: value.residualSeverity } : {}),
+      ...(isEnumValue(value.residualRiskLevel, RISK_LEVEL_VALUES) ? { residualRiskLevel: value.residualRiskLevel } : {})
     },
     issues
   };

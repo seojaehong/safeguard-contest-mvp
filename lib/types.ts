@@ -633,6 +633,8 @@ export type AskResponse = {
   };
   structured?: {
     riskAssessmentRows: RiskAssessmentRow[];
+    /** 「검토 필요:」 자리표시 행. 본표가 아니라 별도 확인 목록으로 출력한다(RA-11). */
+    riskReviewItems?: RiskAssessmentRow[];
     tbmRiskLinks?: TbmRiskLink[];
     riskAssessmentValidation: {
       ok: boolean;

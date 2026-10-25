@@ -28,7 +28,23 @@ import {
   parseStructuredRiskAssessmentRows,
   type StructuredRiskAssessmentRow
 } from "@/lib/risk-assessment-renderer";
-import type { AccidentType, FourM } from "@/lib/risk-assessment-schema";
+import {
+  accidentTypeLabel,
+  fourMLabel,
+  RISK_RETENTION_NOTE,
+  RISK_SCALE_LINES,
+  riskLevelLabel,
+  summarizeRiskLevel,
+  verificationStatusLabel
+} from "@/lib/risk-labels";
+import {
+  buildRiskAssessmentRecordHtml,
+  displayEquipment,
+  displayEvidenceRefs,
+  resolveRiskExportRows,
+  RISK_REVIEW_LIST_TITLE,
+  riskRecordHeaderPairs
+} from "@/lib/risk-assessment-record";
 
 export const dynamic = "force-dynamic";
 
@@ -126,58 +142,21 @@ function readString(value: unknown, fallback = "") {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
 
+// 라벨은 lib/risk-labels.ts 하나에서 가져온다(COPY-12). 모르는 값은 「확인」으로 표시한다.
 function localizeRiskLevel(value: string | undefined): string {
-  const normalized = value?.trim().toLowerCase();
-  if (normalized === "high") return "상";
-  if (normalized === "medium") return "중";
-  if (normalized === "low") return "하";
-  return value?.trim() || "확인";
+  return riskLevelLabel(value) || value?.trim() || "확인";
 }
 
 function localizeVerificationStatus(value: string | undefined): string {
-  const normalized = value?.trim().toLowerCase();
-  if (normalized === "planned") return "조치 예정";
-  if (normalized === "done") return "조치 완료";
-  if (normalized === "needsreview") return "검토 필요";
-  return value?.trim() || "확인";
+  return verificationStatusLabel(value) || "확인";
 }
 
-const FOUR_M_LABELS = {
-  Man: "인적 요인",
-  Machine: "기계·설비 요인",
-  Media: "작업환경 요인",
-  Management: "관리 요인"
-} satisfies Readonly<Record<FourM, string>>;
-
-const ACCIDENT_TYPE_LABELS = {
-  fall: "추락",
-  slip: "미끄러짐",
-  struckBy: "맞음",
-  caughtIn: "끼임",
-  cut: "베임",
-  burn: "화상",
-  electricShock: "감전",
-  chemicalExposure: "화학물질 노출",
-  asphyxiation: "질식",
-  heatIllness: "온열질환",
-  traffic: "교통사고",
-  collapse: "붕괴",
-  fireExplosion: "화재·폭발",
-  other: "기타"
-} satisfies Readonly<Record<AccidentType, string>>;
-
 function localizeFourM(value: string | undefined): string {
-  const normalized = value?.trim();
-  return normalized && normalized in FOUR_M_LABELS
-    ? FOUR_M_LABELS[normalized as FourM]
-    : normalized || "확인";
+  return fourMLabel(value);
 }
 
 function localizeAccidentType(value: string | undefined): string {
-  const normalized = value?.trim();
-  return normalized && normalized in ACCIDENT_TYPE_LABELS
-    ? ACCIDENT_TYPE_LABELS[normalized as AccidentType]
-    : normalized || "확인";
+  return accidentTypeLabel(value);
 }
 
 function readNumber(value: unknown, fallback = 0) {
@@ -286,7 +265,8 @@ function getStructuredRiskRowCandidates(body: Record<string, unknown>): unknown[
 // DOCUMENT_EXPORT_BUDGETS.totalRows. Bytes stay capped by requestBytes and render
 // work by MAX_PDF_RENDER_LINES / MAX_PDF_PAGES.
 function assertPdfRowBudget(body: Record<string, unknown>): void {
-  const candidates = [body.rows, body.riskRows, ...getStructuredRiskRowCandidates(body)];
+  const structured = isRecord(body.structured) ? body.structured : {};
+  const candidates = [body.rows, body.riskRows, body.riskReviewItems, structured.riskReviewItems, ...getStructuredRiskRowCandidates(body)];
   const countedArrays = new Set<unknown[]>();
   let rowCount = 0;
   candidates.forEach((candidate) => {
@@ -332,11 +312,13 @@ function structuredRiskRowsToPdfRows(rows: StructuredRiskAssessmentRow[], docume
     const localizedStatus = localizeVerificationStatus(row.verificationStatus || row.status);
     const localizedRow: StructuredRiskAssessmentRow = {
       ...row,
+      equipment: displayEquipment(row.equipment),
       fourM: localizeFourM(row.fourM),
       accidentType: localizeAccidentType(row.accidentType),
       riskLevel: localizeRiskLevel(row.riskLevel),
       status: localizedStatus,
-      verificationStatus: localizedStatus
+      verificationStatus: localizedStatus,
+      evidence: displayEvidenceRefs(row.evidenceRefs).join(", ")
     };
     return {
       document: documentTitle,
@@ -405,75 +387,25 @@ function compactCell(row: PdfRow | undefined, fallback: string) {
   return value.length > 160 ? `${value.slice(0, 157)}...` : value;
 }
 
-function renderRiskAssessmentRows(rows: PdfRow[], scenario: PdfScenario, topRisk: string) {
-  const hazards = findByKeywords(rows, ["위험", "추락", "전도", "충돌", "끼임", "화재", "중독", "질식", "붕괴"], 5);
-  const controls = findByKeywords(rows, ["조치", "대책", "통제", "점검", "작업중지", "보호구"], 5);
-  return `
-    <section class="section">
-      <h2>1. 사전준비</h2>
-      <table class="meta-table">
-        <tbody>
-          <tr><th>평가대상 작업</th><td>${escapeHtml(scenario.workSummary)}</td><th>평가 장소</th><td>${escapeHtml(scenario.siteName)}</td></tr>
-          <tr><th>평가 참여자</th><td>관리감독자, 작업반장, 근로자 대표</td><th>작업 조건</th><td>${escapeHtml(scenario.weatherNote)}</td></tr>
-          <tr><th>검토 기준</th><td colspan="3">작업계획서, TBM, 안전보건교육 기록, 법령·KOSHA 근거, 현장 사진 증빙</td></tr>
-        </tbody>
-      </table>
-    </section>
-    <section class="section">
-      <h2>2. 유해·위험요인 파악 및 위험성 결정</h2>
-      <table>
-        <thead><tr><th class="no">연번</th><th>단위작업</th><th>유해·위험요인</th><th>4M</th><th>재해형태</th><th>위험성</th><th>현재 안전조치</th></tr></thead>
-        <tbody>
-          ${hazards.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(scenario.workSummary)}</td><td>${escapeHtml(compactCell(row, topRisk || "핵심 위험 확인"))}</td><td>인적 요인/기계·설비 요인/작업환경 요인/관리 요인</td><td>추락·충돌·전도 등</td><td>상/중/하</td><td>${escapeHtml(compactCell(controls[index], "작업 전 통제대책 지정"))}</td></tr>`).join("")}
-        </tbody>
-      </table>
-    </section>
-    <section class="section">
-      <h2>3. 감소대책 수립·실행</h2>
-      <table>
-        <thead><tr><th>추가 감소대책</th><th>담당자</th><th>기한</th><th>증빙</th><th>확인</th></tr></thead>
-        <tbody>
-          ${controls.map((row) => `<tr><td>${escapeHtml(compactCell(row, "위험요인별 감소대책"))}</td><td>작업반장</td><td>작업 전</td><td>사진·TBM·점검표</td><td>□</td></tr>`).join("")}
-        </tbody>
-      </table>
-    </section>
-    <section class="section">
-      <h2>4. 공유·교육 및 재평가</h2>
-      <table><tbody><tr><th>공유 방법</th><td>작업 전 TBM, 안전보건교육, 문자/메일 전파</td><th>재평가 기준</th><td>작업조건·장비·기상·인원 변경 또는 잔류위험 발생 시</td></tr></tbody></table>
-    </section>`;
-}
-
-function renderCanonicalRiskAssessmentRows(rows: StructuredRiskAssessmentRow[], scenario: PdfScenario) {
-  return `
-    <section class="section">
-      <h2>1. 평가 기본정보</h2>
-      <table class="meta-table">
-        <tbody>
-          <tr><th>평가대상 작업</th><td>${escapeHtml(scenario.workSummary)}</td><th>평가 장소</th><td>${escapeHtml(scenario.siteName)}</td></tr>
-          <tr><th>평가 참여자</th><td>관리감독자, 작업반장, 근로자 대표</td><th>작업 조건</th><td>${escapeHtml(scenario.weatherNote)}</td></tr>
-        </tbody>
-      </table>
-    </section>
-    <section class="section">
-      <h2>2. 유해·위험요인 파악 및 감소대책</h2>
-      <table>
-        <thead>
-          <tr><th class="no">연번</th><th>세부작업</th><th>유해·위험요인</th><th>현재 안전보건조치</th><th>위험성</th><th>감소대책</th><th>담당/기한</th><th>확인</th></tr>
-        </thead>
-        <tbody>
-          ${rows.map((row, index) => `<tr><td>${escapeHtml(row.id || String(index + 1))}</td><td>${escapeHtml(row.unitTask)}</td><td>${escapeHtml(row.hazard)}</td><td>${escapeHtml(row.currentControls || "현장 확인")}</td><td>${escapeHtml(localizeRiskLevel(row.riskLevel))}</td><td>${escapeHtml(row.additionalControls)}</td><td>${escapeHtml(`${row.owner || "작업반장"} / ${row.dueDate || "작업 전"}`)}</td><td>${escapeHtml(localizeVerificationStatus(row.verificationStatus || row.status))}</td></tr>`).join("")}
-        </tbody>
-      </table>
-    </section>
-    <section class="section">
-      <h2>3. 공유·재평가 및 증빙</h2>
-      <table>
-        <thead><tr><th>대상</th><th>공유 방법</th><th>증빙</th><th>재평가 기준</th></tr></thead>
-        <tbody>
-          ${rows.map((row) => `<tr><td>${escapeHtml(row.unitTask)}</td><td>작업 전 TBM 및 서명 확인</td><td>${escapeHtml(row.evidence || "사진·TBM·점검표")}</td><td>작업조건·장비·기상·인원 변경 시</td></tr>`).join("")}
-        </tbody>
-      </table>
-    </section>`;
+// 위험성평가 출력은 정본 행(structured.riskAssessmentRows)에서만 그린다(PR-06/10).
+// 키워드로 행을 고르거나(5행 제한) 4M·등급·참여자를 고정 문구로 채우지 않는다.
+function renderRiskAssessmentRecord(
+  rows: PdfRow[],
+  scenario: PdfScenario,
+  structuredRiskRows: StructuredRiskAssessmentRow[],
+  riskReviewRows: StructuredRiskAssessmentRow[]
+) {
+  const editedBodyHtml = structuredRiskRows.length
+    ? undefined
+    : `<p>위험성평가 본문을 직접 고친 출력입니다. 고친 내용을 그대로 싣습니다.</p>${renderRows(rows)}`;
+  return buildRiskAssessmentRecordHtml({
+    rows: structuredRiskRows,
+    reviewRows: riskReviewRows,
+    scenario,
+    section: (title, inner) => `<section class="section"><h2>${escapeHtml(title)}</h2>${inner}</section>`,
+    metaTableClass: "meta-table",
+    editedBodyHtml
+  });
 }
 
 function renderWorkPlanRows(rows: PdfRow[], scenario: PdfScenario) {
@@ -561,10 +493,10 @@ function renderStructuredRows(
   rows: PdfRow[],
   topRisk: string,
   riskRows: PdfRow[],
-  structuredRiskRows: StructuredRiskAssessmentRow[]
+  structuredRiskRows: StructuredRiskAssessmentRow[],
+  riskReviewRows: StructuredRiskAssessmentRow[] = []
 ) {
-  if (kind === "risk" && structuredRiskRows.length) return renderCanonicalRiskAssessmentRows(structuredRiskRows, scenario);
-  if (kind === "risk") return renderRiskAssessmentRows(rows, scenario, topRisk);
+  if (kind === "risk") return renderRiskAssessmentRecord(rows, scenario, structuredRiskRows, riskReviewRows);
   if (kind === "workPlan") return renderWorkPlanRows(rows, scenario);
   if (kind === "permit") return renderPermitRows(rows, scenario);
   if (kind === "tbm") return renderTbmRows(rows, scenario, topRisk, riskRows);
@@ -616,7 +548,8 @@ function buildPdfReadyHtml(
   riskLevel: string,
   topRisk: string,
   riskRows: PdfRow[],
-  structuredRiskRows: StructuredRiskAssessmentRow[]
+  structuredRiskRows: StructuredRiskAssessmentRow[],
+  riskReviewRows: StructuredRiskAssessmentRow[] = []
 ) {
   const generatedAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
   const kind = detectDocumentKind(title);
@@ -759,13 +692,13 @@ function buildPdfReadyHtml(
       <b>위험수준 ${escapeHtml(localizeRiskLevel(riskLevel))}</b>
       <span>${escapeHtml(topRisk || "핵심 위험요인을 현장에서 최종 확인하세요.")}</span>
     </section>
-    ${renderStructuredRows(kind, scenario, rows, topRisk, riskRows, structuredRiskRows)}
-    <section class="signature">
+    ${renderStructuredRows(kind, scenario, rows, topRisk, riskRows, structuredRiskRows, riskReviewRows)}
+    ${kind === "risk" ? "" : `<section class="signature">
       <div><b>작성자</b><br />성명/서명:</div>
       <div><b>관리감독자</b><br />성명/서명:</div>
       <div><b>TBM·교육 확인</b><br />성명/서명:</div>
       <div><b>보관 위치</b><br />문서번호/철:</div>
-    </section>
+    </section>`}
     <p class="notice">본 출력물은 공식자료 기반 현장 검토용 초안입니다. 발주처 지정 원본 양식, 현장 실측, 작업중지 기준, 법령 원문, 서명·결재선을 최종 확인한 뒤 사용하세요.</p>
   </main>
 </body>
@@ -1101,10 +1034,19 @@ function buildPdfContentLines(
   riskLevel: string,
   topRisk: string,
   riskRows: PdfRow[],
-  structuredRiskRows: StructuredRiskAssessmentRow[]
+  structuredRiskRows: StructuredRiskAssessmentRow[],
+  riskReviewRows: StructuredRiskAssessmentRow[] = []
 ) {
   const generatedAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
   const kind = detectDocumentKind(title);
+  const riskRecordLines: PdfContentLine[] = kind === "risk"
+    ? [
+        { text: "평가 기록(산업안전보건법 시행규칙 제37조의4)", role: "section", gap: 10 },
+        ...riskRecordHeaderPairs(scenario).map(([label, value]): PdfContentLine => ({ text: `${label}: ${value}`, role: "table" })),
+        { text: "위험성 결정 기준", role: "section", gap: 10 },
+        ...RISK_SCALE_LINES.flatMap((line) => wrapPdfLine(line, 42).map((text, index): PdfContentLine => ({ text: index ? `   ${text}` : text, role: "table" })))
+      ]
+    : [];
   const lines: PdfContentLine[] = [
     { text: title, role: "title", gap: 18 },
     { text: `SafeClaw 현장 검토용 PDF 초안 · 생성 ${generatedAt}`, role: "note", gap: 16 },
@@ -1115,6 +1057,7 @@ function buildPdfContentLines(
     { text: `위험수준: ${localizeRiskLevel(riskLevel)}`, role: "section" },
     { text: `핵심위험: ${topRisk || "현장 최종 확인 필요"}`, role: "body", gap: 16 },
     { text: `서식 구분: ${kind === "risk" ? "위험성평가표" : kind === "workPlan" ? "작업계획서" : kind === "permit" ? "허가/점검" : kind === "tbm" ? "TBM일지" : "일반 문서"}`, role: "body", gap: 12 },
+    ...riskRecordLines,
     { text: "확인 항목", role: "section", gap: 10 }
   ];
 
@@ -1147,6 +1090,16 @@ function buildPdfContentLines(
     });
   });
 
+  if (kind === "risk" && riskReviewRows.length) {
+    lines.push({ text: RISK_REVIEW_LIST_TITLE, role: "section", gap: 10 });
+    riskReviewRows.forEach((row, index) => {
+      wrapPdfLine(`${index + 1}. ${row.hazard}`, 42).forEach((line, lineIndex) => {
+        lines.push({ text: lineIndex === 0 ? line : `   ${line}`, role: "table" });
+      });
+    });
+  }
+  if (kind === "risk") lines.push({ text: RISK_RETENTION_NOTE, role: "table", gap: 8 });
+
   lines.push(
     { text: "", role: "note", gap: 14 },
     { text: "작성자: ____________________    검토: ____________________    승인: ____________________", role: "table" },
@@ -1162,9 +1115,10 @@ async function buildBinaryPdf(
   riskLevel: string,
   topRisk: string,
   riskRows: PdfRow[],
-  structuredRiskRows: StructuredRiskAssessmentRow[]
+  structuredRiskRows: StructuredRiskAssessmentRow[],
+  riskReviewRows: StructuredRiskAssessmentRow[] = []
 ) {
-  const lines = buildPdfContentLines(title, scenario, rows, riskLevel, topRisk, riskRows, structuredRiskRows);
+  const lines = buildPdfContentLines(title, scenario, rows, riskLevel, topRisk, riskRows, structuredRiskRows, riskReviewRows);
   assertPdfRenderBudget(lines);
   const fonts = loadEmbeddedPdfFonts();
   const pdf = await PDFDocument.create();
@@ -1248,10 +1202,17 @@ async function exportPdf(request: NextRequest) {
     const scenario = parseScenario(body.scenario);
     const rows = parseRows(body.rows, title);
     const riskRows = parseRows(body.riskRows, "위험성평가표");
-    const structuredRiskRows = parseRiskRowsFromBody(body);
+    const isRiskDocument = detectDocumentKind(title) === "risk";
+    // 위험성평가: 「검토 필요:」 행은 본표에서 빼고 확인 필요 목록으로 싣는다(RA-11).
+    const riskExport = isRiskDocument
+      ? resolveRiskExportRows(parseRiskRowsFromBody(body), body)
+      : { main: parseRiskRowsFromBody(body), review: [] };
+    const structuredRiskRows = riskExport.main;
+    const riskReviewRows = riskExport.review;
     const bodyRows = rows.length ? rows : parseBodyText(body.documentText, title);
-    assertParsedPdfRowBudget([bodyRows, riskRows, structuredRiskRows]);
-    const riskLevel = readString(body.riskLevel, "확인");
+    assertParsedPdfRowBudget([bodyRows, riskRows, structuredRiskRows, riskReviewRows]);
+    // 요약 위험수준은 본표 최고 등급과 같아야 한다(EXP-09). 정본 행이 있으면 요청값보다 우선한다.
+    const riskLevel = (isRiskDocument && summarizeRiskLevel(structuredRiskRows)) || readString(body.riskLevel, "확인");
     const topRisk = readString(body.topRisk, "");
     const requestedFormat = request.nextUrl.searchParams.get("format");
     const wantsHtml = requestedFormat === "html";
@@ -1260,7 +1221,7 @@ async function exportPdf(request: NextRequest) {
     if (wantsBinaryPdf) {
       let pdf: Buffer;
       try {
-        pdf = await buildBinaryPdf(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);
+        pdf = await buildBinaryPdf(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows, riskReviewRows);
       } catch (error) {
         if (error instanceof PdfExportLimitError) throw error;
         if (error instanceof PdfFontAssetError) {
@@ -1283,7 +1244,7 @@ async function exportPdf(request: NextRequest) {
       });
     }
 
-    const html = buildPdfReadyHtml(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);
+    const html = buildPdfReadyHtml(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows, riskReviewRows);
     const fileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.html`;
     const encodedFileName = encodeURIComponent(fileName);
 
