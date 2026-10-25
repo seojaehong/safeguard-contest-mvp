@@ -241,7 +241,11 @@ export function SettlementInput() {
               {r.verdict === "shortfall"
                 ? `정산 대상 ${r.shortfallDays}일`
                 : r.verdict === "insufficient-input"
-                  ? "취업규칙 확인이 필요합니다"
+                  ? r.reason === "missing-totals"
+                    ? "부여·사용 누계를 입력해 주세요"
+                    : r.reason === "monthly-choice"
+                      ? "1년 미만 월차 포함 여부를 선택해 주세요"
+                      : "취업규칙 확인이 필요합니다"
                   : "정산 대상이 없습니다"}
             </p>
             <p className="lv-conclusion__detail">{r.groundNote}</p>
@@ -253,15 +257,15 @@ export function SettlementInput() {
               <span className="lv-stat__label">입사일 기준 누계</span>
             </div>
             <div className="lv-stat">
-              <span className="lv-stat__value">{r.fiscalGrantedTotal}</span>
+              <span className="lv-stat__value">{r.fiscalGrantedInput ?? "—"}</span>
               <span className="lv-stat__label">회계연도 부여 누계</span>
             </div>
             <div className="lv-stat">
-              <span className="lv-stat__value">{r.guaranteedTotal}</span>
+              <span className="lv-stat__value">{r.fiscalGrantedInput === null ? "—" : r.guaranteedTotal}</span>
               <span className="lv-stat__label">보장선</span>
             </div>
             <div className="lv-stat">
-              <span className="lv-stat__value">{r.usedOrPaidTotal}</span>
+              <span className="lv-stat__value">{r.usedOrPaidInput ?? "—"}</span>
               <span className="lv-stat__label">사용·지급</span>
             </div>
             <div
@@ -341,6 +345,12 @@ export function SettlementInput() {
                 const shortfall = Number.isNaN(r.shortfallDays)
                   ? "확인 필요"
                   : Math.max(0, r.shortfallDays);
+                // 2026-10-25 (LV-5) — 결과를 11일 가르는 입력이라 엑셀에도 남긴다
+                const monthlyIncluded = r.ledger.some((e) => e.label.startsWith("1년 미만"))
+                  ? "포함"
+                  : monthly === "no"
+                    ? "제외"
+                    : "선택 안 함";
                 trackLeave("leave_export", { kind: "xlsx" });
                 void downloadXlsx(`퇴직연차정산_${endDate}`, [
                   {
@@ -351,10 +361,10 @@ export function SettlementInput() {
                     widths: [26, 58],
                     rows: [
                       ["입사일 기준 누계", r.hireDateTotal],
-                      ["회계연도 부여 누계", r.fiscalGrantedTotal],
+                      ["회계연도 부여 누계", r.fiscalGrantedInput ?? "미입력"],
                       [
                         "보장선(유리한 쪽)",
-                        `${r.guaranteedTotal} (${
+                        r.fiscalGrantedInput === null ? "확인 필요(회계연도 부여 누계 미입력)" : `${r.guaranteedTotal} (${
                           r.favourable === "hire-date"
                             ? "입사일 기준"
                             : r.favourable === "fiscal-year"
@@ -362,14 +372,15 @@ export function SettlementInput() {
                               : "두 기준 동일"
                         })`,
                       ],
-                      ["이미 사용·지급", r.usedOrPaidTotal],
+                      ["이미 사용·지급", r.usedOrPaidInput ?? "미입력"],
                       ["정산 대상 일수", shortfall],
+                      ["1년 미만 월차 포함", monthlyIncluded],
                       ["취업규칙 재산정 규정", clause === "yes" ? "있음" : clause === "no" ? "없음" : "확인 필요"],
                       ["판단 근거", r.groundNote],
                     ],
                     emphasizeRows: [4],
                     notes: [
-                      "· 계산: safeclaw.kr/tools/leave — 노무법인 위너스 · abc@winhr.co.kr",
+                      "· 계산: safeclaw.kr/tools/leave — SafeClaw · 문의는 safeclaw.kr 「도입 문의」",
                       "· 근거 — 고용노동부 근로기준과-5802(2009-12-31), 근기 68207-620(2003-05-23)",
                       "· 퇴직 시 총 휴가일수가 입사일 기준에 미달하면 부족분을 정산합니다.",
                       "· 수당 금액은 산출하지 않습니다. 통상임금 기준은 별도 확인이 필요합니다.",
