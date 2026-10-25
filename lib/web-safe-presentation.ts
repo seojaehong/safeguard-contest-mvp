@@ -341,6 +341,8 @@ export type DryrunPresentationHighlight = {
 
 export type DryrunPresentationSnapshot = {
   runId: string;
+  /** 점검 실행 시각(ISO). 없으면 null — 화면은 「현재 상태 아님」으로 표시한다. */
+  generatedAt: string | null;
   okCount: number;
   totalRuns: number;
   avgMs: number;
@@ -535,6 +537,7 @@ export function toDryrunPresentationSnapshot(value: unknown): DryrunPresentation
 
   return {
     runId: readNonEmptyString(value.runId) ?? "실행 ID 확인 필요",
+    generatedAt: readNonEmptyString(value.generatedAt) ?? null,
     okCount: readFiniteNumber(value.okCount),
     totalRuns: readFiniteNumber(value.totalRuns),
     avgMs: readFiniteNumber(value.avgMs),

@@ -2268,7 +2268,7 @@ export function SafeGuardCommandCenter({
                   />
                   <span>
                     <strong>템플릿 (빠른 생성)</strong>
-                    <small>응답 5–15초 · 무료 · 검증된 본문</small>
+                    <small>응답 5–15초 · 무료 · 고정 틀 본문</small>
                   </span>
                 </label>
                 <label className={`ai-mode-option ${aiMode === "enhanced" ? "selected" : ""}`}>
