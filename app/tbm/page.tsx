@@ -1,10 +1,8 @@
 import Link from "next/link";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
-import { buildSampleWorkpack } from "@/lib/sample-workpack";
+import { TbmSampleAwareBoard } from "@/components/PublicSampleBoards";
 
 export default function TbmFullscreenPage() {
-  const data = buildSampleWorkpack();
-
   return (
     <SafeClawModuleShell
       eyebrow="TBM 모드"
@@ -15,18 +13,7 @@ export default function TbmFullscreenPage() {
       activeHref="/tbm"
       actions={<Link href="/documents">TBM 문서 편집</Link>}
     >
-      <section className="safeclaw-module-panel safeclaw-tbm-board">
-        <span>작업 전 확인</span>
-        <h2>{data.riskSummary.topRisk}</h2>
-        <div>
-          {data.deliverables.tbmQuestions.map((item, index) => (
-            <article key={item}>
-              <strong>{String(index + 1).padStart(2, "0")}</strong>
-              <p>{item}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      <TbmSampleAwareBoard />
     </SafeClawModuleShell>
   );
 }
