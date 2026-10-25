@@ -219,10 +219,6 @@ function remapTbmRiskLinks(
   });
 }
 
-/**
- * 정본 행의 장비 칸에 들어온 사고사례 원천 분류(「518, 제조업」「아카이브(…)」)를 빈칸으로 바꾸고,
- * 판단근거 문장에 같은 값이 끼어 있으면 「장비」로 바꾼다(COPY-07). 다른 칸은 손대지 않는다.
- */
 // DB 하네스가 초안 맨 앞에 붙이는 「오늘 개선·이력 반영」 단락(사진 분석·개선 이력)은 표가 아니므로
 // 정본 직렬화 앞에 그대로 둔다. 그 밖의 생성 문안(키워드가 다른 별도 표)은 정본 직렬화로 바꾼다.
 const HARNESS_REFLECTION_HEADING = "[오늘 개선·이력 반영 - 위험성평가]";
@@ -235,6 +231,10 @@ function withHarnessReflection(previousDraft: string | undefined, serialized: st
   return `${text.slice(0, end)}\n\n${serialized}`;
 }
 
+/**
+ * 정본 행의 장비 칸에 들어온 사고사례 원천 분류(「518, 제조업」「아카이브(…)」)를 빈칸으로 바꾸고,
+ * 판단근거 문장에 같은 값이 끼어 있으면 「장비」로 바꾼다(COPY-07). 다른 칸은 손대지 않는다.
+ */
 function cleanCanonicalRiskRow(row: RiskAssessmentRow): RiskAssessmentRow {
   const raw = row.equipment?.trim() || "";
   const equipment = displayEquipment(raw);
