@@ -73,6 +73,8 @@ function appendRemediationSection(text: string | undefined, heading: string, lin
   return `${body}\n\n${heading}\n${lines.map((line) => `- ${line}`).join("\n")}`;
 }
 
+const TRAVELING_CRANE_PATTERN = /주행\s*크레인|천장\s*크레인|갠트리\s*크레인|옥외\s*크레인/;
+
 function controlLine(item: MissingControl) {
   return item.articles.length
     ? `${item.control} (${item.articles.join(", ")})`
@@ -114,9 +116,18 @@ export function applyOntologyQaRemediation(
     ...commonLines,
     "위험성평가 담당자는 현장 여건에 맞는 확인시각·측정값과 잔여 위험을 평가 기록에 남깁니다."
   ];
+  // 작업계획서는 「반영」이라고 표시하지 않는다. 계획서 칸에 들어간 것이 아니므로 담당·확인 시각 칸을 붙인
+  // 「추가 확인 필요」 줄로 둔다(WP-10). 옥외 주행 크레인 조문(제140조)은 그 설비가 입력에 없으면 싣지 않는다(WP-09).
+  const planControls = result.missing.controls.filter((control) => (
+    !control.articles.some((article) => /제140조(?!의)/.test(article)) || TRAVELING_CRANE_PATTERN.test(response.question)
+  ));
   const planLines = [
-    ...commonLines,
-    "작업계획 승인자는 현장 여건에 맞는 담당자·확인시각·측정값을 계획서 확인란에 기록합니다."
+    `추가 확인 대상 작업: ${reviewTask}`,
+    ...result.missing.hazards.map((hazard) => `추가 확인 필요: ${hazard} 위험 / 담당: (현장 기재) / 확인 시각: (현장 기재)`),
+    ...planControls.map((control) => `추가 확인 필요: ${controlLine(control)} / 담당: (현장 기재) / 확인 시각: (현장 기재)`),
+    ...result.missing.articles.slice(0, 6)
+      .filter((article) => !/제140조(?!의)/.test(article) || TRAVELING_CRANE_PATTERN.test(response.question))
+      .map((article) => `관련 조문 확인: ${article} / 담당: (현장 기재)`)
   ];
   const educationLines = [
     ...commonLines,

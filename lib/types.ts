@@ -134,6 +134,21 @@ export type WorkPlanStructured = {
     reviewer: string;          // 검토자
     approver: string;          // 승인자
   };
+  /** 제38조① 대상 판단 줄. 서버가 작업 분류에서 만든다(AI 생성 아님). */
+  applicability?: WorkPlanApplicabilityLine[];
+  /** 별표4 호별 사전조사·작업계획 칸과 법정 기록 칸. 값이 없으면 「(현장 기재)」. */
+  statutorySections?: WorkPlanStatutorySection[];
+};
+
+export type WorkPlanApplicabilityLine = string;
+
+export type WorkPlanStatutorySection = {
+  /** 별표4 호 번호. 별표4 밖의 법정 기록 칸(제37조·제562조·제619조)은 null. */
+  annexItem: number | null;
+  title: string;
+  basis: string;
+  part: "사전조사" | "작업계획" | "기록";
+  items: Array<{ label: string; entry: string }>;
 };
 
 /**
@@ -248,7 +263,10 @@ export type EducationRecordStructured = {
 export type PermitInspectionStructured = {
   basicInfo: {
     permitNo: string;
-    permitType: "고소작업" | "화기작업" | "밀폐공간" | "전기작업" | "중장비작업" | "화학물질" | "일반 위험작업";
+    // 위 7개 뒤의 값이 현행 판정값(lib/permit-workplan-forms.ts). 앞의 「밀폐공간」「중장비작업」「화학물질」은 저장본 호환용.
+    permitType:
+      | "고소작업" | "화기작업" | "밀폐공간" | "전기작업" | "중장비작업" | "화학물질" | "일반 위험작업"
+      | "밀폐공간 작업" | "화학물질 작업" | "중장비 작업" | "굴착작업" | "설비 정비·격리 작업";
     workName: string;
     location: string;
     workDate: string;
@@ -266,10 +284,25 @@ export type PermitInspectionStructured = {
     evidenceRefs?: string[];    // 연결 근거/증빙 참조
     verification?: string;      // 확인 방법
   }>;
+  /** 밀폐공간 산소·유해가스 측정(제619조의2·제618조3호). 측정값은 현장에서 적는다. */
+  measurements?: Array<{
+    item: string;
+    standard: string;
+    value: string;
+    measuredAt: string;
+    measurer: string;
+  }>;
+  /** 허가구분별 법정 확인 칸(제619조②·제241조② 등). */
+  statutoryChecks?: Array<{
+    basis: string;
+    item: string;
+    entry: string;
+    owner: string;
+  }>;
   attachments: Array<{
     name: string;
     required: boolean;
-    status: "첨부" | "보완 필요" | "해당 없음";
+    status: "확인 전" | "첨부" | "보완 필요" | "해당 없음";
     note: string;
   }>;
   completionChecks: Array<{
