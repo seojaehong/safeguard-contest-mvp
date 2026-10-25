@@ -7,6 +7,7 @@ import {
   type AnswerGenerationResult,
 } from "./ai";
 import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-data";
+import { attachWorkPlanLegalForm } from "./permit-workplan-forms";
 import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiDeliverablesDiagnostics, type AiMode } from "./ai-deliverables";
@@ -2842,7 +2843,14 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       : deterministicTbmBriefingStructured && deterministicTbmLogStructured
         ? "TBM structured=deterministic from risk rows"
         : "TBM structured=template";
-    const linkedWorkPlanStructured = linkWorkPlanToRiskRows(baseDeliverables.workPlanStructured, structuredRiskRows);
+    // 별표4 법정 칸은 AI 가 아니라 작업 분류에서 붙인다(WP-04·WP-06). full 모드 구조화 계획서 xlsx 도 같은 칸을 가진다.
+    const workPlanTaskId = response.scenario.taskClassification?.status === "classified"
+      ? response.scenario.taskClassification.taskId
+      : null;
+    const linkedWorkPlanStructured = attachWorkPlanLegalForm(
+      linkWorkPlanToRiskRows(baseDeliverables.workPlanStructured, structuredRiskRows),
+      { taskId: workPlanTaskId, question, workerCount: response.scenario.workerCount }
+    );
     const linkedPermitInspectionStructured = linkPermitToRiskRows(baseDeliverables.permitInspectionStructured, structuredRiskRows);
     const foreignWorkerBriefingText = aiBodies.foreignWorkerBriefing ?? buildForeignWorkerBriefing(foreignWorkerInput);
     const foreignWorkerTransmissionText = ensureForeignWorkerTransmissionContext(

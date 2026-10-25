@@ -51,7 +51,7 @@ describe("workpack editor structured sections", () => {
   it("separates editable submission sections from provenance appendices without changing source text", () => {
     const source = [
       "[제출상태]",
-      "서식상태: 준제출형",
+      "서식상태: 초안 - 법정 항목 확인 전",
       "",
       "[필수 확인 항목]",
       "근거 반영: KOSHA 위험성평가 안내",

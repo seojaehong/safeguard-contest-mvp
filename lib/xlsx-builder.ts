@@ -1640,7 +1640,7 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   ws.mergeCells(row, 1, row, 6);
   const note = ws.getCell(row, 1);
   note.value =
-    "안전 문서 — 서명·확인란을 작성한 후 현장에 비치하거나 제출하세요.";
+    "초안 — (현장 기재) 칸과 법정 항목을 채우고 서명·확인란을 작성한 뒤 현장에 비치하세요.";
   note.font = { name: "Malgun Gothic", size: 10, italic: true, color: { argb: "FF5E6677" } };
   note.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
 

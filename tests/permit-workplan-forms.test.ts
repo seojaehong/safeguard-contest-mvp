@@ -1,11 +1,18 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import ExcelJS from "exceljs";
+import { HwpDocument } from "@rhwp/core";
+import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
+import { POST as exportHwp } from "@/app/api/export/hwp/route";
+import { POST as exportPdf } from "@/app/api/export/pdf/route";
 import { buildMockAskResponse } from "@/lib/mock-data";
 import { buildPermitInspectionStructuredXlsx, buildWorkPlanStructuredXlsx } from "@/lib/xlsx-builder";
 import { auditAskDeliverables } from "@/lib/deliverable-integrity-policy";
 import { buildQualityContract } from "@/lib/quality-contract";
 import { applyOntologyQaRemediation } from "@/lib/workpack-ontology-qa";
 import {
+  attachWorkPlanLegalForm,
   buildPermitRequiredTerms,
   buildWorkPlanLegalForm,
   resolvePermitCategory
@@ -246,6 +253,147 @@ describe("작업계획서 별표4 호별 양식 (WP-04·WP-06·WP-13·WP-16)", (
     const xlsx = await workbookText(buffer);
     expect(xlsx).toContain("지반의 지하수위 상태");
     expect(xlsx).toContain("마. 흙막이 지보공 설치방법 및 계측계획");
+  });
+});
+
+describe("AI 구조화 계획서에 서버가 별표4 섹션을 붙인다 (WP-06 full 경로)", () => {
+  const aiPlan: WorkPlanStructured = {
+    workOverview: { workName: "굴착", description: "배관 굴착", workerCount: 8, location: "현장", condition: "강풍", equipment: ["굴착기"] },
+    workSteps: [{ stepNo: 1, action: "굴착", equipment: "굴착기", safetyMeasure: "출입통제", owner: "작업반장" }],
+    stopCriteria: ["붕괴 징후"],
+    emergencyResponse: { contacts: [], evacRoute: "출입구", firstAid: "119" },
+    approvers: { author: "작성자", reviewer: "검토자", approver: "승인자" }
+  };
+
+  it("AI 가 법정 칸 없이 낸 구조화 계획서에 6호 사전조사·계획, 3호 칸을 붙이고 AI 값을 지우지 않는다", () => {
+    const attached = attachWorkPlanLegalForm(aiPlan, { taskId: "excavation", question: SCENARIOS.excavation, workerCount: 8 });
+    const annexItems = (attached?.statutorySections ?? []).map((section) => section.annexItem);
+    expect(annexItems).toContain(6);
+    expect(annexItems).toContain(3);
+    expect(attached?.applicability?.join(" ")).toContain("2.5m");
+    expect(attached?.workSteps).toEqual(aiPlan.workSteps);
+  });
+
+  it("AI 가 스스로 적은 법정 칸은 서버 판정으로 덮는다(작업 분류가 정본)", () => {
+    const forged = { ...aiPlan, applicability: ["대상 아님"], statutorySections: [] };
+    const attached = attachWorkPlanLegalForm(forged, { taskId: "excavation", question: SCENARIOS.excavation });
+    expect(attached?.applicability).not.toContain("대상 아님");
+    expect(attached?.statutorySections?.length).toBeGreaterThan(0);
+  });
+
+  it("작업 유형 보류(taskId 없음)면 그대로 돌려준다", () => {
+    expect(attachWorkPlanLegalForm(aiPlan, { taskId: null, question: "작업" })).toBe(aiPlan);
+    expect(attachWorkPlanLegalForm(undefined, { taskId: "excavation", question: SCENARIOS.excavation })).toBeUndefined();
+  });
+
+  it("검색 파이프라인이 구조화 계획서에 법정 칸을 붙인다(lib/search.ts 배선)", () => {
+    const source = readFileSync(path.join(process.cwd(), "lib/search.ts"), "utf8");
+    expect(source).toMatch(/attachWorkPlanLegalForm\(\s*linkWorkPlanToRiskRows\(baseDeliverables\.workPlanStructured/);
+  });
+});
+
+describe("4형식 허가구분·법정 칸 일치 (EXP-01: hwp·pdf/html 은 본문 행을 그대로 쓴다)", () => {
+  // 화면 parseSheetRows 와 같은 규칙: [절] → section, 「키: 값」 → item/content.
+  function rowsFromText(title: string, text: string) {
+    const rows: Array<{ document: string; section: string; item: string; content: string }> = [];
+    let section = "기본정보";
+    let index = 1;
+    for (const raw of text.split(/\r?\n/)) {
+      const line = raw.trim();
+      if (!line) continue;
+      const sectionMatch = line.match(/^\[(.+)\]$/);
+      if (sectionMatch) { section = sectionMatch[1]; index = 1; continue; }
+      const colon = line.indexOf(":");
+      if (colon > 0) rows.push({ document: title, section, item: line.slice(0, colon).trim(), content: line.slice(colon + 1).trim() });
+      else { rows.push({ document: title, section, item: String(index), content: line }); index += 1; }
+    }
+    return rows;
+  }
+
+  function hwpText(binary: Buffer): string {
+    const document = new HwpDocument(new Uint8Array(binary));
+    const texts: string[] = [];
+    try {
+      for (let paraIdx = 0; paraIdx < document.getParagraphCount(0); paraIdx += 1) {
+        const positions = JSON.parse(document.getControlTextPositions(0, paraIdx)) as unknown;
+        if (!Array.isArray(positions)) continue;
+        positions.forEach((_position, controlIdx) => {
+          for (let cellIdx = 0; cellIdx < 2000; cellIdx += 1) {
+            try {
+              const length = document.getCellParagraphLength(0, paraIdx, controlIdx, cellIdx, 0);
+              texts.push(document.getTextInCell(0, paraIdx, controlIdx, cellIdx, 0, 0, length));
+            } catch {
+              break;
+            }
+          }
+        });
+      }
+    } finally {
+      document.free();
+    }
+    return texts.join("\n");
+  }
+
+  it.each(Object.entries(SCENARIOS))("%s: pdf(html)·hwp 에 같은 허가구분이 찍히고, 정화조는 측정 칸이 실린다", async (key, question) => {
+    const response = respond(question);
+    const expected = EXPECTED_PERMIT_CATEGORY[key as keyof typeof SCENARIOS];
+    const title = "안전작업허가 확인서";
+    const rows = rowsFromText(title, response.deliverables.workPermitDraft ?? "");
+    const body = JSON.stringify({ title, rows, profile: { layout: "permit" }, scenario: response.scenario });
+
+    const html = await (await exportPdf(new NextRequest("http://localhost/api/export/pdf?format=html", {
+      method: "POST", headers: { "content-type": "application/json" }, body
+    }))).text();
+    expect(html).toContain(expected);
+
+    const hwpResponse = await exportHwp(new NextRequest("http://localhost/api/export/hwp", {
+      method: "POST", headers: { "content-type": "application/json" }, body
+    }));
+    expect(hwpResponse.status).toBe(200);
+    const hwp = hwpText(Buffer.from(await hwpResponse.arrayBuffer()));
+    expect(hwp).toContain(expected);
+
+    if (key === "confined") {
+      for (const term of ["황화수소", "10ppm 미만", "측정자", "감시인"]) {
+        expect(html).toContain(term);
+        expect(hwp).toContain(term);
+      }
+    } else {
+      expect(html).not.toContain("황화수소");
+    }
+  });
+
+  it("굴착 계획서 본문을 행으로 바꿔도 별표4 칸이 남고 제목·서식 설명 행이 없다(WP-13)", async () => {
+    const text = respond(SCENARIOS.excavation).deliverables.workPlanDraft;
+    const rows = rowsFromText("작업계획서", text);
+    const contents = rows.map((row) => `${row.item} ${row.content}`).join("\n");
+    expect(contents).toContain("라. 지반의 지하수위 상태");
+    expect(contents).toContain("바. 작업지휘자의 배치계획");
+    expect(contents).not.toContain("작업계획서(초안)");
+    expect(contents).not.toContain("현장 서식 기준");
+    expect(rows.find((row) => row.item.includes("작성일"))?.content).toBe("(현장 기재)");
+    const html = await (await exportPdf(new NextRequest("http://localhost/api/export/pdf?format=html", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title: "작업계획서", rows, profile: { layout: "workPlan" }, scenario: respond(SCENARIOS.excavation).scenario })
+    }))).text();
+    expect(html).toContain("지반의 지하수위 상태");
+  });
+});
+
+describe("「준제출형·제출 필수 항목 반영」 라벨 제거 (WP-11)", () => {
+  it("화면 소스와 내려받기 버튼에 「준제출형」「제출 필수 항목을 반영」 문구가 없다", () => {
+    for (const file of ["components/WorkpackEditor.tsx", "components/SafeGuardCommandCenter.tsx", "lib/xlsx-builder.ts"]) {
+      const source = readFileSync(path.join(process.cwd(), file), "utf8");
+      expect(source).not.toContain("준제출형");
+      expect(source).not.toContain("제출 필수 항목을 반영");
+      expect(source).not.toContain("비치하거나 제출하세요");
+    }
+  });
+
+  it("화면에 허가구분을 따로 판정하는 함수가 없다(EXP-01·WP-08)", () => {
+    const source = readFileSync(path.join(process.cwd(), "components/WorkpackEditor.tsx"), "utf8");
+    expect(source).not.toMatch(/function inferPermitType|function buildPermitInspectionStructured|허가구분: 위험작업/);
   });
 });
 

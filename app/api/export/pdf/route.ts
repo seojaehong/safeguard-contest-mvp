@@ -29,6 +29,7 @@ import {
   type StructuredRiskAssessmentRow
 } from "@/lib/risk-assessment-renderer";
 import type { AccidentType, FourM } from "@/lib/risk-assessment-schema";
+import { findPermitAttachmentRows, findPermitTypeInRows, groupStatutoryRows, stripRowBullet } from "@/lib/permit-workplan-forms";
 
 export const dynamic = "force-dynamic";
 
@@ -476,14 +477,25 @@ function renderCanonicalRiskAssessmentRows(rows: StructuredRiskAssessmentRow[], 
     </section>`;
 }
 
+// 법정 절(제38조① 대상 판단·별표4 호별 칸·제562조 기록 등)은 키워드로 고르지 않고 통째로 싣는다(WP-04·EXP-05).
+function renderStatutoryRowSections(rows: PdfRow[]) {
+  return groupStatutoryRows(rows).map((group) => `
+    <section class="section">
+      <h2>${escapeHtml(group.section)}</h2>
+      <table><thead><tr><th class="no">연번</th><th>법정 항목</th><th>기재 내용</th><th>확인</th></tr></thead><tbody>${group.rows.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(stripRowBullet(row.item))}</td><td>${escapeHtml(row.content)}</td><td>□</td></tr>`).join("")}</tbody></table>
+    </section>`).join("");
+}
+
 function renderWorkPlanRows(rows: PdfRow[], scenario: PdfScenario) {
-  const steps = findByKeywords(rows, ["작업", "순서", "장비", "인원", "구간", "방법"], 6);
+  const statutoryRows = new Set(groupStatutoryRows(rows).flatMap((group) => group.rows));
+  const steps = findByKeywords(rows.filter((row) => !statutoryRows.has(row)), ["작업", "순서", "장비", "인원", "구간", "방법"], 6);
   const stopRules = findByKeywords(rows, ["중지", "비상", "강풍", "우천", "폭염", "위험"], 4);
   return `
     <section class="section">
       <h2>1. 작업개요</h2>
       <table class="meta-table"><tbody><tr><th>현장</th><td>${escapeHtml(scenario.siteName)}</td><th>작업</th><td>${escapeHtml(scenario.workSummary)}</td></tr><tr><th>작업인원</th><td>${scenario.workerCount.toLocaleString("ko-KR")}명</td><th>작업조건</th><td>${escapeHtml(scenario.weatherNote)}</td></tr></tbody></table>
     </section>
+    ${renderStatutoryRowSections(rows)}
     <section class="section">
       <h2>2. 세부 작업순서 및 안전대책</h2>
       <table><thead><tr><th class="no">연번</th><th>세부작업</th><th>작업방법</th><th>안전대책</th><th>확인</th></tr></thead><tbody>${steps.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(compactCell(row, "작업방법 확인"))}</td><td>위험성평가·TBM 반영</td><td>□</td></tr>`).join("")}</tbody></table>
@@ -499,11 +511,15 @@ function renderWorkPlanRows(rows: PdfRow[], scenario: PdfScenario) {
 }
 
 function renderPermitRows(rows: PdfRow[], scenario: PdfScenario) {
-  const checks = findPermitChecks(rows);
+  const statutoryRows = new Set(groupStatutoryRows(rows).flatMap((group) => group.rows));
+  const attachmentRows = findPermitAttachmentRows(rows);
+  const checks = findPermitChecks(rows.filter((row) => !statutoryRows.has(row) && !attachmentRows.includes(row)));
+  // 허가구분은 서버가 작업 분류에서 정해 본문에 실은 값을 그대로 쓴다(EXP-01).
+  const permitType = findPermitTypeInRows(rows) ?? "허가구분 확인 전";
   return `
     <section class="section">
       <h2>1. 허가 기본정보</h2>
-      <table class="meta-table"><tbody><tr><th>허가번호</th><td>PTW-${new Date().getFullYear()}-____</td><th>작업명</th><td>${escapeHtml(scenario.workSummary)}</td></tr><tr><th>장소</th><td>${escapeHtml(scenario.siteName)}</td><th>작업시간</th><td>____:____ ~ ____:____</td></tr></tbody></table>
+      <table class="meta-table"><tbody><tr><th>허가번호</th><td>PTW-${new Date().getFullYear()}-____</td><th>작업명</th><td>${escapeHtml(scenario.workSummary)}</td></tr><tr><th>장소</th><td>${escapeHtml(scenario.siteName)}</td><th>작업시간</th><td>____:____ ~ ____:____</td></tr><tr><th>허가구분</th><td colspan="3">${escapeHtml(permitType)}</td></tr></tbody></table>
     </section>
     <section class="section">
       <h2>2. 작업 전 허가조건</h2>
@@ -511,8 +527,11 @@ function renderPermitRows(rows: PdfRow[], scenario: PdfScenario) {
     </section>
     <section class="section">
       <h2>3. 첨부서류 및 종료 확인</h2>
-      <table><thead><tr><th>서류/상태</th><th>해당</th><th>확인</th><th>서명</th></tr></thead><tbody><tr><td>작업계획서</td><td>■</td><td>□</td><td></td></tr><tr><td>위험성평가표</td><td>■</td><td>□</td><td></td></tr><tr><td>작업 종료·원상복구</td><td>■</td><td>□</td><td></td></tr></tbody></table>
-    </section>`;
+      <table><thead><tr><th>서류/상태</th><th>해당</th><th>확인</th><th>서명</th></tr></thead><tbody>${attachmentRows.length
+        ? attachmentRows.map((row) => `<tr><td>${escapeHtml(stripRowBullet(row.item))}</td><td>${escapeHtml(row.content)}</td><td>□</td><td></td></tr>`).join("")
+        : `<tr><td>작업계획서</td><td>■</td><td>□</td><td></td></tr><tr><td>위험성평가표</td><td>■</td><td>□</td><td></td></tr>`}<tr><td>작업 종료·원상복구</td><td>■</td><td>□</td><td></td></tr></tbody></table>
+    </section>
+    ${renderStatutoryRowSections(rows)}`;
 }
 
 function renderTbmRows(rows: PdfRow[], scenario: PdfScenario, topRisk: string, riskRows: PdfRow[]) {

@@ -2520,7 +2520,7 @@ export function SafeGuardCommandCenter({
                             <button
                               type="button"
                               onClick={() => focusWorkpackEditor(selectedOutputItem.key)}
-                              title={`${selectedOutputItem.title} 준제출형 내려받기`}
+                              title={`${selectedOutputItem.title} 초안 내려받기`}
                             >
                               다운로드 설정
                             </button>

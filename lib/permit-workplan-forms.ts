@@ -10,7 +10,7 @@ import { hasHeatCondition, parseFeelsLikeTemperature } from "./task-scenario-pro
 // 구조화 데이터(xlsx·콕핏)는 모두 이 모듈이 만든 같은 객체에서 나온다(EXP-01·WP-08).
 // 측정값·성명·시각은 지어내지 않고 「(현장 기재)」 빈칸으로 둔다.
 // 근거 조문: 산업안전보건기준에 관한 규칙 제37조·제38조·제39조·제241조·제241조의2·제562조·제618조·제619조·제619조의2,
-// 별표4(사전조사 및 작업계획서 내용), 별표6(차량계 건설기계). 2026-10-25 법제처 원문 확인.
+// 별표4(사전조사 및 작업계획서 내용, 2025. 9. 1. 개정), 별표6(차량계 건설기계). 2026-10-25 법제처 원문(lawId 007363) 대조.
 
 export const FIELD_ENTRY = "(현장 기재)";
 
@@ -378,7 +378,7 @@ export function buildWorkPlanLegalForm(input: WorkPlanFormInput): WorkPlanLegalF
       items: entries([
         "가. 전기작업의 목적 및 내용",
         "나. 전기작업 근로자의 자격 및 적정 인원",
-        "다. 작업 범위, 작업책임자 임명, 전기 위험 요인 파악, 접근 한계거리 등 작업시작 전 필요한 사항",
+        "다. 작업 범위, 작업책임자 임명, 전격·아크 섬광·아크 폭발 등 전기 위험 요인 파악, 접근 한계거리, 활선접근 경보장치 휴대 등 작업시작 전 필요한 사항",
         "라. 제319조에 따른 전로 차단 작업계획 및 전원 재투입 절차",
         "마. 절연용 보호구·방호구, 활선작업용 기구·장치의 준비·점검·착용·사용",
         "바. 점검·시운전을 위한 일시 운전, 작업 중단",
@@ -576,4 +576,52 @@ export function renderWorkPlanText(input: WorkPlanTextInput, form: WorkPlanLegal
     "- 근로자 주지(제38조②): 작업 전 TBM에서 계획 내용 공유 후 서명"
   );
   return lines.join("\n");
+}
+
+/**
+ * AI 가 만든 구조화 계획서(full 모드)에 서버 판정 법정 칸을 붙인다. 법정 칸은 작업 분류가 정본이므로
+ * AI 가 적은 applicability·statutorySections 는 덮는다. 작업 유형 보류면 그대로 둔다.
+ */
+export function attachWorkPlanLegalForm<T extends { applicability?: WorkPlanApplicabilityLine[]; statutorySections?: WorkPlanStatutorySection[] }>(
+  structured: T | undefined,
+  input: WorkPlanFormInput
+): T | undefined {
+  if (!structured || !input.taskId) return structured;
+  const form = buildWorkPlanLegalForm(input);
+  return { ...structured, applicability: form.applicability, statutorySections: form.sections };
+}
+
+// ── 인쇄·HTML 서식용 행 고르기 ─────────────────────────────────────
+// 인쇄 서식(서버 pdf html, 화면 대체 인쇄본)은 키워드로 몇 행만 고르므로 법정 칸이 빠졌다(EXP-05·WP-04).
+// 본문 행 가운데 법정 절은 통째로 싣는다.
+
+const STATUTORY_SECTION_PATTERN = /제38조①|별표4|산소·유해가스 측정|법정 확인 항목|밀폐공간 작업 프로그램 연계|악천후 작업중지 기준|폭염작업 기록/;
+
+type SectionRow = { section: string; item: string; content: string };
+
+export function stripRowBullet(value: string): string {
+  return value.replace(/^[-ㆍ]\s*/, "").trim();
+}
+
+export function groupStatutoryRows<T extends SectionRow>(rows: readonly T[]): Array<{ section: string; rows: T[] }> {
+  const groups: Array<{ section: string; rows: T[] }> = [];
+  for (const row of rows) {
+    if (!STATUTORY_SECTION_PATTERN.test(row.section)) continue;
+    const section = row.section.replace(/^\d+\.\s*/, "");
+    const group = groups.find((candidate) => candidate.section === section);
+    if (group) group.rows.push(row);
+    else groups.push({ section, rows: [row] });
+  }
+  return groups;
+}
+
+/** 본문의 「허가구분:」 값. 서버가 작업 분류에서 정한 값이 본문에 실려 있다. */
+export function findPermitTypeInRows(rows: readonly SectionRow[]): string | null {
+  const row = rows.find((candidate) => stripRowBullet(candidate.item) === "허가구분");
+  return row?.content?.trim() || null;
+}
+
+/** 본문 「첨부 확인」 절의 행(허가구분별 첨부 목록). 없으면 빈 배열. */
+export function findPermitAttachmentRows<T extends SectionRow>(rows: readonly T[]): T[] {
+  return rows.filter((row) => /첨부 확인$/.test(row.section));
 }

@@ -18,6 +18,7 @@ import {
 } from "@/lib/safety-document-rubric";
 import { buildWorkpackGenerationFingerprint } from "@/lib/current-workpack";
 import { encodeSpreadsheetDelimitedCell } from "@/lib/spreadsheet-delimited-cell";
+import { findPermitAttachmentRows, findPermitTypeInRows, groupStatutoryRows, stripRowBullet } from "@/lib/permit-workplan-forms";
 import {
   areRiskAssessmentRowsRepresentedInDraft,
   buildStructuredDocumentSections,
@@ -519,9 +520,11 @@ function getWorkPlanStructured(data: AskResponse): WorkPlanStructured | null {
   return deliverables.workPlanStructured ?? null;
 }
 
-function getPermitInspectionStructured(data: AskResponse): PermitInspectionStructured {
+// 허가서 구조화 데이터는 서버가 작업 분류에서 한 번만 만든다(lib/permit-workplan-forms.ts). 화면에서 따로
+// 허가구분을 판정하지 않는다(EXP-01·WP-08). 없으면(작업 유형 보류·이전 저장본) null.
+function getPermitInspectionStructured(data: AskResponse): PermitInspectionStructured | null {
   const deliverables = data.deliverables as { permitInspectionStructured?: PermitInspectionStructured };
-  return deliverables.permitInspectionStructured ?? buildPermitInspectionStructured(data);
+  return deliverables.permitInspectionStructured ?? null;
 }
 
 function WorkExecutionDocumentCockpit({ data, documentKey }: { data: AskResponse; documentKey: DocumentKey }) {
@@ -530,10 +533,10 @@ function WorkExecutionDocumentCockpit({ data, documentKey }: { data: AskResponse
   const permit = getPermitInspectionStructured(data);
   const steps = workPlan?.workSteps.slice(0, 3) ?? [];
   const stopCriteria = compactList(workPlan?.stopCriteria ?? data.riskSummary.immediateActions, data.riskSummary.topRisk, 3);
-  const conditions = permit.conditions.slice(0, 3);
-  const requiredAttachments = permit.attachments.filter((attachment) => attachment.required);
+  const conditions = permit?.conditions.slice(0, 3) ?? [];
+  const requiredAttachments = permit?.attachments.filter((attachment) => attachment.required) ?? [];
   const blockedAttachments = requiredAttachments.filter((attachment) => attachment.status !== "첨부");
-  const completionChecks = permit.completionChecks.slice(0, 2);
+  const completionChecks = permit?.completionChecks.slice(0, 2) ?? [];
   const isPermit = documentKey === "workPermitDraft";
 
   return (
@@ -543,7 +546,7 @@ function WorkExecutionDocumentCockpit({ data, documentKey }: { data: AskResponse
           <span className="eyebrow">작업 실행 cockpit</span>
           <strong>{isPermit ? "허가 조건과 첨부 확인" : "작업 순서와 중지 기준"}</strong>
         </div>
-        <span>{data.scenario.workerCount.toLocaleString("ko-KR")}명 · {isPermit ? permit.basicInfo.permitType : data.riskSummary.riskLevel}</span>
+        <span>{data.scenario.workerCount.toLocaleString("ko-KR")}명 · {isPermit ? permit?.basicInfo.permitType ?? "허가구분 확인 전" : data.riskSummary.riskLevel}</span>
       </div>
       <div className={styles.tbmCockpitGrid}>
         <article>
@@ -553,7 +556,7 @@ function WorkExecutionDocumentCockpit({ data, documentKey }: { data: AskResponse
         </article>
         <article>
           <b>{isPermit ? "첨부 상태" : "작업중지"}</b>
-          <strong>{isPermit ? `${blockedAttachments.length.toLocaleString("ko-KR")}건 보완 · ${requiredAttachments.length.toLocaleString("ko-KR")}건 필수` : stopCriteria[0]}</strong>
+          <strong>{isPermit ? `${blockedAttachments.length.toLocaleString("ko-KR")}건 확인 전 ·${requiredAttachments.length.toLocaleString("ko-KR")}건 필수` : stopCriteria[0]}</strong>
           <small>{isPermit ? blockedAttachments[0]?.name ?? "필수 첨부 확인" : stopCriteria[1] ?? data.scenario.weatherNote}</small>
         </article>
       </div>
@@ -880,173 +883,17 @@ function inferEquipment(text: string, scenario: AskResponse["scenario"], index: 
   return index % 2 === 0 ? "작업장비/공도구" : scenario.companyType;
 }
 
-function buildPermitDraft(data: AskResponse) {
-  const actionList = data.riskSummary.immediateActions.map((action, index) => `${index + 1}. ${action}`).join("\n");
-  const weatherActions = data.externalData.weather.actions.slice(0, 2).map((action, index) => `${index + 1}. ${action}`).join("\n");
-  return [
-    "[1. 허가 기본정보]",
-    `허가대상 작업: ${data.scenario.workSummary}`,
-    `작업현장: ${data.scenario.siteName}`,
-    `작업일시: ${new Date().toLocaleDateString("ko-KR")} 작업 전 확인`,
-    `작업인원: ${data.scenario.workerCount.toLocaleString("ko-KR")}명`,
-    "허가구분: 위험작업 / 작업계획서·위험성평가표 첨부 확인",
-    "",
-    "[2. 작업 전 허가조건]",
-    `핵심위험: ${data.riskSummary.topRisk}`,
-    `필수조치:\n${actionList}`,
-    `기상·환경 확인:\n${weatherActions || data.scenario.weatherNote}`,
-    "보호구: 안전모, 안전화, 작업특성별 보호구 착용 확인",
-    "",
-    "[3. 첨부서류 체크리스트]",
-    "작업계획서: □ 첨부 □ 보완필요",
-    "위험성평가표: □ 첨부 □ 보완필요",
-    "TBM 참석명단: □ 첨부 □ 보완필요",
-    "장비 제원/검사증/운전원 자격: □ 해당 □ 비해당 □ 보완필요",
-    "MSDS/화기·밀폐·고소작업 별도 허가: □ 해당 □ 비해당 □ 보완필요",
-    "사진/작업계획도/통제구역 표시: □ 첨부 □ 보완필요",
-    "",
-    "[4. 종료 확인]",
-    "작업종료: □ 원상복구 □ 잔류위험 없음 □ 미조치사항 있음",
-    "미조치사항 및 후속조치:",
-    "종료 확인자:"
-  ].join("\n");
-}
-
 function resolveInitialWorkPermitDraft(data: AskResponse) {
-  if (data.deliverables.workPermitDraft === "") return "";
+  if (!data.deliverables.workPermitDraft) return "";
   return withSubmitReadiness(
     "허가서/첨부 안전작업허가 확인서",
-    data.deliverables.workPermitDraft ?? buildPermitDraft(data),
+    data.deliverables.workPermitDraft,
     data
   );
 }
 
-function inferPermitType(data: AskResponse): PermitInspectionStructured["basicInfo"]["permitType"] {
-  const text = `${data.question} ${data.scenario.workSummary} ${data.riskSummary.topRisk}`;
-  if (/비계|고소|추락|지붕|외벽/.test(text)) return "고소작업";
-  if (/용접|화기|절단|불꽃/.test(text)) return "화기작업";
-  if (/밀폐|질식|산소|탱크|맨홀/.test(text)) return "밀폐공간";
-  if (/전기|정전|감전|분전반/.test(text)) return "전기작업";
-  if (/지게차|크레인|굴삭|중장비|하역/.test(text)) return "중장비작업";
-  if (/화학|약품|MSDS|세척|누출/.test(text)) return "화학물질";
-  return "일반 위험작업";
-}
-
-function conditionCategoryFromRisk(row: NonNullable<AskResponse["structured"]>["riskAssessmentRows"][number]): PermitInspectionStructured["conditions"][number]["category"] {
-  if (row.fourM === "Machine") return "장비·동선";
-  if (row.fourM === "Media") return "기상·환경";
-  if (row.fourM === "Man") return "보호구";
-  return "교육·TBM";
-}
-
-function primaryConditionCategory(permitType: PermitInspectionStructured["basicInfo"]["permitType"]): PermitInspectionStructured["conditions"][number]["category"] {
-  if (permitType === "화기작업") return "화재·폭발";
-  if (permitType === "밀폐공간") return "질식·가스";
-  if (permitType === "고소작업") return "추락·낙하";
-  return "장비·동선";
-}
-
-function buildPermitInspectionStructured(data: AskResponse): PermitInspectionStructured {
-  const permitType = inferPermitType(data);
-  const today = new Date().toLocaleDateString("ko-KR");
-  const riskRows = data.structured?.riskAssessmentRows ?? [];
-  const topRows = riskRows.slice(0, 4);
-  const weatherActions = data.externalData.weather.actions.slice(0, 2);
-  const immediateActions = data.riskSummary.immediateActions.slice(0, 3);
-  const questionAndWork = `${data.question} ${data.scenario.workSummary}`;
-
-  const conditions: PermitInspectionStructured["conditions"] = [
-    {
-      category: "작업구역",
-      requirement: "작업구역 출입통제와 작업반경 표시",
-      action: immediateActions[0] || "작업 전 위험구역을 표시하고 관계자 외 접근을 제한",
-      owner: "작업반장",
-      status: "확인 전",
-      relatedRiskRowIndex: riskRows.length ? 0 : undefined,
-      evidenceRefs: riskRows[0]?.evidenceRefs || ["위험성평가표"],
-      verification: riskRows[0]?.verification || "작업 전 통제구역 사진과 TBM 복창으로 확인"
-    },
-    {
-      category: primaryConditionCategory(permitType),
-      requirement: `${permitType} 핵심 위험 사전 통제`,
-      action: immediateActions[1] || data.riskSummary.topRisk,
-      owner: "관리감독자",
-      status: "확인 전",
-      relatedRiskRowIndex: riskRows.length ? Math.min(1, riskRows.length - 1) : undefined,
-      evidenceRefs: riskRows[Math.min(1, Math.max(0, riskRows.length - 1))]?.evidenceRefs || ["위험성평가표"],
-      verification: riskRows[Math.min(1, Math.max(0, riskRows.length - 1))]?.verification || "관리감독자가 핵심 위험 조치 이행을 확인"
-    },
-    {
-      category: "기상·환경",
-      requirement: "기상 정보와 현장 체감 조건 확인",
-      action: weatherActions.join(" / ") || data.scenario.weatherNote || "기상·현장 조건 확인 후 작업 여부 결정",
-      owner: "안전관리자",
-      status: "확인 전",
-      relatedRiskRowIndex: riskRows.length ? Math.min(1, riskRows.length - 1) : undefined,
-      evidenceRefs: riskRows[Math.min(1, Math.max(0, riskRows.length - 1))]?.evidenceRefs || ["기상청 현재·예보", "위험성평가표"],
-      verification: "기상 신호와 현장 체감 조건을 함께 확인"
-    },
-    {
-      category: "교육·TBM",
-      requirement: "위험성평가 결과와 작업중지 기준 TBM 공유",
-      action: immediateActions[2] || "작업 전 TBM에서 위험요인과 중지기준을 전원 확인",
-      owner: "TBM 리더",
-      status: "확인 전",
-      relatedRiskRowIndex: riskRows.length ? Math.min(2, riskRows.length - 1) : undefined,
-      evidenceRefs: riskRows[Math.min(2, Math.max(0, riskRows.length - 1))]?.evidenceRefs || ["TBM 기록", "위험성평가표"],
-      verification: "TBM 참석자 서명과 구두 복창으로 확인"
-    }
-  ];
-
-  topRows.forEach((row, index) => {
-    conditions.push({
-      category: conditionCategoryFromRisk(row),
-      requirement: row.hazard,
-      action: row.additionalControls,
-      owner: row.owner || "담당자 지정",
-      status: "확인 전",
-      relatedRiskRowIndex: index,
-      evidenceRefs: row.evidenceRefs,
-      verification: row.verification
-    });
-  });
-
-  return {
-    basicInfo: {
-      permitNo: "현장 발급",
-      permitType,
-      workName: data.scenario.workSummary || "작업명 확인",
-      location: data.scenario.siteName || "작업장소 확인",
-      workDate: today,
-      workerCount: data.scenario.workerCount,
-      requester: "작업반장",
-      approver: "관리감독자"
-    },
-    conditions,
-    attachments: [
-      { name: "작업계획서", required: true, status: "첨부", note: "작업순서·장비·인원·중지기준 확인" },
-      { name: "위험성평가표", required: true, status: riskRows.length ? "첨부" : "보완 필요", note: "유해·위험요인과 감소대책 확인" },
-      { name: "TBM 참석명단", required: true, status: "보완 필요", note: "작업 전 공유 후 참석자 서명" },
-      { name: "장비 제원/검사증/운전원 자격", required: /중장비|지게차|크레인|장비/.test(questionAndWork), status: "보완 필요", note: "해당 장비 사용 시 첨부" },
-      { name: "MSDS/화기·밀폐·고소작업 별도 확인", required: permitType !== "일반 위험작업", status: "보완 필요", note: `${permitType} 조건 확인` },
-      { name: "사진/작업계획도/통제구역 표시", required: true, status: "보완 필요", note: "작업 전·후 증빙 보관" }
-    ],
-    completionChecks: [
-      { item: "작업구역 원상복구", method: "통제선·잔재물·공도구 회수 사진 확인", owner: "작업반장", status: "확인 전" },
-      { item: "잔류위험 확인", method: "미조치 위험요인 여부를 관리감독자가 확인", owner: "관리감독자", status: "확인 전" },
-      { item: "교육·TBM 기록 보관", method: "참석자 서명과 사진증빙 보관 위치 기록", owner: "안전관리자", status: "확인 전" }
-    ],
-    approvers: {
-      requester: "작업반장",
-      safetyManager: "안전관리자",
-      siteManager: "현장소장",
-      completionChecker: "종료 확인자"
-    }
-  };
-}
-
 function withSubmitReadiness(title: string, body: string, data: AskResponse) {
-  const readinessLabel = `서식상태: 준제출형 - ${title} 제출 필수 항목을 반영한 현장 검토용입니다.`;
+  const readinessLabel = `서식상태: 초안 - ${title} 법정 항목 확인 전 현장 검토용입니다.`;
   if (body.includes(readinessLabel) && body.includes("[필수 확인 항목]")) {
     return body;
   }
@@ -1327,8 +1174,27 @@ function buildRiskAssessmentSections(rows: SheetRow[], scenario: AskResponse["sc
   `;
 }
 
+// 법정 절(제38조① 대상 판단·별표4 호별 칸·밀폐공간 측정·제562조 기록 등)은 키워드로 고르지 않고 통째로 싣는다(WP-04·EXP-05).
+function buildStatutoryRowSections(rows: SheetRow[]) {
+  return groupStatutoryRows(rows).map((group) => `
+    <section class="section-block">
+      <div class="section-label">${escapeHtml(group.section)}</div>
+      <table>
+        <thead><tr><th>번호</th><th>법정 항목</th><th>기재 내용</th><th>확인</th></tr></thead>
+        <tbody>
+          ${group.rows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(stripRowBullet(row.item))}</td><td>${escapeHtml(row.content)}</td><td>□</td></tr>`).join("")}
+        </tbody>
+      </table>
+    </section>`).join("");
+}
+
+function withoutStatutoryRows(rows: SheetRow[]) {
+  const statutory = new Set(groupStatutoryRows(rows).flatMap((group) => group.rows));
+  return rows.filter((row) => !statutory.has(row));
+}
+
 function buildWorkPlanSections(rows: SheetRow[], scenario: AskResponse["scenario"]) {
-  const sequenceRows = findRows(rows, ["순서", "작업", "구간", "장비", "인원"], 5);
+  const sequenceRows = findRows(withoutStatutoryRows(rows), ["순서", "작업", "구간", "장비", "인원"], 5);
   const stopRows = findRows(rows, ["중지", "강풍", "우천", "위험", "비상"], 3);
   return `
     <section class="section-block">
@@ -1341,6 +1207,7 @@ function buildWorkPlanSections(rows: SheetRow[], scenario: AskResponse["scenario
         </tbody>
       </table>
     </section>
+    ${buildStatutoryRowSections(rows)}
     <section class="section-block">
       <div class="section-label">2. 세부 작업순서</div>
       <table>
@@ -1388,7 +1255,10 @@ function buildWorkPlanSections(rows: SheetRow[], scenario: AskResponse["scenario
 }
 
 function buildPermitSections(rows: SheetRow[], scenario: AskResponse["scenario"]) {
-  const permitRows = findRows(rows, ["허가", "작업", "핵심", "보호구", "첨부", "종료"], 6);
+  const attachmentRows = findPermitAttachmentRows(rows);
+  const permitRows = findRows(withoutStatutoryRows(rows).filter((row) => !attachmentRows.includes(row)), ["허가", "작업", "핵심", "보호구", "첨부", "종료"], 6);
+  // 허가구분은 서버가 작업 분류에서 정해 본문에 실은 값을 그대로 쓴다(EXP-01).
+  const permitType = findPermitTypeInRows(rows) ?? "허가구분 확인 전";
   return `
     <section class="section-block">
       <div class="section-label">1. 허가 기본정보</div>
@@ -1397,6 +1267,7 @@ function buildPermitSections(rows: SheetRow[], scenario: AskResponse["scenario"]
           <tr><th>허가번호</th><td>PTW-${new Date().getFullYear()}-____</td><th>작업명</th><td>${escapeHtml(scenario.workSummary)}</td></tr>
           <tr><th>작업장소</th><td>${escapeHtml(scenario.siteName)}</td><th>작업시간</th><td>____:____ ~ ____:____</td></tr>
           <tr><th>신청자</th><td>____________________</td><th>허가자</th><td>____________________</td></tr>
+          <tr><th>허가구분</th><td colspan="3">${escapeHtml(permitType)}</td></tr>
         </tbody>
       </table>
     </section>
@@ -1414,15 +1285,18 @@ function buildPermitSections(rows: SheetRow[], scenario: AskResponse["scenario"]
       <table class="permit-check">
         <thead><tr><th>첨부서류</th><th>해당</th><th>첨부</th><th>비고</th></tr></thead>
         <tbody>
-          <tr><td>작업계획서</td><td>■</td><td>□</td><td>작업순서·장비·인원 포함</td></tr>
+          ${attachmentRows.length
+            ? attachmentRows.map((row) => `<tr><td>${escapeHtml(stripRowBullet(row.item))}</td><td>□</td><td>□</td><td>${escapeHtml(row.content)}</td></tr>`).join("")
+            : `<tr><td>작업계획서</td><td>■</td><td>□</td><td>작업순서·장비·인원 포함</td></tr>
           <tr><td>위험성평가표</td><td>■</td><td>□</td><td>감소대책·담당·기한 포함</td></tr>
           <tr><td>TBM 참석명단/교육기록</td><td>■</td><td>□</td><td>성명·소속·직위·서명</td></tr>
           <tr><td>장비 검사증/자격증/MSDS/작업계획도</td><td>□</td><td>□</td><td>해당 작업 시 첨부</td></tr>
           <tr><td>보험가입증명·자격/면허·안전교육 이수증</td><td>□</td><td>□</td><td>원청 제출 요구 시 첨부</td></tr>
-          <tr><td>작업반경도·인양능력표·정비/점검 이력</td><td>□</td><td>□</td><td>장비·중량물 작업 시 첨부</td></tr>
+          <tr><td>작업반경도·인양능력표·정비/점검 이력</td><td>□</td><td>□</td><td>장비·중량물 작업 시 첨부</td></tr>`}
         </tbody>
       </table>
     </section>
+    ${buildStatutoryRowSections(rows)}
     <section class="section-block">
       <div class="section-label">4. 종료 확인</div>
       <table><thead><tr><th>종료 상태</th><th>잔류위험</th><th>원상복구</th><th>종료 확인자</th></tr></thead><tbody><tr><td>□ 완료 □ 중단</td><td>□ 없음 □ 있음</td><td>□ 확인</td><td>성명/서명: __________</td></tr></tbody></table>
@@ -3825,9 +3699,9 @@ export function WorkpackEditor({
       if (selected.key === "workPlanDraft" && dl?.workPlanStructured) {
         structuredMode = "workPlanStructured";
         structuredPayload = dl.workPlanStructured;
-      } else if (selected.key === "workPermitDraft" && !selectedHasIntentionalEmptyPermitDraft) {
+      } else if (selected.key === "workPermitDraft" && !selectedHasIntentionalEmptyPermitDraft && dl?.permitInspectionStructured) {
         structuredMode = "permitInspectionStructured";
-        structuredPayload = dl?.permitInspectionStructured || buildPermitInspectionStructured(data);
+        structuredPayload = dl.permitInspectionStructured;
       } else if (selected.key === "tbmBriefing" && dl?.tbmBriefingStructured) {
         structuredMode = "tbmBriefingStructured";
         structuredPayload = dl.tbmBriefingStructured;
