@@ -47,7 +47,15 @@ import { fetchKoshaEducationRecommendations } from "./kosha-education";
 import { fetchKoshaReferences } from "./kosha";
 import { fetchAccidentCases, selectFallbackAccidentCases } from "./accident-cases";
 import { fetchKoshaOpenApiEvidence } from "./kosha-openapi";
-import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission, ensureForeignWorkerTransmissionContext, reconcileLanguages } from "./foreign-worker";
+import {
+  buildForeignWorkerBriefing,
+  buildForeignWorkerKakaoDigest,
+  buildForeignWorkerLanguages,
+  buildForeignWorkerTransmission,
+  ensureForeignWorkerTransmissionContext,
+  reconcileLanguages,
+  verifyForeignWorkerText
+} from "./foreign-worker";
 import { matchSafetyKnowledge } from "./safety-knowledge";
 import {
   isOverCharBudget,
@@ -2749,9 +2757,15 @@ async function runAskUngated(question: string, options: RunAskOptions = {}): Pro
       { taskId: workPlanTaskId, question, workerCount: response.scenario.workerCount }
     );
     const linkedPermitInspectionStructured = linkPermitToRiskRows(baseDeliverables.permitInspectionStructured, structuredRiskRows);
-    const foreignWorkerBriefingText = aiBodies.foreignWorkerBriefing ?? buildForeignWorkerBriefing(foreignWorkerInput);
+    // 결정 6(H7, 2026-10-25): 외국인 전송본은 검수된 고정 번역표로만 만든다. AI 번역 본문은 쓰지 않는다.
+    // 안내문(foreignWorkerBriefing)의 AI 본문은 외국어 검증(verifyForeignWorkerText)을 통과할 때만 쓰고,
+    // 걸리면 고정 번역표 안내문으로 대체한다.
+    const aiForeignBriefing = aiBodies.foreignWorkerBriefing && verifyForeignWorkerText(aiBodies.foreignWorkerBriefing).status === "ok"
+      ? aiBodies.foreignWorkerBriefing
+      : undefined;
+    const foreignWorkerBriefingText = aiForeignBriefing ?? buildForeignWorkerBriefing(foreignWorkerInput);
     const foreignWorkerTransmissionText = ensureForeignWorkerTransmissionContext(
-      aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput),
+      buildForeignWorkerTransmission(foreignWorkerInput),
       foreignWorkerInput
     );
     const groundingDiagnostics = deliverablesResult?.diagnostics.grounding;
@@ -2805,13 +2819,24 @@ async function runAskUngated(question: string, options: RunAskOptions = {}): Pro
       modelPerDocument: {},
       fallbackUsed: false
     };
-    const deliverablesExecutionTrace = parentlessKoshaReviewRequired
+    const deliverablesExecutionTraceBase = parentlessKoshaReviewRequired
       ? {
           ...upstreamDeliverablesExecutionTrace,
           provider: null,
           modelPerDocument: {}
         }
       : upstreamDeliverablesExecutionTrace;
+    // 결정 6(H7): 전송본은 늘 고정 번역표(결정적 생성)로 적는다. 안내문은 외국어 검증에 걸려 대체됐을 때만 대체 흔적을 남긴다.
+    const foreignTraceOverrides: Record<string, GenerationDeliverableModelTrace> = {
+      foreignWorkerTransmission: deterministicDeliverableTrace(false),
+      ...(aiBodies.foreignWorkerBriefing && !aiForeignBriefing
+        ? { foreignWorkerBriefing: deterministicDeliverableTrace(true) }
+        : {})
+    };
+    const deliverablesExecutionTrace = {
+      ...deliverablesExecutionTraceBase,
+      modelPerDocument: { ...deliverablesExecutionTraceBase.modelPerDocument, ...foreignTraceOverrides }
+    };
     const generationTrace: GenerationTrace = {
       traceId,
       askMode: aiMode,
@@ -2951,7 +2976,8 @@ async function runAskUngated(question: string, options: RunAskOptions = {}): Pro
         foreignWorkerLanguages: reconcileLanguages(foreignWorkerBriefingText, foreignWorkerTransmissionText, foreignWorkerLanguages),
         kakaoMessage: aiBodies.kakaoMessage
           ? aiBodies.kakaoMessage
-          : `${baseDeliverables.kakaoMessage}${outdoorHeatMessageAppendix}\n\n[외국인 근로자 공지]\n${foreignWorkerTransmissionText.split("\n").slice(0, 8).join("\n")}`
+          // EF-06: 앞 8줄 자르기는 「쉬운 한국어:」 제목 줄에서 끊겼다. 한국어 머리 구간 전체를 담는다.
+          : `${baseDeliverables.kakaoMessage}${outdoorHeatMessageAppendix}\n\n[외국인 근로자 공지]\n${buildForeignWorkerKakaoDigest(foreignWorkerTransmissionText)}`
       },
       structured: {
         riskAssessmentRows: structuredRiskRows,
