@@ -2073,7 +2073,7 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
                   {" · "}{record?.memo || worker.trainingSummary}
                 </small>
                 {worker.isForeignWorker ? (
-                  <p className="muted small">외국인 안내: {worker.languageLabel} 미리보기 확인 후 메일·문자로만 전파</p>
+                  <p className="muted small">외국인 안내: {worker.languageLabel} 미리보기로 안내문 확인(실발송 없음)</p>
                 ) : null}
                 <div className="command-actions">
                   <button type="button" className="button secondary" onClick={() => startEditWorker(worker)}>수정</button>
@@ -2212,7 +2212,7 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
             checked={contactConsent}
             onChange={(event) => setContactConsent(event.target.checked)}
           />
-          <span>연락처·국적·언어 정보는 안전교육 확인과 메일·문자 현장 전파 목적으로만 사용합니다. 카카오·밴드 전파는 별도 승인 전까지 제외합니다.</span>
+          <span>연락처·국적·언어 정보는 고객사(사업주)의 위탁으로 안전교육 확인과 언어별 안내문 미리보기에만 씁니다. 메일·문자 실발송은 이번 런칭 범위에 없으며, 공유 링크의 연락처는 공유 중지 즉시·만료 30일 뒤 지웁니다. <a href="/privacy">개인정보 처리방침</a></span>
         </div>
         <div className="command-actions">
           <button type="button" className="button" onClick={saveDraftWorker}>
@@ -2255,17 +2255,17 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
         ) : (
           <article className="safeclaw-module-panel">
             <span>전파 대기</span>
-            <h2>작업 입력 후 실제 전파.</h2>
-            <p>기본 예시 데이터는 메시지 형태만 확인합니다. 메일·문자 실발송은 작업공간에서 문서팩을 생성한 뒤 진행합니다.</p>
+            <h2>작업 입력 후 전송본 미리보기.</h2>
+            <p>기본 예시 데이터는 메시지 형태만 확인합니다. 메일·문자 실발송은 이번 런칭 범위에 없습니다. 작업공간에서 문서팩을 만든 뒤 언어별 전송본을 미리 보고 내려받아 현장에서 전달합니다.</p>
             <a href="/workspace">작업 입력으로 이동</a>
           </article>
         )}
         <article className="safeclaw-module-panel">
           <span>제출 기준 채널</span>
           <h2>메일·문자 우선.</h2>
-          <p>전송 전 수신자, 채널, 언어, 메시지 미리보기를 확인한 뒤 전송 서비스 결과를 채널별로 표시합니다. 현재 대상 기준: {dispatchSourceLabel}.</p>
+          <p>수신자, 채널, 언어별 메시지를 미리보기로 확인합니다. 실제 메일·문자 발송은 하지 않습니다(미리보기 전용). 현재 대상 기준: {dispatchSourceLabel}.</p>
           {!recipientSuggestions.length ? (
-            <p className="export-error">기본 예시 연락처는 실발송 대상에서 제외했습니다. 수신자를 직접 입력해야 전송할 수 있습니다.</p>
+            <p className="export-error">기본 예시 연락처는 미리보기 대상에서 제외했습니다. 수신자를 직접 입력해야 전송본을 미리 볼 수 있습니다.</p>
           ) : null}
           <ul>
             <li>메일: 관리자·원청 보고</li>

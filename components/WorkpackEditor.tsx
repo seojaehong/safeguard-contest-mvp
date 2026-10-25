@@ -38,6 +38,16 @@ import {
   type DocumentKey
 } from "./workpack-editor-structure";
 import { companyFilePrefix, formatCompanyName, formatWorkerCount, formatWorkerHeadcount, hasKnownWorkerCount } from "@/lib/scenario-display";
+import {
+  buildRiskAssessmentRecordHtml,
+  RISK_RECORD_ROW_HEADERS,
+  RISK_REVIEW_LIST_TITLE,
+  riskRecordHeaderPairs,
+  riskRecordRowCells,
+  splitRiskRowsForOutput,
+  toStructuredRiskRows
+} from "@/lib/risk-assessment-record";
+import { RISK_RETENTION_NOTE, RISK_SCALE_LINES } from "@/lib/risk-labels";
 import styles from "./WorkpackEditor.module.css";
 
 declare global {
@@ -845,32 +855,6 @@ function TransmissionDocumentCockpit({ data, documentKey }: { data: AskResponse;
   );
 }
 
-function inferDisasterType(text: string, index: number) {
-  if (/추락|떨어|비계|고소|발판/.test(text)) return "추락";
-  if (/전도|넘어|미끄|우천|바닥/.test(text)) return "전도/미끄럼";
-  if (/충돌|지게차|동선|차량|운반/.test(text)) return "충돌/끼임";
-  if (/화재|용접|화기|폭발/.test(text)) return "화재/폭발";
-  if (/화학|중독|질식|밀폐|가스|노출/.test(text)) return "중독/노출";
-  return index % 2 === 0 ? "협착/충돌" : "기타 재해";
-}
-
-function inferRiskFactor4M(text: string, index: number) {
-  if (/지게차|장비|기계|비계|발판|공구|차량/.test(text)) return "Machine";
-  if (/강풍|우천|폭염|날씨|바닥|밀폐|고소|작업장소/.test(text)) return "Media";
-  if (/신규|미숙련|보호구|교육|작업자|근로자/.test(text)) return "Man";
-  if (/작업중지|통제|감독|유도자|신호수|절차/.test(text)) return "Management";
-  return ["Man", "Machine", "Media", "Management"][index % 4];
-}
-
-function inferEquipment(text: string, scenario: AskResponse["scenario"], index: number) {
-  if (/지게차|운반|하역/.test(text)) return "지게차/운반장비";
-  if (/비계|고소|발판/.test(text)) return "비계/작업발판";
-  if (/용접|화기/.test(text)) return "용접기/화기장비";
-  if (/화학|세척|약품/.test(text)) return "세척제/MSDS";
-  if (/밀폐|가스|질식/.test(text)) return "가스측정기/환기설비";
-  return index % 2 === 0 ? "작업장비/공도구" : scenario.companyType;
-}
-
 function buildPermitDraft(data: AskResponse) {
   const actionList = data.riskSummary.immediateActions.map((action, index) => `${index + 1}. ${action}`).join("\n");
   const weatherActions = data.externalData.weather.actions.slice(0, 2).map((action, index) => `${index + 1}. ${action}`).join("\n");
@@ -1242,80 +1226,21 @@ function buildGenericSections(rows: SheetRow[], profile: SafetyFormProfile) {
   `).join("");
 }
 
-function buildRiskAssessmentSections(rows: SheetRow[], scenario: AskResponse["scenario"]) {
-  const hazardRows = findRows(rows, ["위험", "추락", "전도", "충돌", "화재", "중독", "끼임"], 4);
-  const controlRows = findRows(rows, ["조치", "대책", "점검", "통제", "작업중지"], 4);
-  const controlFor = (index: number) => compactContent(controlRows[index] || controlRows[0], "작업 전 통제대책을 지정하고 이행 여부를 확인");
-  return `
-    <section class="section-block">
-      <div class="section-label">1. 사전준비</div>
-      <table class="mini-table">
-        <colgroup><col style="width: 16%;" /><col style="width: 34%;" /><col style="width: 16%;" /><col style="width: 34%;" /></colgroup>
-        <tbody>
-          <tr><th>평가대상 작업</th><td>${escapeHtml(scenario.workSummary)}</td><th>평가방법</th><td>4M + 가능성·중대성 판단</td></tr>
-          <tr><th>작업장소</th><td>${escapeHtml(scenario.siteName)}</td><th>참여자</th><td>관리감독자, 작업반장, 근로자 대표</td></tr>
-          <tr><th>작업조건</th><td>${escapeHtml(scenario.weatherNote)}</td><th>검토자료</th><td>작업계획서, TBM, KOSHA 자료, 법령 근거</td></tr>
-        </tbody>
-      </table>
-    </section>
-    <section class="section-block">
-      <div class="section-label">2. 유해·위험요인 파악 및 위험성 결정</div>
-      <p class="section-help">제공 서식 기준에 맞춰 단위공종, 작업장소, 사용 장비, 재해형태, 가능성·중대성·등급을 분리합니다.</p>
-      <table class="risk-table">
-        <colgroup>
-          <col style="width: 8%;" /><col style="width: 10%;" /><col style="width: 10%;" /><col style="width: 8%;" />
-          <col style="width: 18%;" /><col style="width: 8%;" /><col style="width: 6%;" /><col style="width: 6%;" />
-          <col style="width: 6%;" /><col style="width: 20%;" />
-        </colgroup>
-        <thead><tr><th>단위공종</th><th>작업장소</th><th>장비/도구</th><th>4M</th><th>유해·위험요인</th><th>재해형태</th><th>가능성</th><th>중대성</th><th>등급</th><th>현재 안전조치</th></tr></thead>
-        <tbody>
-          ${hazardRows.map((row, index) => {
-            const text = rowText(row);
-            return `<tr>
-            <td>${escapeHtml(scenario.workSummary)}</td>
-            <td>${escapeHtml(scenario.siteName)}</td>
-            <td>${escapeHtml(inferEquipment(text, scenario, index))}</td>
-            <td class="center">${escapeHtml(inferRiskFactor4M(text, index))}</td>
-            <td>${escapeHtml(compactContent(row, "작업 중 유해·위험요인"))}</td>
-            <td>${escapeHtml(inferDisasterType(text, index))}</td>
-            <td class="center">중</td>
-            <td class="center">상</td>
-            <td class="center risk-level-high">상</td>
-            <td>${escapeHtml(controlFor(index))}</td>
-          </tr>`;
-          }).join("")}
-        </tbody>
-      </table>
-    </section>
-    <section class="section-block">
-      <div class="section-label">3. 감소대책 수립·실행 및 이행확인</div>
-      <table>
-        <colgroup><col style="width: 32%;" /><col style="width: 28%;" /><col style="width: 14%;" /><col style="width: 12%;" /><col style="width: 14%;" /></colgroup>
-        <thead><tr><th>추가 감소대책</th><th>확인 근거/증빙</th><th>조치담당자</th><th>조치기한</th><th>확인자 서명</th></tr></thead>
-        <tbody>
-          ${controlRows.map((row, index) => `<tr><td>${escapeHtml(compactContent(row, "감소대책"))}</td><td>TBM 공유, 사진/점검 기록, 작업 전 확인</td><td>작업반장</td><td>작업 전</td><td>________</td></tr>`).join("")}
-        </tbody>
-      </table>
-    </section>
-    <section class="section-block">
-      <div class="section-label">4. 위험성평가 회의록 및 재평가 기준</div>
-      <table>
-        <colgroup><col style="width: 20%;" /><col style="width: 30%;" /><col style="width: 20%;" /><col style="width: 30%;" /></colgroup>
-        <tbody>
-          <tr><th>회의일시</th><td>____년 ____월 ____일 ____시</td><th>참석대상</th><td>관리감독자, 작업반장, 작업자 대표</td></tr>
-          <tr><th>재평가 사유</th><td>공법·장비·인원·기상 조건 변경</td><th>재평가 기준</th><td>상 등급 잔류위험 또는 작업중지 발생 시</td></tr>
-          <tr><th>주요 결정</th><td colspan="3">□ 감소대책 이행 후 작업 □ 보완 후 재평가 □ 작업중지 유지</td></tr>
-        </tbody>
-      </table>
-    </section>
-    <section class="section-block">
-      <div class="section-label">5. 공유·교육 및 조치 확인</div>
-      <table>
-        <thead><tr><th>공유 대상</th><th>공유 방법</th><th>이해 확인</th><th>미조치/재평가 필요</th></tr></thead>
-        <tbody><tr><td>투입 근로자 전원</td><td>작업 전 TBM 및 안전보건교육</td><td>구두 복창·서명</td><td>□ 없음 □ 있음: ____________________</td></tr></tbody>
-      </table>
-    </section>
-  `;
+// 인쇄·Word·JPG·HTML 위험성평가 본문(PR-06/10). 정본 행(structured.riskAssessmentRows)을 그대로 싣는다.
+// 키워드로 행을 고르거나 가능성·중대성·등급을 고정값으로 쓰지 않고, 참여자를 고정 문구로 채우지 않는다.
+// 본문을 직접 고쳐 정본 행과 달라졌으면 고친 행을 전부 싣는다.
+function buildRiskAssessmentSections(rows: SheetRow[], scenario: AskResponse["scenario"], profile: SafetyFormProfile, data?: AskResponse) {
+  const { main, review } = splitRiskRowsForOutput(data?.structured?.riskAssessmentRows ?? []);
+  const reviewRows = [...(data?.structured?.riskReviewItems ?? []), ...review];
+  return buildRiskAssessmentRecordHtml({
+    rows: toStructuredRiskRows(main),
+    reviewRows: toStructuredRiskRows(reviewRows),
+    scenario,
+    section: (title, inner) => `<section class="section-block"><div class="section-label">${escapeHtml(title)}</div>${inner}</section>`,
+    tableClass: "risk-table",
+    metaTableClass: "mini-table",
+    editedBodyHtml: buildGenericSections(rows, profile)
+  });
 }
 
 function buildWorkPlanSections(rows: SheetRow[], scenario: AskResponse["scenario"]) {
@@ -1626,7 +1551,7 @@ function buildSafetyFormMarkup(
     ? buildTbmWeatherRiskBridge(data, riskRows.length ? riskRows : rows)
     : "";
   const sections = profile.layout === "risk"
-    ? buildRiskAssessmentSections(rows, scenario)
+    ? buildRiskAssessmentSections(rows, scenario, profile, data)
     : profile.layout === "workPlan"
       ? buildWorkPlanSections(rows, scenario)
       : profile.layout === "permit"
@@ -1664,12 +1589,12 @@ function buildSafetyFormMarkup(
     </div>
     <div class="check-grid">${confirmationCells}</div>
     ${sections}
-    <div class="signature-grid">
+    ${profile.layout === "risk" ? "" : `<div class="signature-grid">
       <div><b>작성자</b>성명/서명:</div>
       <div><b>관리감독자</b>성명/서명:</div>
       <div><b>교육/TBM 확인자</b>성명/서명:</div>
       <div><b>보관 위치</b>문서번호/철:</div>
-    </div>
+    </div>`}
     <p class="form-note">본 문서는 현장 확인 전 초안입니다. 발주처 지정 원본 양식, 작업 전 위험요인, 참석자, 작업중지 기준, 서명란을 최종 확인한 뒤 사용하세요.</p>
   </article>`;
 }
@@ -2046,10 +1971,22 @@ function buildHwpTemplateText(
         ""
       ]
     : [];
+  const riskReviewSource = profile.layout === "risk"
+    ? [...(data?.structured?.riskReviewItems ?? []), ...splitRiskRowsForOutput(data?.structured?.riskAssessmentRows ?? []).review]
+    : [];
+  const riskReviewLines = riskReviewSource.length
+    ? [`[${RISK_REVIEW_LIST_TITLE}]`, ...riskReviewSource.map((row, index) => `${index + 1}. ${row.hazard}`), ""]
+    : [];
   const layoutNotice = profile.layout === "risk"
     ? [
+        "[평가 기록(산업안전보건법 시행규칙 제37조의4)]",
+        ...riskRecordHeaderPairs(scenario).map(([label, value]) => `${label}: ${value}`),
+        "",
+        "[위험성 결정 기준]",
+        ...RISK_SCALE_LINES,
+        "",
         "[서식 구조]",
-        "단위공종 / 작업장소 / 사용 기계기구·장비 / 유해·위험요인 / 재해형태 / 가능성 / 중대성 / 등급 / 감소대책 / 조치담당자 / 조치기한 / 확인자 서명",
+        "세부작업 / 유해·위험요인 / 재해유형 / 현재 안전조치 / 가능성 / 중대성 / 위험성 / 감소대책 / 담당자 / 조치기한 / 이행 결과 / 잔여 위험성",
         ""
       ]
     : profile.layout === "workPlan"
@@ -2091,12 +2028,23 @@ function buildHwpTemplateText(
       ...sectionRows.map((row) => `${row.item}. ${row.content}`),
       ""
     ]),
-    "[확인/서명]",
-    "작성자: ____________________",
-    "관리감독자: ____________________",
-    "교육/TBM 확인자: ____________________",
-    "보관 위치: ____________________",
-    "확인일시: ______년 ____월 ____일 ____시 ____분"
+    ...riskReviewLines,
+    ...(profile.layout === "risk"
+      ? [
+          "[확인 및 결재]",
+          "작성: ____________________",
+          "검토: ____________________",
+          "승인: ____________________",
+          RISK_RETENTION_NOTE
+        ]
+      : [
+          "[확인/서명]",
+          "작성자: ____________________",
+          "관리감독자: ____________________",
+          "교육/TBM 확인자: ____________________",
+          "보관 위치: ____________________",
+          "확인일시: ______년 ____월 ____일 ____시 ____분"
+        ])
   ].join("\n");
 }
 
@@ -2358,6 +2306,15 @@ function SafetyDocumentPreview({
   const tbmBridgeRows = profile.layout === "tbmBriefing" || profile.layout === "tbmLog"
     ? buildTbmBridgeRows(data, riskRows)
     : [];
+  // 위험성평가 미리보기는 인쇄·내보내기와 같은 정본 행에서 그린다(PR-06/10). 정본 행이 없으면(본문 직접 수정) 본문 행을 쓴다.
+  const riskSplit = profile.layout === "risk" ? splitRiskRowsForOutput(data.structured?.riskAssessmentRows ?? []) : null;
+  const riskRecord = riskSplit && riskSplit.main.length
+    ? {
+        header: riskRecordHeaderPairs(scenario),
+        rows: toStructuredRiskRows(riskSplit.main),
+        review: [...(data.structured?.riskReviewItems ?? []), ...riskSplit.review]
+      }
+    : null;
   const tableLabels = profile.layout === "risk"
     ? { primary: "유해·위험요인", action: "재해형태 / 감소대책", confirm: "등급 / 담당" }
     : profile.layout === "workPlan"
@@ -2426,6 +2383,48 @@ function SafetyDocumentPreview({
           </div>
         </section>
       ) : null}
+      {riskRecord ? (
+        <div className="safety-form-section-stack">
+          <section aria-label="평가 기록">
+            <h3>평가 기록(시행규칙 제37조의4)</h3>
+            <div className="safety-form-table-wrap">
+              <table>
+                <tbody>
+                  {riskRecord.header.map(([label, value]) => (
+                    <tr key={label}><th>{label}</th><td>{value}</td></tr>
+                  ))}
+                  {RISK_SCALE_LINES.map((line) => (
+                    <tr key={line}><th>위험성 결정 기준</th><td>{line}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <section aria-label="위험성평가 본표">
+            <h3>유해·위험요인 파악·위험성 결정·감소대책</h3>
+            <div className="safety-form-table-wrap">
+              <table>
+                <thead>
+                  <tr>{RISK_RECORD_ROW_HEADERS.map((label) => <th key={label}>{label}</th>)}</tr>
+                </thead>
+                <tbody>
+                  {riskRecord.rows.map((row, index) => (
+                    <tr key={`risk-${index}`} data-risk-row={index + 1}>
+                      {riskRecordRowCells(row, index).map((cell, cellIndex) => <td key={cellIndex}>{cell}</td>)}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+          {riskRecord.review.length ? (
+            <section aria-label={RISK_REVIEW_LIST_TITLE}>
+              <h3>{RISK_REVIEW_LIST_TITLE}</h3>
+              <ol>{riskRecord.review.map((row, index) => <li key={`review-${index}`}>{row.hazard}</li>)}</ol>
+            </section>
+          ) : null}
+        </div>
+      ) : (
       <div className="safety-form-section-stack">
         {groups.map((group) => (
           <section key={group.section}>
@@ -2455,6 +2454,7 @@ function SafetyDocumentPreview({
           </section>
         ))}
       </div>
+      )}
       <div className="safety-form-signatures">
         <span>작성자 서명</span>
         <span>관리감독자 서명</span>
@@ -2819,6 +2819,8 @@ export function WorkpackEditor({
   const [remediationLoadingId, setRemediationLoadingId] = useState<string | null>(null);
   const documentBodyRef = useRef<HTMLDivElement | null>(null);
   const workpackShellRef = useRef<HTMLElement | null>(null);
+  // 사용자가 근거·품질 칸을 직접 연 횟수. 진입 정렬 타이머가 그 뒤에 늦게 돌아 화면을 위험성평가로 되돌리지 않게 한다.
+  const userPaneActionRef = useRef(0);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const onDeliverablesChangeRef = useRef(onDeliverablesChange);
   const onSelectedDocumentChangeRef = useRef(onSelectedDocumentChange);
@@ -2901,6 +2903,17 @@ export function WorkpackEditor({
     : canonicalRiskText !== values.riskAssessmentDraft;
   const selectedUsesCanonicalRiskRows = selected.key === "riskAssessmentDraft"
     && canonicalRiskRowsAreCurrent;
+  // 위험성평가 출력(인쇄·Word·JPG·HTML·hwpx·xlsx·hwp·pdf)이 쓰는 정본 행. 본문을 직접 고쳐 정본과 달라졌으면 비운다
+  // (그때는 고친 본문 행을 그대로 싣는다). 다른 문서는 손대지 않는다.
+  const selectedRiskExportRows: RiskAssessmentRow[] | undefined = selected.key !== "riskAssessmentDraft"
+    ? undefined
+    : selectedUsesCanonicalRiskRows
+      ? canonicalRiskRows
+      : selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows;
+  const selectedRiskReviewItems = selected.key === "riskAssessmentDraft" ? data.structured?.riskReviewItems : undefined;
+  const exportData: AskResponse = selected.key === "riskAssessmentDraft" && data.structured
+    ? { ...data, structured: { ...data.structured, riskAssessmentRows: selectedRiskExportRows ?? [] } }
+    : data;
   const selectedFormProfile = getSafetyFormProfile(selected.key);
   const rubricEvaluation = useMemo(() => evaluatePublicSafetyRubric(values), [values]);
   const selectedRubricItems = useMemo(() => {
@@ -3152,7 +3165,9 @@ export function WorkpackEditor({
     root.style.scrollBehavior = "auto";
     window.scrollTo({ top: 0, behavior: "auto" });
     root.style.scrollBehavior = previousScrollBehavior;
+    const landingPaneAction = userPaneActionRef.current;
     const alignRequestedDocument = () => {
+      if (userPaneActionRef.current !== landingPaneAction) return;
       if (requestedDocumentKey === "riskAssessmentDraft") {
         alignRiskCockpitBelowToolbar();
         focusSelectedDocumentTarget(requestedDocumentKey);
@@ -3477,7 +3492,9 @@ export function WorkpackEditor({
   }, [expandedStructuredSectionId, selected.key, structuredDocument.body]);
 
   useLayoutEffect(() => {
+    const landingPaneAction = userPaneActionRef.current;
     const alignSelectedDocument = () => {
+      if (userPaneActionRef.current !== landingPaneAction) return;
       if (selected.key === "riskAssessmentDraft") {
         alignRiskCockpitBelowToolbar();
         return;
@@ -3594,6 +3611,7 @@ export function WorkpackEditor({
   }
 
   function openDocumentUtilityPanel(targetTestId: "editor-evidence-panel" | "editor-quality-panel") {
+    userPaneActionRef.current += 1;
     const root = workpackShellRef.current || documentBodyRef.current;
     const drawer = root?.querySelector<HTMLDetailsElement>('[data-testid="editor-provenance-drawer"]');
     if (drawer) {
@@ -3608,6 +3626,14 @@ export function WorkpackEditor({
     alignTarget();
     window.requestAnimationFrame(alignTarget);
     window.setTimeout(alignTarget, 80);
+    // 웹 글꼴(한글 조각)이 서랍을 연 뒤에 내려오면 줄바꿈이 바뀌어 근거 칸이 밀린다. 글꼴이 바뀐 뒤 한 번 더 맞춘다.
+    const fonts = typeof document !== "undefined" ? document.fonts : undefined;
+    if (fonts) {
+      const realignAfterFontSwap = () => window.requestAnimationFrame(alignTarget);
+      void fonts.ready.then(realignAfterFontSwap);
+      fonts.addEventListener("loadingdone", realignAfterFontSwap);
+      window.setTimeout(() => fonts.removeEventListener("loadingdone", realignAfterFontSwap), 2000);
+    }
   }
 
   function selectDocumentKey(key: DocumentKey) {
@@ -3787,7 +3813,7 @@ export function WorkpackEditor({
 
   function downloadHtml() {
     downloadBlob(
-      new Blob([buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows)], { type: "text/html;charset=utf-8" }),
+      new Blob([buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, exportData, riskAssessmentRows)], { type: "text/html;charset=utf-8" }),
       `${baseName}.html`
     );
   }
@@ -3800,7 +3826,7 @@ export function WorkpackEditor({
   function downloadXls() {
     // Legacy HTML-as-.xls — kept for backward compatibility but new UI prefers downloadXlsx().
     downloadBlob(
-      new Blob([buildExcelHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows)], { type: "application/vnd.ms-excel;charset=utf-8" }),
+      new Blob([buildExcelHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, exportData, riskAssessmentRows)], { type: "application/vnd.ms-excel;charset=utf-8" }),
       `${baseName}.xls`
     );
   }
@@ -3853,7 +3879,8 @@ export function WorkpackEditor({
             scenario: data.scenario,
             riskAssessmentRows: selectedUsesCanonicalRiskRows
               ? canonicalRiskRows
-              : selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows
+              : selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows,
+            ...(selectedRiskReviewItems?.length ? { riskReviewItems: selectedRiskReviewItems } : {})
           };
       const response = await fetch("/api/export/xlsx", {
         method: "POST",
@@ -3886,7 +3913,8 @@ export function WorkpackEditor({
           scenario: data.scenario,
           riskAssessmentRows: selectedUsesCanonicalRiskRows
             ? canonicalRiskRows
-            : selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows
+            : selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows,
+          ...(selectedRiskReviewItems?.length ? { riskReviewItems: selectedRiskReviewItems } : {})
         })
       });
       if (!response.ok) {
@@ -3904,14 +3932,14 @@ export function WorkpackEditor({
 
   function downloadDoc() {
     downloadBlob(
-      new Blob([buildWordHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows)], { type: "application/msword;charset=utf-8" }),
+      new Blob([buildWordHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, exportData, riskAssessmentRows)], { type: "application/msword;charset=utf-8" }),
       `${baseName}.doc`
     );
   }
 
   function downloadJpg() {
     setImageStatus("idle");
-    const markup = buildSafetyFormMarkup(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows);
+    const markup = buildSafetyFormMarkup(selected.title, selectedRows, data.scenario, selectedFormProfile, exportData, riskAssessmentRows);
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1754">
       <rect width="100%" height="100%" fill="#fafafb"/>
       <foreignObject x="34" y="34" width="1172" height="1686">
@@ -3948,7 +3976,7 @@ export function WorkpackEditor({
   async function downloadHwpx() {
     setHwpxStatus("building");
     try {
-      const blob = await buildHwpxWithRhwp(buildHwpTemplateText(selected.title, selectedRows, selectedFormProfile, data.scenario, data, riskAssessmentRows));
+      const blob = await buildHwpxWithRhwp(buildHwpTemplateText(selected.title, selectedRows, selectedFormProfile, data.scenario, exportData, riskAssessmentRows));
       downloadBlob(blob, `${baseName}.hwpx`);
       setHwpxStatus("idle");
     } catch (error) {
@@ -4028,7 +4056,7 @@ export function WorkpackEditor({
 
     if (serverExportReadiness === "locked") {
       popup.document.open();
-      popup.document.write(buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows));
+      popup.document.write(buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, exportData, riskAssessmentRows));
       popup.document.close();
       popup.focus();
       popup.print();
@@ -4049,6 +4077,9 @@ export function WorkpackEditor({
           // 안 쓰는 값을 보내면 행·글자 한도(413)에 걸려 대체 서식으로 넘어간다.
           ...(PDF_LINKED_RISK_ROW_DOCUMENT_KEYS.has(selected.key) ? { riskRows: riskAssessmentRows } : {}),
           ...(selectedRows.length ? {} : { documentText: selectedText }),
+          // 위험성평가는 정본 행을 보내 서버 인쇄본이 같은 행을 그리게 한다(키워드로 5~6행만 고르지 않음).
+          ...(selectedRiskExportRows?.length ? { riskAssessmentRows: selectedRiskExportRows } : {}),
+          ...(selectedRiskReviewItems?.length ? { riskReviewItems: selectedRiskReviewItems } : {}),
           riskLevel: data.riskSummary.riskLevel,
           topRisk: data.riskSummary.topRisk
         })
@@ -4070,7 +4101,7 @@ export function WorkpackEditor({
       console.error("server PDF print source failed", error);
       setPdfPrintStatus("fallback");
       popup.document.open();
-      popup.document.write(buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows));
+      popup.document.write(buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, exportData, riskAssessmentRows));
       popup.document.close();
       popup.document.body?.insertAdjacentHTML("afterbegin", PDF_PRINT_FALLBACK_POPUP_NOTICE);
       popup.focus();
@@ -4794,7 +4825,7 @@ export function WorkpackEditor({
                   rows={selectedRows}
                   scenario={data.scenario}
                   profile={selectedFormProfile}
-                  data={data}
+                  data={exportData}
                   riskRows={riskAssessmentRows}
                 />
               </div>

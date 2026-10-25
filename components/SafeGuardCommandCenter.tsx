@@ -1706,9 +1706,12 @@ export function SafeGuardCommandCenter({
   }
 
   async function fetchViaLegacyEndpoint(trimmed: string, harnessMemory: HarnessMemoryInput): Promise<AskResponse> {
+    const authToken = await readWorkspaceAccessToken();
     const response = await fetch("/api/ask", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: authToken
+        ? { "content-type": "application/json", authorization: `Bearer ${authToken}` }
+        : { "content-type": "application/json" },
       body: JSON.stringify({ question: trimmed, aiMode, harnessMemory })
     });
     if (!response.ok) {
@@ -1734,7 +1737,9 @@ export function SafeGuardCommandCenter({
     setState("ready");
     setDocumentSurfaceMode("review");
     setWorkspacePage("document");
-    setMessage("문서팩을 준비했습니다. 편집, 다운로드, 근거 확인, 현장 전파를 이어가세요.");
+    setMessage(payload.aiModeNotice
+      ? `문서팩을 준비했습니다. ${payload.aiModeNotice.message}`
+      : "문서팩을 준비했습니다. 편집, 다운로드, 근거 확인, 현장 전파를 이어가세요.");
   }
 
   async function generateWorkpack(nextQuestion = question) {
@@ -1775,9 +1780,10 @@ export function SafeGuardCommandCenter({
     }
 
     try {
+      const authToken = await readWorkspaceAccessToken();
       const payload = (await fetchAskStream({ question: trimmed, aiMode, harnessMemory }, (event) => {
         setConsoleLines((current) => nextConsoleLines(current, event));
-      })) as AskResponse;
+      }, undefined, authToken)) as AskResponse;
       applyGeneratedPayload(payload);
     } catch (streamError) {
       if (!shouldRetryAskViaLegacy(streamError)) {

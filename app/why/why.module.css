@@ -47,7 +47,7 @@
 
 .comparisonTable thead th {
   background: var(--workspace-accent);
-  color: var(--sc-black);
+  color: var(--workspace-accent-ink, var(--on-sign));
   font-weight: 760;
 }
 

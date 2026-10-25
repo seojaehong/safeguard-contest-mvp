@@ -395,8 +395,17 @@ export type GenerationEvidenceError = {
   message: string;
 };
 
+/** 요청한 생성 모드가 template 으로 강등됐을 때의 안내(2026-10-25 결정 21). */
+export type AskModeNotice = {
+  requestedMode: "template" | "enhanced" | "full";
+  appliedMode: "template";
+  reason: "anonymous" | "daily_cost_cap";
+  message: string;
+};
+
 export type AskResponse = {
   question: string;
+  aiModeNotice?: AskModeNotice;
   answer: string;
   practicalPoints: string[];
   citations: SearchResult[];
@@ -633,6 +642,8 @@ export type AskResponse = {
   };
   structured?: {
     riskAssessmentRows: RiskAssessmentRow[];
+    /** 「검토 필요:」 자리표시 행. 본표가 아니라 별도 확인 목록으로 출력한다(RA-11). */
+    riskReviewItems?: RiskAssessmentRow[];
     tbmRiskLinks?: TbmRiskLink[];
     riskAssessmentValidation: {
       ok: boolean;

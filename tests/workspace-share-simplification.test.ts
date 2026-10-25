@@ -184,10 +184,10 @@ describe("workspace share simplification", () => {
       css.indexOf('.safeclaw-module-shell[data-theme="night"]', css.indexOf('.safeclaw-module-shell[data-theme="day"] .share-panel.workflow-panel'))
     );
 
-    expect(moduleDayShareBlock).toContain("--share-surface: #ffffff;");
-    expect(moduleDayShareBlock).toContain("--share-surface-2: #f5f6f8;");
-    expect(moduleDayShareBlock).toContain("--share-ink: #17191d;");
-    expect(moduleDayShareBlock).toContain("--share-muted: #525a66;");
+    expect(moduleDayShareBlock).toContain("--share-surface: var(--paper);");
+    expect(moduleDayShareBlock).toContain("--share-surface-2: var(--desk);");
+    expect(moduleDayShareBlock).toContain("--share-ink: var(--ink);");
+    expect(moduleDayShareBlock).toContain("--share-muted: var(--ink-2);");
     expect(css).toContain('[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card strong {');
     expect(css).toContain("font-size: var(--text-caption);");
     expect(css).toContain('[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card em {');
@@ -212,7 +212,7 @@ describe("workspace share simplification", () => {
     expect(sharePanel).toContain('return "한국어 메시지 미리보기"');
     expect(sharePanel).toContain('`${formatMessageTargetLabel(data, selectedTarget)} 핵심 안전 안내`');
     expect(sharePanel).not.toContain("외국인 근로자 전송본 ·");
-    expect(sharePanel).toContain("작업자에게는 저장된 언어의 핵심 안전 안내를 보냅니다.");
+    expect(sharePanel).toContain("작업자 전송본은 저장된 언어의 핵심 안전 안내로 만듭니다(미리보기 전용, 실발송 없음).");
     expect(sharePanel).toContain("관리자 화면의 라벨은 한국어로 표시됩니다.");
     expect(sharePanel).toContain(">표시 언어</label>");
     expect(sharePanel).toContain("messageVariants: recipientMessageVariants.messageVariants");

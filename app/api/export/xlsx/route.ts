@@ -19,6 +19,7 @@ import {
 } from "@/lib/document-export-budget";
 import { withPublicDocumentExportAdmission } from "@/lib/public-distributed-rate-limit";
 import { parseStructuredRiskAssessmentRows } from "@/lib/risk-assessment-renderer";
+import { resolveRiskExportRows } from "@/lib/risk-assessment-record";
 import { companyFilePrefix } from "@/lib/scenario-display";
 
 export const dynamic = "force-dynamic";
@@ -223,11 +224,13 @@ async function exportXlsx(request: NextRequest) {
           if (!isRecord(d)) return null;
           const title = readString(d.title);
           if (!title) return null;
+          const riskExport = resolveRiskExportRows(d.edited === true ? [] : parseRiskRowsFromBody(d), d);
           return {
             title,
             rows: parseRows(d.rows, title),
             profile: parseProfile(d.profile),
-            structuredRiskRows: d.edited === true ? [] : parseRiskRowsFromBody(d)
+            structuredRiskRows: riskExport.main,
+            riskReviewItems: riskExport.review
           };
         })
         .filter((d): d is {
@@ -235,6 +238,7 @@ async function exportXlsx(request: NextRequest) {
           rows: SheetRow[];
           profile: ReturnType<typeof parseProfile>;
           structuredRiskRows: ReturnType<typeof parseRiskRowsFromBody>;
+          riskReviewItems: ReturnType<typeof parseRiskRowsFromBody>;
         } => Boolean(d));
       const buffer = await buildWorkpackXlsx(scenario, documents);
       return xlsxResponse(buffer, companyFilePrefix(scenario.companyName, "safeclaw-workpack"), "safeclaw-workpack");
@@ -243,8 +247,15 @@ async function exportXlsx(request: NextRequest) {
     const title = readString(body.title, "SafeClaw 안전 문서");
     const rows = parseRows(body.rows, title);
     const profile = parseProfile(body.profile);
-    const structuredRiskRows = body.edited === true ? [] : parseRiskRowsFromBody(body);
-    const buffer = await buildXlsxForDocument({ title, rows, profile, scenario, structuredRiskRows });
+    const riskExport = resolveRiskExportRows(body.edited === true ? [] : parseRiskRowsFromBody(body), body);
+    const buffer = await buildXlsxForDocument({
+      title,
+      rows,
+      profile,
+      scenario,
+      structuredRiskRows: riskExport.main,
+      riskReviewItems: riskExport.review
+    });
     return xlsxResponse(buffer, companyFilePrefix(scenario.companyName, title), "safeclaw-document");
   } catch (error) {
     if (error instanceof DocumentExportRequestError) return error.response;

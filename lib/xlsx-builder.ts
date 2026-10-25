@@ -7,9 +7,24 @@ import {
   resolveRiskAssessmentRows,
   type StructuredRiskAssessmentRow
 } from "@/lib/risk-assessment-renderer";
-import type { AccidentType } from "@/lib/risk-assessment-schema";
+import type { FourM } from "@/lib/risk-assessment-schema";
+import {
+  accidentTypeLabel,
+  FOUR_M_LABELS,
+  RISK_RETENTION_NOTE,
+  RISK_SCALE_LINES,
+  riskLevelLabel,
+  verificationStatusLabel
+} from "@/lib/risk-labels";
+import {
+  displayEquipment,
+  displayEvidenceRefs,
+  RISK_APPROVAL_LABELS,
+  RISK_REVIEW_LIST_NOTE,
+  RISK_REVIEW_LIST_TITLE,
+  riskRecordHeaderPairs
+} from "@/lib/risk-assessment-record";
 import { formatCompanyName, formatWorkerCount } from "@/lib/scenario-display";
-import { evidenceRefsForDisplay, RISK_LEVEL_DISPLAY_LABELS, VERIFICATION_STATUS_DISPLAY_LABELS } from "@/lib/document-display-labels";
 
 type SheetRow = {
   document: string;
@@ -53,6 +68,8 @@ const RISK_ASSESSMENT_COLUMNS = [
   { header: "감소대책", width: 36 },
   { header: "담당자", width: 14 },
   { header: "조치기한", width: 14 },
+  { header: "이행 결과", width: 18 },
+  { header: "잔여 위험성", width: 10 },
   { header: "확인상태", width: 14 },
   { header: "확인일", width: 14 },
   { header: "확인자", width: 14 },
@@ -64,35 +81,7 @@ const DISPLAY_HEADER_LABELS: Readonly<Record<string, string>> = {
   relatedRiskRowIndex: "연계 위험성평가 번호"
 };
 
-const FOUR_M_LABELS: Readonly<Record<string, string>> = {
-  Man: "인적 요인",
-  Machine: "기계·설비 요인",
-  Media: "작업환경 요인",
-  Management: "관리 요인"
-};
-
-const ACCIDENT_TYPE_LABELS = {
-  fall: "추락",
-  slip: "미끄러짐",
-  struckBy: "맞음",
-  caughtIn: "끼임",
-  cut: "베임",
-  burn: "화상",
-  electricShock: "감전",
-  chemicalExposure: "화학물질 노출",
-  asphyxiation: "질식",
-  heatIllness: "온열질환",
-  traffic: "교통사고",
-  collapse: "붕괴",
-  fireExplosion: "화재·폭발",
-  other: "기타"
-} satisfies Readonly<Record<AccidentType, string>>;
-
-// 표시 이름은 lib/document-display-labels.ts 한 곳에서 가져온다(PR-14, 결정 15: 상·중·하).
-const VERIFICATION_STATUS_LABELS: Readonly<Record<string, string>> = VERIFICATION_STATUS_DISPLAY_LABELS;
-
-const RISK_LEVEL_LABELS: Readonly<Record<string, string>> = RISK_LEVEL_DISPLAY_LABELS;
-
+// 라벨은 lib/risk-labels.ts 하나에서 가져온다(COPY-12, 위험등급 「상·중·하」 통일).
 // 조치기한·확인일 칸: 「현장 확인」 같은 안내 글자 대신 날짜 기입란을 둔다(COPY-05).
 const DATE_FIELD_BLANK = "    년    월    일";
 
@@ -107,19 +96,19 @@ function localizeDisplayHeader(value: string): string {
 }
 
 function localizeFourM(value: string): string {
-  return FOUR_M_LABELS[value] || value;
+  return value in FOUR_M_LABELS ? FOUR_M_LABELS[value as FourM] : value;
 }
 
 function localizeAccidentType(value: string): string {
-  return value in ACCIDENT_TYPE_LABELS ? ACCIDENT_TYPE_LABELS[value as AccidentType] : value;
+  return accidentTypeLabel(value);
 }
 
 function localizeVerificationStatus(value: string): string {
-  return VERIFICATION_STATUS_LABELS[value] || value;
+  return verificationStatusLabel(value);
 }
 
 function localizeRiskLevel(value: string): string {
-  return RISK_LEVEL_LABELS[value] || value;
+  return riskLevelLabel(value);
 }
 
 function mergedCellWidth(ws: ExcelJS.Worksheet, cell: ExcelJS.Cell): number {
@@ -171,7 +160,8 @@ function finalizeWorksheet(
   ws.pageSetup.paperSize = (options.wide ? 8 : 9) as ExcelJS.PaperSize;
   ws.pageSetup.orientation = "landscape";
   ws.pageSetup.fitToPage = true;
-  ws.pageSetup.fitToWidth = options.wide ? 2 : 1;
+  // 넓은 위험성평가 시트도 한 행이 가로 2쪽으로 갈리지 않게 A3 가로 1쪽 폭에 맞춘다(EXP-06).
+  ws.pageSetup.fitToWidth = 1;
   ws.pageSetup.fitToHeight = 0;
   ws.pageSetup.margins = { left: 0.25, right: 0.25, top: 0.5, bottom: 0.5, header: 0.2, footer: 0.2 };
   ws.pageSetup.printArea = `A1:${lastColumnLetter}${options.lastRow}`;
@@ -253,6 +243,8 @@ export type XlsxBuildInput = {
   profile: SafetyFormProfile;
   scenario: AskResponse["scenario"];
   structuredRiskRows?: StructuredRiskAssessmentRow[];
+  /** 「검토 필요:」 자리표시 행 — 본표가 아니라 확인 필요 목록으로 싣는다. */
+  riskReviewItems?: StructuredRiskAssessmentRow[];
 };
 
 type StructuredEditOptions = {
@@ -288,33 +280,37 @@ function writeOfficialLikeRiskAssessmentTable(
   row += 1;
 
   // Index reference for alignment rules (0-based column index = headers index)
-  const wrapColumns = new Set([5, 8, 12, 18]); // hazard, currentControls, additionalControls, 근거
-  const centerColumns = new Set([0, 6, 9, 10, 11, 15, 16]); // No./4M/L/S/RL/확인상태/확인일
+  const wrapColumns = new Set([5, 8, 12, 15, 20]); // hazard, currentControls, additionalControls, 이행 결과, 근거
+  const centerColumns = new Set([0, 6, 9, 10, 11, 16, 17, 18]); // No./4M/L/S/RL/잔여/확인상태/확인일
 
+  // 행 값을 그대로 쓴다. 모르는 값은 빈칸이다(「현장 확인」「작업반장」 같은 대체 문구를 채우지 않는다).
   rows.forEach((riskRow, index) => {
-    const evidenceList = evidenceRefsForDisplay(riskRow.evidenceRefsList?.length ? riskRow.evidenceRefsList : riskRow.evidenceRefs);
-    const evidenceText = evidenceList.length
-      ? evidenceList.join("\n")
-      : (riskRow.evidence || "근거 확인");
+    const evidenceText = displayEvidenceRefs(
+      riskRow.evidenceRefsList && riskRow.evidenceRefsList.length
+        ? riskRow.evidenceRefsList
+        : riskRow.evidenceRefs || []
+    ).join("\n");
     const values = [
-      riskRow.id || String(index + 1),
-      riskRow.location || "현장 확인",
-      riskRow.process || riskRow.section || "위험성평가",
+      String(index + 1),
+      riskRow.location || "",
+      riskRow.process || riskRow.section || "",
       riskRow.unitTask,
-      riskRow.equipment || "장비·도구 확인",
+      displayEquipment(riskRow.equipment),
       riskRow.hazard,
-      localizeFourM(riskRow.fourM || "Management"),
-      localizeAccidentType(riskRow.accidentType || "other"),
-      riskRow.currentControls || "현장 확인",
-      riskRow.likelihood || "확인",
-      riskRow.severity || "확인",
-      localizeRiskLevel(riskRow.riskLevel || "확인"),
+      riskRow.fourM ? localizeFourM(riskRow.fourM) : "",
+      localizeAccidentType(riskRow.accidentType || ""),
+      riskRow.currentControls || "",
+      riskRow.likelihood || "",
+      riskRow.severity || "",
+      localizeRiskLevel(riskRow.riskLevel || ""),
       riskRow.additionalControls,
-      riskRow.owner || "작업반장",
-      dateCellValue(riskRow.dueDate || riskRow.due, "작업 전"),
-      localizeVerificationStatus(riskRow.verificationStatus || riskRow.status || "planned"),
-      dateCellValue(riskRow.verificationDate, DATE_FIELD_BLANK),
-      riskRow.verificationChecker || "관리감독자",
+      riskRow.owner || "",
+      dateCellValue(riskRow.dueDate || riskRow.due, ""),
+      riskRow.implementationResult || "",
+      localizeRiskLevel(riskRow.residualRiskLevel || ""),
+      localizeVerificationStatus(riskRow.verificationStatus || riskRow.status || ""),
+      dateCellValue(riskRow.verificationDate, ""),
+      riskRow.verificationChecker || "",
       evidenceText
     ];
     values.forEach((value, columnIndex) => {
@@ -331,6 +327,92 @@ function writeOfficialLikeRiskAssessmentTable(
     row += 1;
   });
 
+  return row;
+}
+
+function writeRiskSpanRow(
+  ws: ExcelJS.Worksheet,
+  row: number,
+  lastColumn: number,
+  cells: Array<{ text: string; span: number; label?: boolean }>
+): number {
+  let column = 1;
+  cells.forEach((cell, index) => {
+    const endColumn = index === cells.length - 1 ? lastColumn : Math.min(lastColumn, column + cell.span - 1);
+    if (endColumn > column) ws.mergeCells(row, column, row, endColumn);
+    const target = ws.getCell(row, column);
+    target.value = cell.text;
+    target.alignment = { vertical: "middle", horizontal: cell.label ? "center" : "left", wrapText: true };
+    if (cell.label) {
+      target.fill = META_LABEL_FILL;
+      target.font = META_LABEL_FONT;
+    }
+    column = endColumn + 1;
+  });
+  applyBorders(ws, `A${row}:${columnLetter(lastColumn)}${row}`);
+  ws.getRow(row).height = 26;
+  return row + 1;
+}
+
+function writeRiskSectionTitle(ws: ExcelJS.Worksheet, row: number, lastColumn: number, title: string): number {
+  ws.mergeCells(row, 1, row, lastColumn);
+  const cell = ws.getCell(row, 1);
+  cell.value = title;
+  cell.fill = SECTION_FILL;
+  cell.font = SECTION_FONT;
+  cell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
+  applyBorders(ws, `A${row}:${columnLetter(lastColumn)}${row}`);
+  return row + 1;
+}
+
+/** 시행규칙 제37조의4 기록란(실시 시기·담당자, 참여 근로자·근로자대표, 참여 방법)과 위험성 결정 척도. 값은 빈칸이다. */
+function writeRiskRecordHeader(ws: ExcelJS.Worksheet, startRow: number, scenario: Scenario): number {
+  const lastColumn = RISK_ASSESSMENT_COLUMNS.length;
+  let row = writeRiskSectionTitle(ws, startRow, lastColumn, "평가 기록(산업안전보건법 시행규칙 제37조의4)");
+  const pairs = riskRecordHeaderPairs(scenario);
+  for (let index = 0; index < pairs.length; index += 2) {
+    const [leftLabel, leftValue] = pairs[index];
+    const [rightLabel, rightValue] = pairs[index + 1] || ["", ""];
+    row = writeRiskSpanRow(ws, row, lastColumn, [
+      { text: leftLabel, span: 3, label: true },
+      { text: leftValue, span: 7 },
+      { text: rightLabel, span: 3, label: true },
+      { text: rightValue, span: 8 }
+    ]);
+  }
+  row = writeRiskSectionTitle(ws, row, lastColumn, "위험성 결정 기준");
+  RISK_SCALE_LINES.forEach((line) => {
+    row = writeRiskSpanRow(ws, row, lastColumn, [{ text: line, span: lastColumn }]);
+  });
+  return row;
+}
+
+/** 확인 필요 목록·결재란·보존 안내. */
+function writeRiskRecordFooter(
+  ws: ExcelJS.Worksheet,
+  startRow: number,
+  reviewRows: StructuredRiskAssessmentRow[]
+): number {
+  const lastColumn = RISK_ASSESSMENT_COLUMNS.length;
+  let row = startRow;
+  if (reviewRows.length) {
+    row = writeRiskSectionTitle(ws, row + 1, lastColumn, RISK_REVIEW_LIST_TITLE);
+    row = writeRiskSpanRow(ws, row, lastColumn, [{ text: RISK_REVIEW_LIST_NOTE, span: lastColumn }]);
+    reviewRows.forEach((reviewRow, index) => {
+      row = writeRiskSpanRow(ws, row, lastColumn, [
+        { text: String(index + 1), span: 1, label: true },
+        { text: reviewRow.hazard, span: 11 },
+        { text: displayEvidenceRefs(reviewRow.evidenceRefs).join(" / "), span: 9 }
+      ]);
+    });
+  }
+  row = writeRiskSectionTitle(ws, row + 1, lastColumn, "확인 및 결재");
+  row = writeRiskSpanRow(ws, row, lastColumn, RISK_APPROVAL_LABELS.flatMap((label) => [
+    { text: label, span: 2, label: true },
+    { text: "성명/서명:", span: 5 }
+  ]));
+  ws.getRow(row - 1).height = 44;
+  row = writeRiskSpanRow(ws, row, lastColumn, [{ text: RISK_RETENTION_NOTE, span: lastColumn }]);
   return row;
 }
 
@@ -1431,20 +1513,24 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   row += 1; // spacer
 
   if (isStructuredRiskSheet) {
+    row = writeRiskRecordHeader(ws, row, scenario);
     row += 1;
     const riskHeaderRow = row + 1;
     const riskRows = resolveRiskAssessmentRows({ structuredRows: structuredRiskRows, fallbackRows: rows });
     row = writeOfficialLikeRiskAssessmentTable(ws, row, riskRows);
-    row += 1;
-    ws.mergeCells(row, 1, row, lastColumn);
-    const note = ws.getCell(row, 1);
-    note.value =
-      "위험성평가표 — 작업장 환경에 맞게 평가척도(가능성·중대성)를 조정한 후 서명·확인란을 작성해 사용하세요.";
-    note.font = { name: "Malgun Gothic", size: 10, italic: true, color: { argb: "FF5E6677" } };
-    note.alignment = { vertical: "middle", horizontal: "left", indent: 1, wrapText: true };
-    finalizeWorksheet(ws, { lastRow: row, lastColumn, headerRow: riskHeaderRow, wide: true });
+    row = writeRiskRecordFooter(ws, row, input.riskReviewItems || []);
+    finalizeWorksheet(ws, { lastRow: row - 1, lastColumn, headerRow: riskHeaderRow, wide: true });
     const buffer = await wb.xlsx.writeBuffer();
     return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
+  }
+
+  // 위험성평가 본문을 직접 고쳐 정본 행과 달라진 경우에도 제37조의4 기록란은 같은 칸으로 싣는다.
+  if (profile.layout === "risk") {
+    row = addSectionHeader(ws, row, "평가 기록(산업안전보건법 시행규칙 제37조의4)");
+    row = addKeyValueRows(ws, row, riskRecordHeaderPairs(scenario));
+    row = addSectionHeader(ws, row, "위험성 결정 기준");
+    row = addKeyValueRows(ws, row, RISK_SCALE_LINES.map((line, index) => [index === 0 ? "결정 방법" : index === 1 ? "등급" : "허용 기준", line]));
+    row += 1;
   }
 
   // 4) Section summary
@@ -1556,8 +1642,9 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   // 7) Note
   ws.mergeCells(row, 1, row, 6);
   const note = ws.getCell(row, 1);
-  note.value =
-    "안전 문서 — 서명·확인란을 작성한 후 현장에 비치하거나 제출하세요.";
+  note.value = profile.layout === "risk"
+    ? `위험성평가표 — 서명·확인란을 작성한 후 비치합니다. ${RISK_RETENTION_NOTE}`
+    : "안전 문서 — 서명·확인란을 작성한 후 현장에 비치하거나 제출하세요.";
   note.font = { name: "Malgun Gothic", size: 10, italic: true, color: { argb: "FF5E6677" } };
   note.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
 
@@ -1572,7 +1659,13 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
  */
 export async function buildWorkpackXlsx(
   scenario: AskResponse["scenario"],
-  documents: Array<{ title: string; rows: SheetRow[]; profile: SafetyFormProfile; structuredRiskRows?: StructuredRiskAssessmentRow[] }>
+  documents: Array<{
+    title: string;
+    rows: SheetRow[];
+    profile: SafetyFormProfile;
+    structuredRiskRows?: StructuredRiskAssessmentRow[];
+    riskReviewItems?: StructuredRiskAssessmentRow[];
+  }>
 ): Promise<Buffer> {
   const wb = new ExcelJS.Workbook();
   wb.creator = "SafeClaw";
@@ -1626,8 +1719,11 @@ export async function buildWorkpackXlsx(
 
     if (isStructuredRiskSheet) {
       const riskRows = resolveRiskAssessmentRows({ structuredRows: doc.structuredRiskRows, fallbackRows: doc.rows });
-      const lastRow = writeOfficialLikeRiskAssessmentTable(ws, row, riskRows) - 1;
-      finalizeWorksheet(ws, { lastRow, lastColumn: RISK_ASSESSMENT_COLUMNS.length, headerRow: 3, wide: true });
+      row = writeRiskRecordHeader(ws, row, scenario);
+      const riskHeaderRow = row + 1;
+      row = writeOfficialLikeRiskAssessmentTable(ws, row, riskRows);
+      row = writeRiskRecordFooter(ws, row, doc.riskReviewItems || []);
+      finalizeWorksheet(ws, { lastRow: row - 1, lastColumn: RISK_ASSESSMENT_COLUMNS.length, headerRow: riskHeaderRow, wide: true });
       continue;
     }
 

@@ -1,7 +1,18 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { IBM_Plex_Sans_KR } from "next/font/google";
 import { GlobalBoundaryProbe } from "safeclaw-audit-error-escalation";
 import { DeploymentFreshnessGuard } from "@/components/DeploymentFreshnessGuard";
+
+// 제품 글꼴 — IBM Plex Sans KR 400·500·600 (DESIGN.md). CSS 는 --font-plex-kr 로 받는다.
+// 700 이상은 불러오지 않는다. globals.css 의 font-synthesis-weight: none 으로 가짜 굵기를 막는다.
+const plexSansKr = IBM_Plex_Sans_KR({
+  weight: ["400", "500", "600"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-plex-kr",
+  preload: false
+});
 
 const COMMIT_SHA_PATTERN = /^[0-9a-f]{40}$/u;
 
@@ -32,9 +43,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    <html lang="ko" className={plexSansKr.variable}>
       <head>
-        {/* Multilingual scripts remain CDN-backed; core KR and HUD faces are self-hosted. */}
+        {/* Multilingual scripts remain CDN-backed; the product face (IBM Plex Sans KR) is self-hosted by next/font. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
 

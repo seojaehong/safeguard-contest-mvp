@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
+import { isInvitedAdmin, WorkspaceInviteRequiredError } from "@/lib/admin-invite";
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -661,6 +662,8 @@ export async function ensureWorkspaceContext(
     .maybeSingle();
 
   if (organizationSelectError) throw organizationSelectError;
+  // 초대·승인제(결정 20): 조직이 없는 계정은 초대 명단에 있을 때만 새 작업공간을 만든다.
+  if (!existingOrganization && !isInvitedAdmin(user)) throw new WorkspaceInviteRequiredError();
 
   const organizationId = existingOrganization?.id || await insertOrganization(client, user.id, organizationName);
 

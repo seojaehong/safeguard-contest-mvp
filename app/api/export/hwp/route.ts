@@ -10,6 +10,17 @@ import {
   resolveRiskAssessmentRows,
   type StructuredRiskAssessmentRow
 } from "@/lib/risk-assessment-renderer";
+import { RISK_RETENTION_NOTE, RISK_SCALE_LINES } from "@/lib/risk-labels";
+import {
+  displayEvidenceRefs,
+  resolveRiskExportRows,
+  RISK_APPROVAL_LABELS,
+  RISK_RECORD_ROW_HEADERS,
+  RISK_REVIEW_LIST_NOTE,
+  RISK_REVIEW_LIST_TITLE,
+  riskRecordHeaderPairs,
+  riskRecordRowCells
+} from "@/lib/risk-assessment-record";
 import {
   assertDocumentExportInputBudget,
   assertDocumentExportOutputBudget,
@@ -80,22 +91,6 @@ function readString(value: unknown, fallback = "") {
 
 function readNumber(value: unknown, fallback = 0) {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
-}
-
-function localizeRiskLevel(value: string | undefined): string {
-  const normalized = value?.trim().toLowerCase();
-  if (normalized === "high") return "상";
-  if (normalized === "medium") return "중";
-  if (normalized === "low") return "하";
-  return value?.trim() || "확인";
-}
-
-function localizeVerificationStatus(value: string | undefined): string {
-  const normalized = value?.trim().toLowerCase();
-  if (normalized === "planned") return "조치 예정";
-  if (normalized === "done") return "조치 완료";
-  if (normalized === "needsreview") return "검토 필요";
-  return value?.trim() || "확인";
 }
 
 function sanitizeFileName(value: string) {
@@ -211,15 +206,23 @@ function insertHwpTable(document: HwpDocument, paraIdx: number, rows: readonly (
   return document.getParagraphCount(0) - 1;
 }
 
+function insertHwpParagraph(document: HwpDocument, paraIdx: number, text: string): number {
+  document.insertText(0, paraIdx, 0, text);
+  document.splitParagraph(0, paraIdx, document.getParagraphLength(0, paraIdx));
+  return document.getParagraphCount(0) - 1;
+}
+
 function buildHwpBuffer(args: {
   title: string;
   rows: SheetRow[];
   profile: SafetyFormProfile;
   scenario: ReturnType<typeof parseScenario>;
   structuredRiskRows?: StructuredRiskAssessmentRow[];
+  riskReviewItems?: StructuredRiskAssessmentRow[];
 }): Buffer {
   ensureWasm();
   const { title, rows, profile, scenario, structuredRiskRows } = args;
+  const isRisk = profile.layout === "risk";
   const document = HwpDocument.createEmpty();
   try {
     document.createBlankDocument();
@@ -238,24 +241,30 @@ function buildHwpBuffer(args: {
       nextParaIdx = insertHwpTable(document, nextParaIdx, meta, "기본정보");
     }
 
+    // 위험성평가: 시행규칙 제37조의4 기록란과 위험성 결정 기준. 모르는 값은 빈칸이다.
+    if (isRisk) {
+      nextParaIdx = insertHwpParagraph(document, nextParaIdx, "평가 기록(산업안전보건법 시행규칙 제37조의4)");
+      const pairs = riskRecordHeaderPairs(scenario);
+      const recordRows: string[][] = [];
+      for (let index = 0; index < pairs.length; index += 2) {
+        const right = pairs[index + 1] || ["", ""];
+        recordRows.push([pairs[index][0], pairs[index][1], right[0], right[1]]);
+      }
+      nextParaIdx = insertHwpTable(document, nextParaIdx, recordRows, "평가 기록");
+      nextParaIdx = insertHwpParagraph(document, nextParaIdx, "위험성 결정 기준");
+      nextParaIdx = insertHwpTable(document, nextParaIdx, RISK_SCALE_LINES.map((line) => ["결정 기준", line]), "위험성 결정 기준");
+    }
+
     // Body table
     const riskRows = profile.layout === "risk" && structuredRiskRows?.length
       ? resolveRiskAssessmentRows({ structuredRows: structuredRiskRows, fallbackRows: rows })
       : [];
+    // 정본 행을 그대로 싣는다. 모르는 값은 빈칸이다(「현장 확인」「작업반장」을 채우지 않는다).
     const cols = riskRows.length
-      ? ["세부작업", "유해·위험요인", "현재조치", "위험성", "감소대책", "담당/기한", "상태"]
+      ? [...RISK_RECORD_ROW_HEADERS]
       : deriveColumns(profile);
-    const colCount = cols.length;
     const bodyRows: string[][] = riskRows.length
-      ? riskRows.map((riskRow) => [
-        riskRow.unitTask,
-        riskRow.hazard,
-        riskRow.currentControls || "현장 확인",
-        localizeRiskLevel(riskRow.riskLevel),
-        riskRow.additionalControls,
-        `${riskRow.owner || "작업반장"} / ${riskRow.dueDate || "작업 전"}`,
-        localizeVerificationStatus(riskRow.verificationStatus || riskRow.status)
-      ])
+      ? riskRows.map((riskRow, index) => riskRecordRowCells(riskRow, index))
       : rows.map((r, idx) => [
         profile.layout === "risk" ? (r.section || String(idx + 1)) : String(idx + 1),
         r.item || "",
@@ -265,15 +274,31 @@ function buildHwpBuffer(args: {
     const allRows = [cols, ...bodyRows];
     nextParaIdx = insertHwpTable(document, nextParaIdx, allRows, "본문");
 
+    // 「검토 필요:」 자리표시 행은 본표가 아니라 확인 필요 목록으로 싣는다(RA-11).
+    const reviewItems = isRisk ? args.riskReviewItems || [] : [];
+    if (reviewItems.length) {
+      nextParaIdx = insertHwpParagraph(document, nextParaIdx, `${RISK_REVIEW_LIST_TITLE} — ${RISK_REVIEW_LIST_NOTE}`);
+      nextParaIdx = insertHwpTable(document, nextParaIdx, [
+        ["번호", "확인할 내용", "참고자료"],
+        ...reviewItems.map((item, index) => [String(index + 1), item.hazard, displayEvidenceRefs(item.evidenceRefs).join(" / ")])
+      ], "확인 필요 목록");
+    }
+
     document.insertText(0, nextParaIdx, 0, "확인 및 서명");
     const approvalLabelLength = document.getParagraphLength(0, nextParaIdx);
     document.splitParagraph(0, nextParaIdx, approvalLabelLength);
     nextParaIdx = document.getParagraphCount(0) - 1;
-    const approvalRows = [
-      ["작성자", "관리감독자", "교육/TBM 확인자", "확인일시"],
-      ["성명/서명: ____________________", "성명/서명: ____________________", "성명/서명: ____________________", "____년 ____월 ____일 ____시 ____분"]
-    ];
-    insertHwpTable(document, nextParaIdx, approvalRows, "확인·서명");
+    const approvalRows = isRisk
+      ? [
+        [...RISK_APPROVAL_LABELS],
+        RISK_APPROVAL_LABELS.map(() => "성명/서명: ____________________")
+      ]
+      : [
+        ["작성자", "관리감독자", "교육/TBM 확인자", "확인일시"],
+        ["성명/서명: ____________________", "성명/서명: ____________________", "성명/서명: ____________________", "____년 ____월 ____일 ____시 ____분"]
+      ];
+    nextParaIdx = insertHwpTable(document, nextParaIdx, approvalRows, "확인·서명");
+    if (isRisk) document.insertText(0, nextParaIdx, 0, RISK_RETENTION_NOTE);
 
     return Buffer.from(document.exportHwp());
   } finally {
@@ -309,8 +334,15 @@ async function exportHwp(request: NextRequest) {
     const rows = parseRows(body.rows, title);
     const profile = parseProfile(body.profile);
     const scenario = parseScenario(body.scenario);
-    const structuredRiskRows = body.edited === true ? [] : parseRiskRowsFromBody(body);
-    const buffer = buildHwpBuffer({ title, rows, profile, scenario, structuredRiskRows });
+    const riskExport = resolveRiskExportRows(body.edited === true ? [] : parseRiskRowsFromBody(body), body);
+    const buffer = buildHwpBuffer({
+      title,
+      rows,
+      profile,
+      scenario,
+      structuredRiskRows: riskExport.main,
+      riskReviewItems: riskExport.review
+    });
     assertDocumentExportOutputBudget(buffer);
     const fileName = `${sanitizeFileName(companyFilePrefix(scenario.companyName, title))}.hwp`;
     return new NextResponse(new Uint8Array(buffer), {
