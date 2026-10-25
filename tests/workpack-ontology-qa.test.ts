@@ -109,6 +109,49 @@ describe("web workpack ontology QA", () => {
     expect(reviewed.ontologyQa?.result.reviewable && reviewed.ontologyQa.result.verdict).toBe("통과");
   });
 
+  it("주행 크레인이 입력에 없으면 화면에 붙는 검수 결과에서도 제140조 조치·조문을 뺀다(WP-09)", async () => {
+    const craneMissing: QaReviewFound = {
+      ...qaMissing,
+      task: "굴착작업",
+      missing: {
+        hazards: [],
+        controls: [
+          { control: "순간풍속 30m/s 초과 시 이탈방지장치 작동", articles: ["기준규칙 제140조(폭풍에 의한 이탈 방지)"] },
+          { control: "흙막이 지보공 설치", articles: ["기준규칙 제347조"] }
+        ],
+        articles: ["기준규칙 제140조(폭풍에 의한 이탈 방지)"]
+      }
+    };
+    vi.mocked(reviewDocpack).mockResolvedValueOnce(craneMissing).mockResolvedValueOnce(craneMissing);
+    const question = "도시가스 배관 굴착. 깊이 2.5m, 굴착기 1대와 이동식 크레인 1대, 오후 강풍 예보.";
+    const response = buildMockAskResponse(question, mockSearchResults.slice(0, 2), "live", "test");
+    const reviewed = await attachWebOntologyQa(response, question);
+    const result = reviewed.ontologyQa?.result;
+    const shown = JSON.stringify(result?.reviewable ? result.missing : {});
+
+    expect(shown).not.toContain("제140조");
+    expect(shown).not.toContain("이탈방지장치");
+    expect(shown).toContain("흙막이 지보공 설치");
+  });
+
+  it("옥외 주행 크레인 입력이면 검수 결과에 제140조 조치가 남는다(양쪽 분기)", async () => {
+    const craneMissing: QaReviewFound = {
+      ...qaMissing,
+      missing: {
+        hazards: [],
+        controls: [{ control: "순간풍속 30m/s 초과 시 이탈방지장치 작동", articles: ["기준규칙 제140조"] }],
+        articles: []
+      }
+    };
+    vi.mocked(reviewDocpack).mockResolvedValueOnce(craneMissing).mockResolvedValueOnce(craneMissing);
+    const question = "공장 옥외 주행 크레인 1대로 자재 인양, 오후 강풍 예보.";
+    const response = buildMockAskResponse(question, mockSearchResults.slice(0, 2), "live", "test");
+    const reviewed = await attachWebOntologyQa(response, question);
+    const result = reviewed.ontologyQa?.result;
+
+    expect(JSON.stringify(result?.reviewable ? result.missing : {})).toContain("제140조");
+  });
+
   it("threads request cancellation through review and stops before rereview", async () => {
     const controller = new AbortController();
     vi.mocked(reviewDocpack).mockImplementationOnce(async (_task, _document, signal) => {

@@ -81,6 +81,24 @@ function controlLine(item: MissingControl) {
     : item.control;
 }
 
+const isTravelingCraneArticle = (article: string) => /제140조(?!의)/.test(article);
+
+/**
+ * 옥외 주행 크레인 조문(제140조)은 그 설비가 입력에 없으면 문서팩 어느 문서에도, 화면에 붙는 검수 결과에도
+ * 싣지 않는다(WP-09). 계획서만 거르면 TBM·교육·비상대응·화면이 근로자에게 다른 조치를 전한다.
+ */
+function scopeQaResultToInput<T extends QaReviewResult>(result: T, question: string): T {
+  if (!result.reviewable || TRAVELING_CRANE_PATTERN.test(question)) return result;
+  return {
+    ...result,
+    missing: {
+      ...result.missing,
+      controls: result.missing.controls.filter((control) => !control.articles.some(isTravelingCraneArticle)),
+      articles: result.missing.articles.filter((article) => !isTravelingCraneArticle(article))
+    }
+  };
+}
+
 function needsRemediation(result: QaReviewResult): result is QaReviewFound {
   return result.reviewable && (
     result.missing.hazards.length > 0 ||
@@ -94,17 +112,9 @@ export function applyOntologyQaRemediation(
   reviewTask: string,
   result: QaReviewFound
 ): AskResponse {
-  // 옥외 주행 크레인 조문(제140조)은 그 설비가 입력에 없으면 문서팩 어느 문서에도 싣지 않는다(WP-09).
-  // 계획서만 거르면 TBM·교육·비상대응이 근로자에게 다른 조치를 전한다.
-  const hasTravelingCrane = TRAVELING_CRANE_PATTERN.test(response.question);
-  const isTravelingCraneArticle = (article: string) => /제140조(?!의)/.test(article);
-  const controls = hasTravelingCrane
-    ? result.missing.controls
-    : result.missing.controls.filter((control) => !control.articles.some(isTravelingCraneArticle));
-  const articles = (hasTravelingCrane
-    ? result.missing.articles
-    : result.missing.articles.filter((article) => !isTravelingCraneArticle(article))
-  ).slice(0, 6);
+  const scoped = scopeQaResultToInput(result, response.question);
+  const controls = scoped.missing.controls;
+  const articles = scoped.missing.articles.slice(0, 6);
 
   const missingHazardLines = result.missing.hazards.map((hazard) =>
     `누락 위험요인 확인: ${hazard}`
@@ -224,7 +234,7 @@ export async function attachWebOntologyQa(
   }
 
   try {
-    const result = await reviewDocpack(reviewTask, source.text, signal);
+    const result = scopeQaResultToInput(await reviewDocpack(reviewTask, source.text, signal), question);
     if (!needsRemediation(result)) {
       return attachOntologyQaResult(response, reviewTask, result, source.documentKeys);
     }
@@ -232,7 +242,7 @@ export async function attachWebOntologyQa(
     signal?.throwIfAborted();
     const remediated = applyOntologyQaRemediation(response, reviewTask, result);
     const remediatedSource = buildOntologyQaSource(remediated);
-    const rereviewed = await reviewDocpack(reviewTask, remediatedSource.text, signal);
+    const rereviewed = scopeQaResultToInput(await reviewDocpack(reviewTask, remediatedSource.text, signal), question);
     return attachOntologyQaResult(remediated, reviewTask, rereviewed, remediatedSource.documentKeys);
   } catch (error) {
     if (signal?.aborted || (error instanceof Error && error.name === "AbortError")) {
