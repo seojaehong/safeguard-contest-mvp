@@ -85,6 +85,15 @@ function requestWithBody(path: string, body: unknown, options: { ip?: string; si
   });
 }
 
+// 용량이 full 여러 건을 받으므로, 시험 대상 요청 하나만 남기고 나머지 full 자리를 미리 채운다.
+async function occupyOtherFullSlots(): Promise<() => Promise<void>> {
+  const { acquirePublicAskWorkLease, PUBLIC_ASK_PROVIDER_ADMISSION_POLICY } = await import("@/lib/public-ask-admission");
+  const others = PUBLIC_ASK_PROVIDER_ADMISSION_POLICY.capacity / PUBLIC_ASK_PROVIDER_ADMISSION_POLICY.weights.full - 1;
+  const leases = await Promise.all(Array.from({ length: others }, () => acquirePublicAskWorkLease("full")));
+  expect(leases.every(Boolean)).toBe(true);
+  return async () => { await Promise.all(leases.map((lease) => lease?.release())); };
+}
+
 describe("ask generation evidence routes", () => {
   beforeEach(() => {
     vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
@@ -247,6 +256,7 @@ describe("ask generation evidence routes", () => {
     });
     const { POST: postStream } = await import("@/app/api/ask/stream/route");
     const { POST: postJson } = await import("@/app/api/ask/route");
+    const releaseOthers = await occupyOtherFullSlots();
     const stream = await postStream(requestWithBody(
       "/api/ask/stream",
       { question: "성수동 외벽 도장 작업", aiMode: "full" },
@@ -265,6 +275,7 @@ describe("ask generation evidence routes", () => {
 
     await stream.body?.cancel("release full-mode test lease");
     expect(receivedSignal?.aborted).toBe(true);
+    await releaseOthers();
   });
 
   it("does not release the SSE work lease before cancelled provider work settles", async () => {
@@ -283,6 +294,7 @@ describe("ask generation evidence routes", () => {
     });
     const { POST: postStream } = await import("@/app/api/ask/stream/route");
     const { POST: postJson } = await import("@/app/api/ask/route");
+    const releaseOthers = await occupyOtherFullSlots();
     const stream = await postStream(requestWithBody(
       "/api/ask/stream",
       { question: "성수동 외벽 도장 작업", aiMode: "full" },
@@ -302,6 +314,7 @@ describe("ask generation evidence routes", () => {
 
     finishWork();
     await settled;
+    await releaseOthers();
     await vi.waitFor(async () => {
       const afterSettle = await postJson(requestWithBody(
         "/api/ask",
