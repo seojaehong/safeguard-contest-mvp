@@ -1,4 +1,5 @@
 import type { AskResponse } from "./types";
+import { formatWorkerCount, hasKnownWorkerCount } from "./scenario-display";
 
 export type WorkerTrainingStatus = "이수" | "당일 교육 예정" | "확인 필요";
 export type WorkerExperienceLevel = "숙련" | "중간" | "신규";
@@ -186,7 +187,7 @@ export function buildWorkerDispatchTargets(workers: WorkerProfile[]): WorkerDisp
 export function buildDisplayTargetWorkers(data: AskResponse, targetWorkers: WorkerDispatchTarget[]) {
   if (targetWorkers.length) return targetWorkers;
 
-  const workerCount = Math.max(1, data.scenario.workerCount || 1);
+  const workerCount = data.scenario.workerCount;
   return [
     {
       displayName: "현장관리자",
@@ -197,7 +198,7 @@ export function buildDisplayTargetWorkers(data: AskResponse, targetWorkers: Work
       trainingStatus: "확인 필요" as const
     },
     {
-      displayName: `작업자 그룹 ${workerCount}명`,
+      displayName: hasKnownWorkerCount(workerCount) ? `작업자 그룹 ${formatWorkerCount(workerCount)}` : "작업자 그룹(인원 확인 필요)",
       role: "작업자",
       nationality: "현장 확인",
       languageCode: "ko",
@@ -209,7 +210,7 @@ export function buildDisplayTargetWorkers(data: AskResponse, targetWorkers: Work
 
 export function formatDisplayTargetCount(data: AskResponse, targetWorkers: WorkerDispatchTarget[]) {
   if (targetWorkers.length) return `${targetWorkers.length}명`;
-  return `${Math.max(1, data.scenario.workerCount || 1)}명 기준`;
+  return hasKnownWorkerCount(data.scenario.workerCount) ? `${formatWorkerCount(data.scenario.workerCount)} 기준` : "인원 확인 필요";
 }
 
 export function summarizeWorkers(workers: WorkerProfile[]) {

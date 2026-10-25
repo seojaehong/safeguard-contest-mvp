@@ -53,6 +53,7 @@ import {
   validatePhaseAStructuredCitationOutput,
   type PhaseAGenerationGrounding,
 } from "@/lib/ontology/evidence-chain";
+import { hasKnownWorkerCount } from "./scenario-display";
 
 const log = createLogger("ai-deliverables");
 
@@ -364,11 +365,12 @@ export function contextBlock(ctx: GenContext) {
     "",
     "[현장 시나리오]",
     `작업일자: ${ctx.workDate}`,
-    `회사: ${ctx.scenario.companyName}`,
+    // PR-15: 입력에 없는 회사명·인원은 지어내지 않고 「입력 필요」로 적게 한다.
+    `회사: ${ctx.scenario.companyName?.trim() || "입력 없음 — 문서에는 「사업장명 입력 필요」로 적고 회사명을 지어내지 않는다"}`,
     `업종: ${ctx.scenario.companyType || "-"}`,
     `현장: ${ctx.scenario.siteName}`,
     `작업 요약: ${ctx.scenario.workSummary}`,
-    `작업 인원: ${ctx.scenario.workerCount}명`,
+    `작업 인원: ${hasKnownWorkerCount(ctx.scenario.workerCount) ? `${ctx.scenario.workerCount}명` : "입력 없음 — 문서에는 「작업인원 확인 필요」로 적고 인원 수를 지어내지 않는다(유도자·신호수·감시인 등 역할 인원은 총 작업인원이 아니다)"}`,
     `기상/조건: ${ctx.scenario.weatherNote}`,
     "",
     "[DB 하네스 계약]",
@@ -756,10 +758,8 @@ export function freeFormPrompt(ctx: GenContext) {
   return [
     persona(ctx.phaseAGrounding),
     "",
-    "다음 4개의 자유 텍스트 본문을 모두 작성하고 JSON 객체로 반환하라:",
+    "다음 2개의 자유 텍스트 본문을 모두 작성하고 JSON 객체로 반환하라:",
     "  - workpackSummaryDraft: 점검결과 요약(초안). 현장명/작업조건/핵심 위험/즉시 조치/연결 상태를 첫 장으로 정리. 600자 내외.",
-    "  - emergencyResponseDraft: 비상대응 절차(초안). 1.사고 징후 및 즉시 중지 / 2.초기조치 / 3.보고체계 / 4.현장보존 및 재발방지. 1200~1800자.",
-    "  - photoEvidenceDraft: 사진/증빙 기록(초안). 작업 전 / 조치 전·후 / TBM·교육 증빙 / 확인자. 800~1200자.",
     "  - kakaoMessage: 현장 공유 메시지. 카톡 단톡방에 바로 붙여넣을 수 있게 이모지 일부 사용 가능. 400~700자.",
     "",
     emergencyContactRules(),
@@ -767,8 +767,6 @@ export function freeFormPrompt(ctx: GenContext) {
     "응답 JSON 스키마:",
     `{
   "workpackSummaryDraft": "string",
-  "emergencyResponseDraft": "string",
-  "photoEvidenceDraft": "string",
   "kakaoMessage": "string"
 }`,
     "",
@@ -1055,15 +1053,14 @@ async function generateTbmRiskLinks(
 export function parseFree(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<AiDeliverables>(raw);
   if (!j) return null;
-  const required: Array<keyof AiDeliverables> = ["workpackSummaryDraft", "emergencyResponseDraft", "photoEvidenceDraft", "kakaoMessage"];
-  // Free 그룹은 4개 모두 짧은 문서. 1-2개만 살아남는 부분 응답을 retry로 잡아내려고
-  // 4개 모두 length>100인 경우에만 success로 인정.
+  // 결정 8(2026-10-25): 비상대응·사진증빙은 AI 생성에서 빼고 작업유형별 결정적 틀로 둔다(H9).
+  // 모델이 두 키를 돌려줘도 채택하지 않는다.
+  const required: Array<keyof AiDeliverables> = ["workpackSummaryDraft", "kakaoMessage"];
+  // 부분 응답을 retry로 잡아내려고 두 문서 모두 length>100인 경우에만 success로 인정.
   const valid = required.every((k) => typeof j[k] === "string" && (j[k] as string).length > 100);
   if (!valid) return null;
   return {
     workpackSummaryDraft: gateCitations(j.workpackSummaryDraft as string),
-    emergencyResponseDraft: gateCitations(sanitizeContacts(j.emergencyResponseDraft as string)),
-    photoEvidenceDraft: j.photoEvidenceDraft as string,
     kakaoMessage: j.kakaoMessage as string
   };
 }
@@ -1144,11 +1141,13 @@ const DELIVERABLE_GROUP_DOCUMENT_KEYS: Record<string, readonly string[]> = {
   tbmLog: ["tbmLogDraft"],
   educationRecordStructured: ["educationRecordStructured", "safetyEducationPoints"],
   structuredRiskRows: ["structuredRiskRows"],
-  free: ["workpackSummaryDraft", "emergencyResponseDraft", "photoEvidenceDraft", "kakaoMessage"],
+  free: ["workpackSummaryDraft", "kakaoMessage"],
   foreign: ["foreignWorkerBriefing", "foreignWorkerTransmission"],
   tbmRiskLinks: ["tbmRiskLinks"]
 };
 
+// 결정 8(2026-10-25): emergencyResponseDraft·photoEvidenceDraft 는 어느 AI 묶음에도 없다.
+// 늘 작업유형별 결정적 틀(lib/mock-data.ts)로 만들므로 AI 대체(fallback) 기록에도 넣지 않는다.
 const FULL_AI_DOCUMENT_KEYS = [...new Set(Object.values(DELIVERABLE_GROUP_DOCUMENT_KEYS).flat())];
 
 function deterministicDocumentTrace(fallbackUsed: boolean): GenerationDeliverableModelTrace {

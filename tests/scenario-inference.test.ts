@@ -167,7 +167,8 @@ describe("inferScenario", () => {
   ])("preserves a standalone excavation location: %s", (question, location) => {
     const scenario = inferScenario(question);
 
-    expect(scenario.companyName).toBe("현장 업체");
+    // PR-15: 회사명이 입력에 없으면 「현장 업체」 같은 고정값 대신 빈칸(문서 머리는 입력 요청).
+    expect(scenario.companyName).toBe("");
     expect(scenario.siteName).toBe(`${location} 굴착공사 현장`);
   });
 
@@ -180,7 +181,10 @@ describe("inferScenario", () => {
     expect(excavation.siteName).toContain("굴착");
     expect(excavation.siteName).not.toMatch(/^굴착공사/);
     expect(excavation.siteName).not.toContain("청소");
-    expect(cleaning.siteName).toBe("광주 하남산단 청소 현장");
+    // PR-15: 위치 규칙의 고정 현장명(「…청소 현장」) 대신 입력 지명 + 작업명으로 만든다.
+    expect(cleaning.siteName.startsWith("광주 하남산단 ")).toBe(true);
+    expect(cleaning.siteName).toContain("세척");
+    expect(cleaning.siteName).not.toContain("굴착");
   });
 
   it("still selects the chemical-cleaning profile from work identity terms", () => {

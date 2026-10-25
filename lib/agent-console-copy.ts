@@ -79,7 +79,7 @@ function hasText(deliverables: Record<string, unknown>, key: string): boolean {
 
 function docWasRecoveredByFinalPayload(line: AgentConsoleLine, deliverables: Record<string, unknown>): boolean {
   if (line.id === "doc:free") {
-    return ["workpackSummaryDraft", "emergencyResponseDraft", "photoEvidenceDraft", "kakaoMessage"].every((key) =>
+    return ["workpackSummaryDraft", "kakaoMessage"].every((key) =>
       hasText(deliverables, key)
     );
   }

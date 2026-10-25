@@ -1,5 +1,6 @@
 import type { AskResponse, TbmBriefingStructured, TbmLogStructured } from "./types";
 import type { RiskAssessmentRow } from "./risk-assessment-schema";
+import { formatWorkerCount, hasKnownWorkerCount } from "./scenario-display";
 
 // 위험성평가 행에서 TBM 브리핑·기록 구조(서명표 포함)를 결정적으로 만든다.
 // lib/search.ts 와 lib/mock-data.ts(template 경로)가 함께 쓰므로 순환 import 를 피해 따로 둔다.
@@ -76,7 +77,7 @@ export function buildTbmBriefingStructuredFromRiskRows(
     meta: {
       dateTime: "____년 __월 __일 __:__ (현장 기재)",
       location: scenario.siteName,
-      target: `전 작업자 ${scenario.workerCount}명`,
+      target: hasKnownWorkerCount(scenario.workerCount) ? `전 작업자 ${formatWorkerCount(scenario.workerCount)}` : "전 작업자(인원 확인 필요)",
       attendees: "현장 서명 또는 열람 확인 버튼"
     },
     todayWork: {
@@ -104,7 +105,9 @@ export function buildTbmLogStructuredFromRiskRows(
   weatherSummary: string
 ): TbmLogStructured {
   const selectedRows = tbmRows(rows);
-  const workerCount = Math.max(1, scenario.workerCount || 1);
+  // PR-15: 인원을 모르면 1명으로 채우지 않는다. 예정 인원은 0(확인 필요)으로 두고 명단도 비운다.
+  // 서명표 빈 칸은 출력기(xlsx 등)가 최소 1줄을 만든다.
+  const workerCount = hasKnownWorkerCount(scenario.workerCount) ? scenario.workerCount : 0;
   const confirmations = fillTbmList(
     selectedRows.map((row) => `${compactTbmText(row.hazard, "위험요인", 34)} 조치 확인`),
     ["작업중지 기준 공유", "보호구 착용 확인", "비상연락망 확인", "사진 증빙 위치 공유", "작업자 동선 확인"],

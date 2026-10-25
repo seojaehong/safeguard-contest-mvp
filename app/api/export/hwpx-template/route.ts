@@ -10,6 +10,7 @@ import {
   type HwpxTemplateKind
 } from "@/lib/hwpx-template";
 import { withPublicDocumentExportAdmission } from "@/lib/public-distributed-rate-limit";
+import { companyFilePrefix } from "@/lib/scenario-display";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -51,7 +52,7 @@ async function exportHwpxTemplate(request: NextRequest) {
   try {
     const buffer = buildHwpxFromTemplate(kind as HwpxTemplateKind, companyName);
     const label = TEMPLATE_LABELS[kind as HwpxTemplateKind];
-    const fileName = `${sanitizeFileName(`${companyName || "SafeClaw"}-${label}`)}.hwpx`;
+    const fileName = `${sanitizeFileName(companyFilePrefix(companyName, label))}.hwpx`;
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "content-type": "application/hwp+zip",
