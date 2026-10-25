@@ -15,6 +15,8 @@ import {
   enumCellLabel,
   fourMLabel,
   riskLevelLabel,
+  riskManagementNumber,
+  riskManagementNumberLabel,
   verificationStatusLabel
 } from "@/lib/document-display-labels";
 import { getDocumentTitle } from "@/lib/document-titles";
@@ -36,7 +38,9 @@ export const USER_OUTPUT_FORBIDDEN_PATTERNS: ReadonlyArray<{ rule: string; patte
     rule: "영문 enum 줄",
     pattern: /^\s*(?:-\s*)?(?:위험등급|위험수준|위험도|4M|재해형태|재해유형|확인상태)\s*:\s*(?:high|medium|low|Man|Machine|Media|Management|planned|done|needsReview|[a-z]+[A-Z][A-Za-z]*)\s*$/mu
   },
-  { rule: "문서 키", pattern: new RegExp(`\\b(?:${DOCUMENT_KEY_NAMES.join("|")})\\b`, "u") }
+  { rule: "문서 키", pattern: new RegExp(`\\b(?:${DOCUMENT_KEY_NAMES.join("|")})\\b`, "u") },
+  // 위험성평가 관리번호의 taskId 기반 영문 코드(RA-press-1·RA-confined-space-1). 운영 4건 15행이 이 게이트를 지나 나갔다(2026-10-25).
+  { rule: "위험성평가 관리번호 코드", pattern: /\bRA-[a-z]+(?:-[a-z]+)*-\d+\b/u }
 ];
 
 export type UserOutputLeak = { rule: string; sample: string };
@@ -98,6 +102,14 @@ const PHRASE_REPLACEMENTS: ReadonlyArray<readonly [RegExp, string]> = [
   [/\b(?:Man|Machine|Media|Management)\(([^)]+)\)/gu, "$1"]
 ];
 
+// 위험성평가 관리번호 영문 코드(RA-<taskId>-<순번>) → 「위험성평가-NN」.
+// 본문 글에는 행 순번이 없으므로 코드 끝의 순번을 쓴다(기본 틀은 1부터 행 순서대로 매기므로 구조화 행과 같다).
+const RISK_CONTROL_CODE_IN_TEXT = /\bRA-[a-z]+(?:-[a-z]+)*-(\d+)\b/gu;
+
+function rewriteRiskControlCodes(text: string): string {
+  return text.replace(RISK_CONTROL_CODE_IN_TEXT, (_all, ordinal: string) => riskManagementNumber(Number(ordinal) - 1));
+}
+
 const DOCUMENT_KEY_PATTERN = new RegExp(`\\b(${DOCUMENT_KEY_NAMES.join("|")})\\b`, "gu");
 
 // 「라벨: enum」 줄 — 라벨에 맞는 사전으로 바꾼다.
@@ -126,6 +138,7 @@ export function gateUserOutputText(text: string): string {
     `${lead}${label}${sep}${localizeLabelledEnum(label, value)}${tail}`
   ));
   next = next.replace(DOCUMENT_KEY_PATTERN, (key: string) => getDocumentTitle(key));
+  next = rewriteRiskControlCodes(next);
   return next;
 }
 
@@ -204,12 +217,17 @@ const RISK_ROW_TEXT_FIELDS = [
   "whySeverity"
 ] as const;
 
-function gateRiskRowText<T>(row: T): T {
+function gateRiskRowText<T>(row: T, index: number): T {
   if (!row || typeof row !== "object") return row;
   const next: Record<string, unknown> = { ...(row as Record<string, unknown>) };
   for (const field of RISK_ROW_TEXT_FIELDS) {
     const value = next[field];
     if (typeof value === "string") next[field] = gateUserOutputText(value);
+  }
+  // 관리번호: 기본 틀 영문 코드(RA-…-N)만 「위험성평가-NN」으로. Phase A control id 와 사람이 적은 값은 그대로(연결 키).
+  if (typeof next.controlId === "string") {
+    const label = riskManagementNumberLabel(next.controlId, index);
+    if (label !== next.controlId) next.controlId = label;
   }
   return next as T;
 }
@@ -218,7 +236,7 @@ function gateStructuredRiskRows<S>(structured: S): S {
   if (!structured || typeof structured !== "object") return structured;
   const record = structured as Record<string, unknown>;
   if (!Array.isArray(record.riskAssessmentRows)) return structured;
-  return { ...record, riskAssessmentRows: record.riskAssessmentRows.map(gateRiskRowText) } as S;
+  return { ...record, riskAssessmentRows: record.riskAssessmentRows.map((row, index) => gateRiskRowText(row, index)) } as S;
 }
 
 export function gateAskResponseUserOutput<T extends { deliverables: DeliverablesLike; structured?: unknown }>(response: T): T {

@@ -2,6 +2,7 @@ import { AskResponse, DetailRecord, SearchResult } from "./types";
 import { selectFallbackAccidentCases } from "./accident-cases";
 import { buildEvidenceLabels } from "./smsa-mapping";
 import { serializeRiskAssessmentRowsToDraft } from "@/components/workpack-editor-structure";
+import { riskManagementNumber } from "./document-display-labels";
 import { summarizeRiskLevel } from "./risk-labels";
 import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission } from "./foreign-worker";
 import { attachQualityContract } from "./quality-contract";
@@ -1183,7 +1184,8 @@ function buildScenarioRiskAssessmentRows(scenario: ReturnType<typeof inferScenar
     const likelihood = index === 0 ? 3 : 2;
     const severity = profile.riskLevel === "상" || index === 0 ? 4 : 3;
     return {
-      controlId: `RA-${profile.id}-${index + 1}`,
+      // 관리번호는 한글·숫자만(「위험성평가-01」). taskId 기반 영문 코드(RA-press-1)는 사용자 문서에 그대로 나갔다.
+      controlId: riskManagementNumber(index),
       location: scenario.siteName,
       process: profile.processName,
       // 세부작업 칸에는 작업명을 쓴다(위험요인 문장을 넣지 않는다, 편집기 점검 D-11).
