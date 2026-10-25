@@ -18,10 +18,33 @@ export type ParsedRow = {
   error?: string;
 };
 
-/** 2026-03-02 · 2026.3.2 · 20260302 · 2026/3/2 를 모두 받는다 */
+/**
+ * 엑셀 날짜 일련번호(1900 기준) → ISO. 날짜 서식이 없는 셀은 46097 처럼 숫자로 읽힌다.
+ * 20000(1954) ~ 80000(2119) 정수만 받는다 — 그 밖의 숫자는 날짜로 보지 않는다.
+ * 기준일 1899-12-30 은 엑셀의 1900-02-29 오류를 흡수한 값이다(1900-03-01 이후 일련번호에 맞다).
+ */
+function excelSerialToIso(t: string): string | null {
+  if (!/^\d{5}$/.test(t)) return null;
+  const n = Number(t);
+  if (n < 20000 || n > 80000) return null;
+  const d = new Date(Date.UTC(1899, 11, 30) + n * 86_400_000);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * 2026-03-02 · 2026.3.2 · 2026. 3. 2. · 2026년 3월 2일 · 20260302 · 2026/3/2 ·
+ * 엑셀 일련번호(46083) 를 모두 받는다.
+ *
+ * ★ 2026-10-25 (런칭 점검 LV-9) — 공백·끝점이 붙은 한국식 표기와 「년월일」,
+ *   날짜 서식 없는 숫자 셀을 읽지 못해 실무 대장이 통째로 「계산 불가」가 됐다.
+ *   두 자리 연도(26-03-16)는 세기가 모호해 여전히 받지 않는다.
+ */
 export function normalizeDate(text: string): string | null {
   const t = text.trim();
-  let m = t.match(/^(\d{4})[-./](\d{1,2})[-./](\d{1,2})$/);
+  const serial = excelSerialToIso(t);
+  if (serial) return serial;
+  let m = t.match(/^(\d{4})\s*[-./]\s*(\d{1,2})\s*[-./]\s*(\d{1,2})\s*\.?$/);
+  if (!m) m = t.match(/^(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일?$/);
   if (!m) m = t.match(/^(\d{4})(\d{2})(\d{2})$/);
   if (!m) return null;
   const [, y, mo, d] = m;
