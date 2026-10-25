@@ -314,6 +314,23 @@ describe("grounded generation contract", () => {
     expect(result).toEqual({ status: "grounded", violations: [] });
   });
 
+  it("keeps a decimal number inside one narrative sentence", () => {
+    const packet = frozenPacket([{
+      referenceKey: "SIF:sif-dig",
+      kind: "sif",
+      sourceId: "sif-dig",
+      title: "굴착 붕괴 SIF",
+      summary: "굴착면 붕괴",
+      aliases: ["SIF:sif-dig"],
+      controls: ["굴착 깊이 1.5m 이상 구간은 흙막이를 설치한다."]
+    }]);
+    const result = validateGroundedGenerationOutput({
+      riskAssessmentDraft: "굴착 깊이 1.5m 이상 구간은 흙막이를 설치한다."
+    }, packet);
+
+    expect(result).toEqual({ status: "grounded", violations: [] });
+  });
+
   it("fails closed on an unsupported actionable sentence in a narrative draft", () => {
     const packet = buildGroundedGenerationPacket({
       dbHarnessPacket: harnessPacket(),

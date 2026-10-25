@@ -1636,7 +1636,7 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
             url: "https://edu.kosha.or.kr/",
             reason: "KOSHA 공식 교육포털에서 후속 안전교육 후보를 확인합니다.",
             fitLabel: "공식 포털",
-            fitReason: "공식 교육포털 연계 fallback 후보입니다."
+            fitReason: "공식 교육포털에서 확인할 후속 교육 후보입니다."
           }
         ]
       },

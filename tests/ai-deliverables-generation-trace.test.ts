@@ -518,6 +518,14 @@ describe("deliverables generation trace", () => {
       sourceIdentity: "test-packet",
       rejectedGroups: ["riskAssessment"]
     });
+    // 최종 본문은 기본 틀이지만, 거절된 묶음을 어느 제공자가 썼는지는 남긴다.
+    expect(result.diagnostics.trace.modelPerDocument.riskAssessmentDraft).toMatchObject({
+      provider: "safeclaw",
+      source: "deterministic"
+    });
+    expect(result.diagnostics.grounding?.rejectedAttempts).toEqual([
+      expect.objectContaining({ group: "riskAssessment", provider: "anthropic" })
+    ]);
   });
 
   test("preserves critical controls when the provider pipeline fails", async () => {
@@ -546,6 +554,7 @@ describe("deliverables generation trace", () => {
       status: "review_required",
       sourceIdentity: "failed-pipeline-packet",
       rejectedGroups: ["deliverablesPipeline"],
+      rejectedAttempts: [],
       violations: [],
       criticalControls: ["개구부 덮개를 고정한다."]
     });
