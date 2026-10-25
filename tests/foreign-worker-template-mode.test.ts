@@ -33,20 +33,35 @@ const EMITTED_QUESTIONS = [
 ];
 
 describe("template 모드 foreignWorkerLanguages 는 전송본 차단 판정과 같다 (PR13-RV-01)", () => {
-  it.each(BLOCKED_QUESTIONS)("전송본에 언어 블록이 없으면 언어 목록도 비어 있다: %s", (question) => {
+  // 불변식: 언어 목록 = 전송본 언어 블록. 번역표가 검수돼 어떤 언어가 열려도 이 시험은 그대로 통과한다.
+  it.each([...BLOCKED_QUESTIONS, ...EMITTED_QUESTIONS])("언어 목록은 전송본 언어 블록과 같다: %s", (question) => {
     const response = buildMockAskResponse(question, [], "mock", "PR13-RV-01");
     const transmission = response.deliverables.foreignWorkerTransmission;
+    const languages = response.deliverables.foreignWorkerLanguages;
 
-    expect(transmissionLanguageBlocks(transmission)).toEqual([]);
-    expect(response.deliverables.foreignWorkerLanguages).toEqual([]);
+    expect(languages.map((language) => language.nativeLabel)).toEqual(transmissionLanguageBlocks(transmission));
+    for (const language of languages) {
+      for (const line of language.lines) expect(transmission).toContain(line);
+    }
   });
 
-  it("전송본에 「전송 금지」 안내가 있는데 언어 목록이 「전송 가능」으로 오르지 않는다", () => {
+  // 현재 상태 고정(RED→GREEN 증명): 프레스 작업명 번역이 전 언어 검수 전이라 베트남어가 막힌다.
+  // 프레스 작업명 번역을 verified 로 바꾸면 이 시험 하나만 지운다.
+  it("프레스(검수 probe 재현): 전송본에 「전송 금지」 안내가 있고 언어 목록은 비어 있다", () => {
     const response = buildMockAskResponse(BLOCKED_QUESTIONS[0], [], "mock", "PR13-RV-01");
     const transmission = response.deliverables.foreignWorkerTransmission;
 
     expect(transmission).toContain(FOREIGN_WORKER_BLOCK_NOTICE);
-    expect(response.deliverables.foreignWorkerLanguages.map((language) => language.code)).not.toContain("vi");
+    expect(transmissionLanguageBlocks(transmission)).toEqual([]);
+    expect(response.deliverables.foreignWorkerLanguages).toEqual([]);
+  });
+
+  it("작업 유형 보류(taskHeld): 전송본이 보류 안내로 바뀌면 언어 목록도 비어 있다", () => {
+    const response = buildMockAskResponse(BLOCKED_QUESTIONS[2], [], "mock", "PR13-RV-01");
+
+    expect(response.scenario.taskClassification?.status).toBe("review_required");
+    expect(transmissionLanguageBlocks(response.deliverables.foreignWorkerTransmission)).toEqual([]);
+    expect(response.deliverables.foreignWorkerLanguages).toEqual([]);
   });
 
   it.each(EMITTED_QUESTIONS)("언어 목록의 언어마다 전송본에 같은 언어 블록과 같은 문장이 있다: %s", (question) => {
