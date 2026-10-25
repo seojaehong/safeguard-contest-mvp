@@ -67,11 +67,12 @@ export function AdminLoginPanel() {
         email: email.trim(),
         options: {
           emailRedirectTo: buildAuthCallbackUrl(window.location.origin, nextPath, transaction.state),
-          shouldCreateUser: true
+          // 초대·승인제(결정 20): 이메일 링크로 새 계정을 만들지 않는다.
+          shouldCreateUser: false
         }
       });
       if (error) throw error;
-      setMessage("이메일 가입/로그인 링크를 보냈습니다. 메일함에서 확인해 주세요.");
+      setMessage("등록된 관리자 이메일이면 로그인 링크를 보냈습니다. 메일함에서 확인해 주세요. 계정이 없으면 운영자에게 초대를 요청해 주세요.");
     } catch (error) {
       window.localStorage.removeItem(AUTH_TRANSACTION_STORAGE_KEY);
       console.error("admin otp send failed", error);
@@ -144,8 +145,9 @@ export function AdminLoginPanel() {
       <span className="safeclaw-os-tag">관리자 계정</span>
       <h1>이력을 남기는 작업공간으로 들어갑니다.</h1>
       <p>
-        비회원은 브라우저 임시 저장으로 작업하고, 관리자 가입/로그인 후에는 문서팩, 작업자,
-        교육 확인, 전파 로그를 Supabase 이력으로 저장합니다.
+        비회원은 브라우저 임시 저장으로 기본 문서(템플릿)만 만듭니다. 관리자 계정은 초대·승인제이며,
+        로그인 후에는 문서팩, 작업자, 교육 확인 기록을 Supabase 이력으로 저장합니다.{" "}
+        <Link href="/privacy">개인정보 처리방침</Link>
       </p>
 
       {session ? (
@@ -179,7 +181,7 @@ export function AdminLoginPanel() {
             autoComplete="email"
           />
           <button type="button" onClick={sendLoginLink} disabled={isSending || !email.trim()}>
-            {isSending ? "가입/로그인 링크 발송 중" : "이메일로 가입/로그인"}
+            {isSending ? "로그인 링크 보내는 중" : "이메일로 로그인"}
           </button>
           <div className="safeclaw-login-divider" role="presentation"><span>또는</span></div>
           <div className="safeclaw-login-social">

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { WorkspaceInviteRequiredError, workspaceInviteRequiredResponse } from "@/lib/admin-invite";
 import {
   createSupabaseAdminClient,
   ensureWorkspaceContext,
@@ -301,6 +302,7 @@ export async function POST(request: NextRequest) {
       message: "연결 토큰을 발급했습니다. 평문 토큰은 이 화면에서 한 번만 표시됩니다.",
     });
   } catch (error) {
+    if (error instanceof WorkspaceInviteRequiredError) return workspaceInviteRequiredResponse({ token: null });
     console.error("mcp token issue failed", error);
     return NextResponse.json({
       ok: false,

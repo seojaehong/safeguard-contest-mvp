@@ -7,6 +7,7 @@ const REQUIRED_PATHS = [
   "/workspace",
   "/why",
   "/trust",
+  "/privacy",
   "/roadmap",
   "/ask",
 ] as const;
