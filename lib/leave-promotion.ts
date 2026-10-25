@@ -92,6 +92,87 @@ function addMonths(d: Date, n: number): Date {
 }
 
 /**
+ * 「기간이 끝나기 N개월 전」의 기준일 — 종료일 **다음날**에서 N개월을 뺀 날.
+ *
+ * ★ 2026-10-25 (런칭 점검 LV-2) — 종전 식 `addDays(addMonths(end, -N), 1)` 은
+ *   종료일이 12/31 일 때만 교재 표(7/1)와 맞았다. 월말 일수가 짧은 달로 넘어가면
+ *   addMonths 가 말일로 잘려 1~3일 앞당겨졌다(2/28 종료 → 8/29, 맞는 값 9/1).
+ *   「남은 기간이 정확히 N개월이 되는 첫날」은 종료 다음날에서 N개월을 빼야 나온다.
+ *   12/31 → 7/1 · 2/28 → 9/1 · 6/30 → 1/1 · 3/15 → 9/16(종전과 같음).
+ */
+function monthsBefore(end: Date, n: number): Date {
+  return addMonths(addDays(end, 1), -n);
+}
+
+/** 「N개월 전까지」의 마지막 날 — 기준일 전날. 12/31 종료 2개월 → 10/31 */
+function lastDayMonthsBefore(end: Date, n: number): Date {
+  return addDays(monthsBefore(end, n), -1);
+}
+
+/**
+ * 2차 통보(사용자의 시기 지정) 판정 — §61①2·②2.
+ *
+ * ★ 2026-10-25 (런칭 점검 LV-3) — 종전에는 기한(to) 하나만 봤다. 그래서 근로자가
+ *   촉구를 받은 지 하루 만에 보낸 2차 통보도 「일치」였다. 2차 통보는 근로자가
+ *   **촉구를 받은 때부터 10일 안에** 시기를 통보하지 않았을 때 하는 절차다.
+ *     · 수령일이 있으면 창은 수령일+11일부터. 그 전 발송은 차이.
+ *     · 수령일이 없으면 판정하지 않는다(확인 불가). 다만 1차 발송 후 10일 안에
+ *       보낸 것은 수령일이 언제든 응답기한 전이므로 차이로 둔다.
+ *     · 근로자가 응답기한 안에 통보한 기록이 있으면 2차 요건이 서지 않으므로
+ *       일치로 두지 않는다(확인 불가).
+ */
+function secondNoticeWindow(
+  input: PromotionScheduleInput,
+  deadline: Date,
+  label: string,
+  baseNote: string
+): ScheduleWindow {
+  const second = input.secondNoticeSentOn;
+  const sent = input.firstNoticeSentOn;
+  const received = input.firstNoticeReceivedOn;
+  const replyDue = received ? addDays(parse(received), 10) : null;
+  const from = replyDue ? addDays(replyDue, 1) : null;
+  const repliedInTime =
+    Boolean(input.workerRepliedOn) && replyDue !== null && parse(input.workerRepliedOn!) <= replyDue;
+
+  let status: ScheduleStatus;
+  let note = baseNote;
+  if (!second) {
+    status = "unknown";
+  } else if (parse(second) > deadline) {
+    status = "diff";
+  } else if (sent && parse(second) <= parse(sent)) {
+    status = "diff";
+    note = "2차 통보가 1차 촉구 발송일보다 빠르거나 같습니다. 입력 순서를 확인해 주세요.";
+  } else if (from && parse(second) < from) {
+    status = "diff";
+    note = "근로자 응답기한(수령일 +10일)이 지나기 전에 보낸 2차 통보입니다.";
+  } else if (!received) {
+    if (sent && parse(second) <= addDays(parse(sent), 10)) {
+      status = "diff";
+      note = "1차 촉구 발송 후 10일 안에 보낸 2차 통보입니다. 근로자 응답기한이 지나기 전입니다.";
+    } else {
+      status = "unknown";
+      note = "촉구 수령일이 없어 근로자 응답기한이 지난 뒤 보냈는지 확인할 수 없습니다.";
+    }
+  } else if (repliedInTime) {
+    status = "unknown";
+    note = "근로자가 응답기한 안에 사용시기를 통보한 기록이 있습니다. 2차 통보 필요 여부는 판단하지 않습니다.";
+  } else {
+    status = "match";
+  }
+
+  return {
+    label,
+    from: from ? fmt(from) : null,
+    to: fmt(deadline),
+    actual: second,
+    status,
+    note,
+  };
+}
+
+/**
  * 촉진 일정 계산.
  *
  * 두 절차를 각각 구현한다 — §61①(1년 이상)과 §61②(1년 미만)는 기간이 다르다.
@@ -124,10 +205,10 @@ export function buildPromotionSchedule(
   const end = parse(usagePeriodEnd);
 
   if (kind === "monthly-under-1year") {
-    const firstBatchFrom = addDays(addMonths(end, -3), 1); // 10.1
+    const firstBatchFrom = monthsBefore(end, 3); // 10.1
     const firstBatchTo = addDays(firstBatchFrom, 9); // 10.10
-    const firstBatchSecondNotice = addMonths(end, -1); // 11.30
-    const lateBatchFrom = addDays(addMonths(end, -1), 1); // 12.1
+    const firstBatchSecondNotice = lastDayMonthsBefore(end, 1); // 11.30
+    const lateBatchFrom = monthsBefore(end, 1); // 12.1
     const lateBatchTo = addDays(lateBatchFrom, 4); // 12.5 (5일간)
     const lateBatchSecondNotice = addDays(end, -10); // 12.21
 
@@ -143,27 +224,23 @@ export function buildPromotionSchedule(
       usagePeriodEnd,
       windows: (windows = [
         {
-          label: "1차 촉구 — 먼저 발생한 9일분 (3개월 전, 10일간)",
+          // ★ 2026-10-25 (LV-8) — 묶음 일수는 입사일·출근에 따라 달라진다.
+          //   교재 표(1.1 입사)의 9일·2일은 예시일 뿐이라 라벨에 고정하지 않는다.
+          label: "1차 촉구 — 촉구 시점까지 발생분 (3개월 전, 10일간)",
           from: fmt(firstBatchFrom),
           to: fmt(firstBatchTo),
           actual: sent,
           status: !sent ? "unknown" : inFirstBatch ? "match" : "diff",
-          note: "최초 1년 근로가 끝나기 3개월 전을 기준으로 10일 이내입니다(§61②).",
+          note: "최초 1년 근로가 끝나기 3개월 전을 기준으로 10일 이내입니다(§61②). 1월 1일 입사라면 9일분입니다.",
         },
+        secondNoticeWindow(
+          input,
+          firstBatchSecondNotice,
+          "2차 통보 — 촉구 시점까지 발생분",
+          "최초 1년 근로가 끝나기 1개월 전까지입니다."
+        ),
         {
-          label: "2차 통보 — 9일분",
-          from: null,
-          to: fmt(firstBatchSecondNotice),
-          actual: input.secondNoticeSentOn,
-          status: !input.secondNoticeSentOn
-            ? "unknown"
-            : parse(input.secondNoticeSentOn) <= firstBatchSecondNotice
-              ? "match"
-              : "diff",
-          note: "최초 1년 근로가 끝나기 1개월 전까지입니다.",
-        },
-        {
-          label: "1차 촉구 — 뒤에 발생한 2일분 (1개월 전, 5일간)",
+          label: "1차 촉구 — 그 뒤 발생분 (1개월 전, 5일간)",
           from: fmt(lateBatchFrom),
           to: fmt(lateBatchTo),
           actual: inLateBatch ? sent : undefined,
@@ -171,7 +248,7 @@ export function buildPromotionSchedule(
           note: "서면 촉구 후 발생한 휴가는 따로 촉구합니다. 두 묶음을 한 번에 처리할 수 없습니다.",
         },
         {
-          label: "2차 통보 — 2일분",
+          label: "2차 통보 — 그 뒤 발생분",
           from: null,
           to: fmt(lateBatchSecondNotice),
           status: "unknown",
@@ -201,7 +278,8 @@ export function buildPromotionSchedule(
   //   12-31 에서 6개월을 그냥 빼면 6-30 이 나오는데, 실무 기준은 7-01 이다.
   //   남은 기간이 정확히 6개월이 되는 첫날이라는 뜻이다.
   //   (처음에 6-30 으로 구현했다가 교재 표와 대조해 고쳤다)
-  const firstFrom = addDays(addMonths(end, -6), 1);
+  //   (2026-10-25 LV-2 — 다른 종료일에도 같은 기준이 서도록 monthsBefore 로 바꿨다)
+  const firstFrom = monthsBefore(end, 6);
   const firstTo = addDays(firstFrom, 9); // 7.1 부터 10일간 = 7.10
   const sent = input.firstNoticeSentOn;
   windows.push({
@@ -247,23 +325,17 @@ export function buildPromotionSchedule(
   }
 
   // ③ 2차 통보 — 사용기간 끝 2개월 전까지
-  const secondTo = addMonths(end, -2);
-  const second = input.secondNoticeSentOn;
-  const workerReplied = Boolean(input.workerRepliedOn);
-  windows.push({
-    label: "2차 통보 (사용자의 사용시기 지정)",
-    from: null,
-    to: fmt(secondTo),
-    actual: second,
-    status: !second
-      ? "unknown"
-      : parse(second) <= secondTo
-        ? "match"
-        : "diff",
-    note: workerReplied
-      ? "근로자가 사용시기를 통보한 기록이 있습니다. 2차 통보 필요 여부는 사안에 따라 다르므로 판단하지 않습니다."
-      : "근로자 미통보 여부가 확인되지 않으면 2차 통보 필요 여부도 단정하지 않습니다.",
-  });
+  const secondTo = lastDayMonthsBefore(end, 2);
+  windows.push(
+    secondNoticeWindow(
+      input,
+      secondTo,
+      "2차 통보 (사용자의 사용시기 지정)",
+      input.workerRepliedOn
+        ? "근로자가 사용시기를 통보한 기록이 있습니다. 2차 통보 필요 여부는 사안에 따라 다르므로 판단하지 않습니다."
+        : "근로자 미통보 여부가 확인되지 않으면 2차 통보 필요 여부도 단정하지 않습니다."
+    )
+  );
 
   const statuses = windows.map((w) => w.status);
   const overall: ScheduleStatus = statuses.includes("diff")

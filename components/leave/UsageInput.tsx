@@ -9,6 +9,7 @@ import {
   HOURLY_LEAVE_CAUTION,
 } from "@/lib/leave-usage";
 import type { UsageKind, UsageRecord } from "@/lib/leave-usage";
+import { normalizeDate } from "@/lib/leave-sheet";
 import { StatusBadge } from "@/components/leave/LeaveUI";
 
 /**
@@ -48,13 +49,15 @@ function parseUsage(text: string): { records: UsageRecord[]; bad: string[] } {
       continue;
     }
     const kind = KIND_MAP[cols[1]];
-    if (!kind) {
+    // 2026-10-25 (LV-7) — 날짜를 읽지 못한 줄은 합계에 넣지 않고 「읽지 못한 줄」로 보낸다
+    const date = normalizeDate(cols[0]);
+    if (!kind || !date) {
       bad.push(line);
       continue;
     }
     const hours = cols[2] !== undefined ? Number(cols[2].replace(/[^\d.]/g, "")) : undefined;
     records.push({
-      date: cols[0],
+      date,
       kind,
       hours: kind === "hourly" ? (Number.isFinite(hours) ? hours : undefined) : undefined,
     });
@@ -70,18 +73,21 @@ export function UsageInput() {
   const [allowHourly, setAllowHourly] = useState(true);
 
   const { records, bad } = useMemo(() => parseUsage(text), [text]);
+  // 2026-10-25 (LV-7) — 0·빈칸을 8시간으로 몰래 바꾸지 않는다. 유효하지 않으면 계산을 멈추고 알린다.
+  const hpd = hoursPerDay.trim() === "" ? NaN : Number(hoursPerDay);
+  const hoursValid = Number.isFinite(hpd) && hpd > 0;
   const summary = useMemo(
     () =>
-      records.length
+      records.length && hoursValid
         ? summarizeUsage(records, {
-            hoursPerDay: Number(hoursPerDay) || 8,
+            hoursPerDay: hpd,
             allowHalf,
             allowQuarter,
             allowHourly,
             hourlyIncrement: 1,
           })
         : null,
-    [records, hoursPerDay, allowHalf, allowQuarter, allowHourly]
+    [records, hpd, hoursValid, allowHalf, allowQuarter, allowHourly]
   );
 
   return (
@@ -135,7 +141,13 @@ export function UsageInput() {
 
       {bad.length > 0 && (
         <p className="lv-input__filenote" style={{ color: "var(--accent-warm)" }}>
-          읽지 못한 줄 {bad.length}개 — 단위는 종일 · 반차 · 반반차 · 시간차 중 하나여야 합니다.
+          읽지 못한 줄 {bad.length}개 — 날짜는 2026-04-17 형식이어야 하고, 단위는 종일 · 반차 · 반반차 · 시간차 중 하나여야 합니다.
+        </p>
+      )}
+
+      {records.length > 0 && !hoursValid && (
+        <p className="lv-input__filenote" style={{ color: "var(--accent-warm)" }}>
+          1일 소정근로시간을 0보다 큰 값으로 넣어 주세요. 비어 있거나 0이면 환산하지 않습니다.
         </p>
       )}
 
@@ -181,7 +193,7 @@ export function UsageInput() {
                         : r.kind === "quarter"
                           ? 0.25
                           : r.hours !== undefined
-                            ? r.hours / (Number(hoursPerDay) || 8)
+                            ? r.hours / hpd
                             : null;
                   return (
                     <tr key={i} data-diff={issue ? "true" : undefined}>

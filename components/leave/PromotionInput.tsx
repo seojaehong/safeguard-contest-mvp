@@ -38,7 +38,7 @@ export function PromotionInput() {
 
       <div className="lv-form">
         <label className="lv-input__field">
-          <span>연차 사용기간 종료일</span>
+          <span>{kind === "monthly-under-1year" ? "최초 1년 근로기간 종료일 (입사 1주년 전날)" : "연차 사용기간 종료일"}</span>
           <input
             type="date"
             value={usagePeriodEnd}
@@ -76,7 +76,9 @@ export function PromotionInput() {
 
       {!usagePeriodEnd && (
         <p className="lv-input__note">
-          사용기간 종료일을 넣으면 촉구 일정을 계산합니다. 회계연도로 운영하면 보통 12월 31일입니다.
+          {kind === "monthly-under-1year"
+            ? "1년 미만 월 단위 연차는 회계연도와 관계없이 최초 1년 근로가 끝나는 날(입사 1주년 전날)이 종료일입니다(제60조제7항·제61조제2항). 예: 2026-03-02 입사 → 2027-03-01."
+            : "사용기간 종료일을 넣으면 촉구 일정을 계산합니다. 회계연도로 운영하면 보통 12월 31일, 입사일 기준이면 입사 기념일 전날입니다."}
         </p>
       )}
 
