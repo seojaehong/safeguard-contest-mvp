@@ -1,5 +1,6 @@
 import { IntegrationMode } from "./types";
 import { readBoundedResponseText } from "./server/upstream-http";
+import { isMismatchedWorkerCourse, matchesTaskKeyword } from "./education-course-fit";
 
 export type KoshaEducationRecommendation = {
   title: string;
@@ -183,9 +184,11 @@ function mapCourse(course: Record<string, unknown>, question: string): KoshaEduc
   const capacity = [readString(course, "aplyNope"), readString(course, "eduPscpCnt")]
     .filter(Boolean)
     .join("/");
+  // 경영책임자·사업주·선원 과정은 근로자 교육 후보에서 뺀다. 「현장 적합」은 작업 키워드 일치일 때만(EDU-08).
+  if (isMismatchedWorkerCourse(question, `${title} ${target}`)) return null;
   const fitLabel = flags.asksForeignWorker && title.includes("외국인")
     ? "대상 적합"
-    : title.includes("안전") || title.includes("위험") || title.includes("관리감독")
+    : (title.includes("안전") || title.includes("위험") || title.includes("관리감독")) && matchesTaskKeyword(question, `${title} ${target}`)
       ? "현장 적합"
       : "조건부 후보";
 
