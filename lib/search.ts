@@ -2184,7 +2184,10 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
   let deliverablesGroundingPacket: GroundedGenerationPacket | null = null;
 
   // Fix 4: template fast path — no external calls, no AI, pure static output < 100ms
-  if (aiMode === "template") {
+  // 작업 유형을 판정하지 못한 질문(결정 1, 2026-10-25)은 모드와 관계없이 AI·DB 행 생성을 하지 않고
+  // 「작업 유형 확인」 보류 응답을 낸다. DB 근거 행(buildSafetyReferenceRiskRows)이 보류를 덮지 않게 한다.
+  const taskHeld = inferScenario(question).taskClassification.status === "review_required";
+  if (aiMode === "template" || taskHeld) {
     options.signal?.throwIfAborted();
     const response = applyPhaseAResponseBoundary(attachDbHarnessFallback(
       buildMockAskResponse(
