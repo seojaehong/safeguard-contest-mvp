@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   buildPacket: vi.fn(),
+  checkTables: vi.fn(),
   createClient: vi.fn(),
   getStatus: vi.fn(),
   getUser: vi.fn(),
@@ -16,6 +17,9 @@ vi.mock("@/lib/supabase-admin", () => ({
 }));
 vi.mock("@/lib/sif-embedding-gate-status", () => ({
   getSifEmbeddingGateStatus: mocks.getStatus,
+}));
+vi.mock("@/lib/commercial-required-tables", () => ({
+  checkCommercialRequiredTables: mocks.checkTables,
 }));
 vi.mock("@/lib/sif-embedding-approval-packet", () => ({
   buildSifEmbeddingApprovalPacket: mocks.buildPacket,
@@ -33,6 +37,7 @@ beforeEach(() => {
   mocks.getUser.mockReset().mockResolvedValue(null);
   mocks.isPlatformOperator.mockReset().mockReturnValue(false);
   mocks.getStatus.mockReset().mockReturnValue({ ok: true, stage: "ready-for-approval" });
+  mocks.checkTables.mockReset().mockResolvedValue({ ok: true, missing: [], failed: [] });
   mocks.buildPacket.mockReset().mockReturnValue({
     fileName: "sif-approval.md",
     markdown: "# approval",
@@ -70,9 +75,35 @@ describe("SIF operator diagnostics routes", () => {
     const response = await GET(request("/api/sif-embedding-gate/status", true));
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ ok: true, stage: "ready-for-approval" });
+    await expect(response.json()).resolves.toEqual({
+      ok: true,
+      stage: "ready-for-approval",
+      commercialTables: { ok: true, missing: [], failed: [] }
+    });
     expect(mocks.isPlatformOperator).toHaveBeenCalledWith(user);
     expect(mocks.getStatus).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails the operator status with 503 when a migration 010 table is missing", async () => {
+    mocks.getUser.mockResolvedValue({ id: "operator-1", email: "operator@example.com" });
+    mocks.isPlatformOperator.mockReturnValue(true);
+    mocks.checkTables.mockResolvedValue({ ok: false, missing: ["workpack_share_sessions"], failed: [] });
+    const { GET } = await import("@/app/api/sif-embedding-gate/status/route");
+
+    const response = await GET(request("/api/sif-embedding-gate/status", true));
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({
+      commercialTables: { ok: false, missing: ["workpack_share_sessions"] }
+    });
+  });
+
+  it("does not probe tables for anonymous callers", async () => {
+    const { GET } = await import("@/app/api/sif-embedding-gate/status/route");
+
+    await GET(request("/api/sif-embedding-gate/status"));
+
+    expect(mocks.checkTables).not.toHaveBeenCalled();
   });
 
   it("rejects anonymous approval-packet requests before reading the gate artifacts", async () => {

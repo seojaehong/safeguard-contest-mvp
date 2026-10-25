@@ -509,3 +509,50 @@ describe("/api/export/xlsx structured contract", () => {
     }
   });
 });
+
+describe("/api/export/xlsx sheet names", () => {
+  const invalidSheetCharacters = /[\/?*[\]:]/u;
+
+  it.each([
+    "TBM/작업 전 안전점검회의",
+    "사진/증빙",
+    "점검: [A]구역 *확인* ? \ 백업",
+    "아주 긴 문서 제목이 서른한 글자를 넘어가는 경우에도 시트를 만들어야 합니다"
+  ])("returns a valid single-sheet workbook for %s", async (title) => {
+    const response = await POST(xlsxRequest({
+      mode: "single",
+      title,
+      scenario,
+      rows: [{ document: title, section: "본문", item: "확인", content: "현장 확인" }]
+    }));
+
+    expect(response.status).toBe(200);
+    const workbook = await loadWorkbook(response);
+    const sheetName = workbook.worksheets[0]?.name ?? "";
+    expect(sheetName).not.toMatch(invalidSheetCharacters);
+    expect(sheetName.length).toBeGreaterThan(0);
+    expect(sheetName.length).toBeLessThanOrEqual(31);
+  });
+
+  it("keeps workpack sheet names valid and unique when titles collide after sanitizing", async () => {
+    const response = await POST(xlsxRequest({
+      mode: "workpack",
+      scenario,
+      documents: [
+        { title: "TBM/작업 전 안전점검회의", rows: [] },
+        { title: "TBM:작업 전 안전점검회의", rows: [] },
+        { title: "사진/증빙", rows: [] }
+      ]
+    }));
+
+    expect(response.status).toBe(200);
+    const workbook = await loadWorkbook(response);
+    const names = workbook.worksheets.map((worksheet) => worksheet.name);
+    expect(names).toHaveLength(4);
+    expect(new Set(names.map((name) => name.toLowerCase())).size).toBe(names.length);
+    names.forEach((name) => {
+      expect(name).not.toMatch(invalidSheetCharacters);
+      expect(name.length).toBeLessThanOrEqual(31);
+    });
+  });
+});
