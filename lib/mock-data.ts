@@ -9,24 +9,43 @@ import {
   type RiskAssessmentRow,
   type RiskLevel
 } from "./risk-assessment-schema";
+import {
+  HEAT_EMERGENCY_STEP,
+  buildAerialWorkPlatformProfile,
+  buildAutomationProfile,
+  buildChemicalHandlingProfile,
+  buildConfinedSpaceProfile,
+  buildConveyorProfile,
+  buildCraneLiftingProfile,
+  buildForeignWorkerPair,
+  buildHeatPair,
+  buildMachineIsolationProfile,
+  buildNewWorkerPair,
+  buildPressProfile,
+  buildRoadPavingProfile,
+  buildTaskClassification,
+  buildVehicleHaulageProfile,
+  buildWorkAtHeightProfile,
+  hasElectricalWorkIdentity,
+  hasExcavationWorkIdentity,
+  hasHeatCondition,
+  hasHighRiskChemicalCleaningIdentity,
+  hasRoofRepairWorkIdentity,
+  hasScaffoldAssemblyIdentity,
+  hasSimultaneousWorkIdentity,
+  heldDeliverableNotice,
+  inferIndustry,
+  withPairs,
+  zipPairs,
+  type RiskPair,
+  type ScenarioProfile,
+  type ScenarioProfileInput,
+  type TaskId
+} from "./task-scenario-profiles";
 
-type ScenarioProfile = {
-  id: string;
-  companyName: string;
-  companyType: string;
-  siteName: string;
-  workName: string;
-  processName: string;
-  weatherNote: string;
-  riskLevel: AskResponse["riskSummary"]["riskLevel"];
-  topRisk: string;
+type LegacyScenarioProfile = Omit<ScenarioProfileInput, "pairs"> & {
   hazards: [string, string, string];
   actions: [string, string, string];
-  educationName: string;
-  educationTargets: string;
-  questions: [string, string, string];
-  educationPoints: [string, string, string];
-  keywords: string[];
 };
 
 export const mockDetails: DetailRecord[] = [
@@ -112,7 +131,7 @@ export const mockSearchResults: SearchResult[] = mockDetails.map((item) => ({
   tags: item.tags
 }));
 
-export const fieldScenarioProfiles: ScenarioProfile[] = [
+const legacyFieldScenarioProfiles: LegacyScenarioProfile[] = [
   {
     id: "construction-painting",
     companyName: "세이프건설",
@@ -213,7 +232,7 @@ export const fieldScenarioProfiles: ScenarioProfile[] = [
       "용접 작업 전 방염장갑, 보안경, 용접면 착용 상태 확인",
       "흄 체류나 화재 징후 발견 시 즉시 작업중지 후 보고"
     ],
-    keywords: ["용접", "절단", "화기", "제조", "금속", "메탈"]
+    keywords: ["용접", "절단", "화기"]
   },
   {
     id: "facility-maintenance",
@@ -318,6 +337,16 @@ export const fieldScenarioProfiles: ScenarioProfile[] = [
     keywords: ["대구", "창고", "폭염", "온열", "고중량", "숙련", "고령"]
   }
 ];
+
+export const fieldScenarioProfiles: ScenarioProfile[] = legacyFieldScenarioProfiles.map(({ hazards, actions, ...rest }) =>
+  withPairs({ ...rest, pairs: zipPairs(hazards, actions) })
+);
+
+function fieldProfile(id: string): ScenarioProfile {
+  const profile = fieldScenarioProfiles.find((candidate) => candidate.id === id);
+  if (!profile) throw new Error(`unknown field scenario profile: ${id}`);
+  return profile;
+}
 
 export function buildSourceMix(citations: SearchResult[]): NonNullable<AskResponse["sourceMix"]> {
   const counts = citations.reduce<Record<string, number>>((acc, item) => {
@@ -478,19 +507,6 @@ function inferCompanyName(question: string) {
   return "현장 업체";
 }
 
-const excavationWorkIdentityPatterns = [
-  /(?:굴착|터파기)\s*(?:공사|작업)/,
-  /굴착\s+보수\s+작업/
-];
-
-function hasExcavationWorkIdentity(question: string) {
-  return excavationWorkIdentityPatterns.some((pattern) => pattern.test(question));
-}
-
-function hasElectricalWorkIdentity(question: string) {
-  return /정전\s*전로|정전전로|충전\s*전로|충전전로|배전반|분전반|수전반|전기\s*(?:작업|점검|정비|공사)|(?:검전|무전압|절연\s*보호구|절연보호구).{0,20}(?:전기|전로|배전반|분전반|수전반)|(?:전기|전로|배전반|분전반|수전반).{0,20}(?:검전|무전압|절연\s*보호구|절연보호구)/.test(question);
-}
-
 function inferKnownLocationPrefix(question: string) {
   const specificLocation = findSpecificLocationRule(question);
   if (specificLocation) return specificLocation.locationPrefix;
@@ -500,8 +516,14 @@ function inferKnownLocationPrefix(question: string) {
     || null;
 }
 
+// 굴착 대상은 질문에 적힌 관로 이름으로만 정한다. 고정 현장명(열수송관)을 붙이지 않는다.
+function inferExcavationWorkName(question: string) {
+  const conduit = /(도시가스\s*배관|가스\s*배관|상수도관|하수도관|하수관로|열수송관|통신\s*관로|전력구|우수관|오수관)/.exec(question)?.[1];
+  return conduit ? `${conduit.replace(/\s+/g, " ")} 굴착공사` : "굴착공사";
+}
+
 function inferCustomWorkName(question: string) {
-  if (hasExcavationWorkIdentity(question)) return "열수송관 굴착공사";
+  if (hasExcavationWorkIdentity(question)) return inferExcavationWorkName(question);
   if (hasElectricalWorkIdentity(question)) return "정전전로 인근 배전반 점검 작업";
   if (/배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도/.test(question)) {
     return "지하 기계실 배수펌프 점검";
@@ -515,14 +537,6 @@ function inferCustomWorkName(question: string) {
 
 function hasRainCondition(question: string) {
   return /우천|강수|비\s*(?:예보|소식|온|옴|내림|오는|내리는|가\s*옴)|젖은?\s*(?:바닥|노면)|바닥\s*젖음/.test(question);
-}
-
-function hasHighRiskChemicalCleaningIdentity(question: string) {
-  return /(?:SDS|MSDS|물질안전보건자료|GHS|경고표지|라벨).*(?:화학|세척|용기)|(?:화학|세척|용기).*(?:SDS|MSDS|물질안전보건자료|GHS|경고표지|라벨)|화학\s*세척|화학세척|탱크.{0,20}세척|도금.{0,40}세척|비산.{0,20}피부접촉|국소배기.{0,30}세척/i.test(question);
-}
-
-function hasRoofRepairWorkIdentity(question: string) {
-  return /지붕.{0,20}(?:보수|수리|점검|작업|공사)|(?:보수|수리|점검|작업|공사).{0,20}지붕/.test(question);
 }
 
 function inferSpecialContext(question: string): string[] {
@@ -554,41 +568,57 @@ function inferSiteName(question: string, fallback: string, workName: string) {
 function buildExcavationScenarioProfile(question: string, companyName: string): ScenarioProfile {
   const locationPrefix = inferKnownLocationPrefix(question);
   const sitePrefix = locationPrefix || (companyName !== "현장 업체" ? companyName : "");
+  const workName = inferExcavationWorkName(question);
+  const hasCrane = /크레인|양중|인양/.test(question);
+  const depth = Number(/(?:깊이|심도)\s*(\d+(?:\.\d+)?)\s*m/i.exec(question)?.[1] ?? NaN);
+  const planNote = Number.isFinite(depth) && depth >= 2 ? `, 굴착 깊이 ${depth}m — 작업계획서 작성 대상(안전보건규칙 제38조①6호)` : "";
 
-  return {
+  return withPairs({
     id: "construction-excavation",
     companyName,
     companyType: "건설업",
-    siteName: `${sitePrefix ? `${sitePrefix} ` : ""}열수송관 굴착공사 현장`,
-    workName: "열수송관 굴착공사",
-    processName: "지하 매설물 확인, 굴착기 굴착, 이동식 크레인 양중, 토사 적치와 굴착면 통제",
+    siteName: `${sitePrefix ? `${sitePrefix} ` : ""}${workName} 현장`,
+    workName,
+    processName: `지하 매설물 확인, 굴착면 점검, 굴착기 굴착${hasCrane ? ", 이동식 크레인 양중" : ""}, 토사 적치와 굴착면 통제${planNote}`,
     weatherNote: "옥외 굴착 조건, 굴착면 붕괴·매설물 접촉·중장비 작업반경 확인 필요",
     riskLevel: "상",
-    topRisk: "굴착면 붕괴로 작업자가 매몰되거나 굴착기·이동식 크레인이 지하 매설물과 작업자를 접촉할 위험",
-    hazards: [
-      "굴착면 붕괴와 토사 유입으로 인한 매몰",
-      "도면·탐사·시험굴착 미흡으로 인한 지하 매설물 파손",
-      "굴착기 회전반경 또는 이동식 크레인 양중 구역에서 충돌·낙하"
+    topRisk: `굴착면 붕괴로 작업자가 매몰되거나 굴착기${hasCrane ? "·이동식 크레인" : ""}이 지하 매설물과 작업자를 접촉할 위험`,
+    pairs: [
+      {
+        hazard: "굴착면 붕괴와 토사 유입으로 인한 매몰",
+        action: "작업 전 부석·균열과 함수·용수·동결 상태를 점검하고(안전보건규칙 제338조) 굴착면 기울기(별표 11)·흙막이 지보공을 확보하며 붕괴 우려 구역의 출입을 금지(안전보건규칙 제339조·제340조)",
+        basis: "안전보건규칙 제338조·제339조·제340조"
+      },
+      {
+        hazard: "도면·탐사·시험굴착 미흡으로 인한 지하 매설물 파손",
+        action: "매설물 도면 확인과 탐사 후 시험굴착으로 위치를 표시하고 관리 주체와 작업 허가·입회를 확인한 뒤 기계굴착"
+      },
+      hasCrane
+        ? {
+            hazard: "굴착기 회전반경 또는 이동식 크레인 양중 구역에서 충돌·낙하",
+            action: "굴착기와 이동식 크레인 작업반경을 분리하고 신호수·아웃트리거·인양 경로를 작업 전 확인(안전보건규칙 제40조·제146조)",
+            basis: "안전보건규칙 제40조·제146조"
+          }
+        : {
+            hazard: "굴착기 회전반경·후진 구간에서 작업자 충돌",
+            action: "굴착기 작업반경의 출입을 통제하고 정해진 신호에 따라서만 장비를 움직임(안전보건규칙 제40조)",
+            basis: "안전보건규칙 제40조"
+          }
     ],
-    actions: [
-      "매설물 도면 확인과 탐사 후 시험굴착으로 위치를 표시하고 관리 주체와 작업 허가를 확인",
-      "굴착 깊이와 지반 상태에 맞는 굴착면 기울기·흙막이·토사 이격거리를 확보하고 출입을 통제",
-      "굴착기와 이동식 크레인 작업반경을 분리하고 신호수·아웃트리거·인양 경로를 작업 전 확인"
-    ],
-    educationName: "열수송관 굴착공사 전 붕괴·매설물·중장비 충돌 예방 교육",
-    educationTargets: "굴착 작업자, 굴착기·이동식 크레인 운전자, 신호수, 신규·외국인 근로자",
+    educationName: `${workName} 전 붕괴·매설물·중장비 충돌 예방 교육`,
+    educationTargets: `굴착 작업자, 굴착기${hasCrane ? "·이동식 크레인" : ""} 운전자, 신호수`,
     questions: [
       "매설물 도면·탐사·시험굴착 결과와 굴착 허가를 누가 최종 확인했는가?",
       "굴착면 붕괴 징후와 즉시 대피·작업중지 기준을 전원이 알고 있는가?",
-      "굴착기·크레인 작업반경과 신호수 위치, 작업자 대기구역을 분리했는가?"
+      `굴착기${hasCrane ? "·크레인" : ""} 작업반경과 신호수 위치, 작업자 대기구역을 분리했는가?`
     ],
     educationPoints: [
       "매설물 위치 확인과 시험굴착 완료 전 기계굴착 금지",
       "균열·토사 흘러내림·용수 발생 시 즉시 작업중지 후 굴착면 밖으로 대피",
       "중장비 작업반경 출입 금지와 신호수 단일 지시체계 준수"
     ],
-    keywords: ["굴착", "터파기", "열수송관", "매설물", "굴착기", "크레인"]
-  };
+    keywords: ["굴착", "터파기", "매설물", "굴착기"]
+  });
 }
 
 function buildCustomScenarioProfile(question: string): ScenarioProfile {
@@ -608,7 +638,7 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
       : "현장 유지보수";
   const siteName = `${companyName} ${isElectricalWork ? "전기설비 배전반 점검 현장" : isPumpConfinedSpace ? "지하 기계실 배수펌프 점검 현장" : isLeakMaintenance ? "천장 누수 유지보수 현장" : "비정형 작업 현장"}`;
 
-  return {
+  const legacy: LegacyScenarioProfile = {
     id: "custom-maintenance",
     companyName,
     companyType,
@@ -736,59 +766,80 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
         ],
     keywords: isElectricalWork ? ["전기", "정전전로", "배전반", "검전", "절연보호구", "감전"] : []
   };
+  const { hazards, actions, ...rest } = legacy;
+  return withPairs({ ...rest, pairs: zipPairs(hazards, actions) });
 }
 
-// Explicit industry-site nouns (제조공장/공장/제조업, 건설현장/공사장,
-// 물류센터/물류창고/창고) must outrank generic work-action verbs
-// (상하차/피킹/하역 etc.) when picking a scenario profile — otherwise a
-// question like "안산 제조공장 ... 지게차 상하차 작업" gets misread as
-// logistics because the action verbs coincidentally score higher on
-// keyword overlap than the actual named site type.
-// Note: bare "공장" is deliberately excluded here — the cleaning-chemical
-// profile's own site is "하남산단 공장 세척 구역", so a bare "공장" match
-// would misroute cleaning-chemical questions into manufacturing. Likewise
-// "물류창고" is left to the bare "창고" rule below so it resolves to
-// warehouse-heat (창고업), matching that profile's own siteName, rather
-// than being captured by the logistics rule.
-const explicitIndustryNounRules: Array<[RegExp, string]> = [
-  [/제조공장|제조업/, "manufacturing-hotwork"],
-  [/건설현장|공사장/, "construction-painting"],
-  [/물류센터/, "logistics-forklift"],
-  [/창고/, "warehouse-heat"]
-];
-
-const profileContextOnlyKeywords = new Set(["외국인", "신규", "고령", "숙련"]);
-
-function pickExplicitIndustryProfile(question: string) {
-  const matchedRule = explicitIndustryNounRules.find(([pattern]) => pattern.test(question));
-  if (!matchedRule) return null;
-  return fieldScenarioProfiles.find((profile) => profile.id === matchedRule[1]) || null;
+// 폭염 상하차는 핸드파렛트·대차를 쓰는 경우가 많다. 질문에 지게차가 없으면 지게차 행을 지어내지 않는다.
+function buildManualLoadingHeatProfile(question: string): ScenarioProfile {
+  const base = fieldProfile("warehouse-heat");
+  if (/지게차/.test(question)) return base;
+  const pairs = base.pairs.map((pair, index) => index === 2
+    ? {
+        hazard: "핸드파렛트·대차 운반 중 보행자 충돌과 발 끼임",
+        action: "운반 동선과 보행 동선을 나누고 대차 적재 높이를 시야가 가리지 않게 제한"
+      }
+    : pair);
+  return withPairs({ ...base, pairs });
 }
 
-function pickScenarioProfile(question: string) {
-  const normalized = question.trim().toLowerCase();
+// 작업 유형을 먼저 정하고(TASK_RULES 순서), 업종은 inferIndustry 로 따로 정한다.
+// 업종 명사(제조공장·건설현장·창고)는 프로필을 고르지 않는다(F-COV-00·04, EDU-02).
+function pickScenarioProfile(question: string, taskId: TaskId | null): ScenarioProfile {
+  const companyName = inferCompanyName(question);
+  const context = { question, companyName };
+  const industryOverride = (profile: ScenarioProfile) => {
+    const companyType = inferIndustry(question, profile.companyType);
+    return companyType === profile.companyType ? profile : { ...profile, companyType };
+  };
 
-  if (hasRoofRepairWorkIdentity(question)) {
-    return fieldScenarioProfiles.find((profile) => profile.id === "construction-painting") || buildCustomScenarioProfile(question);
+  switch (taskId) {
+    case "roof":
+    case "scaffold-assembly":
+    case "exterior-painting":
+      return industryOverride(fieldProfile("construction-painting"));
+    case "excavation":
+    case "pump-confined":
+    case "electrical":
+    case "leak-maintenance":
+      return buildCustomScenarioProfile(question);
+    case "confined-space":
+      return buildConfinedSpaceProfile(context);
+    case "chemical-cleaning":
+    case "floor-cleaning":
+      return fieldProfile("cleaning-chemical");
+    case "chemical-handling":
+      return buildChemicalHandlingProfile(context);
+    case "press":
+      return buildPressProfile(context);
+    case "conveyor":
+      return buildConveyorProfile(context);
+    case "automation-equipment":
+      return buildAutomationProfile(context);
+    case "machine-isolation":
+      return buildMachineIsolationProfile(context);
+    case "crane-lifting":
+      return buildCraneLiftingProfile(context);
+    case "aerial-work-platform":
+      return buildAerialWorkPlatformProfile(context);
+    case "work-at-height":
+      return buildWorkAtHeightProfile(context);
+    case "vehicle-haulage":
+      return buildVehicleHaulageProfile(context);
+    case "road-paving":
+      return buildRoadPavingProfile(context);
+    case "forklift-logistics":
+      return industryOverride(fieldProfile("logistics-forklift"));
+    case "manual-loading-heat":
+      return industryOverride(buildManualLoadingHeatProfile(question));
+    case "hotwork":
+      return industryOverride(fieldProfile("manufacturing-hotwork"));
+    case "simultaneous-work":
+      return industryOverride(buildCustomScenarioProfile(question));
+    default:
+      // 미분류: 이 프로필은 시나리오 칸(업체·현장)만 채우는 데 쓰고, 문서는 보류한다(buildMockAskResponse).
+      return buildCustomScenarioProfile(question);
   }
-
-  if (/누수|비가\s*새|천장|비정형|유지보수|정비|점검/.test(question) || hasExcavationWorkIdentity(question) || hasElectricalWorkIdentity(question)) {
-    return buildCustomScenarioProfile(question);
-  }
-
-  const explicitProfile = pickExplicitIndustryProfile(question);
-  if (explicitProfile) return explicitProfile;
-
-  const scored = fieldScenarioProfiles.map((profile) => ({
-    profile,
-    score: profile.keywords.reduce(
-      (acc, keyword) => acc + (!profileContextOnlyKeywords.has(keyword) && normalized.includes(keyword.toLowerCase()) ? 1 : 0),
-      0
-    )
-  }));
-
-  scored.sort((a, b) => b.score - a.score);
-  return scored[0]?.score ? scored[0].profile : buildCustomScenarioProfile(question);
 }
 
 function mergeProfileTriple(primary: string[], fallback: [string, string, string]): [string, string, string] {
@@ -805,10 +856,24 @@ function formatActionVerificationQuestion(action: string): string {
   return `조치 완료 여부를 누가 확인했는가? (${normalized})`;
 }
 
+function dedupePairs(pairs: RiskPair[]): RiskPair[] {
+  const seen = new Set<string>();
+  return pairs.filter((pair) => {
+    const key = pair.hazard.trim();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+// 작업 분기(지붕·비계 조립·화학세척·동시작업)는 작업 행을 바꾸고,
+// 조건층(폭염·외국인·신규·고령·야간·LOTO·KOSHA)은 작업 행 뒤에 한 쌍씩 덧붙인다.
+// 위험요인과 대책은 늘 한 쌍(RiskPair)으로 움직이므로 행이 밀리지 않는다.
 function applyQuestionSpecificity(question: string, source: ScenarioProfile): ScenarioProfile {
-  const hazards: string[] = [];
-  const actions: string[] = [];
+  const taskPairs: RiskPair[] = [];
+  const layerPairs: RiskPair[] = [];
   const workerTargets: string[] = [];
+  const emergencySteps = [...(source.emergencySteps ?? [])];
   let workName = source.workName;
   let processName = source.processName;
   let weatherNote = source.weatherNote;
@@ -818,52 +883,59 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
   let replaceBaseRisk = false;
 
   if (hasRoofRepairWorkIdentity(question)) {
-    const hasHeatCondition = /폭염|고온|온열|자외선/.test(question);
+    const heat = hasHeatCondition(question) || /자외선/.test(question);
+    const weakRoof = /슬레이트|채광창/.test(question);
     workName = "옥외 지붕 보수 작업";
     processName = "지붕 작업구역 확인, 안전대 부착설비·작업발판 점검, 개구부·단부 통제, 자재·공구 낙하 방지";
-    weatherNote = hasHeatCondition
+    weatherNote = heat
       ? "옥외 지붕 고온·자외선 조건, 추락방지와 물·그늘·휴식 기준 확인 필요"
       : "옥외 지붕 작업조건, 추락방지·강풍·자재 낙하 통제 상태 확인 필요";
     companyType = "건설업";
     educationName = "옥외 지붕 보수 추락·기상 위험 예방 교육";
     educationTargets = "지붕 보수 작업자, 감시자, 관리감독자";
     replaceBaseRisk = true;
-    hazards.push(
-      "지붕 단부·개구부 또는 불안정한 작업발판에서 작업자가 추락하는 위험",
-      hasHeatCondition
-        ? "옥외 고온·자외선 노출과 휴식 부족으로 인한 온열질환 위험"
-        : "강풍 또는 미끄러운 지붕면에서 균형을 잃고 추락하는 위험",
-      "지붕 위 자재·공구가 낙하해 하부 작업자와 통행자가 맞는 위험"
-    );
-    actions.push(
-      "지붕 단부·개구부를 통제하고 안전대 부착설비·작업발판 상태를 관리감독자가 확인한 뒤 작업 시작",
-      hasHeatCondition
-        ? "물·그늘·휴식 기준과 온열질환 증상 보고 절차를 공유하고 어지러움 발생 시 즉시 작업중지"
-        : "강풍·우천 등 기상 악화 시 작업중지 기준과 안전한 지상 대피 위치를 전원에게 공유",
-      "자재·공구를 고정하고 하부 낙하위험 구역을 출입 통제하며 감시자를 배치"
-    );
-  } else if (/비계.{0,20}(?:조립|해체)|(?:조립|해체).{0,20}비계/.test(question)) {
+    taskPairs.push({
+      hazard: "지붕 단부·개구부 또는 불안정한 작업발판에서 작업자가 추락하는 위험",
+      action: "지붕 단부·개구부를 통제하고 안전대 부착설비·작업발판 상태를 관리감독자가 확인한 뒤 작업 시작(안전보건규칙 제45조)",
+      basis: "안전보건규칙 제45조"
+    });
+    if (weakRoof) {
+      taskPairs.push({
+        hazard: "슬레이트·채광창 등 약한 지붕재를 밟아 깨지면서 추락하는 위험",
+        action: "채광창에 견고한 덮개를 설치하고 슬레이트 등 약한 지붕재 위에는 폭 30센티미터 이상의 발판을 깔며, 곤란하면 추락방호망 또는 안전대를 사용(안전보건규칙 제45조①②)",
+        basis: "안전보건규칙 제45조"
+      });
+    }
+    if (heat) {
+      taskPairs.push(buildHeatPair(question));
+    } else if (!weakRoof) {
+      taskPairs.push({
+        hazard: "강풍 또는 미끄러운 지붕면에서 균형을 잃고 추락하는 위험",
+        action: "강풍·우천 등 기상 악화 시 작업중지 기준과 안전한 지상 대피 위치를 전원에게 공유"
+      });
+    }
+    taskPairs.push({
+      hazard: "지붕 위 자재·공구가 낙하해 하부 작업자와 통행자가 맞는 위험",
+      action: "자재·공구를 고정하고 하부 낙하위험 구역을 출입 통제하며 감시자를 배치"
+    });
+  } else if (hasScaffoldAssemblyIdentity(question)) {
     workName = "이동식 비계 조립·해체 작업";
     processName = "이동식 비계 조립·해체, 작업발판·안전난간 설치, 바퀴 잠금·전도 방지, 하부 출입통제";
-    hazards.push(
-      "이동식 비계 조립·해체 중 작업발판 또는 구조부에서 추락",
-      "연결부·바퀴 잠금·전도 방지 조치 미흡으로 비계가 흔들리거나 전도",
-      "부재·공구 낙하와 하부 출입통제 미흡으로 작업자 충돌"
+    replaceBaseRisk = true;
+    taskPairs.push(
+      {
+        hazard: "이동식 비계 조립·해체 중 작업발판 또는 구조부에서 추락",
+        action: "조립·해체 순서와 작업반경을 정하고 작업발판·안전난간 설치 상태를 관리감독자가 확인"
+      },
+      {
+        hazard: "연결부·바퀴 잠금·전도 방지 조치 미흡으로 비계가 흔들리거나 전도",
+        action: "연결부·고정핀·바퀴 잠금과 전도 방지 지지 상태를 점검한 뒤 사용"
+      },
+      {
+        hazard: "부재·공구 낙하와 하부 출입통제 미흡으로 작업자 충돌",
+        action: "하부 출입을 통제하고 부재·공구 낙하 방지와 보호구 체결 상태를 상호 확인"
+      }
     );
-    actions.push(
-      "조립·해체 순서와 작업반경을 정하고 작업발판·안전난간 설치 상태를 관리감독자가 확인",
-      "연결부·고정핀·바퀴 잠금과 전도 방지 지지 상태를 점검한 뒤 사용",
-      "하부 출입을 통제하고 부재·공구 낙하 방지와 보호구 체결 상태를 상호 확인"
-    );
-  } else if (/프레스/.test(question)) {
-    workName = "프레스 설비 보전 작업";
-    processName = "프레스 설비 보전, 전원 차단·LOTO, 금형·구동부 점검, 방호장치 복구";
-  } else if (/컨베이어/.test(question)) {
-    workName = /야간|심야/.test(question) ? "야간 컨베이어 정비 작업" : "컨베이어 정비 작업";
-    processName = "컨베이어 구동부 정비, 전원 차단·LOTO, 방호장치 점검, 조도·작업자 신호 확인";
-  } else if (/자동화\s*설비|자동화설비/.test(question)) {
-    workName = "자동화설비 방호장치 개선·정비 작업";
-    processName = "자동화설비 방호장치 개선, 전원 차단·LOTO, 예기치 않은 기동 방지, 시험가동 통제";
   }
 
   if (hasHighRiskChemicalCleaningIdentity(question)) {
@@ -874,18 +946,22 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
     educationName = "화학물질 식별·세척 작업 안전교육";
     educationTargets = "화학세척 작업자, 감시자, 관리감독자";
     replaceBaseRisk = true;
-    hazards.push(
-      "미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험",
-      "화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험",
-      "국소배기 불량으로 인한 증기·미스트 흡입 위험"
-    );
-    actions.push(
-      "용기 라벨과 SDS(물질안전보건자료)·GHS 경고표지로 물질을 확인하고 확인 전 사용 금지·작업 보류",
-      "보안경·내화학장갑·보호복을 물질 특성에 맞게 지정하고 세안·세척 수단을 작업 전 확인",
-      "국소배기를 가동하고 비산구역을 통제하며 이상 냄새·자극 증상 발생 시 즉시 작업중지"
+    taskPairs.splice(0, taskPairs.length,
+      {
+        hazard: "미확인 화학물질의 SDS·GHS 경고표지 미확인으로 인한 오사용·혼합 위험",
+        action: "용기 라벨과 SDS(물질안전보건자료)·GHS 경고표지로 물질을 확인하고 확인 전 사용 금지·작업 보류"
+      },
+      {
+        hazard: "화학세척 중 비산·피부접촉으로 인한 눈·피부 손상 위험",
+        action: "보안경·내화학장갑·보호복을 물질 특성에 맞게 지정하고 세안·세척 수단을 작업 전 확인"
+      },
+      {
+        hazard: "국소배기 불량으로 인한 증기·미스트 흡입 위험",
+        action: "국소배기를 가동하고 비산구역을 통제하며 이상 냄새·자극 증상 발생 시 즉시 작업중지"
+      }
     );
   }
-  if (/동시\s*작업|동시작업|상하부\s*작업|상부.*하부|하부.*상부/.test(question)) {
+  if (hasSimultaneousWorkIdentity(question)) {
     workName = /크레인|양중/.test(question) && /화기|용접|절단|불티/.test(question)
       ? "크레인 양중·배관 화기 동시작업"
       : "상하부 동시작업";
@@ -894,77 +970,106 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
     educationName = "양중·화기 동시작업 교차위험 통제 교육";
     educationTargets = "양중 작업자, 화기 작업자, 신호수, 화재감시자, 관리감독자";
     replaceBaseRisk = true;
-    hazards.push(
-      "상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험",
-      "하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험",
-      "양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험"
+    taskPairs.splice(0, taskPairs.length,
+      {
+        hazard: "상부 양중 중 낙하물이 하부 화기작업 구역으로 떨어지는 위험",
+        action: "상하부 작업구역을 분리하고 양중 하부와 불티 비산구역을 출입 통제한 뒤 작업순서·시간을 조정"
+      },
+      {
+        hazard: "하부 화기작업 불티가 양중 자재·가연물에 비산해 화재가 발생하는 위험",
+        action: "양중과 화기 공정의 작업순서·시간을 분리하고 동시 진행이 불가피하면 관리감독자가 교차위험을 재확인"
+      },
+      {
+        hazard: "양중 신호와 화기작업 통제가 분리되어 작업순서·중지 지시가 충돌하는 위험",
+        action: "신호수와 화재감시자를 지정하고 단일 지휘·작업중지 신호와 비상연락 절차를 작업 전 복창"
+      }
     );
-    actions.push(
-      "상하부 작업구역을 분리하고 양중 하부와 불티 비산구역을 출입 통제한 뒤 작업순서·시간을 조정",
-      "양중과 화기 공정의 작업순서·시간을 분리하고 동시 진행이 불가피하면 관리감독자가 교차위험을 재확인",
-      "신호수와 화재감시자를 지정하고 단일 지휘·작업중지 신호와 비상연락 절차를 작업 전 복창"
-    );
+  }
+
+  const corePairs = [...(taskPairs.length ? taskPairs : source.pairs)];
+  let coreChanged = false;
+
+  if (hasHeatCondition(question)) {
+    const heatIndex = corePairs.findIndex((pair) => /온열/.test(pair.hazard));
+    const heatPair = buildHeatPair(question);
+    if (heatIndex >= 0) {
+      corePairs.splice(heatIndex, 1, heatPair);
+      coreChanged = true;
+    } else {
+      layerPairs.push(heatPair);
+    }
+    if (!emergencySteps.includes(HEAT_EMERGENCY_STEP)) emergencySteps.push(HEAT_EMERGENCY_STEP);
+  }
+  if (/외국인/.test(question)) {
+    layerPairs.push(buildForeignWorkerPair(question));
+    const count = question.match(/외국인\s*(?:근로자|작업자)?\s*(\d+)\s*명/)?.[1];
+    if (!/외국인/.test(educationTargets)) workerTargets.push(count ? `외국인 근로자 ${count}명` : "외국인 근로자");
+  }
+  if (/신규/.test(question)) {
+    layerPairs.push(buildNewWorkerPair(question));
+    if (!/신규/.test(educationTargets)) workerTargets.push("신규 투입자");
   }
   if (/청각\s*장애|청각장애|고령/.test(question)) {
-    hazards.push("고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험");
-    actions.push("고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지");
+    layerPairs.push({
+      hazard: "고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험",
+      action: "고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지"
+    });
     if (/고령/.test(question)) workerTargets.push("고령 작업자");
     if (/청각\s*장애|청각장애/.test(question)) workerTargets.push("청각장애 작업자");
-    if (/신규/.test(question)) workerTargets.push("신규 작업자");
   }
   if (/방호장치|예기치 않은 기동|불시기동|LOTO|잠금표지/.test(question)) {
-    const sourceHasIsolationHazard = source.hazards.some((hazard) =>
-      /LOTO|잠금표지|불시기동|예기치 않은 기동/.test(hazard)
-    );
-    const sourceHasIsolationAction = source.actions.some((action) =>
-      /LOTO|잠금표지|전원 차단|무전압/.test(action)
-    );
-    if (!sourceHasIsolationHazard) {
-      hazards.push("방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험");
-    }
-    if (!sourceHasIsolationAction) {
-      actions.push("정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제");
+    const isolationHazardIndex = corePairs.findIndex((pair) => /LOTO|잠금표지|불시기동|예기치 않은 기동/.test(pair.hazard));
+    const hasIsolationAction = corePairs.some((pair) => /LOTO|잠금표지|전원 차단|무전압|잠금장치/.test(pair.action));
+    const isolationAction = "정비 전 전원을 차단하고 LOTO(잠금표지)·무전압·방호장치 복구 상태를 확인한 뒤 시험가동 구역을 통제";
+    if (isolationHazardIndex < 0) {
+      layerPairs.push({ hazard: "방호장치 해제 또는 예기치 않은 기동으로 인한 끼임 위험", action: isolationAction });
+    } else if (!hasIsolationAction) {
+      const target = corePairs[isolationHazardIndex];
+      corePairs.splice(isolationHazardIndex, 1, { ...target, action: `${target.action}; ${isolationAction}` });
+      coreChanged = true;
     }
   }
   if (/KOSHA|안전보건공단|기술지침/.test(question)) {
-    actions.push("KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록");
+    layerPairs.push({
+      hazard: "기술지침(KOSHA Guide)을 법령 의무와 혼동해 법정 조치 확인이 빠지는 위험",
+      action: "KOSHA Guide는 기술지침으로 참고하고 관련 법령의 적용 여부와 현장 조건은 별도 확인 필요로 기록"
+    });
   }
   if (/야간|심야|야간조|조도|피로|단독\s*작업|단독작업|인수인계|재통전/.test(question)) {
-    hazards.push("야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험");
-    actions.push("야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전");
+    layerPairs.push({
+      hazard: "야간 저조도·피로 누적과 단독작업 전환 중 감전·오조작 위험",
+      action: "야간조는 2인 1조를 유지하고 교대 인수인계·조도·피로 상태를 확인하며, 검전과 작업자 퇴거 확인 후 재통전"
+    });
     if (/야간조/.test(question)) workerTargets.push("야간조");
     if (/인수인계/.test(question)) workerTargets.push("교대 인수인계 담당자");
   }
   if (/정비원|보전원/.test(question)) workerTargets.push("정비원");
 
-  if (!hazards.length && !actions.length && !workerTargets.length) {
+  if (!taskPairs.length && !layerPairs.length && !workerTargets.length && !coreChanged && emergencySteps.length === (source.emergencySteps?.length ?? 0)) {
     return source;
   }
 
-  const nextHazards = mergeProfileTriple(hazards, source.hazards);
-  const nextActions = mergeProfileTriple(actions, source.actions);
+  const taskHazards = taskPairs.map((pair) => pair.hazard);
+  const taskActions = taskPairs.map((pair) => pair.action);
   const nextTargets = [...new Set(workerTargets)].join(", ");
-  return {
+  return withPairs({
     ...source,
     companyType,
     workName,
     processName,
     weatherNote,
-    topRisk: hazards.length
+    topRisk: taskHazards.length
       ? replaceBaseRisk
-        ? hazards.join("; ")
-        : `${hazards.join("; ")}. ${source.topRisk}`
+        ? taskHazards.join("; ")
+        : `${taskHazards.join("; ")}. ${source.topRisk}`
       : source.topRisk,
-    hazards: nextHazards,
-    actions: nextActions,
+    pairs: dedupePairs([...corePairs, ...layerPairs]),
     educationName,
     educationTargets: nextTargets ? `${educationTargets}, ${nextTargets}` : educationTargets,
-    questions: mergeProfileTriple(
-      actions.map(formatActionVerificationQuestion),
-      source.questions
-    ),
-    educationPoints: mergeProfileTriple(actions, source.educationPoints)
-  };
+    questions: taskActions.length ? mergeProfileTriple(taskActions.map(formatActionVerificationQuestion), source.questions) : source.questions,
+    educationPoints: taskActions.length ? mergeProfileTriple(taskActions, source.educationPoints) : source.educationPoints,
+    emergencySteps: emergencySteps.length ? emergencySteps : undefined
+  });
 }
 
 function sanitizeWorkSummary(question: string, fallback: string) {
@@ -1003,11 +1108,16 @@ function canonicalRiskLevel(likelihood: number, severity: number): RiskLevel {
 }
 
 function accidentTypeForHazard(hazard: string): RiskAssessmentRow["accidentType"] {
+  if (/질식|산소결핍|유해가스|황화수소/.test(hazard)) return "asphyxiation";
+  if (/붕괴|매몰/.test(hazard)) return "collapse";
+  if (/온열|열사병|폭염/.test(hazard)) return "heatIllness";
   if (/추락|전도/.test(hazard)) return "fall";
   if (/충돌|동선|회차/.test(hazard)) return "struckBy";
+  if (/끼임|끼이|말려|말림|협착/.test(hazard)) return "caughtIn";
   if (/낙하|적재물/.test(hazard)) return "struckBy";
-  if (/화재|불꽃|가연물/.test(hazard)) return "fireExplosion";
+  if (/화재|불꽃|가연물|폭발/.test(hazard)) return "fireExplosion";
   if (/화상/.test(hazard)) return "burn";
+  if (/중독|노출|흡입|피부접촉|비산|누출/.test(hazard)) return "chemicalExposure";
   if (/흄|환기|밀폐|호흡/.test(hazard)) return "asphyxiation";
   if (/감전|전기/.test(hazard)) return "electricShock";
   if (/미끄럼|젖음/.test(hazard)) return "slip";
@@ -1023,7 +1133,7 @@ function fourMForHazard(hazard: string): RiskAssessmentRow["fourM"] {
 
 function buildScenarioRiskAssessmentRows(scenario: ReturnType<typeof inferScenario>): RiskAssessmentRow[] {
   const { profile } = scenario;
-  return profile.hazards.map((hazard, index) => {
+  return profile.pairs.map(({ hazard, action }, index) => {
     const likelihood = index === 0 ? 3 : 2;
     const severity = profile.riskLevel === "상" || index === 0 ? 4 : 3;
     return {
@@ -1041,11 +1151,11 @@ function buildScenarioRiskAssessmentRows(scenario: ReturnType<typeof inferScenar
       hazard,
       fourM: fourMForHazard(hazard),
       accidentType: accidentTypeForHazard(hazard),
-      currentControls: profile.actions[index] || profile.actions[0],
+      currentControls: action,
       likelihood,
       severity,
       riskLevel: canonicalRiskLevel(likelihood, severity),
-      additionalControls: profile.actions[index] || profile.actions[0],
+      additionalControls: action,
       owner: index === 0 ? "관리감독자" : "작업반장",
       due: "현장 확인",
       verification: index === 0 ? "작업 전 TBM 및 현장 사진 확인" : "작업 전 체크리스트 확인",
@@ -1062,11 +1172,13 @@ function buildScenarioRiskAssessmentRows(scenario: ReturnType<typeof inferScenar
 export function inferScenario(question: string) {
   const normalized = question.trim() || defaultQuestion;
   const workerCount = inferWorkerCount(normalized);
-  const profile = applyQuestionSpecificity(normalized, pickScenarioProfile(normalized));
+  const taskClassification = buildTaskClassification(normalized);
+  const profile = applyQuestionSpecificity(normalized, pickScenarioProfile(normalized, taskClassification.taskId as TaskId | null));
   const inferredCompanyName = inferCompanyName(normalized);
   const workSummary = sanitizeWorkSummary(normalized, profile.workName);
 
   return {
+    taskClassification,
     companyName: inferredCompanyName === "현장 업체" ? profile.companyName : inferredCompanyName,
     companyType: profile.companyType,
     siteName: inferSiteName(normalized, profile.siteName, profile.workName),
@@ -1303,9 +1415,7 @@ function buildOfficialStyleWorkPermit(scenario: ReturnType<typeof inferScenario>
     "",
     "[2. 작업 전 허가조건]",
     `- 핵심 위험: ${profile.topRisk}`,
-    `- 안전조치 1: ${profile.actions[0]}`,
-    `- 안전조치 2: ${profile.actions[1]}`,
-    `- 안전조치 3: ${profile.actions[2]}`,
+    ...profile.actions.map((action, index) => `- 안전조치 ${index + 1}: ${action}`),
     `- 허가 전 조건확인: ${roleSpecificCondition(scenario.weatherNote, "permit")}`,
     "- 보호구: 작업별 보호구의 종류, 손상 여부, 착용 상태를 작업 시작 전에 확인",
     "",
@@ -1351,14 +1461,10 @@ function buildOfficialStyleTbmBriefing(scenario: ReturnType<typeof inferScenario
     "- 위험성평가 주요 유해·위험요인을 오늘 TBM 전달 항목으로 연결합니다.",
     "",
     "[2. 위험요인]",
-    `1. ${profile.hazards[0]}`,
-    `2. ${profile.hazards[1]}`,
-    `3. ${profile.hazards[2]}`,
+    ...profile.hazards.map((hazard, index) => `${index + 1}. ${hazard}`),
     "",
     "[3. 안전대책]",
-    `- ${profile.actions[0]}`,
-    `- ${profile.actions[1]}`,
-    `- ${profile.actions[2]}`,
+    ...profile.actions.map((action) => `- ${action}`),
     "- 기상 API 또는 현장 기상 확인 결과가 악화되면 작업반장이 작업중지 여부를 재판단합니다.",
     "",
     "[4. 작업중지 기준]",
@@ -1406,6 +1512,7 @@ function buildEmergencyResponseDraft(scenario: ReturnType<typeof inferScenario>)
     "- 추가 피해 가능성이 있으면 위험구역 접근을 통제하고 전원을 안전한 장소로 이동시킵니다.",
     "",
     "[2. 초기조치]",
+    ...(profile.emergencySteps ?? []).map((step) => `- ${step}`),
     "- 부상자 구조와 응급조치를 우선하되, 구조자 2차 사고 위험을 먼저 확인합니다.",
     "- 전기, 화기, 장비, 차량 등 추가 위험원을 정지 또는 격리합니다.",
     "- 필요한 경우 119, 원청/발주자, 안전관리자에게 즉시 연락합니다.",
@@ -1483,14 +1590,10 @@ function buildOfficialStyleTbmLog(scenario: ReturnType<typeof inferScenario>) {
     `- TBM 기록조건: ${roleSpecificCondition(scenario.weatherNote, "tbmLog")}`,
     "",
     "[잠재위험요인 / 중점위험요인]",
-    `- ${profile.hazards[0]}`,
-    `- ${profile.hazards[1]}`,
-    `- ${profile.hazards[2]}`,
+    ...profile.hazards.map((hazard) => `- ${hazard}`),
     "",
     "[대책 / 작업중지 기준]",
-    `- ${profile.actions[0]}`,
-    `- ${profile.actions[1]}`,
-    `- ${profile.actions[2]}`,
+    ...profile.actions.map((action) => `- ${action}`),
     `- 작업중지 기준: ${profile.questions[0]}`,
     "- 기상 API 또는 현장 기상 확인 결과가 악화되면 작업반장·관리감독자가 작업 가능 여부를 재판단",
     "",
@@ -1574,7 +1677,8 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
     siteName: scenario.siteName,
     workSummary: scenario.workSummary,
     workerCount: scenario.workerCount,
-    weatherNote: scenario.weatherNote
+    weatherNote: scenario.weatherNote,
+    taskClassification: scenario.taskClassification
   };
   const riskSummary = {
     title: `${scenario.companyType} ${profile.workName}`,
@@ -1683,7 +1787,7 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
         `작업: ${profile.workName}`,
         ...(scenario.specialContext.length ? [`특수 대상/조건: ${scenario.specialContext.join(" / ")}`] : []),
         `핵심위험: ${profile.topRisk}`,
-        `필수조치: ${profile.actions[0]} / ${profile.actions[1]} / ${profile.actions[2]}`,
+        `필수조치: ${profile.actions.join(" / ")}`,
         "TBM 및 당일 안전교육 내용 확인 후 작업 시작 바랍니다."
       ].join("\n")
     },
@@ -1720,5 +1824,63 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
     }
   };
 
-  return attachQualityContract(response);
+  return attachQualityContract(
+    scenario.taskClassification.status === "review_required" ? applyTaskClassificationHold(response) : response
+  );
+}
+
+const HELD_DOCUMENT_LABELS: Record<string, string> = {
+  workpackSummaryDraft: "점검결과 요약",
+  riskAssessmentDraft: "위험성평가표",
+  workPlanDraft: "작업계획서",
+  workPermitDraft: "안전작업허가 확인서",
+  tbmBriefing: "TBM 브리핑",
+  tbmLogDraft: "TBM 기록",
+  safetyEducationRecordDraft: "안전보건교육 기록",
+  emergencyResponseDraft: "비상대응 절차",
+  photoEvidenceDraft: "사진/증빙 기록",
+  foreignWorkerBriefing: "외국인 근로자 안내",
+  foreignWorkerTransmission: "외국인 근로자 전송본",
+  kakaoMessage: "작업 안전공지"
+};
+
+// 결정 1(2026-10-25): 작업 유형을 판정하지 못하면 「비정형」 상투 행을 정상 문서로 내지 않는다.
+// 응답 모양은 그대로 두고, 문서 본문을 「작업 유형 확인 필요」 안내로 바꾸고 위험성평가 행을 비운다.
+function applyTaskClassificationHold(response: AskResponse): AskResponse {
+  const workSummary = response.scenario.workSummary || response.question;
+  const holdLine = "작업 유형 확인 필요 — 작업 종류와 사용 장비를 확인한 뒤 다시 생성하세요.";
+  const deliverables = Object.fromEntries(
+    Object.entries(response.deliverables).map(([key, value]) => {
+      if (typeof value === "string") {
+        return [key, heldDeliverableNotice(HELD_DOCUMENT_LABELS[key] ?? "문서", workSummary)];
+      }
+      if (key === "safetyEducationPoints" || key === "tbmQuestions") return [key, [holdLine]];
+      return [key, value];
+    })
+  ) as AskResponse["deliverables"];
+  return {
+    ...response,
+    answer: [
+      "작업 유형 확인 필요",
+      `입력한 내용(${workSummary})에서 작업 유형을 판정하지 못해 문서팩을 만들지 않았습니다.`,
+      "오늘 하는 작업의 종류와 사용 장비를 적어 다시 요청하면 그 작업 기준으로 위험성평가·작업계획서·TBM·교육 기록을 만듭니다."
+    ].join("\n\n"),
+    practicalPoints: [holdLine],
+    scenario: {
+      ...response.scenario,
+      companyType: "작업 유형 확인 필요",
+      siteName: response.scenario.siteName.replace(/\s*비정형\s*(?:유지보수\s*)?(?:현장\s*)?작업\s*현장$/, " 현장(작업 유형 확인 필요)")
+    },
+    riskSummary: {
+      ...response.riskSummary,
+      title: "작업 유형 확인 필요",
+      topRisk: "작업 유형 확인 필요 — 작업 유형이 확인되기 전에는 위험요인을 확정하지 않습니다.",
+      immediateActions: [holdLine]
+    },
+    deliverables,
+    structured: {
+      riskAssessmentRows: [],
+      riskAssessmentValidation: { ok: true, issueCount: 0, issues: [] }
+    }
+  };
 }

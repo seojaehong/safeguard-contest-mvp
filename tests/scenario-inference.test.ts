@@ -154,7 +154,8 @@ describe("inferScenario", () => {
     const scenario = inferScenario(question);
 
     expect(scenario.companyName).toBe(companyName);
-    expect(scenario.siteName).toBe(`${companyName} 열수송관 굴착공사 현장`);
+    // 고정 현장명(열수송관)을 붙이지 않는다(PR-03). 관로 이름이 없으면 「굴착공사」만 쓴다.
+    expect(scenario.siteName).toBe(`${companyName} 굴착공사 현장`);
   });
 
   it.each([
@@ -167,7 +168,7 @@ describe("inferScenario", () => {
     const scenario = inferScenario(question);
 
     expect(scenario.companyName).toBe("현장 업체");
-    expect(scenario.siteName).toBe(`${location} 열수송관 굴착공사 현장`);
+    expect(scenario.siteName).toBe(`${location} 굴착공사 현장`);
   });
 
   it("does not let the canonical Gwangju cleaning location overwrite excavation identity", () => {

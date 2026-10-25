@@ -1999,8 +1999,9 @@ describe("documents editor layout", () => {
     const sample = buildSampleWorkpack();
     const seedRows = sample.structured?.riskAssessmentRows ?? [];
     if (seedRows.length < 3) throw new Error("Risk-row seed fixture is incomplete");
+    // 샘플 질문의 「신규 투입자」 조건층이 4번째 행을 더한다(PR-03). 이 시험은 행 5개 레일을 보므로 작업 행 3개만 쓴다.
     const riskRows = [
-      ...seedRows,
+      ...seedRows.slice(0, 3),
       { ...seedRows[0], hazard: "강풍 중 이동식 비계 흔들림과 추락 위험" },
       { ...seedRows[1], hazard: "도장재 비산과 피부 접촉 위험" }
     ];
