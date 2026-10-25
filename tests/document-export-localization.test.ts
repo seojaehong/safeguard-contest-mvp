@@ -253,7 +253,11 @@ describe("localized editable document exports", () => {
     expect(response.status).toBe(200);
     const reloaded = new HwpDocument(new Uint8Array(await response.arrayBuffer()));
     try {
-      const bodyTable = listHwpTables(reloaded)[1];
+      // 위험성평가는 기본정보·평가 기록(제37조의4)·결정 기준 표 다음에 본표가 온다(PR-06/10).
+      const bodyTable = listHwpTables(reloaded).find((table) => (
+        getHwpCellText(reloaded, table.paraIdx, table.controlIdx, 0) === "번호"
+      ));
+      if (!bodyTable) throw new Error("missing risk body table");
       const dimensions = JSON.parse(reloaded.getTableDimensions(0, bodyTable.paraIdx, bodyTable.controlIdx)) as {
         colCount: number;
         rowCount: number;
@@ -265,8 +269,10 @@ describe("localized editable document exports", () => {
         getHwpCellText(reloaded, bodyTable.paraIdx, bodyTable.controlIdx, dimensions.colCount + offset)
       )).join(" ");
 
-      expect(header).toContain("상태");
-      for (const localized of ["상", "중", "하", "조치 예정", "조치 완료", "검토 필요"]) {
+      // 본표는 제37조의4 기록 칸(위험성·이행 결과·잔여 위험성)을 싣는다. 확인상태 열은 이행 결과 칸으로 바뀌었다.
+      expect(header).toContain("위험성");
+      expect(header).toContain("이행 결과");
+      for (const localized of ["상", "중", "하"]) {
         expect(values).toContain(localized);
       }
       expect(values).not.toMatch(/\b(?:high|medium|low|planned|done|needsReview)\b/u);
@@ -275,7 +281,7 @@ describe("localized editable document exports", () => {
     }
   });
 
-  it("localizes HTML PDF table headers and typed 4M values", async () => {
+  it("does not fill fixed 4M or grade text into an edited HTML PDF risk table", async () => {
     const response = await exportPdf(new NextRequest("http://localhost/api/export/pdf?format=html", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -288,8 +294,11 @@ describe("localized editable document exports", () => {
 
     expect(response.status).toBe(200);
     const html = await response.text();
+    // 정본 행이 없으면 고친 본문 행을 그대로 싣는다. 4M·등급을 고정 문구로 채우지 않는다(COPY-01).
     expect(html).toContain("<th class=\"no\">연번</th>");
-    expect(html).toContain("인적 요인/기계·설비 요인/작업환경 요인/관리 요인");
+    expect(html).toContain("비계 작업 중 추락");
+    expect(html).not.toContain("인적 요인/기계·설비 요인/작업환경 요인/관리 요인");
+    expect(html).not.toContain("상/중/하");
     expect(html).not.toContain(">No.<");
     expect(html).not.toContain("Man/Machine/Media/Management");
   });
@@ -312,8 +321,9 @@ describe("localized editable document exports", () => {
 
     expect(response.status).toBe(200);
     const html = await response.text();
-    expect(html).toContain("위험수준 하");
-    for (const localized of ["상", "중", "하", "조치 예정", "조치 완료", "검토 필요"]) {
+    // 요약 위험수준은 요청값(low)이 아니라 본표 최고 등급이다(EXP-09).
+    expect(html).toContain("위험수준 상");
+    for (const localized of ["상", "중", "하"]) {
       expect(html).toContain(`>${localized}</td>`);
     }
     expect(html).not.toMatch(/>\s*(?:high|medium|low|planned|done|needsReview)\s*</u);
