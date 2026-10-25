@@ -17,6 +17,7 @@ import {
 } from "@/lib/public-ask-admission";
 import { runPublicAskOperation } from "@/lib/public-ask-operation";
 import { resolveRunAskMode } from "@/lib/run-ask-mode";
+import { applyAskModeNoticeHeader, resolveAskModeAdmission } from "@/lib/ask-mode-admission";
 import {
   applyPublicRateLimitHeader,
   publicRateLimitResponse,
@@ -53,10 +54,11 @@ export async function POST(request: NextRequest) {
     );
   }
   const requestedMode = typeof record.aiMode === "string" ? (record.aiMode as AiMode) : undefined;
-  const aiMode = resolveRunAskMode({
+  const modeAdmission = await resolveAskModeAdmission(request, resolveRunAskMode({
     requestedMode: requestedMode && ALLOWED_MODES.includes(requestedMode) ? requestedMode : undefined,
     envDefault: process.env.AI_MODE_DEFAULT,
-  });
+  }));
+  const aiMode = modeAdmission.aiMode;
   const harnessMemory = parseHarnessMemoryInput(record.harnessMemory);
   const operation = await runPublicAskOperation({
     request,
@@ -66,7 +68,9 @@ export async function POST(request: NextRequest) {
     admission: rateLimit,
   });
   if (!operation.ok) return operation.response;
-  const result = operation.data;
+  const result = modeAdmission.notice
+    ? { ...operation.data, aiModeNotice: modeAdmission.notice }
+    : operation.data;
   const sealed = attachGenerationEvidence(result, {
     secret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
     generatedAt: new Date().toISOString()
@@ -88,8 +92,8 @@ export async function POST(request: NextRequest) {
       evidenceSealed: Boolean(sealed.generationEvidence)
     });
   }
-  return applyPublicAskWorkHeaders(applyPublicRateLimitHeader(
+  return applyAskModeNoticeHeader(applyPublicAskWorkHeaders(applyPublicRateLimitHeader(
     NextResponse.json(sanitizeAskResponsePublicSurface(sealed)),
     operation.rateLimit,
-  ), aiMode, operation.workUnit);
+  ), aiMode, operation.workUnit), modeAdmission.notice);
 }

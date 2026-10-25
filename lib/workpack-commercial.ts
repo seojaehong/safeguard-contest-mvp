@@ -323,6 +323,47 @@ export function validateDispatchContacts(input: {
   return { ok: true };
 }
 
+// 작업자 연락처 보유기간(2026-10-25 결정 19): 공유 세션이 중지되면 즉시, 만료되면 30일 뒤
+// 스냅숏의 연락처(phone·email)를 지운다. SafeClaw 는 고객사의 수탁자로 처리한다.
+export const SHARE_CONTACT_RETENTION_DAYS_AFTER_EXPIRY = 30;
+const SNAPSHOT_CONTACT_KEYS = ["phone", "email"] as const;
+
+export function stripWorkerSnapshotContacts(snapshot: Record<string, unknown>): Record<string, unknown> {
+  const next: Record<string, unknown> = { ...snapshot };
+  for (const key of SNAPSHOT_CONTACT_KEYS) delete next[key];
+  return next;
+}
+
+export function countRecipientSnapshotContacts(recipientsSnapshot: unknown): number {
+  if (!Array.isArray(recipientsSnapshot)) return 0;
+  let count = 0;
+  for (const recipient of recipientsSnapshot) {
+    if (typeof recipient !== "object" || recipient === null) continue;
+    const snapshot = (recipient as Record<string, unknown>).workerSnapshot;
+    if (typeof snapshot !== "object" || snapshot === null) continue;
+    for (const key of SNAPSHOT_CONTACT_KEYS) {
+      const value = (snapshot as Record<string, unknown>)[key];
+      if (typeof value === "string" && value.trim()) count += 1;
+    }
+  }
+  return count;
+}
+
+export function stripRecipientSnapshotContacts(recipientsSnapshot: unknown): unknown[] {
+  if (!Array.isArray(recipientsSnapshot)) return [];
+  return recipientsSnapshot.map((recipient) => {
+    if (typeof recipient !== "object" || recipient === null || Array.isArray(recipient)) return recipient;
+    const record = recipient as Record<string, unknown>;
+    const snapshot = record.workerSnapshot;
+    if (typeof snapshot !== "object" || snapshot === null || Array.isArray(snapshot)) return record;
+    return { ...record, workerSnapshot: stripWorkerSnapshotContacts(snapshot as Record<string, unknown>) };
+  });
+}
+
+export function shareContactPurgeCutoff(now: Date = new Date()): string {
+  return new Date(now.getTime() - SHARE_CONTACT_RETENTION_DAYS_AFTER_EXPIRY * 24 * 60 * 60 * 1_000).toISOString();
+}
+
 export function buildShareSessionDraft(input: {
   organizationId: string;
   siteId: string | null;
@@ -394,8 +435,9 @@ export function buildReadConfirmationDraft(input: {
       share_session_id: input.shareSessionId || null,
       worker_id: input.workerId?.trim() || null,
       worker_display_name: displayName,
+      // 열람 확인 기록에는 연락처를 남기지 않는다 — 확인은 이미 끝났고, 보유기간 정리 대상을 줄인다.
       worker_snapshot: {
-        ...input.workerSnapshot,
+        ...stripWorkerSnapshotContacts(input.workerSnapshot),
         displayName
       },
       language_code: cleanLanguageCode(input.languageCode),

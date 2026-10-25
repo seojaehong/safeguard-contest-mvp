@@ -13,6 +13,8 @@ import {
   type WorkspaceUser
 } from "@/lib/supabase-admin";
 import { isRecord } from "@/lib/workspace-api";
+import { WorkspaceInviteRequiredError, workspaceInviteRequiredResponse } from "@/lib/admin-invite";
+import { MAX_BRIEFING_SITES } from "@/lib/briefing";
 import { resolveBriefingEmailDispatchStatus } from "@/lib/server/briefing-dispatch-status";
 import {
   AUTHENTICATED_BRIEFING_REQUEST_MAX_BYTES,
@@ -139,6 +141,33 @@ export async function POST(request: NextRequest) {
   try {
     const context = await ensureWorkspaceContext(client, user, {});
 
+    // 브리핑 자리 상한(SEC-05): cron 은 앞에서부터 MAX_BRIEFING_SITES 곳만 돌린다.
+    // 새로 켜는 요청이 상한을 넘기면 조용히 밀려나지 않도록 저장 단계에서 거절한다.
+    if (enabled) {
+      const { data: currentSite, error: currentError } = await client
+        .from("sites")
+        .select("id,briefing_enabled")
+        .eq("id", context.siteId)
+        .maybeSingle();
+      if (currentError) throw currentError;
+      if (!currentSite?.briefing_enabled) {
+        const { count, error: countError } = await client
+          .from("sites")
+          .select("id", { count: "exact", head: true })
+          .eq("briefing_enabled", true);
+        if (countError) throw countError;
+        if ((count ?? 0) >= MAX_BRIEFING_SITES) {
+          return NextResponse.json({
+            ok: false,
+            configured: true,
+            dispatch,
+            code: "BRIEFING_SITE_CAP_REACHED",
+            message: `아침 브리핑은 지금 ${MAX_BRIEFING_SITES}곳까지만 운영합니다. 자리가 다 찼으니 운영자에게 문의해 주세요.`
+          }, { status: 409 });
+        }
+      }
+    }
+
     const { error } = await client
       .from("sites")
       .update({
@@ -163,6 +192,7 @@ export async function POST(request: NextRequest) {
         : "아침 브리핑 설정을 저장했습니다(현재 꺼짐)."
     });
   } catch (error) {
+    if (error instanceof WorkspaceInviteRequiredError) return workspaceInviteRequiredResponse({ dispatch });
     console.error("briefing settings save failed", error);
     return NextResponse.json({
       ok: false,
