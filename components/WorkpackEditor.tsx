@@ -523,8 +523,7 @@ function getWorkPlanStructured(data: AskResponse): WorkPlanStructured | null {
 // 허가서 구조화 데이터는 서버가 작업 분류에서 한 번만 만든다(lib/permit-workplan-forms.ts). 화면에서 따로
 // 허가구분을 판정하지 않는다(EXP-01·WP-08). 허가서 필드가 아예 없는 이전 저장본만 같은 모듈·같은 작업 분류로
 // 다시 만든다. 작업 유형이 보류면 만들지 않는다.
-function buildLegacyPermit(data: AskResponse): { structured: PermitInspectionStructured; text: string } | null {
-  if (data.deliverables.workPermitDraft !== undefined) return null;
+function buildPermitFromClassification(data: AskResponse): { structured: PermitInspectionStructured; text: string } | null {
   const classification = data.scenario.taskClassification;
   if (classification?.status !== "classified") return null;
   const input = {
@@ -540,6 +539,18 @@ function buildLegacyPermit(data: AskResponse): { structured: PermitInspectionStr
   };
   const structured = buildPermitInspection(input);
   return structured ? { structured, text: renderPermitText(structured, input) } : null;
+}
+
+function buildLegacyPermit(data: AskResponse) {
+  return data.deliverables.workPermitDraft === undefined ? buildPermitFromClassification(data) : null;
+}
+
+// 내려받기용: 서버 구조화 데이터가 없으면 같은 모듈로 다시 만들되, 본문 「허가구분」과 같을 때만 쓴다(형식 간 불일치 방지).
+function resolveExportPermitStructured(data: AskResponse, rows: SheetRow[]): PermitInspectionStructured | null {
+  const existing = getPermitInspectionStructured(data);
+  if (existing) return existing;
+  const rebuilt = buildPermitFromClassification(data)?.structured ?? null;
+  return rebuilt && findPermitTypeInRows(rows) === rebuilt.basicInfo.permitType ? rebuilt : null;
 }
 
 function getPermitInspectionStructured(data: AskResponse): PermitInspectionStructured | null {
@@ -3720,9 +3731,9 @@ export function WorkpackEditor({
       if (selected.key === "workPlanDraft" && dl?.workPlanStructured) {
         structuredMode = "workPlanStructured";
         structuredPayload = dl.workPlanStructured;
-      } else if (selected.key === "workPermitDraft" && !selectedHasIntentionalEmptyPermitDraft && getPermitInspectionStructured(data)) {
+      } else if (selected.key === "workPermitDraft" && !selectedHasIntentionalEmptyPermitDraft && resolveExportPermitStructured(data, selectedRows)) {
         structuredMode = "permitInspectionStructured";
-        structuredPayload = getPermitInspectionStructured(data);
+        structuredPayload = resolveExportPermitStructured(data, selectedRows);
       } else if (selected.key === "tbmBriefing" && dl?.tbmBriefingStructured) {
         structuredMode = "tbmBriefingStructured";
         structuredPayload = dl.tbmBriefingStructured;
