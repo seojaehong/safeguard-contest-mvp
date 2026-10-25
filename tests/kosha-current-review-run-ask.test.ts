@@ -652,9 +652,13 @@ describe("current-base runAsk retrieval provenance", () => {
     const response = await runAsk("지게차 보행자 동선 충돌", { aiMode: "full" });
 
     expect(response.dbHarness?.summary.directEvidence).toBeGreaterThan(0);
-    expect(response.deliverables.riskAssessmentDraft).toContain(
+    // PR-06/10 결정: 위험성평가 초안은 생성 문안이 아니라 정본 행(structured.riskAssessmentRows)의 직렬화다.
+    expect(response.deliverables.riskAssessmentDraft).not.toContain(
       providerNarrativeMarker(deliverablesPrefix, "riskAssessmentDraft")
     );
+    for (const row of response.structured?.riskAssessmentRows || []) {
+      expect(response.deliverables.riskAssessmentDraft).toContain(row.hazard);
+    }
     expect(response.deliverables.workPlanDraft).toContain(
       providerNarrativeMarker(deliverablesPrefix, "workPlanDraft")
     );
