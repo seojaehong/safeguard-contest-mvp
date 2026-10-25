@@ -62,8 +62,9 @@ const safetyReferenceStatusConcurrency = createConcurrencyGuard(
 );
 
 const FIXED_WINDOW_SCRIPT = [
-  "local count = redis.call('INCR', KEYS[1])",
-  "if count == 1 then redis.call('PEXPIRE', KEYS[1], ARGV[1]) end",
+  "local count = redis.call('INCRBY', KEYS[1], tonumber(ARGV[2] or '1'))",
+  // 새 키의 첫 증가(가중치만큼)일 때만 만료를 건다 — INCRBY 12 면 첫 값이 12 다.
+  "if count == tonumber(ARGV[2] or '1') then redis.call('PEXPIRE', KEYS[1], ARGV[1]) end",
   "local ttl = redis.call('PTTL', KEYS[1])",
   "return {count, ttl}",
 ].join("\n");
@@ -88,7 +89,12 @@ type RateLimitMode = "distributed" | "instance";
 
 export type PublicRateLimitDecision = RateLimitResult & {
   mode: RateLimitMode;
-  reason: "distributed" | "distributed_limiter_unavailable" | "distributed_limiter_misconfigured" | "instance_fallback";
+  reason:
+    | "distributed"
+    | "distributed_limiter_unavailable"
+    | "distributed_limiter_misconfigured"
+    | "instance_fallback"
+    | "distributed_outage_instance_fallback";
 };
 
 type Environment = Record<string, string | undefined>;
@@ -109,7 +115,23 @@ export type PublicRateLimitOptions = {
   fetchImpl?: FetchLike;
   timeoutMs?: number;
   requireDistributedInProduction?: boolean;
+  /** 한 번에 올릴 가중치(기본 1). 비용 상한처럼 작업 단위로 셀 때 쓴다. */
+  increment?: number;
+  /**
+   * Upstash 가 설정돼 있는데 호출이 실패했을 때(장애) 503 대신 인스턴스 한도로 허용한다.
+   * 공유 링크 열람처럼 비용이 거의 없는 읽기에만 켠다(2026-10-25 결정 24). 기본 false.
+   */
+  instanceFallbackOnOutage?: boolean;
 };
+
+function checkInstanceLimiter(limiter: RateLimiter, identifier: string, increment: number): RateLimitResult {
+  let last: RateLimitResult = { allowed: true };
+  for (let index = 0; index < increment; index += 1) {
+    last = limiter.check(identifier);
+    if (!last.allowed) return last;
+  }
+  return last;
+}
 
 type UpstashConfiguration =
   | { state: "absent" }
@@ -159,6 +181,7 @@ async function checkUpstashRateLimit(input: {
   config: Extract<UpstashConfiguration, { state: "ready" }>;
   fetchImpl: FetchLike;
   identifier: string;
+  increment: number;
   limit: number;
   namespace: string;
   timeoutMs: number;
@@ -180,6 +203,7 @@ async function checkUpstashRateLimit(input: {
         "1",
         buildRateLimitKey(input.namespace, input.identifier),
         String(input.windowMs),
+        String(input.increment),
       ]),
       cache: "no-store",
       signal: controller.signal,
@@ -233,6 +257,10 @@ export async function checkPublicRateLimit(
   const environment = options.environment ?? process.env;
   const config = readUpstashConfiguration(environment);
   const identifier = options.identifier ?? getClientIp(options.request, environment);
+  const increment = options.increment ?? 1;
+  if (!Number.isSafeInteger(increment) || increment < 1) {
+    throw new Error("rate-limit increment must be a positive safe integer");
+  }
 
   if (config.state === "invalid") {
     console.error("[public-rate-limit] distributed limiter configuration is incomplete or unsafe", {
@@ -246,15 +274,27 @@ export async function checkPublicRateLimit(
     };
   }
   if (config.state === "ready") {
-    return checkUpstashRateLimit({
+    const distributed = await checkUpstashRateLimit({
       config,
       fetchImpl: options.fetchImpl ?? fetch,
       identifier,
+      increment,
       limit: options.limit,
       namespace: options.namespace,
       timeoutMs: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
       windowMs: options.windowMs,
     });
+    if (options.instanceFallbackOnOutage && distributed.reason === "distributed_limiter_unavailable") {
+      console.error("[public-rate-limit] distributed limiter outage — instance fallback admitted", {
+        namespace: options.namespace,
+      });
+      return {
+        ...checkInstanceLimiter(options.instanceLimiter, identifier, increment),
+        mode: "instance",
+        reason: "distributed_outage_instance_fallback",
+      };
+    }
+    return distributed;
   }
 
   if (options.requireDistributedInProduction && environment.VERCEL_ENV === "production") {
@@ -270,7 +310,7 @@ export async function checkPublicRateLimit(
   }
 
   return {
-    ...options.instanceLimiter.check(identifier),
+    ...checkInstanceLimiter(options.instanceLimiter, identifier, increment),
     mode: "instance",
     reason: "instance_fallback",
   };

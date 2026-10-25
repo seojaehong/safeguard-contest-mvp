@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { WorkspaceInviteRequiredError, workspaceInviteRequiredResponse } from "@/lib/admin-invite";
 import { createSupabaseAdminClient, ensureWorkspaceContext, getWorkspaceUser, toJson } from "@/lib/supabase-admin";
 import { isRecord, parseEducationRecordDrafts, parseScenarioContext, parseWorkerProfiles, readString } from "@/lib/workspace-api";
 import {
@@ -57,7 +58,13 @@ export async function POST(request: NextRequest) {
     }, { status: 400 });
   }
 
-  const context = await ensureWorkspaceContext(client, user, parseScenarioContext(body.scenario));
+  let context: Awaited<ReturnType<typeof ensureWorkspaceContext>>;
+  try {
+    context = await ensureWorkspaceContext(client, user, parseScenarioContext(body.scenario));
+  } catch (error) {
+    if (error instanceof WorkspaceInviteRequiredError) return workspaceInviteRequiredResponse();
+    throw error;
+  }
   if (workpackId) {
     const { data: ownedWorkpack, error: workpackError } = await client
       .from("workpacks")

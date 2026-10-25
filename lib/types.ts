@@ -395,8 +395,17 @@ export type GenerationEvidenceError = {
   message: string;
 };
 
+/** 요청한 생성 모드가 template 으로 강등됐을 때의 안내(2026-10-25 결정 21). */
+export type AskModeNotice = {
+  requestedMode: "template" | "enhanced" | "full";
+  appliedMode: "template";
+  reason: "anonymous" | "daily_cost_cap";
+  message: string;
+};
+
 export type AskResponse = {
   question: string;
+  aiModeNotice?: AskModeNotice;
   answer: string;
   practicalPoints: string[];
   citations: SearchResult[];

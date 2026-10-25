@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-25T11:32:58.234Z",
-  "sourceSha": "453286165529ad5e597861c6fed885751e2e476c",
-  "sourceIdentity": "85712eae8ed294c90699e6b9dcc5f5ac4f1108f623255d5c9f2e5ceb92016203",
+  "generatedAt": "2026-10-25T11:56:10.980Z",
+  "sourceSha": "ab78fdcc71b1e6c3eb31030ef439500e00ef0f28",
+  "sourceIdentity": "431f154a7dd3ff15236cceb2b82be616fa7cc5820bb58c0b66b32022c9b7186d",
   "status": "pass",
   "counts": {
-    "pageFiles": 36,
+    "pageFiles": 37,
     "componentFiles": 32,
     "cssLines": 24972,
     "importantDeclarations": 0
@@ -82,6 +82,7 @@
       "/workspace"
     ],
     "standaloneRoutes": [
+      "/privacy",
       "/tools/leave",
       "/tools/leave/advanced",
       "/tools/leave/settlement"
