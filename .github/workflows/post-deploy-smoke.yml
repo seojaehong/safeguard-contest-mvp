@@ -1,0 +1,52 @@
+name: Post-deploy Smoke
+
+# master 에 push 되면 Vercel 배포가 READY 가 될 때까지(/api/build-info 의 commitSha == GITHUB_SHA) 기다린 뒤
+# 주요 페이지와 /api/ask template 1회를 확인한다. 15분 안에 커밋이 올라오지 않으면 실패한다.
+# 내부 코드 노출 검사는 PR-14 전까지 report(경고)다.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      leak_gate:
+        description: "내부 코드 노출 검사 — report(경고만) / enforce(실패)"
+        type: choice
+        options: [report, enforce]
+        default: report
+
+permissions:
+  contents: read
+
+concurrency:
+  group: post-deploy-smoke
+  cancel-in-progress: true
+
+jobs:
+  post-deploy-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Wait for deploy, then pages + /api/ask template
+        env:
+          SMOKE_EXPECT_SHA: ${{ github.sha }}
+          SMOKE_DEPLOY_WAIT_SECONDS: "900"
+          SMOKE_ASK_MODE: template
+          SMOKE_LEAK_GATE: ${{ inputs.leak_gate || 'report' }}
+          SMOKE_OUTPUT_DIR: smoke-output
+        run: node scripts/prod_ask_smoke.mjs
+
+      - name: Upload smoke output
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: post-deploy-smoke-${{ github.sha }}
+          path: smoke-output/
+          retention-days: 14
+          if-no-files-found: warn
