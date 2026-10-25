@@ -3,7 +3,7 @@
 // Vercel cron이 매일 06:00 KST(21:00 UTC, vercel.json)에 이 라우트를 호출한다.
 // 대상 사이트는 DB 우선(sites.briefing_enabled=true, 고객 셀프서브) → env BRIEFING_SITES
 // 폴백(하위호환) 순서로 결정한다. 사이트마다: 1) runAsk로 문서팩 생성 2) Supabase
-// workpacks에 저장(저장되면 /evidence-file 방어 파일에 자동 축적됨) 3) n8n이 이미
+// workpacks에 저장(저장되면 /evidence-file 시행령 제4조 문서 모아보기에 자동 축적됨) 3) n8n이 이미
 // 처리하는 "safeguard.workpack.dispatch" 계약(email 채널)으로 요약 발송.
 // 각 단계는 독립적으로 실패해도 다음 사이트 처리를 막지 않는다 — 무인 실행이 전제이므로.
 

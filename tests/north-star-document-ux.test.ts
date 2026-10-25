@@ -31,7 +31,9 @@ const metricRows: Array<Record<string, unknown>> = [];
 const evaluationDirectory = path.join(process.cwd(), "evaluation", "north-star-document-ux-24h-2026-07-14");
 const productionBuildIdPath = path.join(process.cwd(), ".next", "BUILD_ID");
 const hasProductionBuild = existsSync(productionBuildIdPath);
-const productionBrowserSuite = hasProductionBuild ? describe : describe.skip;
+// CI 는 빌드를 시험보다 먼저 한다(ci.yml). CI 에서 빌드가 없으면 skip 하지 않고 실패시킨다.
+const requireProductionBuild = Boolean(process.env.CI);
+const productionBrowserSuite = hasProductionBuild || requireProductionBuild ? describe : describe.skip;
 const productionBrowserSuiteName = hasProductionBuild
   ? "North Star document cockpit and editor UX"
   : "North Star document cockpit and editor UX [skipped: missing .next/BUILD_ID; run npm.cmd run build first]";
@@ -78,6 +80,7 @@ async function openGeneratedWorkspace(page: Page, theme: Theme) {
 
 productionBrowserSuite(productionBrowserSuiteName, () => {
   beforeAll(async () => {
+    if (!hasProductionBuild) throw new Error("CI requires .next/BUILD_ID before this suite; run npm run build first");
     harness = await startIsolatedNextBrowserHarness({
       slug: "north-star-document-ux",
       initialPath: "/workspace",

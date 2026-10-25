@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkCommercialRequiredTables } from "@/lib/commercial-required-tables";
 import { getSifEmbeddingGateStatus } from "@/lib/sif-embedding-gate-status";
 import { createSupabaseAdminClient, getWorkspaceUser, isPlatformOperator } from "@/lib/supabase-admin";
 
@@ -17,5 +18,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ ok: false, message: "플랫폼 운영자 권한이 필요합니다." }, { status: 403 });
   }
   const status = getSifEmbeddingGateStatus();
-  return NextResponse.json(status, { status: status.ok ? 200 : 503 });
+  // 마이그레이션 010 의 필수 테이블 5개가 PostgREST 에 보이는지 함께 점검한다(PGRST205 → missing).
+  const commercialTables = await checkCommercialRequiredTables(client);
+  return NextResponse.json(
+    { ...status, commercialTables },
+    { status: status.ok && commercialTables.ok ? 200 : 503 }
+  );
 }

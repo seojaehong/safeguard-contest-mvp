@@ -108,8 +108,10 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
   });
 }
 
-describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", () => {
+// CI 는 빌드를 시험보다 먼저 한다(ci.yml). CI 에서 빌드가 없으면 skip 하지 않고 실패시킨다.
+describe.skipIf(!hasProductionBuild && !process.env.CI)("share recipient portal browser contract", () => {
   beforeAll(async () => {
+    if (!hasProductionBuild) throw new Error("CI requires .next/BUILD_ID and prerender-manifest before this suite; run npm run build first");
     harness = await startIsolatedNextBrowserHarness({
       slug: "share-recipient-portal",
       initialPath: "/",

@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { compareRow } from "@/lib/annual-leave";
 import { buildText, looksLikeHeader, normalizeDate, parseLines, readGrid } from "@/lib/leave-sheet";
-import type { ParsedRow } from "@/lib/leave-sheet";
 import { downloadXlsx } from "@/lib/leave-xlsx";
+import { isLeaveCalculationError, leaveCsv, leaveExportRow } from "@/lib/leave-export";
 import { downloadLeaveTemplate } from "@/lib/leave-template-xlsx";
 import { todayLocal } from "@/lib/leave-today";
 import {
@@ -55,36 +55,6 @@ function saveTemplate(t: Template): void {
   } catch {
     /* 저장 못 해도 계산에는 지장이 없다 */
   }
-}
-
-function toCsv(
-  rows: { row: ParsedRow; result: ReturnType<typeof compareRow> | null }[],
-  asOf: string
-): string {
-  const head = ["이름", "입사일", "기준일", "발생일수", "대장기재", "차이", "판정", "적용근거"];
-  const lines = rows.map(({ row, result }) => {
-    if (!result) return [row.name, row.hireDate, asOf, "", "", "", "읽지 못함", row.error ?? ""];
-    const hasRec = row.recordedDays !== null;
-    return [
-      row.name,
-      row.hireDate,
-      asOf,
-      String(result.calculatedDays),
-      // ★ 대장에 「미확인」이라고 적혀 있으면 그 원문을 그대로 싣는다.
-      //   「대장값 없음」으로 쓰면 원본 대장을 왜곡한 파일이 사무소를 돈다.
-      hasRec ? String(row.recordedDays) : (row.recordedRaw ?? ""),
-      hasRec ? String(result.diff) : "",
-      hasRec
-        ? (result.verdict === "diff" ? "차이 있음" : "일치")
-        : row.recordedRaw
-          ? "대조 못 함(숫자 아님)"
-          : "대장값 없음",
-      result.basisLabel,
-    ];
-  });
-  return [head, ...lines]
-    .map((cols) => cols.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
-    .join("\r\n");
 }
 
 export function LeaveInput() {
@@ -480,7 +450,7 @@ export function LeaveInput() {
               className="lv-input__btn"
               onClick={async () => {
                 trackLeave("leave_export", { kind: "copy" });
-                const csv = toCsv(results, asOf);
+                const csv = leaveCsv(results, asOf);
                 try {
                   await navigator.clipboard.writeText(csv.replace(/","/g, "\t").replace(/"/g, ""));
                   setCopied(true);
@@ -504,30 +474,12 @@ export function LeaveInput() {
                     subtitle: `기준일 ${asOf} · 입사일 기준 · 근로기준법 제60조`,
                     header: ["이름", "입사일", "발생일수", "대장 기재", "차이", "판정", "적용 근거"],
                     widths: [14, 13, 10, 10, 8, 13, 46],
-                    rows: results.map(({ row, result }) =>
-                      !result
-                        ? [row.name || "", row.hireDate || "", "", "", "", "읽지 못함", row.error ?? ""]
-                        : [
-                            row.name,
-                            row.hireDate,
-                            result.calculatedDays,
-                            // 대장에 적힌 원문을 보존한다 — 「미확인」을 「대장값 없음」으로
-                            // 바꿔 쓰면 원본을 왜곡한 파일이 사무소 안을 돈다.
-                            row.recordedDays ?? row.recordedRaw ?? "",
-                            row.recordedDays !== null ? result.diff : "",
-                            row.recordedDays !== null
-                              ? result.verdict === "diff"
-                                ? "차이 있음"
-                                : "일치"
-                              : row.recordedRaw
-                                ? "대조 못 함(숫자 아님)"
-                                : "대장값 없음",
-                            result.basisLabel,
-                          ]
-                    ),
+                    rows: results.map(leaveExportRow),
+                    // 차이 있는 줄과 계산하지 못한 줄을 함께 강조한다 — 받는 사람은 행만 본다
                     emphasizeRows: results
                       .map((x, i) =>
-                        x.result && x.row.recordedDays !== null && x.result.verdict === "diff"
+                        (x.result && isLeaveCalculationError(x.result)) ||
+                        (x.result && x.row.recordedDays !== null && x.result.verdict === "diff")
                           ? i
                           : -1
                       )
@@ -535,12 +487,12 @@ export function LeaveInput() {
                     notes: [
                       `· 계산 ${usable.length}명 · 대조 ${comparedCount}명 · 대조 못 함 ${uncompared.length}명 · 대장값 없음 ${noRecord.length}명 · 계산 불가 ${problems.length}줄`,
                       "· 「대조 못 함」은 대장 칸에 숫자가 아닌 값이 적혀 있어 계산값과 맞대보지 못한 줄입니다. 원문을 그대로 실었습니다.",
-                      "· 계산: safeclaw.kr/tools/leave — 노무법인 위너스 · abc@winhr.co.kr",
+                      "· 계산: safeclaw.kr/tools/leave — SafeClaw · 문의는 safeclaw.kr 「도입 문의」",
                       "· 상시 5인 이상 사업장, 1주 소정근로시간 15시간 이상 근로자를 전제로 한 참고 계산입니다.",
                       "· 입사일 기준 「발생일수」입니다. 이월·사용분을 뺀 잔여일수와는 다릅니다.",
                       "· 출근율 80% 미만 구간, 육아휴직 등 특수 출결은 조건이 달라집니다.",
                       "· 회계연도로 운영하는 사업장의 퇴직 정산은 별도 화면에서 계산합니다.",
-                      "· 임금채권 확정이나 분쟁 사안은 별도 검토가 필요합니다.",
+                      "· 개별 사안은 전문가 검토가 필요합니다.",
                     ],
                   },
                 ]);

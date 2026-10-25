@@ -84,7 +84,7 @@ describe("public page provider admission", () => {
     expect(askLivePage).toContain('fetch("/api/ask"');
     expect(askLivePage).toContain("new AbortController()");
     expect(askLivePage).toContain("signal: controller.signal");
-    expect(askLivePage).toContain("return () => controller.abort");
+    expect(askLivePage).toContain("controllerRef.current?.abort");
 
     expect(searchPage).toContain("SearchLivePage");
     expect(searchPage).not.toContain("createPublicPageAdmissionRequest");

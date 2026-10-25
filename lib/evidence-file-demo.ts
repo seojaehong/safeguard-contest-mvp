@@ -1,4 +1,4 @@
-// 비로그인/Supabase 미설정 상태에서도 "경영책임자 방어 파일" 화면이 성립하도록
+// 비로그인/Supabase 미설정 상태에서도 "시행령 제4조 문서 모아보기" 화면이 성립하도록
 // 만드는 데모 workpack 2~3건. buildMockAskResponse가 만드는 문서팩과 같은
 // deliverables 구조를 재사용해 실제 화면과 동일한 그룹핑 로직을 탄다.
 
@@ -58,7 +58,7 @@ export function buildDemoEvidenceWorkpacks(): EvidenceFileWorkpack[] {
       scenario.question,
       mockSearchResults,
       "mock",
-      "SafeClaw 경영책임자 방어 파일 데모 문서팩입니다."
+      "SafeClaw 시행령 제4조 문서 모아보기 데모 문서팩입니다."
     );
 
     return {
