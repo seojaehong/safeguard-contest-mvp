@@ -1,0 +1,56 @@
+name: Monthly Full Quality Check
+
+# 결정 18(2026-10-25): full 모드는 월 1회 수동으로만 돌린다(AI 비용). 응답 전문을 artifact 로 남긴다.
+# 판정 = HTTP·qualityContract.overall(blocked 면 실패)·AI 생존(generationTrace 에서 AI 본문 1건 이상).
+# 내부 코드 노출 검사는 PR-14 전까지 report(경고)가 기본이다.
+
+on:
+  workflow_dispatch:
+    inputs:
+      question:
+        description: "질문(비우면 기본 질문 — 안산 제조공장 용접·지게차)"
+        type: string
+        required: false
+        default: ""
+      leak_gate:
+        description: "내부 코드 노출 검사 — report(경고만) / enforce(실패)"
+        type: choice
+        options: [report, enforce]
+        default: report
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prod-quality-full
+  cancel-in-progress: false
+
+jobs:
+  full-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Full-mode /api/ask quality check
+        env:
+          SMOKE_ASK_MODE: full
+          SMOKE_PAGES: none
+          SMOKE_QUESTION: ${{ inputs.question }}
+          SMOKE_LEAK_GATE: ${{ inputs.leak_gate }}
+          SMOKE_ASK_TIMEOUT_MS: "280000"
+          SMOKE_OUTPUT_DIR: smoke-output
+        run: node scripts/prod_ask_smoke.mjs
+
+      - name: Upload full response
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: prod-quality-full-${{ github.run_id }}
+          path: smoke-output/
+          retention-days: 90
+          if-no-files-found: warn
