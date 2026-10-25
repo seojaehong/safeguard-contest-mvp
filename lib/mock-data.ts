@@ -1654,7 +1654,7 @@ function buildOfficialStyleTbmLog(scenario: ReturnType<typeof inferScenario>) {
     "TBM 내용 숙지 여부(구두 복창): □ 확인 □ 미확인",
     "보호구 착용 상태(상호 점검): □ 확인 □ 미확인",
     "위험구역 표시 및 통제: □ 확인 □ 미확인",
-    "신규·외국인·미숙련 작업자 이해 여부(쉬운 한국어·통역·번역): □ 확인 □ 미확인 □ 해당 없음",
+    "신규·외국인·미숙련 작업자 이해 여부(쉬운 한국어·통역·번역): □ 확인 □ 미확인 □ 대상자 없음",
     `참석자 성명·서명: 아래 참석자 서명표(작업자 ${scenario.workerCount}명)에 기재`,
     "",
     ...(scenario.taskClassification.taskId === "confined-space"
@@ -1700,7 +1700,7 @@ function buildOfficialStyleSafetyEducationRecord(scenario: ReturnType<typeof inf
     `작성일: ${formatKstDate()}`,
     `교육장소: ${scenario.siteName}`,
     `교육대상: ${profile.educationTargets}, 총 ${scenario.workerCount}명`,
-    "교육 실시자: ________ (자격: 관리감독자 등 시행규칙 제26조제3항 해당 여부 확인)",
+    "교육 실시자: (현장 기재, 자격: 관리감독자 등 시행규칙 제26조제3항 해당 여부 확인)",
     "확인자: 작업반장 / 작업자 대표",
     EDUCATION_RETENTION_LINE,
     "",

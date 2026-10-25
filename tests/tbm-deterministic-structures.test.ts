@@ -86,7 +86,9 @@ describe("deterministic TBM structures", () => {
     const log = buildTbmLogStructuredFromRiskRows(scenario, rows, "단시간 흐림, 풍속 1m/s");
 
     expect(log.attendance.expected).toBe(5);
-    expect(log.attendance.actual).toBe(5);
+    // TBM-08: 회의 전 초안은 실제 참석 인원을 비워 둔다.
+    expect(log.attendance.actual).toBe(0);
+    expect(log.attendance.attendees).toHaveLength(5);
     expect(log.hazardsDiscussed[0]).toMatchObject({
       description: "작업발판 외측 추락 위험",
       relatedRiskRowIndex: 0

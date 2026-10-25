@@ -12,6 +12,7 @@ import { buildEducationRecordStructuredXlsx, buildTbmLogStructuredXlsx, buildXls
 import { applyOntologyQaRemediation } from "@/lib/workpack-ontology-qa";
 import { POST as pdfPost } from "@/app/api/export/pdf/route";
 import ExcelJS from "exceljs";
+import { auditAskDeliverables, classifyDeliverablePresence } from "@/lib/deliverable-integrity-policy";
 
 // 운영 full 4문항(합성 질문, 실명·실사업장 아님). tests/task-classification-coverage.test.ts 와 같다.
 const Q = {
@@ -180,6 +181,22 @@ describe("PR-07 TBM", () => {
     wb.worksheets[0].eachRow((row) => values.push(row.values ? JSON.stringify(row.values) : ""));
     const signRows = values.filter((value) => value.includes("서명: ______") && /\[null,"\d+"/.test(value));
     expect(signRows.length).toBe(10);
+  });
+});
+
+describe("PR-07/08 공통: 새 칸이 문서 무결성 검사를 막지 않는다", () => {
+  it.each(ALL)("%s: TBM·교육 기록이 생성 누락·placeholder 과다로 잡히지 않는다", (_, q) => {
+    const response = mock(q);
+    for (const key of ["tbmBriefing", "tbmLogDraft", "safetyEducationRecordDraft"] as const) {
+      expect(classifyDeliverablePresence(response.deliverables[key]).status).toBe("presentNonEmpty");
+    }
+    const audits = auditAskDeliverables({
+      deliverables: response.deliverables as never,
+      requiredKeys: ["tbmBriefing", "tbmLogDraft", "safetyEducationRecordDraft"]
+    });
+    for (const audit of audits) {
+      expect(audit.issues.map((issue) => issue.code)).not.toContain("placeholder_heavy");
+    }
   });
 });
 
