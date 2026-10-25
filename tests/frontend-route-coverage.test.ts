@@ -229,6 +229,8 @@ const approvedSpacingTokens = new Set([
 ]);
 const justifiedSemanticSpacingTokens = new Set(["--os-gutter", "--module-nav-inline", "--decision-header-inline"]);
 const justifiedResponsiveSpacingExpressions = new Set([
+  // IBM Plex Sans KR 글자 상자(1.5em)가 줄높이보다 커서, 글자 2배 확대에서도 눈썹 라벨과 겹치지 않게 글자 크기 비례 여백을 둔다.
+  ".safeclaw-module-shell[data-module-route=\"/reports\"] .safeclaw-page-decision-copy h1|margin-top|0.2em",
   ".safeclaw-landing-nav nav|gap|clamp(var(--space-4), 2.4vw, var(--space-10))",
   ".safeclaw-hero-copy|padding|clamp(var(--space-10), 7vw, var(--space-24))",
   ".safeclaw-hero-console|padding|clamp(32px, 5vw, 64px)",
@@ -1513,11 +1515,14 @@ describe("module route section hierarchy", () => {
       "line-height": "var(--leading-hud)",
       "letter-spacing": "var(--tracking-hud)",
     });
+    // 형광 배경을 없앤 뒤로는 안쪽 여백·기울임이 첫 글자를 밀기만 하므로 둘 다 0 이다(디자인 1단계).
     expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-hero mark")).toMatchObject({
-      padding: "0 var(--space-1)",
+      padding: "0",
+      transform: "none",
     });
     expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-section mark")).toMatchObject({
-      padding: "0 var(--space-1)",
+      padding: "0",
+      transform: "none",
     });
     expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-section h2")).toMatchObject({
       "font-size": "var(--text-section-title)",

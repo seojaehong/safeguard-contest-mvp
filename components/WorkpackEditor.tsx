@@ -2818,6 +2818,8 @@ export function WorkpackEditor({
   const [remediationLoadingId, setRemediationLoadingId] = useState<string | null>(null);
   const documentBodyRef = useRef<HTMLDivElement | null>(null);
   const workpackShellRef = useRef<HTMLElement | null>(null);
+  // 사용자가 근거·품질 칸을 직접 연 횟수. 진입 정렬 타이머가 그 뒤에 늦게 돌아 화면을 위험성평가로 되돌리지 않게 한다.
+  const userPaneActionRef = useRef(0);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const onDeliverablesChangeRef = useRef(onDeliverablesChange);
   const onSelectedDocumentChangeRef = useRef(onSelectedDocumentChange);
@@ -3162,7 +3164,9 @@ export function WorkpackEditor({
     root.style.scrollBehavior = "auto";
     window.scrollTo({ top: 0, behavior: "auto" });
     root.style.scrollBehavior = previousScrollBehavior;
+    const landingPaneAction = userPaneActionRef.current;
     const alignRequestedDocument = () => {
+      if (userPaneActionRef.current !== landingPaneAction) return;
       if (requestedDocumentKey === "riskAssessmentDraft") {
         alignRiskCockpitBelowToolbar();
         focusSelectedDocumentTarget(requestedDocumentKey);
@@ -3487,7 +3491,9 @@ export function WorkpackEditor({
   }, [expandedStructuredSectionId, selected.key, structuredDocument.body]);
 
   useLayoutEffect(() => {
+    const landingPaneAction = userPaneActionRef.current;
     const alignSelectedDocument = () => {
+      if (userPaneActionRef.current !== landingPaneAction) return;
       if (selected.key === "riskAssessmentDraft") {
         alignRiskCockpitBelowToolbar();
         return;
@@ -3604,6 +3610,7 @@ export function WorkpackEditor({
   }
 
   function openDocumentUtilityPanel(targetTestId: "editor-evidence-panel" | "editor-quality-panel") {
+    userPaneActionRef.current += 1;
     const root = workpackShellRef.current || documentBodyRef.current;
     const drawer = root?.querySelector<HTMLDetailsElement>('[data-testid="editor-provenance-drawer"]');
     if (drawer) {
@@ -3618,6 +3625,14 @@ export function WorkpackEditor({
     alignTarget();
     window.requestAnimationFrame(alignTarget);
     window.setTimeout(alignTarget, 80);
+    // 웹 글꼴(한글 조각)이 서랍을 연 뒤에 내려오면 줄바꿈이 바뀌어 근거 칸이 밀린다. 글꼴이 바뀐 뒤 한 번 더 맞춘다.
+    const fonts = typeof document !== "undefined" ? document.fonts : undefined;
+    if (fonts) {
+      const realignAfterFontSwap = () => window.requestAnimationFrame(alignTarget);
+      void fonts.ready.then(realignAfterFontSwap);
+      fonts.addEventListener("loadingdone", realignAfterFontSwap);
+      window.setTimeout(() => fonts.removeEventListener("loadingdone", realignAfterFontSwap), 2000);
+    }
   }
 
   function selectDocumentKey(key: DocumentKey) {

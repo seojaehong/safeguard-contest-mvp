@@ -334,7 +334,7 @@ function expectedTypographyRole(rule, selector) {
 }
 
 const hazardRail = "inset 4px 0 0 var(--sc-hazard-yellow)";
-const moduleRail = "inset 4px 0 0 var(--os-yellow, #ffdc2e)";
+const moduleRail = "inset 4px 0 0 var(--os-yellow, var(--sign-blue))";
 const effectContracts = new Map();
 
 function allowEffect(selector, property, value, reason) {
@@ -409,18 +409,18 @@ allowEffect(
 
 for (const [selector, value, reason] of [
   [".command-center-shell .input-photo-candidates article.accepted", "inset 4px 0 0 var(--workspace-success)", "accepted photo rail"],
-  [".command-center-shell.workspace-theme-day .command-console-input:focus", "0 0 0 3px rgba(245, 197, 24, 0.22)", "keyboard focus ring"],
+  [".command-center-shell.workspace-theme-day .command-console-input:focus", "0 0 0 2px var(--sign-blue)", "keyboard focus ring"],
   [".command-center-shell.workspace-theme-day .input-photo-candidates article.accepted", "inset 4px 0 0 #16a34a", "accepted photo rail"],
-  [".command-center-shell.workspace-theme-day .field-workspace .document-editor.editor-focus-cue", "0 0 0 3px rgba(108, 111, 247, 0.12)", "editor focus cue"],
+  [".command-center-shell.workspace-theme-day .field-workspace .document-editor.editor-focus-cue", "0 0 0 2px var(--sign-blue)", "editor focus cue"],
   [".command-center-shell.workspace-theme-day .field-workspace .doc-tab.active", "inset 4px 0 0 var(--workspace-accent)", "active document rail"],
-  [".command-center-shell.workspace-theme-day .field-workspace :is(.document-textarea, .remediation-textarea):focus", "0 0 0 3px rgba(108, 111, 247, 0.18)", "keyboard focus ring"],
+  [".command-center-shell.workspace-theme-day .field-workspace :is(.document-textarea, .remediation-textarea):focus", "0 0 0 2px var(--sign-blue)", "keyboard focus ring"],
   [".safeclaw-module-shell.module-variant-document .doc-tab.active", "inset 4px 0 0 var(--workspace-accent)", "active document rail"],
   [".safeclaw-module-shell.module-variant-document .template-card.active", "inset 4px 0 0 var(--workspace-accent)", "active template rail"],
-  [".safeclaw-module-shell.module-variant-document .document-textarea:focus", "0 0 0 3px rgba(108, 111, 247, 0.18)", "keyboard focus ring"],
-  [".safeclaw-module-shell.module-variant-document .remediation-textarea:focus", "0 0 0 3px rgba(108, 111, 247, 0.18)", "keyboard focus ring"],
-  [".command-center-shell.workspace-theme-night .field-workspace .document-editor.editor-focus-cue", "0 0 0 3px rgba(108, 111, 247, 0.22)", "editor focus cue"],
+  [".safeclaw-module-shell.module-variant-document .document-textarea:focus", "0 0 0 2px var(--sign-blue)", "keyboard focus ring"],
+  [".safeclaw-module-shell.module-variant-document .remediation-textarea:focus", "0 0 0 2px var(--sign-blue)", "keyboard focus ring"],
+  [".command-center-shell.workspace-theme-night .field-workspace .document-editor.editor-focus-cue", "0 0 0 2px var(--sign-blue)", "editor focus cue"],
   [".command-center-shell.workspace-theme-night .field-workspace .doc-tab.active", "inset 4px 0 0 var(--workspace-accent)", "active document rail"],
-  [".command-center-shell.workspace-theme-night .field-workspace :is(.document-textarea, .remediation-textarea):focus", "0 0 0 3px rgba(108, 111, 247, 0.24)", "keyboard focus ring"],
+  [".command-center-shell.workspace-theme-night .field-workspace :is(.document-textarea, .remediation-textarea):focus", "0 0 0 2px var(--sign-blue)", "keyboard focus ring"],
   [".safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-rail a.active", "inset 4px 0 0 var(--workspace-accent)", "active navigation rail"],
   [".safeclaw-module-shell .safeclaw-module-theme-toggle button.active", "inset 0 0 0 1px var(--workspace-rule-strong)", "selected theme indicator"],
   [".safeclaw-module-shell.module-variant-document :is(.safeclaw-mobile-core-list, .safeclaw-mobile-remaining-list) button[aria-pressed=\"true\"]", "inset 4px 0 0 var(--workspace-accent)", "selected mobile document rail"],
