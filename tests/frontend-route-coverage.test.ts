@@ -1515,11 +1515,14 @@ describe("module route section hierarchy", () => {
       "line-height": "var(--leading-hud)",
       "letter-spacing": "var(--tracking-hud)",
     });
+    // 형광 배경을 없앤 뒤로는 안쪽 여백·기울임이 첫 글자를 밀기만 하므로 둘 다 0 이다(디자인 1단계).
     expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-hero mark")).toMatchObject({
-      padding: "0 var(--space-1)",
+      padding: "0",
+      transform: "none",
     });
     expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-section mark")).toMatchObject({
-      padding: "0 var(--space-1)",
+      padding: "0",
+      transform: "none",
     });
     expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-section h2")).toMatchObject({
       "font-size": "var(--text-section-title)",
