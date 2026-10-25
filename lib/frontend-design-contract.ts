@@ -1,7 +1,8 @@
 export const frontendTypography = {
   fonts: {
-    product: '"Noto Sans KR", "Malgun Gothic", system-ui, sans-serif',
-    hud: '"Geist Mono", "Cascadia Mono", Consolas, monospace',
+    product: '"IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif',
+    // 고정폭 라벨 폐기(DESIGN.md) — hud 역할도 제품 글꼴을 쓴다.
+    hud: '"IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif',
     multilingual:
       '"Noto Sans", "Noto Sans KR", "Noto Sans Thai", "Noto Sans Khmer", "Noto Sans Myanmar", "Noto Sans Devanagari", "Malgun Gothic", sans-serif',
     document: '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif',
@@ -17,7 +18,7 @@ export const frontendTypography = {
     control: { size: "14px", weight: 700, lineHeight: "20px", tracking: "0" },
     table: { size: "13px", weight: 500, lineHeight: "20px", tracking: "0" },
     caption: { size: "12px", weight: 600, lineHeight: "18px", tracking: "0" },
-    hud: { size: "11px", weight: 700, lineHeight: "16px", tracking: "0.08em" },
+    hud: { size: "11px", weight: 700, lineHeight: "16px", tracking: "0" },
   },
   print: {
     title: { size: "20pt", weight: 700, lineHeight: "24pt", tracking: "-0.02em" },
@@ -141,10 +142,10 @@ export const frontendSpacing = {
 export const frontendShape = {
   structuralRadius: "0",
   microRadius: "2px",
-  controlRadius: "4px",
-  panelRadius: "4px",
-  softRadius: "8px",
-  workbenchRadius: "12px",
+  controlRadius: "2px",
+  panelRadius: "2px",
+  softRadius: "2px",
+  workbenchRadius: "2px",
   circleRadius: "50%",
   controlHeight: "44px",
   compactControlHeight: "36px",

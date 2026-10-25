@@ -1322,7 +1322,7 @@ describe("Reports Wave 1 browser design contract", () => {
           return { color: style.outlineColor, width: style.outlineWidth };
         });
         expect(photoApprovalFocus).toEqual({
-          color: scenario.theme === "day" ? "rgb(245, 197, 24)" : "rgb(108, 111, 247)",
+          color: scenario.theme === "day" ? "rgb(29, 90, 166)" : "rgb(138, 180, 248)",
           width: "2px"
         });
         expect(await photoApproval.isChecked()).toBe(false);
@@ -1635,10 +1635,10 @@ describe("Reports Wave 1 browser design contract", () => {
 
     expect(metrics.horizontalOverflow).toBe(0);
     expect(metrics.controlHeights.every((controlHeight) => controlHeight >= 44)).toBe(true);
-    expect(metrics.controlRadii.every((radius) => radius === "8px")).toBe(true);
+    expect(metrics.controlRadii.every((radius) => radius === "2px")).toBe(true);
     expect(metrics.overlapCount).toBe(0);
     expect(metrics.heroCtaHeight).toBeGreaterThanOrEqual(44);
-    expect(metrics.heroCtaRadius).toBe("8px");
+    expect(metrics.heroCtaRadius).toBe("2px");
     expect(contrastRatio(metrics.heroCtaColor, metrics.heroCtaBackground)).toBeGreaterThanOrEqual(4.5);
     if (label === "mobile") {
       expect(metrics.heroColumnCount).toBe(1);
@@ -1651,7 +1651,7 @@ describe("Reports Wave 1 browser design contract", () => {
       expect(metrics.heroCtaClipped).toBe(false);
       expect(metrics.heroMetaCtaOverlap).toBe(false);
     }
-    expect(focusOutline).toBe(theme === "day" ? "rgb(245, 197, 24)" : "rgb(108, 111, 247)");
+    expect(focusOutline).toBe(theme === "day" ? "rgb(29, 90, 166)" : "rgb(138, 180, 248)");
     expect(metrics.accentText).toBe(theme === "day" ? "rgb(102, 81, 0)" : "rgb(181, 183, 255)");
     expect(metrics.tuples).toEqual({
       factLabel: ["12px", "600", "18px", "normal"],
@@ -1841,7 +1841,7 @@ describe("Reports Wave 1 browser design contract", () => {
       });
       expect(metrics.horizontalOverflow).toBe(0);
       expect(metrics.heroCtaHeight).toBeGreaterThanOrEqual(44);
-      expect(metrics.heroCtaRadius).toBe("8px");
+      expect(metrics.heroCtaRadius).toBe("2px");
       expect(metrics.heroCtaClipped).toBe(false);
       expect(metrics.heroMetaCtaOverlap).toBe(false);
       expect(metrics.readinessOccluded).toBe(false);
