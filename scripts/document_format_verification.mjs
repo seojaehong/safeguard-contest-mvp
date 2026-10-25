@@ -29,12 +29,12 @@ const documentRules = [
   {
     id: "risk-assessment",
     label: "위험성평가표",
-    required: ["위험성평가표", "준제출형", "위험요인", "위험성", "기상", "확인", "서명", "근거", "증빙"]
+    required: ["위험성평가표", "법정 항목 확인 전", "위험요인", "위험성", "기상", "확인", "서명", "근거", "증빙"]
   },
   {
     id: "work-plan",
     label: "작업계획서",
-    required: ["작업계획서", "준제출형", "작업계획", "작업 전", "작업 중", "기상", "위험요인", "확인", "서명"]
+    required: ["작업계획서", "법정 항목 확인 전", "작업계획", "작업 전", "작업 중", "기상", "위험요인", "확인", "서명"]
   },
   {
     id: "permit-attachments",
@@ -72,7 +72,7 @@ const exportRules = [
   {
     id: "download-cta",
     label: "document card CTA",
-    required: ["SafeGuardCommandCenter", "focusWorkpackEditor", "다운로드 영역 열기", "준제출형 내려받기", "scrollIntoView"]
+    required: ["SafeGuardCommandCenter", "focusWorkpackEditor", "다운로드 영역 열기", "초안 내려받기", "scrollIntoView"]
   }
 ];
 
@@ -134,7 +134,7 @@ const summary = {
   exportCheckCount: exportResults.length,
   passCount: allResults.length - failed.length,
   failCount: failed.length,
-  readinessLabel: "준제출형",
+  readinessLabel: "법정 항목 확인 전",
   oneToOneReproduction: false,
   remainingGaps: [
     "발주처 지정 원본 갑지/을지의 직인과 허가번호 칸은 아직 1:1 재현하지 않음",

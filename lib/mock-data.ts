@@ -12,6 +12,7 @@ import {
   formatCompanyName,
   formatWorkerCount
 } from "./scenario-display";
+import { buildPermitInspection, renderPermitText, renderWorkPlanText } from "./permit-workplan-forms";
 import {
   validateRiskAssessmentRows,
   type RiskAssessmentRow,
@@ -1319,118 +1320,44 @@ function buildWorkpackSummaryDraft(scenario: ReturnType<typeof inferScenario>, r
   ].join("\n");
 }
 
+// 작업계획서: 별표4 호별 고정 양식(WP-04·WP-06 결정). 제목·서식 설명 줄은 본문에 두지 않는다(WP-13).
 function buildOfficialStyleWorkPlan(scenario: ReturnType<typeof inferScenario>) {
   const { profile } = scenario;
-
-  return [
-    "작업계획서(초안)",
-    "현장 서식 기준: 작업구간, 작업순서, 장비·인원, 허가·첨부, 확인자 중심",
-    "",
-    `공사명: ${scenario.siteName}`,
-    `작업구간: ${profile.processName}`,
-    `작성자: 관리감독자 / 작업반장`,
-    "확인자: 현장소장 / 안전관리자",
-    "작성일: 작업 시작 전",
-    "",
-    "[1. 작업개요]",
-    `- 작업명: ${profile.workName}`,
-    `- 작업내용: ${scenario.workSummary}`,
-    `- 작업인원: ${formatWorkerCount(scenario.workerCount)}`,
-    `- 작업 전 조건확인: ${roleSpecificCondition(scenario.weatherNote, "plan")}`,
-    "",
-    "[2. 작업순서 및 안전조치]",
-    "- 작업 전 작업구역 설정, 보호구 확인, 장비 상태 점검",
-    `- 주요 작업 수행: ${profile.processName}`,
-    `- 단계별 안전조치: ${profile.actions.join(" / ")}`,
-    ...scenario.specialContext.map((item) => `- 특수 조건 안전조치: ${item}`),
-    "- 작업 중 위험구역 출입통제와 작업중지 기준 수시 확인",
-    "- 작업 종료 후 정리정돈, 잔여 위험요인 확인, 사진/기록 보관",
-    "",
-    "[3. 장비·인원·허가 확인]",
-    "- 장비/도구: 작업계획서 또는 안전작업허가서 첨부자료로 확인",
-    "- 작업자: 신규 투입자, 외국인 근로자, 협력업체 인원 별도 확인",
-    "- 허가/첨부: 고위험 작업은 안전작업허가서, 위험성평가표, TBM 기록을 함께 보관",
-    "",
-    "[4. 작업중지 기준]",
-    `- ${profile.questions[0]}`,
-    `- ${profile.questions[1]}`,
-    `- ${profile.questions[2]}`,
-    "",
-    "[5. 확인 근거]",
-    "- 위험성평가표, TBM 기록, 안전보건교육 기록, 사진/영상 증빙을 같은 문서팩으로 묶어 확인합니다."
-  ].join("\n");
+  return renderWorkPlanText({
+    taskId: scenario.taskClassification.taskId,
+    question: scenario.question,
+    siteName: scenario.siteName,
+    workName: profile.workName,
+    processName: profile.processName,
+    workSummary: scenario.workSummary,
+    workerCount: scenario.workerCount,
+    condition: roleSpecificCondition(scenario.weatherNote, "plan"),
+    pairs: profile.pairs,
+    specialContext: scenario.specialContext,
+    stopCriteria: profile.questions
+  });
 }
 
-function inferWorkPermitCategory(scenario: ReturnType<typeof inferScenario>): string {
+function permitFormInput(scenario: ReturnType<typeof inferScenario>) {
   const { profile } = scenario;
-  const fingerprint = [
-    scenario.workSummary,
-    profile.workName,
-    profile.processName,
-    profile.topRisk,
-    ...profile.hazards
-  ].join(" ");
-
-  if (/(화학|세척|SDS|GHS|약품|용제)/iu.test(fingerprint)) return "화학물질 작업";
-  if (/(화기|용접|절단|불꽃)/u.test(fingerprint)) return "화기작업";
-  if (/(밀폐|탱크|맨홀|질식)/u.test(fingerprint)) return "밀폐공간 작업";
-  if (/(전기|감전|분전반|재통전|정전)/u.test(fingerprint)) return "전기작업";
-  if (/(고소|비계|추락|지붕|외벽)/u.test(fingerprint)) return "고소작업";
-  if (/(크레인|지게차|굴삭|양중|중장비)/u.test(fingerprint)) return "중장비 작업";
-  if (/(정비|끼임|컨베이어|방호장치|설비)/u.test(fingerprint)) return "설비 정비·격리 작업";
-  return "일반 위험작업";
+  return {
+    taskId: scenario.taskClassification.taskId,
+    question: scenario.question,
+    siteName: scenario.siteName,
+    workName: profile.workName,
+    workSummary: scenario.workSummary,
+    workerCount: scenario.workerCount,
+    weatherNote: roleSpecificCondition(scenario.weatherNote, "permit"),
+    pairs: profile.pairs,
+    stopCriterion: profile.questions[0]
+  };
 }
 
-function buildOfficialStyleWorkPermit(scenario: ReturnType<typeof inferScenario>) {
-  const { profile } = scenario;
-  const permitCategory = inferWorkPermitCategory(scenario);
-  const chemicalAttachment = permitCategory === "화학물질 작업"
-    ? "- SDS·GHS 경고표지와 취급 보호구를 허가 첨부자료로 확인"
-    : "- 취급 물질이 있으면 SDS·GHS 경고표지와 보호구 적합성을 추가 확인";
-  const isolationAttachment = /전기|정비|격리/u.test(permitCategory)
-    ? "- 에너지원 잠금·표지(LOTO), 잔류에너지 제거, 재가동 승인 상태를 확인"
-    : "- 전원·화기·장비·차량 등 작업구역에 영향을 주는 에너지원의 차단 상태를 확인";
-
-  return [
-    "안전작업허가 확인서(초안)",
-    "현장 적용 전 관리감독자와 허가권자가 작업조건을 최종 확인합니다.",
-    "",
-    "[1. 허가 기본정보]",
-    `- 현장명: ${scenario.siteName}`,
-    `- 허가대상 작업: ${profile.workName}`,
-    `- 허가구분: ${permitCategory}`,
-    `- 작업내용: ${scenario.workSummary}`,
-    `- 작업인원: ${formatWorkerCount(scenario.workerCount)}`,
-    "- 작업시간: 작업 시작 전 허가 시각부터 종료 확인 시각까지",
-    "- 허가상태: 작업 전 조건 확인 및 허가권자 승인 필요",
-    "",
-    "[2. 작업 전 허가조건]",
-    `- 핵심 위험: ${profile.topRisk}`,
-    ...profile.actions.map((action, index) => `- 안전조치 ${index + 1}: ${action}`),
-    `- 허가 전 조건확인: ${roleSpecificCondition(scenario.weatherNote, "permit")}`,
-    "- 보호구: 작업별 보호구의 종류, 손상 여부, 착용 상태를 작업 시작 전에 확인",
-    "",
-    "[3. 격리·차단 및 첨부 확인]",
-    isolationAttachment,
-    chemicalAttachment,
-    "- 위험성평가표, 작업계획서, TBM 기록을 같은 작업허가 묶음으로 확인",
-    "- 출입통제, 감시자·신호수 배치, 비상연락 수단을 현장에서 확인",
-    "",
-    "[4. 작업 중 확인]",
-    `- 작업중지 기준: ${profile.questions[0]}`,
-    `- 변경관리 확인: ${profile.questions[1]}`,
-    "- 작업조건이나 작업자가 바뀌면 기존 허가를 그대로 사용하지 않고 재확인",
-    "",
-    "[5. 종료 확인]",
-    "- 작업 종료 후 공구·자재·폐기물을 정리하고 잔류 위험을 확인",
-    "- 격리·차단 해제와 재가동은 허가권자와 설비 담당자가 함께 확인",
-    "- 종료시간, 종료상태, 확인자, 특이사항을 기록한 뒤 허가를 닫음",
-    "",
-    "[6. 확인자]",
-    "- 작업책임자: 작업 전 조건 확인",
-    "- 관리감독자: 허가조건·보호구·격리 상태 확인",
-    "- 허가권자: 작업 시작 승인 및 종료 확인"
-  ].join("\n");
+// 허가구분은 작업 분류에서 한 번만 정한다. 본문과 구조화 데이터를 같은 객체에서 만든다(EXP-01·WP-08).
+function buildOfficialStylePermit(scenario: ReturnType<typeof inferScenario>) {
+  const input = permitFormInput(scenario);
+  const structured = buildPermitInspection(input);
+  return { structured, text: structured ? renderPermitText(structured, input) : "" };
 }
 
 function buildOfficialStyleTbmBriefing(scenario: ReturnType<typeof inferScenario>) {
@@ -1754,6 +1681,7 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
   const profile = scenario.profile;
   const riskAssessmentRows = buildScenarioRiskAssessmentRows(scenario);
   const riskAssessmentValidation = validateRiskAssessmentRows(riskAssessmentRows);
+  const permit = buildOfficialStylePermit(scenario);
   const responseScenario = {
     companyName: scenario.companyName,
     companyType: scenario.companyType,
@@ -1847,7 +1775,8 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
       workpackSummaryDraft: buildWorkpackSummaryDraft(scenario, summaryRiskLevel),
       riskAssessmentDraft: serializeRiskAssessmentRowsToDraft(riskAssessmentRows),
       workPlanDraft: buildOfficialStyleWorkPlan(scenario),
-      workPermitDraft: buildOfficialStyleWorkPermit(scenario),
+      workPermitDraft: permit.text,
+      ...(permit.structured ? { permitInspectionStructured: permit.structured } : {}),
       tbmBriefing: buildOfficialStyleTbmBriefing(scenario),
       tbmLogDraft: buildOfficialStyleTbmLog(scenario),
       // 결정 10(2026-10-25): template 모드도 참석자 서명표가 있는 구조화 TBM 을 낸다(TBM-04).

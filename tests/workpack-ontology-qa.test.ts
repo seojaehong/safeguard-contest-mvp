@@ -109,6 +109,49 @@ describe("web workpack ontology QA", () => {
     expect(reviewed.ontologyQa?.result.reviewable && reviewed.ontologyQa.result.verdict).toBe("통과");
   });
 
+  it("주행 크레인이 입력에 없으면 화면에 붙는 검수 결과에서도 제140조 조치·조문을 뺀다(WP-09)", async () => {
+    const craneMissing: QaReviewFound = {
+      ...qaMissing,
+      task: "굴착작업",
+      missing: {
+        hazards: [],
+        controls: [
+          { control: "순간풍속 30m/s 초과 시 이탈방지장치 작동", articles: ["기준규칙 제140조(폭풍에 의한 이탈 방지)"] },
+          { control: "흙막이 지보공 설치", articles: ["기준규칙 제347조"] }
+        ],
+        articles: ["기준규칙 제140조(폭풍에 의한 이탈 방지)"]
+      }
+    };
+    vi.mocked(reviewDocpack).mockResolvedValueOnce(craneMissing).mockResolvedValueOnce(craneMissing);
+    const question = "도시가스 배관 굴착. 깊이 2.5m, 굴착기 1대와 이동식 크레인 1대, 오후 강풍 예보.";
+    const response = buildMockAskResponse(question, mockSearchResults.slice(0, 2), "live", "test");
+    const reviewed = await attachWebOntologyQa(response, question);
+    const result = reviewed.ontologyQa?.result;
+    const shown = JSON.stringify(result?.reviewable ? result.missing : {});
+
+    expect(shown).not.toContain("제140조");
+    expect(shown).not.toContain("이탈방지장치");
+    expect(shown).toContain("흙막이 지보공 설치");
+  });
+
+  it("옥외 주행 크레인 입력이면 검수 결과에 제140조 조치가 남는다(양쪽 분기)", async () => {
+    const craneMissing: QaReviewFound = {
+      ...qaMissing,
+      missing: {
+        hazards: [],
+        controls: [{ control: "순간풍속 30m/s 초과 시 이탈방지장치 작동", articles: ["기준규칙 제140조"] }],
+        articles: []
+      }
+    };
+    vi.mocked(reviewDocpack).mockResolvedValueOnce(craneMissing).mockResolvedValueOnce(craneMissing);
+    const question = "공장 옥외 주행 크레인 1대로 자재 인양, 오후 강풍 예보.";
+    const response = buildMockAskResponse(question, mockSearchResults.slice(0, 2), "live", "test");
+    const reviewed = await attachWebOntologyQa(response, question);
+    const result = reviewed.ontologyQa?.result;
+
+    expect(JSON.stringify(result?.reviewable ? result.missing : {})).toContain("제140조");
+  });
+
   it("threads request cancellation through review and stops before rereview", async () => {
     const controller = new AbortController();
     vi.mocked(reviewDocpack).mockImplementationOnce(async (_task, _document, signal) => {
@@ -154,7 +197,8 @@ describe("web workpack ontology QA", () => {
       !document.includes("현장 여건에 맞는 담당자·확인시각·측정값은 전파 전 관리자가 확인합니다.")
     ))).toBe(true);
     expect(remediated.deliverables.riskAssessmentDraft).toContain("잔여 위험을 평가 기록에 남깁니다.");
-    expect(remediated.deliverables.workPlanDraft).toContain("계획서 확인란에 기록합니다.");
+    // 계획서 보완 줄은 「반영」 표시 대신 담당·확인 시각 칸을 가진 「추가 확인 필요」 줄이다(WP-10).
+    expect(remediated.deliverables.workPlanDraft).toMatch(/추가 확인 필요: .*담당: \(현장 기재\) \/ 확인 시각: \(현장 기재\)/);
     expect(remediated.deliverables.safetyEducationRecordDraft).toContain("교육 기록에 남깁니다.");
     expect(remediated.deliverables.emergencyResponseDraft).toContain("대피·연락 조건을 확인");
   });

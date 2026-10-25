@@ -10,6 +10,7 @@ import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-d
 import { buildTbmBriefingStructuredFromRiskRows, buildTbmLogStructuredFromRiskRows } from "./tbm-structured";
 import { ensureConfinedSpaceAirStandard, isTbmTextForTask } from "./tbm-consistency";
 import { ensureEducationRecordSections } from "./education-record-sections";
+import { attachWorkPlanLegalForm } from "./permit-workplan-forms";
 import { attachQualityContract } from "./quality-contract";
 import { canonicalizeRiskAssessmentResponse } from "./risk-assessment-record";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
@@ -2739,7 +2740,14 @@ async function runAskUngated(question: string, options: RunAskOptions = {}): Pro
         ? "AI"
         : tbmStructuredSelection.source === "none" ? "template" : tbmStructuredSelection.source;
     const tbmStructuredSourceDetail = `TBM structured=${tbmStructuredSourceLabel}${tbmConsistencyRejected.length ? ` (작업 불일치로 제외: ${tbmConsistencyRejected.join(", ")})` : ""}`;
-    const linkedWorkPlanStructured = linkWorkPlanToRiskRows(baseDeliverables.workPlanStructured, structuredRiskRows);
+    // 별표4 법정 칸은 AI 가 아니라 작업 분류에서 붙인다(WP-04·WP-06). full 모드 구조화 계획서 xlsx 도 같은 칸을 가진다.
+    const workPlanTaskId = response.scenario.taskClassification?.status === "classified"
+      ? response.scenario.taskClassification.taskId
+      : null;
+    const linkedWorkPlanStructured = attachWorkPlanLegalForm(
+      linkWorkPlanToRiskRows(baseDeliverables.workPlanStructured, structuredRiskRows),
+      { taskId: workPlanTaskId, question, workerCount: response.scenario.workerCount }
+    );
     const linkedPermitInspectionStructured = linkPermitToRiskRows(baseDeliverables.permitInspectionStructured, structuredRiskRows);
     const foreignWorkerBriefingText = aiBodies.foreignWorkerBriefing ?? buildForeignWorkerBriefing(foreignWorkerInput);
     const foreignWorkerTransmissionText = ensureForeignWorkerTransmissionContext(

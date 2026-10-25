@@ -348,7 +348,9 @@ describe("PR-08 교육기록", () => {
         articles: []
       }
     } as never);
-    expect(remediated.deliverables.safetyEducationRecordDraft).toMatch(/제140조[^\n]*옥외 주행 크레인 한정/);
+    // #110(WP-09): 옥외 주행 크레인이 입력에 없으면 제140조 조치는 교육기록에도 싣지 않는다(한정 표기보다 앞선다).
+    expect(remediated.deliverables.safetyEducationRecordDraft).not.toMatch(/제140조/);
+    expect(remediated.deliverables.safetyEducationRecordDraft).not.toMatch(/이탈방지장치/);
   });
 
   it("EDU-08: 선원·수산 과정과 경영책임자 과정은 근로자 교육 적합으로 보지 않는다(양쪽)", () => {

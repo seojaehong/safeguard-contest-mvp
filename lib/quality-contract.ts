@@ -1,5 +1,6 @@
 import type { AskResponse, QualityContract, QualityContractItem, QualityContractStatus } from "./types";
 import { auditAskDeliverables, summarizeIntegrityItems } from "./deliverable-integrity-policy";
+import { buildPermitRequiredTerms, resolvePermitCategory } from "./permit-workplan-forms";
 
 const REQUIRED_EVIDENCE_KEYS = [
   "riskAssessmentDraft",
@@ -175,11 +176,24 @@ function structuredItem(response: AskResponse): QualityContractItem {
   };
 }
 
-function deliverableIntegrityItem(response: AskResponse): QualityContractItem {
-  const items = auditAskDeliverables({
+// 허가서는 허가구분별 필수 칸을 본다(WP-14). 허가구분은 작업 분류에서 정한 값이고, 본문의 「허가구분:」 줄이
+// 그 값과 다르거나 밀폐공간 측정·감시인 칸이 없으면 막힌다. 작업 유형 보류 응답은 허가서를 만들지 않으므로 보지 않는다.
+function auditCoreDeliverables(response: AskResponse) {
+  const permitCategory = resolvePermitCategory(response.scenario?.taskClassification?.taskId, response.question);
+  const permitText = response.deliverables.workPermitDraft;
+  const auditPermit = permitCategory !== null
+    && response.scenario?.taskClassification?.status === "classified"
+    && typeof permitText === "string"
+    && permitText.length > 0;
+  return auditAskDeliverables({
     deliverables: response.deliverables,
-    requiredKeys: CORE_DELIVERABLE_INTEGRITY_KEYS
+    requiredKeys: auditPermit ? [...CORE_DELIVERABLE_INTEGRITY_KEYS, "workPermitDraft"] : CORE_DELIVERABLE_INTEGRITY_KEYS,
+    ...(auditPermit && permitCategory ? { requiredTermsByKey: { workPermitDraft: buildPermitRequiredTerms(permitCategory) } } : {})
   });
+}
+
+function deliverableIntegrityItem(response: AskResponse): QualityContractItem {
+  const items = auditCoreDeliverables(response);
   const summary = summarizeIntegrityItems(items);
   if (summary.verdict === "pass") {
     return {
@@ -200,10 +214,7 @@ function deliverableIntegrityItem(response: AskResponse): QualityContractItem {
 }
 
 function deliverableIntegritySummary(response: AskResponse) {
-  const items = auditAskDeliverables({
-    deliverables: response.deliverables,
-    requiredKeys: CORE_DELIVERABLE_INTEGRITY_KEYS
-  });
+  const items = auditCoreDeliverables(response);
   const summary = summarizeIntegrityItems(items);
   const blockedKeys = items.filter((item) => item.verdict === "blocked").map((item) => item.key);
   return {
