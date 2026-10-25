@@ -74,7 +74,7 @@ export function buildTbmBriefingStructuredFromRiskRows(
 
   return {
     meta: {
-      dateTime: "작업 전 TBM",
+      dateTime: "____년 __월 __일 __:__ (현장 기재)",
       location: scenario.siteName,
       target: `전 작업자 ${scenario.workerCount}명`,
       attendees: "현장 서명 또는 열람 확인 버튼"
@@ -131,16 +131,17 @@ export function buildTbmLogStructuredFromRiskRows(
 
   return {
     meta: {
-      dateTime: "작업 당일 TBM 기록",
+      dateTime: "____년 __월 __일 __:__ (현장 기재)",
       location: scenario.siteName,
       workType: scenario.workSummary,
       instructor: "작업반장"
     },
     attendance: {
       expected: workerCount,
-      actual: workerCount,
-      attendees: Array.from({ length: Math.min(workerCount, 12) }, (_, index) => `작업자 ${index + 1}`),
-      absenceReason: "없음",
+      // 회의 전 초안이므로 실제 참석 인원·명단·결석 사유는 비워 두고 서명표 칸만 작업자 수만큼 만든다(TBM-04·08).
+      actual: 0,
+      attendees: Array.from({ length: workerCount }, () => ""),
+      absenceReason: "현장 기재",
       confirmationMethod: "현장 서명 또는 열람 확인 버튼"
     },
     todayWork: {

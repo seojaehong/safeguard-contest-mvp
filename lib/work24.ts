@@ -1,6 +1,7 @@
 import { IntegrationMode } from "./types";
 import { readBoundedResponseText } from "./server/upstream-http";
 import { createLogger } from "./logger";
+import { isMismatchedWorkerCourse, matchesTaskKeyword } from "./education-course-fit";
 
 const log = createLogger("work24");
 
@@ -81,18 +82,26 @@ function parseCourses(xml: string) {
   }).filter((item) => item.title && item.url);
 }
 
+export const WORK24_EXCLUDED_RANK = 99;
+
 export function scoreCourseFit(question: string, course: Work24Course): Work24Course {
   const normalized = question.toLowerCase();
   const title = course.title.toLowerCase();
   const target = (course.target || "").toLowerCase();
   const text = `${title} ${target}`;
   const asksForeignWorker = ["외국인", "이주", "다국어", "foreign"].some((keyword) => normalized.includes(keyword));
-  const asksConstruction = ["건설", "비계", "추락", "고소", "외벽", "도장"].some((keyword) => normalized.includes(keyword));
-  const asksLogistics = ["지게차", "상하차", "물류", "동선"].some((keyword) => normalized.includes(keyword));
   const isSafetyCourse = ["안전", "산업안전", "보호구", "위험", "msds", "관리감독"].some((keyword) => text.includes(keyword));
   const isForeignCourse = text.includes("외국인");
-  const isConstructionCourse = ["건설", "비계", "추락"].some((keyword) => text.includes(keyword));
-  const isLogisticsCourse = ["지게차", "물류", "하역"].some((keyword) => text.includes(keyword));
+
+  // 업종(선원·수산)이나 대상(경영책임자·사업주)이 다른 과정은 근로자 후속 교육 후보에서 뺀다(EDU-08).
+  if (isMismatchedWorkerCourse(question, text)) {
+    return {
+      ...course,
+      fitLabel: "조건부 후보",
+      fitReason: "교육 대상 또는 업종이 현장 근로자와 달라 후속 교육 후보로 쓰지 않습니다.",
+      rank: WORK24_EXCLUDED_RANK
+    };
+  }
 
   if (asksForeignWorker && isForeignCourse) {
     return {
@@ -103,7 +112,8 @@ export function scoreCourseFit(question: string, course: Work24Course): Work24Co
     };
   }
 
-  if (isSafetyCourse && ((asksConstruction && isConstructionCourse) || (asksLogistics && isLogisticsCourse))) {
+  // 「현장 적합」은 오늘 작업 키워드가 과정명·대상에 직접 있을 때만 쓴다.
+  if (isSafetyCourse && matchesTaskKeyword(question, text)) {
     return {
       ...course,
       fitLabel: "현장 적합",
@@ -115,9 +125,9 @@ export function scoreCourseFit(question: string, course: Work24Course): Work24Co
   if (isSafetyCourse) {
     return {
       ...course,
-      fitLabel: "현장 적합",
-      fitReason: "교육명에 안전·위험관리 주제가 포함되어 사업주 후속 교육 후보로 사용할 수 있습니다.",
-      rank: 18
+      fitLabel: "조건부 후보",
+      fitReason: "일반 안전 과정이라 오늘 작업과 직접 맞는지 관리자가 확인해야 하는 후보입니다.",
+      rank: 30
     };
   }
 
@@ -205,6 +215,7 @@ export async function fetchTrainingRecommendations(question: string, signal?: Ab
 
     const merged = [...parseCourses(foreignXml), ...parseCourses(safetyXml)]
       .map((item) => scoreCourseFit(question, item))
+      .filter((item) => item.rank < WORK24_EXCLUDED_RANK)
       .sort((a, b) => a.rank - b.rank);
     const unique = merged
       .filter((item, index, arr) => arr.findIndex((other) => other.title === item.title && other.startDate === item.startDate) === index)

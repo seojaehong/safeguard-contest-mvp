@@ -129,12 +129,22 @@ describe("PR-07 TBM", () => {
     const response = await runAsk(Q.press, {
       aiMode: "template",
       harnessMemory: {
-        improvements: [{ taskLabel: "금형 교체", improvementText: "안전블록 보관 위치 표시", photoPairAttached: false }] as never,
+        improvements: [{
+          id: "imp-press-1",
+          taskLabel: "금형 교체",
+          hazardLabel: "끼임",
+          improvementText: "안전블록 보관 위치 표시",
+          reflectedDocuments: ["TBM 브리핑", "TBM 기록"],
+          sourceType: "manual",
+          memoryAdmission: "user_accepted_input",
+          photoPairAttached: false
+        }] as never,
         workpackMemory: []
       }
     });
     expect(response.deliverables.tbmLogDraft.startsWith("작업 전 안전점검회의(TBM) 기록")).toBe(true);
     expect(response.deliverables.tbmBriefing.startsWith("작업 전 안전점검회의(TBM) 브리핑")).toBe(true);
+    expect(response.deliverables.tbmLogDraft).toContain("안전블록 보관 위치 표시");
   });
 
   it("TBM-05: 전국 풍랑주의보는 육상 작업 재판단 문구를 만들지 않는다(양쪽)", () => {

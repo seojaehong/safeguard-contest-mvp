@@ -44,6 +44,14 @@ import {
 } from "./task-scenario-profiles";
 import { CONFINED_SPACE_AIR_STANDARD_HEADER, CONFINED_SPACE_AIR_STANDARD_LINES } from "./tbm-consistency";
 import { buildTbmBriefingStructuredFromRiskRows, buildTbmLogStructuredFromRiskRows } from "./tbm-structured";
+import {
+  EDUCATION_RETENTION_LINE,
+  buildConfinedSpaceNoticeSection,
+  buildCraneWindLines,
+  buildEducationCourseSection,
+  buildHeatEmphasisLines,
+  isConfinedSpaceEducation
+} from "./education-record-sections";
 
 type LegacyScenarioProfile = Omit<ScenarioProfileInput, "pairs"> & {
   hazards: [string, string, string];
@@ -782,7 +790,23 @@ function buildManualLoadingHeatProfile(question: string): ScenarioProfile {
         action: "운반 동선과 보행 동선을 나누고 대차 적재 높이를 시야가 가리지 않게 제한"
       }
     : pair);
-  return withPairs({ ...base, pairs });
+  // 지게차가 입력에 없으면 교육대상·강조사항·확인 질문에도 지게차를 쓰지 않는다(EDU-06).
+  // 실내 창고는 「그늘」이 아니라 휴게시설에서 쉰다(EDU-05, 안전보건규칙 제567조).
+  return withPairs({
+    ...base,
+    pairs,
+    educationTargets: "상하차·운반 작업자, 관리감독자",
+    questions: [
+      base.questions[0],
+      base.questions[1],
+      "핸드파렛트·대차 운반 동선과 보행 동선이 나뉘어 있는가?"
+    ],
+    educationPoints: [
+      "어지러움·두통·구토감 발생 시 즉시 작업중지 후 휴게시설에서 휴식하고 보고",
+      base.educationPoints[1],
+      "핸드파렛트·대차는 적재 높이가 시야를 가리지 않게 싣고 보행자 접근 시 정지"
+    ]
+  });
 }
 
 // 작업 유형을 먼저 정하고(TASK_RULES 순서), 업종은 inferIndustry 로 따로 정한다.
@@ -1011,13 +1035,28 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
     layerPairs.push(buildNewWorkerPair(question));
     if (!/신규/.test(educationTargets)) workerTargets.push("신규 투입자");
   }
-  if (/청각\s*장애|청각장애|고령/.test(question)) {
-    layerPairs.push({
-      hazard: "고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험",
-      action: "고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지"
-    });
-    if (/고령/.test(question)) workerTargets.push("고령 작업자");
-    if (/청각\s*장애|청각장애/.test(question)) workerTargets.push("청각장애 작업자");
+  // 입력에 있는 속성만 적는다. 고령만 있는데 「청각장애」를 넣지 않는다(EDU-06).
+  const hasElderly = /고령/.test(question);
+  const hasHearingImpaired = /청각\s*장애|청각장애/.test(question);
+  if (hasElderly || hasHearingImpaired) {
+    const groups = [
+      ...(hasElderly ? ["고령"] : []),
+      ...(hasHearingImpaired ? ["청각장애"] : []),
+      ...(/신규/.test(question) ? ["신규"] : [])
+    ].join("·");
+    layerPairs.push(hasHearingImpaired
+      ? {
+          hazard: `${groups} 작업자의 경보 인지와 의사소통 실패 위험`,
+          action: `${groups} 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지`
+        }
+      : {
+          hazard: `${groups} 작업자의 피로 누적·체력 부담과 작업지시 이해 부족 위험`,
+          action: `${groups} 작업자의 휴식·작업량을 조정하고 상태를 관찰하는 담당자를 정해 복창으로 이해를 확인`
+        });
+    const elderlyCount = question.match(/고령(?:자|\s*작업자|\s*근로자)?\s*(\d+)\s*명/)?.[1];
+    const hearingCount = question.match(/청각\s*장애\s*(?:작업자|근로자)?\s*(\d+)\s*명/)?.[1];
+    if (hasElderly && !/고령/.test(educationTargets)) workerTargets.push(elderlyCount ? `고령 작업자 ${elderlyCount}명` : "고령 작업자");
+    if (hasHearingImpaired && !/청각/.test(educationTargets)) workerTargets.push(hearingCount ? `청각장애 작업자 ${hearingCount}명` : "청각장애 작업자");
   }
   if (/방호장치|예기치 않은 기동|불시기동|LOTO|잠금표지/.test(question)) {
     const isolationHazardIndex = corePairs.findIndex((pair) => /LOTO|잠금표지|불시기동|예기치 않은 기동/.test(pair.hazard));
@@ -1473,7 +1512,7 @@ function buildOfficialStyleTbmBriefing(scenario: ReturnType<typeof inferScenario
     "",
     "[3. 안전대책]",
     ...profile.actions.map((action) => `- ${action}`),
-    "- 기상 API 또는 현장 기상 확인 결과가 악화되면 작업반장이 작업중지 여부를 재판단합니다.",
+    "- 기상청 예보 또는 현장 기상 확인 결과가 악화되면 작업반장이 작업중지 여부를 재판단합니다.",
     "",
     "[4. 작업중지 기준]",
     `- ${profile.questions[0]}`,
@@ -1604,7 +1643,7 @@ function buildOfficialStyleTbmLog(scenario: ReturnType<typeof inferScenario>) {
     "[대책 / 작업중지 기준]",
     ...profile.actions.map((action) => `- ${action}`),
     `- 작업중지 기준: ${profile.questions[0]}`,
-    "- 기상 API 또는 현장 기상 확인 결과가 악화되면 작업반장·관리감독자가 작업 가능 여부를 재판단",
+    "- 기상청 예보 또는 현장 기상 확인 결과가 악화되면 작업반장·관리감독자가 작업 가능 여부를 재판단",
     "",
     "[근로자 확인 사항]",
     "- 보호구 착용: □ 안전모 □ 안전화 □ 턱끈 □ 작업별 보호구",
@@ -1638,21 +1677,39 @@ function buildOfficialStyleTbmLog(scenario: ReturnType<typeof inferScenario>) {
 function buildOfficialStyleSafetyEducationRecord(scenario: ReturnType<typeof inferScenario>) {
   const { profile } = scenario;
 
+  const ctx = {
+    question: scenario.question,
+    taskId: scenario.taskClassification.taskId,
+    companyType: scenario.companyType,
+    workerCount: scenario.workerCount
+  };
+  const courseSection = buildEducationCourseSection(ctx);
+  const emphasis = [
+    ...profile.educationPoints,
+    ...buildHeatEmphasisLines(scenario.question),
+    ...buildCraneWindLines(scenario.question)
+  ];
+
   return [
     "안전보건교육 기록(초안)",
     "공식자료 기반: 산업안전보건교육 가이드북 및 TBM 교육시간 인정 안내 참고",
     "",
     `교육명: ${profile.educationName}`,
-    "교육구분: 당일 작업 전 안전보건교육 및 TBM 연계 기록",
-    "교육일시: 작업 시작 전 15분",
+    "교육구분: 아래 교육 종류·법정 시간 확인표에서 정한 과정(정기·채용 시·작업내용 변경 시·특별교육)",
+    "교육일시: ____년 __월 __일 __:__ ~ __:__ (현장 기재)",
+    `작성일: ${formatKstDate()}`,
     `교육장소: ${scenario.siteName}`,
     `교육대상: ${profile.educationTargets}, 총 ${scenario.workerCount}명`,
-    "교육 실시자: 현장소장 / 관리감독자",
+    "교육 실시자: ________ (자격: 관리감독자 등 시행규칙 제26조제3항 해당 여부 확인)",
     "확인자: 작업반장 / 작업자 대표",
+    EDUCATION_RETENTION_LINE,
+    "",
+    ...courseSection.lines,
     "",
     "[교육대상]",
     `- ${profile.educationTargets}, 총 ${scenario.workerCount}명`,
     "- 신규 투입자, 외국인 근로자, 작업변경자는 이해 여부를 별도 확인합니다.",
+    `- 참석자 성명·서명: 출력 양식의 참석자 서명표(작업자 ${scenario.workerCount}명)에 개인별로 기재`,
     "",
     "[교육내용]",
     `- 오늘 작업 개요: ${scenario.workSummary}`,
@@ -1660,14 +1717,13 @@ function buildOfficialStyleSafetyEducationRecord(scenario: ReturnType<typeof inf
     `- 핵심 위험요인: ${profile.hazards.join(", ")}`,
     `- 즉시 조치: ${profile.actions.join(", ")}`,
     "",
+    ...(isConfinedSpaceEducation(ctx) ? [...buildConfinedSpaceNoticeSection(), ""] : []),
     "[보호구 및 작업방법 강조사항]",
-    `- ${profile.educationPoints[0]}`,
-    `- ${profile.educationPoints[1]}`,
-    `- ${profile.educationPoints[2]}`,
+    ...emphasis.map((line) => `- ${line}`),
     "",
     "[확인방법]",
-    "- 신규 투입자 포함 전원이 작업중지 기준을 구두 복창",
-    "- 보호구 착용 상태를 상호 점검 후 서명 예정",
+    "- 작업중지 기준 구두 복창: □ 전원 확인 □ 미확인자 있음",
+    "- 보호구 착용 상호 점검: □ 확인 □ 미확인",
     "- 작업일지, 모바일 앱, 사진, 영상 등 현장 기록 수단에 교육 실시 사실을 남김",
     "",
     "[TBM 기록 연계]",
@@ -1778,6 +1834,13 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
       workPermitDraft: buildOfficialStyleWorkPermit(scenario),
       tbmBriefing: buildOfficialStyleTbmBriefing(scenario),
       tbmLogDraft: buildOfficialStyleTbmLog(scenario),
+      // 결정 10(2026-10-25): template 모드도 참석자 서명표가 있는 구조화 TBM 을 낸다(TBM-04).
+      ...(riskAssessmentRows.length
+        ? {
+            tbmBriefingStructured: buildTbmBriefingStructuredFromRiskRows(responseScenario, riskAssessmentRows, scenario.weatherNote),
+            tbmLogStructured: buildTbmLogStructuredFromRiskRows(responseScenario, riskAssessmentRows, scenario.weatherNote)
+          }
+        : {}),
       safetyEducationRecordDraft: buildOfficialStyleSafetyEducationRecord(scenario),
       emergencyResponseDraft: buildEmergencyResponseDraft(scenario),
       photoEvidenceDraft: buildPhotoEvidenceDraft(scenario),
@@ -1869,7 +1932,7 @@ function applyTaskClassificationHold(response: AskResponse): AskResponse {
       }
       if (key === "safetyEducationPoints" || key === "tbmQuestions") return [key, [holdLine]];
       return [key, value];
-    })
+    }).filter(([key]) => key !== "tbmBriefingStructured" && key !== "tbmLogStructured")
   ) as AskResponse["deliverables"];
   return {
     ...response,

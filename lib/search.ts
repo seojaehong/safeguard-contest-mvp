@@ -8,6 +8,8 @@ import {
 } from "./ai";
 import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-data";
 import { buildTbmBriefingStructuredFromRiskRows, buildTbmLogStructuredFromRiskRows } from "./tbm-structured";
+import { ensureConfinedSpaceAirStandard, isTbmTextForTask } from "./tbm-consistency";
+import { ensureEducationRecordSections } from "./education-record-sections";
 import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiDeliverablesDiagnostics, type AiMode } from "./ai-deliverables";
@@ -1712,12 +1714,13 @@ export function formatTbmQualityAppendix(
     "",
     "[TBM 필수 반영 체크]",
     `- 주요 유해·위험요인: ${response.riskSummary.topRisk}`,
-    `- 기상 API 결과: ${weather.summary} / ${weatherAction}`,
+    `- 기상 확인: ${weather.summary} / ${weatherAction}`,
     `- 작업중지 기준: ${response.riskSummary.immediateActions.slice(0, 2).join(" / ") || "위험 발견 즉시 작업중지 및 보고"}`,
-    `- 참석자 확인: 작업자 ${response.scenario.workerCount.toLocaleString("ko-KR")}명 대상 구두 복창·서명·보호구 확인`,
+    // 회의 전 초안이므로 실시 완료처럼 적지 않고 현장에서 체크할 칸으로 둔다(TBM-08).
+    `- 참석자 확인(작업자 ${response.scenario.workerCount.toLocaleString("ko-KR")}명): □ 구두 복창 □ 서명 □ 보호구 확인`,
     `- 신규·외국인·미숙련 작업자: ${languageLine}로 이해 여부 별도 확인`,
     "- 사진·증빙 위치: 작업 전 현장, 보호구, 위험구역 통제, TBM 실시 사진을 작업일지·모바일 기록·문서팩 첨부자료에 보관",
-    `- 반영 근거: ${referenceTitles}. 원문성 근거는 evidence UI/metadata에서 확인`
+    `- 반영 근거: ${referenceTitles}`
   ].join("\n");
 }
 
@@ -1926,12 +1929,13 @@ function reflectDbHarnessInDeliverables(response: AskResponse, packet: DbHarness
         "[오늘 개선·이력 반영 - 위험성평가]",
         riskLines
       ),
-      tbmBriefing: prependUniqueSection(
+      // TBM 은 제목·기본정보가 맨 앞에 와야 한다. 앞에 붙이면 xlsx 에서 기본정보가 이 섹션 아래로 묶인다(TBM-09).
+      tbmBriefing: appendUniqueSection(
         response.deliverables.tbmBriefing,
         "[오늘 개선·이력 반영 - TBM]",
         tbmLines
       ),
-      tbmLogDraft: prependUniqueSection(
+      tbmLogDraft: appendUniqueSection(
         response.deliverables.tbmLogDraft,
         "[오늘 개선·이력 반영 - 확인 기록]",
         tbmLines
@@ -2666,17 +2670,30 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       : generatedTbmRiskLinks.length
         ? `TBM-risk links=AI${photoSeedTbmRiskLinks.length ? ` + photo seed links ${photoSeedTbmRiskLinks.length}` : ""}`
         : `TBM-risk links=${harnessStructuredRiskRows.length ? "DB harness deterministic" : "deterministic baseline"}`;
-    const deterministicTbmBriefingStructured = aiMode === "enhanced" && structuredRiskRows.length
-      ? buildTbmBriefingStructuredFromRiskRows(response.scenario, structuredRiskRows, weather.summary)
-      : null;
-    const deterministicTbmLogStructured = aiMode === "enhanced" && structuredRiskRows.length
-      ? buildTbmLogStructuredFromRiskRows(response.scenario, structuredRiskRows, weather.summary)
-      : null;
-    const tbmStructuredSourceDetail = aiBodies.tbmBriefingStructured || aiBodies.tbmLogStructured
-      ? "TBM structured=AI"
-      : deterministicTbmBriefingStructured && deterministicTbmLogStructured
-        ? "TBM structured=deterministic from risk rows"
-        : "TBM structured=template";
+    // 결정 10(2026-10-25): 모든 모드에서 구조화 TBM(서명표 포함)을 기본으로 낸다(TBM-04).
+    // AI 구조·본문이 분류된 작업과 다르면 버리고 작업별 결정형으로 내린다(TBM-02).
+    const tbmTaskId = response.scenario.taskClassification?.taskId ?? null;
+    const tbmStructuredSelection = selectTbmStructuredDeliverables({
+      aiBodies: aiBodies as Record<string, unknown>,
+      scenario: response.scenario,
+      structuredRiskRows,
+      weatherSummary: weather.summary,
+      taskId: tbmTaskId
+    });
+    const rejectedTbmTexts = (["tbmBriefing", "tbmLogDraft"] as const).filter((key) => (
+      typeof aiBodies[key] === "string" && !isTbmTextForTask(tbmTaskId, aiBodies[key] as string)
+    ));
+    const tbmConsistencyRejected = [...tbmStructuredSelection.rejected, ...rejectedTbmTexts];
+    const aiTbmBriefingText = rejectedTbmTexts.includes("tbmBriefing") ? undefined : aiBodies.tbmBriefing;
+    const aiTbmLogText = rejectedTbmTexts.includes("tbmLogDraft") ? undefined : aiBodies.tbmLogDraft;
+    const templateTbmBriefing = boundedResponseDeliverables.tbmBriefing;
+    const templateTbmLog = boundedResponseDeliverables.tbmLogDraft;
+    const tbmStructuredSourceLabel = tbmStructuredSelection.source === "deterministic"
+      ? "deterministic from risk rows"
+      : tbmStructuredSelection.source === "ai"
+        ? "AI"
+        : tbmStructuredSelection.source === "none" ? "template" : tbmStructuredSelection.source;
+    const tbmStructuredSourceDetail = `TBM structured=${tbmStructuredSourceLabel}${tbmConsistencyRejected.length ? ` (작업 불일치로 제외: ${tbmConsistencyRejected.join(", ")})` : ""}`;
     const linkedWorkPlanStructured = linkWorkPlanToRiskRows(baseDeliverables.workPlanStructured, structuredRiskRows);
     const linkedPermitInspectionStructured = linkPermitToRiskRows(baseDeliverables.permitInspectionStructured, structuredRiskRows);
     const foreignWorkerBriefingText = aiBodies.foreignWorkerBriefing ?? buildForeignWorkerBriefing(foreignWorkerInput);
@@ -2840,23 +2857,18 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         // parseSheetRows 우회하고 표 양식에 매핑.
         ...(linkedWorkPlanStructured ? { workPlanStructured: linkedWorkPlanStructured } : {}),
         ...(linkedPermitInspectionStructured ? { permitInspectionStructured: linkedPermitInspectionStructured } : {}),
-        ...(aiBodies.tbmBriefingStructured
-          ? { tbmBriefingStructured: aiBodies.tbmBriefingStructured }
-          : deterministicTbmBriefingStructured
-            ? { tbmBriefingStructured: deterministicTbmBriefingStructured }
-            : {}),
-        ...(aiBodies.tbmLogStructured
-          ? { tbmLogStructured: aiBodies.tbmLogStructured }
-          : deterministicTbmLogStructured
-            ? { tbmLogStructured: deterministicTbmLogStructured }
-            : {}),
+        ...(tbmStructuredSelection.tbmBriefingStructured ? { tbmBriefingStructured: tbmStructuredSelection.tbmBriefingStructured } : {}),
+        ...(tbmStructuredSelection.tbmLogStructured ? { tbmLogStructured: tbmStructuredSelection.tbmLogStructured } : {}),
         ...(aiBodies.educationRecordStructured ? { educationRecordStructured: aiBodies.educationRecordStructured } : {}),
-        tbmBriefing: aiBodies.tbmBriefing
-          ? aiBodies.tbmBriefing
-          : stripPipelineMeta(`${baseDeliverables.tbmBriefing}${tbmQualityAppendix}${outdoorHeatTbmAppendix}${safetyReferenceAppendix}`),
-        tbmLogDraft: aiBodies.tbmLogDraft
-          ? aiBodies.tbmLogDraft
-          : `${baseDeliverables.tbmLogDraft}${tbmQualityAppendix}`.trim(),
+        tbmBriefing: aiTbmBriefingText
+          ? aiTbmBriefingText
+          : stripPipelineMeta(`${templateTbmBriefing}${tbmQualityAppendix}${outdoorHeatTbmAppendix}${safetyReferenceAppendix}`),
+        tbmLogDraft: ensureConfinedSpaceAirStandard(
+          aiTbmLogText
+            ? aiTbmLogText
+            : `${templateTbmLog}${tbmQualityAppendix}`.trim(),
+          tbmTaskId
+        ),
         // Substantive appendices (official-form guidance, heat-education content,
         // serious-accident checklist, recommended follow-up training, fit-check)
         // are concatenated BEFORE the evidence-citation appendices on purpose:
@@ -2864,7 +2876,12 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         // string, so anything meta-tagged must trail everything the field crew
         // actually needs to read.
         safetyEducationRecordDraft: aiBodies.safetyEducationRecordDraft
-          ? aiBodies.safetyEducationRecordDraft
+          ? ensureEducationRecordSections(aiBodies.safetyEducationRecordDraft, {
+              question,
+              taskId: tbmTaskId,
+              companyType: response.scenario.companyType,
+              workerCount: response.scenario.workerCount
+            })
           : stripPipelineMeta(`${baseDeliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${outdoorHeatEducationAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${educationLegalAppendix}${educationKoshaAppendix}${safetyKnowledgeEducationAppendix}${safetyReferenceAppendix}${accidentAppendix}${educationKoshaOpenApiAppendix}`),
         emergencyResponseDraft: aiBodies.emergencyResponseDraft
           ? aiBodies.emergencyResponseDraft
@@ -2998,4 +3015,50 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
 export async function loadDetail(id: string) {
   return loadLegalDetail(id);
 }
-export function selectTbmStructuredDeliverables(_input: { aiBodies: Record<string, unknown>; scenario: AskResponse["scenario"]; structuredRiskRows: RiskAssessmentRow[]; weatherSummary: string; taskId?: string | null }): { tbmBriefingStructured?: TbmBriefingStructured; tbmLogStructured?: TbmLogStructured; source: string; rejected: string[] } { return { source: "none", rejected: [] }; }
+
+function structuredTbmText(value: TbmBriefingStructured | TbmLogStructured): string {
+  const parts: string[] = [value.todayWork?.name ?? ""];
+  if ("hazards" in value) parts.push(...(value.hazards || []).map((item) => item.description));
+  if ("hazardsDiscussed" in value) parts.push(...(value.hazardsDiscussed || []).map((item) => item.description));
+  return parts.join("\n");
+}
+
+/**
+ * 구조화 TBM(서명표 포함)을 모든 모드에서 고른다(결정 10, TBM-04).
+ * AI 구조가 분류된 작업(#104 taskId)과 다른 작업이면 버리고 위험성평가 행으로 결정적으로 만든다(TBM-02).
+ */
+export function selectTbmStructuredDeliverables(input: {
+  aiBodies: Record<string, unknown>;
+  scenario: AskResponse["scenario"];
+  structuredRiskRows: RiskAssessmentRow[];
+  weatherSummary: string;
+  taskId?: string | null;
+}): { tbmBriefingStructured?: TbmBriefingStructured; tbmLogStructured?: TbmLogStructured; source: string; rejected: string[] } {
+  const taskId = input.taskId ?? input.scenario.taskClassification?.taskId ?? null;
+  const rejected: string[] = [];
+  const pickAi = <T extends TbmBriefingStructured | TbmLogStructured>(key: "tbmBriefingStructured" | "tbmLogStructured"): T | undefined => {
+    const value = input.aiBodies[key] as T | undefined;
+    if (!value || typeof value !== "object") return undefined;
+    if (!isTbmTextForTask(taskId, structuredTbmText(value))) {
+      rejected.push(key);
+      return undefined;
+    }
+    return value;
+  };
+  const aiBriefing = pickAi<TbmBriefingStructured>("tbmBriefingStructured");
+  const aiLog = pickAi<TbmLogStructured>("tbmLogStructured");
+  const hasRows = input.structuredRiskRows.length > 0;
+  const tbmBriefingStructured = aiBriefing
+    ?? (hasRows ? buildTbmBriefingStructuredFromRiskRows(input.scenario, input.structuredRiskRows, input.weatherSummary) : undefined);
+  const tbmLogStructured = aiLog
+    ?? (hasRows ? buildTbmLogStructuredFromRiskRows(input.scenario, input.structuredRiskRows, input.weatherSummary) : undefined);
+  const source = aiBriefing || aiLog
+    ? (aiBriefing && aiLog ? "ai" : "ai+deterministic")
+    : tbmBriefingStructured || tbmLogStructured ? "deterministic" : "none";
+  return {
+    ...(tbmBriefingStructured ? { tbmBriefingStructured } : {}),
+    ...(tbmLogStructured ? { tbmLogStructured } : {}),
+    source,
+    rejected
+  };
+}
