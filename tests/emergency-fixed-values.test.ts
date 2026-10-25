@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { contextBlock, freeFormPrompt, parseFree } from "@/lib/ai-deliverables";
-import { companyFilePrefix, formatCompanyName, formatWorkerCount } from "@/lib/scenario-display";
+import { companyFilePrefix, formatCompanyName, formatWorkerCount, formatWorkerHeadcount } from "@/lib/scenario-display";
 import { buildDisplayTargetWorkers, formatDisplayTargetCount } from "@/lib/workspace";
 import { buildTbmLogStructuredFromRiskRows } from "@/lib/search";
-import { buildTbmLogStructuredXlsx } from "@/lib/xlsx-builder";
+import { buildPermitInspectionStructuredXlsx, buildTbmLogStructuredXlsx, buildWorkPlanStructuredXlsx } from "@/lib/xlsx-builder";
+import { readFileSync } from "node:fs";
 import ExcelJS from "exceljs";
 import { ACCIDENT_REPORT_TEMPLATE } from "@/lib/safety-contacts";
 import { buildMockAskResponse, inferScenario, mockSearchResults } from "@/lib/mock-data";
@@ -280,9 +281,70 @@ describe("PR-15 TBM 일지 출석 인원(인원 미상)", () => {
     expect(joined).toContain("사업장명 입력 필요");
   });
 
+  it("구조화 작업계획서·허가서 xlsx 에 인원 미상을 「0명」으로 찍지 않는다(PR15-CLIENT-0명)", async () => {
+    const scenario = inferScenario("건설현장 덤프트럭 토사 반출, 유도자 1명");
+    expect(scenario.workerCount).toBe(0);
+    for (const build of [buildWorkPlanStructuredXlsx, buildPermitInspectionStructuredXlsx]) {
+      const buffer = await build(scenario as never, {} as never);
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer as never);
+      const texts: string[] = [];
+      workbook.eachSheet((ws) => ws.eachRow((row) => row.eachCell((cell) => texts.push(String(cell.text ?? "")))));
+      expect(texts.filter((t) => /(?<!\d)0명/.test(t))).toEqual([]);
+      expect(texts.join("\n")).toContain("확인 필요");
+    }
+  });
+
   it("「재개발」「택지개발」 같은 사업 명사를 회사명으로 쓰지 않는다", () => {
     expect(inferScenario("서울 강서구 재개발 현장 굴착 작업").companyName).toBe("");
     expect(inferScenario("택지개발지구 배관 굴착공사").companyName).toBe("");
     expect(inferScenario("제주개발 굴착 작업").companyName).toBe("제주개발");
+  });
+});
+
+// 편집기·화면 컴포넌트는 vitest 가 JSX 를 읽지 못해 원문을 검사한다(tests/workpack-submission-preview.test.ts 와 같은 방식).
+describe("PR-15 편집기 내보내기·화면의 인원·사업장·파일명 (PR15-CLIENT-0명)", () => {
+  const source = (path: string) => readFileSync(path, "utf8");
+  const CLIENT_FILES = [
+    "components/WorkpackEditor.tsx",
+    "components/SafeGuardCommandCenter.tsx",
+    "components/ReportsDownloadCenter.tsx",
+    "lib/xlsx-builder.ts"
+  ];
+
+  it.each(CLIENT_FILES)("작업인원 원값을 「N명」으로 바로 찍지 않는다: %s", (path) => {
+    const text = source(path);
+    expect(text.match(/workerCount\.toLocaleString\([^)]*\)\}?명/g) ?? []).toEqual([]);
+    expect(text.match(/\.workerCount\}명/g) ?? []).toEqual([]);
+    expect(text.match(/workerCount \|\| 0\}명/g) ?? []).toEqual([]);
+  });
+
+  it("편집기 인쇄용 HTML·XLS·미리보기의 사업장 칸은 빈 회사명을 입력 요청으로 바꾼다", () => {
+    const text = source("components/WorkpackEditor.tsx");
+    expect(/escapeHtml\(scenario\.companyName\)/.test(text)).toBe(false);
+    expect(/<span>\{scenario\.companyName\}<\/span>/.test(text)).toBe(false);
+    expect(text.match(/escapeHtml\(formatCompanyName\(scenario\.companyName\)\)/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
+  });
+
+  it("편집기 파일명은 회사명이 없으면 하이픈·「safeclaw-safeclaw」로 시작하지 않는다", () => {
+    const text = source("components/WorkpackEditor.tsx");
+    expect(/sanitizeFileName\(data\.scenario\.companyName\)/.test(text)).toBe(false);
+    expect(/sanitizeFileName\(`\$\{data\.scenario\.companyName\}-/.test(text)).toBe(false);
+    expect(/sanitizeFileName\(companyFilePrefix\(data\.scenario\.companyName, selected\.fileBase\)\)/.test(text)).toBe(true);
+    expect(companyFilePrefix("", "safeclaw-workpack")).toBe("safeclaw-workpack");
+  });
+
+  it("화면 작업 공유 대상은 인원을 모르면 「0명 작업자」를 쓰지 않는다", () => {
+    const text = source("components/SafeGuardCommandCenter.tsx");
+    expect(/`\$\{fieldBrief\.workerCount\} 작업자 \+ 관리자`/.test(text)).toBe(false);
+    // 화면 미리보기 추정도 역할 인원(유도자 1명)을 총 작업인원으로 쓰지 않는다.
+    const infer = text.slice(text.indexOf("function inferWorkerCountFromText"), text.indexOf("function readApiMessage"));
+    expect(/subgroupHints = [^\n]*유도자[^\n]*신호수[^\n]*화재감시자/.test(infer)).toBe(true);
+    expect(/allCounts = [^;]*subgroupHints\.test/.test(infer)).toBe(true);
+  });
+
+  it("인원 표시 문구: 모르면 「인원 확인 필요」", () => {
+    expect(formatWorkerHeadcount(0)).toBe("인원 확인 필요");
+    expect(formatWorkerHeadcount(12)).toBe("12명");
   });
 });

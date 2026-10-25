@@ -36,6 +36,7 @@ import {
   type ReportViewState
 } from "@/lib/reporting-downloads";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
+import { formatWorkerCount } from "@/lib/scenario-display";
 import { createSafeClawBrowserSupabaseClient } from "@/lib/supabase-browser-client";
 
 const periodOptions: Array<{ value: ReportPeriod; label: string; detail: string }> = [
@@ -534,7 +535,7 @@ function ReportDocument({
           <p><strong>회사</strong><span>{snapshot.scenario.companyName || "확인 필요"}</span></p>
           <p><strong>현장</strong><span>{snapshot.scenario.siteName}</span></p>
           <p><strong>작업</strong><span>{snapshot.scenario.workSummary}</span></p>
-          <p><strong>인원</strong><span>{snapshot.scenario.workerCount}명</span></p>
+          <p><strong>인원</strong><span>{formatWorkerCount(snapshot.scenario.workerCount)}</span></p>
           <p><strong>기상/조건</strong><span>{snapshot.scenario.weatherNote || "확인 필요"}</span></p>
         </div>
       </section>

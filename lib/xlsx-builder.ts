@@ -880,7 +880,7 @@ export async function buildWorkPlanStructuredXlsx(
     ["작업명", data.workOverview.workName],
     ["작업내용", data.workOverview.description],
     ["작업장소", data.workOverview.location],
-    ["작업인원", `${data.workOverview.workerCount || scenario.workerCount || 0}명`],
+    ["작업인원", formatWorkerCount(data.workOverview.workerCount || scenario.workerCount)],
     ["작업조건", data.workOverview.condition],
     ["사용장비", data.workOverview.equipment.join(", ") || "장비 확인"]
   ]);
@@ -950,7 +950,7 @@ export async function buildPermitInspectionStructuredXlsx(
     ["작업명", data.basicInfo.workName],
     ["작업장소", data.basicInfo.location],
     ["작업일", data.basicInfo.workDate],
-    ["작업인원", `${data.basicInfo.workerCount || scenario.workerCount || 0}명`],
+    ["작업인원", formatWorkerCount(data.basicInfo.workerCount || scenario.workerCount)],
     ["신청/허가", `${data.basicInfo.requester} / ${data.basicInfo.approver}`]
   ]);
 

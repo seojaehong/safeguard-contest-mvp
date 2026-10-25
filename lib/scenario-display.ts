@@ -15,6 +15,11 @@ export function formatWorkerCount(count: number | null | undefined): string {
   return hasKnownWorkerCount(count) ? `${count.toLocaleString("ko-KR")}명` : "확인 필요";
 }
 
+// 「N명 · 조건」처럼 다른 말과 이어 쓰는 자리. 모르면 「인원 확인 필요」.
+export function formatWorkerHeadcount(count: number | null | undefined): string {
+  return hasKnownWorkerCount(count) ? `${count.toLocaleString("ko-KR")}명` : "인원 확인 필요";
+}
+
 export function formatCompanyName(companyName: string | null | undefined): string {
   return companyName?.trim() || COMPANY_NAME_INPUT_REQUEST;
 }
