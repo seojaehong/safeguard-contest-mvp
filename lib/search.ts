@@ -67,6 +67,7 @@ import {
   type HarnessImprovement,
   type HarnessMemoryInput
 } from "./db-harness";
+import { formatWorkerCount, hasKnownWorkerCount } from "./scenario-display";
 
 const log = createLogger("search");
 
@@ -1114,7 +1115,7 @@ export function buildTbmBriefingStructuredFromRiskRows(
     meta: {
       dateTime: "작업 전 TBM",
       location: scenario.siteName,
-      target: `전 작업자 ${scenario.workerCount}명`,
+      target: hasKnownWorkerCount(scenario.workerCount) ? `전 작업자 ${formatWorkerCount(scenario.workerCount)}` : "전 작업자(인원 확인 필요)",
       attendees: "현장 서명 또는 열람 확인 버튼"
     },
     todayWork: {
@@ -1142,7 +1143,8 @@ export function buildTbmLogStructuredFromRiskRows(
   weatherSummary: string
 ): TbmLogStructured {
   const selectedRows = tbmRows(rows);
-  const workerCount = Math.max(1, scenario.workerCount || 1);
+  // PR-15: 인원을 모르면 1명·5명으로 채우지 않는다. 출석 수는 0(확인 필요)으로 둔다.
+  const workerCount = hasKnownWorkerCount(scenario.workerCount) ? scenario.workerCount : 0;
   const confirmations = fillTbmList(
     selectedRows.map((row) => `${compactTbmText(row.hazard, "위험요인", 34)} 조치 확인`),
     ["작업중지 기준 공유", "보호구 착용 확인", "비상연락망 확인", "사진 증빙 위치 공유", "작업자 동선 확인"],
@@ -1177,7 +1179,7 @@ export function buildTbmLogStructuredFromRiskRows(
     attendance: {
       expected: workerCount,
       actual: workerCount,
-      attendees: Array.from({ length: Math.min(workerCount, 12) }, (_, index) => `작업자 ${index + 1}`),
+      attendees: workerCount ? Array.from({ length: Math.min(workerCount, 12) }, (_, index) => `작업자 ${index + 1}`) : ["작업자(인원 확인 필요)"],
       absenceReason: "없음",
       confirmationMethod: "현장 서명 또는 열람 확인 버튼"
     },
@@ -1879,7 +1881,7 @@ function formatTbmQualityAppendix(
     `- 주요 유해·위험요인: ${response.riskSummary.topRisk}`,
     `- 기상 API 결과: ${weather.summary} / ${weatherAction}`,
     `- 작업중지 기준: ${response.riskSummary.immediateActions.slice(0, 2).join(" / ") || "위험 발견 즉시 작업중지 및 보고"}`,
-    `- 참석자 확인: 작업자 ${response.scenario.workerCount.toLocaleString("ko-KR")}명 대상 구두 복창·서명·보호구 확인`,
+    `- 참석자 확인: 작업자 ${formatWorkerCount(response.scenario.workerCount)} 대상 구두 복창·서명·보호구 확인`,
     `- 신규·외국인·미숙련 작업자: ${languageLine}로 이해 여부 별도 확인`,
     "- 사진·증빙 위치: 작업 전 현장, 보호구, 위험구역 통제, TBM 실시 사진을 작업일지·모바일 기록·문서팩 첨부자료에 보관",
     `- 반영 근거: ${referenceTitles}. 원문성 근거는 evidence UI/metadata에서 확인`
@@ -2699,7 +2701,6 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const riskKoshaOpenApiAppendix = formatKoshaOpenApiAppendix(koshaOpenApi.references, "risk");
     const workPlanKoshaOpenApiAppendix = formatKoshaOpenApiAppendix(koshaOpenApi.references, "workPlan");
     const educationKoshaOpenApiAppendix = formatKoshaOpenApiAppendix(koshaOpenApi.references, "education");
-    const emergencyKoshaOpenApiAppendix = formatKoshaOpenApiAppendix(koshaOpenApi.references, "emergency");
     const outdoorHeatEnabled = hasOutdoorHeatSignal(weather, question);
     const outdoorHeatRiskAppendix = outdoorHeatEnabled ? formatOutdoorHeatAppendix(weather, "risk") : "";
     const outdoorHeatTbmAppendix = outdoorHeatEnabled ? formatOutdoorHeatAppendix(weather, "tbm") : "";
@@ -3031,12 +3032,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         safetyEducationRecordDraft: aiBodies.safetyEducationRecordDraft
           ? aiBodies.safetyEducationRecordDraft
           : stripPipelineMeta(`${baseDeliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${outdoorHeatEducationAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${educationLegalAppendix}${educationKoshaAppendix}${safetyKnowledgeEducationAppendix}${safetyReferenceAppendix}${accidentAppendix}${educationKoshaOpenApiAppendix}`),
-        emergencyResponseDraft: aiBodies.emergencyResponseDraft
-          ? aiBodies.emergencyResponseDraft
-          : `${baseDeliverables.emergencyResponseDraft}${educationSeriousAccidentAppendix}${accidentAppendix}${emergencyKoshaOpenApiAppendix}`,
-        photoEvidenceDraft: aiBodies.photoEvidenceDraft
-          ? aiBodies.photoEvidenceDraft
-          : ensurePhotoEvidenceDraft(baseDeliverables.photoEvidenceDraft, photoEvidenceAppendix),
+        // 결정 8(2026-10-25): 비상대응·사진증빙은 AI 본문을 쓰지 않고 작업유형별 결정적 틀만 쓴다(H9).
+        // 비상대응에는 KOSHA OpenAPI 「문서 반영 근거」 후보를 붙이지 않는다 — 작업과 무관한
+        // 공정안전보고서 고시가 굴착·폭염 비상대응 근거로 나갔다(EF-10). 교육용 중대재해 점검 문구도 뺀다.
+        emergencyResponseDraft: `${baseDeliverables.emergencyResponseDraft}${accidentAppendix}`,
+        photoEvidenceDraft: ensurePhotoEvidenceDraft(baseDeliverables.photoEvidenceDraft, photoEvidenceAppendix),
         foreignWorkerBriefing: foreignWorkerBriefingText,
         foreignWorkerTransmission: foreignWorkerTransmissionText,
         // Reconciled against the actual body text — the static pack (or the

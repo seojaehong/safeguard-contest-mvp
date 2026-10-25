@@ -1,4 +1,5 @@
 import { AskResponse, ForeignWorkerLanguage } from "./types";
+import { formatCompanyName } from "./scenario-display";
 
 type BriefingInput = {
   question: string;
@@ -770,7 +771,7 @@ export function buildForeignWorkerTransmission(input: BriefingInput) {
     .join("\n\n");
 
   return ensureForeignWorkerTransmissionContext([
-    `[SafeClaw 외국인 근로자 안전공지] ${input.scenario.companyName}`,
+    `[SafeClaw 외국인 근로자 안전공지] ${formatCompanyName(input.scenario.companyName)}`,
     `현장: ${input.scenario.siteName}`,
     `오늘 작업: ${input.scenario.workSummary}`,
     ...buildKoreanContextLines(input),

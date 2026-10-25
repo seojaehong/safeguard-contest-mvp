@@ -7,6 +7,7 @@ import {
   resolveRiskAssessmentRows,
   type StructuredRiskAssessmentRow
 } from "@/lib/risk-assessment-renderer";
+import { formatCompanyName, formatWorkerCount } from "@/lib/scenario-display";
 
 type SheetRow = {
   document: string;
@@ -118,12 +119,12 @@ export async function buildHwpWithTables(input: HwpBuildInput): Promise<Blob> {
         const paraIdx = tableJson.paraIdx;
         const controlIdx = typeof tableJson.controlIdx === "number" ? tableJson.controlIdx : 0;
         const meta: string[][] = [
-          ["사업장", scenario.companyName || "", "현장/공정", scenario.siteName || ""],
+          ["사업장", formatCompanyName(scenario.companyName), "현장/공정", scenario.siteName || ""],
           [
             "작업내용",
             scenario.workSummary || "",
             "인원/조건",
-            `${scenario.workerCount ?? 0}명 · ${scenario.weatherNote || ""}`
+            `${formatWorkerCount(scenario.workerCount)} · ${scenario.weatherNote || ""}`
           ]
         ];
         meta.forEach((row, rIdx) => {

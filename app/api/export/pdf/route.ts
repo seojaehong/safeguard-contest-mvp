@@ -29,6 +29,7 @@ import {
   type StructuredRiskAssessmentRow
 } from "@/lib/risk-assessment-renderer";
 import type { AccidentType, FourM } from "@/lib/risk-assessment-schema";
+import { companyFilePrefix, formatCompanyName, formatWorkerCount } from "@/lib/scenario-display";
 
 export const dynamic = "force-dynamic";
 
@@ -204,7 +205,7 @@ function sanitizeFileName(value: string) {
 function parseScenario(value: unknown): PdfScenario {
   const record = isRecord(value) ? value : {};
   return {
-    companyName: readString(record.companyName, "SafeClaw 현장"),
+    companyName: readString(record.companyName, ""),
     siteName: readString(record.siteName, "현장명 확인"),
     workSummary: readString(record.workSummary, "작업내용 확인"),
     workerCount: readNumber(record.workerCount, 0),
@@ -482,7 +483,7 @@ function renderWorkPlanRows(rows: PdfRow[], scenario: PdfScenario) {
   return `
     <section class="section">
       <h2>1. 작업개요</h2>
-      <table class="meta-table"><tbody><tr><th>현장</th><td>${escapeHtml(scenario.siteName)}</td><th>작업</th><td>${escapeHtml(scenario.workSummary)}</td></tr><tr><th>작업인원</th><td>${scenario.workerCount.toLocaleString("ko-KR")}명</td><th>작업조건</th><td>${escapeHtml(scenario.weatherNote)}</td></tr></tbody></table>
+      <table class="meta-table"><tbody><tr><th>현장</th><td>${escapeHtml(scenario.siteName)}</td><th>작업</th><td>${escapeHtml(scenario.workSummary)}</td></tr><tr><th>작업인원</th><td>${formatWorkerCount(scenario.workerCount)}</td><th>작업조건</th><td>${escapeHtml(scenario.weatherNote)}</td></tr></tbody></table>
     </section>
     <section class="section">
       <h2>2. 세부 작업순서 및 안전대책</h2>
@@ -543,7 +544,7 @@ function renderEducationRows(rows: PdfRow[], scenario: PdfScenario) {
   return `
     <section class="section">
       <h2>1. 교육 개요</h2>
-      <table class="meta-table"><tbody><tr><th>교육명</th><td>${escapeHtml(scenario.workSummary)} 작업 전 안전보건교육</td><th>교육대상</th><td>투입 근로자 ${scenario.workerCount.toLocaleString("ko-KR")}명</td></tr><tr><th>교육방법</th><td>TBM 연계 구두교육·서명</td><th>작업조건</th><td>${escapeHtml(scenario.weatherNote)}</td></tr></tbody></table>
+      <table class="meta-table"><tbody><tr><th>교육명</th><td>${escapeHtml(scenario.workSummary)} 작업 전 안전보건교육</td><th>교육대상</th><td>투입 근로자 ${formatWorkerCount(scenario.workerCount)}</td></tr><tr><th>교육방법</th><td>TBM 연계 구두교육·서명</td><th>작업조건</th><td>${escapeHtml(scenario.weatherNote)}</td></tr></tbody></table>
     </section>
     <section class="section">
       <h2>2. 교육 내용 및 이해 확인</h2>
@@ -749,10 +750,10 @@ function buildPdfReadyHtml(
       </div>
     </header>
     <section class="meta">
-      <div><b>사업장</b>${escapeHtml(scenario.companyName)}</div>
+      <div><b>사업장</b>${escapeHtml(formatCompanyName(scenario.companyName))}</div>
       <div><b>현장</b>${escapeHtml(scenario.siteName)}</div>
       <div><b>작업내용</b>${escapeHtml(scenario.workSummary)}</div>
-      <div><b>인원/기상</b>${scenario.workerCount.toLocaleString("ko-KR")}명 · ${escapeHtml(scenario.weatherNote)}</div>
+      <div><b>인원/기상</b>${formatWorkerCount(scenario.workerCount)} · ${escapeHtml(scenario.weatherNote)}</div>
     </section>
     <p class="kind-note">서식 구분: ${escapeHtml(kindLabels[kind])} · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다.</p>
     <section class="riskbox">
@@ -1108,10 +1109,10 @@ function buildPdfContentLines(
   const lines: PdfContentLine[] = [
     { text: title, role: "title", gap: 18 },
     { text: `SafeClaw 현장 검토용 PDF 초안 · 생성 ${generatedAt}`, role: "note", gap: 16 },
-    { text: `사업장: ${scenario.companyName}`, role: "body" },
+    { text: `사업장: ${formatCompanyName(scenario.companyName)}`, role: "body" },
     { text: `현장: ${scenario.siteName}`, role: "body" },
     { text: `작업: ${scenario.workSummary}`, role: "body" },
-    { text: `인원/기상: ${scenario.workerCount.toLocaleString("ko-KR")}명 · ${scenario.weatherNote}`, role: "body", gap: 14 },
+    { text: `인원/기상: ${formatWorkerCount(scenario.workerCount)} · ${scenario.weatherNote}`, role: "body", gap: 14 },
     { text: `위험수준: ${localizeRiskLevel(riskLevel)}`, role: "section" },
     { text: `핵심위험: ${topRisk || "현장 최종 확인 필요"}`, role: "body", gap: 16 },
     { text: `서식 구분: ${kind === "risk" ? "위험성평가표" : kind === "workPlan" ? "작업계획서" : kind === "permit" ? "허가/점검" : kind === "tbm" ? "TBM일지" : "일반 문서"}`, role: "body", gap: 12 },
@@ -1209,7 +1210,7 @@ async function buildBinaryPdf(
     y -= typography.leading;
   }
   pageStates.forEach((state, index) => {
-    const headerText = Array.from(normalizePdfText(`${title} · ${scenario.companyName}`)).slice(0, 56).join("");
+    const headerText = Array.from(normalizePdfText(`${title} · ${formatCompanyName(scenario.companyName)}`)).slice(0, 56).join("");
     const pageText = `${index + 1} / ${pageStates.length}쪽`;
     state.page.pushOperators(
       beginText(),
@@ -1273,7 +1274,7 @@ async function exportPdf(request: NextRequest) {
         console.error("PDF export failed", error);
         throw error;
       }
-      const pdfFileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.pdf`;
+      const pdfFileName = `${sanitizeFileName(companyFilePrefix(scenario.companyName, title))}.pdf`;
       return new NextResponse(new Uint8Array(pdf), {
         headers: {
           "content-type": "application/pdf",
@@ -1284,7 +1285,7 @@ async function exportPdf(request: NextRequest) {
     }
 
     const html = buildPdfReadyHtml(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);
-    const fileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.html`;
+    const fileName = `${sanitizeFileName(companyFilePrefix(scenario.companyName, title))}.html`;
     const encodedFileName = encodeURIComponent(fileName);
 
     return new NextResponse(html, {

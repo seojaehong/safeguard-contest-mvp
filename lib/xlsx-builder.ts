@@ -8,6 +8,7 @@ import {
   type StructuredRiskAssessmentRow
 } from "@/lib/risk-assessment-renderer";
 import type { AccidentType } from "@/lib/risk-assessment-schema";
+import { formatCompanyName, formatWorkerCount } from "@/lib/scenario-display";
 
 type SheetRow = {
   document: string;
@@ -359,8 +360,8 @@ function addStructuredTitle(ws: ExcelJS.Worksheet, row: number, title: string, s
   row += 1;
 
   const metaRows: Array<[[string, string], [string, string]]> = [
-    [["사업장", scenario.companyName || "SafeClaw 현장"], ["현장", scenario.siteName || "현장 확인"]],
-    [["작업내용", scenario.workSummary || "작업내용 확인"], ["인원/조건", `${scenario.workerCount ?? 0}명 · ${scenario.weatherNote || ""}`]]
+    [["사업장", formatCompanyName(scenario.companyName)], ["현장", scenario.siteName || "현장 확인"]],
+    [["작업내용", scenario.workSummary || "작업내용 확인"], ["인원/조건", `${formatWorkerCount(scenario.workerCount)} · ${scenario.weatherNote || ""}`]]
   ];
 
   metaRows.forEach((pair) => {
@@ -1122,7 +1123,7 @@ export async function buildTbmLogStructuredXlsx(
   row += 1;
   row = addSectionHeader(ws, row, "출석");
   row = addKeyValueRows(ws, row, [
-    ["예정 인원", `${data.attendance.expected || scenario.workerCount || 0}명`],
+    ["예정 인원", formatWorkerCount(data.attendance.expected || scenario.workerCount)],
     ["실제 참석", `${data.attendance.actual || data.attendance.attendees.length || 0}명`],
     ["결석/지각", data.attendance.absenceReason],
     ["확인 방식", data.attendance.confirmationMethod]
@@ -1380,8 +1381,8 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
 
   // 2) Meta grid (2 rows x 4 col-pairs)
   const metaRows = [
-    [["사업장", scenario.companyName || ""], ["현장/공정", scenario.siteName || ""]],
-    [["작업내용", scenario.workSummary || ""], ["인원/조건", `${scenario.workerCount ?? 0}명 · ${scenario.weatherNote || ""}`]]
+    [["사업장", formatCompanyName(scenario.companyName)], ["현장/공정", scenario.siteName || ""]],
+    [["작업내용", scenario.workSummary || ""], ["인원/조건", `${formatWorkerCount(scenario.workerCount)} · ${scenario.weatherNote || ""}`]]
   ];
   for (const pair of metaRows) {
     const [[lbl1, val1], [lbl2, val2]] = pair;
@@ -1580,10 +1581,10 @@ export async function buildWorkpackXlsx(
   cover.getCell(1, 1).font = { name: "Malgun Gothic", size: 18, bold: true, color: { argb: "FF1F4D43" } };
   cover.mergeCells(1, 1, 1, 2);
   const coverRows: Array<[string, string]> = [
-    ["사업장", scenario.companyName || ""],
+    ["사업장", formatCompanyName(scenario.companyName)],
     ["현장/공정", scenario.siteName || ""],
     ["작업내용", scenario.workSummary || ""],
-    ["인원/조건", `${scenario.workerCount ?? 0}명 · ${scenario.weatherNote || ""}`],
+    ["인원/조건", `${formatWorkerCount(scenario.workerCount)} · ${scenario.weatherNote || ""}`],
     ["생성", new Date().toISOString()]
   ];
   coverRows.forEach((pair, idx) => {

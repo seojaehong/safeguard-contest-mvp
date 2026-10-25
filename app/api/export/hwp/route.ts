@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "node:fs";
 import path from "node:path";
+import { companyFilePrefix, formatCompanyName, formatWorkerCount } from "@/lib/scenario-display";
 // Use the WASM init for server runtime. exportHwp() supports tables; exportHwpx() does NOT.
 import { initSync, HwpDocument } from "@rhwp/core";
 import {
@@ -155,7 +156,7 @@ function parseRiskRowsFromBody(body: Record<string, unknown>): StructuredRiskAss
 function parseScenario(value: unknown) {
   const r = isRecord(value) ? value : {};
   return {
-    companyName: readString(r.companyName, "SafeClaw 현장"),
+    companyName: readString(r.companyName, ""),
     companyType: readString(r.companyType, ""),
     siteName: readString(r.siteName, "현장명 확인"),
     workSummary: readString(r.workSummary, "작업내용 확인"),
@@ -230,8 +231,8 @@ function buildHwpBuffer(args: {
     // Metadata table (4 col x 2 row)
     {
       const meta: string[][] = [
-        ["사업장", scenario.companyName, "현장/공정", scenario.siteName],
-        ["작업내용", scenario.workSummary, "인원/조건", `${scenario.workerCount}명 · ${scenario.weatherNote}`]
+        ["사업장", formatCompanyName(scenario.companyName), "현장/공정", scenario.siteName],
+        ["작업내용", scenario.workSummary, "인원/조건", `${formatWorkerCount(scenario.workerCount)} · ${scenario.weatherNote}`]
       ];
       nextParaIdx = insertHwpTable(document, nextParaIdx, meta, "기본정보");
     }
@@ -309,7 +310,7 @@ async function exportHwp(request: NextRequest) {
     const structuredRiskRows = body.edited === true ? [] : parseRiskRowsFromBody(body);
     const buffer = buildHwpBuffer({ title, rows, profile, scenario, structuredRiskRows });
     assertDocumentExportOutputBudget(buffer);
-    const fileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.hwp`;
+    const fileName = `${sanitizeFileName(companyFilePrefix(scenario.companyName, title))}.hwp`;
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "content-type": "application/x-hwp",
