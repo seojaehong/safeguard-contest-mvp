@@ -1652,7 +1652,7 @@ describe("Reports Wave 1 browser design contract", () => {
       expect(metrics.heroMetaCtaOverlap).toBe(false);
     }
     expect(focusOutline).toBe(theme === "day" ? "rgb(29, 90, 166)" : "rgb(138, 180, 248)");
-    expect(metrics.accentText).toBe(theme === "day" ? "rgb(102, 81, 0)" : "rgb(181, 183, 255)");
+    expect(metrics.accentText).toBe(theme === "day" ? "rgb(29, 90, 166)" : "rgb(138, 180, 248)");
     expect(metrics.tuples).toEqual({
       factLabel: ["12px", "600", "18px", "normal"],
       factValue: ["15px", "500", "24px", "normal"],
