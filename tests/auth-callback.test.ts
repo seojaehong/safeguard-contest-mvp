@@ -132,7 +132,8 @@ describe("auth callback transaction", () => {
       fs.readFileSync(filePath, "utf8").includes("createSafeClawBrowserSupabaseClient")
     ));
 
-    expect(clientSurfaces).toHaveLength(11);
+    // 12번째: components/VideoHazardCheck.tsx (동영상 위험 점검 v0, 2026-10-25)
+    expect(clientSurfaces).toHaveLength(12);
     for (const filePath of browserFiles) {
       const relativePath = path.relative(root, filePath);
       const source = fs.readFileSync(filePath, "utf8");
