@@ -2506,6 +2506,18 @@ describe("documents editor layout", () => {
       expect(evidenceActionLanding.pageHeight).toBeLessThanOrEqual(evidenceActionLanding.viewportHeight + 1);
       expect(evidenceActionLanding.scrollWidth).toBeLessThanOrEqual(evidenceActionLanding.viewportWidth + 1);
 
+      // 진입 정렬 타이머(최대 약 2.3초)와 글꼴 교체가 끝난 뒤에도 사용자가 연 근거 칸이 화면에 남아 있어야 한다.
+      await page.waitForTimeout(2_600);
+      const evidenceAfterLandingTimers = await page.evaluate(() => {
+        const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
+        const evidencePanel = document.querySelector<HTMLElement>('[data-testid="editor-evidence-panel"]');
+        if (!workpackShell || !evidencePanel) throw new Error("Missing document section action target");
+        const shellRect = workpackShell.getBoundingClientRect();
+        const evidenceRect = evidencePanel.getBoundingClientRect();
+        return evidenceRect.bottom > shellRect.top && evidenceRect.top < shellRect.bottom;
+      });
+      expect(evidenceAfterLandingTimers).toBe(true);
+
       await page.locator('[aria-label="행 1 유해·위험요인"]').focus();
 
       const riskAssessmentDeepScroll = await page.evaluate(async () => {
