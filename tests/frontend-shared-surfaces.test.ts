@@ -178,7 +178,7 @@ describe("canonical shared surface styles", () => {
         css,
         ".safeclaw-module-shell.module-variant-document .safeclaw-doc-export a:first-of-type",
       ),
-    ).toMatchObject({ color: "var(--workspace-ink)" });
+    ).toMatchObject({ color: "var(--workspace-accent-ink, var(--on-sign))" });
     expect(
       declarationsForExactSelector(
         css,

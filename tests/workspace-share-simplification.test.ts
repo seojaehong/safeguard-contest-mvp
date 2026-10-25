@@ -184,10 +184,10 @@ describe("workspace share simplification", () => {
       css.indexOf('.safeclaw-module-shell[data-theme="night"]', css.indexOf('.safeclaw-module-shell[data-theme="day"] .share-panel.workflow-panel'))
     );
 
-    expect(moduleDayShareBlock).toContain("--share-surface: #ffffff;");
-    expect(moduleDayShareBlock).toContain("--share-surface-2: #f5f6f8;");
-    expect(moduleDayShareBlock).toContain("--share-ink: #17191d;");
-    expect(moduleDayShareBlock).toContain("--share-muted: #525a66;");
+    expect(moduleDayShareBlock).toContain("--share-surface: var(--paper);");
+    expect(moduleDayShareBlock).toContain("--share-surface-2: var(--desk);");
+    expect(moduleDayShareBlock).toContain("--share-ink: var(--ink);");
+    expect(moduleDayShareBlock).toContain("--share-muted: var(--ink-2);");
     expect(css).toContain('[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card strong {');
     expect(css).toContain("font-size: var(--text-caption);");
     expect(css).toContain('[data-module-route="/dispatch"] .share-panel.workflow-panel .channel-card em {');

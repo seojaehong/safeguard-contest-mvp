@@ -210,8 +210,8 @@ describe("workspace layout regression", () => {
         if (!metric) throw new Error(`Missing Night baseline metric: ${selector}`);
         return metric;
       };
-      expect(nightMetric(".command-topbar").borderRadius, `${viewport.label} Night topbar`).toBe("4px");
-      expect(nightMetric(".workspace-theme-toggle").borderRadius, `${viewport.label} Night toggle`).toBe("4px");
+      expect(nightMetric(".command-topbar").borderRadius, `${viewport.label} Night topbar`).toBe("2px");
+      expect(nightMetric(".workspace-theme-toggle").borderRadius, `${viewport.label} Night toggle`).toBe("2px");
       expect(
         nightMetric(".workspace-theme-toggle button:nth-child(1)").minWidth,
         `${viewport.label} Night toggle button`,
@@ -221,20 +221,20 @@ describe("workspace layout regression", () => {
       );
       expect(nightMetric(".workspace-side-nav").borderRadius, `${viewport.label} Night side navigation`).toBe("0px");
       expect(nightMetric(".linear-workspace-layout .command-main").borderRadius, `${viewport.label} Night main`).toBe("0px");
-      expect(nightMetric(".workspace-input-page .command-console-input").borderRadius, `${viewport.label} Night input`).toBe("4px");
+      expect(nightMetric(".workspace-input-page .command-console-input").borderRadius, `${viewport.label} Night input`).toBe("2px");
       expect(
         nightMetric(".workspace-input-page .field-brief-chip-row span:nth-child(1)"),
         `${viewport.label} Night field chip`,
-      ).toMatchObject({ borderRadius: "4px", padding: ["8px", "16px", "8px", "16px"] });
+      ).toMatchObject({ borderRadius: "2px", padding: ["8px", "16px", "8px", "16px"] });
       expect(nightMetric(".workspace-input-page .composer-submit-button"), `${viewport.label} Night primary action`).toMatchObject({
-        borderRadius: "8px",
+        borderRadius: "2px",
         fontWeight: "700",
       });
       expect(nightMetric(".workspace-input-page .advanced-settings"), `${viewport.label} Night advanced settings`).toMatchObject({
-        borderRadius: "4px",
+        borderRadius: "2px",
       });
       expect(nightMetric(".workspace-input-page .quick-scenario-chips"), `${viewport.label} Night examples`).toMatchObject({
-        borderRadius: "4px",
+        borderRadius: "2px",
       });
       expect(day.colors.shell, `${viewport.label} shell theme color`).not.toBe(night.colors.shell);
       expect(day.colors.primary, `${viewport.label} primary theme color`).not.toBe(night.colors.primary);
@@ -1712,7 +1712,7 @@ describe("workspace layout regression", () => {
     expect(metrics.shell.backgroundColor).toBe("rgba(0, 0, 0, 0)");
     expect(metrics.editor.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.editor.color).not.toBe("rgb(246, 245, 239)");
-    expect(metrics.editor.borderRadius).toBeGreaterThanOrEqual(9);
+    expect(metrics.editor.borderRadius).toBeGreaterThanOrEqual(2);
     expect(["auto", "visible"]).toContain(metrics.editor.overflowX);
     expect(metrics.editor.overflowY).toBe("auto");
     expect(metrics.editingTarget.backgroundColor).toBe("rgb(255, 255, 255)");
