@@ -8,6 +8,7 @@ import {
   type StructuredRiskAssessmentRow
 } from "@/lib/risk-assessment-renderer";
 import { formatCompanyName, formatWorkerCount } from "@/lib/scenario-display";
+import { riskLevelLabel } from "@/lib/document-display-labels";
 
 type SheetRow = {
   document: string;
@@ -152,7 +153,7 @@ export async function buildHwpWithTables(input: HwpBuildInput): Promise<Blob> {
         riskRow.unitTask,
         riskRow.hazard,
         riskRow.currentControls || "현장 확인",
-        riskRow.riskLevel || "확인",
+        riskLevelLabel(riskRow.riskLevel) || "확인",
         riskRow.additionalControls,
         `${riskRow.owner || "작업반장"} / ${riskRow.dueDate || "작업 전"}`
       ])

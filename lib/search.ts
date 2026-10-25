@@ -52,6 +52,8 @@ import {
 } from "./public-work-budget";
 import { validateRiskAssessmentRows, type AccidentType, type FourM, type RiskAssessmentRow, type RiskAssessmentValidationIssue } from "./risk-assessment-schema";
 import { splitDocumentMeta } from "./doc-meta-split";
+import { verificationStatusLabel } from "./document-display-labels";
+import { gateAskResponseUserOutput } from "./user-output-gate";
 import { buildEvidenceLabels } from "./smsa-mapping";
 import { createLogger } from "@/lib/logger";
 import { attachProgressListeners, safeEmit, type OnAskProgress } from "./ask-progress";
@@ -777,6 +779,16 @@ function compactRiskCell(value: string | null | undefined, maxLength = 96): stri
   return normalized.length > maxLength ? `${normalized.slice(0, maxLength - 1)}…` : normalized;
 }
 
+// RA-10: 사고사례 분류값(「아카이브(건설업)」「518」「제조업」)은 장비 이름이 아니다. 장비 칸에서 뺀다.
+const NON_EQUIPMENT_REFERENCE_TOKEN = /^(?:\d+|아카이브(?:\([^)]*\))?|(?:제조|건설|서비스|운수|운수창고|농|임|어|광|도소매|전기가스|기타)업(?:등)?)$/u;
+
+export function referenceEquipmentLabel(category: string | null | undefined, subcategory: string | null | undefined): string {
+  const parts = [category, subcategory]
+    .map((part) => (part || "").trim())
+    .filter((part) => part && !NON_EQUIPMENT_REFERENCE_TOKEN.test(part));
+  return compactRiskCell(parts.join(", "), 80);
+}
+
 function includesRiskAssessmentDocument(item: SafetyReferenceItem): boolean {
   const documents = [...(item.primary_documents || []), ...(item.reflected_documents || [])];
   return documents.length === 0 || documents.some((document) =>
@@ -881,7 +893,7 @@ export function buildSafetyReferenceRiskRows(
       location,
       process: processLabel,
       task: taskLabel,
-      equipment: compactRiskCell([item.category, item.subcategory].filter(Boolean).join(", "), 80) || "작업 장비·공구·보호구",
+      equipment: referenceEquipmentLabel(item.category, item.subcategory) || "작업 장비·공구·보호구",
       hazard,
       currentControls: control,
       likelihood: item.item_type === "sif-case" ? 4 : item.evidence_role === "direct" ? 3 : 2,
@@ -890,8 +902,8 @@ export function buildSafetyReferenceRiskRows(
       owner: "작업반장",
       due: "현장 확인",
       verification: operationalView.reviewRequired
-        ? "DB 하네스 근거의 위험요인·통제대책을 원문 및 현장 조건과 대조해 검토"
-        : "DB 하네스 근거와 현장 사진·TBM 확인으로 조치 반영 여부를 확인",
+        ? "참고 자료의 위험요인·통제대책을 원문 및 현장 조건과 대조해 검토"
+        : "참고 자료와 현장 사진·TBM 확인으로 조치 반영 여부를 확인",
       verificationChecker: "관리감독자",
       evidenceRefs,
       verificationStatus: operationalView.reviewRequired ? "needsReview" : "planned"
@@ -1023,11 +1035,27 @@ function buildTbmQuestionHazardLabel(hazard: string): string {
   return /위험/.test(label) ? label : `${label} 위험`;
 }
 
+// TBM-10: 기상 요약을 위험요인처럼 만든 행과 검토 메모 행은 근로자 확인 질문으로 내보내지 않는다.
+function isTbmWorkerQuestionRow(row: RiskAssessmentRow): boolean {
+  if (row.verificationStatus === "needsReview") return false;
+  if (/에 따른 작업환경 변화 위험$/u.test(row.hazard.trim())) return false;
+  if (/^검토 필요\s*:/u.test(row.hazard.trim())) return false;
+  return true;
+}
+
+function subjectParticle(word: string): "이" | "가" {
+  const last = word.trim().charCodeAt(word.trim().length - 1);
+  if (last >= 0xac00 && last <= 0xd7a3) return (last - 0xac00) % 28 === 0 ? "가" : "이";
+  return "가";
+}
+
 export function buildTbmRiskLinks(rows: RiskAssessmentRow[], weatherSummary: string): TbmRiskLink[] {
-  return rows.slice(0, 6).map((row, index) => {
+  const indexed = rows.slice(0, 6).map((row, index) => ({ row, index }));
+  const workerRows = indexed.filter(({ row }) => isTbmWorkerQuestionRow(row));
+  return (workerRows.length ? workerRows : indexed).map(({ row, index }) => {
     const owner = row.owner || "작업반장";
     const checker = row.verificationChecker || "관리감독자";
-    const verificationStatus = row.verificationStatus || "planned";
+    const verificationStatus = verificationStatusLabel(row.verificationStatus || "planned");
     const verificationDate = row.verificationDate || "작업 전";
     const control = row.additionalControls || row.currentControls || "작업 전 안전조치를 확인합니다.";
     const hazardLabel = buildTbmQuestionHazardLabel(row.hazard);
@@ -1038,7 +1066,7 @@ export function buildTbmRiskLinks(rows: RiskAssessmentRow[], weatherSummary: str
       weatherSignal: weatherSummary || "기상청 현재·예보 신호 확인",
       confirmQuestion: `${hazardLabel}에 대해 ${control} 조치를 이해하고 작업 전 확인했습니까?`,
       owner,
-      verification: `${checker}가 ${verificationDate} 기준 ${verificationStatus} 상태로 확인하고 TBM 기록에 남깁니다.`,
+      verification: `${checker}${subjectParticle(checker)} ${verificationDate} 기준 ${verificationStatus} 상태로 확인하고 TBM 기록에 남깁니다.`,
       evidenceRefs: row.evidenceRefs || []
     };
   });
@@ -1879,18 +1907,18 @@ function formatTbmQualityAppendix(
     "",
     "[TBM 필수 반영 체크]",
     `- 주요 유해·위험요인: ${response.riskSummary.topRisk}`,
-    `- 기상 API 결과: ${weather.summary} / ${weatherAction}`,
+    `- 기상청 예보 확인 결과: ${weather.summary} / ${weatherAction}`,
     `- 작업중지 기준: ${response.riskSummary.immediateActions.slice(0, 2).join(" / ") || "위험 발견 즉시 작업중지 및 보고"}`,
     `- 참석자 확인: 작업자 ${formatWorkerCount(response.scenario.workerCount)} 대상 구두 복창·서명·보호구 확인`,
     `- 신규·외국인·미숙련 작업자: ${languageLine}로 이해 여부 별도 확인`,
     "- 사진·증빙 위치: 작업 전 현장, 보호구, 위험구역 통제, TBM 실시 사진을 작업일지·모바일 기록·문서팩 첨부자료에 보관",
-    `- 반영 근거: ${referenceTitles}. 원문성 근거는 evidence UI/metadata에서 확인`
+    `- 반영 근거: ${referenceTitles}. 근거 원문은 문서팩 근거 화면에서 확인`
   ].join("\n");
 }
 
-function formatSeriousAccidentReferenceAppendix(target: "risk" | "tbm" | "education") {
+function formatSeriousAccidentReferenceAppendix(target: "risk" | "tbm" | "education" | "emergency") {
   const common = [
-    "- 내부 참고자료 반영: 중대재해처벌법 실무서 파싱 요약을 바탕으로 유해·위험요인 확인, 개선조치, 교육, 작업중지, 도급관리 축을 점검합니다.",
+    "- 참고자료: 중대재해처벌법 해설 자료를 바탕으로 유해·위험요인 확인, 개선조치, 교육, 작업중지, 도급관리 축을 점검합니다.",
     "- 주의: 해당 참고자료는 공식 법령 원문을 대체하지 않으며, 최종 근거는 법제처 법령정보와 공식 자료로 재확인합니다."
   ];
   const targetLines = {
@@ -1905,6 +1933,11 @@ function formatSeriousAccidentReferenceAppendix(target: "risk" | "tbm" | "educat
     education: [
       "- 안전교육 연결: 신규 투입자, 외국인 근로자, 협력업체 작업자는 이해 여부 확인과 서명·사진·모바일 기록을 남깁니다.",
       "- 교육 후 확인: 위험요인, 작업중지 기준, 보호구·작업방법을 작업자에게 다시 말하게 해 이해도를 확인합니다."
+    ],
+    // EF-09: 비상대응에는 교육용 줄 대신 비상대응 전용 줄을 붙인다.
+    emergency: [
+      "- 비상대응 연결: 사고 발생 시 작업중지, 119 신고, 관리감독자 보고, 2차 피해 방지 순서를 현장 비상연락망과 함께 게시합니다.",
+      "- 협력업체 작업자를 포함해 대피 경로와 응급조치 담당자를 작업 전에 확인합니다."
     ]
   }[target];
 
@@ -2057,18 +2090,18 @@ function buildDbHarnessReflectionLines(packet: DbHarnessPacket) {
 }
 
 function reflectDbHarnessInDeliverables(response: AskResponse, packet: DbHarnessPacket): AskResponse {
-  const { improvementLines, workpackLines, missingLines, coreLines } = buildDbHarnessReflectionLines(packet);
+  // TBM-09·COPY-04: 「공유 전 보완: SIF 유사사례 / 위험성평가표 근거」는 근거 수집 상태(내부 점검)라 현장 문서에 싣지 않는다.
+  const { improvementLines, workpackLines } = buildDbHarnessReflectionLines(packet);
+  const coreLines = [...improvementLines, ...workpackLines];
   if (!coreLines.length) return response;
 
   const riskLines = [
     ...improvementLines.map((line) => `위험성평가 반영: ${line}`),
-    ...workpackLines.map((line) => `유사 작업 이력: ${line}`),
-    ...missingLines
+    ...workpackLines.map((line) => `유사 작업 이력: ${line}`)
   ];
   const tbmLines = [
     ...improvementLines.map((line) => `TBM 전달 항목: ${line}`),
-    ...workpackLines.map((line) => `이전 작업 재확인: ${line}`),
-    ...missingLines
+    ...workpackLines.map((line) => `이전 작업 재확인: ${line}`)
   ];
   const photoLines = [
     ...packet.improvementMemory.slice(0, 5).map((item) => {
@@ -2080,8 +2113,7 @@ function reflectDbHarnessInDeliverables(response: AskResponse, packet: DbHarness
       const siteSignals = item.siteSignals?.length ? ` / 현장 신호: ${item.siteSignals.slice(0, 4).join(", ")}` : "";
       const evidence = item.visionEvidence ? ` / 분석 근거: ${item.visionEvidence}` : "";
       return `${attached}: ${item.taskLabel} - ${item.improvementText}${sourcePhotos}${detected}${observed}${ocr}${siteSignals}${evidence}`;
-    }),
-    ...missingLines
+    })
   ];
 
   return {
@@ -2169,7 +2201,16 @@ export function attachDbHarnessFallback(response: AskResponse, input: {
   });
 }
 
+/**
+ * 사용자 문서 출력 게이트(PR-14): runAsk 의 모든 반환 경로(template·보류·full·실패 대체)가
+ * 같은 마지막 단계를 거친다. 온톨로지 QA 가 붙인 머리줄까지 거른 뒤에 응답이 나가고,
+ * route 의 생성 근거 봉인(attachGenerationEvidence)은 거른 본문 위에서 계산된다.
+ */
 export async function runAsk(question: string, options: RunAskOptions = {}): Promise<AskResponse> {
+  return gateAskResponseUserOutput(await runAskUngated(question, options));
+}
+
+async function runAskUngated(question: string, options: RunAskOptions = {}): Promise<AskResponse> {
   assertRunAskWorkBudget(question, options);
   options.signal?.throwIfAborted();
   const onProgress = options.onProgress;
@@ -2693,6 +2734,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const educationLegalAppendix = formatLegalEvidenceAppendix(citations, "education");
     const riskSeriousAccidentAppendix = formatSeriousAccidentReferenceAppendix("risk");
     const educationSeriousAccidentAppendix = formatSeriousAccidentReferenceAppendix("education");
+    const emergencySeriousAccidentAppendix = formatSeriousAccidentReferenceAppendix("emergency");
     const workPlanKoshaAppendix = formatKoshaPracticalAppendix(kosha.references, "workPlan", "반영 근거: 작업계획 공식자료");
     const educationKoshaAppendix = formatKoshaPracticalAppendix(kosha.references, "education", "반영 근거: 교육 공식자료");
     const trainingFitLines = training.recommendations.slice(0, 2).map((item) => `${item.title}: ${item.fitLabel || "조건부 후보"} - ${item.fitReason || item.reason}`);
@@ -3034,8 +3076,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           : stripPipelineMeta(`${baseDeliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${outdoorHeatEducationAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${educationLegalAppendix}${educationKoshaAppendix}${safetyKnowledgeEducationAppendix}${safetyReferenceAppendix}${accidentAppendix}${educationKoshaOpenApiAppendix}`),
         // 결정 8(2026-10-25): 비상대응·사진증빙은 AI 본문을 쓰지 않고 작업유형별 결정적 틀만 쓴다(H9).
         // 비상대응에는 KOSHA OpenAPI 「문서 반영 근거」 후보를 붙이지 않는다 — 작업과 무관한
-        // 공정안전보고서 고시가 굴착·폭염 비상대응 근거로 나갔다(EF-10). 교육용 중대재해 점검 문구도 뺀다.
-        emergencyResponseDraft: `${baseDeliverables.emergencyResponseDraft}${accidentAppendix}`,
+        // 공정안전보고서 고시가 굴착·폭염 비상대응 근거로 나갔다(EF-10). 중대재해 예방 관리체계 점검은 비상대응 전용 줄(EF-09, #107)만 붙인다.
+        emergencyResponseDraft: `${baseDeliverables.emergencyResponseDraft}${emergencySeriousAccidentAppendix}${accidentAppendix}`,
         photoEvidenceDraft: ensurePhotoEvidenceDraft(baseDeliverables.photoEvidenceDraft, photoEvidenceAppendix),
         foreignWorkerBriefing: foreignWorkerBriefingText,
         foreignWorkerTransmission: foreignWorkerTransmissionText,

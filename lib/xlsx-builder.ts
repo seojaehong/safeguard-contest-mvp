@@ -9,6 +9,7 @@ import {
 } from "@/lib/risk-assessment-renderer";
 import type { AccidentType } from "@/lib/risk-assessment-schema";
 import { formatCompanyName, formatWorkerCount } from "@/lib/scenario-display";
+import { evidenceRefsForDisplay, RISK_LEVEL_DISPLAY_LABELS, VERIFICATION_STATUS_DISPLAY_LABELS } from "@/lib/document-display-labels";
 
 type SheetRow = {
   document: string;
@@ -87,17 +88,19 @@ const ACCIDENT_TYPE_LABELS = {
   other: "기타"
 } satisfies Readonly<Record<AccidentType, string>>;
 
-const VERIFICATION_STATUS_LABELS: Readonly<Record<string, string>> = {
-  planned: "예정",
-  done: "완료",
-  needsReview: "검토 필요"
-};
+// 표시 이름은 lib/document-display-labels.ts 한 곳에서 가져온다(PR-14, 결정 15: 상·중·하).
+const VERIFICATION_STATUS_LABELS: Readonly<Record<string, string>> = VERIFICATION_STATUS_DISPLAY_LABELS;
 
-const RISK_LEVEL_LABELS: Readonly<Record<string, string>> = {
-  high: "높음",
-  medium: "보통",
-  low: "낮음"
-};
+const RISK_LEVEL_LABELS: Readonly<Record<string, string>> = RISK_LEVEL_DISPLAY_LABELS;
+
+// 조치기한·확인일 칸: 「현장 확인」 같은 안내 글자 대신 날짜 기입란을 둔다(COPY-05).
+const DATE_FIELD_BLANK = "    년    월    일";
+
+function dateCellValue(value: string | undefined, fallback: string): string {
+  const text = (value ?? "").trim();
+  if (!text) return fallback;
+  return /^(?:현장\s*확인|확인)$/u.test(text) ? DATE_FIELD_BLANK : text;
+}
 
 function localizeDisplayHeader(value: string): string {
   return DISPLAY_HEADER_LABELS[value] || value;
@@ -289,9 +292,10 @@ function writeOfficialLikeRiskAssessmentTable(
   const centerColumns = new Set([0, 6, 9, 10, 11, 15, 16]); // No./4M/L/S/RL/확인상태/확인일
 
   rows.forEach((riskRow, index) => {
-    const evidenceText = riskRow.evidenceRefsList && riskRow.evidenceRefsList.length
-      ? riskRow.evidenceRefsList.join("\n")
-      : (riskRow.evidence || riskRow.evidenceRefs?.join(", ") || "근거 확인");
+    const evidenceList = evidenceRefsForDisplay(riskRow.evidenceRefsList?.length ? riskRow.evidenceRefsList : riskRow.evidenceRefs);
+    const evidenceText = evidenceList.length
+      ? evidenceList.join("\n")
+      : (riskRow.evidence || "근거 확인");
     const values = [
       riskRow.id || String(index + 1),
       riskRow.location || "현장 확인",
@@ -307,9 +311,9 @@ function writeOfficialLikeRiskAssessmentTable(
       localizeRiskLevel(riskRow.riskLevel || "확인"),
       riskRow.additionalControls,
       riskRow.owner || "작업반장",
-      riskRow.dueDate || riskRow.due || "작업 전",
+      dateCellValue(riskRow.dueDate || riskRow.due, "작업 전"),
       localizeVerificationStatus(riskRow.verificationStatus || riskRow.status || "planned"),
-      riskRow.verificationDate || "현장 확인",
+      dateCellValue(riskRow.verificationDate, DATE_FIELD_BLANK),
       riskRow.verificationChecker || "관리감독자",
       evidenceText
     ];

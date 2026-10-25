@@ -15,9 +15,9 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-static";
 
 const AGENT_CARD = {
-  name: "SafeClaw — AI 안전관리자",
+  name: "SafeClaw — 안전 문서 작성 보조 에이전트",
   description:
-    "산업안전보건법·중대재해처벌법 문서·증빙·기상·법령 검증을 수행하는 AI 안전관리자 에이전트. " +
+    "산업안전보건법·중대재해처벌법 문서·증빙·기상·법령 검증을 수행하는 안전 문서 작성 보조 에이전트. " +
     "현재는 MCP 도구 계층(Streamable HTTP, /api/mcp/mcp)을 공개하고 있으며, A2A task 엔드포인트는 " +
     "로드맵 단계로 아직 제공하지 않는다.",
   url: "https://www.safeclaw.kr",
