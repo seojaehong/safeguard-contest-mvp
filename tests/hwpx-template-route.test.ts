@@ -61,4 +61,19 @@ describe("HWPX template export route", () => {
     expect(consoleError).toHaveBeenCalledWith("HWPX template export failed", error);
     consoleError.mockRestore();
   });
+
+  // PR-15(EXP-03): 회사명이 없으면 파일명에 고정 상호(「SafeClaw」)를 붙이지 않고 제목만 쓴다.
+  it("uses the template title alone as the file name when companyName is empty", async () => {
+    mocks.buildHwpxFromTemplate.mockImplementationOnce(() => Buffer.from("hwpx"));
+
+    const response = await GET(new NextRequest(
+      "http://localhost/api/export/hwpx-template?kind=risk-assessment",
+      { headers: { "x-forwarded-for": "198.51.100.91" } }
+    ));
+
+    expect(response.status).toBe(200);
+    const disposition = response.headers.get("content-disposition") ?? "";
+    expect(disposition).toContain(`filename*=UTF-8''${encodeURIComponent("위험성평가표.hwpx")}`);
+    expect(decodeURIComponent(disposition)).not.toContain("SafeClaw-");
+  });
 });
