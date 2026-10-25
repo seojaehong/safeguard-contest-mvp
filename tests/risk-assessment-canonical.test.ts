@@ -136,6 +136,70 @@ describe("정본 단일화(운영 응답 4건)", () => {
   }
 });
 
+// PR109-B1 — 작업계획서·허가서·TBM 일지 구조화본의 위험성평가 행 번호는 정본화 전 행 순서로 매겨진다.
+// 정본화가 「검토 필요:」 행을 빼면 그 번호도 정본 행 순서로 다시 매겨야 「위험성평가#N」이 같은 위험요인을 가리킨다.
+function withLinkedDocuments(source: AskResponse): AskResponse {
+  const rows = source.structured?.riskAssessmentRows || [];
+  const all = rows.map((_row, index) => index);
+  return {
+    ...source,
+    deliverables: {
+      ...source.deliverables,
+      workPlanStructured: {
+        workSteps: all.map((index) => ({ stepNo: index + 1, action: `단계 ${index + 1}`, equipment: "", safetyMeasure: "", owner: "", relatedRiskRowIndex: [index, (index + 1) % rows.length] }))
+      } as unknown as NonNullable<AskResponse["deliverables"]["workPlanStructured"]>,
+      permitInspectionStructured: {
+        conditions: all.map((index) => ({ category: "작업구역", requirement: `조건 ${index + 1}`, action: "", owner: "", status: "확인 전", relatedRiskRowIndex: index }))
+      } as unknown as NonNullable<AskResponse["deliverables"]["permitInspectionStructured"]>,
+      tbmLogStructured: {
+        hazardsDiscussed: all.map((index) => ({ category: "Management", description: `위험 ${index + 1}`, relatedRiskRowIndex: index }))
+      } as unknown as NonNullable<AskResponse["deliverables"]["tbmLogStructured"]>
+    }
+  };
+}
+
+describe("작업계획서·허가서·TBM 일지의 위험성평가 행 번호가 정본 행을 가리킨다(PR109-B1)", () => {
+  for (const id of SCENARIOS) {
+    it(`${id}: 정본화 뒤에도 같은 위험요인을 가리키고, 빠진 행을 가리키던 번호는 버린다`, () => {
+      const source = withLinkedDocuments(opsResponse(id));
+      const rows = source.structured?.riskAssessmentRows || [];
+      const canonical = canonicalizeRiskAssessmentResponse(source);
+      const main = canonical.structured?.riskAssessmentRows || [];
+      const hazardOf = (index: number) => rows[index].hazard;
+      const kept = (index: number) => !isRiskReviewPlaceholderRow(rows[index]);
+
+      const steps = canonical.deliverables.workPlanStructured?.workSteps || [];
+      const sourceSteps = source.deliverables.workPlanStructured?.workSteps || [];
+      expect(steps).toHaveLength(sourceSteps.length);
+      steps.forEach((step, index) => {
+        const expected = (sourceSteps[index].relatedRiskRowIndex || []).filter(kept).map(hazardOf);
+        expect((step.relatedRiskRowIndex || []).map((ref) => main[ref]?.hazard), `작업계획서 단계 ${index + 1}`).toEqual(expected);
+      });
+
+      const conditions = canonical.deliverables.permitInspectionStructured?.conditions || [];
+      conditions.forEach((condition, index) => {
+        const before = rows[index];
+        if (isRiskReviewPlaceholderRow(before)) expect(condition.relatedRiskRowIndex, `허가서 조건 ${index + 1}`).toBeUndefined();
+        else expect(main[condition.relatedRiskRowIndex as number]?.hazard, `허가서 조건 ${index + 1}`).toBe(before.hazard);
+      });
+
+      const hazards = canonical.deliverables.tbmLogStructured?.hazardsDiscussed || [];
+      hazards.forEach((hazard, index) => {
+        const before = rows[index];
+        if (isRiskReviewPlaceholderRow(before)) expect(hazard.relatedRiskRowIndex, `TBM 일지 ${index + 1}`).toBeUndefined();
+        else expect(main[hazard.relatedRiskRowIndex as number]?.hazard, `TBM 일지 ${index + 1}`).toBe(before.hazard);
+      });
+    });
+  }
+
+  it("logistics-heat: 0번 「검토 필요:」 행 뒤 번호가 한 칸씩 당겨진다", () => {
+    const canonical = canonicalizeRiskAssessmentResponse(withLinkedDocuments(opsResponse("logistics-heat")));
+    expect(isRiskReviewPlaceholderRow(ops["logistics-heat"].structured.riskAssessmentRows[0])).toBe(true);
+    expect(canonical.deliverables.permitInspectionStructured?.conditions.map((condition) => condition.relatedRiskRowIndex)).toEqual([undefined, 0, 1, 2, 3]);
+    expect(canonical.deliverables.workPlanStructured?.workSteps[0].relatedRiskRowIndex).toEqual([0]);
+  });
+});
+
 describe("xlsx·pdf·hwp·인쇄가 같은 정본 행을 그린다", () => {
   for (const id of SCENARIOS) {
     it(`${id}: 위험요인 집합·등급이 형식마다 같고 제37조의4 칸이 있다`, async () => {

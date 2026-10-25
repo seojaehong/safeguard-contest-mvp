@@ -202,21 +202,79 @@ export function buildRiskAssessmentRecordHtml(args: {
   ].join("");
 }
 
-function remapTbmRiskLinks(
-  links: readonly TbmRiskLink[] | undefined,
-  rows: readonly RiskAssessmentRow[],
-  main: readonly RiskAssessmentRow[]
-): TbmRiskLink[] | undefined {
-  if (!links) return undefined;
+/** 정본화 전 행 번호 → 본표 행 번호. 본표에서 빠진 행은 대응표에 없다. */
+function buildRiskRowIndexMap(rows: readonly RiskAssessmentRow[], main: readonly RiskAssessmentRow[]): Map<number, number> {
   const nextIndex = new Map<number, number>();
   rows.forEach((row, index) => {
     const mainIndex = main.indexOf(row);
     if (mainIndex >= 0) nextIndex.set(index, mainIndex);
   });
+  return nextIndex;
+}
+
+function remapTbmRiskLinks(links: readonly TbmRiskLink[] | undefined, nextIndex: Map<number, number>): TbmRiskLink[] | undefined {
+  if (!links) return undefined;
   return links.flatMap((link) => {
     const mapped = nextIndex.get(link.riskRowIndex);
     return mapped === undefined ? [] : [{ ...link, riskRowIndex: mapped }];
   });
+}
+
+/** 번호 하나를 본표 번호로 바꾼다. 빠진 행을 가리키면 칸을 지운다(「연결 위험 확인」으로 나간다). */
+function remapSingleRiskRef<T extends { relatedRiskRowIndex?: number }>(item: T, nextIndex: Map<number, number>): T {
+  if (typeof item.relatedRiskRowIndex !== "number") return item;
+  const mapped = nextIndex.get(item.relatedRiskRowIndex);
+  if (mapped === item.relatedRiskRowIndex) return item;
+  if (mapped !== undefined) return { ...item, relatedRiskRowIndex: mapped };
+  const rest = { ...item };
+  delete rest.relatedRiskRowIndex;
+  return rest;
+}
+
+/**
+ * 작업계획서·허가서·TBM 일지 구조화본의 위험성평가 행 번호는 정본화 전 행 순서로 매겨져 있다(lib/search.ts
+ * linkWorkPlanToRiskRows·linkPermitToRiskRows·buildTbmLogStructuredFromRiskRows). 본표에서 「검토 필요:」 행을
+ * 빼면 같은 대응표로 다시 매긴다(PR109-B1).
+ */
+function remapLinkedDocumentRiskRefs(
+  deliverables: AskResponse["deliverables"],
+  nextIndex: Map<number, number>
+): AskResponse["deliverables"] {
+  const { workPlanStructured, permitInspectionStructured, tbmLogStructured } = deliverables;
+  return {
+    ...deliverables,
+    ...(workPlanStructured?.workSteps
+      ? {
+          workPlanStructured: {
+            ...workPlanStructured,
+            workSteps: workPlanStructured.workSteps.map((step) => {
+              if (!Array.isArray(step.relatedRiskRowIndex)) return step;
+              const mapped = step.relatedRiskRowIndex.flatMap((ref) => {
+                const next = nextIndex.get(ref);
+                return next === undefined ? [] : [next];
+              });
+              return { ...step, relatedRiskRowIndex: [...new Set(mapped)] };
+            })
+          }
+        }
+      : {}),
+    ...(permitInspectionStructured?.conditions
+      ? {
+          permitInspectionStructured: {
+            ...permitInspectionStructured,
+            conditions: permitInspectionStructured.conditions.map((condition) => remapSingleRiskRef(condition, nextIndex))
+          }
+        }
+      : {}),
+    ...(tbmLogStructured?.hazardsDiscussed
+      ? {
+          tbmLogStructured: {
+            ...tbmLogStructured,
+            hazardsDiscussed: tbmLogStructured.hazardsDiscussed.map((hazard) => remapSingleRiskRef(hazard, nextIndex))
+          }
+        }
+      : {})
+  };
 }
 
 // DB 하네스가 초안 맨 앞에 붙이는 「오늘 개선·이력 반영」 단락(사진 분석·개선 이력)은 표가 아니므로
@@ -263,19 +321,21 @@ export function canonicalizeRiskAssessmentResponse(response: AskResponse): AskRe
   const reviewItems = [...(structured.riskReviewItems || []), ...review];
   const validation = validateRiskAssessmentRows(main);
   const summaryLevel = summarizeRiskLevel(main);
+  const nextIndex = buildRiskRowIndexMap(rows, rawMain);
+  const linkedDeliverables = remapLinkedDocumentRiskRefs(response.deliverables, nextIndex);
   return {
     ...response,
     riskSummary: summaryLevel
       ? { ...response.riskSummary, riskLevel: summaryLevel }
       : response.riskSummary,
     deliverables: main.length
-      ? { ...response.deliverables, riskAssessmentDraft: withHarnessReflection(response.deliverables.riskAssessmentDraft, serializeRiskAssessmentRowsToDraft(main)) }
-      : response.deliverables,
+      ? { ...linkedDeliverables, riskAssessmentDraft: withHarnessReflection(response.deliverables.riskAssessmentDraft, serializeRiskAssessmentRowsToDraft(main)) }
+      : linkedDeliverables,
     structured: {
       ...structured,
       riskAssessmentRows: main,
       ...(reviewItems.length ? { riskReviewItems: reviewItems } : {}),
-      ...(structured.tbmRiskLinks ? { tbmRiskLinks: remapTbmRiskLinks(structured.tbmRiskLinks, rows, rawMain) } : {}),
+      ...(structured.tbmRiskLinks ? { tbmRiskLinks: remapTbmRiskLinks(structured.tbmRiskLinks, nextIndex) } : {}),
       riskAssessmentValidation: {
         ok: main.length > 0 && validation.issues.length === 0,
         issueCount: validation.issues.length,
