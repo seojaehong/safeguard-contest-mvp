@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { gateExportPayload } from "@/lib/user-output-gate";
 import {
   buildEducationRecordStructuredXlsx,
   buildPermitInspectionStructuredXlsx,
@@ -172,7 +173,8 @@ export async function GET() {
 
 async function exportXlsx(request: NextRequest) {
   try {
-    const parsed = await readDocumentExportRequestJson(request);
+    // PR-14: 받은 본문의 내부 문구·통째 enum 칸을 사용자용으로 거른 뒤 렌더한다.
+    const parsed = gateExportPayload(await readDocumentExportRequestJson(request));
     const body = isRecord(parsed) ? parsed : {};
     assertDocumentExportInputBudget(body);
     const mode = readString(body.mode, "single");

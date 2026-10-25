@@ -3,6 +3,13 @@ import {
   type RiskAssessmentRow,
   type RiskLevel
 } from "@/lib/risk-assessment-schema";
+import {
+  accidentTypeLabel,
+  evidenceRefsForDisplay,
+  fourMLabel,
+  riskLevelLabel,
+  verificationStatusLabel
+} from "@/lib/document-display-labels";
 
 export type DocumentKey =
   | "workpackSummaryDraft"
@@ -105,25 +112,53 @@ export function serializeRiskAssessmentRowsToDraft(rows: readonly RiskAssessment
       `세부작업: ${row.task}`,
       `장비/도구: ${row.equipment}`,
       `유해·위험요인: ${row.hazard}`,
-      `4M: ${row.fourM}`,
-      `재해형태: ${row.accidentType}`,
+      `4M: ${fourMLabel(row.fourM)}`,
+      `재해형태: ${accidentTypeLabel(row.accidentType)}`,
       `현재 안전조치: ${row.currentControls}`,
       `가능성: ${row.likelihood}`,
       `중대성: ${row.severity}`,
-      `위험등급: ${row.riskLevel}`,
+      `위험등급: ${riskLevelLabel(row.riskLevel)}`,
       `추가 감소대책: ${row.additionalControls}`,
       `조치담당자: ${row.owner}`,
       `조치기한: ${row.due}`,
       `확인방법: ${row.verification}`,
-      `확인상태: ${row.verificationStatus}`,
+      `확인상태: ${verificationStatusLabel(row.verificationStatus)}`,
       `확인일: ${row.verificationDate}`,
       `확인자: ${row.verificationChecker}`,
       `가능성 판단근거: ${row.whyLikelihood}`,
       `중대성 판단근거: ${row.whySeverity}`,
-      `근거: ${row.evidenceRefs.join(" | ")}`,
+      `근거: ${evidenceRefsForDisplay(row.evidenceRefs).join(" | ")}`,
       ""
     ])
   ].join("\n").trimEnd();
+}
+
+// COPY-04: 위험성평가 본문의 머리줄·필드 라벨 줄(위험등급·4M·근거 등)은 TBM 위험요인 행이 아니다.
+const RISK_DRAFT_FIELD_LABELS: ReadonlySet<string> = new Set([
+  "관리번호", "작업장소", "공정", "세부작업", "장비/도구", "4M", "재해형태", "현재 안전조치", "가능성", "중대성",
+  "위험등급", "추가 감소대책", "조치담당자", "조치기한", "확인방법", "확인상태", "확인일", "확인자",
+  "가능성 판단근거", "중대성 판단근거", "근거"
+]);
+
+const TBM_BRIDGE_RISK_KEYWORDS = ["위험", "추락", "전도", "충돌", "끼임", "화재", "중독", "노출"];
+
+/**
+ * 인쇄·HWPX 의 「위험성평가 → TBM」 표에 실을 위험성평가 행을 고른다.
+ * 직렬화된 본문이면 「유해·위험요인」 줄만, 아니면 필드 라벨 줄·머리줄을 뺀 뒤 키워드로 고른다.
+ */
+export function selectTbmBridgeRiskRows<T extends { item: string; content: string }>(rows: readonly T[], limit = 4): T[] {
+  const hazardRows = rows.filter((row) => row.item.trim() === "유해·위험요인" && row.content.trim());
+  if (hazardRows.length) return hazardRows.slice(0, limit);
+  const candidates = rows.filter((row) => (
+    !RISK_DRAFT_FIELD_LABELS.has(row.item.trim())
+    && !/^위험성평가표/u.test(row.content.trim())
+  ));
+  const pool = candidates.length ? candidates : [...rows];
+  const matched = pool.filter((row) => {
+    const text = [row.item, row.content].filter(Boolean).join(" ");
+    return TBM_BRIDGE_RISK_KEYWORDS.some((keyword) => text.includes(keyword));
+  });
+  return (matched.length ? matched : pool).slice(0, limit);
 }
 
 export function isCanonicalRiskAssessmentExportSafe(
