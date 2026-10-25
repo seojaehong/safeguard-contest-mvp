@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { WorkspaceInviteRequiredError, workspaceInviteRequiredResponse } from "@/lib/admin-invite";
 import { createSupabaseAdminClient, ensureWorkspaceContext, getWorkspaceUser } from "@/lib/supabase-admin";
 import { documentKeysFromDeliverables } from "@/lib/evidence-file";
 import type { AskResponse } from "@/lib/types";
@@ -213,7 +214,13 @@ export async function POST(request: NextRequest) {
   const deliverables = askResponse.deliverables;
   const evidenceSummary = buildWorkpackEvidenceSummary(askResponse, verification.snapshot);
   const status = askResponse.status;
-  const context = await ensureWorkspaceContext(client, user, parseScenarioContext(scenario));
+  let context: Awaited<ReturnType<typeof ensureWorkspaceContext>>;
+  try {
+    context = await ensureWorkspaceContext(client, user, parseScenarioContext(scenario));
+  } catch (error) {
+    if (error instanceof WorkspaceInviteRequiredError) return workspaceInviteRequiredResponse({ workpackId: null });
+    throw error;
+  }
 
   const { data, error } = await client
     .from("workpacks")

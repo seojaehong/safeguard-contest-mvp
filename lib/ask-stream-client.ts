@@ -38,11 +38,15 @@ export function shouldRetryAskViaLegacy(error: unknown): boolean {
 export async function fetchAskStream(
   request: AskStreamRequest,
   onEvent: (event: AskProgressEvent) => void,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  authToken?: string | null
 ): Promise<unknown> {
+  // 로그인 토큰이 있어야 AI 보강(enhanced/full)이 허용된다(익명은 template, 결정 21).
+  const headers: Record<string, string> = { "content-type": "application/json" };
+  if (authToken) headers.authorization = `Bearer ${authToken}`;
   const response = await fetch("/api/ask/stream", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers,
     body: JSON.stringify(request),
     signal
   });

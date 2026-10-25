@@ -25,6 +25,7 @@ import {
   type PublicAskWorkLease,
 } from "@/lib/public-ask-admission";
 import { resolveRunAskMode } from "@/lib/run-ask-mode";
+import { applyAskModeNoticeHeader, resolveAskModeAdmission } from "@/lib/ask-mode-admission";
 import {
   applyPublicRateLimitHeader,
   publicRateLimitResponse,
@@ -69,10 +70,11 @@ export async function POST(request: NextRequest) {
     );
   }
   const requestedMode = typeof record.aiMode === "string" ? (record.aiMode as AiMode) : undefined;
-  const aiMode = resolveRunAskMode({
+  const modeAdmission = await resolveAskModeAdmission(request, resolveRunAskMode({
     requestedMode: requestedMode && ALLOWED_MODES.includes(requestedMode) ? requestedMode : undefined,
     envDefault: process.env.AI_MODE_DEFAULT,
-  });
+  }));
+  const aiMode = modeAdmission.aiMode;
   let effectiveRateLimit = rateLimit;
   if (publicAskUsesProvider(aiMode)) {
     const providerRateLimit = await checkPublicAskProviderAdmission(request, aiMode);
@@ -117,7 +119,8 @@ export async function POST(request: NextRequest) {
           onProgress: emit,
           signal: workController.signal,
         });
-        const sealed = attachGenerationEvidence(payload, {
+        const noticed = modeAdmission.notice ? { ...payload, aiModeNotice: modeAdmission.notice } : payload;
+        const sealed = attachGenerationEvidence(noticed, {
           secret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
           generatedAt: new Date().toISOString()
         });
@@ -145,11 +148,11 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  return applyPublicAskWorkHeaders(applyPublicRateLimitHeader(new Response(stream, {
+  return applyAskModeNoticeHeader(applyPublicAskWorkHeaders(applyPublicRateLimitHeader(new Response(stream, {
     headers: {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive"
     }
-  }), effectiveRateLimit), aiMode, workLease.weight);
+  }), effectiveRateLimit), aiMode, workLease.weight), modeAdmission.notice);
 }
