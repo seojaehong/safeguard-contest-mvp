@@ -63,7 +63,7 @@ export const modulePrimaryNav = [
     label: "이력",
     hint: "증빙 · 파일",
     command: { href: "/workspace", label: "새 작업 시작" },
-    children: [{ href: "/evidence-file", label: "책임자 방어 파일" }]
+    children: [{ href: "/evidence-file", label: "시행령 제4조 문서 모아보기" }]
   },
   {
     href: "/settings",

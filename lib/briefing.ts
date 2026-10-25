@@ -172,7 +172,7 @@ function documentPackLink(workpackId?: string | null): string {
 
 /**
  * runAsk() 결과와 사이트명으로 아침 브리핑 이메일 제목/본문을 만든다.
- * workpackId를 주면(저장 성공 시) 문서팩 재열람 링크를, 없으면 방어 파일(evidence-file)
+ * workpackId를 주면(저장 성공 시) 문서팩 재열람 링크를, 없으면 시행령 제4조 문서 모아보기(evidence-file)
  * 링크를 안내한다.
  */
 export function buildBriefingEmail(response: AskResponse, siteName: string, workpackId?: string | null): BriefingEmail {

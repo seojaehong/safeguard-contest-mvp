@@ -194,9 +194,9 @@ export default function EvidenceFilePage() {
 
   return (
     <SafeClawModuleShell
-      eyebrow="경영책임자 방어 파일"
+      eyebrow="시행령 제4조 문서 모아보기"
       title="중대재해처벌법 시행령 제4조 증빙 현황."
-      description="수사·감독 대응 시 경영책임자가 바로 내밀 수 있도록, 생성된 문서팩을 시행령 제4조 항목별 증빙으로 자동 정리합니다."
+      description="생성된 문서팩을 중대재해처벌법 시행령 제4조 각 호에 맞춰 모아 보여 줍니다. 각 호 이행 여부는 사업장이 직접 확인해야 합니다."
       status={state.status === "ready" ? "live" : "partial"}
       mappedTo="시행령 제4조 1~9호 · 문서팩 생성 이력"
       activeHref="/evidence-file"
@@ -264,7 +264,7 @@ export default function EvidenceFilePage() {
       </section>
 
       <p className="muted small">
-        이 파일철은 산업안전보건법·중대재해처벌법 대응 참고자료이며 법률 자문을 대체하지 않습니다.
+        이 화면은 산업안전보건법·중대재해처벌법 이행을 정리하는 참고자료입니다. 개별 사안은 전문가 검토가 필요합니다.
       </p>
     </SafeClawModuleShell>
   );
