@@ -318,7 +318,7 @@ type ShellMetrics = Awaited<ReturnType<typeof readShellMetrics>>;
 
 function expectThemeMetrics(metrics: ShellMetrics, route: string, theme: "day" | "night") {
   const expected = theme === "day"
-    ? { canvas: "rgb(250, 250, 251)", rail: "rgb(255, 255, 255)", surface2: "#f4f5f7", accent: "rgb(81, 72, 216)" }
+    ? { canvas: "rgb(238, 240, 242)", rail: "rgb(255, 255, 255)", surface2: "#eef0f2", accent: "rgb(81, 72, 216)" }
     : { canvas: "rgb(1, 1, 2)", rail: "rgb(15, 16, 17)", surface2: "#141516", accent: "rgb(139, 141, 252)" };
 
   expect.soft(metrics.h1Count, `${route} ${theme} should have one h1`).toBe(1);
@@ -501,7 +501,7 @@ function expectScreenshotPixelAudit(
   label: string
 ): void {
   const expected = theme === "day"
-    ? { rail: { red: 255, green: 255, blue: 255 }, nav: { red: 255, green: 255, blue: 255 }, main: { red: 250, green: 250, blue: 251 } }
+    ? { rail: { red: 255, green: 255, blue: 255 }, nav: { red: 255, green: 255, blue: 255 }, main: { red: 238, green: 240, blue: 242 } }
     : { rail: { red: 15, green: 16, blue: 17 }, nav: { red: 15, green: 16, blue: 17 }, main: { red: 1, green: 1, blue: 2 } };
   const channelDelta = (pixel: ScreenshotPixel, target: ScreenshotPixel) => Math.max(
     Math.abs(pixel.red - target.red),
