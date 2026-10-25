@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { WorkspaceInviteRequiredError, workspaceInviteRequiredResponse } from "@/lib/admin-invite";
 import { createSupabaseAdminClient, ensureWorkspaceContext, getWorkspaceUser } from "@/lib/supabase-admin";
 import { isRecord, parseScenarioContext, parseWorkerProfiles } from "@/lib/workspace-api";
 import {
@@ -19,11 +20,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ ok: false, configured: true, workers: [], message: "관리자 로그인이 필요합니다." }, { status: 401 });
   }
 
-  const context = await ensureWorkspaceContext(client, user, {
-    companyName: request.nextUrl.searchParams.get("companyName") || undefined,
-    siteName: request.nextUrl.searchParams.get("siteName") || undefined,
-    companyType: request.nextUrl.searchParams.get("companyType") || undefined
-  });
+  let context: Awaited<ReturnType<typeof ensureWorkspaceContext>>;
+  try {
+    context = await ensureWorkspaceContext(client, user, {
+      companyName: request.nextUrl.searchParams.get("companyName") || undefined,
+      siteName: request.nextUrl.searchParams.get("siteName") || undefined,
+      companyType: request.nextUrl.searchParams.get("companyType") || undefined
+    });
+  } catch (error) {
+    if (error instanceof WorkspaceInviteRequiredError) return workspaceInviteRequiredResponse({ workers: [] });
+    throw error;
+  }
 
   const { data, error } = await client
     .from("workers")
@@ -60,7 +67,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, configured: true, workerMap: {}, message: "저장할 근로자 정보가 없습니다." }, { status: 400 });
   }
 
-  const context = await ensureWorkspaceContext(client, user, parseScenarioContext(body.scenario));
+  let context: Awaited<ReturnType<typeof ensureWorkspaceContext>>;
+  try {
+    context = await ensureWorkspaceContext(client, user, parseScenarioContext(body.scenario));
+  } catch (error) {
+    if (error instanceof WorkspaceInviteRequiredError) return workspaceInviteRequiredResponse({ workerMap: {} });
+    throw error;
+  }
   const rows = workers.map((worker) => ({
     organization_id: context.organizationId,
     site_id: context.siteId,

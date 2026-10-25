@@ -11,6 +11,8 @@ import {
   WORKFLOW_DISPATCH_REQUEST_MAX_BYTES
 } from "@/lib/public-work-budget";
 import { buildReadConfirmationId } from "@/lib/read-confirmation-idempotency";
+// PR-19: 열람 확인 기록에는 연락처(phone·email)를 남기지 않는다.
+import { stripWorkerSnapshotContacts } from "@/lib/workpack-commercial";
 import {
   buildCanonicalRecipientMessageVariants,
   buildLocalizedDispatchRecipients,
@@ -825,7 +827,7 @@ describe("share session route authority", () => {
       worker_id: WORKER_ID,
       worker_display_name: "Server Nguyen",
       language_code: "vi",
-      worker_snapshot: serverRecipient.workerSnapshot
+      worker_snapshot: stripWorkerSnapshotContacts(serverRecipient.workerSnapshot)
     });
   });
 
@@ -846,7 +848,7 @@ describe("share session route authority", () => {
       worker_id: WORKER_ID,
       worker_display_name: "Server Nguyen",
       language_code: "vi",
-      worker_snapshot: serverRecipient.workerSnapshot
+      worker_snapshot: stripWorkerSnapshotContacts(serverRecipient.workerSnapshot)
     });
   });
 
@@ -999,7 +1001,7 @@ describe("share session route authority", () => {
       worker_id: WORKER_ID,
       worker_display_name: "Server Nguyen",
       language_code: "vi",
-      worker_snapshot: expect.objectContaining(serverRecipient.workerSnapshot)
+      worker_snapshot: expect.objectContaining(stripWorkerSnapshotContacts(serverRecipient.workerSnapshot))
     })]);
 
     const managerStatusResponse = await managerShareRoute.GET(
@@ -2225,7 +2227,7 @@ describe("read confirmation route authority", () => {
       worker_id: WORKER_ID,
       worker_display_name: "Server Nguyen",
       language_code: "vi",
-      worker_snapshot: serverRecipient.workerSnapshot,
+      worker_snapshot: stripWorkerSnapshotContacts(serverRecipient.workerSnapshot),
       confirmation_method: "admin_marked"
     });
   });

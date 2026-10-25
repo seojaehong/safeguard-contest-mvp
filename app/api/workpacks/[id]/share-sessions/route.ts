@@ -6,7 +6,12 @@ import {
   type WorkspaceDatabase
 } from "@/lib/supabase-admin";
 import { isRecord } from "@/lib/workspace-api";
-import { buildShareSessionDraft, parseShareRecipientIds } from "@/lib/workpack-commercial";
+import {
+  buildShareSessionDraft,
+  countRecipientSnapshotContacts,
+  parseShareRecipientIds,
+  stripRecipientSnapshotContacts
+} from "@/lib/workpack-commercial";
 import {
   loadOwnedWorkpackOperationContext,
   loadServerShareRecipients
@@ -207,7 +212,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     ? revokeQuery.is("site_id", null)
     : revokeQuery.eq("site_id", owned.context.siteId);
   const { data, error } = await revokeQuery
-    .select("id,status,updated_at")
+    .select("id,status,updated_at,recipients_snapshot")
     .maybeSingle();
 
   if (error) {
@@ -218,12 +223,30 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: false, configured: true, revokedSessionId: null, message: "소유한 작업팩에서 공유 세션을 찾지 못했습니다." }, { status: 404 });
   }
 
+  // 중지된 링크는 다시 열리지 않으므로 스냅숏 연락처를 바로 지운다(결정 19).
+  let contactsCleared = countRecipientSnapshotContacts(data.recipients_snapshot) === 0;
+  if (!contactsCleared) {
+    const { error: scrubError } = await client
+      .from("workpack_share_sessions")
+      .update({ recipients_snapshot: toJson(stripRecipientSnapshotContacts(data.recipients_snapshot)) })
+      .eq("id", data.id)
+      .eq("organization_id", owned.context.organizationId);
+    if (scrubError) {
+      console.error("share session contact scrub failed", scrubError);
+    } else {
+      contactsCleared = true;
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     configured: true,
     revokedSessionId: data.id,
     status: data.status,
     revokedAt: data.updated_at || revokedAt,
-    message: "공유 세션을 중지했습니다. 기존 초대 링크는 더 이상 열리지 않습니다."
+    contactsCleared,
+    message: contactsCleared
+      ? "공유 세션을 중지했습니다. 기존 초대 링크는 더 이상 열리지 않고, 저장된 작업자 연락처도 지웠습니다."
+      : "공유 세션을 중지했습니다. 기존 초대 링크는 더 이상 열리지 않습니다. 연락처 정리는 다음 보유기간 정리 때 다시 시도합니다."
   });
 }

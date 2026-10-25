@@ -9,6 +9,7 @@ const PUBLIC_PATHS = [
   "/workspace",
   "/why",
   "/trust",
+  "/privacy",
   "/roadmap",
   "/ask",
   "/knowledge",

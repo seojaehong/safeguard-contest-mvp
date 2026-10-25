@@ -1395,7 +1395,7 @@ export function WorkflowSharePanel({
             ))}
           </select>
           <p className="channel-readiness-note">
-            작업자에게는 저장된 언어의 핵심 안전 안내를 보냅니다. 관리자 화면의 라벨은 한국어로 표시됩니다.
+            작업자 전송본은 저장된 언어의 핵심 안전 안내로 만듭니다(미리보기 전용, 실발송 없음). 관리자 화면의 라벨은 한국어로 표시됩니다.
           </p>
         </section>
 

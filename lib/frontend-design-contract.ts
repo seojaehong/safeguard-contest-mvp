@@ -200,6 +200,9 @@ export const userVisibleRoutes = [
  * 이 도구의 계산·가드레일 검증은 `npm run leave:test` 가 맡는다.
  */
 export const standaloneToolRoutes = [
+  // 개인정보 처리방침(2026-10-25 PR-19). SafeClawModuleShell 을 쓰지만 브라우저 증빙(111행)을
+  // 다시 찍기 전까지 명시적 예외로 둔다. 다음 브라우저 감사 갱신 때 userVisibleRoutes(landing)로 옮긴다.
+  "/privacy",
   "/tools/leave",
   "/tools/leave/advanced",
   "/tools/leave/settlement",
