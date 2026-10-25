@@ -1,12 +1,12 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-25T14:35:53.872Z",
-  "sourceSha": "e85545afe22cbc32f24fdcd1bff0fd953285685c",
-  "sourceIdentity": "cd6cf21626156bbb07b6fefcb764c03abf524ed3e4fb8e47d50c62f14b7465c6",
+  "generatedAt": "2026-10-25T15:21:31.765Z",
+  "sourceSha": "d3b5e9bdaf3a649b0930d4bf9377966eb59d0e85",
+  "sourceIdentity": "f53ffcef963f5d42fe41f6156f1f39111d2f1de27fd3bcfcaec1ee281c3acb7a",
   "status": "pass",
   "counts": {
-    "pageFiles": 37,
-    "componentFiles": 32,
+    "pageFiles": 38,
+    "componentFiles": 33,
     "cssLines": 24940,
     "importantDeclarations": 0
   },
@@ -85,7 +85,8 @@
       "/privacy",
       "/tools/leave",
       "/tools/leave/advanced",
-      "/tools/leave/settlement"
+      "/tools/leave/settlement",
+      "/tools/video-check"
     ],
     "missingRoutes": [],
     "unexpectedRoutes": []
