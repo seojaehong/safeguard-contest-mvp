@@ -94,13 +94,25 @@ export function applyOntologyQaRemediation(
   reviewTask: string,
   result: QaReviewFound
 ): AskResponse {
+  // 옥외 주행 크레인 조문(제140조)은 그 설비가 입력에 없으면 문서팩 어느 문서에도 싣지 않는다(WP-09).
+  // 계획서만 거르면 TBM·교육·비상대응이 근로자에게 다른 조치를 전한다.
+  const hasTravelingCrane = TRAVELING_CRANE_PATTERN.test(response.question);
+  const isTravelingCraneArticle = (article: string) => /제140조(?!의)/.test(article);
+  const controls = hasTravelingCrane
+    ? result.missing.controls
+    : result.missing.controls.filter((control) => !control.articles.some(isTravelingCraneArticle));
+  const articles = (hasTravelingCrane
+    ? result.missing.articles
+    : result.missing.articles.filter((article) => !isTravelingCraneArticle(article))
+  ).slice(0, 6);
+
   const missingHazardLines = result.missing.hazards.map((hazard) =>
     `누락 위험요인 확인: ${hazard}`
   );
-  const missingControlLines = result.missing.controls.map((control) =>
+  const missingControlLines = controls.map((control) =>
     `필수 안전조치 반영: ${controlLine(control)}`
   );
-  const missingArticleLines = result.missing.articles.slice(0, 6).map((article) =>
+  const missingArticleLines = articles.map((article) =>
     `관련 조문 확인: ${article}`
   );
   const commonLines = [
@@ -117,17 +129,12 @@ export function applyOntologyQaRemediation(
     "위험성평가 담당자는 현장 여건에 맞는 확인시각·측정값과 잔여 위험을 평가 기록에 남깁니다."
   ];
   // 작업계획서는 「반영」이라고 표시하지 않는다. 계획서 칸에 들어간 것이 아니므로 담당·확인 시각 칸을 붙인
-  // 「추가 확인 필요」 줄로 둔다(WP-10). 옥외 주행 크레인 조문(제140조)은 그 설비가 입력에 없으면 싣지 않는다(WP-09).
-  const planControls = result.missing.controls.filter((control) => (
-    !control.articles.some((article) => /제140조(?!의)/.test(article)) || TRAVELING_CRANE_PATTERN.test(response.question)
-  ));
+  // 「추가 확인 필요」 줄로 둔다(WP-10).
   const planLines = [
     `추가 확인 대상 작업: ${reviewTask}`,
     ...result.missing.hazards.map((hazard) => `추가 확인 필요: ${hazard} 위험 / 담당: (현장 기재) / 확인 시각: (현장 기재)`),
-    ...planControls.map((control) => `추가 확인 필요: ${controlLine(control)} / 담당: (현장 기재) / 확인 시각: (현장 기재)`),
-    ...result.missing.articles.slice(0, 6)
-      .filter((article) => !/제140조(?!의)/.test(article) || TRAVELING_CRANE_PATTERN.test(response.question))
-      .map((article) => `관련 조문 확인: ${article} / 담당: (현장 기재)`)
+    ...controls.map((control) => `추가 확인 필요: ${controlLine(control)} / 담당: (현장 기재) / 확인 시각: (현장 기재)`),
+    ...articles.map((article) => `관련 조문 확인: ${article} / 담당: (현장 기재)`)
   ];
   const educationLines = [
     ...commonLines,
@@ -140,12 +147,12 @@ export function applyOntologyQaRemediation(
 
   const tbmLines = [
     `검수 보완 전달: ${reviewTask}`,
-    ...result.missing.controls.map((control) => `작업 전 확인: ${controlLine(control)}`),
+    ...controls.map((control) => `작업 전 확인: ${controlLine(control)}`),
     ...result.missing.hazards.map((hazard) => `작업자 질문: ${hazard} 위험을 확인했습니까?`)
   ];
   const logLines = [
     `검수 보완 확인: ${reviewTask}`,
-    ...result.missing.controls.map((control) => `확인 항목: ${controlLine(control)} / 담당자 확인 필요`)
+    ...controls.map((control) => `확인 항목: ${controlLine(control)} / 담당자 확인 필요`)
   ];
 
   return {

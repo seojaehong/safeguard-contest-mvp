@@ -426,3 +426,74 @@ describe("작업계획서 보완 부록 라벨 (WP-09·WP-10)", () => {
     expect(plan).not.toContain("제140조");
   });
 });
+
+describe("크레인 조문·장비 분류 문서 간 정합 (WP-09·별표6)", () => {
+  const craneQa = (articles: string[] = []) => ({
+    reviewable: true,
+    task: "굴착작업",
+    registeredTasks: [],
+    missing: {
+      hazards: [],
+      controls: [
+        { control: "순간풍속 30m/s 초과 시 이탈방지장치 작동", articles: ["기준규칙 제140조"] },
+        { control: "흙막이 지보공 설치", articles: ["기준규칙 제347조"] }
+      ],
+      articles
+    }
+  } as unknown as Parameters<typeof applyOntologyQaRemediation>[2]);
+  const DOC_KEYS = [
+    "riskAssessmentDraft",
+    "workPlanDraft",
+    "tbmBriefing",
+    "tbmLogDraft",
+    "safetyEducationRecordDraft",
+    "emergencyResponseDraft"
+  ] as const;
+
+  it("주행 크레인이 입력에 없으면 문서팩 6종 어디에도 제140조·이탈방지장치 줄이 없고, 다른 보완 조치는 남는다", () => {
+    const remediated = applyOntologyQaRemediation(
+      respond(SCENARIOS.excavation),
+      "굴착작업",
+      craneQa(["기준규칙 제140조", "기준규칙 제347조"])
+    );
+    for (const key of DOC_KEYS) {
+      const text = remediated.deliverables[key] ?? "";
+      expect(text, key).not.toContain("제140조");
+      expect(text, key).not.toContain("이탈방지장치");
+      expect(text, key).toContain("흙막이 지보공 설치");
+    }
+  });
+
+  it("옥외 주행 크레인이 입력에 있으면 제140조 보완 줄이 문서팩 6종에 모두 실린다(양쪽 분기)", () => {
+    const response = respond(SCENARIOS.excavation);
+    const withCrane = { ...response, question: `${response.question} 옥외 주행 크레인 1대 사용.` };
+    const remediated = applyOntologyQaRemediation(withCrane, "굴착작업", craneQa(["기준규칙 제140조"]));
+    for (const key of DOC_KEYS) {
+      expect(remediated.deliverables[key] ?? "", key).toContain("제140조");
+    }
+  });
+
+  it("별표4 제3호 가 칸에는 별표6 차량계 건설기계만 싣고, 이동식 크레인은 제6호 나(인원·장비)에만 둔다", () => {
+    const form = buildWorkPlanLegalForm({ taskId: "excavation", question: SCENARIOS.excavation, workerCount: 8 });
+    const item3 = form.sections.find((section) => section.annexItem === 3);
+    const crewEntry = form.sections
+      .filter((section) => section.annexItem === 6)
+      .flatMap((section) => section.items)
+      .find((item) => item.label.startsWith("나. 필요한 인원 및 장비"))?.entry ?? "";
+    const kind = item3?.items.find((item) => item.label.startsWith("가. 사용하는 차량계 건설기계"))?.entry ?? "";
+    expect(kind).toContain("굴착기 1대");
+    expect(kind).not.toContain("크레인");
+    expect(crewEntry).toContain("굴착기 1대");
+    expect(crewEntry).toContain("이동식 크레인 1대");
+  });
+
+  it("차량계 건설기계 없이 크레인·지게차만 있으면 제3호 가 칸에 장비를 적지 않는다(양쪽 분기)", () => {
+    const form = buildWorkPlanLegalForm({
+      taskId: "excavation",
+      question: "굴착 깊이 2.5m, 백호 작업. 이동식 크레인 1대와 지게차 2대 사용."
+    });
+    const item3 = form.sections.find((section) => section.annexItem === 3);
+    const kind = item3?.items.find((item) => item.label.startsWith("가. 사용하는 차량계 건설기계"))?.entry ?? "";
+    expect(kind).not.toMatch(/크레인|지게차/);
+  });
+});

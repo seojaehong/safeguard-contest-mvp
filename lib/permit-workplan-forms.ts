@@ -292,8 +292,11 @@ export function parseExcavationDepth(question: string): number | null {
   return match ? Number(match[1]) : null;
 }
 
-function equipmentSummary(question: string): string {
-  const found = Array.from(question.matchAll(EQUIPMENT_COUNT)).map((match) => `${match[2].replace(/\s+/g, " ")} ${match[3]}대`);
+function equipmentSummary(question: string, onlyVehicleConstruction = false): string {
+  const found = Array.from(question.matchAll(EQUIPMENT_COUNT))
+    // 제3호 가 칸은 별표6 차량계 건설기계만 적는다. 크레인(양중기)·지게차(차량계 하역운반기계)는 제6호 나 칸에만 둔다.
+    .filter((match) => !onlyVehicleConstruction || VEHICLE_CONSTRUCTION_MACHINE.test(match[2]))
+    .map((match) => `${match[2].replace(/\s+/g, " ")} ${match[3]}대`);
   return found.join("·");
 }
 
@@ -322,6 +325,7 @@ export function buildWorkPlanLegalForm(input: WorkPlanFormInput): WorkPlanLegalF
   const sections: WorkPlanStatutorySection[] = [];
   const directorItems: number[] = [];
   const equipment = equipmentSummary(question);
+  const vehicleConstructionEquipment = equipmentSummary(question, true);
   const crew = input.workerCount ? `작업자 ${input.workerCount}명` : "";
   const crewAndEquipment = [crew, equipment].filter(Boolean).join(", ");
 
@@ -369,7 +373,7 @@ export function buildWorkPlanLegalForm(input: WorkPlanFormInput): WorkPlanLegalF
       part: "작업계획",
       items: [
         { label: "사전조사: 굴러 떨어짐·지반 붕괴 방지를 위한 작업장소의 지형 및 지반상태", entry: FIELD_ENTRY },
-        { label: "가. 사용하는 차량계 건설기계의 종류 및 성능", entry: equipment ? `${equipment}(입력) / 성능 ${FIELD_ENTRY}` : FIELD_ENTRY },
+        { label: "가. 사용하는 차량계 건설기계의 종류 및 성능", entry: vehicleConstructionEquipment ? `${vehicleConstructionEquipment}(입력) / 성능 ${FIELD_ENTRY}` : FIELD_ENTRY },
         { label: "나. 차량계 건설기계의 운행경로", entry: FIELD_ENTRY },
         { label: "다. 차량계 건설기계에 의한 작업방법", entry: FIELD_ENTRY }
       ]
