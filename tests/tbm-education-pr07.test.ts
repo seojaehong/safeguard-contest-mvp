@@ -7,7 +7,7 @@ import { buildWeatherActions } from "@/lib/weather";
 import { isTbmTextForTask, ensureConfinedSpaceAirStandard } from "@/lib/tbm-consistency";
 import { buildEducationCourseTable } from "@/lib/education-course-table";
 import { resolveEducationEvidenceLabel, formatEvidenceBadge } from "@/lib/smsa-mapping";
-import { scoreCourseFit } from "@/lib/work24";
+import { scoreCourseFit, WORK24_EXCLUDED_RANK } from "@/lib/work24";
 import { buildEducationRecordStructuredXlsx, buildTbmLogStructuredXlsx, buildXlsxForDocument } from "@/lib/xlsx-builder";
 import { applyOntologyQaRemediation } from "@/lib/workpack-ontology-qa";
 import { POST as pdfPost } from "@/app/api/export/pdf/route";
@@ -353,8 +353,18 @@ describe("PR-08 교육기록", () => {
 
   it("EDU-08: 선원·수산 과정과 경영책임자 과정은 근로자 교육 적합으로 보지 않는다(양쪽)", () => {
     const base = { url: "https://example.invalid", institution: "기관", startDate: "2026-11-01", endDate: "2026-11-02" };
-    const seafarer = scoreCourseFit(Q.press, { ...base, title: "외국인근로자 취업교육(일성_첫번째반)", target: "수산업협동조합중앙회 선원지원부" } as never);
+    // 고용24 실제 모양: 선원지원부는 기관(subTitle → institution) 칸에 오고 대상 칸은 비어 있다.
+    const seafarer = scoreCourseFit(Q.press, { ...base, title: "외국인근로자 취업교육(일성_첫번째반)", institution: "수산업협동조합중앙회 선원지원부", target: "" } as never);
     expect(seafarer.fitLabel).not.toMatch(/적합/);
+    expect(seafarer.rank).toBe(WORK24_EXCLUDED_RANK);
+    const seafarerInTarget = scoreCourseFit(Q.press, { ...base, title: "외국인근로자 취업교육(일성_첫번째반)", target: "수산업협동조합중앙회 선원지원부" } as never);
+    expect(seafarerInTarget.rank).toBe(WORK24_EXCLUDED_RANK);
+    // 반대쪽: 같은 외국인 취업교육이라도 기관이 선원·수산과 무관하면 프레스 외국인 질문에 대상 적합으로 남는다.
+    const foreignGeneral = scoreCourseFit(Q.press, { ...base, title: "외국인근로자 취업교육(제조업_첫번째반)", institution: "한국산업인력공단", target: "" } as never);
+    expect(foreignGeneral.fitLabel).toBe("대상 적합");
+    // 기관명의 「안전」이 과정 주제로 섞여 안전 과정으로 올라가지 않는다.
+    const nonSafetyAtSafetyInstitution = scoreCourseFit(Q.confined, { ...base, title: "엑셀 실무 기초", institution: "한국산업안전보건공단 교육원", target: "" } as never);
+    expect(nonSafetyAtSafetyInstitution.rank).toBeGreaterThan(30);
     const ceo = scoreCourseFit(Q.confined, { ...base, title: "위험성평가 교육(사업주(경영책임자))", target: "사업주(경영책임자)" } as never);
     expect(ceo.fitLabel).not.toMatch(/적합/);
     const msds = scoreCourseFit(Q.confined, { ...base, title: "[인재키움]물질안전보건자료 검증 실무(GHS-MSDS)_서울_대면" } as never);

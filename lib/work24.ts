@@ -94,7 +94,10 @@ export function scoreCourseFit(question: string, course: Work24Course): Work24Co
   const isForeignCourse = text.includes("외국인");
 
   // 업종(선원·수산)이나 대상(경영책임자·사업주)이 다른 과정은 근로자 후속 교육 후보에서 뺀다(EDU-08).
-  if (isMismatchedWorkerCourse(question, text)) {
+  // 고용24는 선원지원부 같은 운영 부서를 기관(subTitle) 칸에 담으므로 업종·대상 판정에는 기관명도 본다.
+  // 안전·외국인 주제 판정에는 넣지 않는다(기관명의 「안전」이 과정 주제로 섞이지 않게).
+  const institution = (course.institution || "").toLowerCase();
+  if (isMismatchedWorkerCourse(question, `${text} ${institution}`)) {
     return {
       ...course,
       fitLabel: "조건부 후보",
