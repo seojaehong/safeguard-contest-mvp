@@ -107,17 +107,49 @@ export function buildMsdNote(items: readonly number[]): string {
   return `근골격계부담작업 ${MSD_POSSIBILITY_PHRASE} — 「${MSD_NOTICE_TITLE}」 ${clauses}. 짧은 영상으로는 하루 작업시간·반복 횟수·물체 무게를 확인할 수 없습니다.`;
 }
 
+/** 붙여 쓴 표기와 띄어 쓴 표기(「근골격계 부담작업」·「근골격계 부담 작업」)를 모두 찾는다. */
+const MSD_TERM = /근골격계\s*부담\s*작업/u;
+
+function splitSentences(text: string): string[] {
+  return text.split(/(?<=[.。])\s*/u);
+}
+
 /**
- * 모델이나 근거 문장이 근골격계부담작업을 단정하면 표준 표현으로 바꾼다.
- * 「근골격계부담작업」이 나오는 문장은 반드시 「해당 가능성, 현장 확인 필요」를 담는다.
+ * 모델이 쓴 자유 문장(위험요인·장면에서 보인 것)이 근골격계부담작업을 단정하면 표준 표현으로 바꾼다.
+ * 근골격계부담작업이 나오는 문장은 반드시 「해당 가능성, 현장 확인 필요」를 담는다.
  */
 export function enforceMsdPhrasing(text: string): string {
-  if (!text.includes("근골격계부담작업")) return text;
-  return text
-    .split(/(?<=[.。])\s*/u)
+  if (!MSD_TERM.test(text)) return text;
+  return splitSentences(text)
     .map((sentence) => {
-      if (!sentence.includes("근골격계부담작업") || sentence.includes(MSD_POSSIBILITY_PHRASE)) return sentence;
+      if (!MSD_TERM.test(sentence) || sentence.includes(MSD_POSSIBILITY_PHRASE)) return sentence;
       return `근골격계부담작업 ${MSD_POSSIBILITY_PHRASE}.`;
+    })
+    .join(" ")
+    .trim();
+}
+
+/**
+ * 근거 하네스가 확정한 조치문용. 조치 내용은 남기고 단정만 걷어낸다.
+ * 「근골격계부담작업에 해당하므로 유해요인조사를 실시한다」
+ *   → 「근골격계부담작업(해당 가능성, 현장 확인 필요)에 해당하면 유해요인조사를 실시한다」
+ * 조치 없이 해당 여부만 단정하는 문장은 표준 표현 한 문장으로 바꾼다.
+ */
+export function enforceMsdPhrasingInControl(text: string): string {
+  if (!MSD_TERM.test(text)) return text;
+  const annotated = `근골격계부담작업(${MSD_POSSIBILITY_PHRASE})`;
+  return splitSentences(text)
+    .map((sentence) => {
+      if (!MSD_TERM.test(sentence) || sentence.includes(MSD_POSSIBILITY_PHRASE)) return sentence;
+      if (/근골격계\s*부담\s*작업\s*(?:에\s*)?(?:해당(?:한다|합니다|함|됨|된다|됩니다)|이다|입니다)\s*[.。]?\s*$/u.test(sentence)) {
+        return `근골격계부담작업 ${MSD_POSSIBILITY_PHRASE}.`;
+      }
+      return sentence
+        .replace(
+          /근골격계\s*부담\s*작업\s*에\s*해당(?:하|되)(?:므로|여서?|어서?|기\s*때문에|는\s*경우)/gu,
+          `${annotated}에 해당하면`
+        )
+        .replace(/근골격계\s*부담\s*작업(?!\(해당 가능성)/gu, annotated);
     })
     .join(" ")
     .trim();
@@ -183,13 +215,18 @@ function intersects(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
 }
 
 export type ArticleMention = {
-  /** 예: 산업안전보건기준에 관한 규칙 제21조 */
+  /** 예: 산업안전보건기준에 관한 규칙 제21조. 법령명을 못 읽으면 「(법령명 확인 안 됨) 제21조」 */
   citation: string;
-  /** 괄호 제목. 예: 통로의 조명 */
+  /** 법령명. 못 읽으면 빈 문자열 */
+  lawName: string;
+  /** 예: 제21조, 제29조의2 */
+  article: string;
+  /** 조문 제목. 예: 통로의 조명. 못 읽으면 빈 문자열 */
   heading: string;
-  /** 제목이 없을 때 주제를 읽은 주변 문장 */
-  context: string;
 };
+
+/** 법령명을 못 읽은 조문 표시. 「제21조」만 남기면 산업안전보건법인지 기준규칙인지 알 수 없다. */
+export const UNKNOWN_LAW_LABEL = "(법령명 확인 안 됨)";
 
 const LAW_NAME = "(산업안전보건기준에\\s*관한\\s*규칙|안전보건규칙|산업안전보건법\\s*시행규칙|산업안전보건법\\s*시행령|산업안전보건법)";
 const ARTICLE_PATTERN = new RegExp(`(?:${LAW_NAME}\\s*)?(제\\d+조(?:의\\d+)?)(?:\\s*\\(([^)]{1,40})\\))?`, "gu");
@@ -201,37 +238,75 @@ function normalizeLawName(name: string | undefined): string {
   return compact;
 }
 
+export function formatArticleCitation(lawName: string, article: string): string {
+  return lawName ? `${lawName} ${article}` : `${UNKNOWN_LAW_LABEL} ${article}`;
+}
+
 export function extractArticleMentions(text: string): ArticleMention[] {
   const mentions: ArticleMention[] = [];
-  const lawInText = new RegExp(LAW_NAME, "u").exec(text)?.[1];
+  const lawMatches = [...text.matchAll(new RegExp(LAW_NAME, "gu"))];
   for (const match of text.matchAll(ARTICLE_PATTERN)) {
-    const lawName = normalizeLawName(match[1] || lawInText);
+    const index = match.index ?? 0;
+    // 조 앞에 법령명이 바로 붙지 않으면, 같은 문자열에서 그 조보다 앞에 나온 가장 가까운 법령명을 쓴다.
+    const nearestLaw = lawMatches.filter((law) => (law.index ?? 0) < index).pop()?.[1];
+    const lawName = normalizeLawName(match[1] || nearestLaw);
     const article = match[2];
     // 지식 DB 법령 항목 제목은 「제619조 밀폐공간 작업 프로그램의 수립ㆍ시행」처럼 괄호 없이 조 뒤에 제목이 온다.
-    const trailingTitle = !match[3] && (match.index ?? 0) === 0
+    const trailingTitle = !match[3] && index === 0
       ? text.slice(match[0].length).split(/[\n.。]/u)[0].trim().slice(0, 40)
       : "";
     const heading = (match[3] || trailingTitle).trim();
-    const start = Math.max(0, (match.index ?? 0) - 60);
-    const end = Math.min(text.length, (match.index ?? 0) + match[0].length + 60);
-    mentions.push({
-      citation: lawName ? `${lawName} ${article}` : article,
-      heading,
-      context: heading ? heading : text.slice(start, end)
-    });
+    mentions.push({ citation: formatArticleCitation(lawName, article), lawName, article, heading });
   }
   return mentions;
 }
 
 /**
+ * 한 보고 안에서 모은 조문 언급을 서로 채워 준다.
+ * - 법령명이 없는 「제21조」는 같은 조 번호에 법령명이 하나만 보이면 그 법령명을 쓴다. 둘 이상이면 비워 둔다.
+ * - 제목이 없는 언급은 같은 법령·같은 조의 다른 언급에서 제목을 가져온다.
+ * 문장 중간의 조문(「…규칙 제21조에 따라 조치한다」)은 제목을 못 읽는다. 그 주변 문장은 후보를 찾으려고
+ * 검색된 글이라 후보와 같은 주제어를 거의 늘 담으므로 주제를 읽는 데 쓰지 않는다.
+ */
+export function resolveArticleMentions(mentions: readonly ArticleMention[]): ArticleMention[] {
+  const lawsByArticle = new Map<string, Set<string>>();
+  for (const mention of mentions) {
+    if (!mention.lawName) continue;
+    const laws = lawsByArticle.get(mention.article) || new Set<string>();
+    laws.add(mention.lawName);
+    lawsByArticle.set(mention.article, laws);
+  }
+  const lawOf = (mention: ArticleMention) => {
+    if (mention.lawName) return mention.lawName;
+    const laws = lawsByArticle.get(mention.article);
+    return laws && laws.size === 1 ? [...laws][0] : "";
+  };
+  const headingByKey = new Map<string, string>();
+  for (const mention of mentions) {
+    const key = `${lawOf(mention)}|${mention.article}`;
+    if (mention.heading && !headingByKey.has(key)) headingByKey.set(key, mention.heading);
+  }
+  return mentions.map((mention) => {
+    const lawName = lawOf(mention);
+    return {
+      citation: formatArticleCitation(lawName, mention.article),
+      lawName,
+      article: mention.article,
+      heading: mention.heading || headingByKey.get(`${lawName}|${mention.article}`) || ""
+    };
+  });
+}
+
+/**
  * 지적 요소와 이어진 조문인가.
- * - 조문 제목(없으면 주변 문장)에서 위험 주제를 읽는다. 위험 주제가 있으면 후보와 하나 이상 겹쳐야 한다.
+ * - 조문 제목에서 위험 주제를 읽는다. 위험 주제가 있으면 후보와 하나 이상 겹쳐야 한다.
  *   예) 제21조(통로의 조명) → 위험 주제 {조명}. 후보 「호스 걸림·좁은 통로」 → {전도, 정리정돈} → 붙이지 않는다.
  * - 위험 주제 없이 장소 주제만 있으면 장소가 겹칠 때 붙인다. 예) 제22조(통로의 설치) ↔ 좁은 통로.
- * - 아무 주제도 읽히지 않으면 이어짐을 확인할 수 없으므로 붙이지 않는다.
+ * - 제목을 못 읽었거나 아무 주제도 읽히지 않으면 이어짐을 확인할 수 없으므로 붙이지 않는다.
  */
 export function isArticleRelevantToCandidate(mention: ArticleMention, candidateText: string): boolean {
-  const subject = mention.heading || mention.context;
+  const subject = mention.heading;
+  if (!subject) return false;
   const articleHazards = topicsOf(subject, HAZARD_TOPICS);
   const candidateHazards = topicsOf(candidateText, HAZARD_TOPICS);
   if (articleHazards.size) return intersects(articleHazards, candidateHazards);
@@ -319,7 +394,41 @@ export type VideoHazardReport = {
   disclaimer: string;
   sceneCount: number;
   durationSec: number;
+  /** 보냈지만 분석하지 못한 장면(일부 실패). 비어 있으면 보낸 장면을 모두 분석한 것 */
+  missedScenes: VideoMissedScene[];
 };
+
+export type VideoMissedScene = {
+  time: number;
+  timeLabel: string;
+  sceneName: string;
+  reason: string;
+};
+
+const MISSED_REASON_LABELS: Readonly<Record<string, string>> = {
+  rejected: "장면 사진을 확인하지 못함",
+  failed: "분석 실패",
+  unconfigured: "분석 제공자 설정 안 됨"
+};
+
+/** 사진 분석의 장면별 상태에서 분석하지 못한 장면을 고른다. */
+export function missedScenesOf(
+  images: ReadonlyArray<{ name: string; status: string }>,
+  scenes: readonly VideoSceneMeta[]
+): VideoMissedScene[] {
+  return images
+    .filter((image) => image.status !== "analyzed")
+    .map((image) => {
+      const time = scenes.find((scene) => scene.name === image.name)?.time ?? parseSceneTimeFromName(image.name) ?? 0;
+      return {
+        time,
+        timeLabel: formatVideoTime(time),
+        sceneName: image.name,
+        reason: MISSED_REASON_LABELS[image.status] || "분석 실패"
+      };
+    })
+    .sort((a, b) => a.time - b.time);
+}
 
 export const VIDEO_REPORT_DISCLAIMER = "장면 추출 기반 1차 점검입니다. 음성은 반영하지 않았고, 사업주가 하는 위험성평가를 대신하지 않습니다.";
 
@@ -349,10 +458,17 @@ export function buildVideoFlowOpinion(input: {
   rows: readonly VideoHazardRow[];
   sceneCount: number;
   durationSec: number;
+  missedScenes?: readonly VideoMissedScene[];
 }): string {
-  const lead = `${formatVideoTime(input.durationSec)} 길이 영상에서 장면 ${input.sceneCount}개를 골라 점검했습니다.`;
+  const missed = input.missedScenes || [];
+  const checked = Math.max(0, input.sceneCount - missed.length);
+  const lead = missed.length
+    ? `${formatVideoTime(input.durationSec)} 길이 영상에서 장면 ${input.sceneCount}개를 골랐고, 그중 ${checked}개만 점검했습니다. ${missed.map((scene) => scene.timeLabel).join(", ")} 장면은 점검하지 못했습니다.`
+    : `${formatVideoTime(input.durationSec)} 길이 영상에서 장면 ${input.sceneCount}개를 골라 점검했습니다.`;
   if (!input.rows.length) {
-    return `${lead} 고른 장면에서 위험 후보를 찾지 못했습니다. 영상에 안 보이는 부분은 현장에서 확인해야 합니다.`;
+    return missed.length
+      ? `${lead} 점검한 장면에서는 위험 후보를 찾지 못했습니다. 점검하지 못한 장면과 영상에 안 보이는 부분은 현장에서 확인해야 합니다.`
+      : `${lead} 고른 장면에서 위험 후보를 찾지 못했습니다. 영상에 안 보이는 부분은 현장에서 확인해야 합니다.`;
   }
   const times = [...new Set(input.rows.map((row) => row.timeLabel))];
   const frequency = new Map<string, number>();
@@ -394,42 +510,52 @@ export function buildVideoHazardReport(input: {
   scenes: readonly VideoSceneMeta[];
   durationSec: number;
   sceneCount?: number;
+  missedScenes?: readonly VideoMissedScene[];
 }): VideoHazardReport {
   const headings = new Map<string, string>();
   const extraActions: string[] = [];
   const questions: string[] = [];
 
-  const rows: VideoHazardRow[] = input.candidates.map((candidate) => {
+  // 조문 언급을 먼저 모두 모아 법령명·제목을 서로 채운 뒤 후보별로 거른다.
+  const rawMentions = input.candidates.map((candidate) => [
+    ...candidate.harness.evidence.flatMap((evidence) => [evidence.title, evidence.excerpt]),
+    ...candidate.harness.confirmedControls.map((item) => item.text)
+  ].flatMap((source) => extractArticleMentions(source || "")));
+  const resolved = resolveArticleMentions(rawMentions.flat());
+  const mentionsByCandidate: ArticleMention[][] = [];
+  let offset = 0;
+  for (const list of rawMentions) {
+    mentionsByCandidate.push(resolved.slice(offset, offset + list.length));
+    offset += list.length;
+  }
+
+  const rows: VideoHazardRow[] = input.candidates.map((candidate, candidateIndex) => {
     const text = candidateText(candidate);
     const { time, name } = sceneTimeFor(candidate, input.scenes);
     const timeLabel = formatVideoTime(time);
     const confirmed = candidate.harness.status === "confirmed" && candidate.harness.confirmedControls.length > 0;
-    const controls = confirmed ? candidate.harness.confirmedControls.map((control) => enforceMsdPhrasing(control.text.trim())) : [];
+    // 확정 조치문은 조치 내용을 지우지 않고 근골격계부담작업 단정만 걷어낸다.
+    const controls = confirmed ? candidate.harness.confirmedControls.map((control) => enforceMsdPhrasingInControl(control.text.trim())) : [];
     const control = controls[0] || UNCONFIRMED_CONTROL;
     extraActions.push(...controls.slice(1));
 
-    const mentionSources = [
-      ...candidate.harness.evidence.flatMap((evidence) => [evidence.title, evidence.excerpt]),
-      ...candidate.harness.confirmedControls.map((item) => item.text)
-    ];
     const articles: string[] = [];
-    for (const source of mentionSources) {
-      for (const mention of extractArticleMentions(source || "")) {
-        if (!isArticleRelevantToCandidate(mention, text)) continue;
-        if (!articles.includes(mention.citation)) articles.push(mention.citation);
-        if (mention.heading && !headings.has(mention.citation)) headings.set(mention.citation, mention.heading);
-      }
+    for (const mention of mentionsByCandidate[candidateIndex]) {
+      if (!isArticleRelevantToCandidate(mention, text)) continue;
+      if (!articles.includes(mention.citation)) articles.push(mention.citation);
+      if (mention.heading && !headings.has(mention.citation)) headings.set(mention.citation, mention.heading);
     }
 
     const msdItems = detectMsdItems(text);
     questions.push(...msdFieldChecks(msdItems));
-    if (!confirmed) questions.push(`${timeLabel} 장면의 「${candidate.label}」이(가) 실제 작업 중에도 그대로인지`);
+    const hazard = enforceMsdPhrasing(candidate.label);
+    if (!confirmed) questions.push(`${timeLabel} 장면의 「${hazard.replace(/[.。]+$/u, "")}」이(가) 실제 작업 중에도 그대로인지`);
 
     return {
       time,
       timeLabel,
       sceneName: name,
-      hazard: enforceMsdPhrasing(candidate.label),
+      hazard,
       observation: enforceMsdPhrasing(candidate.observation || candidate.detail),
       control,
       controlStatus: confirmed ? "confirmed" as const : "check" as const,
@@ -445,9 +571,10 @@ export function buildVideoHazardReport(input: {
     tableControls: rows.map((row) => row.control)
   });
   const sceneCount = input.sceneCount ?? input.scenes.length;
+  const missedScenes = [...(input.missedScenes || [])];
 
   return {
-    flowOpinion: buildVideoFlowOpinion({ rows, sceneCount, durationSec: input.durationSec }),
+    flowOpinion: buildVideoFlowOpinion({ rows, sceneCount, durationSec: input.durationSec, missedScenes }),
     rows,
     riskScenes: riskScenesOf(rows),
     articles: articlesOf(rows, headings),
@@ -456,7 +583,8 @@ export function buildVideoHazardReport(input: {
     limits: [...VIDEO_REPORT_LIMITS],
     disclaimer: VIDEO_REPORT_DISCLAIMER,
     sceneCount,
-    durationSec: input.durationSec
+    durationSec: input.durationSec,
+    missedScenes
   };
 }
 
@@ -472,8 +600,9 @@ export function mergeVideoHazardReports(reports: readonly VideoHazardReport[], m
     actions: reports.flatMap((report) => report.baseActions),
     tableControls: rows.map((row) => row.control)
   });
+  const missedScenes = reports.flatMap((report) => report.missedScenes || []).sort((a, b) => a.time - b.time);
   return {
-    flowOpinion: buildVideoFlowOpinion({ rows, sceneCount: meta.sceneCount, durationSec: meta.durationSec }),
+    flowOpinion: buildVideoFlowOpinion({ rows, sceneCount: meta.sceneCount, durationSec: meta.durationSec, missedScenes }),
     rows,
     riskScenes: riskScenesOf(rows),
     articles: articlesOf(rows, headings),
@@ -482,6 +611,7 @@ export function mergeVideoHazardReports(reports: readonly VideoHazardReport[], m
     limits: [...VIDEO_REPORT_LIMITS],
     disclaimer: VIDEO_REPORT_DISCLAIMER,
     sceneCount: meta.sceneCount,
-    durationSec: meta.durationSec
+    durationSec: meta.durationSec,
+    missedScenes
   };
 }

@@ -13,10 +13,15 @@ import {
   mergeVideoHazardReports,
   MSD_NOTICE_ITEMS,
   MSD_POSSIBILITY_PHRASE,
+  enforceMsdPhrasingInControl,
+  missedScenesOf,
+  resolveArticleMentions,
   splitChecklist,
+  UNKNOWN_LAW_LABEL,
   validateVideoCheckInput,
   VIDEO_REPORT_DISCLAIMER
 } from "@/lib/video-hazard-report";
+import { readVideoBatchResponse } from "@/lib/video-hazard-response";
 
 const FORBIDDEN_USER_WORDS = /상담|진단|판정|노무사|확률|적중률|%/u;
 
@@ -109,6 +114,59 @@ describe("rule 1 — MSD wording", () => {
     expect(fixed).not.toContain("해당합니다");
     expect(fixed).toContain("휴식을 준다");
   });
+
+  it("catches spaced spellings the model often writes", () => {
+    for (const asserted of [
+      "이 작업은 근골격계 부담작업에 해당합니다.",
+      "근골격계 부담 작업입니다.",
+      "근골격계부담 작업으로 본다."
+    ]) {
+      const fixed = enforceMsdPhrasing(asserted);
+      expect(fixed).toBe(`근골격계부담작업 ${MSD_POSSIBILITY_PHRASE}.`);
+    }
+  });
+
+  it("keeps the action of a harness-confirmed control and removes only the assertion", () => {
+    const fixed = enforceMsdPhrasingInControl("근골격계부담작업에 해당하므로 유해요인조사를 실시한다.");
+    expect(fixed).toBe(`근골격계부담작업(${MSD_POSSIBILITY_PHRASE})에 해당하면 유해요인조사를 실시한다.`);
+    const spaced = enforceMsdPhrasingInControl("근골격계 부담작업에 대하여 3년마다 유해요인조사를 한다.");
+    expect(spaced).toContain("유해요인조사를 한다");
+    expect(spaced).toContain(MSD_POSSIBILITY_PHRASE);
+    expect(enforceMsdPhrasingInControl("근골격계 부담작업에 해당한다.")).toBe(`근골격계부담작업 ${MSD_POSSIBILITY_PHRASE}.`);
+    expect(enforceMsdPhrasingInControl("호스를 통로 밖으로 정리한다.")).toBe("호스를 통로 밖으로 정리한다.");
+  });
+
+  it("applies the wording to row text, controls and field questions in the report", () => {
+    const report = buildVideoHazardReport({
+      candidates: [
+        candidate({
+          id: "m1",
+          label: "근골격계 부담작업에 해당하는 반복 작업",
+          observation: "근골격계 부담 작업입니다.",
+          scene: "scene-01_00m04s.jpg",
+          controls: ["근골격계부담작업에 해당하므로 유해요인조사를 실시한다."]
+        }),
+        candidate({
+          id: "m2",
+          label: "근골격계 부담작업 해당 자세",
+          observation: "허리를 구부린 채 작업",
+          scene: "scene-02_00m21s.jpg",
+          confirmed: false
+        })
+      ],
+      scenes: [{ name: "scene-01_00m04s.jpg", time: 4 }, { name: "scene-02_00m21s.jpg", time: 21 }],
+      durationSec: 62
+    });
+    const visible = [
+      ...report.rows.flatMap((row) => [row.hazard, row.observation, row.control]),
+      ...report.fieldChecks,
+      ...report.baseActions
+    ];
+    for (const text of visible) {
+      if (/근골격계\s*부담\s*작업/u.test(text)) expect(text).toContain(MSD_POSSIBILITY_PHRASE);
+    }
+    expect(report.rows[0].control).toContain("유해요인조사를 실시한다");
+  });
 });
 
 describe("rule 2 — article matching filter", () => {
@@ -130,7 +188,8 @@ describe("rule 2 — article matching filter", () => {
   it("reads the knowledge-DB title format 「제N조 제목」 without brackets", () => {
     // data/ 지식 항목의 실제 제목 형식
     const [confined] = extractArticleMentions("제619조 밀폐공간 작업 프로그램의 수립ㆍ시행");
-    expect(confined).toMatchObject({ citation: "제619조", heading: "밀폐공간 작업 프로그램의 수립ㆍ시행" });
+    // 법령명이 없는 제목은 법령명을 지어내지 않고 「법령명 확인 안 됨」을 붙인다(제21조만으로는 법령을 알 수 없다).
+    expect(confined).toMatchObject({ citation: `${UNKNOWN_LAW_LABEL} 제619조`, lawName: "", heading: "밀폐공간 작업 프로그램의 수립ㆍ시행" });
     expect(isArticleRelevantToCandidate(confined, "맨홀 밀폐공간에 작업자가 들어가려 함")).toBe(true);
     expect(isArticleRelevantToCandidate(confined, hoseText)).toBe(false);
   });
@@ -138,6 +197,42 @@ describe("rule 2 — article matching filter", () => {
   it("attaches the lighting article when the scene actually points at darkness", () => {
     const [lighting] = extractArticleMentions(LIGHTING_ARTICLE.title);
     expect(isArticleRelevantToCandidate(lighting, "통로가 어두워 발밑이 잘 보이지 않음")).toBe(true);
+  });
+
+  it("does not read the topic from the surrounding sentence of a mid-sentence article", () => {
+    const excerpt = "통로에 호스가 놓여 걸려 넘어질 위험과 어두운 조명이 함께 있으면 안전보건규칙 제21조에 따라 조치한다.";
+    const [mention] = extractArticleMentions(excerpt);
+    expect(mention).toMatchObject({ citation: "산업안전보건기준에 관한 규칙 제21조", heading: "" });
+    expect(isArticleRelevantToCandidate(mention, "호스 걸림 좁은 통로")).toBe(false);
+  });
+
+  it("borrows the heading of the same article from a sibling mention, then filters by it", () => {
+    const mentions = resolveArticleMentions([
+      ...extractArticleMentions("제21조 통로의 조명"),
+      ...extractArticleMentions("통로에 호스가 놓여 걸리면 안전보건규칙 제21조에 따라 조치한다.")
+    ]);
+    // 법령명 없는 DB 제목은 같은 조 번호에 보이는 법령명 하나로 채워져 한 항목이 된다.
+    expect(new Set(mentions.map((mention) => mention.citation))).toEqual(new Set(["산업안전보건기준에 관한 규칙 제21조"]));
+    expect(mentions.every((mention) => mention.heading === "통로의 조명")).toBe(true);
+    expect(mentions.some((mention) => isArticleRelevantToCandidate(mention, "호스 걸림 좁은 통로"))).toBe(false);
+    expect(isArticleRelevantToCandidate(mentions[1], "통로가 어두워 발밑이 잘 보이지 않음")).toBe(true);
+  });
+
+  it("does not guess the law name when the same article number appears under two laws", () => {
+    const mentions = resolveArticleMentions([
+      ...extractArticleMentions("제21조 통로의 조명"),
+      ...extractArticleMentions("산업안전보건법 제21조(안전관리전문기관 등)"),
+      ...extractArticleMentions("산업안전보건기준에 관한 규칙 제21조(통로의 조명)")
+    ]);
+    expect(mentions[0].citation).toBe(`${UNKNOWN_LAW_LABEL} 제21조`);
+  });
+
+  it("pairs a bare article with the nearest preceding law name, not the first one in the text", () => {
+    const mentions = extractArticleMentions("산업안전보건법 제38조에 따른 조치로 산업안전보건기준에 관한 규칙에서 정한 제3조를 지킨다.");
+    expect(mentions.map((mention) => mention.citation)).toEqual([
+      "산업안전보건법 제38조",
+      "산업안전보건기준에 관한 규칙 제3조"
+    ]);
   });
 });
 
@@ -242,6 +337,48 @@ describe("video hazard report", () => {
   it("says nothing was found without inventing hazards", () => {
     const empty = buildVideoHazardReport({ candidates: [], scenes, durationSec: 62 });
     expect(empty.rows).toEqual([]);
+    expect(empty.missedScenes).toEqual([]);
     expect(empty.flowOpinion).toContain("위험 후보를 찾지 못했습니다");
+  });
+
+  it("names scenes that were sent but not analyzed (partial) instead of reading as a clean result", () => {
+    const missedScenes = missedScenesOf([
+      { name: "scene-01_00m04s.jpg", status: "analyzed" },
+      { name: "scene-03_00m47s.jpg", status: "failed" },
+      { name: "scene-02_00m21s.jpg", status: "rejected" }
+    ], scenes);
+    expect(missedScenes.map((scene) => scene.timeLabel)).toEqual(["0:21", "0:47"]);
+    const partial = buildVideoHazardReport({ candidates: [], scenes, durationSec: 62, missedScenes });
+    expect(partial.flowOpinion).toContain("그중 1개만 점검했습니다");
+    expect(partial.flowOpinion).toContain("0:21, 0:47 장면은 점검하지 못했습니다");
+    expect(partial.flowOpinion).not.toContain("고른 장면에서 위험 후보를 찾지 못했습니다");
+    const merged = mergeVideoHazardReports([report, partial], { sceneCount: 3, durationSec: 62 });
+    expect(merged.missedScenes.map((scene) => scene.timeLabel)).toEqual(["0:21", "0:47"]);
+    expect(merged.flowOpinion).toContain("점검하지 못했습니다");
+  });
+});
+
+describe("batch response reading (screen side)", () => {
+  const goodReport = buildVideoHazardReport({ candidates: [], scenes: [{ name: "a.jpg", time: 1 }], durationSec: 10 });
+
+  it("refuses failed or unconfigured responses even when they carry a report-shaped body", () => {
+    for (const [status, body] of [
+      [200, { ok: false, code: "VIDEO_SCENE_ANALYSIS_FAILED", report: goodReport, message: "장면 사진 점검을 완료하지 못했습니다." }],
+      [502, { ok: false, code: "VIDEO_SCENE_ANALYSIS_FAILED", message: "장면 사진 점검을 완료하지 못했습니다." }],
+      [503, { ok: false, code: "VIDEO_SCENE_ANALYSIS_UNCONFIGURED", message: "사진 분석 제공자 설정이 안 되어 장면을 점검하지 못했습니다." }],
+      [500, "not json"]
+    ] as const) {
+      const result = readVideoBatchResponse(status, body);
+      expect(result.ok).toBe(false);
+    }
+    const unconfigured = readVideoBatchResponse(503, { ok: false, message: "사진 분석 제공자 설정이 안 되어 장면을 점검하지 못했습니다." });
+    expect(unconfigured).toEqual({ ok: false, message: "사진 분석 제공자 설정이 안 되어 장면을 점검하지 못했습니다." });
+  });
+
+  it("accepts a successful response and fills missedScenes for older payloads", () => {
+    const { missedScenes: _omit, ...legacy } = goodReport;
+    const result = readVideoBatchResponse(200, { ok: true, report: legacy });
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.report.missedScenes).toEqual([]);
   });
 });

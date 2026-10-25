@@ -14,6 +14,7 @@ import {
   type VideoCheckField,
   type VideoHazardReport
 } from "@/lib/video-hazard-report";
+import { readVideoBatchResponse } from "@/lib/video-hazard-response";
 
 import styles from "./VideoHazardCheck.module.css";
 
@@ -32,12 +33,6 @@ async function readAccessToken(): Promise<string | null> {
   } catch {
     return null;
   }
-}
-
-function isVideoHazardReport(value: unknown): value is VideoHazardReport {
-  if (typeof value !== "object" || value === null) return false;
-  const record = value as Record<string, unknown>;
-  return typeof record.flowOpinion === "string" && Array.isArray(record.rows) && Array.isArray(record.fieldChecks);
 }
 
 const FACE_STATUS_LABEL: Record<ExtractedScene["faceStatus"], string> = {
@@ -148,16 +143,17 @@ export function VideoHazardCheck() {
           signal: controller.signal
         });
         const body: unknown = await response.json().catch(() => ({}));
-        const record = typeof body === "object" && body !== null ? body as Record<string, unknown> : {};
-        if (!response.ok || !isVideoHazardReport(record.report)) {
-          throw new Error(typeof record.message === "string" ? record.message : `장면 점검 요청 실패: HTTP ${response.status}`);
-        }
-        reports.push(record.report);
+        // 실패·미설정 응답을 「위험 후보 없음」으로 합치지 않는다.
+        const result = readVideoBatchResponse(response.status, body);
+        if (!result.ok) throw new Error(result.message);
+        reports.push(result.report);
       }
       const merged = mergeVideoHazardReports(reports, { sceneCount: selectedScenes.length, durationSec });
       setReport(merged);
       setPhase("done");
-      setStatus(`장면 ${selectedScenes.length}개 점검을 마쳤습니다.`);
+      setStatus(merged.missedScenes.length
+        ? `장면 ${selectedScenes.length}개 중 ${selectedScenes.length - merged.missedScenes.length}개만 점검했습니다. 점검하지 못한 장면: ${merged.missedScenes.map((scene) => scene.timeLabel).join(", ")}.`
+        : `장면 ${selectedScenes.length}개 점검을 마쳤습니다.`);
     } catch (error) {
       if (controller.signal.aborted) return;
       setPhase("error");
@@ -307,8 +303,24 @@ function VideoHazardReportView({ report }: { report: VideoHazardReport }) {
               </tbody>
             </table>
           </div>
-        ) : <p>고른 장면에서 위험 후보를 찾지 못했습니다.</p>}
+        ) : <p>{report.missedScenes.length
+          ? "점검한 장면에서는 위험 후보를 찾지 못했습니다. 점검하지 못한 장면은 아래에 적었습니다."
+          : "고른 장면에서 위험 후보를 찾지 못했습니다."}</p>}
       </section>
+
+      {report.missedScenes.length ? (
+        <section className={`${styles.section} ${styles.notice} ${styles.warning}`}>
+          <h3>점검하지 못한 장면</h3>
+          <p>아래 장면은 분석하지 못했습니다. 위험이 없다는 뜻이 아니니 현장에서 확인해 주세요.</p>
+          <ul>
+            {report.missedScenes.map((scene) => (
+              <li key={`${scene.sceneName}-${scene.time}`}>
+                <strong className={styles.time}>{scene.timeLabel}</strong> · {scene.reason}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {report.riskScenes.length ? (
         <section className={styles.section}>

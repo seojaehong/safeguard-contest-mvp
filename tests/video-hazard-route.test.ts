@@ -178,5 +178,63 @@ describe("video scene hazard route", () => {
     expect(body.report.disclaimer).toContain("위험성평가를 대신하지 않습니다");
     expect(body.analysis).toEqual(expect.objectContaining({ status: "analyzed" }));
     expect(body.analysis.candidates).toBeUndefined();
+    expect(body.report.missedScenes).toEqual([]);
+  });
+
+  function analysisWithStatus(status: "failed" | "unconfigured" | "partial", imageStatuses: Array<"analyzed" | "rejected" | "failed" | "unconfigured">) {
+    const base = analysisWithCandidates();
+    const names = ["scene-01_00m04s.jpg", "scene-02_00m47s.jpg"];
+    return {
+      ...base,
+      status,
+      providerMode: status === "unconfigured" ? "unconfigured" as const : "mock" as const,
+      candidates: status === "partial" ? [base.candidates[0]] : [],
+      images: imageStatuses.map((imageStatus, index) => ({ name: names[index], status: imageStatus, candidates: [], error: null })),
+      counts: {
+        ...base.counts,
+        analyzed: imageStatuses.filter((item) => item === "analyzed").length,
+        rejected: imageStatuses.filter((item) => item === "rejected").length,
+        failed: imageStatuses.filter((item) => item === "failed").length,
+        unconfigured: imageStatuses.filter((item) => item === "unconfigured").length
+      }
+    };
+  }
+
+  it("does not return an empty report as a clean result when every scene failed", async () => {
+    vi.mocked(analyzeHazardPhotos).mockResolvedValue(analysisWithStatus("failed", ["failed", "rejected"]) as never);
+    const response = await POST(videoRequest({}));
+    expect(response.status).toBe(502);
+    const body = await response.json();
+    expect(body.ok).toBe(false);
+    expect(body.code).toBe("VIDEO_SCENE_ANALYSIS_FAILED");
+    expect(body.report).toBeUndefined();
+    expect(body.message).toContain("위험이 없다는 뜻이 아닙니다");
+  });
+
+  it("reports an unconfigured provider as unavailable, not as no hazards", async () => {
+    vi.mocked(analyzeHazardPhotos).mockResolvedValue(analysisWithStatus("unconfigured", ["unconfigured", "unconfigured"]) as never);
+    const response = await POST(videoRequest({}));
+    expect(response.status).toBe(503);
+    const body = await response.json();
+    expect(body.ok).toBe(false);
+    expect(body.configured).toBe(false);
+    expect(body.code).toBe("VIDEO_SCENE_ANALYSIS_UNCONFIGURED");
+    expect(body.report).toBeUndefined();
+  });
+
+  it("names the scenes a partial analysis could not check", async () => {
+    vi.mocked(analyzeHazardPhotos).mockResolvedValue(analysisWithStatus("partial", ["analyzed", "failed"]) as never);
+    const response = await POST(videoRequest({}));
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.ok).toBe(true);
+    expect(body.analysis.scenes).toEqual([
+      { name: "scene-01_00m04s.jpg", status: "analyzed" },
+      { name: "scene-02_00m47s.jpg", status: "failed" }
+    ]);
+    expect(body.report.missedScenes).toEqual([
+      expect.objectContaining({ timeLabel: "0:47", sceneName: "scene-02_00m47s.jpg", reason: "분석 실패" })
+    ]);
+    expect(body.report.flowOpinion).toContain("0:47 장면은 점검하지 못했습니다");
   });
 });

@@ -15,6 +15,7 @@ import {
 import {
   buildVideoCheckQuestion,
   buildVideoHazardReport,
+  missedScenesOf,
   validateVideoCheckInput,
   type VideoSceneMeta
 } from "@/lib/video-hazard-report";
@@ -168,30 +169,44 @@ async function handlePost(request: NextRequest) {
   }
 
   const publicAnalysis = publicPhotoAnalysis(analysis);
-  const hasAnalysis = analysis.status === "analyzed" || analysis.status === "partial";
+  const analysisSummary = {
+    status: publicAnalysis.status,
+    counts: publicAnalysis.counts,
+    errorMessage: publicAnalysis.errorMessage,
+    scenes: publicAnalysis.images.map((image) => ({ name: image.name, status: image.status }))
+  };
+  const configured = analysis.providerMode !== "unconfigured";
+
+  // 분석이 안 됐으면(전 장면 실패·거부, 제공자 미설정) 보고서를 만들지 않는다.
+  // 빈 후보로 보고서를 만들면 화면에 「위험 후보를 찾지 못했습니다」로 보인다.
+  if (analysis.status !== "analyzed" && analysis.status !== "partial") {
+    const unconfigured = analysis.status === "unconfigured";
+    return NextResponse.json({
+      ok: false,
+      configured,
+      code: unconfigured ? "VIDEO_SCENE_ANALYSIS_UNCONFIGURED" : "VIDEO_SCENE_ANALYSIS_FAILED",
+      analysis: analysisSummary,
+      message: unconfigured
+        ? "사진 분석 제공자 설정이 안 되어 장면을 점검하지 못했습니다. 위험이 없다는 뜻이 아닙니다."
+        : "장면 사진 점검을 완료하지 못했습니다. 위험이 없다는 뜻이 아닙니다. 잠시 뒤 다시 시도해 주세요."
+    }, { status: unconfigured ? 503 : 502 });
+  }
+
   const report = buildVideoHazardReport({
     candidates: publicAnalysis.candidates,
     scenes: sceneTimes,
     durationSec,
-    sceneCount
+    sceneCount,
+    missedScenes: missedScenesOf(analysisSummary.scenes, sceneTimes)
   });
   return NextResponse.json({
-    ok: hasAnalysis,
-    configured: analysis.providerMode !== "unconfigured",
-    ...(!hasAnalysis ? { code: "VIDEO_SCENE_ANALYSIS_FAILED" } : {}),
-    analysis: {
-      status: publicAnalysis.status,
-      counts: publicAnalysis.counts,
-      errorMessage: publicAnalysis.errorMessage
-    },
+    ok: true,
+    configured,
+    analysis: analysisSummary,
     report,
     message: analysis.status === "analyzed"
       ? "장면 사진에서 위험 후보를 정리했습니다."
-      : analysis.status === "partial"
-        ? `장면 일부 처리: ${partialAnalysisMessage(analysis.counts)}.`
-        : analysis.status === "unconfigured"
-          ? "사진 분석 제공자 설정을 확인해야 합니다."
-          : "장면 사진 점검을 완료하지 못했습니다."
+      : `장면 일부 처리: ${partialAnalysisMessage(analysis.counts)}.`
   });
 }
 
