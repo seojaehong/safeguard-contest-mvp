@@ -23,6 +23,7 @@ import {
   ACCIDENT_TYPE_DISPLAY_LABELS,
   FOUR_M_DISPLAY_LABELS,
   riskLevelLabel,
+  riskManagementNumberLabel,
   VERIFICATION_STATUS_DISPLAY_LABELS
 } from "@/lib/document-display-labels";
 import { gateUserOutputCell, gateUserOutputText } from "@/lib/user-output-gate";
@@ -2625,7 +2626,7 @@ function RiskAssessmentRowsEditor({
                   </div>
                 </div>
                 <div className={styles.riskRowDetailGrid}>
-                  <label><span>관리번호</span><input aria-label={`행 ${rowIndex + 1} 관리번호`} {...fieldErrorProps(rowIndex, rowId, "controlId")} value={row.controlId || ""} onChange={(event) => onRowChange(rowIndex, "controlId", event.target.value || undefined)} /></label>
+                  <label><span>관리번호</span><input aria-label={`행 ${rowIndex + 1} 관리번호`} {...fieldErrorProps(rowIndex, rowId, "controlId")} value={riskManagementNumberLabel(row.controlId, rowIndex)} onChange={(event) => onRowChange(rowIndex, "controlId", event.target.value || undefined)} /></label>
                   <label><span>공정</span><input aria-label={`행 ${rowIndex + 1} 공정`} {...fieldErrorProps(rowIndex, rowId, "process")} value={row.process} onChange={(event) => onRowChange(rowIndex, "process", event.target.value)} /></label>
                   <label><span>장비/도구</span><input aria-label={`행 ${rowIndex + 1} 장비 도구`} {...fieldErrorProps(rowIndex, rowId, "equipment")} value={row.equipment} onChange={(event) => onRowChange(rowIndex, "equipment", event.target.value)} /></label>
                   <label><span>조치담당자</span><input aria-label={`행 ${rowIndex + 1} 조치담당자`} {...fieldErrorProps(rowIndex, rowId, "owner")} value={row.owner} onChange={(event) => onRowChange(rowIndex, "owner", event.target.value)} /></label>
