@@ -207,7 +207,11 @@ export function extractArticleMentions(text: string): ArticleMention[] {
   for (const match of text.matchAll(ARTICLE_PATTERN)) {
     const lawName = normalizeLawName(match[1] || lawInText);
     const article = match[2];
-    const heading = (match[3] || "").trim();
+    // 지식 DB 법령 항목 제목은 「제619조 밀폐공간 작업 프로그램의 수립ㆍ시행」처럼 괄호 없이 조 뒤에 제목이 온다.
+    const trailingTitle = !match[3] && (match.index ?? 0) === 0
+      ? text.slice(match[0].length).split(/[\n.。]/u)[0].trim().slice(0, 40)
+      : "";
+    const heading = (match[3] || trailingTitle).trim();
     const start = Math.max(0, (match.index ?? 0) - 60);
     const end = Math.min(text.length, (match.index ?? 0) + match[0].length + 60);
     mentions.push({

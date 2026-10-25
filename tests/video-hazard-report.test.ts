@@ -127,6 +127,14 @@ describe("rule 2 — article matching filter", () => {
     expect(isArticleRelevantToCandidate(slip, hoseText)).toBe(true);
   });
 
+  it("reads the knowledge-DB title format 「제N조 제목」 without brackets", () => {
+    // data/ 지식 항목의 실제 제목 형식
+    const [confined] = extractArticleMentions("제619조 밀폐공간 작업 프로그램의 수립ㆍ시행");
+    expect(confined).toMatchObject({ citation: "제619조", heading: "밀폐공간 작업 프로그램의 수립ㆍ시행" });
+    expect(isArticleRelevantToCandidate(confined, "맨홀 밀폐공간에 작업자가 들어가려 함")).toBe(true);
+    expect(isArticleRelevantToCandidate(confined, hoseText)).toBe(false);
+  });
+
   it("attaches the lighting article when the scene actually points at darkness", () => {
     const [lighting] = extractArticleMentions(LIGHTING_ARTICLE.title);
     expect(isArticleRelevantToCandidate(lighting, "통로가 어두워 발밑이 잘 보이지 않음")).toBe(true);
