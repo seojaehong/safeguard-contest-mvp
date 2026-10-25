@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { gateExportPayload } from "@/lib/user-output-gate";
 import fs from "node:fs";
 import path from "node:path";
 // Use the WASM init for server runtime. exportHwp() supports tables; exportHwpx() does NOT.
@@ -299,7 +300,8 @@ export async function GET() {
 
 async function exportHwp(request: NextRequest) {
   try {
-    const parsed = await readDocumentExportRequestJson(request);
+    // PR-14: 받은 본문의 내부 문구·통째 enum 칸을 사용자용으로 거른 뒤 렌더한다.
+    const parsed = gateExportPayload(await readDocumentExportRequestJson(request));
     const body = isRecord(parsed) ? parsed : {};
     assertDocumentExportInputBudget(body);
     const title = readString(body.title, "SafeClaw 안전 문서");

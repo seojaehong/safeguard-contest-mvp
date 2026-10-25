@@ -324,6 +324,15 @@ export type DetailRecord = {
   tags?: string[];
 };
 
+// 작업 유형 선행 판정 결과. review_required 이면 문서를 정상 문서로 내지 않고 「작업 유형 확인」을 받는다.
+export type TaskClassification = {
+  status: "classified" | "review_required";
+  taskId: string | null;
+  taskLabel: string | null;
+  layers: string[];
+  reason: string;
+};
+
 export type AskScenario = {
   siteName: string;
   companyName: string;
@@ -331,6 +340,7 @@ export type AskScenario = {
   workSummary: string;
   workerCount: number;
   weatherNote: string;
+  taskClassification?: TaskClassification;
 };
 
 export type GenerationAnswerTrace = {

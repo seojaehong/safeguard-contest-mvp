@@ -292,8 +292,21 @@ function persistenceItem(response: AskResponse): QualityContractItem {
   };
 }
 
+// 작업 유형을 판정하지 못한 응답만 항목을 더한다(분류된 응답의 항목 수는 그대로).
+function taskClassificationItems(response: AskResponse): QualityContractItem[] {
+  const classification = response.scenario?.taskClassification;
+  if (classification?.status !== "review_required") return [];
+  return [{
+    key: "taskClassification",
+    label: "작업 유형 확인",
+    status: "blocked",
+    detail: "작업 유형 확인 필요 — 입력에서 작업 유형을 판정하지 못해 문서 생성을 보류했습니다. 작업 종류와 사용 장비를 적어 다시 생성하세요."
+  }];
+}
+
 export function buildQualityContract(response: AskResponse, generatedAt = new Date().toISOString()): QualityContract {
   const items = [
+    ...taskClassificationItems(response),
     modeItem(response),
     ontologyItem(response),
     evidenceItem(response),

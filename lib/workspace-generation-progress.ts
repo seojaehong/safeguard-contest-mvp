@@ -58,7 +58,7 @@ export function buildGenerationProgressState(input: {
     const latest = latestUsefulLine(input.consoleLines);
     const detail = latest
       ? `${latest.label}${latest.status === "active" ? " 진행 중" : " 확인됨"}`
-      : "기상, 법령, SIF/KOSHA DB를 순서대로 확인하고 있습니다.";
+      : "기상, 법령, 중대재해 사례·KOSHA 자료를 순서대로 확인하고 있습니다.";
 
     return {
       count,
@@ -93,7 +93,7 @@ export function buildGenerationProgressState(input: {
     count: 0,
     primary: `0/${total}`,
     secondary: "근거 준비",
-    detail: "현장 상황을 입력하면 기상, 법령, SIF/KOSHA DB를 순서대로 확인합니다.",
+    detail: "현장 상황을 입력하면 기상, 법령, 중대재해 사례·KOSHA 자료를 순서대로 확인합니다.",
     indeterminate: false
   };
 }

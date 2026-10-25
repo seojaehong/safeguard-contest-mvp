@@ -2114,7 +2114,7 @@ export function deriveSafetyReferenceOperationalView(item: SafetyReferenceItem):
       hazard: `검토 필요: ${incidentLabel} 사고의 직접 원인과 현장 위험요인 미확정`,
       controls: [
         "SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인",
-        "관리감독자 검토 완료 전 원시 태그·관리대책을 현장 통제대책으로 확정하지 않음"
+        "관리감독자 검토 완료 전 사고사례 관리대책을 현장 통제대책으로 확정하지 않음"
       ],
       reviewRequired: true
     };
