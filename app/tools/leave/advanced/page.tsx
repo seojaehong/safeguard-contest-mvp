@@ -94,8 +94,8 @@ export default function AdvancedPage() {
           <li>반차·반반차는 법정 제도가 아니라 취업규칙·노사합의 사항입니다</li>
         </ul>
         <p className="lv-scope__footer">
-          입력값 기준의 참고 계산입니다. 임금채권 확정이나 분쟁 사안은 별도 검토가 필요합니다.
-         개별 사안의 법적 판단이나 임금채권 확정은 <strong>담당 공인노무사</strong>의 검토를 거치시기 바랍니다.</p>
+          입력값 기준의 참고 계산입니다. 개별 사안은 전문가 검토가 필요합니다.
+        </p>
       </section>
     </main>
   );

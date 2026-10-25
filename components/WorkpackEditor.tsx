@@ -362,6 +362,14 @@ function previewRowItem(row: SheetRow, fallback: string) {
   return label.length > 34 ? `${label.slice(0, 34)}...` : label;
 }
 
+// 서버 인쇄본(/api/export/pdf)이 위험성평가 행을 함께 싣는 문서 — TBM 계열뿐이다.
+const PDF_LINKED_RISK_ROW_DOCUMENT_KEYS: ReadonlySet<string> = new Set(["tbmBriefing", "tbmLogDraft"]);
+
+const PDF_PRINT_FALLBACK_POPUP_NOTICE = "<style>@media print{.safeclaw-print-fallback-notice{display:none!important}}</style>"
+  + "<div class=\"safeclaw-print-fallback-notice\" role=\"alert\" style=\"margin:12px;padding:12px 16px;border:2px solid #b42318;border-radius:8px;background:#fef3f2;color:#7a271a;font:600 14px/1.5 sans-serif\">"
+  + "정식 서버 인쇄본을 만들지 못해 화면 호환 서식으로 표시했습니다. 정식 서식과 내용이 다를 수 있으니 확인한 뒤 인쇄해 주세요. (이 안내는 인쇄되지 않습니다)"
+  + "</div>";
+
 function buildTbmBridgeRows(data: AskResponse, riskRows: SheetRow[]) {
   const riskItems = findRows(riskRows, ["위험", "추락", "전도", "충돌", "끼임", "화재", "중독", "노출"], 4);
   const weatherSignals = data.externalData.weather.actions.length
@@ -2796,6 +2804,7 @@ export function WorkpackEditor({
   const [hydratedStorageKey, setHydratedStorageKey] = useState<string | null>(null);
   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
   const [xlsxStatus, setXlsxStatus] = useState<"idle" | "building" | "error">("idle");
+  const [pdfPrintStatus, setPdfPrintStatus] = useState<"idle" | "fallback" | "blocked">("idle");
   const [hwpStatus, setHwpStatus] = useState<"idle" | "building" | "error">("idle");
   const [serverExportReadiness, setServerExportReadiness] = useState<ServerExportReadiness>("checking");
   const [imageStatus, setImageStatus] = useState<"idle" | "error">("idle");
@@ -4008,9 +4017,11 @@ export function WorkpackEditor({
   }
 
   async function printPdf() {
+    setPdfPrintStatus("idle");
     const popup = window.open("", "_blank", "width=900,height=1100");
     if (!popup) {
       console.error("PDF print window was blocked");
+      setPdfPrintStatus("blocked");
       downloadHtml();
       return;
     }
@@ -4036,8 +4047,10 @@ export function WorkpackEditor({
           title: selected.title,
           scenario: data.scenario,
           rows: selectedRows,
-          riskRows: riskAssessmentRows,
-          documentText: selectedText,
+          // 서버는 TBM 문서에서만 위험성평가 행을 쓰고, rows 가 있으면 documentText 를 쓰지 않는다.
+          // 안 쓰는 값을 보내면 행·글자 한도(413)에 걸려 대체 서식으로 넘어간다.
+          ...(PDF_LINKED_RISK_ROW_DOCUMENT_KEYS.has(selected.key) ? { riskRows: riskAssessmentRows } : {}),
+          ...(selectedRows.length ? {} : { documentText: selectedText }),
           riskLevel: data.riskSummary.riskLevel,
           topRisk: data.riskSummary.topRisk
         })
@@ -4057,9 +4070,11 @@ export function WorkpackEditor({
       popup.print();
     } catch (error) {
       console.error("server PDF print source failed", error);
+      setPdfPrintStatus("fallback");
       popup.document.open();
       popup.document.write(buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows));
       popup.document.close();
+      popup.document.body?.insertAdjacentHTML("afterbegin", PDF_PRINT_FALLBACK_POPUP_NOTICE);
       popup.focus();
       popup.print();
     }
@@ -4654,6 +4669,16 @@ export function WorkpackEditor({
                 </details>
               </div>
 
+              {pdfPrintStatus === "fallback" ? (
+                <p className="export-error" role="alert" data-pdf-print-status="fallback">
+                  정식 서버 인쇄본을 만들지 못해 화면 호환 서식으로 인쇄 창을 열었습니다. 정식 서식과 내용이 다를 수 있으니 확인한 뒤 사용해 주세요.
+                </p>
+              ) : null}
+              {pdfPrintStatus === "blocked" ? (
+                <p className="export-error" role="alert" data-pdf-print-status="blocked">
+                  인쇄 창이 차단되어 HTML 파일로 내려받았습니다. 팝업을 허용한 뒤 다시 시도해 주세요.
+                </p>
+              ) : null}
               {xlsxStatus === "error" ? (
                 <p className="export-error">Excel(.xlsx) 생성 중 오류가 발생했습니다. 잠시 후 다시 시도하거나 PDF 또는 구형 호환 XLS를 사용해 주세요.</p>
               ) : null}

@@ -53,10 +53,10 @@ describe("getEvidenceLabel", () => {
     expect(getEvidenceLabel("structuredRiskRows")?.article).toBe("중대재해처벌법 시행령 제4조 제3호");
   });
 
-  it("labels all TBM variants as 이행 보조 증빙 with 산업안전보건법 제29조 병기", () => {
+  it("labels all TBM variants as 이행 보조 증빙 with 산업안전보건법 제36조 제4항 병기 (2026-10-25 결정 12)", () => {
     for (const docType of ["tbmBriefing", "tbmLog", "tbmBriefingStructured", "tbmLogStructured"]) {
       const label = getEvidenceLabel(docType);
-      expect(label?.related).toBe("산업안전보건법 제29조");
+      expect(label?.related).toBe("산업안전보건법 제36조 제4항");
       expect(label?.purpose).toContain("이행 보조 증빙");
     }
   });
@@ -79,10 +79,15 @@ describe("getEvidenceLabel", () => {
     }
   });
 
-  it("keeps 위험성평가·작업계획서·비상대응 as 1차 이행 증빙 (보조 강등 없음)", () => {
-    for (const docType of ["riskAssessment", "structuredRiskRows", "workPlan", "workPlanStructured", "emergencyResponse"]) {
+  it("keeps 위험성평가·작업계획서 as 1차 이행 증빙 (보조 강등 없음)", () => {
+    for (const docType of ["riskAssessment", "structuredRiskRows", "workPlan", "workPlanStructured"]) {
       expect(getEvidenceLabel(docType)?.purpose).not.toContain("보조");
     }
+  });
+
+  it("비상대응은 제8호 「이행 보조」로 낮춘다 (2026-10-25 결정 11)", () => {
+    expect(getEvidenceLabel("emergencyResponse")?.purpose).toContain("이행 보조");
+    expect(getEvidenceLabel("emergencyResponse")?.purpose).not.toContain("점검 증빙");
   });
 
   it("maps emergencyResponse to 제4조 제8호", () => {

@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { WorkspaceDatabase, WorkspaceUser } from "@/lib/supabase-admin";
 import type { AskResponse } from "@/lib/types";
+import { isPostgrestMissingTableError } from "@/lib/commercial-required-tables";
 import { assessWorkpackReadiness, type WorkpackReadiness } from "@/lib/workpack-readiness";
 import { buildReopenData, type ReopenWorkpackInput } from "@/lib/workpack-store";
 import { verifyAskResponseGenerationEvidence } from "@/lib/generation-evidence";
@@ -177,6 +178,10 @@ export async function loadActiveOwnedShareSession(
   const { data, error } = await shareSessionQuery.maybeSingle();
 
   if (error) {
+    if (isPostgrestMissingTableError(error)) {
+      console.error("owned share session storage table is missing (PGRST205)", error);
+      return { ok: false, status: 503, message: COMMERCIAL_STORAGE_UNAVAILABLE_MESSAGE };
+    }
     console.error("owned share session fetch failed", error);
     return { ok: false, status: 500, message: "공유 세션 권한을 확인하지 못했습니다." };
   }
@@ -242,12 +247,7 @@ function isShareSessionCompatibilitySelectError(error: unknown): boolean {
   return message.includes("share_scope") || message.includes("access_policy");
 }
 
-function isPostgrestSchemaCacheMissingShareSessions(error: unknown): boolean {
-  if (!isRecord(error)) return false;
-  const code = typeof error.code === "string" ? error.code : "";
-  const message = typeof error.message === "string" ? error.message.toLowerCase() : "";
-  return code === "PGRST205" && message.includes("workpack_share_sessions");
-}
+const COMMERCIAL_STORAGE_UNAVAILABLE_MESSAGE = "공유 세션 저장소를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.";
 
 function readPublicString(value: unknown, maxLength = 2_400): string {
   if (typeof value !== "string") return "";
@@ -357,9 +357,10 @@ export async function loadActivePublicShareSession(
     if (isPostgrestNoRowsError(resolvedError)) {
       return { ok: false, status: 404, message: "유효한 공유 세션을 찾지 못했습니다." };
     }
-    if (isPostgrestSchemaCacheMissingShareSessions(resolvedError)) {
-      console.warn("public share session storage is not visible in PostgREST schema cache", resolvedError);
-      return { ok: false, status: 404, message: "유효한 공유 세션을 찾지 못했습니다." };
+    if (isPostgrestMissingTableError(resolvedError)) {
+      // 테이블이 없는 것은 「세션 없음」(404)이 아니라 운영 장애다(마이그레이션 010 미적용·스키마 캐시).
+      console.error("public share session storage table is missing (PGRST205)", resolvedError);
+      return { ok: false, status: 503, message: COMMERCIAL_STORAGE_UNAVAILABLE_MESSAGE };
     }
     console.error("public share session fetch failed", resolvedError);
     return { ok: false, status: 500, message: "공유 세션을 확인하지 못했습니다." };

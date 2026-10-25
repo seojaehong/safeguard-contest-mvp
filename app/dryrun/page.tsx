@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { getLatestDryrunReport, getLatestDryrunSnapshot } from "@/lib/dryrun-status";
 import { toDryrunPresentationSnapshot } from "@/lib/web-safe-presentation";
+import { describeDryrunFreshness } from "@/lib/public-screen-sample";
 import { triggerAppErrorBoundary } from "safeclaw-audit-app-error-escalation";
 
 export const dynamic = "force-dynamic";
@@ -26,19 +27,22 @@ export default async function DryrunPage({
     console.error("dry-run snapshot presentation read failed", error);
   }
   const report = getLatestDryrunReport();
+  // 저장된 점검 기록은 정적 파일이다. 오래된 기록을 「현재 상태」처럼 보이지 않게 점검일을 먼저 밝힌다.
+  const freshness = describeDryrunFreshness(snapshot?.generatedAt ?? null, new Date());
 
   return (
     <SafeClawModuleShell
       eyebrow="운영 점검"
       title="문서 생성 점검."
       description="위험성평가, TBM, 작업계획서 등 문서형 산출물의 생성 상태와 응답 품질을 운영 관점에서 추적합니다."
-      status={snapshot ? "live" : "partial"}
+      status={snapshot && !freshness.stale ? "live" : "partial"}
       mappedTo="생성 점검 · 기록 · 상세 결과"
       activeHref="/dryrun"
       actions={<Link href="/ops/api">연결 상태</Link>}
     >
       {snapshot ? (
         <section className="safeclaw-module-panel dryrun-card">
+          <p className={freshness.stale ? "export-error" : "muted small"} role="status">{freshness.label}</p>
           <div className="safeclaw-module-grid four dryrun-metrics">
             <article><span>실행 ID</span><strong>{snapshot.runId}</strong></article>
             <article><span>성공</span><strong>{snapshot.okCount}/{snapshot.totalRuns}</strong></article>

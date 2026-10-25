@@ -93,8 +93,15 @@ export function summarizeUsage(
     quarter: { count: 0, days: 0 },
     hourly: { count: 0, days: 0 },
   };
+  // ★ 2026-10-25 (LV-7) — 소정근로시간이 0·빈칸이면 화면이 몰래 8시간으로 바꿔 계산했다.
+  //   기본값을 몰래 쓰지 않는다. 유효하지 않으면 계산을 멈춘다.
+  if (!Number.isFinite(policy.hoursPerDay) || policy.hoursPerDay <= 0) {
+    throw new Error("1일 소정근로시간이 0보다 커야 환산할 수 있습니다");
+  }
   const issues: UsageIssue[] = [];
+  // 합계는 정확값을 모두 더한 뒤 마지막에 한 번만 반올림한다(줄마다 반올림하면 누적 오차가 생긴다)
   let totalDays = 0;
+  const exactByKind: Record<UsageKind, number> = { full: 0, half: 0, quarter: 0, hourly: 0 };
 
   records.forEach((r, index) => {
     let days = 0;
@@ -161,12 +168,14 @@ export function summarizeUsage(
     }
 
     byKind[r.kind].count += 1;
-    byKind[r.kind].days = round2(byKind[r.kind].days + days);
-    totalDays = round2(totalDays + days);
+    exactByKind[r.kind] += days;
+    totalDays += days;
   });
 
+  for (const k of Object.keys(exactByKind) as UsageKind[]) byKind[k].days = round2(exactByKind[k]);
+
   return {
-    totalDays,
+    totalDays: round2(totalDays),
     byKind,
     issues,
     needsHourlyCaution: records.some((r) => r.kind === "hourly"),
