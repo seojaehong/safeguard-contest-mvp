@@ -40,16 +40,18 @@ describe("public ask weighted concurrency admission", () => {
       return Response.json({ result: weight });
     }));
 
-    const enhancedLeases = await Promise.all(Array.from({ length: 6 }, () => acquirePublicAskWorkLease("enhanced")));
+    // 사이트 전체 용량 36 = enhanced 18건 또는 full 3건 동시 (2026-10-25 재홍님 결정, 종전 12)
+    const enhancedLeases = await Promise.all(Array.from({ length: 18 }, () => acquirePublicAskWorkLease("enhanced")));
     expect(enhancedLeases.every(Boolean)).toBe(true);
-    expect(activeUnits.size).toBe(12);
+    expect(activeUnits.size).toBe(36);
     await expect(acquirePublicAskWorkLease("full")).resolves.toBeNull();
 
     await Promise.all(enhancedLeases.map((lease) => lease?.release()));
-    const fullLease = await acquirePublicAskWorkLease("full");
-    expect(fullLease?.weight).toBe(12);
-    expect(activeUnits.size).toBe(12);
-    await fullLease?.release();
+    const fullLeases = await Promise.all(Array.from({ length: 3 }, () => acquirePublicAskWorkLease("full")));
+    expect(fullLeases.every((lease) => lease?.weight === 12)).toBe(true);
+    expect(activeUnits.size).toBe(36);
+    await expect(acquirePublicAskWorkLease("full")).resolves.toBeNull();
+    await Promise.all(fullLeases.map((lease) => lease?.release()));
     expect(activeUnits.size).toBe(0);
   });
 
