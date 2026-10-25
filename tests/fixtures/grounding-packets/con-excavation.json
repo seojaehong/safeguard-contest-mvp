@@ -1,0 +1,449 @@
+{
+ "source": "evaluation/launch-depth-audit-2026-10-25/ask/ask-full-con-excavation.json (운영 /api/ask full, 2026-10-25)",
+ "question": "서울 강서구 도시가스 배관 굴착공사. 굴착 깊이 2.5m, 굴착기 1대와 이동식 크레인 1대, 작업자 8명, 매설물 확인 필요, 오후 강풍 예보. 오늘 작업 전 문서팩을 만들어줘.",
+ "dbHarnessPacket": {
+  "mode": "db_harness_first",
+  "question": "서울 강서구 도시가스 배관 굴착공사. 굴착 깊이 2.5m, 굴착기 1대와 이동식 크레인 1대, 작업자 8명, 매설물 확인 필요, 오후 강풍 예보. 오늘 작업 전 문서팩을 만들어줘.",
+  "directEvidence": [],
+  "sifCases": [
+   {
+    "id": "sif-아카이브-건설업-00173",
+    "source_id": "kosha-sif-archive-20260401",
+    "item_type": "sif-case",
+    "category": "아카이브(건설업)",
+    "subcategory": null,
+    "title": "172 / 1. 토공사 / 1.4 되메움 작업",
+    "summary": "연번: 172 고위험작업·상황: 1. 토공사 column_4: 1.4 되메움 작업 column_5: 1.4.1 토사반입 및 되메움 실시 재해종류: 깔림 재해개요: 2018년 9월경 ○○현장에서 피재자가 도시가스 배관(관경 300mm) 부설 후 되메우기를 완료한도로 바닥면 청소를 위해 밀대(길이 약 1m)를 들고 정지 상태로 바닥면 골재 정리 작업 중인 타이어식 굴삭기(버킷용량 0.59㎥) 후면으로 이동하는 순간 굴삭기가 갑자기 후진, 굴삭기 뒷바퀴에 깔려 사망",
+    "keywords": [
+     "굴착",
+     "아카이브(건설업)"
+    ],
+    "risk_tags": [
+     "굴착"
+    ],
+    "primary_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "controls": [
+     "운전자 시야·사각지대 확인 및 차량과 작업자 동선을 차단시설로 분리",
+     "교차·후진 구간 신호수 배치, 후진 경보와 작업반경 접근통제 확인"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "short_summary": "작업차량 이동·후진 구간에서 작업자와 충돌·깔림 위험 · 운전자 시야·사각지대 확인 및 차량과 작업자 동선을 차단시설로 분리 · 교차·후진 구간 신호수 배치, 후진 경보와 작업반경 접근통제 확인",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 운전자 시야·사각지대 확인 및 차량과 작업자 동선을 차단시설로 분리",
+    "source_kind_label": "고위험요인 사례",
+    "operation_signal_label": "유사사례에서 운전자 시야·사각지대 확인 및 차량과 작업자 동선을 차단시설로 분리 후보",
+    "display_title": "○○현장에서 도시가스 배관(관경 300mm) 부설 후 되메우기를 완료한도로 바닥면 청소를 위해 밀대(길이 약 1m)를 들고 정지 상태로 바닥면 골재 정리… 사례",
+    "display_summary": "○○현장에서 도시가스 배관(관경 300mm) 부설 후 되메우기를 완료한도로 바닥면 청소를 위해 밀대(길이 약 1m)를 들고 정지 상태로 바닥면 골재 정리 작업 중인 타이어식 굴삭기(버킷용량 0.59㎥) 후면으로 이동하는 순간 굴삭기가 갑자기 후진,…",
+    "retrieval_source": "rest"
+   },
+   {
+    "id": "sif-아카이브-건설업-01467",
+    "source_id": "kosha-sif-archive-20260401",
+    "item_type": "sif-case",
+    "category": "아카이브(건설업)",
+    "subcategory": null,
+    "title": "1466 / 4. 마감공사 / 4.8 판넬 등 외부마감 작업",
+    "summary": "연번: 1466 고위험작업·상황: 4. 마감공사 column_4: 4.8 판넬 등 외부마감 작업 column_5: 4.8.2 판넬 등 외부마감 시공 재해종류: 부딪힘 재해개요: 2016년 5월경 ○○현장에서 작업자 2명이 판넬절단작업을 하던 중, 이웃 창고의 함석지붕이 강풍에 의해 파손되며 함석지붕과 지붕틀인 목재각재가 날아와 작업자 1명은 오른쪽 다리를 맞아 자상을 입었으며, 작업자 1명은 머리를 맞아 사망 기인물: 외부마감재 재해유발요인: 판넬 절단작업 중",
+    "keywords": [
+     "아카이브(건설업)",
+     "절단"
+    ],
+    "risk_tags": [
+     "절단"
+    ],
+    "primary_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "controls": [
+     "SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인",
+     "관리감독자 검토 완료 전 원시 태그·관리대책을 현장 통제대책으로 확정하지 않음"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "short_summary": "검토 필요: 부딪힘 사고의 직접 원인과 현장 위험요인 미확정 · SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인 · 관리감독자 검토 완료 전 원시 태그·관리대책을 현장 통제대책으로 확정하지 않음",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인",
+    "source_kind_label": "고위험요인 사례",
+    "operation_signal_label": "유사사례에서 SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인 후보",
+    "display_title": "○○현장에서 작업자 2명이 판넬절단작업을 하던 중, 이웃 창고의 함석지붕이 강풍에 의해 파손되며 함석지붕과 지붕틀인 목재각재가 날아와 작업자 1명은 오른… 사례",
+    "display_summary": "○○현장에서 작업자 2명이 판넬절단작업을 하던 중, 이웃 창고의 함석지붕이 강풍에 의해 파손되며 함석지붕과 지붕틀인 목재각재가 날아와 작업자 1명은 오른쪽 다리를 맞아 자상을 입었으며, 작업자 1명은 머리를 맞아 사망",
+    "retrieval_source": "rest"
+   },
+   {
+    "id": "sif-아카이브-건설업-02001",
+    "source_id": "kosha-sif-archive-20260401",
+    "item_type": "sif-case",
+    "category": "아카이브(건설업)",
+    "subcategory": null,
+    "title": "2000 / 5. 전기·기계 설비공사 / 5.2 기계설비 작업",
+    "summary": "연번: 2000 고위험작업·상황: 5. 전기·기계 설비공사 column_4: 5.2 기계설비 작업 column_5: 5.2.2 기계설비 설치 재해종류: 추락 재해개요: 2016년 08월경 ○○현장에서 작업자 3명이 고소작업대에 탑승하여 40M 높이의 건물 외벽에 도시가스 배관작업 중 고소작업대의 붐 인출용 체인을 고정하는 볼트가 갑자기 파단되면서 급격히 붐이 접히면서 붐 간의 접힘 충격에 의해 탑승하고 있던 근로자 3명 중 2명은 11M 아래 바닥으로 떨어져 사",
+    "keywords": [
+     "고소",
+     "아카이브(건설업)",
+     "추락"
+    ],
+    "risk_tags": [
+     "추락",
+     "고소"
+    ],
+    "primary_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "TBM 브리핑",
+     "TBM 기록",
+     "안전보건교육 기록",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "controls": [
+     "턴테이블 체결볼트·붐 연결핀·힌지 용접부를 제작사 기준으로 점검하고 변형·균열 부품 즉시 교체",
+     "작업대 정격하중을 준수하고 탑승자 안전대 체결·하부 출입통제 후 구조부 이상 시 즉시 사용중지"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "TBM 브리핑",
+     "TBM 기록",
+     "안전보건교육 기록",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "short_summary": "고소작업대 턴테이블·붐·힌지 구조부의 볼트·용접부 파단으로 인한 작업대 추락 위험 · 턴테이블 체결볼트·붐 연결핀·힌지 용접부를 제작사 기준으로 점검하고 변형·균열 부품 즉시 교체 · 작업대 정격하중을 준수하고 탑승자 안전대 체결·하부 출입통제 후 구조부 이상 시 즉시 사용중지",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 턴테이블 체결볼트·붐 연결핀·힌지 용접부를 제작사 기준으로 점검하고 변형·균열 부품…",
+    "source_kind_label": "고위험요인 사례",
+    "operation_signal_label": "유사사례에서 턴테이블 체결볼트·붐 연결핀·힌지 용접부를 제작사 기준으로 점검하고 변형·… 후보",
+    "display_title": "○○현장에서 작업자 3명이 고소작업대에 탑승하여 40M 높이의 건물 외벽에 도시가스 배관작업 중 고소작업대의 붐 인출용 체인을 고정하는 볼트가 갑자기 파… 사례",
+    "display_summary": "○○현장에서 작업자 3명이 고소작업대에 탑승하여 40M 높이의 건물 외벽에 도시가스 배관작업 중 고소작업대의 붐 인출용 체인을 고정하는 볼트가 갑자기 파단되면서 급격히 붐이 접히면서 붐 간의 접힘 충격에 의해 탑승하고 있던 근로자 3명 중 2명은 1…",
+    "retrieval_source": "rest"
+   }
+  ],
+  "supportingEvidence": [
+   {
+    "id": "downloads-14-2023-장마철-건설현장-안전보건-길잡이-978a7b8fc7-record-0003-item",
+    "source_id": "downloads-14-2023-장마철-건설현장-안전보건-길잡이-978a7b8fc7",
+    "item_type": "emergency_response",
+    "category": "비상대응",
+    "subcategory": "knowledge_reference",
+    "title": "14 2023 장마철 건설현장 안전보건 길잡이 - 장마철 주요사고 장마철 날씨 전망 장마철 핵심안전수칙 2023-건설안전-255 집중호우 · 침수 감전 무너짐 · 매몰 태풍 · 강풍 배수로, 배수시설 사전점검 및",
+    "summary": "장마철 주요사고 장마철 날씨 전망 장마철 핵심안전수칙 2023-건설안전-255 집중호우 · 침수 감전 무너짐 · 매몰 태풍 · 강풍 배수로, 배수시설 사전점검 및 정비 집중호우 등 악천후 시 작업중지 및 대피 침수된 장소 출입 통제 누전차단기 연결, 접지·절연 상태 점검 충전부 및 배전반 등 빗물유입 방지 조치 전기기계·기구 젖은 손으로 취급 금지 굴착면 적정 기울기 확보 배수로 설치 및 사면 비닐 보양 옹벽 등 붕괴우려 장소 점검 및 출입통제 1 11 1 2 22 2 3 33 3 각종 시설물, 적재물 등 결속 및 보강 태풍 등 강풍 예보 시 작업제한 및 중지 비상대",
+    "keywords": [
+     "비상",
+     "안전보건",
+     "붕괴",
+     "장마",
+     "기계"
+    ],
+    "risk_tags": [
+     "비상",
+     "안전보건",
+     "붕괴",
+     "장마",
+     "기계"
+    ],
+    "primary_documents": [
+     "비상대응 절차",
+     "내부 지식DB"
+    ],
+    "controls": [
+     "비상연락망·대피·응급조치 절차 확인",
+     "장비 동선 분리와 신호수 배치 확인"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "비상대응 절차",
+     "내부 지식DB"
+    ],
+    "short_summary": "붕괴 위험: 비상연락망·대피·응급조치 절차 미확인 · 비상연락망·대피·응급조치 절차 확인 · 장비 동선 분리와 신호수 배치 확인",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "비상대응 절차 · 내부 지식DB에 비상연락망·대피·응급조치 절차 확인",
+    "source_kind_label": "안전 참고자료",
+    "operation_signal_label": "문서와 TBM에 비상연락망·대피·응급조치 절차 확인 반영",
+    "retrieval_source": "rest"
+   },
+   {
+    "id": "downloads-14-2023-장마철-건설현장-안전보건-길잡이-978a7b8fc7-record-0002-item",
+    "source_id": "downloads-14-2023-장마철-건설현장-안전보건-길잡이-978a7b8fc7",
+    "item_type": "risk_assessment",
+    "category": "위험성평가",
+    "subcategory": "field_form_or_guide",
+    "title": "14 2023 장마철 건설현장 안전보건 길잡이 - I 목차Contents Ⅵ Ⅱ Ⅰ Ⅲ Ⅳ Ⅴ 장마철이란? 여름철 재해 발생 현황 장마철 위험요인별 안전관리 1. 집중호우로 인한 건설현장 침수 2. 굴착면 무너짐",
+    "summary": "I 목차Contents Ⅵ Ⅱ Ⅰ Ⅲ Ⅳ Ⅴ 장마철이란? 여름철 재해 발생 현황 장마철 위험요인별 안전관리 1. 집중호우로 인한 건설현장 침수 2. 굴착면 무너짐 3. 태풍·강풍으로 인한 무너짐 4. 낙뢰 5. 감전 6. 중독·질식 (밀폐공간작업) 7. 온열질환 안전보건 교육자료 자율안전보건 점검표 [부록] 사업장 자체점검표 07 13 15 16 18 21 24 25 28 36 42 59 78",
+    "keywords": [
+     "안전보건",
+     "점검표",
+     "질식",
+     "장마"
+    ],
+    "risk_tags": [
+     "안전보건",
+     "점검표",
+     "질식",
+     "장마"
+    ],
+    "primary_documents": [
+     "위험성평가표"
+    ],
+    "controls": [
+     "진입 전 산소·유해가스 농도 측정 및 강제환기 실시",
+     "감시인 외부 배치·구조장비 확보 후 내부 설비·펌프·모터 전원 차단 및 잠금표지(LOTO) 적용"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "위험성평가표"
+    ],
+    "short_summary": "밀폐공간 진입 중 산소결핍·유해가스 노출 및 내부 설비 불시기동 위험 · 진입 전 산소·유해가스 농도 측정 및 강제환기 실시 · 감시인 외부 배치·구조장비 확보 후 내부 설비·펌프·모터 전원 차단 및 잠금표지(LOTO) 적용",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "위험성평가표에 진입 전 산소·유해가스 농도 측정 및 강제환기 실시",
+    "source_kind_label": "위험성평가 기준",
+    "operation_signal_label": "위험성평가에 진입 전 산소·유해가스 농도 측정 및 강제환기 실시 반영",
+    "retrieval_source": "rest"
+   },
+   {
+    "id": "kosha-447a172c699304de7acc5bea",
+    "source_id": "kosha-guide-offline:D-C-10",
+    "item_type": "technical-support-regulation",
+    "category": null,
+    "subcategory": null,
+    "title": "D-C-10-2026 건설장비(이동식크레인, 항타기 및 항발기, 타워크레인) 작업계획서 작성에 관한 기술지원규정",
+    "summary": "",
+    "keywords": [],
+    "risk_tags": [],
+    "primary_documents": [],
+    "controls": [],
+    "source_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914313984348485/1",
+    "evidence_role": "supporting",
+    "retrieval_source": "local-hybrid",
+    "kosha_guide": {
+     "referenceId": "kosha-447a172c699304de7acc5bea",
+     "stableDocumentKey": "D-C-10",
+     "version": "D-C-10-2026",
+     "quality": "accepted",
+     "lifecycle": "current",
+     "bodyKind": "native",
+     "anchors": [],
+     "evidenceRef": null,
+     "directEligible": false
+    }
+   },
+   {
+    "id": "kosha-8c13ab5569ffb383179dc401",
+    "source_id": "kosha-guide-offline:D-C-11",
+    "item_type": "technical-support-regulation",
+    "category": null,
+    "subcategory": null,
+    "title": "D-C-11-2026 굴착 및 토공 안전작업에 관한 기술지원규정",
+    "summary": "",
+    "keywords": [],
+    "risk_tags": [],
+    "primary_documents": [],
+    "controls": [],
+    "source_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914341697414755/1",
+    "evidence_role": "supporting",
+    "retrieval_source": "local-hybrid",
+    "kosha_guide": {
+     "referenceId": "kosha-8c13ab5569ffb383179dc401",
+     "stableDocumentKey": "D-C-11",
+     "version": "D-C-11-2026",
+     "quality": "accepted",
+     "lifecycle": "current",
+     "bodyKind": "native",
+     "anchors": [],
+     "evidenceRef": null,
+     "directEligible": false
+    }
+   }
+  ],
+  "improvementMemory": [],
+  "workpackMemory": [],
+  "retrievalContract": {
+   "source": "safety_reference_items",
+   "mode": "hybrid-local-supabase",
+   "vector": {
+    "enabled": false,
+    "attempted": false,
+    "ready": false,
+    "reason": "disabled",
+    "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+   },
+   "sourceCounts": {
+    "directEvidence": 0,
+    "sifCases": 3,
+    "supportingEvidence": 4,
+    "rest": 5,
+    "ranked": 0,
+    "vector": 0,
+    "hybrid": 0,
+    "localTag": 0,
+    "localRanked": 0,
+    "localHybrid": 2
+   },
+   "message": "Supabase 안전 지식 DB 호출 완료 (KOSHA 기술지원규정 3건, KOSHA 기술지침 0건, SIF 유사사례 3건, 일반 카탈로그 5건, 작업특화 rerank 적용)"
+  },
+  "ontologyChecklist": {
+   "status": "ready",
+   "missing": []
+  },
+  "generationContract": {
+   "llmRole": "naturalize_only",
+   "llmOutputScope": "rewrite_fixed_evidence_only",
+   "evidenceAuthority": "db_harness",
+   "providerRetryScope": "naturalization_retry_only",
+   "fallbackChainAllowed": false,
+   "genericProseSubstitutionAllowed": false,
+   "missingEvidencePolicy": "surface_review_required",
+   "requiredDocuments": [
+    "위험성평가표",
+    "TBM 브리핑",
+    "TBM 기록"
+   ],
+   "missingEvidence": [],
+   "documentCoverage": [
+    {
+     "document": "위험성평가표",
+     "covered": true,
+     "evidenceTypes": [
+      "sifCase"
+     ]
+    },
+    {
+     "document": "TBM 브리핑",
+     "covered": true,
+     "evidenceTypes": [
+      "sifCase"
+     ]
+    },
+    {
+     "document": "TBM 기록",
+     "covered": true,
+     "evidenceTypes": [
+      "sifCase"
+     ]
+    }
+   ]
+  }
+ },
+ "citations": [
+  {
+   "id": "lawgo-law-283449",
+   "type": "law",
+   "title": "산업안전보건법",
+   "summary": "고용노동부 · 법률 · 공포 20260219",
+   "citation": "법률 · 공포 20260219",
+   "sourceLabel": "Law.go 법령",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/lsInfoP.do?lsiSeq=283449",
+   "tags": [
+    "법률",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-law-288431",
+   "type": "law",
+   "title": "산업안전보건법 시행규칙",
+   "summary": "고용노동부 · 고용노동부령 · 공포 20260728",
+   "citation": "고용노동부령 · 공포 20260728",
+   "sourceLabel": "Law.go 법령",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/lsInfoP.do?lsiSeq=288431",
+   "tags": [
+    "고용노동부령",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-law-288347",
+   "type": "law",
+   "title": "산업안전보건법 시행령",
+   "summary": "고용노동부 · 대통령령 · 공포 20260728",
+   "citation": "대통령령 · 공포 20260728",
+   "sourceLabel": "Law.go 법령",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/lsInfoP.do?lsiSeq=288347",
+   "tags": [
+    "대통령령",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-expc-343113",
+   "type": "interpretation",
+   "title": "경상남도 남해군 - 공공행정에서 비현업업무에 종사하는 사람이 산업안전보건위원회의 근로자위원이 될 수 있는지(「산업안전보건법 시행령」 별표 1 제4호가목 등 관련)",
+   "summary": "법제처 · 경상남도 남해군 · 회신 2026.04.22",
+   "citation": "법제처 · 회신 2026.04.22",
+   "sourceLabel": "Law.go 해석례",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=expc&amp;ID=343113&amp;type=HTML&amp;mobileYn=",
+   "tags": [
+    "법제처",
+    "경상남도 남해군",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-expc-314491",
+   "type": "interpretation",
+   "title": "고용노동부 - ‘3일 이상의 휴업’이 연속적인 기간을 의미하는지 여부(「산업안전보건법 시행규칙」 제4조 등 관련)",
+   "summary": "법제처 · 고용노동부 · 회신 2014.07.16",
+   "citation": "법제처 · 회신 2014.07.16",
+   "sourceLabel": "Law.go 해석례",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=expc&amp;ID=314491&amp;type=HTML&amp;mobileYn=",
+   "tags": [
+    "법제처",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-expc-343007",
+   "type": "interpretation",
+   "title": "고용노동부 - 국가기관 또는 지방자치단체가 유해작업 도급금지 의무 등을 위반한 경우 「산업안전보건법」 제161조제1항에 따라 과징금을 부과할 수 있는지(「산업안전보건법」 제161조제1항 등 관련)",
+   "summary": "법제처 · 고용노동부 · 회신 2026.03.30",
+   "citation": "법제처 · 회신 2026.03.30",
+   "sourceLabel": "Law.go 해석례",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=expc&amp;ID=343007&amp;type=HTML&amp;mobileYn=",
+   "tags": [
+    "법제처",
+    "고용노동부",
+    "Law.go"
+   ]
+  }
+ ]
+}

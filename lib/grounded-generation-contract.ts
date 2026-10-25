@@ -6,14 +6,19 @@ import {
   getSafetyReferenceDisplayTitle,
   isKoshaSupportingCitationEligible,
   isKoshaTechnicalReference,
+  isOverseasSafetyReference,
   isSafetyReferenceDirectEligible,
+  isSafetyReferenceReviewMetaControl,
+  OVERSEAS_REFERENCE_NOTICE,
   type SafetyReferenceItem
 } from "@/lib/safety-reference-catalog";
 import type { SearchResult } from "@/lib/types";
 
+// PR-12(2026-10-26): ontology = 생성 전에 주입한 온톨로지 published 조치(결정 3 안 A, 조치 1건 = 출처 1건, 조문 연결),
+// overseas = 국외 참고 사례(country≠KR) — 참고 표시로만 싣고 controls·조문 매핑에 쓰지 않는다.
 export type GroundedGenerationSource = Readonly<{
   referenceKey: string;
-  kind: "direct" | "sif" | "kosha" | "law";
+  kind: "direct" | "ontology" | "sif" | "kosha" | "law" | "overseas";
   sourceId: string;
   title: string;
   summary: string;
@@ -21,10 +26,20 @@ export type GroundedGenerationSource = Readonly<{
   controls: readonly string[];
 }>;
 
+export type OntologyControlEvidence = Readonly<{
+  controlId: string;
+  controlLabel: string;
+  taskLabel: string;
+  hazardLabel: string;
+  articles: readonly Readonly<{ nodeId: string; label: string; law: string; articleNo: string }>[];
+}>;
+
 export type GroundedGenerationPacket = Readonly<{
   version: "grounded-generation-v1";
   sourceIdentity: string;
+  /** ready = controls 를 가진 국내 출처가 1건 이상. 체크리스트 부족은 status 가 아니라 checklist(진단 배지)로만 남긴다(H1). */
   status: "ready" | "review_required";
+  checklist: Readonly<{ status: "ready" | "review_required"; missing: readonly string[] }>;
   llmRole: "naturalize_only";
   sources: readonly GroundedGenerationSource[];
 }>;
@@ -97,7 +112,47 @@ function safetySource(
       item.kosha_guide?.stableDocumentKey,
       item.kosha_guide?.evidenceRef
     ]),
-    controls: uniqueStrings(item.controls)
+    // H5: 「검토 필요」 운영 뷰의 메타 문구(「관리감독자 검토 완료 전 …」 등)는 작업자 조치가 아니다 — controls 로 싣지 않는다.
+    controls: uniqueStrings(item.controls).filter((control) => !isSafetyReferenceReviewMetaControl(control))
+  };
+}
+
+function overseasSource(item: SafetyReferenceItem): GroundedGenerationSource {
+  const referenceKey = `OVS:${item.id}`;
+  const title = getSafetyReferenceDisplayTitle(item);
+  return {
+    referenceKey,
+    kind: "overseas",
+    sourceId: item.id,
+    title,
+    summary: `${OVERSEAS_REFERENCE_NOTICE} ${item.country ? `[${item.country}] ` : ""}${item.summary || ""}`.trim(),
+    aliases: uniqueStrings([referenceKey, item.id, item.source_id, title]),
+    controls: []
+  };
+}
+
+const LAW_NAME_ALIASES: Readonly<Record<string, readonly string[]>> = {
+  "산업안전보건기준에 관한 규칙": ["산업안전보건기준에 관한 규칙", "안전보건규칙", "기준규칙"],
+  "산업안전보건법 시행규칙": ["산업안전보건법 시행규칙"],
+  "산업안전보건법 시행령": ["산업안전보건법 시행령"],
+  "산업안전보건법": ["산업안전보건법"],
+  "중대재해 처벌 등에 관한 법률": ["중대재해 처벌 등에 관한 법률", "중대재해처벌법"]
+};
+
+function ontologySource(evidence: OntologyControlEvidence): GroundedGenerationSource {
+  const referenceKey = `ONT:${evidence.controlId}`;
+  const articleAliases = evidence.articles.flatMap((article) => [
+    article.label,
+    ...(LAW_NAME_ALIASES[article.law] || [article.law]).map((law) => `${law} 제${article.articleNo}조`)
+  ]);
+  return {
+    referenceKey,
+    kind: "ontology",
+    sourceId: evidence.controlId,
+    title: evidence.controlLabel,
+    summary: `${evidence.taskLabel} · ${evidence.hazardLabel} · 근거 ${evidence.articles.map((article) => article.label).join(", ")}`,
+    aliases: uniqueStrings([referenceKey, evidence.controlId, evidence.controlLabel, ...articleAliases]),
+    controls: [evidence.controlLabel]
   };
 }
 
@@ -126,17 +181,27 @@ export function buildGroundedGenerationPacket(input: {
   dbHarnessPacket: DbHarnessPacket;
   legalCandidates: readonly SearchResult[];
   eligibleKoshaIds: ReadonlySet<string>;
+  /** 생성 전에 조회한 온톨로지 published 조치(lib/grounding-ontology-injection.ts). */
+  ontologySources?: readonly OntologyControlEvidence[];
 }): GroundedGenerationPacket {
-  const direct = input.dbHarnessPacket.directEvidence
+  const allReferences = [
+    ...input.dbHarnessPacket.directEvidence,
+    ...input.dbHarnessPacket.sifCases,
+    ...input.dbHarnessPacket.supportingEvidence
+  ];
+  const overseas = allReferences.filter(isOverseasSafetyReference).map(overseasSource);
+  const domestic = (items: readonly SafetyReferenceItem[]) => items.filter((item) => !isOverseasSafetyReference(item));
+  const direct = domestic(input.dbHarnessPacket.directEvidence)
     .filter((item) => !isKoshaTechnicalReference(item) && isSafetyReferenceDirectEligible(item))
     .map((item) => safetySource(item, "direct", `DB:${item.id}`));
-  const sif = input.dbHarnessPacket.sifCases
+  const ontology = (input.ontologySources || []).map(ontologySource);
+  const sif = domestic(input.dbHarnessPacket.sifCases)
     .filter((item) => item.item_type === "sif-case")
     .map((item) => safetySource(item, "sif", `SIF:${item.id}`));
-  const kosha = [
+  const kosha = domestic([
     ...input.dbHarnessPacket.directEvidence,
     ...input.dbHarnessPacket.supportingEvidence
-  ]
+  ])
     .filter(isKoshaTechnicalReference)
     .filter((item) => input.eligibleKoshaIds.has(item.id) && isKoshaSupportingCitationEligible(item))
     .map((item) => {
@@ -150,19 +215,26 @@ export function buildGroundedGenerationPacket(input: {
   const law = input.legalCandidates.map(legalSource);
   const kindOrder: Readonly<Record<GroundedGenerationSource["kind"], number>> = {
     direct: 0,
-    sif: 1,
-    kosha: 2,
-    law: 3
+    ontology: 1,
+    sif: 2,
+    kosha: 3,
+    law: 4,
+    overseas: 5
   };
-  const sources = canonicalizeSources([...direct, ...sif, ...kosha, ...law])
+  const sources = canonicalizeSources([...direct, ...ontology, ...sif, ...kosha, ...law, ...overseas])
     .sort((left, right) => (
       kindOrder[left.kind] - kindOrder[right.kind]
       || compareCanonical(left.referenceKey, right.referenceKey)
       || compareCanonical(left.sourceId, right.sourceId)
     ));
-  const status = input.dbHarnessPacket.ontologyChecklist.status === "ready" && sources.length > 0
+  // H1(결정 2): 체크리스트 부족(TBM 기록 근거 없음 등)은 생성을 막지 않는다. 출처가 0건이면 빈 출력도 review_required.
+  const status = sources.some((source) => source.kind !== "overseas" && source.controls.length > 0)
     ? "ready"
     : "review_required";
+  const checklist = {
+    status: input.dbHarnessPacket.ontologyChecklist.status,
+    missing: uniqueStrings(input.dbHarnessPacket.ontologyChecklist.missing)
+  };
   const identityPayload = JSON.stringify({
     version: "grounded-generation-v1",
     status,
@@ -181,6 +253,7 @@ export function buildGroundedGenerationPacket(input: {
     version: "grounded-generation-v1",
     sourceIdentity: createHash("sha256").update(identityPayload).digest("hex"),
     status,
+    checklist,
     llmRole: "naturalize_only",
     sources
   };
@@ -197,7 +270,7 @@ function isFieldVerificationSentinel(value: string): boolean {
 
 function sourceMatchesReference(source: GroundedGenerationSource, reference: string): boolean {
   const normalizedReference = normalize(reference);
-  const typedReference = /^(DB|SIF|KOSHA|LAW):/i.test(reference.trim());
+  const typedReference = /^(DB|ONT|SIF|KOSHA|LAW|OVS):/i.test(reference.trim());
   if (typedReference) return normalize(source.referenceKey) === normalizedReference;
   return source.aliases.some((alias) => normalize(alias) === normalizedReference);
 }
@@ -207,22 +280,54 @@ function matchingSources(packet: GroundedGenerationPacket, reference: string): r
 }
 
 const KOSHA_REFERENCE_RE = /\b[A-Z](?:-[A-Z])?-\d{1,4}-\d{4}\b/g;
-const LAW_REFERENCE_RE = /제\d+조(?:의\d+)?/g;
+// H6(결정 5): 조문은 법령명과 함께 써야 근거가 된다. 맨 「제N조」는 어느 출처와도 맞지 않는다(law: null).
+const LAW_NAME_PATTERN = "산업안전보건기준에\\s*관한\\s*규칙|안전보건규칙|기준규칙|산업안전보건법\\s*시행규칙|산업안전보건법\\s*시행령|산업안전보건법|중대재해\\s*처벌\\s*등에\\s*관한\\s*법률|중대재해처벌법";
+const LAW_REFERENCE_RE = new RegExp(`(?:(${LAW_NAME_PATTERN})\\s*)?(제\\d+조(?:의\\d+)?)`, "g");
 
-type ExplicitReference = { kind: "kosha" | "law"; value: string };
+type ExplicitReference =
+  | { kind: "kosha"; value: string }
+  | { kind: "law"; value: string; law: string | null; article: string };
+
+function canonicalLawName(raw: string): string {
+  const compact = raw.replace(/\s+/g, "");
+  if (/^(?:산업안전보건기준에관한규칙|안전보건규칙|기준규칙)$/.test(compact)) return "산업안전보건기준에 관한 규칙";
+  if (compact === "산업안전보건법시행규칙") return "산업안전보건법 시행규칙";
+  if (compact === "산업안전보건법시행령") return "산업안전보건법 시행령";
+  if (compact === "산업안전보건법") return "산업안전보건법";
+  if (/^(?:중대재해처벌등에관한법률|중대재해처벌법)$/.test(compact)) return "중대재해 처벌 등에 관한 법률";
+  return compact;
+}
 
 function collectExplicitReferences(value: string): ExplicitReference[] {
-  return [
-    ...(value.match(KOSHA_REFERENCE_RE) || []).map((match) => ({ kind: "kosha" as const, value: match })),
-    ...(value.match(LAW_REFERENCE_RE) || []).map((match) => ({ kind: "law" as const, value: match }))
-  ];
+  const references: ExplicitReference[] = (value.match(KOSHA_REFERENCE_RE) || [])
+    .map((match) => ({ kind: "kosha" as const, value: match }));
+  for (const match of value.matchAll(LAW_REFERENCE_RE)) {
+    references.push({
+      kind: "law",
+      value: match[0].replace(/\s+/g, " ").trim(),
+      law: match[1] ? canonicalLawName(match[1]) : null,
+      article: match[2]
+    });
+  }
+  return references;
 }
 
 function sourceHasExplicitReference(source: GroundedGenerationSource, reference: ExplicitReference): boolean {
-  if (source.kind !== reference.kind) return false;
+  if (reference.kind === "kosha") {
+    if (source.kind !== "kosha") return false;
+    const sourceText = [source.referenceKey, source.title, source.summary, ...source.aliases].join("\n");
+    return collectExplicitReferences(sourceText).some((candidate) => (
+      candidate.kind === "kosha" && normalize(candidate.value) === normalize(reference.value)
+    ));
+  }
+  // 조문은 법령·온톨로지 출처만 댈 수 있다. 국외 참고 사례(overseas)는 조문 매핑에 쓰지 않는다.
+  if (reference.law === null) return false;
+  if (source.kind !== "law" && source.kind !== "ontology") return false;
   const sourceText = [source.referenceKey, source.title, source.summary, ...source.aliases].join("\n");
   return collectExplicitReferences(sourceText).some((candidate) => (
-    candidate.kind === reference.kind && normalize(candidate.value) === normalize(reference.value)
+    candidate.kind === "law"
+    && candidate.law === reference.law
+    && normalize(candidate.article) === normalize(reference.article)
   ));
 }
 

@@ -142,6 +142,7 @@ function frozenPacket(sources: GroundedGenerationPacket["sources"]): GroundedGen
     version: "grounded-generation-v1",
     sourceIdentity: "collision-fixture",
     status: "ready",
+    checklist: Object.freeze({ status: "ready", missing: Object.freeze([]) }),
     llmRole: "naturalize_only",
     sources: Object.freeze([...sources])
   });
@@ -592,17 +593,30 @@ describe("grounded generation contract", () => {
       legalCandidates: [legalCandidates[0], { ...legalCandidates[0], id: "law-29", title: "산업안전보건법 제29조" }],
       eligibleKoshaIds: new Set(["kosha-1"])
     });
+    // PR-12 H1: 체크리스트(TBM 기록 근거 등)는 status 가 아니라 checklist 로만 실린다 — 해시(행동 필드)에는 들지 않는다.
     const reviewHarness = harnessPacket();
     reviewHarness.ontologyChecklist = { status: "review_required", missing: ["fixture"] };
-    const changedStatus = buildGroundedGenerationPacket({
+    const changedChecklist = buildGroundedGenerationPacket({
       dbHarnessPacket: reviewHarness,
       legalCandidates: [legalCandidates[0], { ...legalCandidates[0], id: "law-29", title: "산업안전보건법 제29조" }],
       eligibleKoshaIds: new Set(["kosha-1"])
+    });
+    // controls 를 가진 출처가 모두 빠지면 status 가 review_required 로 바뀌고 해시도 바뀐다.
+    const noControlHarness = harnessPacket();
+    noControlHarness.sifCases = [];
+    const changedStatus = buildGroundedGenerationPacket({
+      dbHarnessPacket: noControlHarness,
+      legalCandidates: [legalCandidates[0], { ...legalCandidates[0], id: "law-29", title: "산업안전보건법 제29조" }],
+      eligibleKoshaIds: new Set<string>()
     });
 
     expect(reordered.sourceIdentity).toBe(baseline.sourceIdentity);
     expect(JSON.stringify(reordered.sources)).toBe(JSON.stringify(baseline.sources));
     expect(changedTitle.sourceIdentity).not.toBe(baseline.sourceIdentity);
+    expect(changedChecklist.status).toBe("ready");
+    expect(changedChecklist.checklist).toEqual({ status: "review_required", missing: ["fixture"] });
+    expect(changedChecklist.sourceIdentity).toBe(baseline.sourceIdentity);
+    expect(changedStatus.status).toBe("review_required");
     expect(changedStatus.sourceIdentity).not.toBe(baseline.sourceIdentity);
   });
 

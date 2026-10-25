@@ -70,6 +70,13 @@ export type SafetyReferenceItem = {
   primary_documents: string[];
   controls: string[];
   source_url?: string | null;
+  /** 011 마이그레이션 칸(2026-10-25). 조회는 review_status='published' 만 쓴다. country≠KR 은 국내 법령 근거가 아니다. */
+  country?: string;
+  language?: string;
+  translation?: "original" | "machine" | "human_reviewed";
+  review_status?: "published" | "review_required" | "rejected";
+  legal_basis_scope?: "domestic" | "overseas_reference";
+  task_ids?: string[];
   evidence_role?: "direct" | "supporting";
   reflected_documents?: string[];
   short_summary?: string;
@@ -263,6 +270,12 @@ export function buildPublicSafetyReferenceItem(item: SafetyReferenceItem): Safet
     ...(item.source_url !== undefined
       ? { source_url: normalizeApprovedSafetyReferenceProvenanceUrl(item.source_url) }
       : {}),
+    // 011 칸 — 화면이 「국내 법령 근거 아님(참고 사례)」 표시를 내려면 국가·범위가 공개 패킷에 남아야 한다.
+    ...(item.country ? { country: boundPublicReferenceText(item.country, 8) } : {}),
+    ...(item.language ? { language: boundPublicReferenceText(item.language, 8) } : {}),
+    ...(item.review_status ? { review_status: item.review_status } : {}),
+    ...(item.legal_basis_scope ? { legal_basis_scope: item.legal_basis_scope } : {}),
+    ...(item.task_ids ? { task_ids: boundPublicReferenceList(item.task_ids, 12, PUBLIC_REFERENCE_LIMITS.listValue) } : {}),
     ...(item.evidence_role ? { evidence_role: item.evidence_role } : {}),
     ...(item.reflected_documents
       ? { reflected_documents: boundPublicReferenceList(item.reflected_documents, 24, PUBLIC_REFERENCE_LIMITS.listValue) }
@@ -403,7 +416,7 @@ const EXPECTED_TECHNICAL_TOTAL = 1040;
 const DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small";
 const DEFAULT_EMBEDDING_DIMENSIONS = 1536;
 const VECTOR_SEARCH_TIMEOUT_MS = 20_000;
-const SELECT_FIELDS = [
+const CORE_SELECT_FIELDS = [
   "id",
   "source_id",
   "item_type",
@@ -418,6 +431,45 @@ const SELECT_FIELDS = [
   "controls",
   "payload"
 ].join(",");
+// 011: 출처·국가·검수 상태·작업유형 칸. review_status 는 서버 필터(eq.published)와 클라이언트 후처리 둘 다에 쓴다.
+// (source_url 은 스키마 가변 칸으로 분류돼 핵심 SELECT 에 넣지 않는다 — tests/kosha-grounding-fail-closed)
+// 011 이 없는 DB(미리보기·미적용 사본)에서는 fetchReferenceItemsCompat 가 핵심 칸으로 재조회한다.
+const PROVENANCE_SELECT_FIELDS = ["country", "language", "review_status", "legal_basis_scope", "task_ids"];
+const SELECT_FIELDS = [CORE_SELECT_FIELDS, ...PROVENANCE_SELECT_FIELDS].join(",");
+
+export const OVERSEAS_REFERENCE_NOTICE = "국내 법령 근거 아님(참고 사례)";
+
+// 「검토 필요」 운영 뷰가 controls 자리에 넣는 검토 메모. 관리자 안내문이지 작업자 조치가 아니다 — 생성 패킷 controls 에서 뺀다(H5).
+const REVIEW_META_CONTROL_UNRESOLVED_KOSHA = "검증된 현행 원문과 provenance를 확인한 뒤 기술적 보조지침으로 사용";
+const REVIEW_META_CONTROL_SIF_COMPARE = "SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인";
+const REVIEW_META_CONTROL_SIF_HOLD = "관리감독자 검토 완료 전 사고사례 관리대책을 현장 통제대책으로 확정하지 않음";
+// 운영 응답에는 옛 문구 변형(「관리감독자 검토 완료 전 원시 태그·관리대책을 …」)도 남아 있어 정확 일치가 아니라 꼴로 본다.
+const REVIEW_META_CONTROL_PATTERNS: readonly RegExp[] = [
+  /^관리감독자 검토 완료 전 .*확정하지 않음$/u,
+  /^SIF 사고개요와 .*직접 원인 확인$/u,
+  /provenance를 확인한 뒤 .*보조지침으로 사용$/u
+];
+
+export function isSafetyReferenceReviewMetaControl(value: string): boolean {
+  const compact = value.replace(/\s+/g, " ").trim();
+  return compact === REVIEW_META_CONTROL_UNRESOLVED_KOSHA
+    || compact === REVIEW_META_CONTROL_SIF_COMPARE
+    || compact === REVIEW_META_CONTROL_SIF_HOLD
+    || REVIEW_META_CONTROL_PATTERNS.some((pattern) => pattern.test(compact));
+}
+
+/** country≠KR 또는 legal_basis_scope=overseas_reference. 패킷에는 참고 표시로만 싣고 조문 매핑·controls 에 쓰지 않는다. */
+export function isOverseasSafetyReference(
+  item: Pick<SafetyReferenceItem, "country" | "legal_basis_scope">
+): boolean {
+  if (item.legal_basis_scope === "overseas_reference") return true;
+  return typeof item.country === "string" && item.country.trim().length > 0 && item.country.trim().toUpperCase() !== "KR";
+}
+
+/** review_status 칸이 있는 행은 published 만 통과. 칸이 없는 행(로컬 코퍼스·번들 자산)은 그대로 둔다. */
+export function isPublishedSafetyReference(item: Pick<SafetyReferenceItem, "review_status">): boolean {
+  return item.review_status === undefined || item.review_status === "published";
+}
 
 function getSupabaseConfig(): SupabaseConfig | null {
   const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -1100,7 +1152,7 @@ export function deriveSafetyReferenceOperationalView(item: SafetyReferenceItem):
   ) {
     return {
       hazard: `검토 필요: ${compactText(getSafetyReferenceDisplayTitle(item), 64)} 근거 상태 미확정`,
-      controls: ["검증된 현행 원문과 provenance를 확인한 뒤 기술적 보조지침으로 사용"],
+      controls: [REVIEW_META_CONTROL_UNRESOLVED_KOSHA],
       reviewRequired: true
     };
   }
@@ -2112,10 +2164,7 @@ export function deriveSafetyReferenceOperationalView(item: SafetyReferenceItem):
     const incidentLabel = accidentType || "SIF";
     return {
       hazard: `검토 필요: ${incidentLabel} 사고의 직접 원인과 현장 위험요인 미확정`,
-      controls: [
-        "SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인",
-        "관리감독자 검토 완료 전 사고사례 관리대책을 현장 통제대책으로 확정하지 않음"
-      ],
+      controls: [REVIEW_META_CONTROL_SIF_COMPARE, REVIEW_META_CONTROL_SIF_HOLD],
       reviewRequired: true
     };
   }
@@ -2882,6 +2931,38 @@ async function fetchReferenceItems(config: SupabaseConfig, params: URLSearchPara
 }
 
 /**
+ * 011 칸(review_status·country·task_ids…)이 없는 DB 에서 400(42703 column does not exist)이 나면
+ * ① task_ids 조회는 뜻이 없으니 빈 결과로 끝내고 ② 그 밖에는 핵심 칸만으로 다시 조회한다.
+ * 그 행들은 review_status 가 없으므로 isPublishedSafetyReference 가 그대로 통과시킨다(011 이전 행 = 기존 published 행).
+ */
+async function fetchReferenceItemsCompat(config: SupabaseConfig, params: URLSearchParams, signal?: AbortSignal): Promise<{
+  ok: boolean;
+  status: number;
+  message: string;
+  items: SafetyReferenceItem[];
+}> {
+  const first = await fetchReferenceItems(config, params, signal);
+  if (first.ok || first.status !== 400) return first;
+  const usesProvenanceColumns = params.get("review_status") !== null
+    || PROVENANCE_SELECT_FIELDS.some((field) => (params.get("select") || "").split(",").includes(field));
+  if (!usesProvenanceColumns) return first;
+  if (params.has("task_ids") || (params.get("or") || "").includes("task_ids.")) {
+    log.warn("safety reference task_ids column unavailable; skipping task bucket", { event: "safety_reference_provenance_columns_missing" });
+    return {
+      ok: true,
+      status: 200,
+      message: "안전 참고자료 작업유형 칸(task_ids)이 없는 DB 라 작업유형 묶음 조회를 건너뛰었습니다.",
+      items: []
+    };
+  }
+  log.warn("safety reference provenance columns unavailable; retrying with core columns", { event: "safety_reference_provenance_columns_missing" });
+  const legacy = new URLSearchParams(params);
+  legacy.set("select", CORE_SELECT_FIELDS);
+  legacy.delete("review_status");
+  return fetchReferenceItems(config, legacy, signal);
+}
+
+/**
  * Track E-3: ranked search via Postgres RPC. Uses tsvector + pg_trgm
  * with weighted scoring (KOSHA 기술지원규정 100 / 기술지침 80 / others
  * 10–30) + ts_rank_cd × 50 + title-similarity × 20.
@@ -3190,6 +3271,10 @@ export type SafetyReferenceSearchOptions = {
   itemType?: string;
   sourceId?: string;
   riskTag?: string;
+  /** lib/task-scenario-profiles TaskId 묶음 — DB task_ids 배열 검색(1개 cs, 여러 개 ov). 있으면 질의어 ilike 대신 쓴다. */
+  taskIds?: readonly string[];
+  /** taskIds 와 함께 쓸 작업 프로필 키워드 — DB keywords 배열 겹침(ov). taskIds 가 없으면 무시한다. */
+  keywords?: readonly string[];
   evidenceRole?: "direct" | "supporting";
   signal?: AbortSignal;
 };
@@ -3244,16 +3329,22 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
   }
 
   // Track E-3: try the ranked RPC first when no specialised filters block it.
-  // RPC handles only `query` + `itemType`. For sourceId/riskTag we still use the
-  // legacy ilike path. evidenceRole is post-filtered on returned items.
-  if (query && !options.sourceId && !options.riskTag) {
+  // RPC handles only `query` + `itemType`. For sourceId/riskTag/taskIds we still use the
+  // legacy REST path. evidenceRole is post-filtered on returned items.
+  if (query && !options.sourceId && !options.riskTag && !sanitizeTaskIds(options.taskIds).length) {
     const vector = await fetchVectorReferences(config, query, fetchLimit, options.itemType, vectorRuntime, options.signal);
     vectorSearch = vector.status;
     const ranked = await fetchRankedReferences(config, query, fetchLimit, options.itemType, options.signal);
     if ((ranked && ranked.ok && ranked.items.length) || vector.items.length) {
+      // RPC(010 match_safety_reference_embeddings)는 review_status 를 거르지도 돌려주지도 않는다.
+      // id 로 011 칸을 보강한 뒤 published 만 남긴다(TS 후처리 — RPC 교체 마이그레이션은 만들지 않는다).
+      const [publishedVector, publishedRanked] = await Promise.all([
+        enrichProvenanceColumns(config, vector.items, options.signal),
+        enrichProvenanceColumns(config, ranked?.ok ? ranked.items : [], options.signal)
+      ]);
       const merged = mergeSafetyReferenceHybridResults({
-        vectorItems: vector.items,
-        rankedItems: ranked?.ok ? ranked.items : [],
+        vectorItems: publishedVector.filter(isPublishedSafetyReference),
+        rankedItems: publishedRanked.filter(isPublishedSafetyReference),
         limit,
         evidenceRole: options.evidenceRole
       });
@@ -3279,16 +3370,27 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
   params.set("select", SELECT_FIELDS);
   params.set("limit", String(fetchLimit));
   params.set("order", "item_type.asc,title.asc");
+  // PR-12: review_required·rejected 행은 검색·생성에 쓰지 않는다(011 주석의 조회 쪽 필터).
+  params.set("review_status", "eq.published");
   if (options.itemType) params.set("item_type", `eq.${options.itemType}`);
   if (options.sourceId) params.set("source_id", `eq.${options.sourceId}`);
   if (options.riskTag) params.set("risk_tags", `cs.{"${options.riskTag}"}`);
-
+  const taskIds = sanitizeTaskIds(options.taskIds);
+  const taskKeywords = sanitizeTaskKeywords(options.keywords);
   const searchTerm = safeIlikeTerm(query);
-  if (searchTerm) {
+  if (taskIds.length) {
+    // taskId 묶음 조회: task_ids 배열(1개면 cs, 여러 개면 ov) 과 keywords 겹침을 OR 로 묶는다. 질의어 ilike 는 쓰지 않는다.
+    const taskFilter = taskIds.length === 1 ? `cs.{${taskIds[0]}}` : `ov.{${taskIds.join(",")}}`;
+    if (taskKeywords.length) {
+      params.set("or", `(task_ids.${taskFilter},keywords.ov.{${taskKeywords.map((keyword) => `"${keyword}"`).join(",")}})`);
+    } else {
+      params.set("task_ids", taskFilter);
+    }
+  } else if (searchTerm) {
     params.set("or", `(title.ilike.*${searchTerm}*,summary.ilike.*${searchTerm}*,body.ilike.*${searchTerm}*)`);
   }
 
-  const firstPass = await fetchReferenceItems(config, params, options.signal);
+  const firstPass = await fetchReferenceItemsCompat(config, params, options.signal);
   if (!firstPass.ok) {
     return {
       ok: false,
@@ -3304,10 +3406,10 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
   }
 
   let items = filterByEvidenceRole(
-    firstPass.items.map((item) => withRetrievalSource(item, "rest")),
+    firstPass.items.filter(isPublishedSafetyReference).map((item) => withRetrievalSource(item, "rest")),
     options.evidenceRole
   );
-  if (items.length === 0 && searchTerm.includes(" ")) {
+  if (items.length === 0 && !taskIds.length && searchTerm.includes(" ")) {
     const byId = new Map<string, SafetyReferenceItem>();
     const fallbackTerms = extractFallbackTerms(searchTerm);
     const minimumSignalPasses = Math.min(4, fallbackTerms.length);
@@ -3316,10 +3418,10 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
       const fallbackParams = new URLSearchParams(params);
       fallbackParams.set("limit", String(fetchLimit));
       fallbackParams.set("or", `(title.ilike.*${term}*,summary.ilike.*${term}*,body.ilike.*${term}*)`);
-      const fallback = await fetchReferenceItems(config, fallbackParams, options.signal);
+      const fallback = await fetchReferenceItemsCompat(config, fallbackParams, options.signal);
       if (fallback.ok) {
         filterByEvidenceRole(
-          fallback.items.map((item) => withRetrievalSource(item, "rest")),
+          fallback.items.filter(isPublishedSafetyReference).map((item) => withRetrievalSource(item, "rest")),
           options.evidenceRole
         ).forEach((item) => byId.set(item.id, item));
       } else {
@@ -3346,6 +3448,75 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
     koshaGrounding: summarizeKoshaGrounding({ items: items.slice(0, limit) }),
     message: "Supabase 안전 지식 DB에서 참고자료를 조회했습니다."
   };
+}
+
+function sanitizeTaskIds(values: readonly string[] | undefined): string[] {
+  return [...new Set((values || [])
+    .map((value) => value.trim())
+    .filter((value) => /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(value)))];
+}
+
+function sanitizeTaskKeywords(values: readonly string[] | undefined): string[] {
+  return [...new Set((values || [])
+    .map((value) => value.replace(/[\s"'(),{}\\]+/g, " ").trim())
+    .filter((value) => value.length >= 2 && value.length <= 40))].slice(0, 12);
+}
+
+const PROVENANCE_COLUMNS = ["id", "country", "language", "review_status", "legal_basis_scope", "task_ids"] as const;
+
+/**
+ * RPC 결과 행에 011 칸이 없으면 REST 로 id 묶음을 조회해 채운다. 조회가 실패하면 행을 그대로 둔다
+ * (칸이 없는 행은 isPublishedSafetyReference 가 통과시키므로, 운영 REST 는 항상 칸을 돌려준다는 전제가 깨지면 로그로만 남는다).
+ */
+async function enrichProvenanceColumns(
+  config: SupabaseConfig,
+  items: SafetyReferenceItem[],
+  signal?: AbortSignal
+): Promise<SafetyReferenceItem[]> {
+  const missing = items.filter((item) => item.review_status === undefined);
+  if (!missing.length) return items;
+  const ids = [...new Set(missing.map((item) => item.id))].filter((id) => /^[A-Za-z0-9가-힣._-]+$/u.test(id)).slice(0, 100);
+  if (!ids.length) return items;
+  const params = new URLSearchParams();
+  params.set("select", PROVENANCE_COLUMNS.join(","));
+  params.set("id", `in.(${ids.map((id) => `"${id}"`).join(",")})`);
+  params.set("limit", String(ids.length));
+  try {
+    const { response, data } = await fetchWithDeadline(buildRestUrl(config, "safety_reference_items", params), {
+      headers: {
+        apikey: config.serviceRoleKey,
+        Authorization: `Bearer ${config.serviceRoleKey}`
+      },
+      cache: "no-store"
+    }, signal, async (nextResponse, deadlineSignal) => ({
+      response: nextResponse,
+      data: nextResponse.ok ? await readBoundedJson(nextResponse, deadlineSignal) : undefined,
+    }));
+    if (!response.ok || !Array.isArray(data)) return items;
+    const byId = new Map<string, Record<string, unknown>>();
+    for (const row of data) {
+      if (isRecord(row) && typeof row.id === "string") byId.set(row.id, row);
+    }
+    return items.map((item) => {
+      const row = byId.get(item.id);
+      if (!row || item.review_status !== undefined) return item;
+      return {
+        ...item,
+        ...(typeof row.country === "string" ? { country: row.country } : {}),
+        ...(typeof row.language === "string" ? { language: row.language } : {}),
+        ...(typeof row.review_status === "string" ? { review_status: row.review_status as SafetyReferenceItem["review_status"] } : {}),
+        ...(typeof row.legal_basis_scope === "string" ? { legal_basis_scope: row.legal_basis_scope as SafetyReferenceItem["legal_basis_scope"] } : {}),
+        ...(isStringArray(row.task_ids) ? { task_ids: row.task_ids } : {})
+      };
+    });
+  } catch (error) {
+    signal?.throwIfAborted();
+    log.error("safety reference provenance enrichment failed", {
+      event: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
+      errorType: error instanceof Error ? error.name : typeof error
+    });
+    return items;
+  }
 }
 
 function filterByEvidenceRole(
