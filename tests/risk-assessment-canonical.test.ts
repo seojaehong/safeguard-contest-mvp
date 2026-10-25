@@ -19,6 +19,7 @@ import {
   toStructuredRiskRows
 } from "@/lib/risk-assessment-record";
 import { riskLevelLabel, summarizeRiskLevel } from "@/lib/risk-labels";
+import { gateAskResponseUserOutput } from "@/lib/user-output-gate";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import type { AskResponse } from "@/lib/types";
 
@@ -127,6 +128,10 @@ describe("정본 단일화(운영 응답 4건)", () => {
       for (const link of canonical.structured?.tbmRiskLinks || []) {
         expect(main[link.riskRowIndex]?.hazard).toBe(link.hazard);
       }
+      // runAsk 는 정본화 뒤에 PR-14 출력 게이트를 거친다. 다시 만든 초안에도 내부 표지가 남지 않아야 한다.
+      const gated = gateAskResponseUserOutput(canonical);
+      expect(gated.deliverables.riskAssessmentDraft).not.toMatch(INTERNAL_MARKERS);
+      expect(gated.deliverables.workpackSummaryDraft).not.toMatch(INTERNAL_MARKERS);
     });
   }
 });

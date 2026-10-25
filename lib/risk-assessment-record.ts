@@ -220,6 +220,22 @@ function remapTbmRiskLinks(
 }
 
 /**
+ * 정본 행의 장비 칸에 들어온 사고사례 원천 분류(「518, 제조업」「아카이브(…)」)를 빈칸으로 바꾸고,
+ * 판단근거 문장에 같은 값이 끼어 있으면 「장비」로 바꾼다(COPY-07). 다른 칸은 손대지 않는다.
+ */
+function cleanCanonicalRiskRow(row: RiskAssessmentRow): RiskAssessmentRow {
+  const raw = row.equipment?.trim() || "";
+  const equipment = displayEquipment(raw);
+  if (!raw || equipment === raw) return row;
+  return {
+    ...row,
+    equipment,
+    whyLikelihood: row.whyLikelihood.split(raw).join("장비"),
+    whySeverity: row.whySeverity.split(raw).join("장비")
+  };
+}
+
+/**
  * 응답의 위험성평가를 정본 행 하나로 맞춘다.
  * - 「검토 필요:」 행은 structured.riskReviewItems 로 옮긴다.
  * - 화면 초안(deliverables.riskAssessmentDraft)은 정본 행을 직렬화한 글로 바꾼다(키워드 재파싱 없음).
@@ -230,7 +246,8 @@ export function canonicalizeRiskAssessmentResponse(response: AskResponse): AskRe
   const structured = response.structured;
   const rows = structured?.riskAssessmentRows || [];
   if (!structured || !rows.length) return response;
-  const { main, review } = splitRiskRowsForOutput(rows);
+  const { main: rawMain, review } = splitRiskRowsForOutput(rows);
+  const main = rawMain.map(cleanCanonicalRiskRow);
   const reviewItems = [...(structured.riskReviewItems || []), ...review];
   const validation = validateRiskAssessmentRows(main);
   const summaryLevel = summarizeRiskLevel(main);
@@ -246,7 +263,7 @@ export function canonicalizeRiskAssessmentResponse(response: AskResponse): AskRe
       ...structured,
       riskAssessmentRows: main,
       ...(reviewItems.length ? { riskReviewItems: reviewItems } : {}),
-      ...(structured.tbmRiskLinks ? { tbmRiskLinks: remapTbmRiskLinks(structured.tbmRiskLinks, rows, main) } : {}),
+      ...(structured.tbmRiskLinks ? { tbmRiskLinks: remapTbmRiskLinks(structured.tbmRiskLinks, rows, rawMain) } : {}),
       riskAssessmentValidation: {
         ok: main.length > 0 && validation.issues.length === 0,
         issueCount: validation.issues.length,
