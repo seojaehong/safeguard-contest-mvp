@@ -1207,7 +1207,7 @@ export function buildTbmLogStructuredFromRiskRows(
     attendance: {
       expected: workerCount,
       actual: workerCount,
-      attendees: workerCount ? Array.from({ length: Math.min(workerCount, 12) }, (_, index) => `작업자 ${index + 1}`) : ["작업자(인원 확인 필요)"],
+      attendees: Array.from({ length: Math.min(workerCount, 12) }, (_, index) => `작업자 ${index + 1}`),
       absenceReason: "없음",
       confirmationMethod: "현장 서명 또는 열람 확인 버튼"
     },

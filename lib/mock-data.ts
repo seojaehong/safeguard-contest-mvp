@@ -492,7 +492,7 @@ function findSpecificLocationRule(question: string) {
   );
 }
 
-const workDescriptorCompanyNames = /^(?:(?:굴착|보수|굴착보수|열수송관굴착|도로굴착보수)공사|물류창고|도금공장|식품공장|제조공장|전자부품공장)$/;
+const workDescriptorCompanyNames = /^(?:(?:굴착|보수|굴착보수|열수송관굴착|도로굴착보수)공사|(?:재|택지|도시|도시재|신도시|주택|단지|산업단지|역세권)개발|물류창고|도금공장|식품공장|제조공장|전자부품공장)$/;
 
 function isWorkDescriptorCompanyName(candidate: string) {
   return workDescriptorCompanyNames.test(candidate.replace(/\s+/g, ""));

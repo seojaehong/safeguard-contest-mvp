@@ -1128,7 +1128,7 @@ export async function buildTbmLogStructuredXlsx(
   row = addSectionHeader(ws, row, "출석");
   row = addKeyValueRows(ws, row, [
     ["예정 인원", formatWorkerCount(data.attendance.expected || scenario.workerCount)],
-    ["실제 참석", `${data.attendance.actual || data.attendance.attendees.length || 0}명`],
+    ["실제 참석", formatWorkerCount(data.attendance.actual || data.attendance.attendees.length)],
     ["결석/지각", data.attendance.absenceReason],
     ["확인 방식", data.attendance.confirmationMethod]
   ]);

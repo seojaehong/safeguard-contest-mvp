@@ -3,6 +3,9 @@ import { describe, expect, it } from "vitest";
 import { contextBlock, freeFormPrompt, parseFree } from "@/lib/ai-deliverables";
 import { companyFilePrefix, formatCompanyName, formatWorkerCount } from "@/lib/scenario-display";
 import { buildDisplayTargetWorkers, formatDisplayTargetCount } from "@/lib/workspace";
+import { buildTbmLogStructuredFromRiskRows } from "@/lib/search";
+import { buildTbmLogStructuredXlsx } from "@/lib/xlsx-builder";
+import ExcelJS from "exceljs";
 import { ACCIDENT_REPORT_TEMPLATE } from "@/lib/safety-contacts";
 import { buildMockAskResponse, inferScenario, mockSearchResults } from "@/lib/mock-data";
 
@@ -255,5 +258,31 @@ describe("PR-15 문서 머리·파일명·AI 프롬프트의 고정값", () => {
     const response = buildMockAskResponse("공장 프레스 금형 교체 작업, 유도자 1명", mockSearchResults.slice(0, 4), "mock", "test");
     expect(formatDisplayTargetCount(response, [])).toBe("인원 확인 필요");
     expect(buildDisplayTargetWorkers(response, []).map((w) => w.displayName)).toContain("작업자 그룹(인원 확인 필요)");
+  });
+});
+
+describe("PR-15 TBM 일지 출석 인원(인원 미상)", () => {
+  it("구조화 TBM 일지와 xlsx 에 「1명」「0명」 참석을 지어내지 않는다", async () => {
+    const question = "공장 프레스 금형 교체 작업, 유도자 1명";
+    const scenario = inferScenario(question);
+    const structured = buildTbmLogStructuredFromRiskRows(scenario as never, [], "");
+    expect(structured.attendance.expected).toBe(0);
+    expect(structured.attendance.attendees).toEqual([]);
+    const buffer = await buildTbmLogStructuredXlsx(scenario as never, structured as never);
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(buffer as never);
+    const texts: string[] = [];
+    workbook.eachSheet((ws) => ws.eachRow((row) => row.eachCell((cell) => texts.push(String(cell.text ?? "")))));
+    const joined = texts.join("\n");
+    expect(joined).toContain("확인 필요");
+    // 입력 작업명(「…유도자 1명」)을 그대로 옮긴 칸은 빼고 본다.
+    expect(texts.filter((t) => /(?<!\d)[01]명/.test(t.replace(/유도자 1명/g, "")))).toEqual([]);
+    expect(joined).toContain("사업장명 입력 필요");
+  });
+
+  it("「재개발」「택지개발」 같은 사업 명사를 회사명으로 쓰지 않는다", () => {
+    expect(inferScenario("서울 강서구 재개발 현장 굴착 작업").companyName).toBe("");
+    expect(inferScenario("택지개발지구 배관 굴착공사").companyName).toBe("");
+    expect(inferScenario("제주개발 굴착 작업").companyName).toBe("제주개발");
   });
 });
