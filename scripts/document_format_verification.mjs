@@ -134,7 +134,7 @@ const summary = {
   exportCheckCount: exportResults.length,
   passCount: allResults.length - failed.length,
   failCount: failed.length,
-  readinessLabel: "초안 - 법정 항목 확인 전",
+  readinessLabel: "법정 항목 확인 전",
   oneToOneReproduction: false,
   remainingGaps: [
     "발주처 지정 원본 갑지/을지의 직인과 허가번호 칸은 아직 1:1 재현하지 않음",

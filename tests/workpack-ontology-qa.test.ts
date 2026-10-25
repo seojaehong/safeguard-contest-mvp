@@ -154,7 +154,8 @@ describe("web workpack ontology QA", () => {
       !document.includes("현장 여건에 맞는 담당자·확인시각·측정값은 전파 전 관리자가 확인합니다.")
     ))).toBe(true);
     expect(remediated.deliverables.riskAssessmentDraft).toContain("잔여 위험을 평가 기록에 남깁니다.");
-    expect(remediated.deliverables.workPlanDraft).toContain("계획서 확인란에 기록합니다.");
+    // 계획서 보완 줄은 「반영」 표시 대신 담당·확인 시각 칸을 가진 「추가 확인 필요」 줄이다(WP-10).
+    expect(remediated.deliverables.workPlanDraft).toMatch(/추가 확인 필요: .*담당: \(현장 기재\) \/ 확인 시각: \(현장 기재\)/);
     expect(remediated.deliverables.safetyEducationRecordDraft).toContain("교육 기록에 남깁니다.");
     expect(remediated.deliverables.emergencyResponseDraft).toContain("대피·연락 조건을 확인");
   });

@@ -43,9 +43,17 @@ const PERMIT_CATEGORY_BY_TASK: Record<string, PermitCategory> = {
   "leak-maintenance": "일반 위험작업"
 };
 
-/** 작업 유형이 없으면(보류) null. 표에 없는 새 작업 유형은 「일반 위험작업」. */
-export function resolvePermitCategory(taskId: string | null | undefined): PermitCategory | null {
+// 동시작업은 여러 작업이 겹치는 유형이라 그 안에 화기작업이 있으면 화기작업 허가를 받는다.
+const COMPOSITE_TASK_IDS = new Set(["simultaneous-work"]);
+const HOTWORK_IN_QUESTION = /용접|용단|화기|절단/;
+
+/**
+ * 허가구분을 정하는 유일한 함수. 작업 유형이 없으면(보류) null. 표에 없는 새 작업 유형은 「일반 위험작업」.
+ * 원문 질문은 동시작업 안의 화기작업을 가릴 때만 본다. 호출하는 모든 곳(본문·구조화·품질 계약)이 같은 인자를 넘긴다.
+ */
+export function resolvePermitCategory(taskId: string | null | undefined, question = ""): PermitCategory | null {
   if (!taskId) return null;
+  if (COMPOSITE_TASK_IDS.has(taskId) && HOTWORK_IN_QUESTION.test(question)) return "화기작업";
   return PERMIT_CATEGORY_BY_TASK[taskId] ?? "일반 위험작업";
 }
 
@@ -120,7 +128,7 @@ const HEAT_CHECKS: StatutoryCheck[] = [
 ];
 
 export function buildPermitInspection(input: PermitFormInput): PermitInspectionStructured | null {
-  const permitType = resolvePermitCategory(input.taskId);
+  const permitType = resolvePermitCategory(input.taskId, input.question);
   if (!permitType) return null;
   const isConfined = permitType === "밀폐공간 작업";
   const isHotwork = permitType === "화기작업" || /용접|용단|화기/.test(input.question);

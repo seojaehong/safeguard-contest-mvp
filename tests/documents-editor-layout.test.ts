@@ -1048,7 +1048,10 @@ describe("documents editor layout", () => {
       }
       expect(metrics.sectionDetailCount).toBe(1);
       expect(metrics.sectionTextareaCount).toBe(1);
-      expect(metrics.sectionTabCount).toBe(6);
+      // 작업계획서는 별표4 호별 고정 양식이라 절 수가 작업 유형에 따라 달라진다(WP-04). 본문 절 + 머리말 1개.
+      const samplePlanSections = buildSampleWorkpack().deliverables.workPlanDraft.match(/^\[[^\]\n]+\]$/gmu)?.length ?? 0;
+      expect(samplePlanSections).toBeGreaterThanOrEqual(5);
+      expect(metrics.sectionTabCount).toBe(samplePlanSections + 1);
       expect(metrics.selectedSectionTabCount).toBe(1);
       expect(metrics.filledSectionTabCount).toBe(6);
       expect(metrics.emptySectionTabCount).toBe(0);

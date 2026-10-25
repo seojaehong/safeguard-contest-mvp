@@ -179,7 +179,7 @@ function structuredItem(response: AskResponse): QualityContractItem {
 // 허가서는 허가구분별 필수 칸을 본다(WP-14). 허가구분은 작업 분류에서 정한 값이고, 본문의 「허가구분:」 줄이
 // 그 값과 다르거나 밀폐공간 측정·감시인 칸이 없으면 막힌다. 작업 유형 보류 응답은 허가서를 만들지 않으므로 보지 않는다.
 function auditCoreDeliverables(response: AskResponse) {
-  const permitCategory = resolvePermitCategory(response.scenario?.taskClassification?.taskId);
+  const permitCategory = resolvePermitCategory(response.scenario?.taskClassification?.taskId, response.question);
   const permitText = response.deliverables.workPermitDraft;
   const auditPermit = permitCategory !== null
     && response.scenario?.taskClassification?.status === "classified"

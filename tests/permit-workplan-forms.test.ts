@@ -79,12 +79,18 @@ describe("허가구분 단일 판정 (WP-02·WP-08·EXP-01)", () => {
     const expected = EXPECTED_PERMIT_CATEGORY[key as keyof typeof SCENARIOS];
     const structured = response.deliverables.permitInspectionStructured as PermitInspectionStructured;
 
-    expect(resolvePermitCategory(response.scenario.taskClassification?.taskId)).toBe(expected);
+    expect(resolvePermitCategory(response.scenario.taskClassification?.taskId, question)).toBe(expected);
     expect(structured?.basicInfo.permitType).toBe(expected);
     // hwp·pdf·html·화면은 workPermitDraft 본문을 줄 단위로 쓴다.
     expect(permitTypeLine(response.deliverables.workPermitDraft ?? "")).toBe(expected);
     const xlsx = await workbookText(await buildPermitInspectionStructuredXlsx(response.scenario, structured as unknown as Record<string, unknown>));
     expect(xlsx).toContain(expected);
+  });
+
+  it("동시작업은 질문에 화기작업이 있을 때만 화기작업 허가로 본다(양쪽 분기)", () => {
+    expect(resolvePermitCategory("simultaneous-work", "용접과 크레인 동시작업")).toBe("화기작업");
+    expect(resolvePermitCategory("simultaneous-work", "상하부 동시작업, 자재 인양")).toBe("일반 위험작업");
+    expect(resolvePermitCategory("press", "프레스 금형 교체, 용접 없음 확인")).toBe("설비 정비·격리 작업");
   });
 
   it("작업 유형을 판정하지 못하면 허가 구조화 데이터를 만들지 않는다(보류 문서팩에서 허가서가 멀쩡히 나오지 않음)", () => {

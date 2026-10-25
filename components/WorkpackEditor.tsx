@@ -18,7 +18,7 @@ import {
 } from "@/lib/safety-document-rubric";
 import { buildWorkpackGenerationFingerprint } from "@/lib/current-workpack";
 import { encodeSpreadsheetDelimitedCell } from "@/lib/spreadsheet-delimited-cell";
-import { findPermitAttachmentRows, findPermitTypeInRows, groupStatutoryRows, stripRowBullet } from "@/lib/permit-workplan-forms";
+import { buildPermitInspection, findPermitAttachmentRows, findPermitTypeInRows, groupStatutoryRows, renderPermitText, stripRowBullet } from "@/lib/permit-workplan-forms";
 import {
   areRiskAssessmentRowsRepresentedInDraft,
   buildStructuredDocumentSections,
@@ -521,10 +521,30 @@ function getWorkPlanStructured(data: AskResponse): WorkPlanStructured | null {
 }
 
 // 허가서 구조화 데이터는 서버가 작업 분류에서 한 번만 만든다(lib/permit-workplan-forms.ts). 화면에서 따로
-// 허가구분을 판정하지 않는다(EXP-01·WP-08). 없으면(작업 유형 보류·이전 저장본) null.
+// 허가구분을 판정하지 않는다(EXP-01·WP-08). 허가서 필드가 아예 없는 이전 저장본만 같은 모듈·같은 작업 분류로
+// 다시 만든다. 작업 유형이 보류면 만들지 않는다.
+function buildLegacyPermit(data: AskResponse): { structured: PermitInspectionStructured; text: string } | null {
+  if (data.deliverables.workPermitDraft !== undefined) return null;
+  const classification = data.scenario.taskClassification;
+  if (classification?.status !== "classified") return null;
+  const input = {
+    taskId: classification.taskId,
+    question: data.question,
+    siteName: data.scenario.siteName,
+    workName: data.scenario.workSummary,
+    workSummary: data.scenario.workSummary,
+    workerCount: data.scenario.workerCount,
+    weatherNote: data.scenario.weatherNote,
+    pairs: (data.structured?.riskAssessmentRows ?? []).map((row) => ({ hazard: row.hazard, action: row.additionalControls })),
+    stopCriterion: data.riskSummary.immediateActions[0]
+  };
+  const structured = buildPermitInspection(input);
+  return structured ? { structured, text: renderPermitText(structured, input) } : null;
+}
+
 function getPermitInspectionStructured(data: AskResponse): PermitInspectionStructured | null {
   const deliverables = data.deliverables as { permitInspectionStructured?: PermitInspectionStructured };
-  return deliverables.permitInspectionStructured ?? null;
+  return deliverables.permitInspectionStructured ?? buildLegacyPermit(data)?.structured ?? null;
 }
 
 function WorkExecutionDocumentCockpit({ data, documentKey }: { data: AskResponse; documentKey: DocumentKey }) {
@@ -884,16 +904,17 @@ function inferEquipment(text: string, scenario: AskResponse["scenario"], index: 
 }
 
 function resolveInitialWorkPermitDraft(data: AskResponse) {
-  if (!data.deliverables.workPermitDraft) return "";
+  const body = data.deliverables.workPermitDraft ?? buildLegacyPermit(data)?.text ?? "";
+  if (!body) return "";
   return withSubmitReadiness(
     "허가서/첨부 안전작업허가 확인서",
-    data.deliverables.workPermitDraft,
+    body,
     data
   );
 }
 
 function withSubmitReadiness(title: string, body: string, data: AskResponse) {
-  const readinessLabel = `서식상태: 초안 - ${title} 법정 항목 확인 전 현장 검토용입니다.`;
+  const readinessLabel = `서식상태: 법정 항목 확인 전 - ${title} 현장 검토용입니다. (현장 기재) 빈칸을 채운 뒤 사용하세요.`;
   if (body.includes(readinessLabel) && body.includes("[필수 확인 항목]")) {
     return body;
   }
@@ -3699,9 +3720,9 @@ export function WorkpackEditor({
       if (selected.key === "workPlanDraft" && dl?.workPlanStructured) {
         structuredMode = "workPlanStructured";
         structuredPayload = dl.workPlanStructured;
-      } else if (selected.key === "workPermitDraft" && !selectedHasIntentionalEmptyPermitDraft && dl?.permitInspectionStructured) {
+      } else if (selected.key === "workPermitDraft" && !selectedHasIntentionalEmptyPermitDraft && getPermitInspectionStructured(data)) {
         structuredMode = "permitInspectionStructured";
-        structuredPayload = dl.permitInspectionStructured;
+        structuredPayload = getPermitInspectionStructured(data);
       } else if (selected.key === "tbmBriefing" && dl?.tbmBriefingStructured) {
         structuredMode = "tbmBriefingStructured";
         structuredPayload = dl.tbmBriefingStructured;
