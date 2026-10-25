@@ -47,6 +47,8 @@ const CASES: CoverageCase[] = [
   { id: "crane-wall", q: "외벽 패널 크레인 양중 작업, 작업자 5명", task: "crane-lifting", first: /인양|양중|낙하/, rows: /인양|양중|낙하|크레인|신호|전도|줄걸이|패널/, forbidden: /이동식 비계|외벽 도장/ },
   { id: "forklift-fall", q: "공장 지게차 운행 중 추락 위험 있는 적재 작업", task: "forklift-logistics", first: /지게차/, rows: /지게차|낙하|동선|충돌|적재|전도/ },
   { id: "confined-weld-order", q: "밀폐공간 맨홀 내부 배관 용접 보수", task: "confined-space", first: /산소|질식|유해가스/, rows: /산소|질식|유해가스|용접|불티|화재|감시인|구출|구조/ },
+  // 작업 정체가 주변 장비 언급보다 앞서는지(샘플 문서팩 질문)
+  { id: "painting-with-forklift-mention", q: "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.", task: "exterior-painting", first: /비계|추락/, rows: /비계|추락|전도|낙하|지게차/, forbidden: /랙 피킹|출하/ },
   // 운영 full 4문항
   { id: "full-excavation", q: "서울 강서구 도시가스 배관 굴착공사. 굴착 깊이 2.5m, 굴착기 1대와 이동식 크레인 1대, 작업자 8명, 매설물 확인 필요, 오후 강풍 예보. 오늘 작업 전 문서팩을 만들어줘.", task: "excavation", first: /붕괴|매몰/, rows: /붕괴|매몰|매설물|굴착기|크레인|충돌/, forbidden: /열수송관/ },
   { id: "full-confined", q: "부산 해운대 상가건물 지하 정화조 청소 작업. 밀폐공간 진입, 작업자 3명, 외부 협력업체 소속, 산소·황화수소 측정 필요. 오늘 작업 전 문서팩을 만들어줘.", task: "confined-space", first: /산소|황화수소|질식/, rows: /산소|질식|황화수소|유해가스|감시인|구출|구조/, forbidden: /전기판넬|감전|누수 구간/ },

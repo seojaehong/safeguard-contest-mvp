@@ -141,6 +141,8 @@ const TASK_RULES: Array<[TaskId, (question: string) => boolean]> = [
   ["chemical-handling", (q) => CHEMICAL_SUBSTANCE.test(q) && CHEMICAL_HANDLING_VERB.test(q)],
   ["press", (q) => /프레스/.test(q)],
   ["scaffold-assembly", hasScaffoldAssemblyIdentity],
+  // 외벽 도장은 함께 적힌 지게차·크레인 「인접 위험」보다 앞선다(작업 정체 > 주변 장비).
+  ["exterior-painting", (q) => /외벽.{0,10}도장|도장.{0,10}(?:외벽|비계)|비계.{0,30}도장|이동식\s*비계/.test(q)],
   ["conveyor", (q) => /컨베이어/.test(q) && MACHINE_SERVICE_VERB.test(q)],
   ["automation-equipment", (q) => /자동화\s*설비|자동화설비/.test(q)],
   ["machine-isolation", (q) => MACHINE_NOUN.test(q) && MACHINE_SERVICE_VERB.test(q) && !/전기\s*설비/.test(q)],
@@ -152,7 +154,6 @@ const TASK_RULES: Array<[TaskId, (question: string) => boolean]> = [
   ["forklift-logistics", (q) => /지게차/.test(q)],
   ["manual-loading-heat", (q) => /상하차|하역|적재|운반|피킹|출하|고중량/.test(q) && hasHeatCondition(q)],
   ["forklift-logistics", (q) => /상하차|하역|피킹|출하/.test(q)],
-  ["exterior-painting", (q) => /외벽.{0,10}도장|도장.{0,10}(?:외벽|비계)|비계.{0,30}도장|이동식\s*비계/.test(q)],
   ["hotwork", (q) => /용접|용단|절단|화기/.test(q)],
   ["floor-cleaning", (q) => /바닥\s*세척|화학\s*세제|세제/.test(q)],
   ["leak-maintenance", (q) => /누수|비가\s*새|천장.{0,10}(?:보수|수리)/.test(q)]
