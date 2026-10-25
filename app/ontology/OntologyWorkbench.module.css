@@ -162,7 +162,7 @@
 .expandButton {
   border-color: var(--sc-hazard-yellow);
   background: var(--sc-hazard-yellow);
-  color: var(--sc-steel-950);
+  color: var(--on-sign);
 }
 
 .toolbar {
@@ -375,7 +375,7 @@
   .mobileViewControl button[aria-pressed="true"] {
     border-color: var(--sc-hazard-yellow);
     background: var(--sc-hazard-yellow);
-    color: var(--sc-steel-950);
+    color: var(--on-sign);
   }
   .explorer,
   .directory {
@@ -428,7 +428,7 @@
 :global(.safeclaw-module-shell[data-theme]) .root .expandButton {
   border-color: var(--sc-hazard-yellow);
   background: var(--sc-hazard-yellow);
-  color: var(--sc-steel-950);
+  color: var(--on-sign);
 }
 
 @media (max-width: 900px) {
@@ -466,7 +466,7 @@
   .mobileViewControl button[aria-pressed="true"] {
     border-color: var(--sc-hazard-yellow);
     background: var(--sc-hazard-yellow);
-    color: var(--sc-steel-950);
+    color: var(--on-sign);
   }
   .mobileViewControl button:focus-visible {
     outline: 3px solid var(--ontology-focus-ring);

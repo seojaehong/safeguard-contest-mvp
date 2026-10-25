@@ -13,8 +13,8 @@ const desktopRoutes = ["/home", "/documents", "/evidence", "/reports", "/setting
 const mobileRoutes = ["/home", "/documents", "/reports", "/settings/ai-connect"] as const;
 const warmRoutes = ["/home", "/documents", "/evidence", "/reports", "/settings/ai-connect", "/workspace"] as const;
 const workspaceAccent = {
-  day: "#f5c518",
-  night: "#6c6ff7"
+  day: "#1d5aa6",
+  night: "#8ab4f8"
 } as const;
 
 type ModuleTheme = keyof typeof workspaceAccent;
@@ -282,13 +282,13 @@ describe("module shell design regression", () => {
 
     for (const metrics of results) {
       expect(metrics.hasShell, metrics.route).toBe(true);
-      expect(metrics.shellBackground, metrics.route).toBe("rgb(250, 250, 251)");
-      expect(metrics.shellColor, metrics.route).toBe("rgb(23, 25, 29)");
-      expect(metrics.h1Color, metrics.route).toBe("rgb(23, 25, 29)");
+      expect(metrics.shellBackground, metrics.route).toBe("rgb(238, 240, 242)");
+      expect(metrics.shellColor, metrics.route).toBe("rgb(27, 28, 30)");
+      expect(metrics.h1Color, metrics.route).toBe("rgb(27, 28, 30)");
       expect(metrics.railBackground, metrics.route).not.toBe("rgb(1, 1, 2)");
       if (metrics.route === "/documents") {
         expect(metrics.cockpitBackground, metrics.route).toBe("rgb(255, 255, 255)");
-        expect(metrics.documentIndexButtonBackground, metrics.route).toBe("rgb(244, 245, 247)");
+        expect(metrics.documentIndexButtonBackground, metrics.route).toBe("rgb(238, 240, 242)");
       }
       expect(metrics.heroTop, metrics.route).toBeLessThanOrEqual(70);
       expect(metrics.h1FontSize, metrics.route).toBeGreaterThanOrEqual(24);
@@ -310,7 +310,7 @@ describe("module shell design regression", () => {
 
     for (const [workspace, module] of [[workspaceDay, moduleDay], [workspaceNight, moduleNight]] as const) {
       const expectedAccent = workspaceAccent[workspace.theme];
-      const expectedRgb = workspace.theme === "day" ? "rgb(245, 197, 24)" : "rgb(108, 111, 247)";
+      const expectedRgb = workspace.theme === "day" ? "rgb(29, 90, 166)" : "rgb(138, 180, 248)";
       expect(workspace.accent, `workspace ${workspace.theme}`).toBe(expectedAccent);
       expect(module.accent, `module ${module.theme}`).toBe(expectedAccent);
       expect(module.principalBackground, `command ${module.theme}`).toBe(expectedRgb);
@@ -343,20 +343,20 @@ describe("module shell design regression", () => {
       expect(metrics.navHeight, metrics.route).toBeLessThanOrEqual(90);
       expect(metrics.heroTop, metrics.route).toBeLessThanOrEqual(260);
       expect(metrics.h1Top, metrics.route).toBeLessThanOrEqual(330);
-      expect(metrics.h1Color, metrics.route).toBe("rgb(23, 25, 29)");
+      expect(metrics.h1Color, metrics.route).toBe("rgb(27, 28, 30)");
       expect(metrics.h1FontSize, metrics.route).toBeGreaterThanOrEqual(22);
       expect(metrics.h1FontSize, metrics.route).toBeLessThanOrEqual(32);
       expect(metrics.contentTop, metrics.route).toBeLessThanOrEqual(workspace.mainStartTop + 80);
       if (metrics.route === "/documents") {
         expect(metrics.cockpitBackground, metrics.route).toBe("rgb(255, 255, 255)");
-        expect(metrics.documentIndexButtonBackground, metrics.route).toBe("rgb(244, 245, 247)");
+        expect(metrics.documentIndexButtonBackground, metrics.route).toBe("rgb(238, 240, 242)");
       }
       expect(metrics.horizontalOverflow, metrics.route).toBe(false);
     }
 
     expect(workspace.horizontalOverflow).toBe(false);
-    expect(openMenu.railRadius).toBe("14px");
-    expect(openMenu.navRadius).toBe("8px");
+    expect(openMenu.railRadius).toBe("2px");
+    expect(openMenu.navRadius).toBe("2px");
     expect(openMenu.menuRowGap).toBeGreaterThanOrEqual(8);
     expect(openMenu.menuColumnGap).toBeGreaterThanOrEqual(8);
     expect(openMenu.controlHeights.length).toBeGreaterThan(0);

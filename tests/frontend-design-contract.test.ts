@@ -223,7 +223,7 @@ describe("frontend design contract", () => {
       size: "11px",
       weight: 700,
       lineHeight: "16px",
-      tracking: "0.08em",
+      tracking: "0",
     });
   });
 
@@ -232,8 +232,8 @@ describe("frontend design contract", () => {
     expect(frontendShape).toMatchObject({
       structuralRadius: "0",
       microRadius: "2px",
-      controlRadius: "4px",
-      panelRadius: "4px",
+      controlRadius: "2px",
+      panelRadius: "2px",
       circleRadius: "50%",
       controlHeight: "44px",
       compactControlHeight: "36px",
