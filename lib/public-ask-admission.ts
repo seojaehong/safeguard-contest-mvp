@@ -9,7 +9,8 @@ import {
 const PUBLIC_ASK_LIMIT = 10;
 const PUBLIC_ASK_WINDOW_MS = 60_000;
 export const PUBLIC_ASK_PROVIDER_ADMISSION_POLICY = {
-  capacity: 12,
+  // 사이트 전체 동시 작업 단위. full 3건 또는 enhanced 18건 (2026-10-25 결정, 종전 12 = full 1건).
+  capacity: 36,
   leaseMs: 310_000,
   namespace: "public-ask-provider-work",
   // Template has no providers; enhanced runs answer/mapping; full adds the parallel document groups.
