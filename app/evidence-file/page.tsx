@@ -236,7 +236,7 @@ export default function EvidenceFilePage() {
             {result.sections.map((section) => (
               <details key={section.article} className="advanced-downloads">
                 <summary>
-                  {formatEvidenceBadge(section.article)} · {section.count}건 · {section.purpose}
+                  {formatEvidenceBadge(section.article, section.purpose)} · {section.count}건 · {section.purpose}
                 </summary>
                 <div className="advanced-download-grid">
                   {section.documents.map((doc) => (

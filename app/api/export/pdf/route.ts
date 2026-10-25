@@ -463,7 +463,7 @@ function renderTbmRows(rows: PdfRow[], scenario: PdfScenario, topRisk: string, r
     </section>
     <section class="section">
       <h2>3. 참석자 확인</h2>
-      <table><thead><tr><th>연번</th><th>성명</th><th>소속/역할</th><th>오전</th><th>오후</th><th>서명</th></tr></thead><tbody>${Array.from({ length: Math.max(4, Math.min(8, scenario.workerCount || 4)) }, (_, index) => `<tr><td>${index + 1}</td><td></td><td></td><td>□</td><td>□</td><td></td></tr>`).join("")}</tbody></table>
+      <table><thead><tr><th>연번</th><th>성명</th><th>소속/역할</th><th>오전</th><th>오후</th><th>서명</th></tr></thead><tbody>${Array.from({ length: signatureRowCount(scenario) }, (_, index) => `<tr><td>${index + 1}</td><td></td><td></td><td>□</td><td>□</td><td></td></tr>`).join("")}</tbody></table>
     </section>
     <section class="section">
       <h2>4. 미조치 위험 및 증빙</h2>
@@ -471,20 +471,51 @@ function renderTbmRows(rows: PdfRow[], scenario: PdfScenario, topRisk: string, r
     </section>`;
 }
 
+// 교육기록 출력에서 빼는 부록: 후속 과정 추천·적합성 목록은 근로자 교육 실시 기록이 아니다(EDU-04·08).
+const EDUCATION_EXCLUDED_SECTION = /추천|교육 적합성/;
+const EDUCATION_META_SECTIONS = new Set(["기본정보", "본문"]);
+
+function selectEducationPrintRows(rows: PdfRow[]): PdfRow[] {
+  return rows.filter((row) => !EDUCATION_EXCLUDED_SECTION.test(row.section));
+}
+
+function educationMetaValue(rows: PdfRow[], item: string): string {
+  return rows.find((row) => EDUCATION_META_SECTIONS.has(row.section) && row.item === item)?.content || "";
+}
+
+// 서명란은 작업자 수만큼. 출력 쪽수 한도(MAX_PDF_PAGES) 안에 들도록 50칸까지만 싣고 나머지는 별지에 받는다.
+const MAX_SIGNATURE_ROWS = 50;
+function signatureRowCount(scenario: PdfScenario): number {
+  return Math.min(MAX_SIGNATURE_ROWS, Math.max(1, scenario.workerCount || 0));
+}
+
 function renderEducationRows(rows: PdfRow[], scenario: PdfScenario) {
-  const contents = findByKeywords(rows, ["교육", "보호구", "위험", "확인", "외국인", "신규"], 5);
+  // 교육기록은 섹션을 전부 싣는다(종전: 키워드로 고른 앞 5줄만). 개요는 본문 값을 읽는다(EDU-04).
+  const printable = selectEducationPrintRows(rows);
+  const educationName = educationMetaValue(printable, "교육명") || `${scenario.workSummary} 작업 전 안전보건교육`;
+  const educationTarget = educationMetaValue(printable, "교육대상") || `투입 근로자 ${scenario.workerCount.toLocaleString("ko-KR")}명`;
+  const educationTime = educationMetaValue(printable, "교육일시") || "____년 __월 __일 __:__ ~ __:__";
+  const educationKind = educationMetaValue(printable, "교육구분") || "교육 종류 확인 필요";
+  const bodyGroups = groupRows(printable.filter((row) => !EDUCATION_META_SECTIONS.has(row.section)));
+  const metaRows = printable.filter((row) => EDUCATION_META_SECTIONS.has(row.section)
+    && !["교육명", "교육대상", "교육일시", "교육구분"].includes(row.item));
   return `
     <section class="section">
       <h2>1. 교육 개요</h2>
-      <table class="meta-table"><tbody><tr><th>교육명</th><td>${escapeHtml(scenario.workSummary)} 작업 전 안전보건교육</td><th>교육대상</th><td>투입 근로자 ${scenario.workerCount.toLocaleString("ko-KR")}명</td></tr><tr><th>교육방법</th><td>TBM 연계 구두교육·서명</td><th>작업조건</th><td>${escapeHtml(scenario.weatherNote)}</td></tr></tbody></table>
+      <table class="meta-table"><tbody><tr><th>교육명</th><td>${escapeHtml(educationName)}</td><th>교육대상</th><td>${escapeHtml(educationTarget)}</td></tr><tr><th>교육일시</th><td>${escapeHtml(educationTime)}</td><th>교육구분</th><td>${escapeHtml(educationKind)}</td></tr>${metaRows.map((row) => `<tr><th>${escapeHtml(row.item)}</th><td colspan="3">${escapeHtml(row.content)}</td></tr>`).join("")}</tbody></table>
+    </section>
+    ${bodyGroups.map((group, groupIndex) => `
+    <section class="section">
+      <h2>${groupIndex + 2}. ${escapeHtml(group.section)}</h2>
+      <table><thead><tr><th class="no">연번</th><th>항목</th><th>내용</th></tr></thead><tbody>${group.rows.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td></tr>`).join("")}</tbody></table>
+    </section>`).join("")}
+    <section class="section">
+      <h2>${bodyGroups.length + 2}. 참석자 확인</h2>
+      <table><thead><tr><th>연번</th><th>성명</th><th>소속/직책</th><th>이해확인</th><th>서명</th></tr></thead><tbody>${Array.from({ length: signatureRowCount(scenario) }, (_, index) => `<tr><td>${index + 1}</td><td></td><td></td><td>□</td><td></td></tr>`).join("")}</tbody></table>
     </section>
     <section class="section">
-      <h2>2. 교육 내용 및 이해 확인</h2>
-      <table><thead><tr><th class="no">연번</th><th>교육 항목</th><th>주요 내용</th><th>확인방법</th></tr></thead><tbody>${contents.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(compactCell(row, "교육 내용"))}</td><td>구두 복창·서명</td></tr>`).join("")}</tbody></table>
-    </section>
-    <section class="section">
-      <h2>3. 교육 실시 및 보관</h2>
-      <table><tbody><tr><th>교육 실시자</th><td>____________________</td><th>보관 위치</th><td>문서철/전자폴더: ____________________</td></tr><tr><th>미이해자 조치</th><td colspan="3">□ 재설명 □ 통역 확인 □ 작업 배치 전 보완교육</td></tr></tbody></table>
+      <h2>${bodyGroups.length + 3}. 교육 실시 및 보관</h2>
+      <table><tbody><tr><th>교육 실시자</th><td>____________________</td><th>보관 위치</th><td>문서철/전자폴더: ____________________</td></tr><tr><th>보존 기간</th><td colspan="3">사업장 규정·관할 지청 확인</td></tr><tr><th>미이해자 조치</th><td colspan="3">□ 재설명 □ 통역 확인 □ 작업 배치 전 보완교육</td></tr></tbody></table>
     </section>`;
 }
 
@@ -1057,7 +1088,7 @@ function buildPdfContentLines(
     { text: `인원/기상: ${scenario.workerCount.toLocaleString("ko-KR")}명 · ${scenario.weatherNote}`, role: "body", gap: 14 },
     { text: `위험수준: ${localizeRiskLevel(riskLevel)}`, role: "section" },
     { text: `핵심위험: ${topRisk || "현장 최종 확인 필요"}`, role: "body", gap: 16 },
-    { text: `서식 구분: ${kind === "risk" ? "위험성평가표" : kind === "workPlan" ? "작업계획서" : kind === "permit" ? "허가/점검" : kind === "tbm" ? "TBM일지" : "일반 문서"}`, role: "body", gap: 12 },
+    { text: `서식 구분: ${kind === "risk" ? "위험성평가표" : kind === "workPlan" ? "작업계획서" : kind === "permit" ? "허가/점검" : kind === "tbm" ? "TBM일지" : kind === "education" ? "안전보건교육 기록" : "일반 문서"}`, role: "body", gap: 12 },
     ...riskRecordLines,
     { text: "확인 항목", role: "section", gap: 10 }
   ];
@@ -1075,7 +1106,9 @@ function buildPdfContentLines(
     ? canonicalRiskRows
     : kind === "tbm"
       ? (riskRows.length ? [...riskRows, ...rows] : (rows.length ? rows : fallbackRows))
-      : (rows.length ? rows : fallbackRows);
+      : kind === "education"
+        ? (selectEducationPrintRows(rows).length ? selectEducationPrintRows(rows) : fallbackRows)
+        : (rows.length ? rows : fallbackRows);
   if (kind === "tbm") {
     lines.push({ text: "위험성평가표 위험요인과 오늘 기상/환경 신호를 TBM 전달사항으로 연결합니다.", role: "table" });
     lines.push({ text: `오늘 기상/환경 신호: ${scenario.weatherNote}`, role: "table", gap: 8 });
@@ -1091,6 +1124,14 @@ function buildPdfContentLines(
     });
   });
 
+  if (kind === "education" || kind === "tbm") {
+    // 개인별 서명란을 작업자 수만큼 싣는다(EDU-04·TBM-04).
+    lines.push({ text: "", role: "note", gap: 10 });
+    lines.push({ text: "참석자 서명", role: "section", gap: 8 });
+    Array.from({ length: signatureRowCount(scenario) }, (_, index) => index).forEach((index) => {
+      lines.push({ text: `${index + 1}. 성명: ______________  소속: __________  이해확인 □  서명: ______________`, role: "table" });
+    });
+  }
   if (kind === "risk" && riskReviewRows.length) {
     lines.push({ text: RISK_REVIEW_LIST_TITLE, role: "section", gap: 10 });
     riskReviewRows.forEach((row, index) => {

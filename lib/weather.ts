@@ -830,7 +830,12 @@ async function fetchVillageForecastSignal(location: LocationConfig, signal?: Abo
   }
 }
 
-function buildWeatherActions(signals: KmaSignal[]) {
+function isSeaOnlyWarning(summary: string): boolean {
+  if (!/풍랑/.test(summary)) return false;
+  return !/호우|대설|강풍|태풍|폭염|한파|건조|황사|해일|안개/.test(summary.replace(/풍랑\S*/g, ""));
+}
+
+export function buildWeatherActions(signals: KmaSignal[]) {
   const liveSignals = signals.filter((signal) => signal.mode === "live");
   const windValues = liveSignals
     .map((signal) => Number(signal.windSpeedMps || "0"))
@@ -838,7 +843,13 @@ function buildWeatherActions(signals: KmaSignal[]) {
   const maxWind = Math.max(0, ...windValues);
   const maxPop = Math.max(0, ...liveSignals.map((signal) => Number(signal.precipitationProbability || "0")).filter((value) => Number.isFinite(value)));
   const hasRain = liveSignals.some((signal) => signal.precipitationType && signal.precipitationType !== "강수없음");
-  const warning = liveSignals.find((signal) => signal.endpoint === "기상특보" && !signal.summary.includes("없음"));
+  // 해상 특보(풍랑·해일)만 있으면 육상 작업의 작업중지 재판단 근거로 쓰지 않는다(TBM-05).
+  // 현장 관할 구역(stnId) 필터는 특보 조회 경로에 구역 코드가 없어 아직 하지 못했다.
+  const warning = liveSignals.find((signal) => (
+    signal.endpoint === "기상특보"
+    && !signal.summary.includes("없음")
+    && !isSeaOnlyWarning(signal.summary)
+  ));
   const impact = liveSignals.find((signal) => signal.endpoint === "영향예보" && /주의|경고|위험|심각/.test(signal.summary));
   const outdoorHeatLevel = liveSignals
     .map((signal) => signal.heatRiskLevel || heatRiskLevelByTemperature(signal.apparentTemperature) || heatRiskLevelByTemperature(signal.temperatureC))

@@ -178,12 +178,17 @@ export async function buildHwpWithTables(input: HwpBuildInput): Promise<Blob> {
       }
     }
 
-    // 4) Footer signature
+    // 4) Footer signature — 교육·TBM 기록은 참석자 개인별 서명란을 작업자 수만큼 싣는다(EDU-04·TBM-04).
+    const attendeeSignLines = profile.layout === "education" || profile.layout === "tbmLog"
+      ? `\n\n[참석자 서명]\n${Array.from({ length: Math.min(50, Math.max(1, scenario.workerCount || 0)) }, (_, index) => (
+        `${index + 1}. 성명: ______________  소속: __________  이해확인 □  서명: ______________`
+      )).join("\n")}`
+      : "";
     document.insertText(
       0,
       0,
       0,
-      "\n\n[확인/서명]\n작성자: ____________________\n관리감독자: ____________________\n교육/TBM 확인자: ____________________\n확인일시: ______년 ____월 ____일 ____시 ____분"
+      `${attendeeSignLines}\n\n[확인/서명]\n작성자: ____________________\n관리감독자: ____________________\n교육/TBM 확인자: ____________________\n확인일시: ______년 ____월 ____일 ____시 ____분`
     );
 
     const exported = document.exportHwp();

@@ -784,7 +784,7 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
     items.push({
       label: "직접 근거",
       value: evidenceLabel
-        ? formatEvidenceBadge(evidenceLabel.article)
+        ? formatEvidenceBadge(evidenceLabel.article, evidenceLabel.purpose)
         : safetyReferenceEvidenceTitle(directReference) || lawCitation?.title || "원문 확인 권장",
       detail: directReference?.operationSignalLabel
         || directReference?.shortSummary
