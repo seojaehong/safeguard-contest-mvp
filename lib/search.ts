@@ -11,6 +11,7 @@ import { buildTbmBriefingStructuredFromRiskRows, buildTbmLogStructuredFromRiskRo
 import { ensureConfinedSpaceAirStandard, isTbmTextForTask } from "./tbm-consistency";
 import { ensureEducationRecordSections } from "./education-record-sections";
 import { attachQualityContract } from "./quality-contract";
+import { canonicalizeRiskAssessmentResponse } from "./risk-assessment-record";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiDeliverablesDiagnostics, type AiMode } from "./ai-deliverables";
 import { buildGroundedGenerationPacket, type GroundedGenerationPacket } from "./grounded-generation-contract";
@@ -457,8 +458,8 @@ function buildRiskRow(params: {
     verificationStatus: params.verificationStatus || "planned",
     verificationDate: params.due,
     verificationChecker: params.verificationChecker,
-    whyLikelihood: `${params.location}의 작업 조건과 ${params.equipment} 사용 상태를 고려해 발생 가능성을 ${params.likelihood}로 산정했습니다.`,
-    whySeverity: `${params.hazard} 발생 시 작업중지, 부상 또는 중대재해로 이어질 수 있어 중대성을 ${params.severity}로 산정했습니다.`,
+    whyLikelihood: `가능성 ${params.likelihood}은 참고자료 종류에 따른 제안값입니다. 작업 빈도·노출 시간을 현장에서 확인해 고칩니다.`,
+    whySeverity: `중대성 ${params.severity}은 「${params.hazard}」의 예상 피해 정도에 따른 제안값입니다. 현장에서 확인해 고칩니다.`,
     evidenceRefs: params.evidenceRefs
   };
 }
@@ -502,7 +503,7 @@ function buildFallbackRiskAssessmentRows(response: AskResponse, weatherSummary: 
       location,
       process,
       task: scenario.workSummary,
-      equipment: /비계/.test(workText) ? "이동식 비계, 작업발판, 보호구" : /지게차/.test(workText) ? "지게차, 팔레트, 하역구역 표지" : "작업 장비·공구·보호구",
+      equipment: /비계/.test(workText) ? "이동식 비계, 작업발판, 보호구" : /지게차/.test(workText) ? "지게차, 팔레트, 하역구역 표지" : "",
       hazard: topRisk,
       currentControls: "작업 전 장비 상태, 작업구역, 보호구 착용 상태를 확인합니다.",
       likelihood: 4,
@@ -895,7 +896,8 @@ export function buildSafetyReferenceRiskRows(
       location,
       process: processLabel,
       task: taskLabel,
-      equipment: referenceEquipmentLabel(item.category, item.subcategory) || "작업 장비·공구·보호구",
+      // 사고사례 원천의 분류값(「518, 제조업」「아카이브(건설업)」)은 장비가 아니다(COPY-07). 거른 뒤 남는 값이 없으면 빈칸이다.
+      equipment: referenceEquipmentLabel(item.category, item.subcategory),
       hazard,
       currentControls: control,
       likelihood: item.item_type === "sif-case" ? 4 : item.evidence_role === "direct" ? 3 : 2,
@@ -2021,7 +2023,8 @@ export function attachDbHarnessFallback(response: AskResponse, input: {
   const packet = buildPublicDbHarnessPacket(internalPacket);
   const promptContext = buildHarnessPromptContext(internalPacket);
   const reflectedResponse = reflectDbHarnessInDeliverables(response, packet);
-  const structuredResponse = attachPhotoSeedStructuredOutput(reflectedResponse, input.harnessMemory.improvements);
+  // 위험성평가 정본 단일화(PR-06/10): 초안·요약 위험수준·확인 필요 목록을 정본 행에서 다시 만든다.
+  const structuredResponse = canonicalizeRiskAssessmentResponse(attachPhotoSeedStructuredOutput(reflectedResponse, input.harnessMemory.improvements));
   return attachQualityContract({
     ...structuredResponse,
     answer: buildDbHarnessAnswer(packet),
@@ -2995,7 +2998,7 @@ async function runAskUngated(question: string, options: RunAskOptions = {}): Pro
 
     const withOntologyQa = await attachWebOntologyQa(withMcpDetail, question, options.signal);
     const finalResponse = applyPhaseAResponseBoundary(
-      attachQualityContract(withOntologyQa),
+      attachQualityContract(canonicalizeRiskAssessmentResponse(withOntologyQa)),
       options.phaseAGrounding,
     );
     const finalDeliverablesTrace = finalizeDeliverablesTrace(finalResponse, deliverablesExecutionTrace);

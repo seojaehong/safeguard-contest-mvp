@@ -26,6 +26,8 @@ export type StructuredRiskAssessmentRow = {
   evidence?: string;
   evidenceRefsList?: string[];
   evidenceRefs?: string[];
+  implementationResult?: string;
+  residualRiskLevel?: string;
 };
 
 type SheetRow = {
@@ -83,7 +85,7 @@ export function parseStructuredRiskAssessmentRows(value: unknown): StructuredRis
 
     const evidenceRefs = readStringArray(item, ["evidenceRefs", "evidenceReferences", "근거"]);
     const evidenceRefsList = evidenceRefs;
-    const due = readString(item, ["due", "dueDate", "deadline", "targetDate", "기한"], "작업 전");
+    const due = readString(item, ["due", "dueDate", "deadline", "targetDate", "기한"], "");
     const verificationStatus = readString(item, ["verificationStatus", "status", "completionStatus", "확인상태"], "planned");
 
     return [{
@@ -94,27 +96,29 @@ export function parseStructuredRiskAssessmentRows(value: unknown): StructuredRis
       unitTask: unitTask || "세부작업 확인",
       equipment: readString(item, ["equipment", "tools", "machine", "장비도구", "장비·도구"]),
       hazard: hazard || "유해·위험요인 확인",
-      fourM: readString(item, ["fourM", "4M", "fourMCategory"], "Management"),
-      accidentType: readString(item, ["accidentType", "accident", "injuryType", "재해유형"], "other"),
+      fourM: readString(item, ["fourM", "4M", "fourMCategory"], ""),
+      accidentType: readString(item, ["accidentType", "accident", "injuryType", "재해유형"], ""),
       currentControls: readString(item, ["currentControls", "currentControl", "existingControls", "safetyMeasures", "현재조치"]),
       likelihood: readString(item, ["likelihood", "possibility", "frequency", "가능성"]),
       severity: readString(item, ["severity", "impact", "중대성"]),
-      riskLevel: readString(item, ["riskLevel", "risk", "level", "위험성"], "확인"),
+      riskLevel: readString(item, ["riskLevel", "risk", "level", "위험성"], ""),
       additionalControls: additionalControls || "감소대책 현장 확인",
-      owner: readString(item, ["owner", "assignee", "personInCharge", "담당자"], "작업반장"),
+      owner: readString(item, ["owner", "assignee", "personInCharge", "담당자"], ""),
       dueDate: due,
       due,
       status: verificationStatus,
       verification: readString(item, ["verification", "confirmation", "확인"], "현장 확인"),
       verificationStatus,
       verificationDate: readString(item, ["verificationDate", "checkDate", "확인일"], "현장 확인"),
-      verificationChecker: readString(item, ["verificationChecker", "checker", "확인자"], "관리감독자"),
+      verificationChecker: readString(item, ["verificationChecker", "checker", "확인자"], ""),
       whyLikelihood: readString(item, ["whyLikelihood", "likelihoodReason", "가능성근거"]),
       whySeverity: readString(item, ["whySeverity", "severityReason", "중대성근거"]),
       evidence: readString(item, ["evidence", "proof", "attachment", "증빙"])
         || evidenceRefs.join(", "),
       evidenceRefsList,
-      evidenceRefs
+      evidenceRefs,
+      implementationResult: readString(item, ["implementationResult", "이행결과"]),
+      residualRiskLevel: readString(item, ["residualRiskLevel", "잔여위험"])
     }];
   });
 }
@@ -172,7 +176,10 @@ export function buildRiskAssessmentText(row: StructuredRiskAssessmentRow): strin
     row.whySeverity ? `중대성 근거: ${row.whySeverity}` : "",
     row.owner ? `담당: ${row.owner}` : "",
     row.dueDate || row.due ? `기한: ${row.dueDate || row.due}` : "",
-    row.verificationChecker || row.verificationDate ? `확인: ${row.verificationChecker || "관리감독자"} / ${row.verificationDate || "현장 확인"} / ${row.verificationStatus || row.status || "planned"}` : "",
+    // 확인자·확인일을 고정 문구로 채우지 않는다(모르는 값은 빈칸).
+    row.verificationChecker || row.verificationDate
+      ? `확인: ${[row.verificationChecker, row.verificationDate, row.verificationStatus || row.status].filter(Boolean).join(" / ")}`
+      : "",
     row.evidence ? `증빙: ${row.evidence}` : ""
   ].filter(Boolean).join("\n");
 }

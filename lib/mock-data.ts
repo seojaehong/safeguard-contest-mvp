@@ -2,6 +2,7 @@ import { AskResponse, DetailRecord, SearchResult } from "./types";
 import { selectFallbackAccidentCases } from "./accident-cases";
 import { buildEvidenceLabels } from "./smsa-mapping";
 import { serializeRiskAssessmentRowsToDraft } from "@/components/workpack-editor-structure";
+import { summarizeRiskLevel } from "./risk-labels";
 import { buildForeignWorkerBriefing, buildForeignWorkerTransmission, getDefaultForeignWorkerLanguages } from "./foreign-worker";
 import { attachQualityContract } from "./quality-contract";
 import {
@@ -1130,17 +1131,6 @@ function sanitizeWorkSummary(question: string, fallback: string) {
   return (workSentence || normalized || fallback).replace(/\.$/, "").trim();
 }
 
-function format4mLine(hazard: string) {
-  const checks = [
-    ["Man", /신규|작업자|외국인|고령|숙련|보호구|추락|끼임|충돌|낙하/.test(hazard) ? "중점" : "확인"],
-    ["Machine", /비계|지게차|장비|도구|용접|세척기|대차|펌프|랙|팔레트|전도|끼임|낙하/.test(hazard) ? "중점" : "확인"],
-    ["Media", /강풍|우천|폭염|고온|환기|밀폐|젖음|작업환경|동선|흄|비산|출하|혼잡/.test(hazard) ? "중점" : "확인"],
-    ["Management", /통제|신호|작업중지|관리|교육|허가|동선|감시|분리|혼잡|화재/.test(hazard) ? "중점" : "확인"]
-  ];
-
-  return `   - 4M 체크: ${checks.map(([label, status]) => `${label}:${status === "중점" ? "■" : "□"}`).join(" ")} / 중점 확인: ${checks.filter(([, status]) => status === "중점").map(([label]) => label).join(", ") || "현장 확인"}`;
-}
-
 function canonicalRiskLevel(likelihood: number, severity: number): RiskLevel {
   const score = likelihood * severity;
   if (score >= 10) return "high";
@@ -1181,18 +1171,21 @@ function buildScenarioRiskAssessmentRows(scenario: ReturnType<typeof inferScenar
       controlId: `RA-${profile.id}-${index + 1}`,
       location: scenario.siteName,
       process: profile.processName,
-      task: index === 0 ? profile.workName : hazard,
+      // 세부작업 칸에는 작업명을 쓴다(위험요인 문장을 넣지 않는다, 편집기 점검 D-11).
+      task: profile.workName,
+      // 위험요인에 장비가 드러날 때만 적고, 모르면 빈칸으로 둔다.
       equipment: /비계/.test(hazard)
-        ? "이동식 비계, 안전난간, 추락방지 보호구"
-        : /지게차|랙|상하차|피킹/.test(hazard)
-          ? "지게차, 랙, 팔레트, 신호장비"
+        ? "이동식 비계"
+        : /지게차/.test(hazard)
+          ? "지게차"
           : /용접|절단|화기/.test(hazard)
-            ? "용접기, 절단기, 소화기, 차폐막"
-            : "현장 장비 및 보호구",
+            ? "용접기·절단기"
+            : "",
       hazard,
       fourM: fourMForHazard(hazard),
       accidentType: accidentTypeForHazard(hazard),
-      currentControls: action,
+      // 현재 안전조치는 입력에 없으므로 빈칸이다. 기본 틀의 조치는 「감소대책」 칸에만 둔다(RA-09).
+      currentControls: "",
       likelihood,
       severity,
       riskLevel: canonicalRiskLevel(likelihood, severity),
@@ -1203,9 +1196,9 @@ function buildScenarioRiskAssessmentRows(scenario: ReturnType<typeof inferScenar
       verificationStatus: index === 0 ? "planned" : "needsReview",
       verificationDate: "현장 확인",
       verificationChecker: "작업반장",
-      whyLikelihood: "작업 전 노출 빈도와 현장 통제 상태를 함께 반영",
-      whySeverity: "추락·충돌·화재 등 중대재해 가능성을 보수적으로 반영",
-      evidenceRefs: ["riskAssessmentDraft", "tbmBriefing"]
+      whyLikelihood: `가능성 ${likelihood}은 작업 유형 기본 틀의 제안값입니다. 작업 빈도·노출 시간을 현장에서 확인해 고칩니다.`,
+      whySeverity: `중대성 ${severity}은 작업 유형 기본 틀의 제안값입니다. 예상 피해 정도를 현장에서 확인해 고칩니다.`,
+      evidenceRefs: ["SafeClaw 작업 유형별 기본 틀"]
     };
   });
 }
@@ -1271,7 +1264,7 @@ function roleSpecificCondition(weatherNote: string, role: DocumentConditionRole)
   return fallbackByRole[role];
 }
 
-function buildWorkpackSummaryDraft(scenario: ReturnType<typeof inferScenario>) {
+function buildWorkpackSummaryDraft(scenario: ReturnType<typeof inferScenario>, riskLevel: string) {
   const { profile } = scenario;
 
   return [
@@ -1287,7 +1280,7 @@ function buildWorkpackSummaryDraft(scenario: ReturnType<typeof inferScenario>) {
     ...(scenario.specialContext.length ? ["", "[특수 대상/조건]", ...scenario.specialContext.map((item) => `- ${item}`)] : []),
     "",
     "[핵심 판단]",
-    `- 위험수준: ${profile.riskLevel}`,
+    `- 위험수준: ${riskLevel}`,
     `- 핵심 위험: ${profile.topRisk}`,
     "",
     "[즉시 조치]",
@@ -1302,76 +1295,6 @@ function buildWorkpackSummaryDraft(scenario: ReturnType<typeof inferScenario>) {
     "- 안전보건교육: 교육대상, 교육내용, 이해도 확인, 후속 교육",
     "- 비상대응: 즉시조치, 보고체계, 현장보존, 재발방지",
     "- 사진/증빙: 조치 전·후 사진, 설명, 확인자"
-  ].join("\n");
-}
-
-function buildOfficialStyleRiskAssessment(scenario: ReturnType<typeof inferScenario>) {
-  const { profile } = scenario;
-
-  return [
-    "위험성평가표(초안)",
-    "공식자료 기반: KOSHA 위험성평가 절차 및 4M 기법 참고",
-    "",
-    `업체명: ${scenario.companyName}`,
-    `업종: ${scenario.companyType}`,
-    `작업명: ${profile.workName}`,
-    `공정/세부작업: ${profile.processName}`,
-    `작업장소: ${scenario.siteName}`,
-    `작업인원: ${scenario.workerCount}명`,
-    `기상 및 작업조건: ${roleSpecificCondition(scenario.weatherNote, "risk")}`,
-    "",
-    "[1. 사전준비]",
-    `- 평가대상 작업: ${profile.workName}`,
-    "- 참여자: 현장소장, 관리감독자, 작업반장, 해당 작업자",
-    "- 확인자료: 작업계획, 기상조건, 장비·보호구 상태, 최근 TBM 기록",
-    "",
-    "[2. 유해·위험요인 파악]",
-    `1. 세부작업: ${profile.hazards[0]}`,
-    `   - 유해·위험요인: ${profile.hazards[0]}`,
-    format4mLine(profile.hazards[0]),
-    "",
-    `2. 세부작업: ${profile.hazards[1]}`,
-    `   - 유해·위험요인: ${profile.hazards[1]}`,
-    format4mLine(profile.hazards[1]),
-    "",
-    `3. 세부작업: ${profile.hazards[2]}`,
-    `   - 유해·위험요인: ${profile.hazards[2]}`,
-    format4mLine(profile.hazards[2]),
-    "",
-    "[3. 위험성 결정]",
-    `1. ${profile.hazards[0]}`,
-    `   - 현재 위험성: ${profile.riskLevel}`,
-    "   - 판단근거: 사고 발생 가능성과 중대성을 함께 고려",
-    `2. ${profile.hazards[1]}`,
-    `   - 현재 위험성: ${profile.riskLevel === "상" ? "상" : "중"}`,
-    "   - 판단근거: 작업 전 통제 여부와 노출 빈도 확인",
-    `3. ${profile.hazards[2]}`,
-    "   - 현재 위험성: 중",
-    "   - 판단근거: 관리감독 및 작업자 숙지 여부 확인",
-    "",
-    "[4. 감소대책 수립 및 실행]",
-    `1. ${profile.actions[0]}`,
-    "   - 실행시점: 작업 시작 전",
-    "   - 담당: 관리감독자 / 작업반장",
-    "   - 잔여 위험성: 중",
-    `2. ${profile.actions[1]}`,
-    "   - 실행시점: 작업 시작 전 및 작업 중 수시",
-    "   - 담당: 작업반장 / 신호수",
-    "   - 잔여 위험성: 중",
-    `3. ${profile.actions[2]}`,
-    "   - 실행시점: TBM 직후",
-    "   - 담당: 전 작업자",
-    "   - 잔여 위험성: 하",
-    "",
-    "[5. 공유·교육]",
-    "- 위험성평가 결과는 TBM에서 구두 설명하고, 작업자 이해 여부를 확인합니다.",
-    "- 신규 투입자와 외국인 근로자는 쉬운 문장 또는 다국어 보조 설명을 추가합니다.",
-    "",
-    "[6. 조치 확인]",
-    "위험성평가 실시자: 현장소장 / 관리감독자",
-    "근로자 참여 확인: 작업 전 TBM에서 공유 및 복창 확인",
-    "조치 완료 예정일: 작업 시작 전 즉시",
-    "미조치 항목 처리: 작업 보류 또는 책임자 승인 후 재평가"
   ].join("\n");
 }
 
@@ -1749,9 +1672,11 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
     weatherNote: scenario.weatherNote,
     taskClassification: scenario.taskClassification
   };
+  // 요약 위험수준은 평가표 최고 등급과 같아야 한다(EXP-09).
+  const summaryRiskLevel = summarizeRiskLevel(riskAssessmentRows) || profile.riskLevel;
   const riskSummary = {
     title: `${scenario.companyType} ${profile.workName}`,
-    riskLevel: profile.riskLevel,
+    riskLevel: summaryRiskLevel,
     topRisk: profile.topRisk,
     immediateActions: [
       profile.actions[0],
@@ -1828,7 +1753,7 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
     },
     riskSummary,
     deliverables: {
-      workpackSummaryDraft: buildWorkpackSummaryDraft(scenario),
+      workpackSummaryDraft: buildWorkpackSummaryDraft(scenario, summaryRiskLevel),
       riskAssessmentDraft: serializeRiskAssessmentRowsToDraft(riskAssessmentRows),
       workPlanDraft: buildOfficialStyleWorkPlan(scenario),
       workPermitDraft: buildOfficialStyleWorkPermit(scenario),
