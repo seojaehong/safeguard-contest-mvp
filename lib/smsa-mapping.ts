@@ -180,3 +180,4 @@ export function buildEvidenceLabels(documentKeys: readonly string[]): Record<str
   }
   return result;
 }
+export function resolveEducationEvidenceLabel(_s: { courseDetermined: boolean; hoursRecorded: boolean; signed: boolean }): SmsaEvidenceLabel { return EDUCATION_LABEL; }

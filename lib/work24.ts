@@ -81,7 +81,7 @@ function parseCourses(xml: string) {
   }).filter((item) => item.title && item.url);
 }
 
-function scoreCourseFit(question: string, course: Work24Course): Work24Course {
+export function scoreCourseFit(question: string, course: Work24Course): Work24Course {
   const normalized = question.toLowerCase();
   const title = course.title.toLowerCase();
   const target = (course.target || "").toLowerCase();

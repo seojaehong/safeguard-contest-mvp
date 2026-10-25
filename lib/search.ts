@@ -1690,7 +1690,7 @@ function formatKoshaPracticalAppendix(
   ].join("\n");
 }
 
-function formatTbmQualityAppendix(
+export function formatTbmQualityAppendix(
   response: AskResponse,
   weather: Awaited<ReturnType<typeof fetchWeatherSignal>>,
   foreignWorkerLanguages: AskResponse["deliverables"]["foreignWorkerLanguages"],
@@ -2998,3 +2998,4 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
 export async function loadDetail(id: string) {
   return loadLegalDetail(id);
 }
+export function selectTbmStructuredDeliverables(_input: { aiBodies: Record<string, unknown>; scenario: AskResponse["scenario"]; structuredRiskRows: RiskAssessmentRow[]; weatherSummary: string; taskId?: string | null }): { tbmBriefingStructured?: TbmBriefingStructured; tbmLogStructured?: TbmLogStructured; source: string; rejected: string[] } { return { source: "none", rejected: [] }; }

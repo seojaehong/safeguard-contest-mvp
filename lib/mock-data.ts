@@ -42,6 +42,8 @@ import {
   type ScenarioProfileInput,
   type TaskId
 } from "./task-scenario-profiles";
+import { CONFINED_SPACE_AIR_STANDARD_HEADER, CONFINED_SPACE_AIR_STANDARD_LINES } from "./tbm-consistency";
+import { buildTbmBriefingStructuredFromRiskRows, buildTbmLogStructuredFromRiskRows } from "./tbm-structured";
 
 type LegacyScenarioProfile = Omit<ScenarioProfileInput, "pairs"> & {
   hazards: [string, string, string];
@@ -1192,8 +1194,14 @@ export function inferScenario(question: string) {
         ? "고온 작업조건, 온열질환 예방과 휴식 기준 공유 필요"
         : profile.weatherNote,
     specialContext: inferSpecialContext(normalized),
+    question: normalized,
     profile
   };
+}
+
+// 문서 작성일은 생성 시각(KST)으로 적는다. 실시 일시는 현장에서 적는 빈칸으로 둔다(TBM-03).
+function formatKstDate(date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
 }
 
 type DocumentConditionRole =
@@ -1576,7 +1584,8 @@ function buildOfficialStyleTbmLog(scenario: ReturnType<typeof inferScenario>) {
     "작업 전 안전점검회의(TBM) 기록(초안)",
     "공식자료 기반: 작업일지·모바일 앱·사진·영상 등 다양한 기록 인정 취지 참고",
     "",
-    "일시: 2026-04-25 08:00",
+    "일시: ____년 __월 __일 __:__ (현장 기재)",
+    `작성일: ${formatKstDate()}`,
     `업체명: ${scenario.companyName}`,
     `작업장소: ${scenario.siteName}`,
     `작업내용: ${scenario.workSummary}`,
@@ -1603,11 +1612,15 @@ function buildOfficialStyleTbmLog(scenario: ReturnType<typeof inferScenario>) {
     "- 음주·피로 여부: □ 이상 없음 □ 확인 필요",
     "",
     "[참석자 확인]",
-    "TBM 내용 숙지 여부: 전원 구두 복창 및 서명 예정",
-    "보호구 착용 상태: 상호 점검",
-    "위험구역 표시 및 통제: 확인",
-    "신규·외국인·미숙련 작업자: 쉬운 한국어/통역/번역 메시지로 이해 여부 별도 확인",
+    "TBM 내용 숙지 여부(구두 복창): □ 확인 □ 미확인",
+    "보호구 착용 상태(상호 점검): □ 확인 □ 미확인",
+    "위험구역 표시 및 통제: □ 확인 □ 미확인",
+    "신규·외국인·미숙련 작업자 이해 여부(쉬운 한국어·통역·번역): □ 확인 □ 미확인 □ 해당 없음",
+    `참석자 성명·서명: 아래 참석자 서명표(작업자 ${scenario.workerCount}명)에 기재`,
     "",
+    ...(scenario.taskClassification.taskId === "confined-space"
+      ? [CONFINED_SPACE_AIR_STANDARD_HEADER, ...CONFINED_SPACE_AIR_STANDARD_LINES, ""]
+      : []),
     "[사진·영상 기록 메모]",
     "- 작업 전 현장 상태, 보호구 착용, 위험구역 통제, TBM 실시 사진을 기록합니다.",
     "- 사진/영상 파일명, 모바일 앱 기록 ID, 작업일지 보관 위치를 남깁니다.",

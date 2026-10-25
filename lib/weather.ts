@@ -830,7 +830,7 @@ async function fetchVillageForecastSignal(location: LocationConfig, signal?: Abo
   }
 }
 
-function buildWeatherActions(signals: KmaSignal[]) {
+export function buildWeatherActions(signals: KmaSignal[]) {
   const liveSignals = signals.filter((signal) => signal.mode === "live");
   const windValues = liveSignals
     .map((signal) => Number(signal.windSpeedMps || "0"))
