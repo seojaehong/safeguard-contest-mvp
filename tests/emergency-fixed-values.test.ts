@@ -142,6 +142,11 @@ describe("PR-15 업체·현장·인원 고정값 제거 (F-COV-06·07·08, EXP-0
     const scenario = inferScenario("이천 물류센터 지게차 상하차 작업");
     expect(scenario.siteName).not.toMatch(/인천|남동공단/);
     expect(scenario.companyName).not.toBe("이천");
+    for (const question of ["건설현장 덤프트럭 토사 반출, 유도자 1명", "공사장 거푸집 해체 작업"]) {
+      const site = inferScenario(question).siteName;
+      expect(site).not.toMatch(/성수동|근린생활시설/);
+      expect(inferScenario(question).weatherNote).not.toContain("강풍");
+    }
   });
 
   it.each([
