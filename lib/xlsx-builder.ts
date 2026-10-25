@@ -81,6 +81,15 @@ const DISPLAY_HEADER_LABELS: Readonly<Record<string, string>> = {
 };
 
 // 라벨은 lib/risk-labels.ts 하나에서 가져온다(COPY-12, 위험등급 「상·중·하」 통일).
+// 조치기한·확인일 칸: 「현장 확인」 같은 안내 글자 대신 날짜 기입란을 둔다(COPY-05).
+const DATE_FIELD_BLANK = "    년    월    일";
+
+function dateCellValue(value: string | undefined, fallback: string): string {
+  const text = (value ?? "").trim();
+  if (!text) return fallback;
+  return /^(?:현장\s*확인|확인)$/u.test(text) ? DATE_FIELD_BLANK : text;
+}
+
 function localizeDisplayHeader(value: string): string {
   return DISPLAY_HEADER_LABELS[value] || value;
 }
@@ -295,11 +304,11 @@ function writeOfficialLikeRiskAssessmentTable(
       localizeRiskLevel(riskRow.riskLevel || ""),
       riskRow.additionalControls,
       riskRow.owner || "",
-      riskRow.dueDate || riskRow.due || "",
+      dateCellValue(riskRow.dueDate || riskRow.due, ""),
       riskRow.implementationResult || "",
       localizeRiskLevel(riskRow.residualRiskLevel || ""),
       localizeVerificationStatus(riskRow.verificationStatus || riskRow.status || ""),
-      riskRow.verificationDate || "",
+      dateCellValue(riskRow.verificationDate, ""),
       riskRow.verificationChecker || "",
       evidenceText
     ];

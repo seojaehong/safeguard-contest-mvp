@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { gateExportPayload } from "@/lib/user-output-gate";
 import {
   getPublicDistributedAdmissionReadiness,
   withPublicDocumentExportAdmission,
@@ -1190,7 +1191,8 @@ async function buildBinaryPdf(
 
 async function exportPdf(request: NextRequest) {
   try {
-    const parsed = await readDocumentExportRequestJson(request);
+    // PR-14: 받은 본문의 내부 문구·통째 enum 칸을 사용자용으로 거른 뒤 렌더한다.
+    const parsed = gateExportPayload(await readDocumentExportRequestJson(request));
     const requestBody = isRecord(parsed) ? parsed : {};
     const body = selectRenderedPdfFields(
       requestBody,

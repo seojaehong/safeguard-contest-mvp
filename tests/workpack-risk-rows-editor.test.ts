@@ -42,7 +42,8 @@ describe("workpack risk row editor contract", () => {
     expect(draft).toContain("강풍 시 작업중지 및 안전대 체결");
     expect(draft).toContain("가능성: 3");
     expect(draft).toContain("중대성: 4");
-    expect(draft).toContain("위험등급: high");
+    expect(draft).toContain("위험등급: 상");
+    expect(draft).not.toMatch(/^(?:위험등급|4M|재해형태|확인상태): (?:high|medium|low|Man|Machine|Media|Management|planned|done|needsReview|fall)$/mu);
     expect(draft).toContain("KOSHA 이동식 비계 지침 | 현장 작업계획");
   });
 

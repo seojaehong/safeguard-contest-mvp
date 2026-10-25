@@ -1,42 +1,19 @@
 // 위험성평가 출력용 한글 라벨 — 화면 미리보기·인쇄·Word·xlsx·hwp·pdf 가 모두 이 맵을 쓴다.
 // 결정(2026-10-25, COPY-12): 위험등급 표기는 「상·중·하」로 통일한다.
 import type { AccidentType, FourM, RiskLevel, VerificationStatus } from "@/lib/risk-assessment-schema";
+import {
+  ACCIDENT_TYPE_DISPLAY_LABELS,
+  FOUR_M_DISPLAY_LABELS,
+  RISK_LEVEL_DISPLAY_LABELS,
+  VERIFICATION_STATUS_DISPLAY_LABELS
+} from "@/lib/document-display-labels";
 
-export const RISK_LEVEL_LABELS = {
-  high: "상",
-  medium: "중",
-  low: "하"
-} satisfies Readonly<Record<RiskLevel, string>>;
-
-export const FOUR_M_LABELS = {
-  Man: "인적 요인",
-  Machine: "기계·설비 요인",
-  Media: "작업환경 요인",
-  Management: "관리 요인"
-} satisfies Readonly<Record<FourM, string>>;
-
-export const ACCIDENT_TYPE_LABELS = {
-  fall: "추락",
-  slip: "미끄러짐",
-  struckBy: "맞음",
-  caughtIn: "끼임",
-  cut: "베임",
-  burn: "화상",
-  electricShock: "감전",
-  chemicalExposure: "화학물질 노출",
-  asphyxiation: "질식",
-  heatIllness: "온열질환",
-  traffic: "교통사고",
-  collapse: "붕괴",
-  fireExplosion: "화재·폭발",
-  other: "기타"
-} satisfies Readonly<Record<AccidentType, string>>;
-
-export const VERIFICATION_STATUS_LABELS = {
-  planned: "조치 예정",
-  done: "조치 완료",
-  needsReview: "검토 필요"
-} satisfies Readonly<Record<VerificationStatus, string>>;
+// 낱말 사전은 lib/document-display-labels.ts(PR-14) 한 곳이다. 여기서는 그 사전을 그대로 쓰고,
+// 위험성평가 출력에 필요한 「모르는 값은 빈칸」 변환과 척도·보존 문구만 더한다.
+export const RISK_LEVEL_LABELS: Readonly<Record<RiskLevel, string>> = RISK_LEVEL_DISPLAY_LABELS;
+export const FOUR_M_LABELS: Readonly<Record<FourM, string>> = FOUR_M_DISPLAY_LABELS;
+export const ACCIDENT_TYPE_LABELS: Readonly<Record<AccidentType, string>> = ACCIDENT_TYPE_DISPLAY_LABELS;
+export const VERIFICATION_STATUS_LABELS: Readonly<Record<VerificationStatus, string>> = VERIFICATION_STATUS_DISPLAY_LABELS;
 
 const RISK_LEVEL_ALIASES: Readonly<Record<string, RiskLevel>> = {
   high: "high",

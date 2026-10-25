@@ -133,14 +133,14 @@ export function buildAnswerPanelStatusNotes(data: AnswerPanelPublicStatusInput) 
   if (safetyReference) {
     notes.push(
       safetyReference.count > 0
-        ? `안전지식 DB: ${safetyReference.count.toLocaleString("ko-KR")}건 반영 후보`
-        : `안전지식 DB: ${publicModeLabel(safetyReference.mode)}`
+        ? `안전 참고자료: ${safetyReference.count.toLocaleString("ko-KR")}건 반영 후보`
+        : `안전 참고자료: ${publicModeLabel(safetyReference.mode)}`
     );
   }
 
   if (data.dbHarness) {
     const summary = data.dbHarness.summary;
-    notes.push(`검증 근거: 직접 근거 ${summary.directEvidence}건 · SIF 사례 ${summary.sifCases}건`);
+    notes.push(`검증 근거: 직접 근거 ${summary.directEvidence}건 · 중대재해 사례 ${summary.sifCases}건`);
   }
 
   if (data.qualityContract) {

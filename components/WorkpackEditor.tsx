@@ -19,12 +19,20 @@ import {
 import { buildWorkpackGenerationFingerprint } from "@/lib/current-workpack";
 import { encodeSpreadsheetDelimitedCell } from "@/lib/spreadsheet-delimited-cell";
 import {
+  ACCIDENT_TYPE_DISPLAY_LABELS,
+  FOUR_M_DISPLAY_LABELS,
+  riskLevelLabel,
+  VERIFICATION_STATUS_DISPLAY_LABELS
+} from "@/lib/document-display-labels";
+import { gateUserOutputCell, gateUserOutputText } from "@/lib/user-output-gate";
+import {
   areRiskAssessmentRowsRepresentedInDraft,
   buildStructuredDocumentSections,
   groupSubmissionPreviewRows,
   isCanonicalRiskAssessmentExportSafe,
   isMetaSection,
   replaceStructuredDocumentSection,
+  selectTbmBridgeRiskRows,
   serializeRiskAssessmentRowsToDraft,
   updateRiskAssessmentRowField,
   type DocumentKey
@@ -38,14 +46,7 @@ import {
   splitRiskRowsForOutput,
   toStructuredRiskRows
 } from "@/lib/risk-assessment-record";
-import {
-  ACCIDENT_TYPE_LABELS,
-  FOUR_M_LABELS,
-  RISK_RETENTION_NOTE,
-  RISK_SCALE_LINES,
-  riskLevelLabel,
-  VERIFICATION_STATUS_LABELS
-} from "@/lib/risk-labels";
+import { RISK_RETENTION_NOTE, RISK_SCALE_LINES } from "@/lib/risk-labels";
 import styles from "./WorkpackEditor.module.css";
 
 declare global {
@@ -111,9 +112,10 @@ type CustomerTemplateField = {
 };
 type ServerExportReadiness = "checking" | "ready" | "locked";
 
-// 위험성평가 라벨은 lib/risk-labels.ts 하나에서 가져온다(COPY-12). 화면·인쇄·xlsx·hwp·pdf 가 같은 낱말을 쓴다.
-const accidentTypeLabels = ACCIDENT_TYPE_LABELS;
-const verificationStatusLabels = VERIFICATION_STATUS_LABELS;
+// 표시 이름은 인쇄·xlsx·hwp 와 같은 사전(lib/document-display-labels.ts)을 쓴다(PR-14, COPY-08).
+const accidentTypeLabels: Readonly<Record<RiskAssessmentRow["accidentType"], string>> = ACCIDENT_TYPE_DISPLAY_LABELS;
+
+const verificationStatusLabels: Readonly<Record<RiskAssessmentRow["verificationStatus"], string>> = VERIFICATION_STATUS_DISPLAY_LABELS;
 
 function createEmptyRiskAssessmentRow(data: AskResponse): RiskAssessmentRow {
   return {
@@ -369,7 +371,7 @@ const PDF_PRINT_FALLBACK_POPUP_NOTICE = "<style>@media print{.safeclaw-print-fal
   + "</div>";
 
 function buildTbmBridgeRows(data: AskResponse, riskRows: SheetRow[]) {
-  const riskItems = findRows(riskRows, ["위험", "추락", "전도", "충돌", "끼임", "화재", "중독", "노출"], 4);
+  const riskItems = selectTbmBridgeRiskRows(riskRows);
   const weatherSignals = data.externalData.weather.actions.length
     ? data.externalData.weather.actions
     : [data.externalData.weather.summary || data.scenario.weatherNote];
@@ -1719,8 +1721,15 @@ function parseSheetRows(title: string, body: string): SheetRow[] {
   return rows;
 }
 
+// PR-14: 인쇄·XLS·Word·HWPX·CSV 가 모두 이 행을 쓴다. 칸 하나가 통째로 enum(fireExplosion·planned·high)이면
+// 한글로, 내부 문구는 사용자 문구로 바꾼다. 편집 중인 본문(values)은 건드리지 않는다.
 function buildRowsForDocument(meta: EditableDocument, values: Record<DocumentKey, string>) {
-  return parseSheetRows(meta.title, values[meta.key]);
+  return parseSheetRows(meta.title, values[meta.key]).map((row) => ({
+    ...row,
+    section: gateUserOutputText(row.section),
+    item: gateUserOutputText(row.item),
+    content: gateUserOutputCell(row.content)
+  }));
 }
 
 function buildRowsForAll(values: Record<DocumentKey, string>) {
@@ -2667,7 +2676,7 @@ function RiskAssessmentRowsEditor({
                       value={row.fourM}
                       onChange={(event) => onRowChange(rowIndex, "fourM", event.target.value as RiskAssessmentRow["fourM"])}
                     >
-                      {FOUR_M_VALUES.map((value) => <option key={value} value={value}>{FOUR_M_LABELS[value]}</option>)}
+                      {FOUR_M_VALUES.map((value) => <option key={value} value={value}>{FOUR_M_DISPLAY_LABELS[value]}</option>)}
                     </select>
                   </label>
                   <label>
@@ -4233,7 +4242,7 @@ export function WorkpackEditor({
                     <b>4M/등급</b>
                     <strong>
                       {canonicalRiskRows[0]
-                        ? `${FOUR_M_LABELS[canonicalRiskRows[0].fourM] ?? canonicalRiskRows[0].fourM} · ${riskLevelLabel(canonicalRiskRows[0].riskLevel)}`
+                        ? `${FOUR_M_DISPLAY_LABELS[canonicalRiskRows[0].fourM] ?? canonicalRiskRows[0].fourM} · ${riskLevelLabel(canonicalRiskRows[0].riskLevel)}`
                         : `${selectedRows.length.toLocaleString("ko-KR")}건 연결`}
                     </strong>
                   </span>

@@ -6,6 +6,8 @@
 import type { AskResponse, TbmRiskLink } from "@/lib/types";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import { validateRiskAssessmentRows } from "@/lib/risk-assessment-schema";
+import { evidenceRefsForDisplay } from "@/lib/document-display-labels";
+import { gateUserOutputCell } from "@/lib/user-output-gate";
 import { serializeRiskAssessmentRowsToDraft } from "@/components/workpack-editor-structure";
 import {
   parseStructuredRiskAssessmentRows,
@@ -56,9 +58,9 @@ const INTERNAL_EVIDENCE_PATTERNS = [
 ];
 
 export function displayEvidenceRefs(refs: readonly string[] | undefined): string[] {
-  return (refs || [])
-    .map((ref) => ref.trim())
-    .filter((ref) => ref && !INTERNAL_EVIDENCE_PATTERNS.some((pattern) => pattern.test(ref)));
+  // PR-14 사전(문서 키 → 문서명, 내부 출처 표지 제거)을 먼저 거친 뒤 위험성평가 칸에 맞지 않는 원천 분류를 더 거른다.
+  return evidenceRefsForDisplay(refs)
+    .filter((ref) => !INTERNAL_EVIDENCE_PATTERNS.some((pattern) => pattern.test(ref)));
 }
 
 /** 머리 기록란. 평가 대상 외에는 전부 빈칸 또는 선택 상자다. */
@@ -123,16 +125,17 @@ function residualLabel(row: StructuredRiskAssessmentRow): string {
 
 /** 본표 한 행을 출력 칸 순서대로 만든다. 행 값을 그대로 쓰고 모르는 값은 빈칸이다. */
 export function riskRecordRowCells(row: StructuredRiskAssessmentRow, index: number): string[] {
+  // 글 칸은 PR-14 출력 게이트를 한 번 더 거친다(편집기 인쇄처럼 서버 게이트를 거치지 않는 경로).
   return [
     String(index + 1),
-    row.unitTask || "",
-    row.hazard || "",
+    gateUserOutputCell(row.unitTask || ""),
+    gateUserOutputCell(row.hazard || ""),
     accidentTypeLabel(row.accidentType),
-    row.currentControls || "",
+    gateUserOutputCell(row.currentControls || ""),
     row.likelihood || "",
     row.severity || "",
     riskLevelLabel(row.riskLevel),
-    row.additionalControls || "",
+    gateUserOutputCell(row.additionalControls || ""),
     row.owner || "",
     row.dueDate || row.due || "",
     row.implementationResult || "",
