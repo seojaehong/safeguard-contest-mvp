@@ -8,6 +8,7 @@ import {
   evidenceRefsForDisplay,
   fourMLabel,
   riskLevelLabel,
+  riskManagementNumberLabel,
   verificationStatusLabel
 } from "@/lib/document-display-labels";
 
@@ -106,7 +107,8 @@ export function serializeRiskAssessmentRowsToDraft(rows: readonly RiskAssessment
     "",
     ...rows.flatMap((row, index) => [
       `[${index + 1}. ${row.task}]`,
-      `관리번호: ${row.controlId || "-"}`,
+      // 옛 저장본의 영문 코드(RA-press-1)도 여기서 「위험성평가-NN」으로 바꾼다(RA-10/COPY).
+      `관리번호: ${riskManagementNumberLabel(row.controlId, index) || "-"}`,
       `작업장소: ${row.location}`,
       `공정: ${row.process}`,
       `세부작업: ${row.task}`,
