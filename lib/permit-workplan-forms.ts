@@ -4,6 +4,7 @@ import type {
   WorkPlanStatutorySection
 } from "./types";
 import { hasHeatCondition, parseFeelsLikeTemperature } from "./task-scenario-profiles";
+import { formatWorkerCount, hasKnownWorkerCount } from "./scenario-display";
 
 // 작업허가서·작업계획서의 법정 칸을 만드는 한 곳.
 // 허가구분은 작업 분류(TaskClassification.taskId)에서 한 번만 정한다. 본문(hwp·pdf·html·화면)과
@@ -215,7 +216,7 @@ export function renderPermitText(permit: PermitInspectionStructured, input: Pick
     `- 허가대상 작업: ${basicInfo.workName}`,
     `- 허가구분: ${basicInfo.permitType}`,
     `- 작업내용: ${input.workSummary}`,
-    `- 작업인원: ${basicInfo.workerCount}명`,
+    `- 작업인원: ${formatWorkerCount(basicInfo.workerCount)}`,
     `- 허가번호: ${basicInfo.permitNo}`,
     `- 작업 일시(허가 시각~종료 시각): ${basicInfo.workDate}`,
     "- 허가상태: 작업 전 조건 확인 및 허가권자 승인 필요",
@@ -326,7 +327,7 @@ export function buildWorkPlanLegalForm(input: WorkPlanFormInput): WorkPlanLegalF
   const directorItems: number[] = [];
   const equipment = equipmentSummary(question);
   const vehicleConstructionEquipment = equipmentSummary(question, true);
-  const crew = input.workerCount ? `작업자 ${input.workerCount}명` : "";
+  const crew = hasKnownWorkerCount(input.workerCount) ? `작업자 ${formatWorkerCount(input.workerCount)}` : "";
   const crewAndEquipment = [crew, equipment].filter(Boolean).join(", ");
 
   if (/타워\s*크레인/.test(question) && /설치|조립|해체/.test(question)) {
@@ -551,7 +552,7 @@ export function renderWorkPlanText(input: WorkPlanTextInput, form: WorkPlanLegal
     `- 작업명: ${input.workName}`,
     `- 작업구간: ${input.processName}`,
     `- 작업내용: ${input.workSummary}`,
-    `- 작업인원: ${input.workerCount}명`,
+    `- 작업인원: ${formatWorkerCount(input.workerCount)}`,
     `- 작업 전 조건확인: ${input.condition}`,
     `- 작성자: ${FIELD_ENTRY}`,
     `- 작성일: ${FIELD_ENTRY}`,

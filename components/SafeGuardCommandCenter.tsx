@@ -20,6 +20,7 @@ import { nextConsoleLines, type AgentConsoleLine } from "@/lib/agent-console-cop
 import type { AskResponse, IntegrationMode, QualityContractStatus } from "@/lib/types";
 import { buildDbHarnessSurfaceContract, type HarnessImprovement, type HarnessMemoryInput } from "@/lib/db-harness";
 import type { FieldExample } from "@/lib/field-examples";
+import { formatWorkerCount, formatWorkerHeadcount, hasKnownWorkerCount } from "@/lib/scenario-display";
 import { formatEvidenceBadge } from "@/lib/smsa-mapping";
 import {
   buildAcceptedHazardPhotoAppendix,
@@ -384,7 +385,8 @@ function inferWorkerCountFromText(text: string) {
     /(?:총\s*작업자|전체\s*작업자|작업자\s*총|총\s*작업인원|작업인원\s*총|투입\s*인원|전체\s*인원|참석\s*대상)\s*(\d+)\s*명/g,
     /(?:작업자|작업인원|인력|참석)\s*(\d+)\s*명/g
   ];
-  const subgroupHints = /(외국인|신규|고령|숙련|운전자|피킹|감시자|관리자)\s*$/;
+  // lib/mock-data.ts inferWorkerCount 와 같은 목록. 역할 인원(유도자 1명 등)은 총 작업인원이 아니다(F-COV-08).
+  const subgroupHints = /(외국인|신규|고령|고령자|숙련|운전자|운전원|피킹|감시자|감시인|관리자|유도자|신호수|화재감시자|안전관리자)\s*(?:근로자|작업자)?\s*$/;
 
   for (const pattern of totalPatterns) {
     for (const match of compact.matchAll(pattern)) {
@@ -394,9 +396,11 @@ function inferWorkerCountFromText(text: string) {
     }
   }
 
-  const allCounts = [...compact.matchAll(/(\d+)\s*명/g)].map((match) => Number(match[1]));
+  const allCounts = [...compact.matchAll(/(\d+)\s*명/g)]
+    .filter((match) => !subgroupHints.test(compact.slice(Math.max(0, (match.index || 0) - 12), match.index || 0)))
+    .map((match) => Number(match[1]));
   if (allCounts.length) return `${Math.max(...allCounts)}명`;
-  return "입력 필요";
+  return formatWorkerHeadcount(0);
 }
 
 function readApiMessage(value: unknown, fallback: string) {
@@ -443,7 +447,7 @@ function buildApiFieldBrief(data: AskResponse, fallbackExample: FieldExample): F
     siteName: data.scenario.siteName || fallbackExample.region,
     industry: data.scenario.companyType || fallbackExample.industry,
     workSummary: data.scenario.workSummary || fallbackExample.workType,
-    workerCount: `${data.scenario.workerCount}명`,
+    workerCount: formatWorkerHeadcount(data.scenario.workerCount),
     weather: data.externalData.weather.summary || data.scenario.weatherNote || fallbackExample.weatherSignal,
     sourceLabel: data.externalData.weather.mode === "live" ? "API 반영 브리프" : "입력+보강 브리프",
     foreignWorkerSignal: inferForeignSignal(data.question, fallbackExample.hasForeignWorkers)
@@ -784,7 +788,7 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
     items.push({
       label: "직접 근거",
       value: evidenceLabel
-        ? formatEvidenceBadge(evidenceLabel.article)
+        ? formatEvidenceBadge(evidenceLabel.article, evidenceLabel.purpose)
         : safetyReferenceEvidenceTitle(directReference) || lawCitation?.title || "원문 확인 권장",
       detail: directReference?.operationSignalLabel
         || directReference?.shortSummary
@@ -1959,7 +1963,9 @@ export function SafeGuardCommandCenter({
     acceptedInputHazardCandidateKeys.includes(buildHazardPhotoCandidateKey(candidate))
   ).length;
   const shareTargetSnapshotLabel = data
-    ? `${fieldBrief.workerCount} 작업자 + 관리자`
+    ? hasKnownWorkerCount(data.scenario.workerCount)
+      ? `${formatWorkerCount(data.scenario.workerCount)} 작업자 + 관리자`
+      : "작업자(인원 확인 필요) + 관리자"
     : "문서 생성 후 참여자 확인";
   const shareStorageLabel = savedWorkpackId
     ? "DB 이력 연결"

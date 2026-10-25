@@ -24,6 +24,7 @@ import {
   RISK_REVIEW_LIST_TITLE,
   riskRecordHeaderPairs
 } from "@/lib/risk-assessment-record";
+import { formatCompanyName, formatWorkerCount } from "@/lib/scenario-display";
 
 type SheetRow = {
   document: string;
@@ -445,8 +446,8 @@ function addStructuredTitle(ws: ExcelJS.Worksheet, row: number, title: string, s
   row += 1;
 
   const metaRows: Array<[[string, string], [string, string]]> = [
-    [["사업장", scenario.companyName || "SafeClaw 현장"], ["현장", scenario.siteName || "현장 확인"]],
-    [["작업내용", scenario.workSummary || "작업내용 확인"], ["인원/조건", `${scenario.workerCount ?? 0}명 · ${scenario.weatherNote || ""}`]]
+    [["사업장", formatCompanyName(scenario.companyName)], ["현장", scenario.siteName || "현장 확인"]],
+    [["작업내용", scenario.workSummary || "작업내용 확인"], ["인원/조건", `${formatWorkerCount(scenario.workerCount)} · ${scenario.weatherNote || ""}`]]
   ];
 
   metaRows.forEach((pair) => {
@@ -843,7 +844,10 @@ function parseEducationRecordStructured(value: StructuredRecord): EducationRecor
     }),
     understandingCheck: readString(value.understandingCheck, "이해확인 방법 확인"),
     tbmLink: readString(value.tbmLink, "TBM 연계 확인"),
-    followupRecommendation: readString(value.followupRecommendation, "후속 교육 확인")
+    followupRecommendation: readString(value.followupRecommendation, "후속 교육 확인"),
+    ...(readNumber(value.durationHours, 0) > 0 ? { durationHours: readNumber(value.durationHours, 0) } : {}),
+    ...(readString(value.instructorQualification) ? { instructorQualification: readString(value.instructorQualification) } : {}),
+    attendees: readStringArray(value.attendees)
   };
 }
 
@@ -1003,7 +1007,7 @@ export async function buildWorkPlanStructuredXlsx(
     ["작업명", data.workOverview.workName],
     ["작업내용", data.workOverview.description],
     ["작업장소", data.workOverview.location],
-    ["작업인원", `${data.workOverview.workerCount || scenario.workerCount || 0}명`],
+    ["작업인원", formatWorkerCount(data.workOverview.workerCount || scenario.workerCount)],
     ["작업조건", data.workOverview.condition],
     ["사용장비", data.workOverview.equipment.join(", ") || "장비 확인"]
   ]);
@@ -1087,7 +1091,7 @@ export async function buildPermitInspectionStructuredXlsx(
     ["작업명", data.basicInfo.workName],
     ["작업장소", data.basicInfo.location],
     ["작업일", data.basicInfo.workDate],
-    ["작업인원", `${data.basicInfo.workerCount || scenario.workerCount || 0}명`],
+    ["작업인원", formatWorkerCount(data.basicInfo.workerCount || scenario.workerCount)],
     ["신청/허가", `${data.basicInfo.requester} / ${data.basicInfo.approver}`]
   ]);
 
@@ -1296,8 +1300,8 @@ export async function buildTbmLogStructuredXlsx(
   row += 1;
   row = addSectionHeader(ws, row, "출석");
   row = addKeyValueRows(ws, row, [
-    ["예정 인원", `${data.attendance.expected || scenario.workerCount || 0}명`],
-    ["실제 참석", `${data.attendance.actual || data.attendance.attendees.length || 0}명`],
+    ["예정 인원", formatWorkerCount(data.attendance.expected || scenario.workerCount)],
+    ["실제 참석", data.attendance.actual ? formatWorkerCount(data.attendance.actual) : "____명 (현장 기재)"],
     ["결석/지각", data.attendance.absenceReason],
     ["확인 방식", data.attendance.confirmationMethod]
   ]);
@@ -1305,7 +1309,9 @@ export async function buildTbmLogStructuredXlsx(
   row += 1;
   row = addSectionHeader(ws, row, "참석자명단");
   row = addTableHeader(ws, row, ["No.", "참석자", "확인방법", "서명", "비고", "확인"]);
-  const attendeeRows = data.attendance.attendees.length ? data.attendance.attendees : ["참석자 확인"];
+  // 서명표는 예정 인원(작업자 수)만큼 칸을 만든다. 명단이 짧거나 비어 있어도 줄이지 않는다(TBM-04).
+  const signRowCount = Math.max(1, data.attendance.expected || scenario.workerCount || 0, data.attendance.attendees.length);
+  const attendeeRows = Array.from({ length: signRowCount }, (_, index) => data.attendance.attendees[index] || "");
   attendeeRows.forEach((attendee, index) => {
     row = setRowValues(ws, row, [
       String(index + 1),
@@ -1460,6 +1466,8 @@ export async function buildEducationRecordStructuredXlsx(
     ["장소", data.location],
     ["교육대상", data.target],
     ["실시자", data.instructor],
+    ["실시자 자격(시행규칙 제26조제3항)", data.instructorQualification || "________ (현장 기재)"],
+    ["실시 시간", data.durationHours ? `${data.durationHours}시간` : "____시간 (현장 기재)"],
     ["확인자", data.confirmer]
   ]);
 
@@ -1488,8 +1496,11 @@ export async function buildEducationRecordStructuredXlsx(
   row += 1;
   row = addSectionHeader(ws, row, "참석자 확인");
   row = addTableHeader(ws, row, ["No.", "성명", "소속/직책", "이해확인", "서명", "비고"]);
-  ["1", "2", "3", "4", "5"].forEach((no) => {
-    row = setRowValues(ws, row, [no, "", "", "□ 이해함", "서명: ______", ""]);
+  // 참석자 서명 행은 작업자 수만큼 만든다(EDU-10, 종전 5행 고정).
+  const educationAttendees = data.attendees ?? [];
+  const educationSignRows = Math.max(1, scenario.workerCount || 0, educationAttendees.length);
+  Array.from({ length: educationSignRows }, (_, index) => index).forEach((index) => {
+    row = setRowValues(ws, row, [String(index + 1), educationAttendees[index] || "", "", "□ 이해함", "서명: ______", ""]);
   });
 
   row += 1;
@@ -1554,8 +1565,8 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
 
   // 2) Meta grid (2 rows x 4 col-pairs)
   const metaRows = [
-    [["사업장", scenario.companyName || ""], ["현장/공정", scenario.siteName || ""]],
-    [["작업내용", scenario.workSummary || ""], ["인원/조건", `${scenario.workerCount ?? 0}명 · ${scenario.weatherNote || ""}`]]
+    [["사업장", formatCompanyName(scenario.companyName)], ["현장/공정", scenario.siteName || ""]],
+    [["작업내용", scenario.workSummary || ""], ["인원/조건", `${formatWorkerCount(scenario.workerCount)} · ${scenario.weatherNote || ""}`]]
   ];
   for (const pair of metaRows) {
     const [[lbl1, val1], [lbl2, val2]] = pair;
@@ -1712,6 +1723,35 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
 
   row += 1;
 
+  // 5-1) 교육·TBM 기록은 개인별 서명표를 작업자 수만큼 싣는다(EDU-04·TBM-04).
+  if (profile.layout === "education" || profile.layout === "tbmLog") {
+    const signCount = Math.max(1, scenario.workerCount || 0);
+    ws.mergeCells(row, 1, row, 6);
+    ws.getCell(row, 1).value = profile.layout === "education" ? "교육 참석자 명단" : "TBM 참석자 명단";
+    ws.getCell(row, 1).font = { name: "Malgun Gothic", size: 12, bold: true };
+    row += 1;
+    ["No.", "성명", "소속/직책", "이해확인", "서명", "비고"].forEach((label, idx) => {
+      const cell = ws.getCell(row, idx + 1);
+      cell.value = label;
+      cell.fill = HEADER_FILL;
+      cell.font = HEADER_FONT;
+      cell.alignment = { vertical: "middle", horizontal: "center" };
+    });
+    applyBorders(ws, `A${row}:F${row}`);
+    row += 1;
+    for (let index = 0; index < signCount; index += 1) {
+      ws.getCell(row, 1).value = index + 1;
+      ws.getCell(row, 2).value = "";
+      ws.getCell(row, 3).value = "";
+      ws.getCell(row, 4).value = "□ 확인";
+      ws.getCell(row, 5).value = "참석자 서명: ______";
+      ws.getCell(row, 6).value = "";
+      applyBorders(ws, `A${row}:F${row}`);
+      row += 1;
+    }
+    row += 1;
+  }
+
   // 6) Approval row
   if (profile.approvalLabels?.length) {
     profile.approvalLabels.slice(0, 5).forEach((label, idx) => {
@@ -1765,10 +1805,10 @@ export async function buildWorkpackXlsx(
   cover.getCell(1, 1).font = { name: "Malgun Gothic", size: 18, bold: true, color: { argb: "FF1F4D43" } };
   cover.mergeCells(1, 1, 1, 2);
   const coverRows: Array<[string, string]> = [
-    ["사업장", scenario.companyName || ""],
+    ["사업장", formatCompanyName(scenario.companyName)],
     ["현장/공정", scenario.siteName || ""],
     ["작업내용", scenario.workSummary || ""],
-    ["인원/조건", `${scenario.workerCount ?? 0}명 · ${scenario.weatherNote || ""}`],
+    ["인원/조건", `${formatWorkerCount(scenario.workerCount)} · ${scenario.weatherNote || ""}`],
     ["생성", new Date().toISOString()]
   ];
   coverRows.forEach((pair, idx) => {

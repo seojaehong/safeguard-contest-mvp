@@ -140,7 +140,9 @@ describe("foreignWorkerPrompt forklift/pallet worker-mount prohibition (Finding:
 describe("post-processing: contact sanitization on parsed output", () => {
   const LONG = "가".repeat(300);
 
-  it("parseFree strips a fabricated phone number out of emergencyResponseDraft", () => {
+  // 결정 8(2026-10-25): 비상대응은 AI 본문을 채택하지 않는다. 지어낸 번호가 담긴 AI 비상대응은
+  // 다듬는 대상이 아니라 버리는 대상이다.
+  it("parseFree drops an AI emergencyResponseDraft (with a fabricated phone number) entirely", () => {
     const raw = JSON.stringify({
       workpackSummaryDraft: LONG,
       emergencyResponseDraft: `${LONG} 한국산재보험공단 1644-0644 로 연락.`,
@@ -149,7 +151,8 @@ describe("post-processing: contact sanitization on parsed output", () => {
     });
     const out = parseFree(raw);
     expect(out).not.toBeNull();
-    expect(out!.emergencyResponseDraft).not.toContain("1644-0644");
+    expect(out).not.toHaveProperty("emergencyResponseDraft");
+    expect(JSON.stringify(out)).not.toContain("1644-0644");
   });
 
   it("parseForeign strips fabricated phone numbers out of foreignWorkerBriefing and foreignWorkerTransmission", () => {

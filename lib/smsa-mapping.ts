@@ -45,10 +45,17 @@ const TBM_LABEL: SmsaEvidenceLabel = {
 // 안전보건교육 기록의 주근거는 산업안전보건법 제29조(안전보건교육 의무)다.
 // 시행령 제4조의 9개 호 어디에도 안전보건교육이 명시 항목으로 없으므로(감사 결과),
 // 종전 "제4조 제3호·제5호" 주근거 라벨을 내리고 중처법은 제3호 이행 보조로만 병기한다.
+// 생성된 교육기록 초안은 교육 종류·실시 시간·참석자 서명이 비어 있으므로 「실시 증빙」이 아니다.
+// 셋이 모두 채워졌을 때만 「실시 증빙」으로 올린다(EDU-03, 2026-10-25 결정 — 런칭 깊이 점검 5절).
 const EDUCATION_LABEL: SmsaEvidenceLabel = {
   article: "산업안전보건법 제29조",
-  purpose: "안전보건교육 실시 증빙",
+  purpose: "안전보건교육 기록 초안(교육 종류·시간·서명 확인 전)",
   related: "중대재해처벌법 시행령 제4조 제3호 이행 보조"
+};
+
+const EDUCATION_COMPLETED_LABEL: SmsaEvidenceLabel = {
+  ...EDUCATION_LABEL,
+  purpose: "안전보건교육 실시 증빙"
 };
 
 // 시행령 제4조 제8호는 매뉴얼 「마련」과 그에 따른 조치를 「반기 1회 이상 점검」하는 것까지다.
@@ -132,10 +139,11 @@ export function getEvidenceLabel(docType: string): SmsaEvidenceLabel | null {
  * 다중 호(예: "제4조 제3호·제5호")는 첫 호만 배지에 반영한다(카드는 절제된
  * 요약 표시가 목적이며, 전체 근거는 카드 상세/툴팁에서 확인).
  */
-export function formatEvidenceBadge(article: string): string {
+export function formatEvidenceBadge(article: string, purpose?: string): string {
   if (article.startsWith("산업안전보건법")) {
     const kosha = /제(\d+)조/.exec(article);
-    if (kosha) return `산안법 §${kosha[1]}조 증빙`;
+    // purpose 가 「증빙」이 아닌 초안 라벨이면 배지에도 「증빙」을 쓰지 않는다(EDU-03).
+    if (kosha) return purpose !== undefined && !purpose.includes("증빙") ? `산안법 §${kosha[1]}조 기록 초안` : `산안법 §${kosha[1]}조 증빙`;
   }
   const match = /제(\d+)조\s*제(\d+)호/.exec(article);
   if (!match) return "중처법 증빙";
@@ -179,4 +187,9 @@ export function buildEvidenceLabels(documentKeys: readonly string[]): Record<str
     if (label) result[key] = label;
   }
   return result;
+}
+
+/** 교육 종류·실시 시간·참석자 서명이 모두 채워진 교육기록만 「실시 증빙」 라벨을 받는다(EDU-03). */
+export function resolveEducationEvidenceLabel(state: { courseDetermined: boolean; hoursRecorded: boolean; signed: boolean }): SmsaEvidenceLabel {
+  return state.courseDetermined && state.hoursRecorded && state.signed ? EDUCATION_COMPLETED_LABEL : EDUCATION_LABEL;
 }

@@ -204,8 +204,9 @@ function providerNarrativeDeliverables(prefix: string): AiDeliverables {
     workpackSummaryDraft: providerNarrativeMarker(prefix, "workpackSummaryDraft"),
     riskAssessmentDraft: providerNarrativeMarker(prefix, "riskAssessmentDraft"),
     workPlanDraft: providerNarrativeMarker(prefix, "workPlanDraft"),
-    tbmBriefing: providerNarrativeMarker(prefix, "tbmBriefing"),
-    tbmLogDraft: providerNarrativeMarker(prefix, "tbmLogDraft"),
+    // TBM 본문은 분류된 작업(지게차) 낱말이 있어야 같은 작업 문서로 받아들인다(PR-07 TBM-02).
+    tbmBriefing: `${providerNarrativeMarker(prefix, "tbmBriefing")} 지게차 보행자 동선`,
+    tbmLogDraft: `${providerNarrativeMarker(prefix, "tbmLogDraft")} 지게차 보행자 동선`,
     safetyEducationRecordDraft: providerNarrativeMarker(prefix, "safetyEducationRecordDraft"),
     emergencyResponseDraft: providerNarrativeMarker(prefix, "emergencyResponseDraft"),
     photoEvidenceDraft: providerNarrativeMarker(prefix, "photoEvidenceDraft"),

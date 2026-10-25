@@ -5,6 +5,13 @@ import { serializeRiskAssessmentRowsToDraft } from "@/components/workpack-editor
 import { summarizeRiskLevel } from "./risk-labels";
 import { buildForeignWorkerBriefing, buildForeignWorkerTransmission, getDefaultForeignWorkerLanguages } from "./foreign-worker";
 import { attachQualityContract } from "./quality-contract";
+import { OFFICIAL_CONTACTS } from "./safety-contacts";
+import {
+  COMPANY_NAME_INPUT_REQUEST,
+  WORKER_COUNT_UNKNOWN,
+  formatCompanyName,
+  formatWorkerCount
+} from "./scenario-display";
 import { buildPermitInspection, renderPermitText, renderWorkPlanText } from "./permit-workplan-forms";
 import {
   validateRiskAssessmentRows,
@@ -13,6 +20,7 @@ import {
 } from "./risk-assessment-schema";
 import {
   HEAT_EMERGENCY_STEP,
+  UNKNOWN_FIELD_CONDITION,
   buildAerialWorkPlatformProfile,
   buildAutomationProfile,
   buildChemicalHandlingProfile,
@@ -44,6 +52,16 @@ import {
   type ScenarioProfileInput,
   type TaskId
 } from "./task-scenario-profiles";
+import { CONFINED_SPACE_AIR_STANDARD_HEADER, CONFINED_SPACE_AIR_STANDARD_LINES } from "./tbm-consistency";
+import { buildTbmBriefingStructuredFromRiskRows, buildTbmLogStructuredFromRiskRows } from "./tbm-structured";
+import {
+  EDUCATION_RETENTION_LINE,
+  buildConfinedSpaceNoticeSection,
+  buildCraneWindLines,
+  buildEducationCourseSection,
+  buildHeatEmphasisLines,
+  isConfinedSpaceEducation
+} from "./education-record-sections";
 
 type LegacyScenarioProfile = Omit<ScenarioProfileInput, "pairs"> & {
   hazards: [string, string, string];
@@ -141,7 +159,7 @@ const legacyFieldScenarioProfiles: LegacyScenarioProfile[] = [
     siteName: "서울 성수동 근린생활시설 현장",
     workName: "외벽 도장 작업",
     processName: "이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제",
-    weatherNote: "오후 강풍 예보, 이동식 비계 흔들림 주의",
+    weatherNote: UNKNOWN_FIELD_CONDITION,
     riskLevel: "상",
     topRisk: "강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험",
     hazards: [
@@ -175,7 +193,7 @@ const legacyFieldScenarioProfiles: LegacyScenarioProfile[] = [
     siteName: "인천 남동공단 물류센터",
     workName: "상하차 및 피킹 작업",
     processName: "지게차 상하차, 랙 피킹, 출하 동선 분리",
-    weatherNote: "실내 작업, 출하량 증가로 동선 혼잡",
+    weatherNote: UNKNOWN_FIELD_CONDITION,
     riskLevel: "상",
     topRisk: "지게차 동선과 보행 동선이 겹치면서 충돌하거나 적재물이 낙하할 위험",
     hazards: [
@@ -311,7 +329,7 @@ const legacyFieldScenarioProfiles: LegacyScenarioProfile[] = [
     siteName: "대구 달서구 물류창고",
     workName: "고중량 박스 적재 및 수작업 운반",
     processName: "박스 적재, 핸드파렛트 이동, 지게차 보조 운반, 휴식관리",
-    weatherNote: "폭염주의 수준, 온열질환과 근골격계 부담 관리 필요",
+    weatherNote: UNKNOWN_FIELD_CONDITION,
     riskLevel: "중",
     topRisk: "폭염 환경에서 고중량 박스 운반이 반복되어 온열질환과 근골격계 부담이 커질 수 있음",
     hazards: [
@@ -377,7 +395,7 @@ function inferWorkerCount(question: string) {
     /(?:총\s*작업자|전체\s*작업자|작업자\s*총|총\s*작업인원|작업인원\s*총|투입\s*인원|전체\s*인원|참석\s*대상)\s*(\d+)\s*명/g,
     /(?:작업자|작업인원|인력|참석)\s*(\d+)\s*명/g
   ];
-  const subgroupHints = /(외국인|신규|고령|숙련|운전자|피킹|감시자|관리자)\s*$/;
+  const subgroupHints = /(외국인|신규|고령|고령자|숙련|운전자|운전원|피킹|감시자|감시인|관리자|유도자|신호수|화재감시자|안전관리자)\s*(?:근로자|작업자)?\s*$/;
 
   for (const pattern of totalPatterns) {
     for (const match of compact.matchAll(pattern)) {
@@ -387,9 +405,15 @@ function inferWorkerCount(question: string) {
     }
   }
 
-  const allCounts = [...compact.matchAll(/(\d+)\s*명/g)].map((match) => Number(match[1]));
-  return allCounts.length ? Math.max(...allCounts) : 5;
+  // 역할 인원(유도자·신호수·화재감시자 1명 등)은 총 작업인원이 아니다(F-COV-08).
+  const allCounts = [...compact.matchAll(/(\d+)\s*명/g)]
+    .filter((match) => !subgroupHints.test(compact.slice(Math.max(0, (match.index || 0) - 12), match.index || 0)))
+    .map((match) => Number(match[1]));
+  // 총 인원을 알 수 없으면 0(확인 필요)으로 둔다. 기본값 5명을 지어내지 않는다.
+  return allCounts.length ? Math.max(...allCounts) : WORKER_COUNT_UNKNOWN;
 }
+
+export { WORKER_COUNT_UNKNOWN, COMPANY_NAME_INPUT_REQUEST, formatWorkerCount, formatCompanyName };
 
 const topLevelRegionTokens = new Set([
   "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기",
@@ -445,7 +469,7 @@ const nonCompanyLeadTokens = new Set(["오늘", "작업", "현장", "상부", "�
 const knownCityLocationTokens = new Set([
   "평택", "구미", "창원", "포항", "안산", "화성", "수원", "성남", "고양",
   "용인", "김해", "여수", "순천", "광양", "청주", "천안", "아산", "전주",
-  "군산", "익산"
+  "군산", "익산", "이천", "김포", "거제", "시흥", "파주"
 ]);
 
 function normalizeStandaloneToken(token: string) {
@@ -480,7 +504,7 @@ function findSpecificLocationRule(question: string) {
   );
 }
 
-const workDescriptorCompanyNames = /^(?:(?:굴착|보수|굴착보수|열수송관굴착|도로굴착보수)공사|물류창고|도금공장|식품공장|제조공장|전자부품공장)$/;
+const workDescriptorCompanyNames = /^(?:(?:굴착|보수|굴착보수|열수송관굴착|도로굴착보수)공사|(?:재|택지|도시|도시재|신도시|주택|단지|산업단지|역세권)개발|물류창고|도금공장|식품공장|제조공장|전자부품공장)$/;
 
 function isWorkDescriptorCompanyName(candidate: string) {
   return workDescriptorCompanyNames.test(candidate.replace(/\s+/g, ""));
@@ -488,25 +512,15 @@ function isWorkDescriptorCompanyName(candidate: string) {
 
 function inferCompanyName(question: string) {
   const trimmed = question.trim();
-  const companyMatches = trimmed.matchAll(/([가-힣A-Za-z0-9]+(?:테크인씨|테크이엔씨|엔지니어링|주식회사|건설|산업|전기|설비|이엔씨|테크|관리|로지스|메탈|창고|시설|기업|공사|㈜))/g);
+  const companyMatches = trimmed.matchAll(/([가-힣A-Za-z0-9]+(?:테크인씨|테크이엔씨|엔지니어링|주식회사|건설|산업|전기|설비|이엔씨|테크|관리|로지스|메탈|창고|시설|기업|공사|상사|개발|물산|㈜))/g);
   for (const companyMatch of companyMatches) {
     const candidate = companyMatch[1].replace(/^㈜/, "").trim();
     if (!isWorkDescriptorCompanyName(candidate)) return candidate;
   }
 
-  const firstToken = normalizeStandaloneToken(trimmed.split(/\s+/)[0] || "");
-  const looksLikeBarePlaceName =
-    firstToken &&
-    (
-      knownStandaloneLocationTokens.has(firstToken)
-      || nonCompanyLeadTokens.has(firstToken)
-      || inferLeadingLocationToken(trimmed) === firstToken
-    );
-  if (firstToken && !looksLikeBarePlaceName && !isWorkDescriptorCompanyName(firstToken)) {
-    return firstToken.replace(/[,.]$/, "");
-  }
-
-  return "현장 업체";
+  // 회사 접미사로 찾지 못하면 빈칸으로 둔다. 질문 첫 낱말(「건설현장」「탱크」「이천」)을
+  // 회사명으로 쓰지 않는다(F-COV-07). 문서 머리에는 「사업장명 입력 필요」로 나간다.
+  return "";
 }
 
 function inferKnownLocationPrefix(question: string) {
@@ -557,21 +571,25 @@ function inferSpecialContext(question: string): string[] {
   return notes;
 }
 
+export const SITE_NAME_INPUT_REQUEST = "현장명 입력 필요";
+
+// 현장명은 입력에 있는 지명과 작업명으로만 만든다. 시연용 고정 현장명(「부산 해운대 시설관리 현장」
+// 「인천 남동공단 물류센터」)이나 프로필 기본 현장명을 쓰지 않는다(F-COV-06, EXP-03).
 function inferSiteName(question: string, fallback: string, workName: string) {
   if (hasExcavationWorkIdentity(question)) return fallback;
 
   const matchedRule = findSpecificLocationRule(question);
-  if (matchedRule) return matchedRule.siteName;
-  const locationPrefix = inferKnownLocationPrefix(question);
+  const locationPrefix = matchedRule?.locationPrefix ?? inferKnownLocationPrefix(question);
   if (locationPrefix) return `${locationPrefix} ${workName} 현장`;
-  return fallback;
+  return `${workName} 현장(${SITE_NAME_INPUT_REQUEST})`;
 }
 
 function buildExcavationScenarioProfile(question: string, companyName: string): ScenarioProfile {
   const locationPrefix = inferKnownLocationPrefix(question);
-  const sitePrefix = locationPrefix || (companyName !== "현장 업체" ? companyName : "");
+  const sitePrefix = locationPrefix || companyName;
   const workName = inferExcavationWorkName(question);
   const hasCrane = /크레인|양중|인양/.test(question);
+  const isGasConduit = /가스/.test(question);
   const depth = Number(/(?:깊이|심도)\s*(\d+(?:\.\d+)?)\s*m/i.exec(question)?.[1] ?? NaN);
   const planNote = Number.isFinite(depth) && depth >= 2 ? `, 굴착 깊이 ${depth}m — 작업계획서 작성 대상(안전보건규칙 제38조①6호)` : "";
 
@@ -579,7 +597,7 @@ function buildExcavationScenarioProfile(question: string, companyName: string): 
     id: "construction-excavation",
     companyName,
     companyType: "건설업",
-    siteName: `${sitePrefix ? `${sitePrefix} ` : ""}${workName} 현장`,
+    siteName: sitePrefix ? `${sitePrefix} ${workName} 현장` : `${workName} 현장(${SITE_NAME_INPUT_REQUEST})`,
     workName,
     processName: `지하 매설물 확인, 굴착면 점검, 굴착기 굴착${hasCrane ? ", 이동식 크레인 양중" : ""}, 토사 적치와 굴착면 통제${planNote}`,
     weatherNote: "옥외 굴착 조건, 굴착면 붕괴·매설물 접촉·중장비 작업반경 확인 필요",
@@ -619,7 +637,13 @@ function buildExcavationScenarioProfile(question: string, companyName: string): 
       "균열·토사 흘러내림·용수 발생 시 즉시 작업중지 후 굴착면 밖으로 대피",
       "중장비 작업반경 출입 금지와 신호수 단일 지시체계 준수"
     ],
-    keywords: ["굴착", "터파기", "매설물", "굴착기"]
+    keywords: ["굴착", "터파기", "매설물", "굴착기"],
+    emergencySteps: [
+      "굴착면이 무너져 작업자가 매몰되면 굴착기 등 장비를 즉시 멈추고 119에 신고하며, 추가 붕괴 위험을 확인하기 전에는 굴착면 아래로 들어가 구조하지 않습니다.",
+      isGasConduit
+        ? "매설 가스 배관이 파손돼 가스 누출이 의심되면 장비 엔진·화기 등 점화원을 끄고 작업자를 바람이 불어오는 쪽으로 대피시킨 뒤 119와 해당 배관 관리 주체에 신고합니다."
+        : "매설물이 파손되면 장비를 멈추고 파손 부위 접근을 통제한 뒤 해당 매설물 관리 주체에 신고합니다."
+    ]
   });
 }
 
@@ -638,7 +662,7 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
     : isLeakMaintenance
       ? "시설관리·유지보수"
       : "현장 유지보수";
-  const siteName = `${companyName} ${isElectricalWork ? "전기설비 배전반 점검 현장" : isPumpConfinedSpace ? "지하 기계실 배수펌프 점검 현장" : isLeakMaintenance ? "천장 누수 유지보수 현장" : "비정형 작업 현장"}`;
+  const siteName = `${[inferKnownLocationPrefix(question), companyName].find(Boolean) ?? ""} ${isElectricalWork ? "전기설비 배전반 점검 현장" : isPumpConfinedSpace ? "지하 기계실 배수펌프 점검 현장" : isLeakMaintenance ? "천장 누수 유지보수 현장" : "비정형 작업 현장"}`.trim();
 
   const legacy: LegacyScenarioProfile = {
     id: "custom-maintenance",
@@ -782,7 +806,23 @@ function buildManualLoadingHeatProfile(question: string): ScenarioProfile {
         action: "운반 동선과 보행 동선을 나누고 대차 적재 높이를 시야가 가리지 않게 제한"
       }
     : pair);
-  return withPairs({ ...base, pairs });
+  // 지게차가 입력에 없으면 교육대상·강조사항·확인 질문에도 지게차를 쓰지 않는다(EDU-06).
+  // 실내 창고는 「그늘」이 아니라 휴게시설에서 쉰다(EDU-05, 안전보건규칙 제567조).
+  return withPairs({
+    ...base,
+    pairs,
+    educationTargets: "상하차·운반 작업자, 관리감독자",
+    questions: [
+      base.questions[0],
+      base.questions[1],
+      "핸드파렛트·대차 운반 동선과 보행 동선이 나뉘어 있는가?"
+    ],
+    educationPoints: [
+      "어지러움·두통·구토감 발생 시 즉시 작업중지 후 휴게시설에서 휴식하고 보고",
+      base.educationPoints[1],
+      "핸드파렛트·대차는 적재 높이가 시야를 가리지 않게 싣고 보행자 접근 시 정지"
+    ]
+  });
 }
 
 // 작업 유형을 먼저 정하고(TASK_RULES 순서), 업종은 inferIndustry 로 따로 정한다.
@@ -1011,13 +1051,28 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
     layerPairs.push(buildNewWorkerPair(question));
     if (!/신규/.test(educationTargets)) workerTargets.push("신규 투입자");
   }
-  if (/청각\s*장애|청각장애|고령/.test(question)) {
-    layerPairs.push({
-      hazard: "고령·청각장애·신규 작업자의 경보 인지와 의사소통 실패 위험",
-      action: "고령·청각장애·신규 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지"
-    });
-    if (/고령/.test(question)) workerTargets.push("고령 작업자");
-    if (/청각\s*장애|청각장애/.test(question)) workerTargets.push("청각장애 작업자");
+  // 입력에 있는 속성만 적는다. 고령만 있는데 「청각장애」를 넣지 않는다(EDU-06).
+  const hasElderly = /고령/.test(question);
+  const hasHearingImpaired = /청각\s*장애|청각장애/.test(question);
+  if (hasElderly || hasHearingImpaired) {
+    const groups = [
+      ...(hasElderly ? ["고령"] : []),
+      ...(hasHearingImpaired ? ["청각장애"] : []),
+      ...(/신규/.test(question) ? ["신규"] : [])
+    ].join("·");
+    layerPairs.push(hasHearingImpaired
+      ? {
+          hazard: `${groups} 작업자의 경보 인지와 의사소통 실패 위험`,
+          action: `${groups} 작업자에게 시각 신호·수신호와 복창 확인을 적용하고 이해하지 못하면 즉시 작업중지`
+        }
+      : {
+          hazard: `${groups} 작업자의 피로 누적·체력 부담과 작업지시 이해 부족 위험`,
+          action: `${groups} 작업자의 휴식·작업량을 조정하고 상태를 관찰하는 담당자를 정해 복창으로 이해를 확인`
+        });
+    const elderlyCount = question.match(/고령(?:자|\s*작업자|\s*근로자)?\s*(\d+)\s*명/)?.[1];
+    const hearingCount = question.match(/청각\s*장애\s*(?:작업자|근로자)?\s*(\d+)\s*명/)?.[1];
+    if (hasElderly && !/고령/.test(educationTargets)) workerTargets.push(elderlyCount ? `고령 작업자 ${elderlyCount}명` : "고령 작업자");
+    if (hasHearingImpaired && !/청각/.test(educationTargets)) workerTargets.push(hearingCount ? `청각장애 작업자 ${hearingCount}명` : "청각장애 작업자");
   }
   if (/방호장치|예기치 않은 기동|불시기동|LOTO|잠금표지/.test(question)) {
     const isolationHazardIndex = corePairs.findIndex((pair) => /LOTO|잠금표지|불시기동|예기치 않은 기동/.test(pair.hazard));
@@ -1173,8 +1228,9 @@ export function inferScenario(question: string) {
 
   return {
     taskClassification,
-    question: normalized,
-    companyName: inferredCompanyName === "현장 업체" ? profile.companyName : inferredCompanyName,
+    // 입력에서 찾은 회사명만 쓴다. 없으면 빈칸(문서 머리는 「사업장명 입력 필요」). 프로필의
+    // 시연용 회사명(그린메탈·이지시설관리·대성창고)으로 채우지 않는다(EXP-03, F-COV-06).
+    companyName: inferredCompanyName,
     companyType: profile.companyType,
     siteName: inferSiteName(normalized, profile.siteName, profile.workName),
     workSummary,
@@ -1187,8 +1243,14 @@ export function inferScenario(question: string) {
         ? "고온 작업조건, 온열질환 예방과 휴식 기준 공유 필요"
         : profile.weatherNote,
     specialContext: inferSpecialContext(normalized),
+    question: normalized,
     profile
   };
+}
+
+// 문서 작성일은 생성 시각(KST)으로 적는다. 실시 일시는 현장에서 적는 빈칸으로 둔다(TBM-03).
+function formatKstDate(date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
 }
 
 type DocumentConditionRole =
@@ -1226,12 +1288,17 @@ function buildWorkpackSummaryDraft(scenario: ReturnType<typeof inferScenario>, r
     "점검결과 요약(초안)",
     "현장 문서팩 첫 장 · 작업 전 검토용",
     "",
-    `업체명: ${scenario.companyName}`,
+    `업체명: ${formatCompanyName(scenario.companyName)}`,
     `업종: ${scenario.companyType}`,
     `현장명: ${scenario.siteName}`,
-    `작업명: ${profile.workName}`,
-    `작업인원: ${scenario.workerCount}명`,
+    // 작업명은 입력 작업을 그대로 쓰고, 판정한 작업 유형은 따로 적는다(EF-12).
+    `작업명: ${scenario.workSummary || profile.workName}`,
+    `작업 유형: ${scenario.taskClassification.taskLabel ?? "확인 필요"}`,
+    `작업인원: ${formatWorkerCount(scenario.workerCount)}`,
     `작업조건 판단: ${roleSpecificCondition(scenario.weatherNote, "summary")}`,
+    ...(!scenario.companyName || scenario.workerCount <= 0
+      ? [`입력 필요: ${[!scenario.companyName ? "사업장명" : "", scenario.workerCount <= 0 ? "총 작업인원" : ""].filter(Boolean).join("·")}을 입력한 뒤 비치합니다.`]
+      : []),
     ...(scenario.specialContext.length ? ["", "[특수 대상/조건]", ...scenario.specialContext.map((item) => `- ${item}`)] : []),
     "",
     "[핵심 판단]",
@@ -1302,9 +1369,9 @@ function buildOfficialStyleTbmBriefing(scenario: ReturnType<typeof inferScenario
     "",
     "일시: 작업 시작 전",
     `장소: ${scenario.siteName}`,
-    `업체명: ${scenario.companyName}`,
+    `업체명: ${formatCompanyName(scenario.companyName)}`,
     `오늘 작업: ${profile.workName}`,
-    `참석 대상: 작업자 ${scenario.workerCount}명, 작업반장, 관리감독자`,
+    `참석 대상: 작업자 ${formatWorkerCount(scenario.workerCount)}, 작업반장, 관리감독자`,
     "",
     "[1. 작업내용]",
     `- ${scenario.workSummary}`,
@@ -1343,6 +1410,23 @@ function buildOfficialStyleTbmBriefing(scenario: ReturnType<typeof inferScenario
   ].join("\n");
 }
 
+// 결정 8(2026-10-25): 비상대응 절차는 AI 생성 대상이 아니고 이 결정적 틀로만 만든다.
+// 법정 보고 문구는 법제처 원문(2026-10-25 조회)과 맞춘다 — 산업안전보건법 제54조·제57조③,
+// 같은 법 시행규칙 제3조·제67조·제73조①③, 중대재해처벌법 시행령 제4조제8호,
+// 안전보건규칙 제640조·제641조(밀폐공간). 기관 번호는 lib/safety-contacts.ts 의 공식 번호만 쓰고,
+// 지방고용노동관서는 지역마다 다르므로 번호를 적지 않고 빈칸으로 둔다.
+function buildEmergencyTaskSection(scenario: ReturnType<typeof inferScenario>): string[] {
+  if (scenario.taskClassification.taskId !== "confined-space") return [];
+  return [
+    "",
+    "[밀폐공간 작업 추가 확인]",
+    "- 작업 시작 전 작업근로자와 감시인에게 관할 소방관서 등 비상연락처와 응급조치, 대피용 기구의 위치와 사용방법을 알리고 숙지 여부를 확인합니다(안전보건규칙 제641조).",
+    "- 구출 순서(위 [2. 초기조치]와 같은 순서): ① 외부 감시인 119 신고 → ② 환기 유지와 관계자 외 접근 통제 → ③ 공기호흡기 또는 송기마스크를 착용한 사람만 구출 → ④ 산소·유해가스 재측정 전 작업 재개 금지.",
+    "- 긴급 구조훈련(비상연락체계 운영, 구조용 장비 사용, 공기호흡기·송기마스크 착용, 응급처치)은 6개월에 1회 이상 실시하고 결과를 기록·보존합니다(안전보건규칙 제640조).",
+    "- 최근 구조훈련 실시일: ____ / 기록 보관 위치: ____"
+  ];
+}
+
 function buildEmergencyResponseDraft(scenario: ReturnType<typeof inferScenario>) {
   const { profile } = scenario;
 
@@ -1350,9 +1434,10 @@ function buildEmergencyResponseDraft(scenario: ReturnType<typeof inferScenario>)
     "비상대응 절차(초안)",
     "중대재해·산업재해 발생 대비 현장 초기대응 기록",
     "",
-    `업체명: ${scenario.companyName}`,
+    `업체명: ${formatCompanyName(scenario.companyName)}`,
     `현장명: ${scenario.siteName}`,
-    `작업명: ${profile.workName}`,
+    `작업명: ${scenario.workSummary || profile.workName}`,
+    `작업 유형: ${scenario.taskClassification.taskLabel ?? "확인 필요"}`,
     `비상대응 조건: ${roleSpecificCondition(scenario.weatherNote, "emergency")}`,
     ...(scenario.specialContext.length ? [`특수 대상/조건: ${scenario.specialContext.join(" / ")}`] : []),
     "적용대상: 현장소장, 관리감독자, 작업반장, 작업자, 협력업체",
@@ -1360,23 +1445,74 @@ function buildEmergencyResponseDraft(scenario: ReturnType<typeof inferScenario>)
     "[1. 사고 징후 및 즉시 중지]",
     `- 핵심 위험: ${profile.topRisk}`,
     "- 사고 징후, 아차사고, 위험 발견 시 작업자는 즉시 작업을 중지하고 작업반장에게 보고합니다.",
+    "- 중대재해가 발생하면 즉시 해당 작업을 중지시키고 근로자를 작업장소에서 대피시킵니다(산업안전보건법 제54조제1항).",
     "- 추가 피해 가능성이 있으면 위험구역 접근을 통제하고 전원을 안전한 장소로 이동시킵니다.",
     "",
     "[2. 초기조치]",
     ...(profile.emergencySteps ?? []).map((step) => `- ${step}`),
     "- 부상자 구조와 응급조치를 우선하되, 구조자 2차 사고 위험을 먼저 확인합니다.",
     "- 전기, 화기, 장비, 차량 등 추가 위험원을 정지 또는 격리합니다.",
-    "- 필요한 경우 119, 원청/발주자, 안전관리자에게 즉시 연락합니다.",
+    "- 인명 피해가 있거나 의심되면 119에 먼저 신고하고, 원청/발주자와 안전관리자에게 연락합니다.",
+    ...buildEmergencyTaskSection(scenario),
     "",
     "[3. 보고체계]",
-    "- 최초 발견자 → 작업반장 → 관리감독자 → 현장소장 → 발주자/원청 안전 담당 순으로 보고합니다.",
-    "- 보고 내용은 사고시간, 장소, 작업내용, 피해상황, 초기조치, 추가 위험 여부를 포함합니다.",
+    "- 사업장 내부: 최초 발견자 → 작업반장 → 관리감독자 → 현장소장 → 발주자/원청 안전 담당 순으로 보고합니다.",
+    "- 내부 보고 내용은 사고시간, 장소, 작업내용, 피해상황, 초기조치, 추가 위험 여부를 포함합니다.",
+    "- 중대재해(사망자가 1명 이상 발생한 재해, 3개월 이상의 요양이 필요한 부상자가 동시에 2명 이상 발생한 재해, 부상자 또는 직업성 질병자가 동시에 10명 이상 발생한 재해 — 시행규칙 제3조)가 발생한 사실을 알게 되면 지체 없이 사업장 소재지를 관할하는 지방고용노동관서의 장에게 전화·팩스 또는 그 밖의 적절한 방법으로 보고합니다(산업안전보건법 제54조제2항, 시행규칙 제67조).",
+    "  · 보고 사항: ① 발생 개요 및 피해 상황 ② 조치 및 전망 ③ 그 밖의 중요한 사항",
+    "- 사망자가 발생하거나 3일 이상의 휴업이 필요한 부상을 입거나 질병에 걸린 사람이 발생하면 그 산업재해가 발생한 날부터 1개월 이내에 산업재해조사표(시행규칙 별지 제30호서식)를 작성해 관할 지방고용노동관서의 장에게 제출합니다(전자문서 포함, 산업안전보건법 제57조제3항, 시행규칙 제73조제1항).",
+    "  · 산업재해조사표는 근로자대표의 확인을 받고, 기재 내용에 근로자대표의 이견이 있으면 그 내용을 첨부합니다. 근로자대표가 없으면 재해자 본인의 확인을 받아 제출할 수 있습니다(시행규칙 제73조제3항).",
     "",
-    "[4. 현장보존 및 재발방지]",
+    "[4. 비상연락망]",
+    `- 화재·구조·구급: ${OFFICIAL_CONTACTS.fireAndAmbulance}`,
+    "- 관할 지방고용노동관서(사업장 소재지 관할): 전화 ____ / 팩스 ____",
+    `- 산재보험 요양급여 신청 문의: 근로복지공단 ${OFFICIAL_CONTACTS.workersCompensationService}`,
+    `- 고용노동부 고객상담센터: ${OFFICIAL_CONTACTS.moelCounseling}`,
+    "- 현장소장: 성명 ____ / 전화 ____",
+    "- 관리감독자: 성명 ____ / 전화 ____",
+    "- 안전관리자: 성명 ____ / 전화 ____",
+    "- 원청·발주자 안전 담당: 성명 ____ / 전화 ____",
+    "- 대피 장소·집결지: ____",
+    "",
+    "[5. 현장보존 및 재발방지]",
     "- 인명구조와 추가 피해 방지를 제외하고 현장을 임의 변경하지 않습니다.",
     "- 사진/영상, TBM 기록, 위험성평가표, 교육 기록을 함께 보관합니다.",
-    "- 재개 전 위험성평가를 다시 수행하고 감소대책 이행 여부를 확인합니다."
+    "- 재개 전 위험성평가를 다시 수행하고 감소대책 이행 여부를 확인합니다.",
+    "",
+    "[6. 매뉴얼 점검 기록(중대재해처벌법 시행령 제4조제8호, 반기 1회 이상)]",
+    "- 적용 범위: 사업주 또는 경영책임자등의 의무이며, 상시 근로자가 5명 미만인 사업 또는 사업장에는 적용하지 않습니다(중대재해처벌법 제3조).",
+    "- 점검 항목: 가. 작업 중지·근로자 대피·위험요인 제거 등 대응조치 / 나. 중대산업재해를 입은 사람에 대한 구호조치 / 다. 추가 피해방지를 위한 조치",
+    "- 점검일: ____ / 점검자: ____",
+    "- 점검 결과·보완 사항: ____"
   ].join("\n");
+}
+
+// 결정 8: 사진/증빙도 AI 생성에서 빼고, 작업 유형별 측정·확인 칸을 결정적으로 붙인다.
+function buildPhotoTaskSection(scenario: ReturnType<typeof inferScenario>): string[] {
+  const taskId = scenario.taskClassification.taskId;
+  const lines: string[] = [];
+  if (taskId === "confined-space") {
+    lines.push(
+      "- 산소·유해가스 측정 기록: 측정자 ____ / 측정 일시·장소 ____ / 산소 ____% / 황화수소 ____ppm / 평가 결과 ____ (안전보건규칙 제619조의2제4항, 3년 보존)",
+      "- 외부 감시인 배치·연락설비 사진:",
+      "- 송기마스크·공기호흡기·구출 기구 비치 사진:"
+    );
+  } else if (taskId === "excavation") {
+    lines.push(
+      "- 매설물 탐사·시험굴착 위치 표시 사진:",
+      "- 굴착면 기울기·흙막이 상태 사진:",
+      "- 장비 작업반경 출입통제 사진:"
+    );
+  } else if (taskId === "press") {
+    lines.push(
+      "- 프레스 방호장치·비상정지 장치 상태 사진:",
+      "- 금형 교체 중 슬라이드 고정·동력 차단 상태 사진:"
+    );
+  }
+  if (hasHeatCondition(scenario.workSummary) || taskId === "manual-loading-heat") {
+    lines.push("- 체감온도 측정 기록: 일자 ____ / 시각 ____ / 체감온도 ____℃ / 조치사항 ____ (안전보건규칙 제562조제2항제3호)");
+  }
+  return lines.length ? ["[작업 유형별 확인 기록]", ...lines, ""] : [];
 }
 
 function buildPhotoEvidenceDraft(scenario: ReturnType<typeof inferScenario>) {
@@ -1386,9 +1522,9 @@ function buildPhotoEvidenceDraft(scenario: ReturnType<typeof inferScenario>) {
     "사진/증빙 기록(초안)",
     "현장 점검 및 제출 대응용 첨부 슬롯",
     "",
-    `업체명: ${scenario.companyName}`,
+    `업체명: ${formatCompanyName(scenario.companyName)}`,
     `현장명: ${scenario.siteName}`,
-    `작업명: ${profile.workName}`,
+    `작업명: ${scenario.workSummary || profile.workName}`,
     `촬영 확인조건: ${roleSpecificCondition(scenario.weatherNote, "photo")}`,
     ...(scenario.specialContext.length ? [`특수 대상/조건: ${scenario.specialContext.join(" / ")}`] : []),
     "",
@@ -1408,6 +1544,7 @@ function buildPhotoEvidenceDraft(scenario: ReturnType<typeof inferScenario>) {
     `- 조치내용: ${profile.actions[1]}`,
     "- 조치 후 사진: 작업반장 또는 관리감독자 확인 후 상태",
     "",
+    ...buildPhotoTaskSection(scenario),
     "[3. TBM 및 교육 증빙]",
     "- TBM 실시 사진 또는 모바일 기록:",
     "- 참석자 확인 또는 서명:",
@@ -1427,11 +1564,12 @@ function buildOfficialStyleTbmLog(scenario: ReturnType<typeof inferScenario>) {
     "작업 전 안전점검회의(TBM) 기록(초안)",
     "공식자료 기반: 작업일지·모바일 앱·사진·영상 등 다양한 기록 인정 취지 참고",
     "",
-    "일시: 2026-04-25 08:00",
-    `업체명: ${scenario.companyName}`,
+    "일시: ____년 __월 __일 __:__ (현장 기재)",
+    `작성일: ${formatKstDate()}`,
+    `업체명: ${formatCompanyName(scenario.companyName)}`,
     `작업장소: ${scenario.siteName}`,
     `작업내용: ${scenario.workSummary}`,
-    `참석인원: ${scenario.workerCount}명`,
+    `참석인원: ${formatWorkerCount(scenario.workerCount)}`,
     "실시자: 작업반장 / 관리감독자",
     "위험성평가 실시여부: □ 예 □ 아니오",
     "작업날짜와 TBM 일시 동일 여부: □ 예 □ 아니오",
@@ -1454,11 +1592,15 @@ function buildOfficialStyleTbmLog(scenario: ReturnType<typeof inferScenario>) {
     "- 음주·피로 여부: □ 이상 없음 □ 확인 필요",
     "",
     "[참석자 확인]",
-    "TBM 내용 숙지 여부: 전원 구두 복창 및 서명 예정",
-    "보호구 착용 상태: 상호 점검",
-    "위험구역 표시 및 통제: 확인",
-    "신규·외국인·미숙련 작업자: 쉬운 한국어/통역/번역 메시지로 이해 여부 별도 확인",
+    "TBM 내용 숙지 여부(구두 복창): □ 확인 □ 미확인",
+    "보호구 착용 상태(상호 점검): □ 확인 □ 미확인",
+    "위험구역 표시 및 통제: □ 확인 □ 미확인",
+    "신규·외국인·미숙련 작업자 이해 여부(쉬운 한국어·통역·번역): □ 확인 □ 미확인 □ 대상자 없음",
+    `참석자 성명·서명: 아래 참석자 서명표(작업자 ${formatWorkerCount(scenario.workerCount)})에 기재`,
     "",
+    ...(scenario.taskClassification.taskId === "confined-space"
+      ? [CONFINED_SPACE_AIR_STANDARD_HEADER, ...CONFINED_SPACE_AIR_STANDARD_LINES, ""]
+      : []),
     "[사진·영상 기록 메모]",
     "- 작업 전 현장 상태, 보호구 착용, 위험구역 통제, TBM 실시 사진을 기록합니다.",
     "- 사진/영상 파일명, 모바일 앱 기록 ID, 작업일지 보관 위치를 남깁니다.",
@@ -1476,21 +1618,39 @@ function buildOfficialStyleTbmLog(scenario: ReturnType<typeof inferScenario>) {
 function buildOfficialStyleSafetyEducationRecord(scenario: ReturnType<typeof inferScenario>) {
   const { profile } = scenario;
 
+  const ctx = {
+    question: scenario.question,
+    taskId: scenario.taskClassification.taskId,
+    companyType: scenario.companyType,
+    workerCount: scenario.workerCount
+  };
+  const courseSection = buildEducationCourseSection(ctx);
+  const emphasis = [
+    ...profile.educationPoints,
+    ...buildHeatEmphasisLines(scenario.question),
+    ...buildCraneWindLines(scenario.question)
+  ];
+
   return [
     "안전보건교육 기록(초안)",
     "공식자료 기반: 산업안전보건교육 가이드북 및 TBM 교육시간 인정 안내 참고",
     "",
     `교육명: ${profile.educationName}`,
-    "교육구분: 당일 작업 전 안전보건교육 및 TBM 연계 기록",
-    "교육일시: 작업 시작 전 15분",
+    "교육구분: 아래 교육 종류·법정 시간 확인표에서 정한 과정(정기·채용 시·작업내용 변경 시·특별교육)",
+    "교육일시: ____년 __월 __일 __:__ ~ __:__ (현장 기재)",
+    `작성일: ${formatKstDate()}`,
     `교육장소: ${scenario.siteName}`,
-    `교육대상: ${profile.educationTargets}, 총 ${scenario.workerCount}명`,
-    "교육 실시자: 현장소장 / 관리감독자",
+    `교육대상: ${profile.educationTargets}, ${scenario.workerCount > 0 ? `총 ${formatWorkerCount(scenario.workerCount)}` : "총 인원 확인 필요"}`,
+    "교육 실시자: (현장 기재, 자격: 관리감독자 등 시행규칙 제26조제3항 해당 여부 확인)",
     "확인자: 작업반장 / 작업자 대표",
+    EDUCATION_RETENTION_LINE,
+    "",
+    ...courseSection.lines,
     "",
     "[교육대상]",
-    `- ${profile.educationTargets}, 총 ${scenario.workerCount}명`,
+    `- ${profile.educationTargets}, ${scenario.workerCount > 0 ? `총 ${formatWorkerCount(scenario.workerCount)}` : "총 인원 확인 필요"}`,
     "- 신규 투입자, 외국인 근로자, 작업변경자는 이해 여부를 별도 확인합니다.",
+    `- 참석자 성명·서명: 출력 양식의 참석자 서명표(작업자 ${formatWorkerCount(scenario.workerCount)})에 개인별로 기재`,
     "",
     "[교육내용]",
     `- 오늘 작업 개요: ${scenario.workSummary}`,
@@ -1498,14 +1658,13 @@ function buildOfficialStyleSafetyEducationRecord(scenario: ReturnType<typeof inf
     `- 핵심 위험요인: ${profile.hazards.join(", ")}`,
     `- 즉시 조치: ${profile.actions.join(", ")}`,
     "",
+    ...(isConfinedSpaceEducation(ctx) ? [...buildConfinedSpaceNoticeSection(), ""] : []),
     "[보호구 및 작업방법 강조사항]",
-    `- ${profile.educationPoints[0]}`,
-    `- ${profile.educationPoints[1]}`,
-    `- ${profile.educationPoints[2]}`,
+    ...emphasis.map((line) => `- ${line}`),
     "",
     "[확인방법]",
-    "- 신규 투입자 포함 전원이 작업중지 기준을 구두 복창",
-    "- 보호구 착용 상태를 상호 점검 후 서명 예정",
+    "- 작업중지 기준 구두 복창: □ 전원 확인 □ 미확인자 있음",
+    "- 보호구 착용 상호 점검: □ 확인 □ 미확인",
     "- 작업일지, 모바일 앱, 사진, 영상 등 현장 기록 수단에 교육 실시 사실을 남김",
     "",
     "[TBM 기록 연계]",
@@ -1553,7 +1712,7 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
   const response: AskResponse = {
     question: question.trim() || defaultQuestion,
     answer: [
-      `${scenario.companyName} ${scenario.siteName}의 주요 위험은 ${profile.topRisk}입니다.`,
+      `${[scenario.companyName, scenario.siteName].filter(Boolean).join(" ")}의 주요 위험은 ${profile.topRisk}입니다.`,
       `${scenario.companyType} 현장 기준으로 위험 요약, 위험성평가 초안, TBM 브리핑, TBM 일지, 안전교육 기록을 한 번에 생성하는 흐름을 제공합니다.`,
       "실무에서는 작업 전 위험구역 통제, 보호구 확인, 신규 투입자 이해 여부까지 같이 확인해야 합니다."
     ].join("\n\n"),
@@ -1620,6 +1779,13 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
       ...(permit.structured ? { permitInspectionStructured: permit.structured } : {}),
       tbmBriefing: buildOfficialStyleTbmBriefing(scenario),
       tbmLogDraft: buildOfficialStyleTbmLog(scenario),
+      // 결정 10(2026-10-25): template 모드도 참석자 서명표가 있는 구조화 TBM 을 낸다(TBM-04).
+      ...(riskAssessmentRows.length
+        ? {
+            tbmBriefingStructured: buildTbmBriefingStructuredFromRiskRows(responseScenario, riskAssessmentRows, scenario.weatherNote),
+            tbmLogStructured: buildTbmLogStructuredFromRiskRows(responseScenario, riskAssessmentRows, scenario.weatherNote)
+          }
+        : {}),
       safetyEducationRecordDraft: buildOfficialStyleSafetyEducationRecord(scenario),
       emergencyResponseDraft: buildEmergencyResponseDraft(scenario),
       photoEvidenceDraft: buildPhotoEvidenceDraft(scenario),
@@ -1637,9 +1803,9 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
         profile.questions[2]
       ],
       kakaoMessage: [
-        `[오늘 작업 안전공지] ${scenario.companyName}`,
+        `[오늘 작업 안전공지]${scenario.companyName ? ` ${scenario.companyName}` : ""}`,
         `현장: ${scenario.siteName}`,
-        `작업: ${profile.workName}`,
+        `작업: ${scenario.workSummary || profile.workName}`,
         ...(scenario.specialContext.length ? [`특수 대상/조건: ${scenario.specialContext.join(" / ")}`] : []),
         `핵심위험: ${profile.topRisk}`,
         `필수조치: ${profile.actions.join(" / ")}`,
@@ -1711,7 +1877,7 @@ function applyTaskClassificationHold(response: AskResponse): AskResponse {
       }
       if (key === "safetyEducationPoints" || key === "tbmQuestions") return [key, [holdLine]];
       return [key, value];
-    })
+    }).filter(([key]) => key !== "tbmBriefingStructured" && key !== "tbmLogStructured")
   ) as AskResponse["deliverables"];
   return {
     ...response,
@@ -1724,7 +1890,9 @@ function applyTaskClassificationHold(response: AskResponse): AskResponse {
     scenario: {
       ...response.scenario,
       companyType: "작업 유형 확인 필요",
-      siteName: response.scenario.siteName.replace(/\s*비정형\s*(?:유지보수\s*)?(?:현장\s*)?작업\s*현장$/, " 현장(작업 유형 확인 필요)")
+      siteName: response.scenario.siteName
+        .replace(/^비정형\s*(?:유지보수\s*)?(?:현장\s*)?작업\s*현장\(현장명 입력 필요\)$/, "현장명 입력 필요(작업 유형 확인 필요)")
+        .replace(/\s*비정형\s*(?:유지보수\s*)?(?:현장\s*)?작업\s*현장$/, " 현장(작업 유형 확인 필요)")
     },
     riskSummary: {
       ...response.riskSummary,

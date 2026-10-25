@@ -255,6 +255,12 @@ export type EducationRecordStructured = {
   understandingCheck: string;  // 이해확인방법 (1-2 문장)
   tbmLink: string;             // TBM 연계 (이번 TBM에서 어떻게 강조)
   followupRecommendation: string; // 후속 교육 추천 (1-2 문장)
+  /** 실시 시간(시간). 법정 시간 누계 확인용(EDU-10). 없으면 현장 기재 칸으로 둔다. */
+  durationHours?: number;
+  /** 실시자 자격(시행규칙 제26조제3항 각 호). 없으면 현장 기재 칸으로 둔다. */
+  instructorQualification?: string;
+  /** 참석자 성명. 비어 있어도 서명표는 작업자 수만큼 만든다. */
+  attendees?: string[];
 };
 
 /**

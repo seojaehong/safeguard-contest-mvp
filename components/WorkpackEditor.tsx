@@ -38,6 +38,7 @@ import {
   updateRiskAssessmentRowField,
   type DocumentKey
 } from "./workpack-editor-structure";
+import { companyFilePrefix, formatCompanyName, formatWorkerCount, formatWorkerHeadcount, hasKnownWorkerCount } from "@/lib/scenario-display";
 import {
   buildRiskAssessmentRecordHtml,
   RISK_RECORD_ROW_HEADERS,
@@ -431,7 +432,7 @@ function TbmDocumentCockpit({ data, documentKey }: { data: AskResponse; document
           <span className="eyebrow">TBM 진행 cockpit</span>
           <strong>{documentKey === "tbmLogDraft" ? "기록 전 확인할 질문과 조치" : "브리핑 전에 바로 읽을 핵심"}</strong>
         </div>
-        <span>{data.scenario.workerCount.toLocaleString("ko-KR")}명 · 위험도 {data.riskSummary.riskLevel}</span>
+        <span>{formatWorkerHeadcount(data.scenario.workerCount)} · 위험도 {data.riskSummary.riskLevel}</span>
       </div>
       <div className={styles.tbmCockpitGrid}>
         <article>
@@ -489,7 +490,7 @@ function SummaryDocumentCockpit({ data, documentKey }: { data: AskResponse; docu
         <article>
           <b>오늘 작업</b>
           <strong>{data.scenario.workSummary}</strong>
-          <small>{data.scenario.workerCount.toLocaleString("ko-KR")}명 · {data.scenario.weatherNote}</small>
+          <small>{formatWorkerHeadcount(data.scenario.workerCount)} · {data.scenario.weatherNote}</small>
         </article>
         <article>
           <b>핵심 위험</b>
@@ -577,7 +578,7 @@ function WorkExecutionDocumentCockpit({ data, documentKey }: { data: AskResponse
           <span className="eyebrow">작업 실행 cockpit</span>
           <strong>{isPermit ? "허가 조건과 첨부 확인" : "작업 순서와 중지 기준"}</strong>
         </div>
-        <span>{data.scenario.workerCount.toLocaleString("ko-KR")}명 · {isPermit ? permit?.basicInfo.permitType ?? "허가구분 확인 전" : data.riskSummary.riskLevel}</span>
+        <span>{formatWorkerHeadcount(data.scenario.workerCount)} · {isPermit ? permit?.basicInfo.permitType ?? "허가구분 확인 전" : data.riskSummary.riskLevel}</span>
       </div>
       <div className={styles.tbmCockpitGrid}>
         <article>
@@ -650,7 +651,7 @@ function EducationDocumentCockpit({ data, documentKey }: { data: AskResponse; do
         <span>
           {isForeignBriefing
             ? `${briefingLanguages.length.toLocaleString("ko-KR")}개 언어 · 채택본 확인`
-            : `${data.scenario.workerCount.toLocaleString("ko-KR")}명 · ${education?.type || "작업 전 교육"}`}
+            : `${formatWorkerHeadcount(data.scenario.workerCount)} · ${education?.type || "작업 전 교육"}`}
         </span>
       </div>
       <div className={styles.tbmCockpitGrid}>
@@ -659,7 +660,7 @@ function EducationDocumentCockpit({ data, documentKey }: { data: AskResponse; do
           <strong>
             {isForeignBriefing
               ? briefingLanguages.join(" · ")
-              : education?.target || `${data.scenario.workerCount.toLocaleString("ko-KR")}명 현장 작업자`}
+              : education?.target || (hasKnownWorkerCount(data.scenario.workerCount) ? `${formatWorkerCount(data.scenario.workerCount)} 현장 작업자` : "현장 작업자(인원 확인 필요)")}
           </strong>
           <small>
             {isForeignBriefing
@@ -797,7 +798,7 @@ function PhotoEvidenceDocumentCockpit({ data, documentKey }: { data: AskResponse
           <span className="eyebrow">사진·증빙 cockpit</span>
           <strong>촬영 · 보관 · 연결 근거</strong>
         </div>
-        <span>{data.scenario.siteName} · {data.scenario.workerCount.toLocaleString("ko-KR")}명</span>
+        <span>{data.scenario.siteName} · {formatWorkerHeadcount(data.scenario.workerCount)}</span>
       </div>
       <div className={styles.tbmCockpitGrid}>
         <article>
@@ -1149,7 +1150,7 @@ function buildWorkPlanSections(rows: SheetRow[], scenario: AskResponse["scenario
       <table class="mini-table">
         <tbody>
           <tr><th>공사명/현장</th><td>${escapeHtml(scenario.siteName)}</td><th>해당 작업</th><td>${escapeHtml(scenario.workSummary)}</td></tr>
-          <tr><th>작업업체</th><td>${escapeHtml(scenario.companyName)}</td><th>작업인원</th><td>${scenario.workerCount.toLocaleString("ko-KR")}명</td></tr>
+          <tr><th>작업업체</th><td>${escapeHtml(formatCompanyName(scenario.companyName))}</td><th>작업인원</th><td>${formatWorkerCount(scenario.workerCount)}</td></tr>
           <tr><th>작업일시</th><td>____년 ____월 ____일 ____시</td><th>작업지휘자</th><td>성명/연락처: ____________________</td></tr>
         </tbody>
       </table>
@@ -1259,7 +1260,7 @@ function buildEducationSections(rows: SheetRow[], scenario: AskResponse["scenari
       <table class="mini-table">
         <tbody>
           <tr><th>교육명</th><td>${escapeHtml(scenario.workSummary)} 작업 전 안전보건교육</td><th>교육일시</th><td>____년 ____월 ____일 ____시</td></tr>
-          <tr><th>교육장소</th><td>${escapeHtml(scenario.siteName)}</td><th>교육대상</th><td>투입 근로자 ${scenario.workerCount.toLocaleString("ko-KR")}명</td></tr>
+          <tr><th>교육장소</th><td>${escapeHtml(scenario.siteName)}</td><th>교육대상</th><td>${hasKnownWorkerCount(scenario.workerCount) ? `투입 근로자 ${formatWorkerCount(scenario.workerCount)}` : "투입 근로자(인원 확인 필요)"}</td></tr>
           <tr><th>교육자</th><td>관리감독자 / 작업반장</td><th>교육방법</th><td>TBM, 현장 시연, 구두 이해 확인</td></tr>
         </tbody>
       </table>
@@ -1312,7 +1313,7 @@ function buildTbmLogSections(rows: SheetRow[], scenario: AskResponse["scenario"]
       <table class="mini-table tbm-daily-table">
         <tbody>
           <tr><th>공종</th><td>${escapeHtml(scenario.workSummary)}</td><th>일자</th><td>____년 ____월 ____일</td></tr>
-          <tr><th>현장</th><td>${escapeHtml(scenario.siteName)}</td><th>작업인원</th><td>${scenario.workerCount.toLocaleString("ko-KR")}명</td></tr>
+          <tr><th>현장</th><td>${escapeHtml(scenario.siteName)}</td><th>작업인원</th><td>${formatWorkerCount(scenario.workerCount)}</td></tr>
           <tr><th>진행자</th><td>작업반장 / 관리감독자</td><th>기상·조건</th><td>${escapeHtml(scenario.weatherNote)}</td></tr>
         </tbody>
       </table>
@@ -1359,7 +1360,7 @@ function buildTbmLogSections(rows: SheetRow[], scenario: AskResponse["scenario"]
       <table class="tbm-daily-table">
         <thead><tr><th>분류</th><th>인원</th><th>담당</th><th>비고</th></tr></thead>
         <tbody>
-          <tr><td>근로자</td><td>${scenario.workerCount.toLocaleString("ko-KR")}명</td><td>담당자</td><td></td></tr>
+          <tr><td>근로자</td><td>${formatWorkerCount(scenario.workerCount)}</td><td>담당자</td><td></td></tr>
           <tr><td>관리자</td><td></td><td>현장소장</td><td></td></tr>
         </tbody>
       </table>
@@ -1487,10 +1488,10 @@ function buildSafetyFormMarkup(
     </header>
     <p class="form-lineage">서식 구분: ${escapeHtml(profile.subtitle)} · 원본 서식 1:1 재현이 아니라 현장 입력값과 공식자료를 정리한 검토용 출력입니다.</p>
     <div class="meta-grid">
-      <div class="meta-item"><b>사업장</b><span>${escapeHtml(scenario.companyName)}</span></div>
+      <div class="meta-item"><b>사업장</b><span>${escapeHtml(formatCompanyName(scenario.companyName))}</span></div>
       <div class="meta-item"><b>현장/공정</b><span>${escapeHtml(scenario.siteName)}</span></div>
       <div class="meta-item"><b>작업내용</b><span>${escapeHtml(scenario.workSummary)}</span></div>
-      <div class="meta-item"><b>인원/조건</b><span>${scenario.workerCount.toLocaleString("ko-KR")}명 · ${escapeHtml(scenario.weatherNote)}</span></div>
+      <div class="meta-item"><b>인원/조건</b><span>${formatWorkerHeadcount(scenario.workerCount)} · ${escapeHtml(scenario.weatherNote)}</span></div>
     </div>
     <div class="check-grid">${confirmationCells}</div>
     ${sections}
@@ -1763,8 +1764,8 @@ function buildExcelHtml(
   </div>
   <table class="meta-grid">
     <tbody>
-      <tr><td class="label">사업장</td><td>${escapeHtml(scenario.companyName)}</td><td class="label">현장/공정</td><td>${escapeHtml(scenario.siteName)}</td></tr>
-      <tr><td class="label">작업내용</td><td>${escapeHtml(scenario.workSummary)}</td><td class="label">인원/조건</td><td>${scenario.workerCount.toLocaleString("ko-KR")}명 · ${escapeHtml(scenario.weatherNote)}</td></tr>
+      <tr><td class="label">사업장</td><td>${escapeHtml(formatCompanyName(scenario.companyName))}</td><td class="label">현장/공정</td><td>${escapeHtml(scenario.siteName)}</td></tr>
+      <tr><td class="label">작업내용</td><td>${escapeHtml(scenario.workSummary)}</td><td class="label">인원/조건</td><td>${formatWorkerHeadcount(scenario.workerCount)} · ${escapeHtml(scenario.weatherNote)}</td></tr>
     </tbody>
   </table>
   <table class="confirm"><tbody><tr>${confirmationRows}</tr></tbody></table>
@@ -2249,10 +2250,10 @@ function SafetyDocumentPreview({
         </div>
       </div>
       <div className="safety-form-meta-grid">
-        <div><b>사업장</b><span>{scenario.companyName}</span></div>
+        <div><b>사업장</b><span>{formatCompanyName(scenario.companyName)}</span></div>
         <div><b>현장/공정</b><span>{scenario.siteName}</span></div>
         <div><b>작업내용</b><span>{scenario.workSummary}</span></div>
-        <div><b>인원/조건</b><span>{scenario.workerCount.toLocaleString("ko-KR")}명 · {scenario.weatherNote}</span></div>
+        <div><b>인원/조건</b><span>{formatWorkerHeadcount(scenario.workerCount)} · {scenario.weatherNote}</span></div>
       </div>
       <div className="safety-form-check-row">
         {profile.confirmationRows.map((row) => (
@@ -2781,7 +2782,7 @@ export function WorkpackEditor({
   const selectedUsesEditedText = dirtyDocumentKeys.includes(selected.key)
     || selectedText !== initialValues[selected.key]
     || selectedHasIntentionalEmptyPermitDraft;
-  const baseName = sanitizeFileName(`${data.scenario.companyName}-${selected.fileBase}`);
+  const baseName = sanitizeFileName(companyFilePrefix(data.scenario.companyName, selected.fileBase));
   const selectedRows = buildRowsForDocument(selected, values);
   const riskAssessmentMeta = documentMeta.find((item) => item.key === "riskAssessmentDraft") || documentMeta[1];
   const riskAssessmentRows = buildRowsForDocument(riskAssessmentMeta, values);
@@ -3892,24 +3893,24 @@ export function WorkpackEditor({
 
   function downloadAll() {
     const combined = buildCombinedText(values);
-    downloadBlob(new Blob([combined], { type: "text/plain;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeclaw-workpack.txt`);
+    downloadBlob(new Blob([combined], { type: "text/plain;charset=utf-8" }), `${sanitizeFileName(companyFilePrefix(data.scenario.companyName, "safeclaw-workpack"))}.txt`);
   }
 
   function downloadAllCsv() {
     const rows = buildLaunchSheetRows(values);
-    downloadBlob(new Blob([`\uFEFF${buildDelimited(rows, ",")}`], { type: "text/csv;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeclaw-workpack.csv`);
+    downloadBlob(new Blob([`\uFEFF${buildDelimited(rows, ",")}`], { type: "text/csv;charset=utf-8" }), `${sanitizeFileName(companyFilePrefix(data.scenario.companyName, "safeclaw-workpack"))}.csv`);
   }
 
   function downloadAllXls() {
     const rows = buildLaunchSheetRows(values);
-    downloadBlob(new Blob([buildLaunchWorkbookHtml("SafeClaw 문서팩", rows)], { type: "application/vnd.ms-excel;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeclaw-workpack.xls`);
+    downloadBlob(new Blob([buildLaunchWorkbookHtml("SafeClaw 문서팩", rows)], { type: "application/vnd.ms-excel;charset=utf-8" }), `${sanitizeFileName(companyFilePrefix(data.scenario.companyName, "safeclaw-workpack"))}.xls`);
   }
 
   function downloadSheetsTsv() {
     const rows = buildLaunchSheetRows(values);
     downloadBlob(
       new Blob([`\uFEFF${buildDelimited(rows, "\t")}`], { type: "text/tab-separated-values;charset=utf-8" }),
-      `${sanitizeFileName(data.scenario.companyName)}-google-sheets.tsv`
+      `${sanitizeFileName(companyFilePrefix(data.scenario.companyName, "google-sheets"))}.tsv`
     );
   }
 

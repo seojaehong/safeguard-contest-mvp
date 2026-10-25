@@ -9,6 +9,7 @@ import type {
 import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 import type { RiskAssessmentRow, RiskLevel } from "@/lib/risk-assessment-schema";
 import { encodeSpreadsheetDelimitedCell } from "@/lib/spreadsheet-delimited-cell";
+import { formatWorkerCount } from "@/lib/scenario-display";
 
 export type ReportPeriod = "daily" | "weekly" | "monthly" | "custom";
 
@@ -1067,7 +1068,7 @@ export function buildReportMarkdown(snapshot: ReportSnapshot) {
     `- 회사: ${snapshot.scenario.companyName || "확인 필요"}`,
     `- 현장: ${snapshot.scenario.siteName}`,
     `- 작업: ${snapshot.scenario.workSummary}`,
-    `- 인원: ${snapshot.scenario.workerCount}명`,
+    `- 인원: ${formatWorkerCount(snapshot.scenario.workerCount)}`,
     `- 기상/조건: ${snapshot.scenario.weatherNote || "확인 필요"}`,
     "",
     "## 핵심 지표",

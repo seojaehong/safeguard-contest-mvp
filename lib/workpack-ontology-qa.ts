@@ -76,8 +76,13 @@ function appendRemediationSection(text: string | undefined, heading: string, lin
 const TRAVELING_CRANE_PATTERN = /주행\s*크레인|천장\s*크레인|갠트리\s*크레인|옥외\s*크레인/;
 
 function controlLine(item: MissingControl) {
-  return item.articles.length
-    ? `${item.control} (${item.articles.join(", ")})`
+  // 제140조(폭풍에 의한 이탈 방지)는 옥외에 설치된 주행 크레인 규정이다. 이동식 크레인 작업중지 기준으로
+  // 읽히지 않게 적용 범위를 붙인다(EDU-07). 이동식 크레인은 제37조제1항 판단과 장비 정격 풍속을 따른다.
+  const articles = item.articles.map((article) => (
+    /제140조/.test(article) ? `${article} — 옥외 주행 크레인 한정` : article
+  ));
+  return articles.length
+    ? `${item.control} (${articles.join(", ")})`
     : item.control;
 }
 
