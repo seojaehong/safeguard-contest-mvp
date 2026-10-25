@@ -306,7 +306,7 @@ function AdminAccessPanel({
     try {
       const { error } = await client.auth.signInWithOtp({
         email: email.trim(),
-        options: { emailRedirectTo: window.location.origin }
+        options: { emailRedirectTo: window.location.origin, shouldCreateUser: false }
       });
       if (error) throw error;
       setMessage("관리자 로그인 링크를 보냈습니다. 메일함에서 확인해 주세요.");
@@ -592,7 +592,7 @@ function WorkerEducationPanel({
             checked={draft.consent}
             onChange={(event) => setDraft((current) => ({ ...current, consent: event.target.checked }))}
           />
-          <span>연락처·국적·언어 정보를 교육 확인과 현장 전파 목적으로 사용합니다.</span>
+          <span>연락처·국적·언어 정보는 고객사(사업주)의 위탁으로 교육 확인과 언어별 안내문 미리보기에만 씁니다. 메일·문자 실발송은 하지 않으며, 공유 링크의 연락처는 공유 중지 즉시·만료 30일 뒤 지웁니다. <a href="/privacy">개인정보 처리방침</a></span>
         </div>
         <button type="button" className="button secondary full-button" onClick={addWorker} disabled={!draft.displayName.trim() || !draft.consent}>명단에 추가</button>
       </div>

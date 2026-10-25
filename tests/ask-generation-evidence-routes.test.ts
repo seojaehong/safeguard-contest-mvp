@@ -18,6 +18,19 @@ vi.mock("@/lib/search", () => ({
   runAsk: mocks.runAsk
 }));
 
+// 익명은 template 만 허용된다(PR-19 결정 21). enhanced/full 경로 시험은 로그인 관리자로 보낸다.
+vi.mock("@/lib/ask-mode-admission", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/ask-mode-admission")>();
+  return {
+    ...actual,
+    resolveAskModeAdmission: (request: Request, resolvedMode: Parameters<typeof actual.resolveAskModeAdmission>[1]) =>
+      actual.resolveAskModeAdmission(request, resolvedMode, {
+        isAuthenticated: async () => true,
+        checkDailyCap: async () => true,
+      }),
+  };
+});
+
 function responseWithHarness(): AskResponse {
   const question = "성수동 외벽 도장 작업";
   const response = buildMockAskResponse(question, [], "mock", "test");

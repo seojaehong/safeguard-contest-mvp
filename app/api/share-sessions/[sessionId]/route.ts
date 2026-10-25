@@ -117,7 +117,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
     limit: SHARE_READ_LIMIT,
     windowMs: SHARE_RATE_WINDOW_MS,
     instanceLimiter: shareReadCallerLimiter,
-    requireDistributedInProduction: true
+    requireDistributedInProduction: true,
+    // 결정 24: Upstash 장애 때 열람은 인스턴스 한도로 허용한다(오류 로그는 남긴다).
+    instanceFallbackOnOutage: true
   });
   const callerLimited = publicRateLimitResponse(callerAdmission);
   if (callerLimited) return callerLimited;
@@ -132,7 +134,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
     limit: SHARE_READ_LIMIT,
     windowMs: SHARE_RATE_WINDOW_MS,
     instanceLimiter: shareReadCapabilityLimiter,
-    requireDistributedInProduction: true
+    requireDistributedInProduction: true,
+    instanceFallbackOnOutage: true
   });
   const limited = publicRateLimitResponse(admission);
   if (limited) return limited;
@@ -149,8 +152,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
       ? shareReadConcurrency.tryAcquire()
       : distributedRelease;
   } catch (error) {
-    console.error("public Share read concurrency admission unavailable", error);
-    return shareReadConcurrencyResponse(callerAdmission);
+    // 결정 24: 분산 동시성 장애 때도 열람은 인스턴스 동시성 한도로 허용한다.
+    console.error("public Share read concurrency admission unavailable — instance fallback", error);
+    releaseRead = shareReadConcurrency.tryAcquire();
   }
   if (!releaseRead) return shareReadConcurrencyResponse(callerAdmission);
 

@@ -5,6 +5,10 @@
     {
       "path": "/api/briefing/run",
       "schedule": "0 21 * * *"
+    },
+    {
+      "path": "/api/share-sessions/contact-retention",
+      "schedule": "30 18 * * *"
     }
   ]
 }
