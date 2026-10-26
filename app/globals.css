@@ -7126,7 +7126,7 @@ ul {
   color: #ff8a8a;
 }
 
-/* 클로(Claw) AI 안전관리자 채팅 — D-2 콘솔 세계관 재사용 */
+/* 클로(Claw) 작업팩 질문 채팅 — D-2 콘솔 세계관 재사용 */
 .claw-chat {
   display: grid;
   gap: 12px;
@@ -14549,7 +14549,8 @@ body:has(.safeclaw-landing) :is(
   min-width: 0;
 }
 
-/* UX PR-0 ②·③: 결과 머리 바로 아래 「확인할 항목」 블록. 본문 details 는 접힌 채 두고 여기서 연다. */
+/* UX PR-0 ②·③: 결과 머리 바로 아래 「확인할 항목」 블록(작업 유형 확인·편집본 재검증이 있을 때만).
+   본문 details 는 접힌 채 두고 머리 줄의 「본문 바로 열기」로 연다. */
 .command-center-shell .document-check-first {
   display: grid;
   gap: 8px;
@@ -14559,6 +14560,15 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .document-check-first > .input-helper {
   margin: 0;
+}
+
+/* UX PR-0 ④: 익명 안내는 첨부 안내 칸을 재사용한다. 좁은 화면에서는 문장을 줄바꿈해 끝까지 보인다. */
+@media (max-width: 720px) {
+  .command-center-shell .composer-attachment-status small.anonymous-mode-notice {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
 }
 
 .command-center-shell .document-check-first-open {

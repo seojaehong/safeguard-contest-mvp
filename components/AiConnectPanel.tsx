@@ -466,7 +466,7 @@ export function AiConnectPanel() {
     if (!sessionChecked) return;
     if (!session?.access_token) {
       setPhotoVision(null);
-      setPhotoVisionMessage("로그인 후 사진 분석/OCR 운영 진단을 확인할 수 있습니다.");
+      setPhotoVisionMessage("로그인 후 사진 분석/OCR 운영 점검 결과를 확인할 수 있습니다.");
       return;
     }
 

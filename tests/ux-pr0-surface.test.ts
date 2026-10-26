@@ -47,16 +47,19 @@ describe("③ 결과 머리 문구와 확인 항목 위치", () => {
 describe("② 머리 아래 확인 블록 (본문 details 는 접힌 채 둔다)", () => {
   const workspace = read("components/SafeGuardCommandCenter.tsx");
 
-  it("renders the check-first block between the head and the safety brief", () => {
+  it("renders the check-first block between the head and the safety brief, and the body opener in the head line", () => {
     const head = workspace.indexOf('className="compact-head document-workbench-head"');
     const block = workspace.indexOf('data-testid="document-check-first"');
     const brief = workspace.indexOf('className="safety-brief-dashboard"');
     expect(block).toBeGreaterThan(head);
     expect(brief).toBeGreaterThan(block);
+    const headSource = sliceBetween(workspace, 'className="compact-head document-workbench-head"', 'data-testid="document-check-first"');
+    expect(headSource).toContain("본문 바로 열기");
     const blockSource = sliceBetween(workspace, 'data-testid="document-check-first"', 'className="generation-focus"');
     expect(blockSource).toContain('data-task-classification="review_required"');
     expect(blockSource).toContain("편집본 재검증");
-    expect(blockSource).toContain("본문 바로 열기");
+    // 짧은 데스크톱(1440×723)·390px 한 화면 계약 때문에 확인 항목이 없을 때는 블록을 그리지 않는다.
+    expect(workspace).toContain('(data.scenario.taskClassification?.status === "review_required" || requiresRevalidation) ? (');
   });
 
   it("keeps the deep-review details collapsed by default and opens it from the block", () => {
@@ -81,9 +84,10 @@ describe("④ 익명 강등 사전 안내 (입력 단계)", () => {
   it("shows the notice on the input page before generation, only for anonymous sessions", () => {
     const workspace = read("components/SafeGuardCommandCenter.tsx");
     expect(workspace).toContain('from "@/lib/ask-mode-messages"');
-    const inputPage = sliceBetween(workspace, 'className="workspace-step-page workspace-input-page"', 'className="input-composer-tray"');
-    expect(inputPage).toContain('data-testid="anonymous-mode-notice"');
-    expect(inputPage).toContain("{ANONYMOUS_MESSAGE}");
+    // 1638×510 입력 화면 계약(composer.bottom ≤ viewport-8) 때문에 줄을 더하지 않고 첨부 안내 칸(small)을 재사용한다.
+    const tray = sliceBetween(workspace, 'className="input-composer-tray"', 'className="composer-mode-label"');
+    expect(tray).toContain('data-testid="anonymous-mode-notice"');
+    expect(tray).toContain("{ANONYMOUS_MESSAGE}");
     expect(workspace).toContain("setAnonymousSession(");
   });
 });

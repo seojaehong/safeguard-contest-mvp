@@ -1989,11 +1989,6 @@ export function SafeGuardCommandCenter({
                 {inputError}
               </p>
             ) : null}
-            {anonymousSession ? (
-              <p className="input-helper" data-testid="anonymous-mode-notice">
-                {ANONYMOUS_MESSAGE}
-              </p>
-            ) : null}
             <div className="input-composer-tray" aria-label="현장 입력 첨부">
               <label className="composer-attach-button" aria-label="현장 사진 첨부">
                 <input
@@ -2011,11 +2006,16 @@ export function SafeGuardCommandCenter({
               </label>
               <div className="composer-attachment-status">
                 <strong>{inputHazardPhotos.length ? `${inputHazardPhotos.length}/${MAX_INPUT_HAZARD_PHOTO_FILES}장 첨부` : `사진 첨부 최대 ${MAX_INPUT_HAZARD_PHOTO_FILES}장`}</strong>
-                <small>
-                  {inputHazardPhotoAnalysis.status === "analyzing"
-                    ? "사진에서 위험요인과 OCR 신호를 찾고 있습니다."
-                    : inputHazardPhotoAnalysis.message || "첨부하면 위험요인 후보를 자동 분석하고, 선택한 후보만 문서에 반영합니다."}
-                </small>
+                {anonymousSession && !inputHazardPhotos.length && inputHazardPhotoAnalysis.status !== "analyzing" && !inputHazardPhotoAnalysis.message ? (
+                  // UX PR-0 ④: 익명 강등 사전 안내. 짧은 화면(1638×510) 계약 때문에 줄을 더하지 않고 첨부 안내 칸을 쓴다.
+                  <small className="anonymous-mode-notice" data-testid="anonymous-mode-notice">{ANONYMOUS_MESSAGE}</small>
+                ) : (
+                  <small>
+                    {inputHazardPhotoAnalysis.status === "analyzing"
+                      ? "사진에서 위험요인과 OCR 신호를 찾고 있습니다."
+                      : inputHazardPhotoAnalysis.message || "첨부하면 위험요인 후보를 자동 분석하고, 선택한 후보만 문서에 반영합니다."}
+                  </small>
+                )}
               </div>
               {inputHazardPhotos.length ? (
                 <button
@@ -2238,14 +2238,24 @@ export function SafeGuardCommandCenter({
               <div>
                 <span className="eyebrow">문서 생성 완료</span>
                 <strong>{coreDocumentsReady ? "확인할 항목을 먼저 보세요" : selectedOutputItem.title}</strong>
-                <small>{message || "선택 문서의 본문, 인용 근거, 원문 확인 상태를 함께 검토합니다."}</small>
+                <small>
+                  {message || "선택 문서의 본문, 인용 근거, 원문 확인 상태를 함께 검토합니다."}
+                  {data ? (
+                    <>
+                      {" "}
+                      <button type="button" className="document-check-first-open" onClick={openDocumentDeepReview}>
+                        {selectedOutputItem.title} 본문 바로 열기
+                      </button>
+                    </>
+                  ) : null}
+                </small>
               </div>
               <div className="document-progress-summary" aria-label={`문서팩 진행 ${generationProgress.primary}`}>
                 <span>{generationProgress.primary}</span>
                 <b>{generationProgress.secondary}</b>
               </div>
             </div>
-            {data ? (
+            {data && (data.scenario.taskClassification?.status === "review_required" || requiresRevalidation) ? (
               <div className="document-check-first" data-testid="document-check-first" aria-label="확인할 항목">
                 {data.scenario.taskClassification?.status === "review_required" ? (
                   <p className="input-helper input-helper-error" role="alert" data-task-classification="review_required">
@@ -2262,12 +2272,6 @@ export function SafeGuardCommandCenter({
                     {isRevalidating ? "재검증 중" : "편집본 재검증"}
                   </button>
                 ) : null}
-                <p className="input-helper document-check-first-line">
-                  근거 {documentEvidenceCount}건 · 확인 필요 {documentReviewCount}건.{" "}
-                  <button type="button" className="document-check-first-open" onClick={openDocumentDeepReview}>
-                    {selectedOutputItem.title} 본문 바로 열기
-                  </button>
-                </p>
               </div>
             ) : null}
             {busy ? (
