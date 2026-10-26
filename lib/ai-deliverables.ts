@@ -1445,7 +1445,8 @@ export async function generateAllDeliverablesWithDiagnostics(
   };
 
   const GROUNDING_REJECT_REASON = "grounding review required";
-  const FORBIDDEN_TERM_REJECT_REASON = "사용자 금지어(판정·진단·상담·노무사) 거절";
+  // 사유 문구에 금지어 자체를 적지 않는다(진단 로그·응답 trace 로 나갈 수 있다).
+  const FORBIDDEN_TERM_REJECT_REASON = "사용자 노출 금지어 포함 — 묶음 거절";
   // 거절 사유를 돌려준다(null = 채택). 패킷 모드는 종전 게이트 그대로, 비패킷 AI 묶음도 금지어 4종만은 같은 목록으로 거절한다(11-3 의 14번).
   const rejectForGrounding = (name: string, value: Partial<AiDeliverables>): string | null => {
     if (opts.phaseAGrounding) {
