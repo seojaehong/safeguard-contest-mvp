@@ -2363,7 +2363,7 @@ export function SafeGuardCommandCenter({
             <div className="compact-head document-workbench-head">
               <div>
                 <span className="eyebrow">문서 생성 완료</span>
-                <strong>{coreDocumentsReady ? "안전 문서팩 3종 준비 완료" : selectedOutputItem.title}</strong>
+                <strong>{coreDocumentsReady ? "확인할 항목을 먼저 보세요" : selectedOutputItem.title}</strong>
                 <small>{message || "선택 문서의 본문, 인용 근거, 원문 확인 상태를 함께 검토합니다."}</small>
               </div>
               <div className="document-progress-summary" aria-label={`문서팩 진행 ${generationProgress.primary}`}>
@@ -2371,6 +2371,21 @@ export function SafeGuardCommandCenter({
                 <b>{generationProgress.secondary}</b>
               </div>
             </div>
+            {data?.scenario.taskClassification?.status === "review_required" ? (
+              <p className="input-helper input-helper-error" role="alert" data-task-classification="review_required">
+                <strong>작업 유형 확인 필요</strong> — {data.scenario.taskClassification.reason} 문서팩은 작업 유형이 확인될 때까지 보류됩니다.
+              </p>
+            ) : null}
+            {requiresRevalidation ? (
+              <button
+                type="button"
+                className="button command-primary workbench-primary-action document-revalidate-action"
+                disabled={isRevalidating}
+                onClick={() => void handleEditedWorkpackRevalidation()}
+              >
+                {isRevalidating ? "재검증 중" : "편집본 재검증"}
+              </button>
+            ) : null}
             {busy ? (
               <div className="generation-focus" role="status" aria-live="polite">
                 <span className="button-spinner" aria-hidden="true" />
@@ -2379,11 +2394,6 @@ export function SafeGuardCommandCenter({
                   <small>{generationProgress.detail}</small>
                 </div>
               </div>
-            ) : null}
-            {data?.scenario.taskClassification?.status === "review_required" ? (
-              <p className="input-helper input-helper-error" role="alert" data-task-classification="review_required">
-                <strong>작업 유형 확인 필요</strong> — {data.scenario.taskClassification.reason} 문서팩은 작업 유형이 확인될 때까지 보류됩니다.
-              </p>
             ) : null}
             {data ? (
               <section className="safety-brief-dashboard" aria-label="Safety Brief Dashboard">
@@ -2544,16 +2554,6 @@ export function SafeGuardCommandCenter({
                           ? selectedDocumentBody.slice(0, 1200)
                           : "현장 상황을 입력하고 문서팩을 생성하면 이곳에서 문서 본문과 근거를 바로 검토합니다."}
                       </pre>
-                      {requiresRevalidation ? (
-                        <button
-                          type="button"
-                          className="button command-primary workbench-primary-action"
-                          disabled={isRevalidating}
-                          onClick={() => void handleEditedWorkpackRevalidation()}
-                        >
-                          {isRevalidating ? "재검증 중" : "편집본 재검증"}
-                        </button>
-                      ) : null}
                       <button
                         type="button"
                         className="button command-primary document-next-button workbench-primary-action workbench-disabled-state"
