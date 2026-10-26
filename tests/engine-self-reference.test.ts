@@ -36,6 +36,16 @@ describe("엔진 프롬프트·도구 설명의 제품 자기 호칭 제거", ()
     });
   }
 
+  // 치환 뒤 어절 공백이 살아 있어야 한다 — MCP 도구 description 은 클라이언트에 그대로 노출된다.
+  // 「없음」 단언만으로는 「에이전트가옥외」 같은 붙임을 못 잡아 형태 단언을 따로 둔다.
+  it("MCP 도구 설명 — 「에이전트가」 뒤에 한글 어절이 붙어 있지 않다(공백 유지)", () => {
+    expect(countMatches(read("app/api/mcp/[transport]/implementation.ts"), /에이전트가[가-힣]/u)).toBe(0);
+  });
+
+  it("MCP 도구 설명 — 「안전 보조 에이전트가 」가 옛 「안전관리자 에이전트가 」 6곳과 1:1 로 공백을 포함해 들어 있다", () => {
+    expect(countMatches(read("app/api/mcp/[transport]/implementation.ts"), /안전 보조 에이전트가 /u)).toBe(6);
+  });
+
   it("클로 채팅 기본 프롬프트는 「안전 문서 작성을 돕는」 보조로 자신을 소개한다", () => {
     expect(read("lib/agent-loop.ts")).toContain("안전 문서 작성을 돕는");
   });
