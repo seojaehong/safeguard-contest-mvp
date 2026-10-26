@@ -80,10 +80,12 @@ describe("④ 익명 강등 사전 안내 (입력 단계)", () => {
   it("shows the notice on the input page before generation, only for anonymous sessions", () => {
     const workspace = read("components/SafeGuardCommandCenter.tsx");
     expect(workspace).toContain('from "@/lib/ask-mode-messages"');
-    // 1638×510 입력 화면 계약(composer.bottom ≤ viewport-8) 때문에 줄을 더하지 않고 첨부 안내 칸(small)을 재사용한다.
-    const tray = sliceBetween(workspace, 'className="input-composer-tray"', 'className="composer-mode-label"');
-    expect(tray).toContain('data-testid="anonymous-mode-notice"');
-    expect(tray).toContain("{ANONYMOUS_MESSAGE}");
+    // 1638×510 입력 화면 계약(composer.bottom ≤ viewport-8) 때문에 입력창 위가 아니라 생성 단추 아래 상태 줄에 둔다.
+    // (첨부 안내 small 은 ≤720px·짧은 데스크톱에서 display:none 이라 쓸 수 없다.)
+    const afterTray = sliceBetween(workspace, 'className="input-composer-tray"', 'className="field-brief-chip-row"');
+    expect(afterTray).toContain('data-testid="anonymous-mode-notice"');
+    expect(afterTray).toContain("{ANONYMOUS_MESSAGE}");
+    expect(afterTray.indexOf('data-testid="anonymous-mode-notice"')).toBeGreaterThan(afterTray.indexOf("composer-submit-button"));
     expect(workspace).toContain("setAnonymousSession(");
   });
 });

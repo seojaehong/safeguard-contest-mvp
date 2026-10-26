@@ -1995,16 +1995,11 @@ export function SafeGuardCommandCenter({
               </label>
               <div className="composer-attachment-status">
                 <strong>{inputHazardPhotos.length ? `${inputHazardPhotos.length}/${MAX_INPUT_HAZARD_PHOTO_FILES}장 첨부` : `사진 첨부 최대 ${MAX_INPUT_HAZARD_PHOTO_FILES}장`}</strong>
-                {anonymousSession && !inputHazardPhotos.length && inputHazardPhotoAnalysis.status !== "analyzing" && !inputHazardPhotoAnalysis.message ? (
-                  // UX PR-0 ④: 익명 강등 사전 안내. 짧은 화면(1638×510) 계약 때문에 줄을 더하지 않고 첨부 안내 칸을 쓴다.
-                  <small className="anonymous-mode-notice" data-testid="anonymous-mode-notice">{ANONYMOUS_MESSAGE}</small>
-                ) : (
-                  <small>
-                    {inputHazardPhotoAnalysis.status === "analyzing"
-                      ? "사진에서 위험요인과 OCR 신호를 찾고 있습니다."
-                      : inputHazardPhotoAnalysis.message || "첨부하면 위험요인 후보를 자동 분석하고, 선택한 후보만 문서에 반영합니다."}
-                  </small>
-                )}
+                <small>
+                  {inputHazardPhotoAnalysis.status === "analyzing"
+                    ? "사진에서 위험요인과 OCR 신호를 찾고 있습니다."
+                    : inputHazardPhotoAnalysis.message || "첨부하면 위험요인 후보를 자동 분석하고, 선택한 후보만 문서에 반영합니다."}
+                </small>
               </div>
               {inputHazardPhotos.length ? (
                 <button
@@ -2029,6 +2024,13 @@ export function SafeGuardCommandCenter({
                 {busy ? "근거 확인 중" : "안전 문서 생성"}
               </button>
             </div>
+            {anonymousSession ? (
+              // UX PR-0 ④: 익명 강등 사전 안내. 입력창 위에 줄을 더하면 1638×510 입력 화면 계약(composer.bottom ≤ viewport-8)을
+              // 넘기고, 첨부 안내 small 은 ≤720px·짧은 데스크톱에서 display:none 이라 생성 단추 아래 상태 줄에 둔다.
+              <p className="input-helper input-admission-status" data-testid="anonymous-mode-notice" role="status">
+                {ANONYMOUS_MESSAGE}
+              </p>
+            ) : null}
             {providerAdmissionState !== "ready" ? (
               <p className="input-helper input-admission-status" role="status">
                 {providerAdmissionState === "checking"

@@ -14562,15 +14562,6 @@ body:has(.safeclaw-landing) :is(
   margin: 0;
 }
 
-/* UX PR-0 ④: 익명 안내는 첨부 안내 칸을 재사용한다. 좁은 화면에서는 문장을 줄바꿈해 끝까지 보인다. */
-@media (max-width: 720px) {
-  .command-center-shell .composer-attachment-status small.anonymous-mode-notice {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
-  }
-}
-
 .command-center-shell .document-secondary-actions > details {
   min-width: 0;
 }
