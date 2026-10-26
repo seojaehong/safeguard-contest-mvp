@@ -19,6 +19,9 @@ const INTERNAL_ENUM_VALUE = /^(high|medium|low|planned|needsReview|fireExplosion
 const INTERNAL_SUBSTRINGS = [
   { rule: "riskAssessmentDraft", pattern: /riskAssessmentDraft/iu },
   { rule: "SIF:sif-", pattern: /SIF:sif-/iu },
+  { rule: "sif-", pattern: /\bsif-(?:아카이브|archive)-/iu },
+  { rule: "DB:", pattern: /\bDB:[a-z-]+-\d+/u },
+  { rule: "패킷", pattern: /패킷/u },
   { rule: "fallback", pattern: /fallback/iu },
   { rule: "mock", pattern: /mock/iu }
 ];

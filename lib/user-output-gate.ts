@@ -27,6 +27,10 @@ export const USER_OUTPUT_FORBIDDEN_PATTERNS: ReadonlyArray<{ rule: string; patte
   { rule: "파싱", pattern: /파싱/u },
   { rule: "검수 보완", pattern: /검수 보완/u },
   { rule: "SIF ID", pattern: /SIF:\s*sif-/iu },
+  // 패킷 참조 키를 AI 가 사용자 칸에 베껴 쓴 꼴(2026-10-26 run1 — 굴착 「DB:construction-process-0122」, 정화조 접두사 없는 「sif-아카이브-건설업-01001」, 프레스 「패킷 SIF 지게차 사례」)
+  { rule: "SIF 참조 키", pattern: /\bsif-[^\s,;)\]]+/iu },
+  { rule: "DB 참조 키", pattern: /\bDB:[a-z-]+-\d+/u },
+  { rule: "패킷", pattern: /패킷/u },
   { rule: "검색 경로", pattern: /검색:\s*(?:rest|ranked|vector|hybrid|local-tag|local-ranked|local-hybrid)\b/u },
   { rule: "원시 태그", pattern: /원시 태그/u },
   { rule: "DB 하네스", pattern: /DB\s*하네스/u },
@@ -83,6 +87,14 @@ const PHRASE_REPLACEMENTS: ReadonlyArray<readonly [RegExp, string]> = [
   // SIF 사례 ID — 괄호째 지운다
   [/\s*\(\s*SIF:\s*sif-[^)]*\)/giu, ""],
   [/\s*SIF:\s*sif-[^\s,;)\]]+/giu, ""],
+  // 접두사 없는 SIF 키·DB 참조 키 — 괄호째, 아니면 키만 지운다
+  [/\s*\(\s*sif-[^)]*\)/giu, ""],
+  [/\s*\bsif-[^\s,;)\]]+/giu, ""],
+  [/\s*\(\s*DB:[a-z-]+-\d+\s*\)/gu, ""],
+  [/\s*\bDB:[a-z-]+-\d+/gu, ""],
+  // 생성 패킷 호칭
+  [/근거\s*패킷/gu, "근거 자료"],
+  [/패킷/gu, "참고자료"],
   // 검수 메모
   [/원시 태그·관리대책을/gu, "사고사례 관리대책을"],
   [/원시 태그/gu, "사고사례 분류"],
@@ -147,6 +159,21 @@ export function gateUserOutputCell(value: string): string {
   return enumCellLabel(value) ?? gateUserOutputText(value);
 }
 
+// TBM 일지 「교육 자료」(tbmLogStructured.safetyEducation.materials)는 쉼표 목록 문자열이다.
+// AI 가 항목 자리에 패킷 참조 키를 그대로 베껴 쓰므로(「SIF:sif-…」「DB:…-0122」「SIF 아카이브 사례(sif-…)」「패킷 SIF 지게차 사례」)
+// 키가 든 항목은 통째로 지우고 법령·지침·자료 제목 항목만 남긴다. 다 지워지면 빈 문자열(빌더가 「교육자료 확인」으로 채운다).
+const MATERIALS_INTERNAL_ITEM = /SIF:|\bDB:[a-z-]+-\d+|\bsif-|패킷|KOSHA_SUPPORTING/iu;
+
+export function gateMaterialsList(value: string): string {
+  if (!value) return value;
+  return value
+    .split(/\s*,\s*/u)
+    .map((item) => item.trim())
+    .filter((item) => item && !MATERIALS_INTERNAL_ITEM.test(item))
+    .map((item) => gateUserOutputText(item))
+    .join(", ");
+}
+
 // 내보내기 요청 본문에서 표 칸으로 쓰이는 키 — 통째 enum 을 한글로 바꾼다.
 // structuredRiskRows 의 riskLevel·fourM 등 enum 필드는 각 빌더가 사전으로 옮기므로 건드리지 않는다.
 const EXPORT_CELL_KEYS = new Set(["content", "item", "value", "section", "detail", "note"]);
@@ -174,6 +201,7 @@ const EXPORT_ENUM_KEYS = new Set([
 export function gateExportPayload<T>(value: T, key = ""): T {
   if (typeof value === "string") {
     if (EXPORT_ENUM_KEYS.has(key)) return value;
+    if (key === "materials") return gateMaterialsList(value) as T;
     return (EXPORT_CELL_KEYS.has(key) ? gateUserOutputCell(value) : gateUserOutputText(value)) as T;
   }
   if (Array.isArray(value)) return value.map((item) => gateExportPayload(item, key)) as T;
@@ -187,12 +215,38 @@ export function gateExportPayload<T>(value: T, key = ""): T {
 
 type DeliverablesLike = Record<string, unknown>;
 
-/** 응답의 deliverables(문자열·문자열 배열)만 거른다. structured 는 데이터라 그대로 둔다. */
+// AI 채택 구조화 문서 — 편집기(cockpit)·엑셀이 이 객체의 글자 칸을 그대로 그린다. 문자열 잎을 본문 게이트에 통과시킨다.
+// 그 밖의 객체 값(foreignWorkerLanguages 고정 번역표 등)은 건드리지 않는다.
+const STRUCTURED_DELIVERABLE_KEYS = new Set([
+  "workPlanStructured",
+  "permitInspectionStructured",
+  "tbmBriefingStructured",
+  "tbmLogStructured",
+  "educationRecordStructured"
+]);
+// 구조화 문서 안에서 게이트를 지나지 않는 칸 — 출처 추적(evidenceRefs)과 enum(빌더가 사전으로 옮긴다).
+const STRUCTURED_UNGATED_KEYS = new Set(["evidenceRefs", "type", "permitType", "part", ...EXPORT_ENUM_KEYS]);
+
+function gateStructuredDocumentText(value: unknown, key = ""): unknown {
+  if (typeof value === "string") return key === "materials" ? gateMaterialsList(value) : gateUserOutputText(value);
+  if (Array.isArray(value)) return value.map((item) => gateStructuredDocumentText(item, key));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([childKey, child]) => (
+        [childKey, STRUCTURED_UNGATED_KEYS.has(childKey) ? child : gateStructuredDocumentText(child, childKey)]
+      ))
+    );
+  }
+  return value;
+}
+
+/** 응답의 deliverables — 문자열·문자열 배열과 다섯 구조화 문서의 글자 칸을 거른다. 그 밖의 객체는 데이터라 그대로 둔다. */
 export function gateDeliverables<T extends DeliverablesLike>(deliverables: T): T {
   const next: DeliverablesLike = { ...deliverables };
   for (const [key, value] of Object.entries(deliverables)) {
     if (typeof value === "string") next[key] = gateUserOutputText(value);
     else if (Array.isArray(value)) next[key] = value.map((item) => (typeof item === "string" ? gateUserOutputText(item) : item));
+    else if (value && typeof value === "object" && STRUCTURED_DELIVERABLE_KEYS.has(key)) next[key] = gateStructuredDocumentText(value);
   }
   return next as T;
 }

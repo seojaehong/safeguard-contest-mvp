@@ -561,7 +561,7 @@ function tbmLogStructuredPrompt(ctx: GenContext) {
     "safetyEducation": {
       "topic": "string (교육 주제)",
       "keyPoints": ["string (핵심 1줄)"],
-      "materials": "string (사용 자료/근거, 예: KOSHA Guide C-12-2024)"
+      "materials": "string (사용 자료/근거 — 법령·지침·자료 제목만 쉼표로 나열. 내부 참조 키(SIF:·DB:·sif- 로 시작하는 키)와 '패킷' 표기 금지. 예: KOSHA Guide C-12-2024)"
     },
     "unaddressedItems": [
       { "item": "string", "plannedAction": "string", "owner": "string", "dueDate": "YYYY-MM-DD 또는 현장 확인", "evidenceRefs": ["string"] }

@@ -45,10 +45,49 @@ export type GroundedGenerationPacket = Readonly<{
 }>;
 
 export type GroundingViolation = Readonly<{
-  code: "unknown_reference" | "control_provenance_missing" | "control_claim_not_in_packet";
+  code: "unknown_reference" | "control_provenance_missing" | "control_claim_not_in_packet" | "forbidden_term";
   path: string;
   value: string;
 }>;
+
+// 사용자 노출 금지어(판정·진단·상담·노무사). AI 생성 묶음에만 적용하며 치환하지 않고 묶음을 거절해 결정론 틀로 떨어뜨린다.
+// 복합어 허용 목록은 법정 용어·기관명만 — 결정론 틀의 「고용노동부 고객상담센터 1350」 등은 이 검사 밖(결정론 틀은 여기를 지나지 않는다).
+const FORBIDDEN_USER_TERMS = /판정|진단|상담|노무사/u;
+const ALLOWED_COMPOUND_TERMS: readonly string[] = [
+  "안전보건진단", // 산업안전보건법 제47조
+  "건강진단", // 특수·일반·배치전·수시·임시건강진단(법 제129조~제131조)
+  "진단서",
+  "고객상담센터", // 고용노동부 고객상담센터 1350
+  "고충상담", // 고충상담원·고충상담 창구
+  "노동위원회 판정"
+];
+
+function stripAllowedCompoundTerms(text: string): string {
+  let next = text;
+  for (const term of ALLOWED_COMPOUND_TERMS) next = next.split(term).join(" ");
+  return next;
+}
+
+/** 문자열 하나에 금지어가 있는가(허용 복합어 제외). */
+export function hasForbiddenUserTerm(text: string): boolean {
+  return FORBIDDEN_USER_TERMS.test(stripAllowedCompoundTerms(text));
+}
+
+function validateForbiddenTerms(node: unknown, path: string, violations: GroundingViolation[]): void {
+  if (typeof node === "string") {
+    if (hasForbiddenUserTerm(node)) violations.push({ code: "forbidden_term", path, value: node });
+    return;
+  }
+  if (Array.isArray(node)) {
+    node.forEach((item, index) => validateForbiddenTerms(item, `${path}[${index}]`, violations));
+    return;
+  }
+  if (!node || typeof node !== "object") return;
+  for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+    if (key === "evidenceRefs") continue; // 출처 추적 데이터
+    validateForbiddenTerms(value, path ? `${path}.${key}` : key, violations);
+  }
+}
 
 export type GroundedGenerationValidation = Readonly<{
   status: "grounded" | "review_required";
@@ -602,6 +641,7 @@ export function validateGroundedGenerationOutput(
 ): GroundedGenerationValidation {
   const violations: GroundingViolation[] = [];
   validateNode(output, packet, "$", violations);
+  validateForbiddenTerms(output, "$", violations);
   if (output && typeof output === "object" && !Array.isArray(output)) {
     const record = output as Record<string, unknown>;
     validateSchemaControls(record, packet, violations);

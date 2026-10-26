@@ -736,7 +736,7 @@ export type AskResponse = {
     rejectedAttempts?: Array<{ group: string; provider: GenerationDeliverableModelTrace["provider"]; model: string | null }>;
     violations: Array<{
       group: string;
-      code: "unknown_reference" | "control_provenance_missing" | "control_claim_not_in_packet";
+      code: "unknown_reference" | "control_provenance_missing" | "control_claim_not_in_packet" | "forbidden_term";
       path: string;
     }>;
   };
