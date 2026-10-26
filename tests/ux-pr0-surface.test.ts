@@ -67,6 +67,57 @@ describe("② 머리 아래 확인 블록 (본문 details 는 접힌 채 둔다)
   });
 });
 
+describe("④ 익명 강등 사전 안내 (입력 단계)", () => {
+  it("shares one message module between the server admission and the client input page", async () => {
+    const messages = await import("@/lib/ask-mode-messages");
+    expect(messages.ANONYMOUS_MESSAGE).toMatch(/^로그인하지 않/u);
+    expect(messages.ANONYMOUS_MESSAGE).not.toMatch(/상담|진단|판정|지도|대리|자문|노무사|안전관리자/u);
+    const admission = read("lib/ask-mode-admission.ts");
+    expect(admission).toContain('from "@/lib/ask-mode-messages"');
+    expect(admission).not.toContain("로그인하지 않은 체험에서는");
+    expect(read("lib/ask-mode-messages.ts")).not.toMatch(/^import /mu);
+  });
+
+  it("shows the notice on the input page before generation, only for anonymous sessions", () => {
+    const workspace = read("components/SafeGuardCommandCenter.tsx");
+    expect(workspace).toContain('from "@/lib/ask-mode-messages"');
+    const inputPage = sliceBetween(workspace, 'className="workspace-step-page workspace-input-page"', 'className="input-composer-tray"');
+    expect(inputPage).toContain('data-testid="anonymous-mode-notice"');
+    expect(inputPage).toContain("{ANONYMOUS_MESSAGE}");
+    expect(workspace).toContain("setAnonymousSession(");
+  });
+});
+
+describe("⑤ 문구 교정 — 면책·자기 호칭·히어로 CTA", () => {
+  it("replaces the ClawChat disclaimer and head without 「자문」 or 「안전관리자」", () => {
+    const chat = read("components/ClawChat.tsx");
+    expect(chat).toContain("만든 문서는 초안입니다. 최종 확인은 현장에서 사람이 합니다.");
+    expect(chat).toContain("이 작업팩에 대해 묻기");
+    expect(chat).not.toContain("전문가 자문");
+    expect(chat).not.toContain("안전관리자");
+  });
+
+  it("stops the product calling itself 「안전관리자」 in the hero replay and the connect panel", () => {
+    expect(read("components/HeroConsoleReplay.tsx")).not.toContain("안전관리자");
+    expect(read("components/AiConnectPanel.tsx")).not.toContain("안전관리자");
+  });
+
+  it("keeps one hero CTA on the landing page and the two pinned sentences", () => {
+    const landing = read("components/SafeClawLanding.tsx");
+    const cta = sliceBetween(landing, 'className="safeclaw-os-cta"', "</div>");
+    expect(cta.split("<Link").length - 1).toBe(1);
+    expect(cta).not.toContain('href="/documents"');
+    expect(landing).toContain("현장관리자의 문서 준비를 돕습니다");
+    expect(landing).toContain("안전 판단과 최종 확인은 사람이 맡습니다.");
+  });
+});
+
+describe("⑥ 사장 코드 삭제", () => {
+  it("removes SafeClawHomepage from SafeGuardCommandCenter", () => {
+    expect(read("components/SafeGuardCommandCenter.tsx")).not.toContain("SafeClawHomepage");
+  });
+});
+
 describe("helpers", () => {
   it("sliceBetween finds a bounded region", () => {
     expect(sliceBetween("a<b>c</b>d", "<b>", "</b>")).toBe("<b>c");

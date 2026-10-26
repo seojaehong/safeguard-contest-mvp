@@ -16,6 +16,7 @@ import {
   parseStoredCurrentWorkpack
 } from "@/lib/current-workpack";
 import { fetchAskStream, shouldRetryAskViaLegacy } from "@/lib/ask-stream-client";
+import { ANONYMOUS_MESSAGE } from "@/lib/ask-mode-messages";
 import { nextConsoleLines, type AgentConsoleLine } from "@/lib/agent-console-copy";
 import type { AskResponse, IntegrationMode, QualityContractStatus } from "@/lib/types";
 import { buildDbHarnessSurfaceContract, type HarnessImprovement, type HarnessMemoryInput } from "@/lib/db-harness";
@@ -967,6 +968,22 @@ export function SafeGuardCommandCenter({
   const [improvementSaveState, setImprovementSaveState] = useState<ImprovementSaveState>("idle");
   const [activeWorkspaceTheme, setActiveWorkspaceTheme] = useState<WorkspaceTheme>(workspaceTheme);
   const [providerAdmissionState, setProviderAdmissionState] = useState<ProviderAdmissionState>("checking");
+  // UX PR-0 ④: 익명 강등(lib/ask-mode-admission)을 생성 뒤가 아니라 입력 단계에서 미리 알린다.
+  // 세션을 읽기 전(null)에는 표시하지 않는다 — 로그인 사용자에게 잠깐 보이는 것을 막는다.
+  const [anonymousSession, setAnonymousSession] = useState<boolean | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    readWorkspaceAccessToken()
+      .then((token) => {
+        if (!cancelled) setAnonymousSession(!token);
+      })
+      .catch(() => {
+        if (!cancelled) setAnonymousSession(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [aiMode, setAiMode] = useState<"template" | "enhanced" | "full">(() => {
     if (typeof window === "undefined") return "enhanced";
     const stored = window.localStorage.getItem("safeclaw.aiMode");
@@ -1970,6 +1987,11 @@ export function SafeGuardCommandCenter({
             {inputError ? (
               <p className="input-helper input-helper-error" id="field-command-error" role="alert">
                 {inputError}
+              </p>
+            ) : null}
+            {anonymousSession ? (
+              <p className="input-helper" data-testid="anonymous-mode-notice">
+                {ANONYMOUS_MESSAGE}
               </p>
             ) : null}
             <div className="input-composer-tray" aria-label="현장 입력 첨부">
