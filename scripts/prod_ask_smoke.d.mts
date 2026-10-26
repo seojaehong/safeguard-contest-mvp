@@ -3,6 +3,8 @@ export const DEFAULT_BASE_URL: string;
 export const DEFAULT_QUESTION: string;
 export const DEFAULT_PAGES: string[];
 export const USER_VISIBLE_ROOTS: string[];
+/** full 경로 Phase A control id 어휘 사본 — lib/document-display-labels.ts PHASE_A_CONTROL_IDS 와 같아야 한다. */
+export const PHASE_A_CONTROL_IDS: string[];
 
 export type SmokeCheck = {
   name: string;

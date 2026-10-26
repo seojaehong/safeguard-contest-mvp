@@ -8,6 +8,7 @@ import { EVIDENCE_CHAIN_REGISTRY } from "@/lib/ontology/evidence-chain-registry"
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import type { AskResponse } from "@/lib/types";
 import { findUserOutputLeaks, gateAskResponseUserOutput, gateUserOutputText } from "@/lib/user-output-gate";
+import { findInternalCodeLeaks, PHASE_A_CONTROL_IDS as SMOKE_PHASE_A_CONTROL_IDS } from "../scripts/prod_ask_smoke.mjs";
 
 const PHASE_A_IDS = [
   "fall-work-platform",
@@ -144,5 +145,19 @@ describe("Phase A control id 어휘 — registry 정본과 같다", () => {
       expect(gateUserOutputText(`관리번호: ${human}`)).toBe(`관리번호: ${human}`);
       expect(findUserOutputLeaks(`관리번호: ${human}`)).toEqual([]);
     }
+  });
+});
+
+// 운영 스모크(scripts/prod_ask_smoke.mjs)는 .mjs 라 registry 를 import 하지 못하고 어휘 사본을 가진다 — 어긋나면 여기서 잡는다.
+describe("smoke 누출 규칙도 같은 어휘", () => {
+  it("smoke 의 PHASE_A_CONTROL_IDS 사본이 registry 정본과 같고, 「관리번호: <id>」 줄 판정이 lib 와 일치한다", () => {
+    expect([...SMOKE_PHASE_A_CONTROL_IDS].sort()).toEqual([...PHASE_A_CONTROL_IDS].sort());
+    for (const id of PHASE_A_CONTROL_IDS) {
+      expect(findInternalCodeLeaks({ deliverables: { riskAssessmentDraft: `관리번호: ${id}` } }).map((leak) => leak.rule)).toEqual(["관리번호 영문 코드"]);
+    }
+    for (const human of ["lift-check", "a-1", "fall-x", "press-line-a"]) {
+      expect(findInternalCodeLeaks({ deliverables: { riskAssessmentDraft: `관리번호: ${human}` } })).toEqual([]);
+    }
+    expect(findInternalCodeLeaks({ deliverables: { riskAssessmentDraft: "관리번호: RA-press-1" } }).map((leak) => leak.rule)).toEqual(["관리번호 영문 코드"]);
   });
 });

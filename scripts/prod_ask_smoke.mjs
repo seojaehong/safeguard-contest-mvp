@@ -13,6 +13,18 @@ export const DEFAULT_BASE_URL = "https://www.safeclaw.kr";
 export const DEFAULT_QUESTION = "안산 제조공장 용접 및 지게차 상하차 작업, 외국인 근로자 3명 포함 작업자 6명";
 export const DEFAULT_PAGES = ["/", "/workspace", "/ask", "/knowledge", "/evidence", "/trust", "/login"];
 
+// full 경로 Phase A control id 어휘 — lib/ontology/evidence-chain-registry.ts controls[].controlId 사본(PHASE_A_CONTROL_IDS 와 일치해야 한다).
+export const PHASE_A_CONTROL_IDS = [
+  "fall-work-platform",
+  "fall-opening-guard",
+  "fall-anchor",
+  "vehicle-contact-prevention",
+  "electrical-deenergized-isolation",
+  "electrical-live-part-guarding",
+  "electrical-live-work-distance",
+  "electrical-insulating-ppe",
+  "electrical-grounding"
+];
 // 값 전체가 내부 enum 이면 노출이다(부분 일치는 보지 않는다 — 「low」가 문장 속 영어일 수 있다).
 const INTERNAL_ENUM_VALUE = /^(high|medium|low|planned|needsReview|fireExplosion|struckBy|electricShock)$/u;
 // 값 안에 들어 있으면 노출이다(대소문자 무시).
@@ -22,8 +34,10 @@ const INTERNAL_SUBSTRINGS = [
   { rule: "sif-", pattern: /\bsif-(?:아카이브|archive)-/iu },
   { rule: "DB:", pattern: /\bDB:[a-z-]+-\d+/u },
   { rule: "패킷", pattern: /패킷/u },
-  // 위험성평가 관리번호 영문 코드(RA-press-1, #114)·Phase A control id(fall-work-platform, inventory 10-4 의 5번) — lib/user-output-gate.ts 와 같은 규칙
-  { rule: "관리번호 영문 코드", pattern: /^\s*관리번호:\s*(?:RA-[a-z]+(?:-[a-z]+)*-\d+|[a-z]+(?:-[a-z]+)+)\s*$/mu },
+  // 위험성평가 관리번호 영문 코드(RA-press-1, #114)·Phase A control id(fall-work-platform, inventory 10-4 의 5번) — lib/user-output-gate.ts 와 같은 규칙.
+  // Phase A 어휘는 lib/document-display-labels.ts PHASE_A_CONTROL_IDS(evidence-chain-registry 정본)와 같아야 한다 — .mjs 라 그 모듈을
+  // 가져오지 못해 위에 사본을 둔다. 어긋나면 tests/risk-control-id-display.test.ts 「smoke 누출 규칙도 같은 어휘」가 잡는다. 사람이 적은 소문자 약호(lift-check)는 잡지 않는다.
+  { rule: "관리번호 영문 코드", pattern: new RegExp("^\\s*관리번호:\\s*(?:RA-[a-z]+(?:-[a-z]+)*-\\d+|" + PHASE_A_CONTROL_IDS.join("|") + ")\\s*$", "mu") },
   { rule: "fallback", pattern: /fallback/iu },
   { rule: "mock", pattern: /mock/iu }
 ];
