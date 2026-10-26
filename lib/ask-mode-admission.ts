@@ -1,5 +1,6 @@
 import type { AiMode } from "@/lib/ai-deliverables";
 import { checkAiDailyCostCap } from "@/lib/ai-daily-cost-cap";
+import { ANONYMOUS_MESSAGE, DAILY_CAP_MESSAGE } from "@/lib/ask-mode-messages";
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
 import type { AskModeNotice } from "@/lib/types";
 
@@ -12,11 +13,6 @@ export type AskModeAdmission = {
 };
 
 export const ASK_MODE_DOWNGRADE_HEADER = "X-SafeClaw-AI-Mode-Downgraded";
-
-const ANONYMOUS_MESSAGE =
-  "로그인하지 않은 체험에서는 기본 문서(템플릿)만 만듭니다. AI 보강 문서는 관리자 로그인 뒤 쓸 수 있습니다.";
-const DAILY_CAP_MESSAGE =
-  "오늘 사이트 전체 AI 생성 한도를 다 써서 기본 문서(템플릿)로 만들었습니다. 자정(KST)이 지나면 다시 AI 보강을 쓸 수 있습니다.";
 
 type Dependencies = {
   isAuthenticated?: (request: Request) => Promise<boolean>;
