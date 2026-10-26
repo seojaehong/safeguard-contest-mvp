@@ -2963,6 +2963,20 @@ async function fetchReferenceItemsCompat(config: SupabaseConfig, params: URLSear
 }
 
 /**
+ * inventory 11-3 의 12번: `search_safety_references_ranked` 는 저장소(supabase/migrations·docs·scripts)에
+ * 정의가 없고 운영 DB 에도 없어 full 1회(동시 4버킷)마다 404(PGRST202) 4건이 났다.
+ * 한 프로세스에서 「함수 없음」이 확정되면(404) 그 Supabase URL 로는 다시 치지 않고 조용히 ilike 폴백으로
+ * 간다. 동시 호출은 첫 호출의 결과를 기다려 같은 판정을 공유한다. 네트워크 실패·5xx·중단은 기억하지
+ * 않는다(일시 오류). 함수를 나중에 만들면 인스턴스 재기동 뒤 코드 변경 없이 다시 쓰인다.
+ */
+const SAFETY_REFERENCE_RANKED_RPC_MISSING_CODE = "safety_reference_ranked_rpc_missing" as const;
+const rankedRpcMissingByUrl = new Map<string, true | Promise<boolean>>();
+
+export function resetSafetyReferenceRankedRpcStateForTests(): void {
+  rankedRpcMissingByUrl.clear();
+}
+
+/**
  * Track E-3: ranked search via Postgres RPC. Uses tsvector + pg_trgm
  * with weighted scoring (KOSHA 기술지원규정 100 / 기술지침 80 / others
  * 10–30) + ts_rank_cd × 50 + title-similarity × 20.
@@ -2970,6 +2984,57 @@ async function fetchReferenceItemsCompat(config: SupabaseConfig, params: URLSear
  * Returns null when the RPC isn't reachable (caller falls back to ilike).
  */
 async function fetchRankedReferences(
+  config: SupabaseConfig,
+  query: string,
+  limit: number,
+  itemType?: string,
+  signal?: AbortSignal
+): Promise<{ ok: boolean; status: number; message: string; items: SafetyReferenceItem[] } | null> {
+  // No await between the lookup and the probe registration — the first caller claims the probe
+  // synchronously, so concurrent callers (the 4 full-mode buckets) await it instead of repeating the 404.
+  const known = rankedRpcMissingByUrl.get(config.url);
+  if (known === true) {
+    return null; // RPC known missing in this process — silent fallback, no request.
+  }
+  let settleProbe: ((missing: boolean) => void) | undefined;
+  if (known) {
+    if (await known) return null;
+  } else {
+    rankedRpcMissingByUrl.set(config.url, new Promise<boolean>((resolve) => {
+      settleProbe = resolve;
+    }));
+  }
+  // Only the probing caller clears its own pending entry; a definitive 404 is latched by whoever sees it.
+  const releaseProbe = () => {
+    if (!settleProbe) return;
+    if (rankedRpcMissingByUrl.get(config.url) !== true) rankedRpcMissingByUrl.delete(config.url);
+    settleProbe(false);
+    settleProbe = undefined;
+  };
+  try {
+    const result = await fetchRankedReferencesOnce(config, query, limit, itemType, signal);
+    if (result === null) {
+      const alreadyKnown = rankedRpcMissingByUrl.get(config.url) === true;
+      rankedRpcMissingByUrl.set(config.url, true);
+      settleProbe?.(true);
+      settleProbe = undefined;
+      if (!alreadyKnown) {
+        log.warn("safety reference ranked RPC search_safety_references_ranked is missing (404 PGRST202); using ilike fallback for the rest of this process", {
+          event: SAFETY_REFERENCE_RANKED_RPC_MISSING_CODE,
+          errorCode: SAFETY_REFERENCE_RANKED_RPC_MISSING_CODE
+        });
+      }
+      return null;
+    }
+    releaseProbe();
+    return result;
+  } catch (error) {
+    releaseProbe();
+    throw error;
+  }
+}
+
+async function fetchRankedReferencesOnce(
   config: SupabaseConfig,
   query: string,
   limit: number,

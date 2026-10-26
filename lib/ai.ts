@@ -2,6 +2,8 @@ import OpenAI from "openai";
 import type { AskResponse, SearchResult } from "./types";
 import { buildMockAskResponse } from "./mock-data";
 import { generateWithVertex } from "./vertex/client";
+import { generateWithAnthropic } from "@/lib/anthropic-client";
+import { resolveDeliverablesProvider } from "@/lib/ai-provider-policy";
 import { resolvePositiveIntEnv } from "@/lib/ai-deliverables-policy";
 import { createLogger } from "@/lib/logger";
 import {
@@ -23,7 +25,17 @@ const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-2.5-
 // (2026-07-02 smoke: "OpenAI response timeout after 10000ms" -> fallback).
 const RESPONSE_TIMEOUT_MS = resolvePositiveIntEnv(process.env.OPENAI_TIMEOUT_MS, 20_000);
 const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "25000", 10);
+// Anthropic answer budget (short free-text answer, same ceiling as the OpenAI path).
+const ANTHROPIC_ANSWER_TIMEOUT_MS = resolvePositiveIntEnv(process.env.ANTHROPIC_ANSWER_TIMEOUT_MS, 20_000);
 const RETRY_DELAY_MS = 500;
+// inventory 11-3 의 11번: answer 경로가 Vertex/OpenAI 키만 보고 Anthropic(AI_DELIVERABLES_PROVIDER=claude ·
+// ANTHROPIC_API_KEY)을 조건에 넣지 않아 full 실출력이 status.ai=mock 으로 나갔다. deliverables 와 같은
+// 결정 함수를 쓰므로 두 경로가 「Anthropic 이 켜졌는가」에서 어긋나지 않는다.
+const anthropicAnswerDecision = resolveDeliverablesProvider({
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+  providerFlag: process.env.AI_DELIVERABLES_PROVIDER,
+  modelOverride: process.env.ANTHROPIC_MODEL,
+});
 
 export const AI_ANSWER_OUTPUT_BUDGET = Object.freeze({
   label: "AI answer",
@@ -78,7 +90,7 @@ type ProviderGenerationResult = {
   answer: string;
   providerLabel: string;
   policyNote: string;
-  provider: "openai" | "vertex";
+  provider: "anthropic" | "openai" | "vertex";
   model: string;
   fallbackUsed: boolean;
 };
@@ -86,7 +98,7 @@ type ProviderGenerationResult = {
 export type AnswerGenerationResult = {
   response: AskResponse;
   trace: {
-    provider: "openai" | "vertex" | "mock";
+    provider: "anthropic" | "openai" | "vertex" | "mock";
     model: string | null;
     fallbackUsed: boolean;
   };
@@ -103,6 +115,20 @@ export function applyPhaseAAnswerBoundary(
 
 function isVertexConfigured(): boolean {
   return Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && process.env.GCP_PROJECT_ID);
+}
+
+function resolveAnthropicAnswerModel(): string | null {
+  return anthropicAnswerDecision.provider === "anthropic" && anthropicAnswerDecision.model
+    ? anthropicAnswerDecision.model
+    : null;
+}
+
+function isAnthropicAnswerConfigured(): boolean {
+  return resolveAnthropicAnswerModel() !== null;
+}
+
+function isAnyAnswerProviderConfigured(): boolean {
+  return isAnthropicAnswerConfigured() || isVertexConfigured() || Boolean(openAiApiKey);
 }
 
 async function wait(ms: number, signal?: AbortSignal) {
@@ -204,6 +230,38 @@ async function generateWithOpenAI(
     policyNote: `OpenAI 응답은 최대 ${budget.maxOutputTokens} tokens/${budget.maxOutputChars} chars, timeout ${RESPONSE_TIMEOUT_MS}ms, retry 없음, 실패 시 graceful fallback 정책을 따릅니다.`,
     provider: "openai",
     model: openAiModel,
+    fallbackUsed: false
+  };
+}
+
+async function generateWithAnthropicAnswer(
+  prompt: string,
+  budget: ProviderTextBudget,
+  signal?: AbortSignal,
+): Promise<ProviderGenerationResult> {
+  const model = resolveAnthropicAnswerModel();
+  if (!model) {
+    throw new Error("Anthropic answer provider is not configured");
+  }
+
+  // 1 attempt only, same as the other providers — a retry doubles wall time.
+  const answer = await withRetry(
+    () => generateWithAnthropic(model, prompt, {
+      maxOutputTokens: budget.maxOutputTokens,
+      timeoutMs: ANTHROPIC_ANSWER_TIMEOUT_MS,
+      signal,
+    }),
+    1,
+    `Anthropic response (${model})`,
+    signal,
+  );
+
+  return {
+    answer: enforceProviderTextBudget(answer, budget),
+    providerLabel: `Claude via Anthropic (${model})`,
+    policyNote: `Anthropic 응답은 최대 ${budget.maxOutputTokens} tokens/${budget.maxOutputChars} chars, timeout ${ANTHROPIC_ANSWER_TIMEOUT_MS}ms, 재시도 없음, 실패 시 보조 응답 정책을 따릅니다.`,
+    provider: "anthropic",
+    model,
     fallbackUsed: false
   };
 }
@@ -421,13 +479,51 @@ export async function enhanceLegalEvidenceMappings(
     });
 }
 
+async function generateAnswerWithVertexOrOpenAI(
+  prompt: string,
+  signal?: AbortSignal,
+): Promise<ProviderGenerationResult> {
+  return isVertexConfigured()
+    ? await generateWithGemini(prompt, AI_ANSWER_OUTPUT_BUDGET, signal).catch((error) => {
+        signal?.throwIfAborted();
+        if (!openAiApiKey) throw error;
+        log.error("Vertex AI model chain failed; falling back to OpenAI", safeGenerationFailureContext(error));
+        return generateWithOpenAI(prompt, AI_ANSWER_OUTPUT_BUDGET, signal)
+          .then((fallback) => ({ ...fallback, fallbackUsed: true }));
+      })
+    : await generateWithOpenAI(prompt, AI_ANSWER_OUTPUT_BUDGET, signal);
+}
+
+/**
+ * Answer provider chain: Anthropic (when AI_DELIVERABLES_PROVIDER=claude + key) first,
+ * then the Vertex → OpenAI chain. When Anthropic is the only provider and it fails, the
+ * error propagates so search.ts records an honest "fallback" (never "mock").
+ */
+async function generateAnswerWithProviderChain(
+  prompt: string,
+  signal?: AbortSignal,
+): Promise<ProviderGenerationResult> {
+  if (!isAnthropicAnswerConfigured()) {
+    return generateAnswerWithVertexOrOpenAI(prompt, signal);
+  }
+  try {
+    return await generateWithAnthropicAnswer(prompt, AI_ANSWER_OUTPUT_BUDGET, signal);
+  } catch (error) {
+    signal?.throwIfAborted();
+    if (!isVertexConfigured() && !openAiApiKey) throw error;
+    log.error("Anthropic answer failed; falling back to Vertex/OpenAI chain", safeGenerationFailureContext(error));
+    const fallback = await generateAnswerWithVertexOrOpenAI(prompt, signal);
+    return { ...fallback, fallbackUsed: true };
+  }
+}
+
 export async function generateAnswer(
   question: string,
   citations: SearchResult[],
   options: { traceId: string; phaseAGrounding?: PhaseAGenerationGrounding; signal?: AbortSignal }
 ): Promise<AnswerGenerationResult> {
   options.signal?.throwIfAborted();
-  if (!isVertexConfigured() && !openAiApiKey) {
+  if (!isAnyAnswerProviderConfigured()) {
     const trace = { provider: "mock", model: null, fallbackUsed: false } as const;
     log.info("safeclaw_answer_trace", {
       event: "safeclaw_answer_trace",
@@ -446,16 +542,7 @@ export async function generateAnswer(
   }
 
   const prompt = buildPrompt(question, citations, options.phaseAGrounding);
-
-  const response = isVertexConfigured()
-    ? await generateWithGemini(prompt, AI_ANSWER_OUTPUT_BUDGET, options.signal).catch((error) => {
-        options.signal?.throwIfAborted();
-        if (!openAiApiKey) throw error;
-        log.error("Vertex AI model chain failed; falling back to OpenAI", safeGenerationFailureContext(error));
-        return generateWithOpenAI(prompt, AI_ANSWER_OUTPUT_BUDGET, options.signal)
-          .then((fallback) => ({ ...fallback, fallbackUsed: true }));
-      })
-    : await generateWithOpenAI(prompt, AI_ANSWER_OUTPUT_BUDGET, options.signal);
+  const response = await generateAnswerWithProviderChain(prompt, options.signal);
 
   const live = buildMockAskResponse(
     question,
