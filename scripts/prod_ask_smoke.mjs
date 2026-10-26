@@ -22,6 +22,8 @@ const INTERNAL_SUBSTRINGS = [
   { rule: "sif-", pattern: /\bsif-(?:아카이브|archive)-/iu },
   { rule: "DB:", pattern: /\bDB:[a-z-]+-\d+/u },
   { rule: "패킷", pattern: /패킷/u },
+  // 위험성평가 관리번호 영문 코드(RA-press-1, #114)·Phase A control id(fall-work-platform, inventory 10-4 의 5번) — lib/user-output-gate.ts 와 같은 규칙
+  { rule: "관리번호 영문 코드", pattern: /^\s*관리번호:\s*(?:RA-[a-z]+(?:-[a-z]+)*-\d+|[a-z]+(?:-[a-z]+)+)\s*$/mu },
   { rule: "fallback", pattern: /fallback/iu },
   { rule: "mock", pattern: /mock/iu }
 ];
