@@ -3,7 +3,8 @@
 import { describe, expect, it } from "vitest";
 
 import { serializeRiskAssessmentRowsToDraft } from "@/components/workpack-editor-structure";
-import { riskManagementNumberLabel } from "@/lib/document-display-labels";
+import { isInternalRiskControlId, PHASE_A_CONTROL_IDS, riskManagementNumberLabel } from "@/lib/document-display-labels";
+import { EVIDENCE_CHAIN_REGISTRY } from "@/lib/ontology/evidence-chain-registry";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import type { AskResponse } from "@/lib/types";
 import { findUserOutputLeaks, gateAskResponseUserOutput, gateUserOutputText } from "@/lib/user-output-gate";
@@ -123,5 +124,25 @@ describe("응답 게이트 — 구조화 행 controlId", () => {
     expect(gated.deliverables.riskAssessmentDraft).toContain("관리번호: 위험성평가-01");
     // 본문과 행이 같은 라벨을 쓰므로 편집기의 「행이 본문에 있는가」 판정이 유지된다.
     expect(serializeRiskAssessmentRowsToDraft(rows)).toContain("관리번호: 위험성평가-01");
+  });
+});
+
+// PR #120 반박: 소문자 하이픈 일반 패턴은 사람이 적은 약호(lift-check)까지 덮는다 → 어휘를 registry 정본으로 좁혔다.
+describe("Phase A control id 어휘 — registry 정본과 같다", () => {
+  it("registry 의 controls[].controlId 전부가 내부 id 로 잡히고, 사람이 적은 소문자 약호는 아니다", () => {
+    const ids = EVIDENCE_CHAIN_REGISTRY.flatMap((chain) => chain.controls.map((control) => control.controlId));
+    expect(ids.length).toBeGreaterThan(0);
+    for (const id of ids) {
+      expect(PHASE_A_CONTROL_IDS).toContain(id);
+      expect(isInternalRiskControlId(id)).toBe(true);
+      expect(riskManagementNumberLabel(id, 0)).toBe("위험성평가-01");
+      expect(gateUserOutputText(`관리번호: ${id}`)).toBe("관리번호: 위험성평가-01");
+    }
+    for (const human of ["lift-check", "a-1", "fall-x", "wp-01", "press-line-a"]) {
+      expect(isInternalRiskControlId(human)).toBe(false);
+      expect(riskManagementNumberLabel(human, 3)).toBe(human);
+      expect(gateUserOutputText(`관리번호: ${human}`)).toBe(`관리번호: ${human}`);
+      expect(findUserOutputLeaks(`관리번호: ${human}`)).toEqual([]);
+    }
   });
 });

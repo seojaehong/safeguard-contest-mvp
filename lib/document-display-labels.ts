@@ -7,6 +7,7 @@
 // 위험등급 표기는 「상·중·하」(결정 15, 2026-10-25).
 
 import { getDocumentTitle, DOCUMENT_TITLES } from "@/lib/document-titles";
+import { EVIDENCE_CHAIN_REGISTRY } from "@/lib/ontology/evidence-chain-registry";
 import type { AccidentType, FourM, RiskLevel, VerificationStatus } from "@/lib/risk-assessment-schema";
 
 export const FOUR_M_DISPLAY_LABELS: Readonly<Record<FourM, string>> = {
@@ -100,11 +101,19 @@ export function enumCellLabel(value: string): string | null {
 // 기본 틀은 행마다 `RA-<작업 유형 id>-<순번>`(RA-press-1·RA-confined-space-1) 을 관리번호로 만들었고,
 // 이 값이 초안 본문 「관리번호:」 줄과 편집 화면에 그대로 나갔다(운영 4건 15행). 사용자에게 나가는
 // 관리번호는 한글·숫자만 쓴다 — 「위험성평가-01」.
-// full 경로의 Phase A control id(fall-work-platform·electrical-grounding 등, 소문자 영단어를 하이픈으로 이은 꼴)도
-// 같은 자리에서 행 순번으로 바꾼다(inventory 10-4 의 5번, 2026-10-26). 연결 키는 evidenceRefs(「ONT:…」)에 따로 남는다.
-// 사람이 적은 값(「A-1」·「WP-01」·한글)은 그대로 둔다.
+// full 경로의 Phase A control id(fall-work-platform·electrical-grounding 등)도 같은 자리에서 행 순번으로 바꾼다
+// (inventory 10-4 의 5번, 2026-10-26). 연결 키는 evidenceRefs(「ONT:…」)에 따로 남는다.
+// 어휘는 evidence-chain-registry 의 controls[].controlId 그대로다 — Phase A 검증(evidence-chain.ts 의
+// unsupported_phase_a_fact)이 그 밖의 id 를 생성 단계에서 거절하므로, 소문자 하이픈 꼴 일반 패턴으로 넓히면
+// 사람이 적은 약호(「lift-check」·「a-1」)까지 덮는다(PR #120 반박). 사람이 적은 값(「A-1」·「WP-01」·한글)은 그대로 둔다.
 export const RISK_CONTROL_CODE_PATTERN = /^RA-[a-z]+(?:-[a-z]+)*-\d+$/iu;
-export const PHASE_A_CONTROL_ID_PATTERN = /^[a-z]+(?:-[a-z]+)+$/u;
+/** Phase A control id 어휘(registry 정본). 「관리번호:」 줄 게이트(user-output-gate)도 이 목록으로 정규식을 만든다. */
+export const PHASE_A_CONTROL_IDS: readonly string[] = Object.freeze(
+  [...new Set(EVIDENCE_CHAIN_REGISTRY.flatMap((chain) => chain.controls.map((control) => control.controlId)))]
+);
+/** 정규식 조각 `fall-work-platform|fall-anchor|…` — id 는 소문자·하이픈뿐이라 이스케이프가 필요 없다. */
+export const PHASE_A_CONTROL_ID_ALTERNATION = PHASE_A_CONTROL_IDS.join("|");
+export const PHASE_A_CONTROL_ID_PATTERN = new RegExp(`^(?:${PHASE_A_CONTROL_ID_ALTERNATION})$`, "u");
 
 /** 사용자 문서에 그대로 나가면 안 되는 관리번호 값인가(기본 틀 영문 코드·Phase A control id). */
 export function isInternalRiskControlId(value: string): boolean {
