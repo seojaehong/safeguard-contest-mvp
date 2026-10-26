@@ -900,6 +900,37 @@ function resolveInitialWorkPermitDraft(data: AskResponse) {
   );
 }
 
+// 저장본 로드 게이트(inventory 10-4 의 4번): 교정 전에 저장된 작업팩(localStorage 현재 작업팩·서버 재열기·편집기 자동저장본)의
+// 본문에는 그 뒤에 추가된 규칙(위험성평가 관리번호 영문 코드 등)이 남아 있다. 저장본 데이터는 생성 근거 봉인이 덮고 있어
+// 바꾸지 않고, 편집기가 textarea 첫 값을 만드는 자리에서 거른다(같은 입력에 두 번 돌려도 같다).
+function gateDocumentValues(values: WorkpackDocumentValues): WorkpackDocumentValues {
+  return Object.fromEntries(
+    Object.entries(values).map(([key, value]) => [key, typeof value === "string" ? gateUserOutputText(value) : value])
+  ) as WorkpackDocumentValues;
+}
+
+/** 편집기 textarea 의 첫 값. 생성 직후 응답과 저장본(localStorage·서버 재열기) 둘 다 여기를 지난다. */
+export function buildInitialWorkpackDocumentValues(data: AskResponse): WorkpackDocumentValues {
+  return gateDocumentValues(buildUngatedInitialDocumentValues(data));
+}
+
+function buildUngatedInitialDocumentValues(data: AskResponse): WorkpackDocumentValues {
+  return {
+    workpackSummaryDraft: data.deliverables.workpackSummaryDraft,
+    riskAssessmentDraft: withSubmitReadiness("위험성평가표", data.deliverables.riskAssessmentDraft, data),
+    workPlanDraft: withSubmitReadiness("작업계획서", data.deliverables.workPlanDraft, data),
+    workPermitDraft: resolveInitialWorkPermitDraft(data),
+    tbmBriefing: withSubmitReadiness("TBM 브리핑", data.deliverables.tbmBriefing, data),
+    tbmLogDraft: withSubmitReadiness("TBM 일지", data.deliverables.tbmLogDraft, data),
+    safetyEducationRecordDraft: withSubmitReadiness("안전교육", data.deliverables.safetyEducationRecordDraft, data),
+    emergencyResponseDraft: data.deliverables.emergencyResponseDraft,
+    photoEvidenceDraft: data.deliverables.photoEvidenceDraft,
+    foreignWorkerBriefing: data.deliverables.foreignWorkerBriefing,
+    foreignWorkerTransmission: data.deliverables.foreignWorkerTransmission,
+    kakaoMessage: data.deliverables.kakaoMessage
+  };
+}
+
 function withSubmitReadiness(title: string, body: string, data: AskResponse) {
   const readinessLabel = `서식상태: 법정 항목 확인 전 - ${title} 현장 검토용입니다. (현장 기재) 빈칸을 채운 뒤 사용하세요.`;
   if (body.includes(readinessLabel) && body.includes("[필수 확인 항목]")) {
@@ -2097,7 +2128,7 @@ function parseDocumentValues(value: unknown, fallback: WorkpackDocumentValues): 
   }, { ...fallback });
 }
 
-function parseStoredDraft(
+export function parseStoredDraft(
   raw: string | null,
   fallback: WorkpackDocumentValues,
   fallbackRiskRows: RiskAssessmentRow[]
@@ -2109,7 +2140,8 @@ function parseStoredDraft(
     const record = readObject(parsed);
     if (!record) return { version: 1, values: fallback, dirtyKeys: [] };
 
-    const parsedValues = parseDocumentValues(record.values || record, fallback);
+    // 교정 전에 편집해 둔 본문도 같은 게이트를 지난다(저장본 로드 게이트). fallback 은 이미 게이트를 지난 값이다.
+    const parsedValues = gateDocumentValues(parseDocumentValues(record.values || record, fallback));
     const storedDirtyKeys = Array.isArray(record.dirtyKeys)
       ? record.dirtyKeys.filter(isDocumentKey)
       : documentMeta.filter((item) => parsedValues[item.key] !== fallback[item.key]).map((item) => item.key);
@@ -2118,8 +2150,9 @@ function parseStoredDraft(
       acc[key] = parsedValues[key];
       return acc;
     }, { ...fallback });
+    // 정본 글도 같은 게이트를 지나야 「정본 글 === 본문」 판정이 유지된다(직렬화는 riskManagementNumberLabel 로 같은 라벨을 쓴다).
     const canonicalRiskText = typeof record.canonicalRiskText === "string"
-      ? record.canonicalRiskText
+      ? gateUserOutputText(record.canonicalRiskText)
       : undefined;
     const draftRiskRows = parseStoredRiskRows(record.draftRiskRows);
     const restoredRiskRows = draftRiskRows ?? fallbackRiskRows;
@@ -2688,23 +2721,7 @@ export function WorkpackEditor({
   onSelectedDocumentChange?: (key: DocumentKey) => void;
   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
 }) {
-  const initialValues = useMemo<WorkpackDocumentValues>(
-    () => ({
-      workpackSummaryDraft: data.deliverables.workpackSummaryDraft,
-      riskAssessmentDraft: withSubmitReadiness("위험성평가표", data.deliverables.riskAssessmentDraft, data),
-      workPlanDraft: withSubmitReadiness("작업계획서", data.deliverables.workPlanDraft, data),
-      workPermitDraft: resolveInitialWorkPermitDraft(data),
-      tbmBriefing: withSubmitReadiness("TBM 브리핑", data.deliverables.tbmBriefing, data),
-      tbmLogDraft: withSubmitReadiness("TBM 일지", data.deliverables.tbmLogDraft, data),
-      safetyEducationRecordDraft: withSubmitReadiness("안전교육", data.deliverables.safetyEducationRecordDraft, data),
-      emergencyResponseDraft: data.deliverables.emergencyResponseDraft,
-      photoEvidenceDraft: data.deliverables.photoEvidenceDraft,
-      foreignWorkerBriefing: data.deliverables.foreignWorkerBriefing,
-      foreignWorkerTransmission: data.deliverables.foreignWorkerTransmission,
-      kakaoMessage: data.deliverables.kakaoMessage
-    }),
-    [data]
-  );
+  const initialValues = useMemo<WorkpackDocumentValues>(() => buildInitialWorkpackDocumentValues(data), [data]);
   const storageKey = useMemo(
     () => `safeclaw-workpack:${data.scenario.companyName}:${data.scenario.siteName}:${data.question}:${generationFingerprint || buildGenerationEvidenceFingerprint(data)}`,
     [data, generationFingerprint]
