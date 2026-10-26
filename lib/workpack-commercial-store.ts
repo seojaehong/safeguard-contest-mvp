@@ -289,14 +289,15 @@ export function buildPublicShareDocuments(deliverablesValue: unknown): PublicSha
   return candidates.filter((document) => document.body.length > 0);
 }
 
-function buildPublicRecipientMessage(
+export function buildPublicRecipientMessage(
   deliverablesValue: unknown,
   languageCode: string
 ): PublicShareRecipientMessage | null {
   const deliverables = readDeliverables(deliverablesValue);
   const normalizedLanguageCode = languageCode.trim().toLowerCase() || "ko";
   if (normalizedLanguageCode === "ko") {
-    const body = readPublicString(deliverables.kakaoMessage, 1_800);
+    // 문서 3종(buildPublicShareDocuments)과 같은 게이트 — 옛 저장본의 관리번호 영문 코드·내부 호칭을 읽을 때 거른다(10-4 의 3번).
+    const body = gateUserOutputText(readPublicString(deliverables.kakaoMessage, 1_800));
     return body ? { languageCode: "ko", title: "한국어 전송본", body } : null;
   }
 
