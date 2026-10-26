@@ -3,7 +3,12 @@
 // 저장본 데이터 자체는 생성 근거 봉인(generationEvidence)이 덮고 있어 바꾸지 않고, 편집기가 첫 값을 만드는 자리에서 거른다.
 import { describe, expect, it } from "vitest";
 
-import { buildInitialWorkpackDocumentValues, parseStoredDraft } from "@/components/WorkpackEditor";
+import {
+  buildInitialRiskRows,
+  buildInitialWorkpackDocumentValues,
+  isInitialRiskTextExactlyCanonical,
+  parseStoredDraft
+} from "@/components/WorkpackEditor";
 import { serializeRiskAssessmentRowsToDraft } from "@/components/workpack-editor-structure";
 import { buildMockAskResponse } from "@/lib/mock-data";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
@@ -77,5 +82,61 @@ describe("편집기 자동저장본(localStorage) 복원 게이트", () => {
     expect(stored.values.tbmBriefing).not.toContain("패킷");
     expect(stored.canonicalRiskText).toBe(stored.values.riskAssessmentDraft);
     expect(stored.canonicalRiskText).toBe(serializeRiskAssessmentRowsToDraft(rows));
+  });
+});
+
+// PR #120 반박 ⑤: 본문 textarea 만 게이트를 지나고 비교 상대(구조화 행 직렬화·저장본 행)는 게이트 전 값이면,
+// 행 글자 칸에 치환 대상 문구(「패킷」·「온톨로지」)가 있을 때 「정본 글 === 본문」 판정이 뒤집혀 구조화 편집이 잠긴다.
+function workpackWithGatedPhraseInRows(): AskResponse {
+  const response = buildMockAskResponse(QUESTION, [], "mock", "test");
+  const rows = (response.structured?.riskAssessmentRows ?? []).map((row, index) => (
+    index === 0
+      ? { ...row, hazard: `${row.hazard} — 근거 패킷 확인`, additionalControls: `${row.additionalControls} (온톨로지 QA 보완 반영)` }
+      : row
+  ));
+  expect(rows.length).toBeGreaterThan(0);
+  // 생성 직후 운영 꼴 — 본문은 행 직렬화 그대로(게이트 전)
+  const draft = serializeRiskAssessmentRowsToDraft(rows);
+  expect(findUserOutputLeaks(draft).map((leak) => leak.rule)).toEqual(expect.arrayContaining(["패킷", "온톨로지"]));
+  return {
+    ...response,
+    deliverables: { ...response.deliverables, riskAssessmentDraft: draft },
+    structured: response.structured ? { ...response.structured, riskAssessmentRows: rows } : response.structured
+  };
+}
+
+describe("편집기 구조화 편집 잠금 — 비교 상대도 같은 게이트를 지난다", () => {
+  it("행 글자 칸에 치환 대상 문구가 있어도 본문 === 행 직렬화면 잠기지 않는다", () => {
+    const data = workpackWithGatedPhraseInRows();
+    const initialValues = buildInitialWorkpackDocumentValues(data);
+    const initialRiskRows = buildInitialRiskRows(data);
+    expect(initialRiskRows).toHaveLength(data.structured!.riskAssessmentRows.length);
+    for (const row of initialRiskRows) {
+      expect(findUserOutputLeaks(row.hazard)).toEqual([]);
+      expect(findUserOutputLeaks(row.additionalControls)).toEqual([]);
+    }
+    expect(isInitialRiskTextExactlyCanonical(data, initialValues, initialRiskRows)).toBe(true);
+    // data(생성 근거 봉인 대상)는 그대로다.
+    expect(data.structured!.riskAssessmentRows[0].hazard).toContain("패킷");
+  });
+
+  it("자동저장본의 행도 같은 게이트를 지나 「정본 글 === 행 직렬화」가 유지된다", () => {
+    const data = workpackWithGatedPhraseInRows();
+    const fallback = buildInitialWorkpackDocumentValues(data);
+    const rows = data.structured!.riskAssessmentRows as RiskAssessmentRow[];
+    const legacyCanonical = data.deliverables.riskAssessmentDraft;
+    const raw = JSON.stringify({
+      version: 1,
+      values: { ...fallback, riskAssessmentDraft: legacyCanonical },
+      dirtyKeys: ["riskAssessmentDraft"],
+      draftRiskRows: rows,
+      canonicalRiskRows: rows,
+      canonicalRiskText: legacyCanonical
+    });
+    const stored = parseStoredDraft(raw, fallback, buildInitialRiskRows(data));
+    expect(stored.canonicalRiskText).toBe(stored.values.riskAssessmentDraft);
+    expect(stored.draftRiskRows).toBeDefined();
+    expect(serializeRiskAssessmentRowsToDraft(stored.draftRiskRows!)).toBe(stored.canonicalRiskText);
+    for (const row of stored.canonicalRiskRows ?? []) expect(findUserOutputLeaks(row.hazard)).toEqual([]);
   });
 });

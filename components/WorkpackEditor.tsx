@@ -26,7 +26,7 @@ import {
   riskManagementNumberLabel,
   VERIFICATION_STATUS_DISPLAY_LABELS
 } from "@/lib/document-display-labels";
-import { gateUserOutputCell, gateUserOutputText } from "@/lib/user-output-gate";
+import { gateAskResponseUserOutput, gateRiskAssessmentRows, gateUserOutputCell, gateUserOutputText } from "@/lib/user-output-gate";
 import {
   areRiskAssessmentRowsRepresentedInDraft,
   buildStructuredDocumentSections,
@@ -912,6 +912,28 @@ function gateDocumentValues(values: WorkpackDocumentValues): WorkpackDocumentVal
 /** 편집기 textarea 의 첫 값. 생성 직후 응답과 저장본(localStorage·서버 재열기) 둘 다 여기를 지난다. */
 export function buildInitialWorkpackDocumentValues(data: AskResponse): WorkpackDocumentValues {
   return gateDocumentValues(buildUngatedInitialDocumentValues(data));
+}
+
+/**
+ * 편집기 구조화 행의 첫 값(구조화 편집 정본 행·행 입력칸·출력 행의 출발점).
+ * 본문 textarea(buildInitialWorkpackDocumentValues)와 같은 출력 게이트를 지난다 — 비교 상대가 게이트 전 값이면
+ * 행 글자 칸에 치환 대상 문구가 있을 때 「정본 글 === 본문」 판정이 뒤집혀 구조화 편집이 잠긴다(PR #120 반박 ⑤).
+ * 출력 4형식이 쓰는 gateAskResponseUserOutput 을 그대로 지나며 data 는 바꾸지 않는다.
+ */
+export function buildInitialRiskRows(data: AskResponse): RiskAssessmentRow[] {
+  return gateAskResponseUserOutput(data).structured?.riskAssessmentRows ?? [];
+}
+
+/** 생성 직후 본문이 구조화 행의 직렬화 그대로인가 — 구조화 편집 잠금의 첫 판정. 양쪽 다 게이트를 지난 값으로 비교한다. */
+export function isInitialRiskTextExactlyCanonical(
+  data: AskResponse,
+  initialValues: WorkpackDocumentValues,
+  initialRiskRows: readonly RiskAssessmentRow[]
+): boolean {
+  if (!initialRiskRows.length) return false;
+  // 제출상태 머리(위험요인·근거 반영 줄)도 본문과 같은 게이트를 지난다(같은 입력에 두 번 돌려도 같다).
+  const expected = gateUserOutputText(withSubmitReadiness("위험성평가표", serializeRiskAssessmentRowsToDraft(initialRiskRows), data));
+  return initialValues.riskAssessmentDraft === expected;
 }
 
 function buildUngatedInitialDocumentValues(data: AskResponse): WorkpackDocumentValues {
@@ -2154,13 +2176,17 @@ export function parseStoredDraft(
     const canonicalRiskText = typeof record.canonicalRiskText === "string"
       ? gateUserOutputText(record.canonicalRiskText)
       : undefined;
-    const draftRiskRows = parseStoredRiskRows(record.draftRiskRows);
+    // 저장본의 행(편집 중 행·정본 행)도 정본 글·본문과 같은 행 게이트를 지난다 — 행 글자 칸에 치환 대상 문구가 남아 있으면
+    // 「정본 글 === 행 직렬화」가 어긋나 구조화 편집이 잠긴다(PR #120 반박 ⑤). fallbackRiskRows 는 이미 게이트를 지난 값이다.
+    const storedDraftRiskRows = parseStoredRiskRows(record.draftRiskRows);
+    const draftRiskRows = storedDraftRiskRows ? gateRiskAssessmentRows(storedDraftRiskRows) : null;
     const restoredRiskRows = draftRiskRows ?? fallbackRiskRows;
     const riskRowIds = parseStoredRiskRowIds(record.riskRowIds, restoredRiskRows.length) ?? undefined;
     const parsedRiskRows = validateRiskAssessmentRows(record.canonicalRiskRows);
-    const hasStoredCanonicalRows = parsedRiskRows.ok
+    const storedCanonicalRiskRows = parsedRiskRows.ok ? gateRiskAssessmentRows(parsedRiskRows.rows) : null;
+    const hasStoredCanonicalRows = storedCanonicalRiskRows !== null
       && canonicalRiskText !== undefined
-      && isCanonicalRiskAssessmentExportSafe(parsedRiskRows.rows, canonicalRiskText, values.riskAssessmentDraft);
+      && isCanonicalRiskAssessmentExportSafe(storedCanonicalRiskRows, canonicalRiskText, values.riskAssessmentDraft);
     const hasCurrentStructuredDraft = draftRiskRows !== null
       && canonicalRiskText !== undefined
       && canonicalRiskText === values.riskAssessmentDraft
@@ -2171,7 +2197,7 @@ export function parseStoredDraft(
       dirtyKeys,
       draftRiskRows: restoredRiskRows,
       riskRowIds,
-      canonicalRiskRows: hasStoredCanonicalRows ? parsedRiskRows.rows : restoredRiskRows,
+      canonicalRiskRows: hasStoredCanonicalRows && storedCanonicalRiskRows ? storedCanonicalRiskRows : restoredRiskRows,
       canonicalRiskText: hasStoredCanonicalRows || hasCurrentStructuredDraft ? canonicalRiskText : undefined
     };
   } catch (error) {
@@ -2726,10 +2752,7 @@ export function WorkpackEditor({
     () => `safeclaw-workpack:${data.scenario.companyName}:${data.scenario.siteName}:${data.question}:${generationFingerprint || buildGenerationEvidenceFingerprint(data)}`,
     [data, generationFingerprint]
   );
-  const initialRiskRows = useMemo(
-    () => data.structured?.riskAssessmentRows ?? [],
-    [data]
-  );
+  const initialRiskRows = useMemo(() => buildInitialRiskRows(data), [data]);
   const [selectedKey, setSelectedKey] = useState<DocumentKey>(() => requestedDocumentKey ?? DEFAULT_SELECTED_DOCUMENT_KEY);
   const [values, setValues] = useState<WorkpackDocumentValues>(initialValues);
   const [dirtyDocumentKeys, setDirtyDocumentKeys] = useState<DocumentKey[]>([]);
@@ -2826,13 +2849,7 @@ export function WorkpackEditor({
     : !dirtyDocumentKeys.includes("riskAssessmentDraft")
       && values.riskAssessmentDraft === initialValues.riskAssessmentDraft
       && areRiskAssessmentRowsRepresentedInDraft(canonicalRiskRows, values.riskAssessmentDraft);
-  const expectedInitialCanonicalRiskText = withSubmitReadiness(
-    "위험성평가표",
-    serializeRiskAssessmentRowsToDraft(initialRiskRows),
-    data
-  );
-  const initialRiskTextIsExactlyCanonical = initialRiskRows.length > 0
-    && initialValues.riskAssessmentDraft === expectedInitialCanonicalRiskText;
+  const initialRiskTextIsExactlyCanonical = isInitialRiskTextExactlyCanonical(data, initialValues, initialRiskRows);
   const structuredRiskEditLocked = canonicalRiskText === null
     ? dirtyDocumentKeys.includes("riskAssessmentDraft")
       || values.riskAssessmentDraft !== initialValues.riskAssessmentDraft
