@@ -96,6 +96,28 @@ export function enumCellLabel(value: string): string | null {
     ?? (Object.prototype.hasOwnProperty.call(DOCUMENT_TITLES, text) ? DOCUMENT_TITLES[text] : null);
 }
 
+// 위험성평가 관리번호 (RA-10/COPY, 2026-10-26).
+// 기본 틀은 행마다 `RA-<작업 유형 id>-<순번>`(RA-press-1·RA-confined-space-1) 을 관리번호로 만들었고,
+// 이 값이 초안 본문 「관리번호:」 줄과 편집 화면에 그대로 나갔다(운영 4건 15행). 사용자에게 나가는
+// 관리번호는 한글·숫자만 쓴다 — 「위험성평가-01」. Phase A 의 의미 있는 control id(fall-work-platform 등)와
+// 사람이 적은 값은 건드리지 않는다(연결 키·편집 값이라 그대로 둬야 한다).
+export const RISK_CONTROL_CODE_PATTERN = /^RA-[a-z]+(?:-[a-z]+)*-\d+$/iu;
+
+/** 0부터 세는 행 순번 → 「위험성평가-01」. 두 자리 미만은 0 을 채우고, 100 이상은 그대로 쓴다. */
+export function riskManagementNumber(index: number): string {
+  return `위험성평가-${String(index + 1).padStart(2, "0")}`;
+}
+
+/**
+ * 관리번호 표시값. 기본 틀 영문 코드(RA-…-N)면 행 순번으로 「위험성평가-NN」을 만들고,
+ * 그 밖의 값(빈칸·한글·사람이 적은 값·Phase A control id)은 그대로 돌려준다.
+ */
+export function riskManagementNumberLabel(controlId: string | null | undefined, index: number): string {
+  const text = typeof controlId === "string" ? controlId.trim() : "";
+  if (!text) return "";
+  return RISK_CONTROL_CODE_PATTERN.test(text) ? riskManagementNumber(index) : text;
+}
+
 // 근거 목록에 섞여 들어오는 내부 출처 표지 — 사람이 읽을 자료명이 아니다.
 const INTERNAL_EVIDENCE_REF_PATTERNS: readonly RegExp[] = [
   /^DB\s*하네스\s*(?:직접|보조)\s*근거$/u,

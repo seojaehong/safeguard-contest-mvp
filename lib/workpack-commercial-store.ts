@@ -11,6 +11,7 @@ import {
   type ServerShareRecipientsResult,
   type ShareRecipientInput
 } from "@/lib/workpack-commercial";
+import { gateUserOutputText } from "@/lib/user-output-gate";
 
 export type StoredWorkpackShareAuthority = {
   workpack: AskResponse | null;
@@ -262,23 +263,27 @@ function readDeliverables(value: unknown): Record<string, unknown> {
   return isRecord(value) ? value : {};
 }
 
-function buildPublicShareDocuments(deliverablesValue: unknown): PublicShareDocument[] {
+/**
+ * 공유본 문서 3종. 저장된 deliverables 는 생성 시점의 게이트(PR-14)를 지난 글이지만, 그 뒤에 추가된 규칙
+ * (위험성평가 관리번호 영문 코드 등)은 옛 저장본에 남아 있으므로 읽을 때 한 번 더 거른다(같은 입력에 두 번 돌려도 같다).
+ */
+export function buildPublicShareDocuments(deliverablesValue: unknown): PublicShareDocument[] {
   const deliverables = readDeliverables(deliverablesValue);
   const candidates: PublicShareDocument[] = [
     {
       key: "riskAssessmentDraft",
       title: "위험성평가표",
-      body: readPublicString(deliverables.riskAssessmentDraft)
+      body: gateUserOutputText(readPublicString(deliverables.riskAssessmentDraft))
     },
     {
       key: "tbmBriefing",
       title: "TBM 브리핑",
-      body: readPublicString(deliverables.tbmBriefing)
+      body: gateUserOutputText(readPublicString(deliverables.tbmBriefing))
     },
     {
       key: "tbmLogDraft",
       title: "TBM 기록",
-      body: readPublicString(deliverables.tbmLogDraft)
+      body: gateUserOutputText(readPublicString(deliverables.tbmLogDraft))
     }
   ];
   return candidates.filter((document) => document.body.length > 0);

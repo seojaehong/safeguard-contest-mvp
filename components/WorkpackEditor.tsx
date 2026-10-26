@@ -23,6 +23,7 @@ import {
   ACCIDENT_TYPE_DISPLAY_LABELS,
   FOUR_M_DISPLAY_LABELS,
   riskLevelLabel,
+  riskManagementNumberLabel,
   VERIFICATION_STATUS_DISPLAY_LABELS
 } from "@/lib/document-display-labels";
 import { gateUserOutputCell, gateUserOutputText } from "@/lib/user-output-gate";
@@ -983,7 +984,20 @@ function getSafetyFormProfile(key: DocumentKey): SafetyFormProfile {
     };
   }
 
-  if (key === "safetyEducationRecordDraft" || key === "foreignWorkerBriefing") {
+  // COPY-14: 외국인 안내문은 교육기록 서식 코드(SC-EDU-01)를 빌려 쓰지 않는다.
+  if (key === "foreignWorkerBriefing") {
+    return {
+      code: "SC-FW-01",
+      subtitle: "외국인 근로자 안전 안내문",
+      layout: "education",
+      primaryColumn: "안내 항목",
+      actionColumn: "안내 내용 / 확인 방법",
+      confirmationRows: ["대상 언어 확인", "쉬운 한국어 안내", "통역·관리자 확인", "이해 확인"],
+      approvalLabels: ["작성", "확인자", "보관"]
+    };
+  }
+
+  if (key === "safetyEducationRecordDraft") {
     return {
       code: "SC-EDU-01",
       subtitle: "안전보건교육 실시 및 이해 확인서",
@@ -2625,7 +2639,7 @@ function RiskAssessmentRowsEditor({
                   </div>
                 </div>
                 <div className={styles.riskRowDetailGrid}>
-                  <label><span>관리번호</span><input aria-label={`행 ${rowIndex + 1} 관리번호`} {...fieldErrorProps(rowIndex, rowId, "controlId")} value={row.controlId || ""} onChange={(event) => onRowChange(rowIndex, "controlId", event.target.value || undefined)} /></label>
+                  <label><span>관리번호</span><input aria-label={`행 ${rowIndex + 1} 관리번호`} {...fieldErrorProps(rowIndex, rowId, "controlId")} value={riskManagementNumberLabel(row.controlId, rowIndex)} onChange={(event) => onRowChange(rowIndex, "controlId", event.target.value || undefined)} /></label>
                   <label><span>공정</span><input aria-label={`행 ${rowIndex + 1} 공정`} {...fieldErrorProps(rowIndex, rowId, "process")} value={row.process} onChange={(event) => onRowChange(rowIndex, "process", event.target.value)} /></label>
                   <label><span>장비/도구</span><input aria-label={`행 ${rowIndex + 1} 장비 도구`} {...fieldErrorProps(rowIndex, rowId, "equipment")} value={row.equipment} onChange={(event) => onRowChange(rowIndex, "equipment", event.target.value)} /></label>
                   <label><span>조치담당자</span><input aria-label={`행 ${rowIndex + 1} 조치담당자`} {...fieldErrorProps(rowIndex, rowId, "owner")} value={row.owner} onChange={(event) => onRowChange(rowIndex, "owner", event.target.value)} /></label>

@@ -2,8 +2,9 @@ import { AskResponse, DetailRecord, SearchResult } from "./types";
 import { selectFallbackAccidentCases } from "./accident-cases";
 import { buildEvidenceLabels } from "./smsa-mapping";
 import { serializeRiskAssessmentRowsToDraft } from "@/components/workpack-editor-structure";
+import { riskManagementNumber } from "./document-display-labels";
 import { summarizeRiskLevel } from "./risk-labels";
-import { buildForeignWorkerBriefing, buildForeignWorkerTransmission, getDefaultForeignWorkerLanguages } from "./foreign-worker";
+import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission } from "./foreign-worker";
 import { attachQualityContract } from "./quality-contract";
 import { OFFICIAL_CONTACTS } from "./safety-contacts";
 import {
@@ -1183,7 +1184,8 @@ function buildScenarioRiskAssessmentRows(scenario: ReturnType<typeof inferScenar
     const likelihood = index === 0 ? 3 : 2;
     const severity = profile.riskLevel === "상" || index === 0 ? 4 : 3;
     return {
-      controlId: `RA-${profile.id}-${index + 1}`,
+      // 관리번호는 한글·숫자만(「위험성평가-01」). taskId 기반 영문 코드(RA-press-1)는 사용자 문서에 그대로 나갔다.
+      controlId: riskManagementNumber(index),
       location: scenario.siteName,
       process: profile.processName,
       // 세부작업 칸에는 작업명을 쓴다(위험요인 문장을 넣지 않는다, 편집기 점검 D-11).
@@ -1791,7 +1793,8 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
       photoEvidenceDraft: buildPhotoEvidenceDraft(scenario),
       foreignWorkerBriefing: buildForeignWorkerBriefing(foreignWorkerInput),
       foreignWorkerTransmission: buildForeignWorkerTransmission(foreignWorkerInput),
-      foreignWorkerLanguages: getDefaultForeignWorkerLanguages(foreignWorkerInput.question),
+      // PR13-RV-01: template 모드(익명·작업 유형 보류)도 전송본과 같은 차단 판정을 본다 — 실제 전송되는 언어만 올린다.
+      foreignWorkerLanguages: buildForeignWorkerLanguages(foreignWorkerInput),
       safetyEducationPoints: [
         profile.educationPoints[0],
         profile.educationPoints[1],
@@ -1876,6 +1879,8 @@ function applyTaskClassificationHold(response: AskResponse): AskResponse {
         return [key, heldDeliverableNotice(HELD_DOCUMENT_LABELS[key] ?? "문서", workSummary)];
       }
       if (key === "safetyEducationPoints" || key === "tbmQuestions") return [key, [holdLine]];
+      // PR13-RV-01: 전송본이 보류 안내로 바뀌면 전송되는 언어도 없다 — 공유 패널·작업자 발송 허용 언어가 전송본과 어긋나지 않게 비운다.
+      if (key === "foreignWorkerLanguages") return [key, []];
       return [key, value];
     }).filter(([key]) => key !== "tbmBriefingStructured" && key !== "tbmLogStructured")
   ) as AskResponse["deliverables"];
