@@ -944,7 +944,6 @@ export function SafeGuardCommandCenter({
   const [message, setMessage] = useState("");
   const [inputError, setInputError] = useState("");
   const commandInputRef = useRef<HTMLTextAreaElement>(null);
-  const deepReviewRef = useRef<HTMLDetailsElement>(null);
   const [state, setState] = useState<GenerationState>("idle");
   const [checkedActions, setCheckedActions] = useState<boolean[]>([]);
   const [liveWeather, setLiveWeather] = useState<WeatherBrief | null>(null);
@@ -1061,16 +1060,6 @@ export function SafeGuardCommandCenter({
     }
     setWorkspacePage(targetPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  // UX PR-0 ②: 본문 details 를 기본 펼침으로 두지 않는다 — 390px 문서 화면 한 화면 계약
-  // (workspace-layout-regression 「documents cockpit」 bodyHeight ≤ 1.05×viewport)과 충돌한다.
-  // 대신 머리 아래 확인 블록에서 한 번에 연다.
-  function openDocumentDeepReview() {
-    const element = deepReviewRef.current;
-    if (!element) return;
-    element.open = true;
-    element.scrollIntoView({ block: "start", behavior: "smooth" });
   }
 
   function focusWorkpackEditor(key: DocumentKey) {
@@ -2238,17 +2227,7 @@ export function SafeGuardCommandCenter({
               <div>
                 <span className="eyebrow">문서 생성 완료</span>
                 <strong>{coreDocumentsReady ? "확인할 항목을 먼저 보세요" : selectedOutputItem.title}</strong>
-                <small>
-                  {message || "선택 문서의 본문, 인용 근거, 원문 확인 상태를 함께 검토합니다."}
-                  {data ? (
-                    <>
-                      {" "}
-                      <button type="button" className="document-check-first-open" onClick={openDocumentDeepReview}>
-                        {selectedOutputItem.title} 본문 바로 열기
-                      </button>
-                    </>
-                  ) : null}
-                </small>
+                <small>{message || "선택 문서의 본문, 인용 근거, 원문 확인 상태를 함께 검토합니다."}</small>
               </div>
               <div className="document-progress-summary" aria-label={`문서팩 진행 ${generationProgress.primary}`}>
                 <span>{generationProgress.primary}</span>
@@ -2394,7 +2373,9 @@ export function SafeGuardCommandCenter({
                   </section>
                 </div>
               </details>
-              <details className="document-deep-review" data-testid="document-deep-review" ref={deepReviewRef}>
+              {/* UX PR-0 ②: 기본 펼침으로 두지 않는다 — 390×844·1440×723 문서 화면 한 화면 계약(workspace-layout-regression)과
+                  충돌한다. 확인 항목(review_required·재검증)은 머리 아래 블록에서 먼저 보인다. */}
+              <details className="document-deep-review" data-testid="document-deep-review">
                 <summary>
                   <span>문서 깊게 보기</span>
                   <strong>{selectedOutputItem.title} 미리보기 · 편집 · 다운로드</strong>

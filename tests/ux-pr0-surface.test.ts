@@ -47,14 +47,12 @@ describe("③ 결과 머리 문구와 확인 항목 위치", () => {
 describe("② 머리 아래 확인 블록 (본문 details 는 접힌 채 둔다)", () => {
   const workspace = read("components/SafeGuardCommandCenter.tsx");
 
-  it("renders the check-first block between the head and the safety brief, and the body opener in the head line", () => {
+  it("renders the check-first block between the head and the safety brief", () => {
     const head = workspace.indexOf('className="compact-head document-workbench-head"');
     const block = workspace.indexOf('data-testid="document-check-first"');
     const brief = workspace.indexOf('className="safety-brief-dashboard"');
     expect(block).toBeGreaterThan(head);
     expect(brief).toBeGreaterThan(block);
-    const headSource = sliceBetween(workspace, 'className="compact-head document-workbench-head"', 'data-testid="document-check-first"');
-    expect(headSource).toContain("본문 바로 열기");
     const blockSource = sliceBetween(workspace, 'data-testid="document-check-first"', 'className="generation-focus"');
     expect(blockSource).toContain('data-task-classification="review_required"');
     expect(blockSource).toContain("편집본 재검증");
@@ -62,11 +60,9 @@ describe("② 머리 아래 확인 블록 (본문 details 는 접힌 채 둔다)
     expect(workspace).toContain('(data.scenario.taskClassification?.status === "review_required" || requiresRevalidation) ? (');
   });
 
-  it("keeps the deep-review details collapsed by default and opens it from the block", () => {
+  it("keeps the deep-review details collapsed by default (one-screen contracts)", () => {
     const details = sliceBetween(workspace, '<details className="document-deep-review"', ">");
     expect(details).not.toMatch(/\sopen(?:\s|=|>)/u);
-    expect(details).toContain("ref={deepReviewRef}");
-    expect(workspace).toContain("function openDocumentDeepReview()");
   });
 });
 
