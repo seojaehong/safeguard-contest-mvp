@@ -1,0 +1,314 @@
+{
+ "source": "evaluation/launch-depth-audit-2026-10-25/ask/ask-full-logistics-heat.json (운영 /api/ask full, 2026-10-25)",
+ "question": "대구 달서구 물류창고 상하차 작업. 폭염(체감 34도), 작업자 10명 중 고령자 2명, 컨베이어와 핸드파렛트 사용. 오늘 작업 전 문서팩을 만들어줘.",
+ "dbHarnessPacket": {
+  "mode": "db_harness_first",
+  "question": "대구 달서구 물류창고 상하차 작업. 폭염(체감 34도), 작업자 10명 중 고령자 2명, 컨베이어와 핸드파렛트 사용. 오늘 작업 전 문서팩을 만들어줘.",
+  "directEvidence": [],
+  "sifCases": [
+   {
+    "id": "sif-아카이브-제조업등-02284",
+    "source_id": "kosha-sif-archive-20260401",
+    "item_type": "sif-case",
+    "category": "아카이브(제조업등)",
+    "subcategory": null,
+    "title": "2284 / 기타의사업 / 도소매·음식·숙박업",
+    "summary": "연번: 2284 산재업종 (대분류): 기타의사업 산재업종 (중분류): 도소매·음식·숙박업 산재업종 (소분류): 도소매및소비자용품수리업 재해개요: 2020년 10월경 물류창고에서 재해자가 세라믹 타일을 출고하는 작업 중, 타일 1묶음(10장, 1.5ton)이 작업자 방향으로 넘어지며 타일에 깔려 사망 기인물: 중량물 고위험작업·상황: 상하차 작업 또는 화물(물체)이 적재된 장소 주변에서의 작업 재해유발요인: 『무게 또는 형태가 한쪽으로 치우치거나 무게중심이 높은(",
+    "keywords": [
+     "낙하",
+     "아카이브(제조업등)",
+     "전도"
+    ],
+    "risk_tags": [
+     "전도",
+     "낙하"
+    ],
+    "primary_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "controls": [
+     "SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인",
+     "관리감독자 검토 완료 전 원시 태그·관리대책을 현장 통제대책으로 확정하지 않음"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "short_summary": "검토 필요: SIF 사고의 직접 원인과 현장 위험요인 미확정 · SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인 · 관리감독자 검토 완료 전 원시 태그·관리대책을 현장 통제대책으로 확정하지 않음",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인",
+    "source_kind_label": "고위험요인 사례",
+    "operation_signal_label": "유사사례에서 SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인 후보",
+    "display_title": "물류창고에서 세라믹 타일을 출고하는 작업 중, 타일 1묶음(10장, 1.5ton)이 작업자 방향으로 넘어지며 타일에 깔려 사망 사례",
+    "display_summary": "물류창고에서 세라믹 타일을 출고하는 작업 중, 타일 1묶음(10장, 1.5ton)이 작업자 방향으로 넘어지며 타일에 깔려 사망",
+    "retrieval_source": "rest"
+   },
+   {
+    "id": "sif-아카이브-제조업등-01009",
+    "source_id": "kosha-sif-archive-20260401",
+    "item_type": "sif-case",
+    "category": "아카이브(제조업등)",
+    "subcategory": null,
+    "title": "1009 / 제조업 / 기계기구·금속·비금속광물제품제조업",
+    "summary": "연번: 1009 산재업종 (대분류): 제조업 산재업종 (중분류): 기계기구·금속·비금속광물제품제조업 산재업종 (소분류): 자동차및모터사이클수리업 재해개요: 2020년 3월 OO공장 정비고 앞에서 폐차압축기 프레임(구조물) 조립작업 중 폐차압축기 프레임 옆면과 가용접 되어있던 폐차압축기 상판이 전도되면서 2명이 사상(1명 사망, 1명 부상) 기인물: 중량물(폐차압축기 부속품) 고위험작업·상황: 상하차 작업 또는 화물(물체)이 적재된 장소 주변에서의 작업 재해유발요",
+    "keywords": [
+     "낙하",
+     "아카이브(제조업등)",
+     "전도",
+     "크레인"
+    ],
+    "risk_tags": [
+     "전도",
+     "크레인",
+     "낙하"
+    ],
+    "primary_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "controls": [
+     "물체·부재·부착장치의 고정·결속 및 낙하방지 상태 확인",
+     "낙하 예상 작업반경과 하부 출입통제"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "short_summary": "상부 물체·부재·장비의 낙하·비래로 인한 작업자 타격·깔림 위험 · 물체·부재·부착장치의 고정·결속 및 낙하방지 상태 확인 · 낙하 예상 작업반경과 하부 출입통제",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 물체·부재·부착장치의 고정·결속 및 낙하방지 상태 확인",
+    "source_kind_label": "고위험요인 사례",
+    "operation_signal_label": "유사사례에서 물체·부재·부착장치의 고정·결속 및 낙하방지 상태 확인 후보",
+    "display_title": "OO공장 정비고 앞에서 폐차압축기 프레임(구조물) 조립작업 중 폐차압축기 프레임 옆면과 가용접 되어있던 폐차압축기 상판이 전도되면서 2명이 사상(1명 사… 사례",
+    "display_summary": "OO공장 정비고 앞에서 폐차압축기 프레임(구조물) 조립작업 중 폐차압축기 프레임 옆면과 가용접 되어있던 폐차압축기 상판이 전도되면서 2명이 사상(1명 사망, 1명 부상)",
+    "retrieval_source": "rest"
+   },
+   {
+    "id": "sif-아카이브-제조업등-01691",
+    "source_id": "kosha-sif-archive-20260401",
+    "item_type": "sif-case",
+    "category": "아카이브(제조업등)",
+    "subcategory": null,
+    "title": "1691 / 운수창고통신업 / 철도·항공·창고·운수관련서비스업",
+    "summary": "연번: 1691 산재업종 (대분류): 운수창고통신업 산재업종 (중분류): 철도·항공·창고·운수관련서비스업 산재업종 (소분류): 창고업 재해개요: 2022년 3월경 OO물류창고에서 재해자가 오더피커를 이용하여 적재대(2-3번 랙) 4단에 제품 상자를 적재하던 중 플랫폼(작업대)에서 바닥(h≒5.5m)으로 떨어져 사망 기인물: 고소작업대 고위험작업·상황: 고소작업대 사용 작업 재해유발요인: 『안전난간이 없거나 설치상태가 불량한 작업대』에서 작업 중 떨어짐 위험 위험",
+    "keywords": [
+     "고소",
+     "아카이브(제조업등)",
+     "추락"
+    ],
+    "risk_tags": [
+     "추락",
+     "고소"
+    ],
+    "primary_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "controls": [
+     "작업발판·안전난간·개구부 상태 확인",
+     "안전대 체결 및 작업반경 출입통제"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "short_summary": "고소·비계 작업 중 작업발판·단부 방호 미확인으로 인한 추락 위험 · 작업발판·안전난간·개구부 상태 확인 · 안전대 체결 및 작업반경 출입통제",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 작업발판·안전난간·개구부 상태 확인",
+    "source_kind_label": "고위험요인 사례",
+    "operation_signal_label": "유사사례에서 작업발판·안전난간·개구부 상태 확인 후보",
+    "display_title": "OO물류창고에서 오더피커를 이용하여 적재대(2-3번 랙) 4단에 제품 상자를 적재하던 중 플랫폼(작업대)에서 바닥(h≒5.5m)으로 떨어져 사망 사례",
+    "display_summary": "OO물류창고에서 오더피커를 이용하여 적재대(2-3번 랙) 4단에 제품 상자를 적재하던 중 플랫폼(작업대)에서 바닥(h≒5.5m)으로 떨어져 사망",
+    "retrieval_source": "rest"
+   }
+  ],
+  "supportingEvidence": [],
+  "improvementMemory": [],
+  "workpackMemory": [],
+  "retrievalContract": {
+   "source": "safety_reference_items",
+   "mode": "rest-ilike",
+   "vector": {
+    "enabled": false,
+    "attempted": false,
+    "ready": false,
+    "reason": "disabled",
+    "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+   },
+   "sourceCounts": {
+    "directEvidence": 0,
+    "sifCases": 3,
+    "supportingEvidence": 0,
+    "rest": 3,
+    "ranked": 0,
+    "vector": 0,
+    "hybrid": 0,
+    "localTag": 0,
+    "localRanked": 0,
+    "localHybrid": 0
+   },
+   "message": "Supabase 안전 지식 DB 호출 완료 (KOSHA 기술지원규정 3건, KOSHA 기술지침 0건, SIF 유사사례 3건, 일반 카탈로그 5건, 작업특화 rerank 적용)"
+  },
+  "ontologyChecklist": {
+   "status": "review_required",
+   "missing": [
+    "TBM 브리핑 근거",
+    "TBM 기록 근거"
+   ]
+  },
+  "generationContract": {
+   "llmRole": "naturalize_only",
+   "llmOutputScope": "rewrite_fixed_evidence_only",
+   "evidenceAuthority": "db_harness",
+   "providerRetryScope": "naturalization_retry_only",
+   "fallbackChainAllowed": false,
+   "genericProseSubstitutionAllowed": false,
+   "missingEvidencePolicy": "surface_review_required",
+   "requiredDocuments": [
+    "위험성평가표",
+    "TBM 브리핑",
+    "TBM 기록"
+   ],
+   "missingEvidence": [
+    "TBM 브리핑",
+    "TBM 기록"
+   ],
+   "documentCoverage": [
+    {
+     "document": "위험성평가표",
+     "covered": true,
+     "evidenceTypes": [
+      "sifCase"
+     ]
+    },
+    {
+     "document": "TBM 브리핑",
+     "covered": false,
+     "evidenceTypes": []
+    },
+    {
+     "document": "TBM 기록",
+     "covered": false,
+     "evidenceTypes": []
+    }
+   ]
+  }
+ },
+ "citations": [
+  {
+   "id": "lawgo-law-283449",
+   "type": "law",
+   "title": "산업안전보건법",
+   "summary": "고용노동부 · 법률 · 공포 20260219",
+   "citation": "법률 · 공포 20260219",
+   "sourceLabel": "Law.go 법령",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/lsInfoP.do?lsiSeq=283449",
+   "tags": [
+    "법률",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-law-288431",
+   "type": "law",
+   "title": "산업안전보건법 시행규칙",
+   "summary": "고용노동부 · 고용노동부령 · 공포 20260728",
+   "citation": "고용노동부령 · 공포 20260728",
+   "sourceLabel": "Law.go 법령",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/lsInfoP.do?lsiSeq=288431",
+   "tags": [
+    "고용노동부령",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-law-288347",
+   "type": "law",
+   "title": "산업안전보건법 시행령",
+   "summary": "고용노동부 · 대통령령 · 공포 20260728",
+   "citation": "대통령령 · 공포 20260728",
+   "sourceLabel": "Law.go 법령",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/lsInfoP.do?lsiSeq=288347",
+   "tags": [
+    "대통령령",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-expc-343113",
+   "type": "interpretation",
+   "title": "경상남도 남해군 - 공공행정에서 비현업업무에 종사하는 사람이 산업안전보건위원회의 근로자위원이 될 수 있는지(「산업안전보건법 시행령」 별표 1 제4호가목 등 관련)",
+   "summary": "법제처 · 경상남도 남해군 · 회신 2026.04.22",
+   "citation": "법제처 · 회신 2026.04.22",
+   "sourceLabel": "Law.go 해석례",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=expc&amp;ID=343113&amp;type=HTML&amp;mobileYn=",
+   "tags": [
+    "법제처",
+    "경상남도 남해군",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-expc-314491",
+   "type": "interpretation",
+   "title": "고용노동부 - ‘3일 이상의 휴업’이 연속적인 기간을 의미하는지 여부(「산업안전보건법 시행규칙」 제4조 등 관련)",
+   "summary": "법제처 · 고용노동부 · 회신 2014.07.16",
+   "citation": "법제처 · 회신 2014.07.16",
+   "sourceLabel": "Law.go 해석례",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=expc&amp;ID=314491&amp;type=HTML&amp;mobileYn=",
+   "tags": [
+    "법제처",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-expc-343007",
+   "type": "interpretation",
+   "title": "고용노동부 - 국가기관 또는 지방자치단체가 유해작업 도급금지 의무 등을 위반한 경우 「산업안전보건법」 제161조제1항에 따라 과징금을 부과할 수 있는지(「산업안전보건법」 제161조제1항 등 관련)",
+   "summary": "법제처 · 고용노동부 · 회신 2026.03.30",
+   "citation": "법제처 · 회신 2026.03.30",
+   "sourceLabel": "Law.go 해석례",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=expc&amp;ID=343007&amp;type=HTML&amp;mobileYn=",
+   "tags": [
+    "법제처",
+    "고용노동부",
+    "Law.go"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,556 @@
+{
+ "source": "evaluation/launch-depth-audit-2026-10-25/ask/ask-full-confined-space.json (운영 /api/ask full, 2026-10-25)",
+ "question": "부산 해운대 상가건물 지하 정화조 청소 작업. 밀폐공간 진입, 작업자 3명, 외부 협력업체 소속, 산소·황화수소 측정 필요. 오늘 작업 전 문서팩을 만들어줘.",
+ "dbHarnessPacket": {
+  "mode": "db_harness_first",
+  "question": "부산 해운대 상가건물 지하 정화조 청소 작업. 밀폐공간 진입, 작업자 3명, 외부 협력업체 소속, 산소·황화수소 측정 필요. 오늘 작업 전 문서팩을 만들어줘.",
+  "directEvidence": [],
+  "sifCases": [
+   {
+    "id": "sif-아카이브-제조업등-02394",
+    "source_id": "kosha-sif-archive-20260401",
+    "item_type": "sif-case",
+    "category": "아카이브(제조업등)",
+    "subcategory": null,
+    "title": "2394 / 기타의사업 / 도소매·음식·숙박업",
+    "summary": "연번: 2394 산재업종 (대분류): 기타의사업 산재업종 (중분류): 도소매·음식·숙박업 산재업종 (소분류): 도소매및소비자용품수리업 재해개요: 2023년 10월경 OO아파트 상가건물 1층의 작업장에서 재해자가 고압산소가스 이충전 작업 중 화재·폭발이 발생하여 사망 기인물: 기타 설비(가스용기) 고위험작업·상황: 위험물질 취급 또는 그 장소에서 작업 재해유발요인: 『설비의 위험물질을 파악 및 제거·차단하지 않은 상태』에서 작업하여 화재·폭발·누출·접촉 등으로 인",
+    "keywords": [
+     "아카이브(제조업등)",
+     "폭발",
+     "화재"
+    ],
+    "risk_tags": [
+     "화재",
+     "폭발"
+    ],
+    "primary_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "controls": [
+     "사고 원인과 가연물·압력·점화원 상태를 원문에서 재확인",
+     "원인 확인 전 작업 중지, 위험구역 출입통제 및 관리감독자 검토"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "short_summary": "검토 필요: 화재·폭발 사고의 직접 원인 미확정 · 사고 원인과 가연물·압력·점화원 상태를 원문에서 재확인 · 원인 확인 전 작업 중지, 위험구역 출입통제 및 관리감독자 검토",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 사고 원인과 가연물·압력·점화원 상태를 원문에서 재확인",
+    "source_kind_label": "고위험요인 사례",
+    "operation_signal_label": "유사사례에서 사고 원인과 가연물·압력·점화원 상태를 원문에서 재확인 후보",
+    "display_title": "OO아파트 상가건물 1층의 작업장에서 고압산소가스 이충전 작업 중 화재·폭발이 발생하여 사망 사례",
+    "display_summary": "OO아파트 상가건물 1층의 작업장에서 고압산소가스 이충전 작업 중 화재·폭발이 발생하여 사망",
+    "retrieval_source": "rest"
+   },
+   {
+    "id": "sif-아카이브-제조업등-01064",
+    "source_id": "kosha-sif-archive-20260401",
+    "item_type": "sif-case",
+    "category": "아카이브(제조업등)",
+    "subcategory": null,
+    "title": "1064 / 제조업 / 기계기구·금속·비금속광물제품제조업",
+    "summary": "연번: 1064 산재업종 (대분류): 제조업 산재업종 (중분류): 기계기구·금속·비금속광물제품제조업 산재업종 (소분류): 일반산업용기계장치제조업 재해개요: 2016년 2월경 도금업체에서 재해자가 약 2m 정도의 배관을 TIG용접을 하던 중 배관안에서 쓰러져 동료 작업자가 발견, 병원으로 이송후 사망 기인물: 유해가스(아르곤가스) 고위험작업·상황: 용접(용단)·절단·사상 또는 도장 작업 재해유발요인: 『취급하는 물질이 배관·호스·용기 등에서 누출』로 인한 화학물질",
+    "keywords": [
+     "밀폐",
+     "아카이브(제조업등)",
+     "절단",
+     "질식",
+     "폭발",
+     "화재",
+     "화학"
+    ],
+    "risk_tags": [
+     "화재",
+     "폭발",
+     "질식",
+     "화학",
+     "밀폐",
+     "절단"
+    ],
+    "primary_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "TBM 브리핑",
+     "TBM 기록",
+     "안전보건교육 기록",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "controls": [
+     "SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인",
+     "관리감독자 검토 완료 전 원시 태그·관리대책을 현장 통제대책으로 확정하지 않음"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "TBM 브리핑",
+     "TBM 기록",
+     "안전보건교육 기록",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "short_summary": "검토 필요: SIF 사고의 직접 원인과 현장 위험요인 미확정 · SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인 · 관리감독자 검토 완료 전 원시 태그·관리대책을 현장 통제대책으로 확정하지 않음",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인",
+    "source_kind_label": "고위험요인 사례",
+    "operation_signal_label": "유사사례에서 SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인 후보",
+    "display_title": "도금업체에서 약 2m 정도의 배관을 TIG용접을 하던 중 배관안에서 쓰러져 동료 발견, 병원으로 이송후 사망 사례",
+    "display_summary": "도금업체에서 약 2m 정도의 배관을 TIG용접을 하던 중 배관안에서 쓰러져 동료 발견, 병원으로 이송후 사망",
+    "retrieval_source": "rest"
+   },
+   {
+    "id": "sif-아카이브-건설업-01001",
+    "source_id": "kosha-sif-archive-20260401",
+    "item_type": "sif-case",
+    "category": "아카이브(건설업)",
+    "subcategory": null,
+    "title": "1000 / 4. 마감공사 / 4.2 방수 작업",
+    "summary": "연번: 1000 고위험작업·상황: 4. 마감공사 column_4: 4.2 방수 작업 column_5: 4.2.1 방수면처리, 방수 및 보호몰탈 등 시공 재해종류: 질식 재해개요: 2018년 9월경 ○○현장에서 피재자가 지하주차장 외벽과 흙막이 벽체사이(길이 : 19m, 폭 : 2.5m, 깊이: 15m)에 설치된 비계 1.5단 작업발판(높이:2.9m) 위에서 외벽 우레탄 방수작업 중 도포된 유기용제(프라이머) 유증기에 의해 중독되어 의식을 잃고 2.9m 아래 바닥",
+    "keywords": [
+     "비계",
+     "아카이브(건설업)",
+     "중독",
+     "질식",
+     "화학"
+    ],
+    "risk_tags": [
+     "질식",
+     "중독",
+     "화학",
+     "비계"
+    ],
+    "primary_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "controls": [
+     "진입 전 산소·유해가스 농도 측정 및 강제환기 실시",
+     "감시인 외부 배치, 구조장비·구조계획 확보 및 단독 구조진입 금지"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "short_summary": "밀폐공간 진입 중 산소결핍·유해가스 노출과 질식 위험 · 진입 전 산소·유해가스 농도 측정 및 강제환기 실시 · 감시인 외부 배치, 구조장비·구조계획 확보 및 단독 구조진입 금지",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 진입 전 산소·유해가스 농도 측정 및 강제환기 실시",
+    "source_kind_label": "고위험요인 사례",
+    "operation_signal_label": "유사사례에서 진입 전 산소·유해가스 농도 측정 및 강제환기 실시 후보",
+    "display_title": "○○현장에서 지하주차장 외벽과 흙막이 벽체사이(길이 : 19m, 폭 : 2.5m, 깊이: 15m)에 설치된 비계 1.5단 작업발판(높이:2.9m) 위에서… 사례",
+    "display_summary": "○○현장에서 지하주차장 외벽과 흙막이 벽체사이(길이 : 19m, 폭 : 2.5m, 깊이: 15m)에 설치된 비계 1.5단 작업발판(높이:2.9m) 위에서 외벽 우레탄 방수작업 중 도포된 유기용제(프라이머) 유증기에 의해 중독되어 의식을 잃고 2.9m…",
+    "retrieval_source": "rest"
+   },
+   {
+    "id": "sif-아카이브-제조업등-01163",
+    "source_id": "kosha-sif-archive-20260401",
+    "item_type": "sif-case",
+    "category": "아카이브(제조업등)",
+    "subcategory": null,
+    "title": "1163 / 제조업 / 기계기구·금속·비금속광물제품제조업",
+    "summary": "연번: 1163 산재업종 (대분류): 제조업 산재업종 (중분류): 기계기구·금속·비금속광물제품제조업 산재업종 (소분류): 선재제품제조업 재해개요: 2016년 8월경 도금공장에 설치된 집수조 내에서 재해자1이 질식으로 쓰러져, 재해자2가 구조하러 들어가다 의식을 잃고 쓰러지고, 재해자3이 이를 또 구조하러 들어가다 의식을 잃고 쓰러짐. 주변 작업자들이 이를 집수조 밖으로 구조하여 병원에 이송하였으나 1명 사망하고 2명 부상 기인물: 유해가스 고위험작업·상황: 피트",
+    "keywords": [
+     "밀폐",
+     "아카이브(제조업등)",
+     "중독",
+     "질식"
+    ],
+    "risk_tags": [
+     "질식",
+     "중독",
+     "밀폐"
+    ],
+    "primary_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "controls": [
+     "SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인",
+     "관리감독자 검토 완료 전 원시 태그·관리대책을 현장 통제대책으로 확정하지 않음"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "short_summary": "검토 필요: SIF 사고의 직접 원인과 현장 위험요인 미확정 · SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인 · 관리감독자 검토 완료 전 원시 태그·관리대책을 현장 통제대책으로 확정하지 않음",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인",
+    "source_kind_label": "고위험요인 사례",
+    "operation_signal_label": "유사사례에서 SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인 후보",
+    "display_title": "도금공장에 설치된 집수조 내에서 재해자1이 질식으로 쓰러져, 재해자2가 구조하러 들어가다 의식을 잃고 쓰러지고, 재해자3이 이를 또 구조하러 들어가다 의… 사례",
+    "display_summary": "도금공장에 설치된 집수조 내에서 재해자1이 질식으로 쓰러져, 재해자2가 구조하러 들어가다 의식을 잃고 쓰러지고, 재해자3이 이를 또 구조하러 들어가다 의식을 잃고 쓰러짐. 주변 작업자들이 이를 집수조 밖으로 구조하여 병원에 이송하였으나 1명 사망하고…",
+    "retrieval_source": "rest"
+   }
+  ],
+  "supportingEvidence": [
+   {
+    "id": "onedrive-industrial-safety-수준평가-중앙지사-주-씨티에너지-2412-c159d7d806-record-0005-item",
+    "source_id": "onedrive-industrial-safety-수준평가-중앙지사-주-씨티에너지-2412-c159d7d806",
+    "item_type": "permit",
+    "category": "허가서",
+    "subcategory": "form_template",
+    "title": "수준평가-중앙지사-(주)씨티에너지-2412 - 작업중지권의 홍보, 교육 밀폐공간안전보건 작업허가서 그림입니다. 원본 그림의 이름: CLP000035540003.bmp 원본 그림의 크기: 가로 1090pixel",
+    "summary": "작업중지권의 홍보, 교육 밀폐공간안전보건 작업허가서 그림입니다. 원본 그림의 이름: CLP000035540003.bmp 원본 그림의 크기: 가로 1090pixel, 세로 650pixel 그림입니다. 원본 그림의 이름: CLP000049ac0001.bmp 원본 그림의 크기: 가로 4000pixel, 세로 2252pixel 작업허가서 및 계획서 게시 비상 시 대응 체계 그림입니다. 원본 그림의 이름: CLP000035540009.bmp 원본 그림의 크기: 가로 818pixel, 세로 1184pixel 그림입니다. 원본 그림의 이름: CLP00003554000a.bmp 원",
+    "keywords": [
+     "허가",
+     "허가서",
+     "비상",
+     "대응",
+     "안전보건"
+    ],
+    "risk_tags": [
+     "허가",
+     "허가서",
+     "비상",
+     "대응",
+     "안전보건"
+    ],
+    "primary_documents": [
+     "허가서/첨부"
+    ],
+    "controls": [
+     "진입 전 산소·유해가스 농도 측정 및 강제환기 실시",
+     "감시인 외부 배치·구조장비 확보 후 내부 설비·펌프·모터 전원 차단 및 잠금표지(LOTO) 적용"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "허가서/첨부"
+    ],
+    "short_summary": "밀폐공간 진입 중 산소결핍·유해가스 노출 및 내부 설비 불시기동 위험 · 진입 전 산소·유해가스 농도 측정 및 강제환기 실시 · 감시인 외부 배치·구조장비 확보 후 내부 설비·펌프·모터 전원 차단 및 잠금표지(LOTO) 적용",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "허가서/첨부에 진입 전 산소·유해가스 농도 측정 및 강제환기 실시",
+    "source_kind_label": "안전 참고자료",
+    "operation_signal_label": "문서와 TBM에 진입 전 산소·유해가스 농도 측정 및 강제환기 실시 반영",
+    "retrieval_source": "rest"
+   },
+   {
+    "id": "kosha-a5501fc8586a88d1602a313b",
+    "source_id": "kosha-guide-offline:E-G-18",
+    "item_type": "technical-support-regulation",
+    "category": null,
+    "subcategory": null,
+    "title": "E-G-18-2026 밀폐공간 작업 프로그램 수립 및 시행에 관한 기술지원규정",
+    "summary": "",
+    "keywords": [],
+    "risk_tags": [],
+    "primary_documents": [],
+    "controls": [],
+    "source_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914540778798257/1",
+    "evidence_role": "supporting",
+    "retrieval_source": "local-hybrid",
+    "kosha_guide": {
+     "referenceId": "kosha-a5501fc8586a88d1602a313b",
+     "stableDocumentKey": "E-G-18",
+     "version": "E-G-18-2026",
+     "quality": "accepted",
+     "lifecycle": "current",
+     "bodyKind": "native",
+     "anchors": [],
+     "evidenceRef": null,
+     "directEligible": false
+    }
+   },
+   {
+    "id": "kosha-31bf9cd27d41cb748280a864",
+    "source_id": "kosha-guide-offline:C-C-1",
+    "item_type": "technical-support-regulation",
+    "category": null,
+    "subcategory": null,
+    "title": "C-C-1-2025 인화성 액체 및 기체 잔류물이 있는 탱크의 청소 및 가스제거에 관한 기술지원규정",
+    "summary": "",
+    "keywords": [],
+    "risk_tags": [],
+    "primary_documents": [],
+    "controls": [],
+    "source_url": "https://portal.kosha.or.kr/openapi/v1/file/down/FL00021380479/2",
+    "evidence_role": "supporting",
+    "retrieval_source": "local-hybrid",
+    "kosha_guide": {
+     "referenceId": "kosha-31bf9cd27d41cb748280a864",
+     "stableDocumentKey": "C-C-1",
+     "version": "C-C-1-2025",
+     "quality": "accepted",
+     "lifecycle": "current",
+     "bodyKind": "native",
+     "anchors": [],
+     "evidenceRef": null,
+     "directEligible": false
+    }
+   },
+   {
+    "id": "kosha-c41ada4f27092a58772b89a7",
+    "source_id": "kosha-guide-offline:D-C-3",
+    "item_type": "technical-support-regulation",
+    "category": null,
+    "subcategory": null,
+    "title": "D-C-3-2025 철골공사(데크플레이트 포함)의 안전작업에 관한 기술지원규정",
+    "summary": "",
+    "keywords": [],
+    "risk_tags": [],
+    "primary_documents": [],
+    "controls": [],
+    "source_url": "https://portal.kosha.or.kr/openapi/v1/file/down/FL00021380611/2",
+    "evidence_role": "supporting",
+    "retrieval_source": "local-hybrid",
+    "kosha_guide": {
+     "referenceId": "kosha-c41ada4f27092a58772b89a7",
+     "stableDocumentKey": "D-C-3",
+     "version": "D-C-3-2025",
+     "quality": "accepted",
+     "lifecycle": "current",
+     "bodyKind": "native",
+     "anchors": [],
+     "evidenceRef": null,
+     "directEligible": false
+    }
+   },
+   {
+    "id": "onedrive-industrial-safety-첨부4-시공사-안전관리-수준-평가표-분당-광진기업-제출-c1b018f92b-record-0004-item",
+    "source_id": "onedrive-industrial-safety-첨부4-시공사-안전관리-수준-평가표-분당-광진기업-제출-c1b018f92b",
+    "item_type": "risk_assessment",
+    "category": "위험성평가",
+    "subcategory": "form_template",
+    "title": "[첨부4] 시공사 안전관리 수준 평가표_분당 광진기업(제출) - 3. 위험작업 안전관리(20점)",
+    "summary": "열수송분야 건설공사 안전관리 지원 용역 시공사(도급인, 수급인) 안전관리수준 평가표(상반기) 시공사 | 광진기업(도급인) | 현장명 | 2024년 강남지사 추가사용자 열수송관공사 점검업체 | ㈜대진건설안전기술원 | 점검일자 | 2025-06-10 00:00:00 공정률 | 54.37%( 5월 7일 현재) 3. 위험작업 안전관리(20점) | ※ 평가표 활용 방법 1. 점검표 행 및 열 폭 및 높이 임의 조정 금지 2. 각 항목 확인 평가 후 수준에 맞는 칸에 알파벳 대문자 \"O\"를 입력 3. 평가항목 중 적용 대상이 아닌 항목은 공란으로 처리하고 확인근거 란에 사유 기",
+    "keywords": [
+     "위험성평가",
+     "작업계획",
+     "작업계획서",
+     "허가",
+     "허가서",
+     "비상",
+     "대응",
+     "안전보건",
+     "점검표",
+     "중대재해",
+     "추락",
+     "화재",
+     "붕괴",
+     "기계"
+    ],
+    "risk_tags": [
+     "작업계획서",
+     "허가",
+     "허가서",
+     "비상",
+     "대응",
+     "안전보건",
+     "점검표",
+     "중대재해",
+     "추락",
+     "화재",
+     "붕괴",
+     "기계"
+    ],
+    "primary_documents": [
+     "위험성평가표"
+    ],
+    "controls": [
+     "진입 전 산소·유해가스 농도 측정 및 강제환기 실시",
+     "감시인 외부 배치·구조장비 확보 후 내부 설비·펌프·모터 전원 차단 및 잠금표지(LOTO) 적용"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "위험성평가표"
+    ],
+    "short_summary": "밀폐공간 진입 중 산소결핍·유해가스 노출 및 내부 설비 불시기동 위험 · 진입 전 산소·유해가스 농도 측정 및 강제환기 실시 · 감시인 외부 배치·구조장비 확보 후 내부 설비·펌프·모터 전원 차단 및 잠금표지(LOTO) 적용",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "위험성평가표에 진입 전 산소·유해가스 농도 측정 및 강제환기 실시",
+    "source_kind_label": "위험성평가 기준",
+    "operation_signal_label": "위험성평가에 진입 전 산소·유해가스 농도 측정 및 강제환기 실시 반영",
+    "retrieval_source": "rest"
+   }
+  ],
+  "improvementMemory": [],
+  "workpackMemory": [],
+  "retrievalContract": {
+   "source": "safety_reference_items",
+   "mode": "hybrid-local-supabase",
+   "vector": {
+    "enabled": false,
+    "attempted": false,
+    "ready": false,
+    "reason": "disabled",
+    "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+   },
+   "sourceCounts": {
+    "directEvidence": 0,
+    "sifCases": 4,
+    "supportingEvidence": 5,
+    "rest": 6,
+    "ranked": 0,
+    "vector": 0,
+    "hybrid": 0,
+    "localTag": 0,
+    "localRanked": 0,
+    "localHybrid": 3
+   },
+   "message": "Supabase 안전 지식 DB 호출 완료 (KOSHA 기술지원규정 3건, KOSHA 기술지침 0건, SIF 유사사례 3건, 일반 카탈로그 5건, 작업특화 rerank 적용)"
+  },
+  "ontologyChecklist": {
+   "status": "ready",
+   "missing": []
+  },
+  "generationContract": {
+   "llmRole": "naturalize_only",
+   "llmOutputScope": "rewrite_fixed_evidence_only",
+   "evidenceAuthority": "db_harness",
+   "providerRetryScope": "naturalization_retry_only",
+   "fallbackChainAllowed": false,
+   "genericProseSubstitutionAllowed": false,
+   "missingEvidencePolicy": "surface_review_required",
+   "requiredDocuments": [
+    "위험성평가표",
+    "TBM 브리핑",
+    "TBM 기록"
+   ],
+   "missingEvidence": [],
+   "documentCoverage": [
+    {
+     "document": "위험성평가표",
+     "covered": true,
+     "evidenceTypes": [
+      "sifCase"
+     ]
+    },
+    {
+     "document": "TBM 브리핑",
+     "covered": true,
+     "evidenceTypes": [
+      "sifCase"
+     ]
+    },
+    {
+     "document": "TBM 기록",
+     "covered": true,
+     "evidenceTypes": [
+      "sifCase"
+     ]
+    }
+   ]
+  }
+ },
+ "citations": [
+  {
+   "id": "lawgo-law-283449",
+   "type": "law",
+   "title": "산업안전보건법",
+   "summary": "고용노동부 · 법률 · 공포 20260219",
+   "citation": "법률 · 공포 20260219",
+   "sourceLabel": "Law.go 법령",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/lsInfoP.do?lsiSeq=283449",
+   "tags": [
+    "법률",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-law-288431",
+   "type": "law",
+   "title": "산업안전보건법 시행규칙",
+   "summary": "고용노동부 · 고용노동부령 · 공포 20260728",
+   "citation": "고용노동부령 · 공포 20260728",
+   "sourceLabel": "Law.go 법령",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/lsInfoP.do?lsiSeq=288431",
+   "tags": [
+    "고용노동부령",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-law-288347",
+   "type": "law",
+   "title": "산업안전보건법 시행령",
+   "summary": "고용노동부 · 대통령령 · 공포 20260728",
+   "citation": "대통령령 · 공포 20260728",
+   "sourceLabel": "Law.go 법령",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/lsInfoP.do?lsiSeq=288347",
+   "tags": [
+    "대통령령",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-expc-343113",
+   "type": "interpretation",
+   "title": "경상남도 남해군 - 공공행정에서 비현업업무에 종사하는 사람이 산업안전보건위원회의 근로자위원이 될 수 있는지(「산업안전보건법 시행령」 별표 1 제4호가목 등 관련)",
+   "summary": "법제처 · 경상남도 남해군 · 회신 2026.04.22",
+   "citation": "법제처 · 회신 2026.04.22",
+   "sourceLabel": "Law.go 해석례",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=expc&amp;ID=343113&amp;type=HTML&amp;mobileYn=",
+   "tags": [
+    "법제처",
+    "경상남도 남해군",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-expc-314491",
+   "type": "interpretation",
+   "title": "고용노동부 - ‘3일 이상의 휴업’이 연속적인 기간을 의미하는지 여부(「산업안전보건법 시행규칙」 제4조 등 관련)",
+   "summary": "법제처 · 고용노동부 · 회신 2014.07.16",
+   "citation": "법제처 · 회신 2014.07.16",
+   "sourceLabel": "Law.go 해석례",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=expc&amp;ID=314491&amp;type=HTML&amp;mobileYn=",
+   "tags": [
+    "법제처",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-expc-343007",
+   "type": "interpretation",
+   "title": "고용노동부 - 국가기관 또는 지방자치단체가 유해작업 도급금지 의무 등을 위반한 경우 「산업안전보건법」 제161조제1항에 따라 과징금을 부과할 수 있는지(「산업안전보건법」 제161조제1항 등 관련)",
+   "summary": "법제처 · 고용노동부 · 회신 2026.03.30",
+   "citation": "법제처 · 회신 2026.03.30",
+   "sourceLabel": "Law.go 해석례",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=expc&amp;ID=343007&amp;type=HTML&amp;mobileYn=",
+   "tags": [
+    "법제처",
+    "고용노동부",
+    "Law.go"
+   ]
+  }
+ ]
+}

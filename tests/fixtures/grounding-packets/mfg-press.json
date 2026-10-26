@@ -1,0 +1,461 @@
+{
+ "source": "evaluation/launch-depth-audit-2026-10-25/ask/ask-full-mfg-press.json (운영 /api/ask full, 2026-10-25)",
+ "question": "경기 안산 금속부품 제조공장 프레스 금형 교체 작업. 작업자 6명 중 외국인 근로자 2명(베트남어), 신규 투입자 1명. 지게차로 금형 운반, 상하차 포함. 오늘 작업 전 문서팩을 만들어줘.",
+ "dbHarnessPacket": {
+  "mode": "db_harness_first",
+  "question": "경기 안산 금속부품 제조공장 프레스 금형 교체 작업. 작업자 6명 중 외국인 근로자 2명(베트남어), 신규 투입자 1명. 지게차로 금형 운반, 상하차 포함. 오늘 작업 전 문서팩을 만들어줘.",
+  "directEvidence": [
+   {
+    "id": "machinery-0518",
+    "source_id": "kosha-machinery-20210909",
+    "item_type": "machinery",
+    "category": "518",
+    "subcategory": "제조업",
+    "title": "518 · 제조업 · 기계기구·금속·비금속광물제품제조업 · 각종기계또는동부속품제조업",
+    "summary": "번호: 518 업종대분류: 제조업 업종중분류: 기계기구·금속·비금속광물제품제조업 업종소분류: 각종기계또는동부속품제조업 기계설비명: 전동 지게차 기계설비영문명: Electric forklift 기계설비설명: 전동을 동력으로 하는 기계로써/ 포크와 마스트로 구성된 중량물을 운반 하역하는 기계기구이다.",
+    "keywords": [
+     "518",
+     "제조업",
+     "기계기구·금속·비금속광물제품제조업",
+     "각종기계또는동부속품제조업",
+     "전동 지게차",
+     "Electric forklift"
+    ],
+    "risk_tags": [
+     "지게차"
+    ],
+    "primary_documents": [
+     "작업계획서",
+     "위험성평가표",
+     "TBM 브리핑",
+     "안전보건교육 기록"
+    ],
+    "controls": [
+     "지게차 동선과 보행 동선을 바닥표시·차단시설로 분리",
+     "교차·후진 구간 신호수 배치 및 후진 경보·접근통제 확인"
+    ],
+    "source_url": null,
+    "evidence_role": "direct",
+    "reflected_documents": [
+     "작업계획서",
+     "위험성평가표",
+     "TBM 브리핑",
+     "안전보건교육 기록"
+    ],
+    "short_summary": "자재 반입 지게차 동선과 작업자 통행 동선 중첩으로 인한 충돌 위험 · 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리 · 교차·후진 구간 신호수 배치 및 후진 경보·접근통제 확인",
+    "evidence_role_label": "문서 문구 직접 근거",
+    "document_reflection_label": "작업계획서 · 위험성평가표 · TBM 브리핑에 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리",
+    "source_kind_label": "장비 위험 기준",
+    "operation_signal_label": "문서와 TBM에 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리 반영",
+    "retrieval_source": "rest"
+   },
+   {
+    "id": "machinery-0184",
+    "source_id": "kosha-machinery-20210909",
+    "item_type": "machinery",
+    "category": "184",
+    "subcategory": "제조업",
+    "title": "184 · 제조업 · 기계기구·금속·비금속광물제품제조업 · 자동차제조업",
+    "summary": "번호: 184 업종대분류: 제조업 업종중분류: 기계기구·금속·비금속광물제품제조업 업종소분류: 자동차제조업 기계설비명: 리치형 지게차 기계설비영문명: Reach type fork lift 기계설비설명: 입식 지게차는 앞쪽에 2단으로 신축하는 수직 마스트가 있어서/ 이에 맞물린 좌우 2개의 포크를 하물 밑에 밀어 넣고/ 들어올려 짐을 나르는 지게차 중/ 운전자가 서서 운행 및 작업을 하는 지게차이다.",
+    "keywords": [
+     "184",
+     "제조업",
+     "기계기구·금속·비금속광물제품제조업",
+     "자동차제조업",
+     "리치형 지게차",
+     "Reach type fork lift"
+    ],
+    "risk_tags": [
+     "지게차"
+    ],
+    "primary_documents": [
+     "작업계획서",
+     "위험성평가표",
+     "TBM 브리핑",
+     "안전보건교육 기록"
+    ],
+    "controls": [
+     "가동부 방호덮개 설치 및 비상정지장치 작동 확인",
+     "정비 전 전원 차단 및 잠금표지(LOTO)"
+    ],
+    "source_url": null,
+    "evidence_role": "direct",
+    "reflected_documents": [
+     "작업계획서",
+     "위험성평가표",
+     "TBM 브리핑",
+     "안전보건교육 기록"
+    ],
+    "short_summary": "기계 가동부 끼임 및 정비 중 불시기동 위험 · 가동부 방호덮개 설치 및 비상정지장치 작동 확인 · 정비 전 전원 차단 및 잠금표지(LOTO)",
+    "evidence_role_label": "문서 문구 직접 근거",
+    "document_reflection_label": "작업계획서 · 위험성평가표 · TBM 브리핑에 가동부 방호덮개 설치 및 비상정지장치 작동 확인",
+    "source_kind_label": "장비 위험 기준",
+    "operation_signal_label": "문서와 TBM에 가동부 방호덮개 설치 및 비상정지장치 작동 확인 반영",
+    "retrieval_source": "rest"
+   }
+  ],
+  "sifCases": [
+   {
+    "id": "sif-아카이브-제조업등-01048",
+    "source_id": "kosha-sif-archive-20260401",
+    "item_type": "sif-case",
+    "category": "아카이브(제조업등)",
+    "subcategory": null,
+    "title": "1048 / 제조업 / 기계기구·금속·비금속광물제품제조업",
+    "summary": "연번: 1048 산재업종 (대분류): 제조업 산재업종 (중분류): 기계기구·금속·비금속광물제품제조업 산재업종 (소분류): 일반산업용기계장치제조업 재해개요: 2019년 2월 OO공장 OO 소속 재해자가 지게차 포크로 프레임 구조부재와 상부철판 사이 틈을 벌리다가 프레임이 넘어지면서 재해자 흉부를 타격하여 사망 기인물: 자동화설비(제품다단적재기 포스트 프레임) 고위험작업·상황: 지게차 사용 작업 재해유발요인: 『무게 또는 형태가 한쪽으로 치우치거나 무게중심이 높은(",
+    "keywords": [
+     "낙하",
+     "아카이브(제조업등)",
+     "전도",
+     "지게차"
+    ],
+    "risk_tags": [
+     "전도",
+     "지게차",
+     "낙하"
+    ],
+    "primary_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "controls": [
+     "적재물 무게중심·결속 및 포크 삽입 상태 확인",
+     "적재물 전도·낙하 작업반경 출입통제 및 신호수 배치"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "short_summary": "지게차 운반·상하차 중 적재물 전도·낙하 및 작업자 타격 위험 · 적재물 무게중심·결속 및 포크 삽입 상태 확인 · 적재물 전도·낙하 작업반경 출입통제 및 신호수 배치",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 적재물 무게중심·결속 및 포크 삽입 상태 확인",
+    "source_kind_label": "고위험요인 사례",
+    "operation_signal_label": "유사사례에서 적재물 무게중심·결속 및 포크 삽입 상태 확인 후보",
+    "display_title": "OO공장 OO 소속 지게차 포크로 프레임 구조부재와 상부철판 사이 틈을 벌리다가 프레임이 넘어지면서 재해자 흉부를 타격하여 사망 사례",
+    "display_summary": "OO공장 OO 소속 지게차 포크로 프레임 구조부재와 상부철판 사이 틈을 벌리다가 프레임이 넘어지면서 재해자 흉부를 타격하여 사망",
+    "retrieval_source": "rest"
+   },
+   {
+    "id": "sif-아카이브-건설업-02938",
+    "source_id": "kosha-sif-archive-20260401",
+    "item_type": "sif-case",
+    "category": "아카이브(건설업)",
+    "subcategory": null,
+    "title": "2937 / 13. 기타 건설공사 / 13.1 안전가시설 작업",
+    "summary": "연번: 2937 고위험작업·상황: 13. 기타 건설공사 column_4: 13.1 안전가시설 작업 column_5: 13.1.10. 안전가시설(휀스, 안전난간) 재해종류: 추락 재해개요: 2019년 4월경 ○○현장에서 재해자가 해안산책로 난간보수 작업 중 몸의 균형을 잃고 바닥으로 추락하여 사망 기인물: 기타 개구부 재해유발요인: 해안산책로 난간보수 작업 중 몸의 균형을 잃고 추락 위험성 감소대책(예시): ▶ 작업발판의 단부와 같이 근로자가 떨어질 위험이 있는",
+    "keywords": [
+     "아카이브(건설업)",
+     "추락"
+    ],
+    "risk_tags": [
+     "추락"
+    ],
+    "primary_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "controls": [
+     "작업발판·안전난간·개구부 상태 확인",
+     "안전대 체결 및 작업반경 출입통제"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "short_summary": "고소·비계 작업 중 작업발판·단부 방호 미확인으로 인한 추락 위험 · 작업발판·안전난간·개구부 상태 확인 · 안전대 체결 및 작업반경 출입통제",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 작업발판·안전난간·개구부 상태 확인",
+    "source_kind_label": "고위험요인 사례",
+    "operation_signal_label": "유사사례에서 작업발판·안전난간·개구부 상태 확인 후보",
+    "display_title": "○○현장에서 해안산책로 난간보수 작업 중 몸의 균형을 잃고 바닥으로 추락하여 사망 사례",
+    "display_summary": "○○현장에서 해안산책로 난간보수 작업 중 몸의 균형을 잃고 바닥으로 추락하여 사망",
+    "retrieval_source": "rest"
+   },
+   {
+    "id": "sif-아카이브-제조업등-01014",
+    "source_id": "kosha-sif-archive-20260401",
+    "item_type": "sif-case",
+    "category": "아카이브(제조업등)",
+    "subcategory": null,
+    "title": "1014 / 제조업 / 기계기구·금속·비금속광물제품제조업",
+    "summary": "연번: 1014 산재업종 (대분류): 제조업 산재업종 (중분류): 기계기구·금속·비금속광물제품제조업 산재업종 (소분류): 자동차및모터사이클수리업 재해개요: 2021년 1월 OO공장 근로자가 이동식 사다리를 사용하여 지게차 파렛트 위로 이동 중 발을 헛디뎌 높이 약 2.15m 아래 바닥으로 추락하여 사망 기인물: 지게차 고위험작업·상황: 작업장소 통행·이동 재해유발요인: 지게차 포크(파렛트), 굴삭기 버킷 등에 탑승하여 높은 장소로 승강하는 등 『설비를 주용도(하",
+    "keywords": [
+     "고소",
+     "비계",
+     "아카이브(제조업등)",
+     "지게차",
+     "추락"
+    ],
+    "risk_tags": [
+     "추락",
+     "비계",
+     "지게차",
+     "고소"
+    ],
+    "primary_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "controls": [
+     "지게차 동선과 보행 동선을 바닥표시·차단시설로 분리",
+     "교차·후진 구간 신호수 배치 및 후진 경보·접근통제 확인"
+    ],
+    "source_url": null,
+    "evidence_role": "supporting",
+    "reflected_documents": [
+     "점검결과 요약",
+     "위험성평가표",
+     "작업계획서",
+     "사진/증빙",
+     "비상대응 절차"
+    ],
+    "short_summary": "자재 반입 지게차 동선과 작업자 통행 동선 중첩으로 인한 충돌 위험 · 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리 · 교차·후진 구간 신호수 배치 및 후진 경보·접근통제 확인",
+    "evidence_role_label": "현장 판단 보조 근거",
+    "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리",
+    "source_kind_label": "고위험요인 사례",
+    "operation_signal_label": "유사사례에서 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리 후보",
+    "display_title": "OO공장 이동식 사다리를 사용하여 지게차 파렛트 위로 이동 중 발을 헛디뎌 높이 약 2.15m 아래 바닥으로 추락하여 사망 사례",
+    "display_summary": "OO공장 이동식 사다리를 사용하여 지게차 파렛트 위로 이동 중 발을 헛디뎌 높이 약 2.15m 아래 바닥으로 추락하여 사망",
+    "retrieval_source": "rest"
+   }
+  ],
+  "supportingEvidence": [
+   {
+    "id": "kosha-5fcf445ecc22c2dde382f084",
+    "source_id": "kosha-guide-offline:E-G-4",
+    "item_type": "technical-support-regulation",
+    "category": null,
+    "subcategory": null,
+    "title": "E-G-4-2025 근골격계질환 예방을 위한 업종직종별 기술지원규정",
+    "summary": "",
+    "keywords": [],
+    "risk_tags": [],
+    "primary_documents": [],
+    "controls": [],
+    "source_url": "https://portal.kosha.or.kr/openapi/v1/file/down/FL00021380215/2",
+    "evidence_role": "supporting",
+    "retrieval_source": "local-hybrid",
+    "kosha_guide": {
+     "referenceId": "kosha-5fcf445ecc22c2dde382f084",
+     "stableDocumentKey": "E-G-4",
+     "version": "E-G-4-2025",
+     "quality": "accepted",
+     "lifecycle": "current",
+     "bodyKind": "native",
+     "anchors": [],
+     "evidenceRef": null,
+     "directEligible": false
+    }
+   },
+   {
+    "id": "kosha-980cd6b6aa862fdcba382160",
+    "source_id": "kosha-guide-offline:A-R-1",
+    "item_type": "technical-support-regulation",
+    "category": null,
+    "subcategory": null,
+    "title": "A-R-1-2026 자율안전보건체계 구축 및 운영에 관한 기술지원규정",
+    "summary": "",
+    "keywords": [],
+    "risk_tags": [],
+    "primary_documents": [],
+    "controls": [],
+    "source_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012910085865122652/3",
+    "evidence_role": "supporting",
+    "retrieval_source": "local-ranked",
+    "kosha_guide": {
+     "referenceId": "kosha-980cd6b6aa862fdcba382160",
+     "stableDocumentKey": "A-R-1",
+     "version": "A-R-1-2026",
+     "quality": "accepted",
+     "lifecycle": "current",
+     "bodyKind": "native",
+     "anchors": [],
+     "evidenceRef": null,
+     "directEligible": false
+    }
+   }
+  ],
+  "improvementMemory": [],
+  "workpackMemory": [],
+  "retrievalContract": {
+   "source": "safety_reference_items",
+   "mode": "hybrid-local-supabase",
+   "vector": {
+    "enabled": false,
+    "attempted": false,
+    "ready": false,
+    "reason": "disabled",
+    "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+   },
+   "sourceCounts": {
+    "directEvidence": 2,
+    "sifCases": 3,
+    "supportingEvidence": 2,
+    "rest": 5,
+    "ranked": 0,
+    "vector": 0,
+    "hybrid": 0,
+    "localTag": 0,
+    "localRanked": 1,
+    "localHybrid": 1
+   },
+   "message": "Supabase 안전 지식 DB 호출 완료 (KOSHA 기술지원규정 3건, KOSHA 기술지침 0건, SIF 유사사례 3건, 일반 카탈로그 5건, 작업특화 rerank 적용)"
+  },
+  "ontologyChecklist": {
+   "status": "review_required",
+   "missing": [
+    "TBM 기록 근거"
+   ]
+  },
+  "generationContract": {
+   "llmRole": "naturalize_only",
+   "llmOutputScope": "rewrite_fixed_evidence_only",
+   "evidenceAuthority": "db_harness",
+   "providerRetryScope": "naturalization_retry_only",
+   "fallbackChainAllowed": false,
+   "genericProseSubstitutionAllowed": false,
+   "missingEvidencePolicy": "surface_review_required",
+   "requiredDocuments": [
+    "위험성평가표",
+    "TBM 브리핑",
+    "TBM 기록"
+   ],
+   "missingEvidence": [
+    "TBM 기록"
+   ],
+   "documentCoverage": [
+    {
+     "document": "위험성평가표",
+     "covered": true,
+     "evidenceTypes": [
+      "directEvidence",
+      "sifCase"
+     ]
+    },
+    {
+     "document": "TBM 브리핑",
+     "covered": true,
+     "evidenceTypes": [
+      "directEvidence"
+     ]
+    },
+    {
+     "document": "TBM 기록",
+     "covered": false,
+     "evidenceTypes": []
+    }
+   ]
+  }
+ },
+ "citations": [
+  {
+   "id": "lawgo-law-283449",
+   "type": "law",
+   "title": "산업안전보건법",
+   "summary": "고용노동부 · 법률 · 공포 20260219",
+   "citation": "법률 · 공포 20260219",
+   "sourceLabel": "Law.go 법령",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/lsInfoP.do?lsiSeq=283449",
+   "tags": [
+    "법률",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-law-288431",
+   "type": "law",
+   "title": "산업안전보건법 시행규칙",
+   "summary": "고용노동부 · 고용노동부령 · 공포 20260728",
+   "citation": "고용노동부령 · 공포 20260728",
+   "sourceLabel": "Law.go 법령",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/lsInfoP.do?lsiSeq=288431",
+   "tags": [
+    "고용노동부령",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-law-288347",
+   "type": "law",
+   "title": "산업안전보건법 시행령",
+   "summary": "고용노동부 · 대통령령 · 공포 20260728",
+   "citation": "대통령령 · 공포 20260728",
+   "sourceLabel": "Law.go 법령",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/lsInfoP.do?lsiSeq=288347",
+   "tags": [
+    "대통령령",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-expc-343113",
+   "type": "interpretation",
+   "title": "경상남도 남해군 - 공공행정에서 비현업업무에 종사하는 사람이 산업안전보건위원회의 근로자위원이 될 수 있는지(「산업안전보건법 시행령」 별표 1 제4호가목 등 관련)",
+   "summary": "법제처 · 경상남도 남해군 · 회신 2026.04.22",
+   "citation": "법제처 · 회신 2026.04.22",
+   "sourceLabel": "Law.go 해석례",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=expc&amp;ID=343113&amp;type=HTML&amp;mobileYn=",
+   "tags": [
+    "법제처",
+    "경상남도 남해군",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-expc-314491",
+   "type": "interpretation",
+   "title": "고용노동부 - ‘3일 이상의 휴업’이 연속적인 기간을 의미하는지 여부(「산업안전보건법 시행규칙」 제4조 등 관련)",
+   "summary": "법제처 · 고용노동부 · 회신 2014.07.16",
+   "citation": "법제처 · 회신 2014.07.16",
+   "sourceLabel": "Law.go 해석례",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=expc&amp;ID=314491&amp;type=HTML&amp;mobileYn=",
+   "tags": [
+    "법제처",
+    "고용노동부",
+    "Law.go"
+   ]
+  },
+  {
+   "id": "lawgo-expc-343007",
+   "type": "interpretation",
+   "title": "고용노동부 - 국가기관 또는 지방자치단체가 유해작업 도급금지 의무 등을 위반한 경우 「산업안전보건법」 제161조제1항에 따라 과징금을 부과할 수 있는지(「산업안전보건법」 제161조제1항 등 관련)",
+   "summary": "법제처 · 고용노동부 · 회신 2026.03.30",
+   "citation": "법제처 · 회신 2026.03.30",
+   "sourceLabel": "Law.go 해석례",
+   "sourceSystem": "lawgo",
+   "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=expc&amp;ID=343007&amp;type=HTML&amp;mobileYn=",
+   "tags": [
+    "법제처",
+    "고용노동부",
+    "Law.go"
+   ]
+  }
+ ]
+}

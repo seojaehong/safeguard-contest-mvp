@@ -16,6 +16,8 @@ import { canonicalizeRiskAssessmentResponse } from "./risk-assessment-record";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiDeliverablesDiagnostics, type AiMode } from "./ai-deliverables";
 import { buildGroundedGenerationPacket, type GroundedGenerationPacket } from "./grounded-generation-contract";
+import { assembleInjectionGraph, buildOntologyGroundingSources, loadInjectionGraph, resolveInjectionTaskLabels } from "./grounding-ontology-injection";
+import { classifyWorkTask, inferConditionLayers } from "./task-scenario-profiles";
 import {
   buildPhaseACanonicalAnswer,
   type PhaseAGenerationGrounding,
@@ -271,6 +273,19 @@ function buildParentlessKoshaReviewDeliverables(
 
 function safeFailureContext(error: unknown): { errorType: string } {
   return { errorType: error instanceof Error ? error.name : typeof error };
+}
+
+/** 작업계획서 구조화본의 응급조치 칸을 작업유형별 고정 절차로 채운다. 절차가 없으면 「현장 확인 필요」를 유지한다. */
+function withDeterministicEmergencyFirstAid<T extends { emergencyResponse?: { firstAid?: string } } | undefined>(
+  plan: T,
+  emergencySteps: readonly string[]
+): T {
+  if (!plan || !plan.emergencyResponse) return plan;
+  const firstAid = emergencySteps.map((step) => step.trim()).filter(Boolean).join(" ");
+  return {
+    ...plan,
+    emergencyResponse: { ...plan.emergencyResponse, firstAid: firstAid || "현장 확인 필요" }
+  };
 }
 
 function buildGroundingReview(
@@ -2205,13 +2220,24 @@ async function runAskUngated(question: string, options: RunAskOptions = {}): Pro
           message: SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE
         };
       });
+    // PR-12: 작업 분류 TaskId → DB task_ids/keywords 묶음 조회(다섯째 버킷). 질의어 ilike 에 걸리지 않는
+    // 영문 국외 행과 신규 국내 행(011)이 이 버킷으로 들어온다. 국외 행은 패킷에서 참고 표시로만 쓴다.
+    const classifiedTaskId = classifyWorkTask(question).taskId;
+    const taskProfileKeywords = inferScenario(question).profile.keywords ?? [];
     const safetyReferencePromise = (async () => {
-      const [supportReg, guideline, sifSearch, general] = await Promise.all([
+      const [supportReg, guideline, sifSearch, general, taskBucketRaw] = await Promise.all([
         safeSearch({ query: question, limit: 3, itemType: "technical-support-regulation" }),
         safeSearch({ query: question, limit: 3, itemType: "technical-guideline" }),
         safeSearch({ query: question, limit: 3, itemType: "sif-case" }),
-        safeSearch({ query: question, limit: 5 })
+        safeSearch({ query: question, limit: 5 }),
+        classifiedTaskId
+          ? safeSearch({ query: question, limit: 5, taskIds: [classifiedTaskId], keywords: taskProfileKeywords })
+          : Promise.resolve(emptyResult)
       ]);
+      // 다섯째 버킷은 뒤에 붙였다. 호출 순서를 흉내 내는 시험 더블이 네 번만 답하면 빈 결과로 둔다.
+      const taskBucket: SafetyReferenceSearchResult = taskBucketRaw && Array.isArray(taskBucketRaw.items)
+        ? taskBucketRaw
+        : emptyResult;
       const sif = !sifSearch.configured && sifSearch.items.length === 0
         ? buildOfflineSifFallbackResult(question, 3)
         : sifSearch;
@@ -2220,7 +2246,7 @@ async function runAskUngated(question: string, options: RunAskOptions = {}): Pro
       // should not outrank SIF/confined-space/LOTO-specific evidence.
       const seen = new Set<string>();
       const candidates: SafetyReferenceItem[] = [];
-      for (const bucket of [supportReg.items, guideline.items, sif.items, general.items]) {
+      for (const bucket of [supportReg.items, guideline.items, sif.items, taskBucket.items, general.items]) {
         for (const item of bucket) {
           if (seen.has(item.id)) continue;
           seen.add(item.id);
@@ -2234,9 +2260,10 @@ async function runAskUngated(question: string, options: RunAskOptions = {}): Pro
         `KOSHA 기술지원규정 ${supportReg.count}건`,
         `KOSHA 기술지침 ${guideline.count}건`,
         `SIF 유사사례 ${sif.count}건`,
+        `작업유형 묶음 ${taskBucket.count}건`,
         `일반 카탈로그 ${general.count}건`
       ];
-      const buckets = [supportReg, guideline, sif, general];
+      const buckets = [supportReg, guideline, sif, taskBucket, general];
       const errorCode = buckets.some((bucket) => bucket.errorCode === SAFETY_REFERENCE_SEARCH_FAILURE_CODE)
         ? SAFETY_REFERENCE_SEARCH_FAILURE_CODE
         : undefined;
@@ -2295,8 +2322,14 @@ async function runAskUngated(question: string, options: RunAskOptions = {}): Pro
             koshaPromise.catch(() => null),
             accidentCasesPromise.catch(() => null),
             safetyReferencePromise.catch(() => null),
-          ]).then(([rawBase, wthr, trng, ksha, acc, safeRef]) => {
+            // H2: 생성 전에 온톨로지 published 그래프를 받아 작업유형 조치를 패킷에 싣는다(DB 실패 시 시드·overlay).
+            loadInjectionGraph(options.signal).catch(() => assembleInjectionGraph(null)),
+          ]).then(([rawBase, wthr, trng, ksha, acc, safeRef, injectionGraph]) => {
             const safeRefItems = safeRef?.items ?? [];
+            const ontologySources = buildOntologyGroundingSources(
+              injectionGraph,
+              resolveInjectionTaskLabels({ taskId: classifiedTaskId, layers: inferConditionLayers(question) })
+            );
             const internalDbHarnessPacket = buildDbHarnessPacket({
               question,
               references: safeRefItems,
@@ -2316,7 +2349,8 @@ async function runAskUngated(question: string, options: RunAskOptions = {}): Pro
             const groundingPacket = buildGroundedGenerationPacket({
               dbHarnessPacket: internalDbHarnessPacket,
               legalCandidates: rawBase.slice(0, 6),
-              eligibleKoshaIds: koshaParentEvidenceReadyIdsEarly
+              eligibleKoshaIds: koshaParentEvidenceReadyIdsEarly,
+              ontologySources
             });
             deliverablesGroundingPacket = groundingPacket;
             const dbHarnessContext = buildHarnessPromptContext(internalDbHarnessPacket);
@@ -2752,9 +2786,13 @@ async function runAskUngated(question: string, options: RunAskOptions = {}): Pro
     const workPlanTaskId = response.scenario.taskClassification?.status === "classified"
       ? response.scenario.taskClassification.taskId
       : null;
-    const linkedWorkPlanStructured = attachWorkPlanLegalForm(
-      linkWorkPlanToRiskRows(baseDeliverables.workPlanStructured, structuredRiskRows),
-      { taskId: workPlanTaskId, question, workerCount: response.scenario.workerCount }
+    // 결정 8(2026-10-25): 응급조치는 AI 생성에서 빼고 작업유형별 고정 절차(profile.emergencySteps)로 둔다(H9).
+    const linkedWorkPlanStructured = withDeterministicEmergencyFirstAid(
+      attachWorkPlanLegalForm(
+        linkWorkPlanToRiskRows(baseDeliverables.workPlanStructured, structuredRiskRows),
+        { taskId: workPlanTaskId, question, workerCount: response.scenario.workerCount }
+      ),
+      inferScenario(question).profile.emergencySteps ?? []
     );
     const linkedPermitInspectionStructured = linkPermitToRiskRows(baseDeliverables.permitInspectionStructured, structuredRiskRows);
     // 결정 6(H7, 2026-10-25): 외국인 전송본은 검수된 고정 번역표로만 만든다. AI 번역 본문은 쓰지 않는다.

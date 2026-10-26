@@ -312,7 +312,13 @@ export function safeParseJson<T = unknown>(raw: string): T | null {
   }
 }
 
-export function persona(phaseAGrounding?: PhaseAGenerationGrounding) {
+// 패킷 모드(불변 생성 근거 패킷이 있을 때)의 공통 규칙. 게이트(validateGroundedGenerationOutput)와 형식이 같아야 한다(H4).
+const PACKET_MODE_CONTROL_RULE =
+  "실행 조치(감소대책·안전조치·작업중지 기준·교육 요점)는 패킷 controls 문구를 한 문장에 하나씩 그대로 쓴다. 합치기·의역·개수 맞추기용 새 조치 금지. 패킷에 없는 조치가 필요하면 '현장 확인 필요'라고만 적는다.";
+const PACKET_MODE_CITATION_RULE =
+  "조문은 패킷 출처 aliases 에 있는 표기로 법령명과 함께 쓴다(예: 안전보건규칙 제623조). 조번호만 쓰거나(제4조) 패킷에 없는 조문·기술지침 코드를 쓰지 않는다.";
+
+export function persona(phaseAGrounding?: PhaseAGenerationGrounding, packetEnforced = false) {
   return [
     ...(phaseAGrounding ? [buildPhaseAGenerationPrompt(phaseAGrounding), ""] : []),
     "당신은 한국 산업안전기사 자격을 갖춘 5년 차 현장 안전관리자다.",
@@ -325,7 +331,9 @@ export function persona(phaseAGrounding?: PhaseAGenerationGrounding) {
     "  5) 감소대책은 즉시 실행 가능한 행동 단위로 적는다.",
     "  6) 외국인 근로자·신규 투입자 이슈는 시나리오에 키워드가 있으면 별도 강조.",
     "  7) 거절 문장 금지(\"제공할 수 없습니다\"). 부족하면 '현장 확인 필요'로 표기.",
-    "  8) **KOSHA 기술지침/기술지원규정이 컨텍스트에 제공되면, 위험성평가·작업계획·TBM·교육 본문 안에서 그 지침 코드(예: H-205-2018, M-123-2012, X-78-2018)와 함께 직접 인용하라.** 단순 부록이 아니라 위험요인 또는 감소대책 항목 끝에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형태로 표시. 괄호 안에는 콜론(:) 사용 금지 — 대시(—) 또는 슬래시(/)만 사용. 줄바꿈도 금지. 한 줄에 모두 들어가야 한다.",
+    packetEnforced
+      ? `  8) ${PACKET_MODE_CONTROL_RULE} ${PACKET_MODE_CITATION_RULE}`
+      : "  8) **KOSHA 기술지침/기술지원규정이 컨텍스트에 제공되면, 위험성평가·작업계획·TBM·교육 본문 안에서 그 지침 코드(예: H-205-2018, M-123-2012, X-78-2018)와 함께 직접 인용하라.** 단순 부록이 아니라 위험요인 또는 감소대책 항목 끝에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형태로 표시. 괄호 안에는 콜론(:) 사용 금지 — 대시(—) 또는 슬래시(/)만 사용. 줄바꿈도 금지. 한 줄에 모두 들어가야 한다.",
     "  9) 모든 출력은 반드시 JSON. 마크다운 fence 금지.",
     "  10) 날짜·연도는 [현장 시나리오]의 작업일자만 사용한다. 다른 날짜를 만들지 마라.",
     "  11) 사람 이름·회사 정식명칭·주소는 시나리오에 없으면 '____' 또는 '현장 확인 필요'로 표기한다. 예시 이름(김철수, 김安全 등)을 지어내지 마라."
@@ -406,11 +414,13 @@ export function contextBlock(ctx: GenContext) {
 
 function riskAssessmentSinglePrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    persona(ctx.phaseAGrounding, Boolean(ctx.groundingPacket)),
     "",
     "위험성평가표(초안)를 작성하고 다음 JSON 형식으로만 반환하라.",
     "[기본정보] [1.사전준비] [2.유해·위험요인 파악] (4M 표시) [3.위험성 결정] (가능성/중대성/등급) [4.감소대책 수립 및 실행] [5.공유·교육] [6.조치 확인] 섹션 포함.",
-    "위험요인은 5~7개를 시나리오에 맞게 발굴. 길이 1500~3500자 권장. 줄바꿈 포함 일반 텍스트.",
+    ctx.groundingPacket
+      ? `위험요인은 패킷 출처(controls)가 다루는 범위 안에서만 적고 개수를 맞추려 만들지 않는다. ${PACKET_MODE_CONTROL_RULE} 줄바꿈 포함 일반 텍스트.`
+      : "위험요인은 5~7개를 시나리오에 맞게 발굴. 길이 1500~3500자 권장. 줄바꿈 포함 일반 텍스트.",
     "",
     "응답 JSON 스키마: { \"riskAssessmentDraft\": \"string\" }",
     "",
@@ -424,10 +434,12 @@ function riskAssessmentSinglePrompt(ctx: GenContext) {
 // 정해진 행/열 레이아웃에 그대로 채운다.
 function workPlanStructuredPrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    persona(ctx.phaseAGrounding, Boolean(ctx.groundingPacket)),
     "",
     "한국 산업안전 표준 작업계획서의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
-    "산문/장문 금지. 각 필드는 셀에 들어갈 짧은 문구(80자 이내) 단위로 작성. 위험요인·감소대책은 시나리오 특화. KOSHA 자료가 있으면 safetyMeasure 안에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식으로 1줄 포함.",
+    ctx.groundingPacket
+      ? `산문/장문 금지. 각 필드는 셀에 들어갈 짧은 문구(80자 이내) 단위로 작성. safetyMeasure·stopCriteria 는 ${PACKET_MODE_CONTROL_RULE} 각 workStep 의 evidenceRefs 에는 그 조치를 가진 출처의 referenceKey 를 그대로 적는다. emergencyResponse.firstAid 는 '현장 확인 필요'로만 적는다(응급조치는 작업유형별 고정 절차로 따로 만든다).`
+      : "산문/장문 금지. 각 필드는 셀에 들어갈 짧은 문구(80자 이내) 단위로 작성. 위험요인·감소대책은 시나리오 특화. KOSHA 자료가 있으면 safetyMeasure 안에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식으로 1줄 포함.",
     "",
     "응답 JSON 스키마:",
     `{
@@ -458,7 +470,9 @@ function workPlanStructuredPrompt(ctx: GenContext) {
 }`,
     "",
     "필수 조건: workSteps 4-7개. 각 workStep은 위험성평가 row 0-based index를 relatedRiskRowIndex에 1개 이상 넣고, evidenceRefs와 verification을 채운다. stopCriteria 3-5개. contacts 3-4개. 모든 string은 \\n 없이 한 줄.",
-    "relatedRiskRowIndex 규칙: 0-based 정수만 사용(1번째 위험성평가 행 = 0). 위험성평가표는 이 요청과 별도 호출로 생성되므로 정확한 행 개수를 알 수 없다 — 위험요인 발굴 순서상 상위 5~7개 안에 들 만큼 확실히 관련된 행만, workStep당 1~2개로 최소화해서 넣어라. 큰 숫자를 추측해서 넣지 말 것.",
+    ctx.groundingPacket
+      ? "relatedRiskRowIndex 규칙: 0-based 정수만 사용(1번째 위험성평가 행 = 0). 위험성평가표는 이 요청과 별도 호출로 생성되므로 정확한 행 개수를 알 수 없다 — 확실히 관련된 행만 workStep당 1~2개로 최소화해서 넣어라. 큰 숫자를 추측해서 넣지 말 것."
+      : "relatedRiskRowIndex 규칙: 0-based 정수만 사용(1번째 위험성평가 행 = 0). 위험성평가표는 이 요청과 별도 호출로 생성되므로 정확한 행 개수를 알 수 없다 — 위험요인 발굴 순서상 상위 5~7개 안에 들 만큼 확실히 관련된 행만, workStep당 1~2개로 최소화해서 넣어라. 큰 숫자를 추측해서 넣지 말 것.",
     "",
     contextBlock(ctx)
   ].join("\n");
@@ -467,10 +481,12 @@ function workPlanStructuredPrompt(ctx: GenContext) {
 // TBM 브리핑 schema-first. workPlan과 동일하게 산문 대신 셀 객체 직접 반환.
 function tbmBriefingStructuredPrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    persona(ctx.phaseAGrounding, Boolean(ctx.groundingPacket)),
     "",
     "한국 산업안전 표준 TBM 브리핑의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
-    "산문/장문 금지. 각 필드는 1줄 단위 짧은 문구. hazards/measures는 시나리오 특화 4M 분류. KOSHA 자료가 있으면 measures.action 안에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식 포함.",
+    ctx.groundingPacket
+      ? `산문/장문 금지. 각 필드는 1줄 단위 짧은 문구. hazards 는 4M 분류. measures.action·stopCriteria 는 ${PACKET_MODE_CONTROL_RULE} measures 의 evidenceRefs 에는 그 조치를 가진 출처의 referenceKey 를 그대로 적는다.`
+      : "산문/장문 금지. 각 필드는 1줄 단위 짧은 문구. hazards/measures는 시나리오 특화 4M 분류. KOSHA 자료가 있으면 measures.action 안에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식 포함.",
     "",
     "응답 JSON 스키마:",
     `{
@@ -509,7 +525,7 @@ function tbmBriefingStructuredPrompt(ctx: GenContext) {
 // Schema-first TBM 일지 (사후 기록). tbmBriefing(사전)과 분리된 export.
 function tbmLogStructuredPrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    persona(ctx.phaseAGrounding, Boolean(ctx.groundingPacket)),
     "",
     "한국 산업안전 표준 TBM 일지(사후 기록)의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
     "산문/장문 금지. 각 필드는 1줄 단위 짧은 문구. hazardsDiscussed/safetyEducation은 실제 진행한 내용 기준. unaddressedItems는 미조치 항목(없으면 빈 배열).",
@@ -545,7 +561,7 @@ function tbmLogStructuredPrompt(ctx: GenContext) {
     "safetyEducation": {
       "topic": "string (교육 주제)",
       "keyPoints": ["string (핵심 1줄)"],
-      "materials": "string (사용 자료/근거, 예: KOSHA Guide C-12-2024)"
+      "materials": "string (사용 자료/근거 — 법령·지침·자료 제목만 쉼표로 나열. 내부 참조 키(SIF:·DB:·sif- 로 시작하는 키)와 '패킷' 표기 금지. 예: KOSHA Guide C-12-2024)"
     },
     "unaddressedItems": [
       { "item": "string", "plannedAction": "string", "owner": "string", "dueDate": "YYYY-MM-DD 또는 현장 확인", "evidenceRefs": ["string"] }
@@ -570,10 +586,12 @@ function tbmLogStructuredPrompt(ctx: GenContext) {
 
 function tbmLogSinglePrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    persona(ctx.phaseAGrounding, Boolean(ctx.groundingPacket)),
     "",
     "TBM 일지(초안)를 작성하고 다음 JSON 형식으로만 반환하라.",
-    "결재/공종/일자/근로자 확인사항/금일 작업/금일 위험요인/일일 안전교육/참석자명단/인원집계/미조치 및 사진증빙 섹션 포함. 길이 1500~3500자.",
+    ctx.groundingPacket
+      ? `결재/공종/일자/근로자 확인사항/금일 작업/금일 위험요인/일일 안전교육/참석자명단/인원집계/미조치 및 사진증빙 섹션 포함. 길이 제한 없음. ${PACKET_MODE_CONTROL_RULE}`
+      : "결재/공종/일자/근로자 확인사항/금일 작업/금일 위험요인/일일 안전교육/참석자명단/인원집계/미조치 및 사진증빙 섹션 포함. 길이 1500~3500자.",
     "",
     "응답 JSON 스키마: { \"tbmLogDraft\": \"string\" }",
     "",
@@ -584,10 +602,12 @@ function tbmLogSinglePrompt(ctx: GenContext) {
 // 안전보건교육 기록 schema-first.
 function educationRecordStructuredPrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    persona(ctx.phaseAGrounding, Boolean(ctx.groundingPacket)),
     "",
     "한국 산업안전 표준 안전보건교육 기록의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
-    "산문/장문 금지. curriculum 각 항목의 lawCitation은 산업안전보건법/시행규칙/시행령 조항 명시. KOSHA 자료가 있으면 keyPoints 항목 끝에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식 포함.",
+    ctx.groundingPacket
+      ? `산문/장문 금지. curriculum 각 항목의 lawCitation 은 ${PACKET_MODE_CITATION_RULE} 패킷에 맞는 조문이 없으면 lawCitation 은 '현장 확인 필요'. keyPoints·safetyEducationPoints 는 ${PACKET_MODE_CONTROL_RULE}`
+      : "산문/장문 금지. curriculum 각 항목의 lawCitation은 산업안전보건법/시행규칙/시행령 조항 명시. KOSHA 자료가 있으면 keyPoints 항목 끝에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식 포함.",
     "",
     "응답 JSON 스키마:",
     `{
@@ -621,10 +641,12 @@ function educationRecordStructuredPrompt(ctx: GenContext) {
 
 function safetyEducationSinglePrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    persona(ctx.phaseAGrounding, Boolean(ctx.groundingPacket)),
     "",
     "안전보건교육 기록 초안 + 강조사항 5개를 작성하고 다음 JSON 형식으로만 반환하라.",
-    "safetyEducationRecordDraft: 교육명/구분/일시/장소/대상/실시자/확인자/교육내용(법령조항 명시)/이해확인방법/TBM 연계/후속 교육 추천. 길이 1500~3500자.",
+    ctx.groundingPacket
+      ? `safetyEducationRecordDraft: 교육명/구분/일시/장소/대상/실시자/확인자/교육내용/이해확인방법/TBM 연계/후속 교육 추천. 길이 제한 없음. ${PACKET_MODE_CONTROL_RULE} ${PACKET_MODE_CITATION_RULE}`
+      : "safetyEducationRecordDraft: 교육명/구분/일시/장소/대상/실시자/확인자/교육내용(법령조항 명시)/이해확인방법/TBM 연계/후속 교육 추천. 길이 1500~3500자.",
     "safetyEducationPoints: 작업자에게 강조할 핵심 메시지 5개 짧은 문장 배열.",
     "",
     "응답 JSON 스키마: { \"safetyEducationRecordDraft\": \"string\", \"safetyEducationPoints\": [\"string\",\"string\",\"string\",\"string\",\"string\"] }",
@@ -636,7 +658,16 @@ function safetyEducationSinglePrompt(ctx: GenContext) {
 function structuredRiskRowsPrompt(ctx: GenContext) {
   const rowSchema = FORM_SCHEMA_REGISTRY.riskAssessment.rowSchema;
   const explicitProcesses = extractExplicitProcessLabels(ctx);
-  const rowCoverageRule = explicitProcesses.length >= 2
+  const rowCoverageRule = ctx.groundingPacket
+    ? [
+        "  - rows 는 패킷 controls 가 다루는 위험요인만큼만 만든다(개수 고정 없음, 최대 18개).",
+        `  - currentControls·additionalControls 는 ${PACKET_MODE_CONTROL_RULE}`,
+        "  - 각 행의 evidenceRefs 에는 그 조치를 가진 출처의 referenceKey 를 그대로 적는다.",
+        ...(explicitProcesses.length >= 2
+          ? [`  - 명시 공종: ${explicitProcesses.join(", ")} — process 필드에는 위 명시 공종명을 그대로 넣고 공종을 누락하지 않는다.`]
+          : [])
+      ]
+    : explicitProcesses.length >= 2
     ? [
         `  - 명시된 공종이 2개 이상이면 rows는 전체 5~7개 고정이 아니라 공종별 coverage를 우선한다.`,
         `  - 명시 공종: ${explicitProcesses.join(", ")}`,
@@ -645,7 +676,7 @@ function structuredRiskRowsPrompt(ctx: GenContext) {
       ]
     : ["  - rows는 현장 시나리오에 맞는 5~7개 위험성평가 행이다."];
   return [
-    persona(ctx.phaseAGrounding),
+    persona(ctx.phaseAGrounding, Boolean(ctx.groundingPacket)),
     "",
     "위험성평가표 렌더러가 바로 사용할 수 있는 JSON rows만 반환하라.",
     "산문, 마크다운, 설명, 코드 fence 금지. 최상위 객체는 반드시 {\"rows\":[...]} 형태.",
@@ -705,7 +736,7 @@ function tbmRiskLinksPrompt(ctx: GenContext, rows: RiskAssessmentRow[]) {
     evidenceRefs: row.evidenceRefs
   }));
   return [
-    persona(ctx.phaseAGrounding),
+    persona(ctx.phaseAGrounding, Boolean(ctx.groundingPacket)),
     "",
     "위험성평가 rows를 TBM에서 바로 확인할 수 있는 연결 질문 JSON으로 변환하라.",
     "산문, 마크다운, 설명, 코드 fence 금지. 최상위 객체는 반드시 {\"tbmRiskLinks\":[...]} 형태.",
@@ -756,7 +787,7 @@ function emergencyContactRules() {
 
 export function freeFormPrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    persona(ctx.phaseAGrounding, Boolean(ctx.groundingPacket)),
     "",
     "다음 2개의 자유 텍스트 본문을 모두 작성하고 JSON 객체로 반환하라:",
     "  - workpackSummaryDraft: 점검결과 요약(초안). 현장명/작업조건/핵심 위험/즉시 조치/연결 상태를 첫 장으로 정리. 600자 내외.",
@@ -776,7 +807,7 @@ export function freeFormPrompt(ctx: GenContext) {
 
 export function foreignWorkerPrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    persona(ctx.phaseAGrounding, Boolean(ctx.groundingPacket)),
     "",
     "외국인 근로자용 안내문 2종을 작성하고 JSON 객체로 반환하라.",
     "반드시 세 키(foreignWorkerBriefing, foreignWorkerTransmission, foreignWorkerLanguages)를 모두 포함한 하나의 JSON 객체만 출력하라. JSON 앞뒤에 코드펜스·설명·후기 등 어떤 텍스트도 붙이지 마라.",
@@ -1161,6 +1192,36 @@ function deterministicDocumentTrace(fallbackUsed: boolean): GenerationDeliverabl
 
 const ENHANCED_CORE_SPEC_NAMES = new Set<string>();
 
+const FIELD_VERIFICATION_SENTINEL = "현장 확인 필요";
+
+/**
+ * 결정 8(2026-10-25): 응급조치는 AI 가 쓰지 않는다. 패킷 모드에서 AI 가 넘긴 workPlanStructured.emergencyResponse.firstAid 는
+ * 게이트에 들어가기 전에 「현장 확인 필요」로 바꾸고, 본문은 search.ts 가 작업유형별 고정 절차(profile.emergencySteps)로 채운다.
+ */
+function withoutAiFirstAid(value: Partial<AiDeliverables>, packetEnforced: boolean): Partial<AiDeliverables> {
+  const plan = value.workPlanStructured;
+  if (!packetEnforced || !plan || !plan.emergencyResponse) return value;
+  return {
+    ...value,
+    workPlanStructured: {
+      ...plan,
+      emergencyResponse: { ...plan.emergencyResponse, firstAid: FIELD_VERIFICATION_SENTINEL }
+    }
+  };
+}
+
+/** H4 자기시험용: 실제 생성에 쓰는 모든 프롬프트 빌더 출력을 묶음 이름별로 돌려준다. */
+export function buildDeliverablePromptsForAudit(opts: GenerateAllOptions): Record<string, string> {
+  const ctx = buildContext(opts);
+  return {
+    ...Object.fromEntries(TABULAR_SPECS.map((spec) => [spec.name, spec.buildPrompt(ctx)])),
+    structuredRiskRows: structuredRiskRowsPrompt(ctx),
+    free: freeFormPrompt(ctx),
+    foreign: foreignWorkerPrompt(ctx),
+    tbmRiskLinks: tbmRiskLinksPrompt(ctx, [])
+  };
+}
+
 export function listAiDeliverableGroupsForScope(scope: "full" | "enhanced" = "full"): string[] {
   const tabularNames = TABULAR_SPECS
     .filter((spec) => scope === "full" || ENHANCED_CORE_SPEC_NAMES.has(spec.name))
@@ -1229,6 +1290,8 @@ export type AiDeliverablesDiagnostics = {
   grounding?: {
     status: "grounded" | "review_required";
     sourceIdentity: string;
+    /** DB 하네스 체크리스트(TBM 기록 근거 등). H1 이후 status 와 분리된 진단 배지용 값이다. */
+    checklist: { status: "ready" | "review_required"; missing: string[] };
     rejectedGroups: string[];
     // 거절된 묶음을 실제로 쓴 제공자. 최종 본문 출처(modelPerDocument)와는 다르다.
     rejectedAttempts: Array<{ group: string; provider: GenerationDeliverableModelTrace["provider"]; model: string | null }>;
@@ -1267,6 +1330,7 @@ export function buildFailedDeliverablesDiagnostics(input: {
     grounding: input.groundingPacket ? {
       status: "review_required",
       sourceIdentity: input.groundingPacket.sourceIdentity,
+      checklist: { status: input.groundingPacket.checklist.status, missing: [...input.groundingPacket.checklist.missing] },
       rejectedGroups: input.fallbackUsed ? ["deliverablesPipeline"] : [],
       rejectedAttempts: [],
       violations: [],
@@ -1404,13 +1468,14 @@ export async function generateAllDeliverablesWithDiagnostics(
   settled.forEach((s, i) => {
     const name = allSpecs[i].name;
     if (s.status === "fulfilled") {
-      if (rejectForGrounding(name, s.value)) {
+      const value = withoutAiFirstAid(s.value, Boolean(opts.groundingPacket));
+      if (rejectForGrounding(name, value)) {
         groupResults.push({ group: name, status: "rejected", reason: "grounding review required" });
         safeEmit(onProgress, { kind: "doc", name, status: "fail" });
         return;
       }
       groupResults.push({ group: name, status: "fulfilled" });
-      Object.assign(out, s.value);
+      Object.assign(out, value);
       safeEmit(onProgress, { kind: "doc", name, status: "ok" });
     } else {
       groupResults.push({
@@ -1450,6 +1515,7 @@ export async function generateAllDeliverablesWithDiagnostics(
           ? "grounded"
           : "review_required",
         sourceIdentity: opts.groundingPacket.sourceIdentity,
+        checklist: { status: opts.groundingPacket.checklist.status, missing: [...opts.groundingPacket.checklist.missing] },
         rejectedGroups: rejectedGroundingGroups,
         rejectedAttempts,
         violations: groundingViolations,

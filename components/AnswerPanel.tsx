@@ -10,7 +10,8 @@ import type { AskResponse } from "@/lib/types";
 const GROUNDING_ISSUE_LABELS: Readonly<Record<string, string>> = {
   unknown_reference: "승인되지 않은 근거가 포함됨",
   control_provenance_missing: "조치의 연결 근거가 없음",
-  control_claim_not_in_packet: "근거팩에 없는 조치가 포함됨"
+  control_claim_not_in_packet: "근거팩에 없는 조치가 포함됨",
+  forbidden_term: "현장 문서에 쓸 수 없는 표현이 포함됨"
 };
 
 export function AnswerPanel({ data }: { data: AskResponse }) {

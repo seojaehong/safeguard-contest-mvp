@@ -1,6 +1,15 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-import type { GroundedGenerationPacket } from "@/lib/grounded-generation-contract";
+import type { DbHarnessPacket } from "@/lib/db-harness";
+import { buildGroundedGenerationPacket, type GroundedGenerationPacket } from "@/lib/grounded-generation-contract";
+import {
+  assembleInjectionGraph,
+  buildOntologyGroundingSources,
+  resolveInjectionTaskLabels
+} from "@/lib/grounding-ontology-injection";
+import type { SearchResult } from "@/lib/types";
 import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
 import {
   buildPhaseAGenerationGrounding,
@@ -18,6 +27,7 @@ const groundingPacket: GroundedGenerationPacket = Object.freeze({
   version: "grounded-generation-v1",
   sourceIdentity: "test-packet",
   status: "ready",
+  checklist: Object.freeze({ status: "ready", missing: Object.freeze([]) }),
   llmRole: "naturalize_only",
   sources: Object.freeze([Object.freeze({
     referenceKey: "LAW:law-38",
@@ -553,6 +563,7 @@ describe("deliverables generation trace", () => {
     expect(diagnostics.grounding).toEqual({
       status: "review_required",
       sourceIdentity: "failed-pipeline-packet",
+      checklist: { status: "ready", missing: [] },
       rejectedGroups: ["deliverablesPipeline"],
       rejectedAttempts: [],
       violations: [],
@@ -595,6 +606,87 @@ describe("deliverables generation trace", () => {
       sourceIdentity: "test-packet",
       rejectedGroups: []
     });
+  });
+
+  // CI-01: 합성 패킷(law 1건·controls 0·서술문만)은 늘 통과해 CI 가 초록이었다. 운영 응답에서 뽑은 실제 형태의 패킷과
+  // 실행 가능 문장이 든 출력으로 고정한다. H9: AI 가 쓴 응급조치(firstAid)는 채택하지 않는다(결정 8).
+  test("accepts a real-shaped packet-mode work plan, strips AI first aid, and rejects an invented control", async () => {
+    const fixture = JSON.parse(readFileSync(
+      path.resolve(__dirname, "fixtures/grounding-packets/mfg-press.json"),
+      "utf8"
+    )) as { question: string; dbHarnessPacket: DbHarnessPacket; citations: SearchResult[] };
+    const graph = assembleInjectionGraph(null);
+    const packet = buildGroundedGenerationPacket({
+      dbHarnessPacket: fixture.dbHarnessPacket,
+      legalCandidates: fixture.citations.slice(0, 6),
+      eligibleKoshaIds: new Set<string>(),
+      ontologySources: buildOntologyGroundingSources(graph, resolveInjectionTaskLabels({ taskId: "press", layers: [] }))
+    });
+    expect(packet.status).toBe("ready");
+    expect(packet.checklist.status).toBe("review_required");
+    const ontology = packet.sources.filter((source) => source.kind === "ontology");
+    expect(ontology.length).toBeGreaterThanOrEqual(3);
+    const step = (index: number) => ({
+      stepNo: index + 1,
+      action: `${index + 1}단계`,
+      equipment: "프레스",
+      safetyMeasure: ontology[index].controls[0],
+      owner: "관리감독자",
+      relatedRiskRowIndex: [0],
+      evidenceRefs: [ontology[index].referenceKey],
+      verification: "육안 확인"
+    });
+    const workPlan = {
+      workOverview: { workName: "프레스 금형 교체", description: "금형 교체", workerCount: 6, location: "프레스 라인", condition: "실내", equipment: ["프레스"] },
+      workSteps: [step(0), step(1), step(2)],
+      stopCriteria: ["현장 확인 필요", "현장 확인 필요"],
+      emergencyResponse: { contacts: [{ role: "관리감독자", phone: "____" }], evacRoute: "주 출입구", firstAid: "AI 가 지어낸 응급조치 문장" },
+      approvers: { author: "작성자", reviewer: "검토자", approver: "승인자" }
+    };
+    mocks.anthropicGenerate.mockImplementation(async (_model: string, prompt: string) => {
+      if (prompt.includes('"workPlanStructured"')) return JSON.stringify({ workPlanStructured: workPlan });
+      if (prompt.includes('"tbmBriefingStructured"')) {
+        return JSON.stringify({
+          tbmBriefingStructured: {
+            meta: { dateTime: "2026-10-26 08:00" },
+            todayWork: { name: "프레스 금형 교체" },
+            hazards: [{ hazard: "끼임" }, { hazard: "낙하" }],
+            measures: [
+              { action: "패킷에 없는 조치를 지어낸다", evidenceRefs: [ontology[0].referenceKey] },
+              { action: ontology[1].controls[0], evidenceRefs: [ontology[1].referenceKey] }
+            ],
+            stopCriteria: ["현장 확인 필요", "현장 확인 필요"],
+            confirmTopics: ["확인 1", "확인 2", "확인 3"]
+          }
+        });
+      }
+      throw new Error("fixture deterministic fallback");
+    });
+    mocks.vertexGenerate.mockRejectedValue(new Error("fixture vertex unavailable"));
+    const { generateAllDeliverablesWithDiagnostics } = await import("@/lib/ai-deliverables");
+
+    const result = await generateAllDeliverablesWithDiagnostics({
+      scenario: { companyName: "", siteName: "안산 공장", workSummary: "프레스 금형 교체 작업", workerCount: 6, weatherNote: "실내" },
+      question: fixture.question,
+      groundingPacket: packet,
+      traceId: "trace-real-shaped-packet"
+    });
+
+    expect(result.diagnostics.groupResults).toContainEqual(expect.objectContaining({ group: "workPlanStructured", status: "fulfilled" }));
+    expect(result.deliverables.workPlanStructured?.emergencyResponse.firstAid).toBe("현장 확인 필요");
+    expect(result.deliverables.workPlanStructured?.workSteps.map((item) => item.safetyMeasure)).toEqual(
+      ontology.slice(0, 3).map((source) => source.controls[0])
+    );
+    expect(result.diagnostics.groupResults).toContainEqual(expect.objectContaining({
+      group: "tbmBriefingStructured",
+      status: "rejected",
+      reason: "grounding review required"
+    }));
+    expect(result.diagnostics.grounding?.violations).toContainEqual(expect.objectContaining({
+      group: "tbmBriefingStructured",
+      code: "control_claim_not_in_packet"
+    }));
+    expect(result.diagnostics.grounding?.checklist).toEqual(fixture.dbHarnessPacket.ontologyChecklist);
   });
 });
 
