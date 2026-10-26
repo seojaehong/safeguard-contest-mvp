@@ -89,6 +89,16 @@ function validateForbiddenTerms(node: unknown, path: string, violations: Groundi
   }
 }
 
+/**
+ * AI 묶음 출력에서 금지어가 든 글자 칸(evidenceRefs 제외). 패킷 게이트(validateGroundedGenerationOutput)와
+ * 비패킷 AI 묶음 거절(ai-deliverables rejectForGrounding)이 같은 목록·같은 허용 복합어를 쓴다(11-3 의 14번).
+ */
+export function findForbiddenUserTerms(output: unknown): GroundingViolation[] {
+  const violations: GroundingViolation[] = [];
+  validateForbiddenTerms(output, "$", violations);
+  return violations;
+}
+
 export type GroundedGenerationValidation = Readonly<{
   status: "grounded" | "review_required";
   violations: readonly GroundingViolation[];

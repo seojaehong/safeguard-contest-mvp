@@ -37,6 +37,7 @@ import { formatWorkDate, isHeavyOutputDoc, planModelAttempts, planPostAnthropicA
 import { ACCIDENT_REPORT_TEMPLATE, OFFICIAL_CONTACTS, sanitizeContacts } from "@/lib/safety-contacts";
 import { gateCitations } from "@/lib/law-citation-gate";
 import {
+  findForbiddenUserTerms,
   serializeGroundedGenerationPacket,
   validateGroundedGenerationOutput,
   type GroundedGenerationPacket,
@@ -1443,18 +1444,26 @@ export async function generateAllDeliverablesWithDiagnostics(
     }
   };
 
-  const rejectForGrounding = (name: string, value: Partial<AiDeliverables>): boolean => {
+  const GROUNDING_REJECT_REASON = "grounding review required";
+  const FORBIDDEN_TERM_REJECT_REASON = "사용자 금지어(판정·진단·상담·노무사) 거절";
+  // 거절 사유를 돌려준다(null = 채택). 패킷 모드는 종전 게이트 그대로, 비패킷 AI 묶음도 금지어 4종만은 같은 목록으로 거절한다(11-3 의 14번).
+  const rejectForGrounding = (name: string, value: Partial<AiDeliverables>): string | null => {
     if (opts.phaseAGrounding) {
       const phaseAValidation = validatePhaseAStructuredCitationOutput(value, opts.phaseAGrounding);
       if (phaseAValidation.status === "review_required") {
         rejectedGroundingGroups.push(name);
         resetRejectedGroup(name);
-        return true;
+        return GROUNDING_REJECT_REASON;
       }
     }
-    if (!opts.groundingPacket) return false;
+    if (!opts.groundingPacket) {
+      // 비패킷 경로: 금지어가 든 묶음은 치환하지 않고 통째로 거절해 결정론 틀로 떨어뜨린다(패킷 게이트와 같은 목록·허용 복합어).
+      if (findForbiddenUserTerms(value).length === 0) return null;
+      resetRejectedGroup(name);
+      return FORBIDDEN_TERM_REJECT_REASON;
+    }
     const validation = validateGroundedGenerationOutput(value, opts.groundingPacket);
-    if (validation.status === "grounded") return false;
+    if (validation.status === "grounded") return null;
     rejectedGroundingGroups.push(name);
     groundingViolations.push(...validation.violations.map((violation) => ({
       group: name,
@@ -1462,15 +1471,16 @@ export async function generateAllDeliverablesWithDiagnostics(
       path: violation.path
     })));
     resetRejectedGroup(name);
-    return true;
+    return GROUNDING_REJECT_REASON;
   };
 
   settled.forEach((s, i) => {
     const name = allSpecs[i].name;
     if (s.status === "fulfilled") {
       const value = withoutAiFirstAid(s.value, Boolean(opts.groundingPacket));
-      if (rejectForGrounding(name, value)) {
-        groupResults.push({ group: name, status: "rejected", reason: "grounding review required" });
+      const rejectReason = rejectForGrounding(name, value);
+      if (rejectReason) {
+        groupResults.push({ group: name, status: "rejected", reason: rejectReason });
         safeEmit(onProgress, { kind: "doc", name, status: "fail" });
         return;
       }
@@ -1491,13 +1501,13 @@ export async function generateAllDeliverablesWithDiagnostics(
   applyRiskRowClamp(out);
   if (scope === "full") {
     const tbmRiskLinksResult = await generateTbmRiskLinks(ctx, out.structuredRiskRows || [], traceOptions);
-    const groundingRejected = rejectForGrounding("tbmRiskLinks", tbmRiskLinksResult);
-    if (!groundingRejected) Object.assign(out, tbmRiskLinksResult);
-    const tbmRiskLinksOk = !groundingRejected && (tbmRiskLinksResult.tbmRiskLinks?.length || 0) > 0;
+    const tbmRiskLinksRejectReason = rejectForGrounding("tbmRiskLinks", tbmRiskLinksResult);
+    if (!tbmRiskLinksRejectReason) Object.assign(out, tbmRiskLinksResult);
+    const tbmRiskLinksOk = !tbmRiskLinksRejectReason && (tbmRiskLinksResult.tbmRiskLinks?.length || 0) > 0;
     groupResults.push({
       group: "tbmRiskLinks",
       status: tbmRiskLinksOk ? "fulfilled" : "rejected",
-      reason: tbmRiskLinksOk ? undefined : groundingRejected ? "grounding review required" : "empty or skipped"
+      reason: tbmRiskLinksOk ? undefined : tbmRiskLinksRejectReason ?? "empty or skipped"
     });
     safeEmit(onProgress, { kind: "doc", name: "tbmRiskLinks", status: tbmRiskLinksOk ? "ok" : "fail" });
   }
