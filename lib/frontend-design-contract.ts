@@ -206,6 +206,9 @@ export const standaloneToolRoutes = [
   "/tools/leave",
   "/tools/leave/advanced",
   "/tools/leave/settlement",
+  // 동영상 위험 점검 v0(2026-10-25 TASK-824). 관리자 로그인 전용 시험 화면이라 브라우저 증빙(111행)을
+  // 찍기 전까지 명시적 예외로 둔다. 운영 화면 진입점을 붙일 때 userVisibleRoutes 로 옮긴다.
+  "/tools/video-check",
 ] as const;
 
 export const specialSurfaceFiles = [
