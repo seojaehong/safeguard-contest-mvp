@@ -1102,6 +1102,7 @@ export function SafeGuardCommandCenter({
   const [message, setMessage] = useState("");
   const [inputError, setInputError] = useState("");
   const commandInputRef = useRef<HTMLTextAreaElement>(null);
+  const deepReviewRef = useRef<HTMLDetailsElement>(null);
   const [state, setState] = useState<GenerationState>("idle");
   const [checkedActions, setCheckedActions] = useState<boolean[]>([]);
   const [liveWeather, setLiveWeather] = useState<WeatherBrief | null>(null);
@@ -1202,6 +1203,16 @@ export function SafeGuardCommandCenter({
     }
     setWorkspacePage(targetPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // UX PR-0 ②: 본문 details 를 기본 펼침으로 두지 않는다 — 390px 문서 화면 한 화면 계약
+  // (workspace-layout-regression 「documents cockpit」 bodyHeight ≤ 1.05×viewport)과 충돌한다.
+  // 대신 머리 아래 확인 블록에서 한 번에 연다.
+  function openDocumentDeepReview() {
+    const element = deepReviewRef.current;
+    if (!element) return;
+    element.open = true;
+    element.scrollIntoView({ block: "start", behavior: "smooth" });
   }
 
   function focusWorkpackEditor(key: DocumentKey) {
@@ -2371,20 +2382,30 @@ export function SafeGuardCommandCenter({
                 <b>{generationProgress.secondary}</b>
               </div>
             </div>
-            {data?.scenario.taskClassification?.status === "review_required" ? (
-              <p className="input-helper input-helper-error" role="alert" data-task-classification="review_required">
-                <strong>작업 유형 확인 필요</strong> — {data.scenario.taskClassification.reason} 문서팩은 작업 유형이 확인될 때까지 보류됩니다.
-              </p>
-            ) : null}
-            {requiresRevalidation ? (
-              <button
-                type="button"
-                className="button command-primary workbench-primary-action document-revalidate-action"
-                disabled={isRevalidating}
-                onClick={() => void handleEditedWorkpackRevalidation()}
-              >
-                {isRevalidating ? "재검증 중" : "편집본 재검증"}
-              </button>
+            {data ? (
+              <div className="document-check-first" data-testid="document-check-first" aria-label="확인할 항목">
+                {data.scenario.taskClassification?.status === "review_required" ? (
+                  <p className="input-helper input-helper-error" role="alert" data-task-classification="review_required">
+                    <strong>작업 유형 확인 필요</strong> — {data.scenario.taskClassification.reason} 문서팩은 작업 유형이 확인될 때까지 보류됩니다.
+                  </p>
+                ) : null}
+                {requiresRevalidation ? (
+                  <button
+                    type="button"
+                    className="button command-primary workbench-primary-action document-revalidate-action"
+                    disabled={isRevalidating}
+                    onClick={() => void handleEditedWorkpackRevalidation()}
+                  >
+                    {isRevalidating ? "재검증 중" : "편집본 재검증"}
+                  </button>
+                ) : null}
+                <p className="input-helper document-check-first-line">
+                  근거 {documentEvidenceCount}건 · 확인 필요 {documentReviewCount}건.{" "}
+                  <button type="button" className="document-check-first-open" onClick={openDocumentDeepReview}>
+                    {selectedOutputItem.title} 본문 바로 열기
+                  </button>
+                </p>
+              </div>
             ) : null}
             {busy ? (
               <div className="generation-focus" role="status" aria-live="polite">
@@ -2506,7 +2527,7 @@ export function SafeGuardCommandCenter({
                   </section>
                 </div>
               </details>
-              <details className="document-deep-review" data-testid="document-deep-review">
+              <details className="document-deep-review" data-testid="document-deep-review" ref={deepReviewRef}>
                 <summary>
                   <span>문서 깊게 보기</span>
                   <strong>{selectedOutputItem.title} 미리보기 · 편집 · 다운로드</strong>

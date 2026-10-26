@@ -14520,6 +14520,31 @@ body:has(.safeclaw-landing) :is(
   min-width: 0;
 }
 
+/* UX PR-0 ②·③: 결과 머리 바로 아래 「확인할 항목」 블록. 본문 details 는 접힌 채 두고 여기서 연다. */
+.command-center-shell .document-check-first {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 12px;
+  min-width: 0;
+}
+
+.command-center-shell .document-check-first > .input-helper {
+  margin: 0;
+}
+
+.command-center-shell .document-check-first-open {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
 .command-center-shell .document-secondary-actions > details {
   min-width: 0;
 }
