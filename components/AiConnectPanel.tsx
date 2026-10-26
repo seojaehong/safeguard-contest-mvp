@@ -296,7 +296,7 @@ const tabs: { id: AiConnectTab; label: string; body: string }[] = [
   {
     id: "openclaw",
     label: "OpenClaw/Codex",
-    body: "상주 AI 안전관리자에 SafeClaw 도구를 연결합니다.",
+    body: "상주 AI 에이전트(OpenClaw·Codex)에 SafeClaw 도구를 연결합니다.",
   },
   {
     id: "claude",

@@ -98,7 +98,6 @@ export function SafeClawLanding() {
             <p className="safeclaw-hero-position">현장관리자의 문서 준비를 돕습니다 — 안전 판단과 최종 확인은 사람이 맡습니다.</p>
             <div className="safeclaw-os-cta">
               <Link href="/workspace" className="primary safeclaw-shared-action">작업공간 열기 →</Link>
-              <Link href="/documents" className="safeclaw-shared-action">문서팩 보기</Link>
             </div>
           </div>
           <HeroConsoleReplay />
