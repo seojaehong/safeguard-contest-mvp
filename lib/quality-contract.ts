@@ -1,6 +1,18 @@
 import type { AskResponse, QualityContract, QualityContractItem, QualityContractStatus } from "./types";
-import { auditAskDeliverables, summarizeIntegrityItems } from "./deliverable-integrity-policy";
-import { buildPermitRequiredTerms, resolvePermitCategory } from "./permit-workplan-forms";
+import {
+  auditAskDeliverables,
+  auditTextDocument,
+  summarizeIntegrityItems,
+  type IntegritySummary,
+  type TextDocumentAudit
+} from "./deliverable-integrity-policy";
+import {
+  auditWorkPlanStructuredForm,
+  buildPermitRequiredTerms,
+  buildWorkPlanLegalForm,
+  buildWorkPlanRequiredTerms,
+  resolvePermitCategory
+} from "./permit-workplan-forms";
 
 const REQUIRED_EVIDENCE_KEYS = [
   "riskAssessmentDraft",
@@ -178,38 +190,83 @@ function structuredItem(response: AskResponse): QualityContractItem {
 
 // 허가서는 허가구분별 필수 칸을 본다(WP-14). 허가구분은 작업 분류에서 정한 값이고, 본문의 「허가구분:」 줄이
 // 그 값과 다르거나 밀폐공간 측정·감시인 칸이 없으면 막힌다. 작업 유형 보류 응답은 허가서를 만들지 않으므로 보지 않는다.
-function auditCoreDeliverables(response: AskResponse) {
-  const permitCategory = resolvePermitCategory(response.scenario?.taskClassification?.taskId, response.question);
+// 작업계획서는 별표4 해당 호의 필수 칸을 본다(WP-06). 허가서 게이트(WP-14)와 같은 방식 — 작업 분류에서 만든 양식
+// (buildWorkPlanLegalForm)의 섹션 제목·항목 라벨이 본문에 없으면 막고, full 모드 구조화본(workPlanStructured)도 같은 칸을 가져야 한다.
+// 값이 비어 있는 칸(「(현장 기재)」)은 막지 않는다. 작업 유형 보류 응답은 양식을 만들 수 없으므로 보지 않는다.
+const WORK_PLAN_GATE_KEYS: ReadonlySet<string> = new Set(["workPlanDraft", "workPlanStructured"]);
+
+function auditCoreDeliverables(response: AskResponse): TextDocumentAudit[] {
+  const classification = response.scenario?.taskClassification;
+  const classified = classification?.status === "classified";
+  const permitCategory = resolvePermitCategory(classification?.taskId, response.question);
   const permitText = response.deliverables.workPermitDraft;
   const auditPermit = permitCategory !== null
-    && response.scenario?.taskClassification?.status === "classified"
+    && classified
     && typeof permitText === "string"
     && permitText.length > 0;
-  return auditAskDeliverables({
+  const workPlanText = response.deliverables.workPlanDraft;
+  const workPlanInput = classified && classification?.taskId && typeof workPlanText === "string" && workPlanText.length > 0
+    ? { taskId: classification.taskId, question: response.question, workerCount: response.scenario.workerCount }
+    : null;
+  const workPlanForm = workPlanInput ? buildWorkPlanLegalForm(workPlanInput) : null;
+  const items = auditAskDeliverables({
     deliverables: response.deliverables,
     requiredKeys: auditPermit ? [...CORE_DELIVERABLE_INTEGRITY_KEYS, "workPermitDraft"] : CORE_DELIVERABLE_INTEGRITY_KEYS,
     ...(auditPermit && permitCategory ? { requiredTermsByKey: { workPermitDraft: buildPermitRequiredTerms(permitCategory) } } : {})
   });
+  if (workPlanInput && workPlanForm && typeof workPlanText === "string") {
+    // 계획서는 「칸 존재」(필수어)만 본다. 일반 감사(placeholder·길이)는 지금까지 계획서에 돌지 않았고,
+    // 운영 본문은 부록 체인이 붙어 「현장 확인 필요」가 여러 번 있을 수 있어 같이 걸면 멀쩡한 응답이 막힌다.
+    const textAudit = auditTextDocument({
+      key: "workPlanDraft",
+      title: "workPlanDraft",
+      text: workPlanText,
+      requiredTerms: buildWorkPlanRequiredTerms(workPlanInput, workPlanForm)
+    });
+    const missingTerms = textAudit.missingRequiredTerms;
+    items.push({
+      ...textAudit,
+      verdict: missingTerms.length ? "blocked" : "pass",
+      issues: missingTerms.length ? [{ code: "missing_required_term", detail: `법정 칸 누락: ${missingTerms.join(", ")}` }] : []
+    });
+  }
+  if (workPlanForm && response.deliverables.workPlanStructured) {
+    const structuredAudit = auditWorkPlanStructuredForm(response.deliverables.workPlanStructured, workPlanForm);
+    if (structuredAudit.verdict === "blocked") {
+      items.push({
+        key: "workPlanStructured",
+        title: "workPlanStructured",
+        verdict: "blocked",
+        charCount: 0,
+        placeholderCount: 0,
+        missingRequiredTerms: structuredAudit.missing,
+        missingScenarioTerms: [],
+        issues: [{ code: "missing_required_term", detail: `법정 칸 누락: ${structuredAudit.missing.join(", ")}` }]
+      });
+    }
+  }
+  return items;
+}
+
+function integrityDetail(summary: IntegritySummary, blockedKeys: string[]): string {
+  if (summary.verdict === "pass") {
+    return `핵심 문서 ${summary.passCount}/${summary.totalCount}종의 본문 placeholder와 필수 문구를 확인했습니다.`;
+  }
+  const base = `핵심 문서 ${summary.blockedCount}/${summary.totalCount}종 보완 필요: ${blockedKeys.join(", ")}`;
+  return blockedKeys.some((key) => WORK_PLAN_GATE_KEYS.has(key))
+    ? `${base} — 작업계획서 별표4 법정 칸 누락, 현장 확인 필요`
+    : base;
 }
 
 function deliverableIntegrityItem(response: AskResponse): QualityContractItem {
   const items = auditCoreDeliverables(response);
   const summary = summarizeIntegrityItems(items);
-  if (summary.verdict === "pass") {
-    return {
-      key: "integrity",
-      label: "문서 본문 검수",
-      status: "ready",
-      detail: `핵심 문서 ${summary.passCount}/${summary.totalCount}종의 본문 placeholder와 필수 문구를 확인했습니다.`
-    };
-  }
-
   const blockedKeys = items.filter((item) => item.verdict === "blocked").map((item) => item.key);
   return {
     key: "integrity",
     label: "문서 본문 검수",
-    status: "blocked",
-    detail: `핵심 문서 ${summary.blockedCount}/${summary.totalCount}종 보완 필요: ${blockedKeys.join(", ")}`
+    status: summary.verdict === "pass" ? "ready" : "blocked",
+    detail: integrityDetail(summary, blockedKeys)
   };
 }
 
@@ -222,9 +279,7 @@ function deliverableIntegritySummary(response: AskResponse) {
     checkedCount: summary.totalCount,
     blockedCount: summary.blockedCount,
     blockedKeys,
-    detail: summary.verdict === "pass"
-      ? `핵심 문서 ${summary.passCount}/${summary.totalCount}종의 본문 placeholder와 필수 문구를 확인했습니다.`
-      : `핵심 문서 ${summary.blockedCount}/${summary.totalCount}종 보완 필요: ${blockedKeys.join(", ")}`
+    detail: integrityDetail(summary, blockedKeys)
   };
 }
 

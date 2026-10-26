@@ -2,6 +2,8 @@ import { defineConfig } from "vitest/config";
 import path from "node:path";
 
 export default defineConfig({
+  // tsconfig 가 jsx: preserve 라 .tsx 모듈(편집기의 순수 함수)을 시험에서 import 하려면 vitest 쪽에서 JSX 를 변환해야 한다.
+  oxc: { jsx: { runtime: "automatic" } },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "."),

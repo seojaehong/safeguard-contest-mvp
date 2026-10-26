@@ -94,12 +94,17 @@ describe("표시 이름 사전 — 관리번호", () => {
     expect(riskManagementNumber(99)).toBe("위험성평가-100");
   });
 
-  it("RA- 코드만 바꾸고 다른 값은 그대로 둔다", () => {
+  // inventory 10-4 의 5번(2026-10-26): full 경로 Phase A control id(fall-work-platform 등 registry 의 id)도
+  // RA- 코드와 같은 자리에서 행 순번 「위험성평가-NN」이 된다. 사람이 적은 값(한글·대문자·소문자 약호)은 그대로.
+  it("RA- 코드와 Phase A control id 만 바꾸고 다른 값은 그대로 둔다", () => {
     expect(riskManagementNumberLabel("RA-press-3", 0)).toBe("위험성평가-01");
     expect(riskManagementNumberLabel("RA-confined-space-1", 2)).toBe("위험성평가-03");
     expect(riskManagementNumberLabel("위험성평가-07", 0)).toBe("위험성평가-07");
     expect(riskManagementNumberLabel("ABC", 0)).toBe("ABC");
-    expect(riskManagementNumberLabel("fall-work-platform", 0)).toBe("fall-work-platform");
+    expect(riskManagementNumberLabel("fall-work-platform", 0)).toBe("위험성평가-01");
+    expect(riskManagementNumberLabel("electrical-grounding", 1)).toBe("위험성평가-02");
+    expect(riskManagementNumberLabel("lift-check", 0)).toBe("lift-check");
+    expect(riskManagementNumberLabel("a-1", 0)).toBe("a-1");
     expect(riskManagementNumberLabel("", 4)).toBe("");
     expect(riskManagementNumberLabel(undefined, 4)).toBe("");
   });

@@ -14,6 +14,7 @@ import {
   DOCUMENT_KEY_NAMES,
   enumCellLabel,
   fourMLabel,
+  PHASE_A_CONTROL_ID_ALTERNATION,
   riskLevelLabel,
   riskManagementNumber,
   riskManagementNumberLabel,
@@ -44,7 +45,10 @@ export const USER_OUTPUT_FORBIDDEN_PATTERNS: ReadonlyArray<{ rule: string; patte
   },
   { rule: "문서 키", pattern: new RegExp(`\\b(?:${DOCUMENT_KEY_NAMES.join("|")})\\b`, "u") },
   // 위험성평가 관리번호의 taskId 기반 영문 코드(RA-press-1·RA-confined-space-1). 운영 4건 15행이 이 게이트를 지나 나갔다(2026-10-25).
-  { rule: "위험성평가 관리번호 코드", pattern: /\bRA-[a-z]+(?:-[a-z]+)*-\d+\b/u }
+  { rule: "위험성평가 관리번호 코드", pattern: /\bRA-[a-z]+(?:-[a-z]+)*-\d+\b/u },
+  // full 경로 Phase A control id(fall-work-platform 등)가 「관리번호:」 줄에 그대로 나가는 꼴(inventory 10-4 의 5번).
+  // 어휘는 registry 정본(PHASE_A_CONTROL_IDS) — 사람이 적은 소문자 약호(lift-check)는 잡지 않는다.
+  { rule: "위험성평가 관리번호 영문 id", pattern: new RegExp(`^\\s*관리번호:\\s*(?:${PHASE_A_CONTROL_ID_ALTERNATION})\\s*$`, "mu") }
 ];
 
 export type UserOutputLeak = { rule: string; sample: string };
@@ -118,8 +122,33 @@ const PHRASE_REPLACEMENTS: ReadonlyArray<readonly [RegExp, string]> = [
 // 본문 글에는 행 순번이 없으므로 코드 끝의 순번을 쓴다(기본 틀은 1부터 행 순서대로 매기므로 구조화 행과 같다).
 const RISK_CONTROL_CODE_IN_TEXT = /\bRA-[a-z]+(?:-[a-z]+)*-(\d+)\b/gu;
 
+// Phase A control id(fall-work-platform)가 「관리번호:」 줄에 있으면 행 순번으로 바꾼다. id 에는 순번이 없으므로
+// 직렬화본의 머리줄 「[N. 작업명]」 번호를 쓰고, 머리줄이 없으면 「관리번호:」 줄의 등장 순서를 쓴다(같은 입력에 두 번 돌려도 같다).
+const RISK_ROW_HEADER_LINE = /^\s*\[(\d+)\.\s/u;
+const PHASE_A_CONTROL_ID_LINE = new RegExp(`^(\\s*관리번호:\\s*)(${PHASE_A_CONTROL_ID_ALTERNATION})(\\s*)$`, "u");
+
+function rewritePhaseAControlIdLines(text: string): string {
+  if (!/관리번호:/u.test(text)) return text;
+  let headerOrdinal: number | null = null;
+  let occurrence = 0;
+  return text
+    .split("\n")
+    .map((line) => {
+      const header = RISK_ROW_HEADER_LINE.exec(line);
+      if (header) headerOrdinal = Number(header[1]);
+      const match = PHASE_A_CONTROL_ID_LINE.exec(line);
+      if (!match) return line;
+      occurrence += 1;
+      const index = headerOrdinal !== null && headerOrdinal > 0 ? headerOrdinal - 1 : occurrence - 1;
+      return `${match[1]}${riskManagementNumber(index)}${match[3]}`;
+    })
+    .join("\n");
+}
+
 function rewriteRiskControlCodes(text: string): string {
-  return text.replace(RISK_CONTROL_CODE_IN_TEXT, (_all, ordinal: string) => riskManagementNumber(Number(ordinal) - 1));
+  return rewritePhaseAControlIdLines(
+    text.replace(RISK_CONTROL_CODE_IN_TEXT, (_all, ordinal: string) => riskManagementNumber(Number(ordinal) - 1))
+  );
 }
 
 const DOCUMENT_KEY_PATTERN = new RegExp(`\\b(${DOCUMENT_KEY_NAMES.join("|")})\\b`, "gu");
@@ -278,7 +307,8 @@ function gateRiskRowText<T>(row: T, index: number): T {
     const value = next[field];
     if (typeof value === "string") next[field] = gateUserOutputText(value);
   }
-  // 관리번호: 기본 틀 영문 코드(RA-…-N)만 「위험성평가-NN」으로. Phase A control id 와 사람이 적은 값은 그대로(연결 키).
+  // 관리번호: 기본 틀 영문 코드(RA-…-N)·Phase A control id(fall-work-platform)는 「위험성평가-NN」으로. 사람이 적은 값은 그대로.
+  // 연결 키는 evidenceRefs(「ONT:…」)에 남는다. Phase A 검증(validatePhaseAStructuredCitationOutput)은 생성 단계(이 게이트 앞)에서만 돈다.
   if (typeof next.controlId === "string") {
     const label = riskManagementNumberLabel(next.controlId, index);
     if (label !== next.controlId) next.controlId = label;
@@ -286,11 +316,16 @@ function gateRiskRowText<T>(row: T, index: number): T {
   return next as T;
 }
 
+/** 위험성평가 구조화 행 배열에 응답 게이트와 같은 행 게이트를 건다(편집기 저장본 복원이 쓴다). 입력은 바꾸지 않는다. */
+export function gateRiskAssessmentRows<T>(rows: readonly T[]): T[] {
+  return rows.map((row, index) => gateRiskRowText(row, index));
+}
+
 function gateStructuredRiskRows<S>(structured: S): S {
   if (!structured || typeof structured !== "object") return structured;
   const record = structured as Record<string, unknown>;
   if (!Array.isArray(record.riskAssessmentRows)) return structured;
-  return { ...record, riskAssessmentRows: record.riskAssessmentRows.map((row, index) => gateRiskRowText(row, index)) } as S;
+  return { ...record, riskAssessmentRows: gateRiskAssessmentRows(record.riskAssessmentRows) } as S;
 }
 
 export function gateAskResponseUserOutput<T extends { deliverables: DeliverablesLike; structured?: unknown }>(response: T): T {
