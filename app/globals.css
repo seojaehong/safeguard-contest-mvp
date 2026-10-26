@@ -10057,7 +10057,36 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+/* report.md D-6 (2026-10-25): table-layout: fixed + 첫 열 52px·끝 열 128px 고정 때문에 열이 많은 표(위험성평가표 13열)는
+   가운데 열이 한 글자 폭으로 줄어 세로로 깨졌다. 9열 이상은 표에 최소 폭을 주고 .safety-form-table-wrap(overflow-x: auto)
+   안에서 가로 스크롤한다. 5~8열은 640px. 문서 바깥(scrollWidth)은 늘지 않는다. */
+.safety-form-preview table:has(tr > :nth-child(5)) {
+  min-width: 640px;
+}
+
+.safety-form-preview table:has(tr > :nth-child(9)) {
+  min-width: 1040px;
+}
+
 @media (max-width: 760px) {
+  /* D-6 보조: 좁은 화면에서는 고정 열 폭과 칸 여백을 줄이고 낱말 단위로 줄바꿈한다. */
+  .safety-form-preview th,
+  .safety-form-preview td {
+    padding: 6px 5px;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  .safety-form-preview th:first-child,
+  .safety-form-preview td:first-child {
+    width: 34px;
+  }
+
+  .safety-form-preview th:last-child,
+  .safety-form-preview td:last-child {
+    width: 56px;
+  }
+
   .safety-form-preview-head,
   .safety-form-meta-grid,
   .safety-form-check-row,
@@ -21206,6 +21235,13 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-ink);
   padding: 0;
   overflow: visible;
+}
+
+/* report.md D-1 (2026-10-25): 아래 .document-editor :is(h3, strong) { color: var(--workspace-ink) } 가
+   .safety-form-section-stack h3 의 color: var(--paper) 를 덮어 검정 띠 위에 검정 글자가 됐다.
+   서식 띠(#171b22)는 그대로 두고 글자색만 되돌린다. 야간 테마는 ink 가 밝아 문제 없음. */
+.command-center-shell.workspace-theme-day .field-workspace .document-editor .safety-form-section-stack h3 {
+  color: var(--paper);
 }
 
 .command-center-shell.workspace-theme-day .field-workspace .workpack-sidebar,
