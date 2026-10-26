@@ -1884,7 +1884,7 @@ describe("workspace layout regression", () => {
     await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
     await page.getByRole("button", { name: /안전 문서 생성/ }).click();
     await page.locator(".workspace-document-page").waitFor({ state: "visible", timeout: 60_000 });
-    await page.getByText(/12\/12 생성|안전 문서팩 3종 준비 완료/u).first().waitFor({ timeout: 60_000 });
+    await page.getByText(/12\/12 생성|확인할 항목을 먼저 보세요/u).first().waitFor({ timeout: 60_000 });
 
     const metrics = await page.evaluate(async () => {
       await document.fonts.ready;
@@ -2011,7 +2011,7 @@ describe("workspace layout regression", () => {
     await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
     await page.getByRole("button", { name: /안전 문서 생성/ }).click();
     await page.locator(".workspace-document-page").waitFor({ state: "visible", timeout: 60_000 });
-    await page.getByText(/12\/12 생성|안전 문서팩 3종 준비 완료/u).first().waitFor({ timeout: 60_000 });
+    await page.getByText(/12\/12 생성|확인할 항목을 먼저 보세요/u).first().waitFor({ timeout: 60_000 });
 
     const documents = await readStageMetrics(".document-workbench");
     expect(documents.bodyHeight).toBeLessThanOrEqual(Math.ceil(documents.viewportHeight * 1.25));

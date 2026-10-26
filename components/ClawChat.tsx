@@ -7,7 +7,7 @@ import {
 } from "@/lib/claw-chat-session";
 import { parseSseChunk } from "@/lib/sse-client";
 
-// 클로(Claw) AI 안전관리자 채팅 v0의 UI.
+// 클로(Claw) 작업팩 질문 채팅 v0의 UI.
 // SSE 스트림({kind:"text-delta"|"tool"|"final"|"error"})을 lib/sse-client.parseSseChunk로
 // 파싱해, 도구 사용은 콘솔 라인(.agent-console*)으로 흘리고 답변은 타이핑 스트리밍한다.
 
@@ -180,10 +180,10 @@ export function ClawChat({ authToken, siteOptions, selectedSiteId, onSiteChange,
   );
 
   return (
-    <article className="workspace-panel card claw-chat" aria-label="클로 AI 안전관리자">
+    <article className="workspace-panel card claw-chat" aria-label="이 작업팩에 대해 묻기">
       <div className="compact-head">
-        <span className="eyebrow">상주 안전관리자</span>
-        <strong>클로에게 묻기</strong>
+        <span className="eyebrow">클로에게 묻기</span>
+        <strong>이 작업팩에 대해 묻기</strong>
       </div>
       {siteOptions.length > 1 ? (
         <select
@@ -268,7 +268,7 @@ export function ClawChat({ authToken, siteOptions, selectedSiteId, onSiteChange,
         </button>
       </form>
 
-      <p className="claw-disclaimer">클로의 답변은 초안입니다. 최종 판단은 현장 확인과 전문가 자문으로.</p>
+      <p className="claw-disclaimer">만든 문서는 초안입니다. 최종 확인은 현장에서 사람이 합니다.</p>
     </article>
   );
 }

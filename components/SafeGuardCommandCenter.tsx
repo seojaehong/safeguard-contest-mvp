@@ -16,6 +16,7 @@ import {
   parseStoredCurrentWorkpack
 } from "@/lib/current-workpack";
 import { fetchAskStream, shouldRetryAskViaLegacy } from "@/lib/ask-stream-client";
+import { ANONYMOUS_MESSAGE } from "@/lib/ask-mode-messages";
 import { nextConsoleLines, type AgentConsoleLine } from "@/lib/agent-console-copy";
 import type { AskResponse, IntegrationMode, QualityContractStatus } from "@/lib/types";
 import { buildDbHarnessSurfaceContract, type HarnessImprovement, type HarnessMemoryInput } from "@/lib/db-harness";
@@ -918,165 +919,6 @@ function StepDot({ status }: { status: StepStatus }) {
   return <span className={`step-dot ${status}`} aria-hidden="true" />;
 }
 
-function SafeClawHomepage({ onStart }: { onStart: () => void }) {
-  const navItems = [
-    ["시스템", "system"],
-    ["선언", "manifesto"],
-    ["실행", "execution"],
-    ["언어", "language"],
-    ["도입사례", "proof"],
-    ["작업공간", "command"]
-  ] as const;
-  const pipeline = [
-    { code: "01 · INPUT", title: "입력", body: "오늘 작업 한 줄에서 현장 브리프와 근거 후보를 준비", metric: "현장 상황" },
-    { code: "02 · DOCS", title: "문서", body: "위험성평가와 TBM을 중심으로 공식 근거와 누락 조치를 대조", metric: "위험성평가/TBM" },
-    { code: "03 · SHARE", title: "공유", body: "문서팩 전파, 전송 로그, 개선사항 후보를 남김", metric: "공유·기록" }
-  ];
-  const proofSources = [
-    ["L.14991", "산업안전보건법", "법령 조항"],
-    ["KOSHA-2024", "KOSHA Guide", "공식자료"],
-    ["MOEL", "고용노동부 고시", "교육·지침"],
-    ["KMA", "기상청", "현재·예보"],
-    ["WORK24", "고용24", "후속 교육"],
-    ["AI", "Gemini", "문서 초안"]
-  ];
-  const languages = [
-    ["KO", "한국어", "오늘의 안전 수칙"],
-    ["VI", "Tiếng Việt", "Quy tắc an toàn hôm nay"],
-    ["TH", "ภาษาไทย", "กฎความปลอดภัยวันนี้"],
-    ["UZ", "O'zbek", "Bugungi xavfsizlik qoidalari"],
-    ["MN", "Монгол", "Өнөөдрийн аюулгүй"],
-    ["ZH", "中文", "今日安全守则"],
-    ["KM", "ភាសាខ្មែរ", "ច្បាប់សុវត្ថិភាពថ្ងៃនេះ"],
-    ["NE", "नेपाली", "आजको सुरक्षा नियम"],
-    ["ID", "Bahasa", "Aturan keselamatan"],
-    ["MY", "မြန်မာ", "ယနေ့ဘေးကင်းရေး"]
-  ];
-
-  function jumpTo(id: string) {
-    const target = document.getElementById(id);
-    if (!target) return;
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  return (
-    <section className="safeclaw-landing" aria-label="SafeClaw 회사 홈페이지">
-      <header className="safeclaw-landing-nav">
-        <Link href="/" className="safeclaw-os-brand" aria-label="SafeClaw OS 홈">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/ClawMark-Inverse.svg" alt="" className="safeclaw-os-mark" width={28} height={28} />
-          <strong>safeclaw/<em>os</em></strong>
-        </Link>
-        <nav aria-label="SafeClaw 홈페이지 메뉴">
-          {navItems.map(([label, id]) => (
-            <button key={id} type="button" onClick={() => jumpTo(id)}>{label}</button>
-          ))}
-        </nav>
-        <div className="safeclaw-landing-actions">
-          <button type="button" className="safeclaw-login" onClick={onStart}>로그인</button>
-          <button type="button" className="safeclaw-contact" onClick={onStart}>도입 문의 →</button>
-        </div>
-      </header>
-
-      <section className="safeclaw-os-hero" id="system">
-        <div className="safeclaw-os-status">
-          <span><i /> 시스템 · 정상 가동</span>
-          <b>REGION · KR-CENTRAL</b>
-          <b>FIELD OS · ACTIVE</b>
-          <b>UTC+9 · 2026-05-01</b>
-        </div>
-        <div className="safeclaw-os-hero-body">
-          <div>
-            <span className="safeclaw-os-tag">산업안전 · 현장 운영 체제</span>
-            <h1>
-              서류는<br />
-              <mark>안전이 아니다.</mark><br />
-              실행만이 안전이다.
-            </h1>
-            <p>safeclaw는 산업 현장의 운영 체제입니다.</p>
-            <p>한 줄 입력으로 위험성평가, TBM, 안전교육, 외국인 전파, 증빙 이력까지 연결합니다.</p>
-            <div className="safeclaw-os-cta">
-              <button type="button" onClick={onStart}>작업 생성 시작 →</button>
-              <Link href="/documents">문서팩 확인</Link>
-            </div>
-          </div>
-          <aside className="safeclaw-os-console" aria-label="실행 콘솔">
-            <span>safeclaw@field-os ~ %</span>
-            <b># 아래 버튼을 눌러 샘플 작업을 배포하세요</b>
-            <button type="button" onClick={onStart}>작업공간 열기</button>
-          </aside>
-        </div>
-      </section>
-
-      <section className="safeclaw-os-section" id="manifesto">
-        <div className="safeclaw-os-section-head">
-          <span>§ 01</span>
-          <b>선언</b>
-        </div>
-        <h2>한 줄 입력에서 확인 이력까지,<br /><mark>3단계 워크벤치</mark>로.</h2>
-        <div className="safeclaw-pipeline-grid">
-          {pipeline.map((item) => (
-            <article key={item.code}>
-              <span>{item.code}</span>
-              <h3>{item.title}</h3>
-              <p>{item.body}</p>
-              <b>{item.metric}</b>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="safeclaw-os-section compact" id="execution">
-        <div className="safeclaw-os-section-head">
-          <span>§ 02</span>
-          <b>검증 코퍼스 · 인용 가능 근거</b>
-        </div>
-        <div className="safeclaw-proof-matrix">
-          {proofSources.map(([code, title, meta]) => (
-            <article key={code}>
-              <span>{code}</span>
-              <h3>{title}</h3>
-              <p>{meta}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="safeclaw-os-section" id="language">
-        <div className="safeclaw-os-section-head">
-          <span>§ 03</span>
-          <b>언어</b>
-        </div>
-        <h2>외국인 작업자에게<br /><mark>"알아서 통역"</mark>은 끝났습니다.</h2>
-        <div className="safeclaw-language-matrix">
-          {languages.map(([code, title, sub]) => (
-            <article key={code}>
-              <span>{code}</span>
-              <h3>{title}</h3>
-              <p>{sub}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="safeclaw-os-section terminal" id="proof">
-        <div className="safeclaw-os-section-head">
-          <span>§ 04</span>
-          <b>실행</b>
-        </div>
-        <h2>작업 명령. <mark>실행.</mark></h2>
-        <div className="safeclaw-terminal">
-          <div><span /> <span /> <span /> <b>safeclaw@field-os ~ %</b><em>접속됨</em></div>
-          <pre>{`# 샘플 작업을 실제 API 조합으로 생성합니다
-질문: 서울 성수동 외벽 도장 · 이동식 비계 · 강풍 · 신규 작업자
-출력: 위험성평가표 / TBM / 안전교육 / 외국인 전송본 / 현장 전파 메시지`}</pre>
-          <button type="button" onClick={onStart}>샘플 작업 생성으로 이동 →</button>
-        </div>
-      </section>
-    </section>
-  );
-}
-
 export function SafeGuardCommandCenter({
   examples,
   initialScenarioId,
@@ -1125,6 +967,22 @@ export function SafeGuardCommandCenter({
   const [improvementSaveState, setImprovementSaveState] = useState<ImprovementSaveState>("idle");
   const [activeWorkspaceTheme, setActiveWorkspaceTheme] = useState<WorkspaceTheme>(workspaceTheme);
   const [providerAdmissionState, setProviderAdmissionState] = useState<ProviderAdmissionState>("checking");
+  // UX PR-0 ④: 익명 강등(lib/ask-mode-admission)을 생성 뒤가 아니라 입력 단계에서 미리 알린다.
+  // 세션을 읽기 전(null)에는 표시하지 않는다 — 로그인 사용자에게 잠깐 보이는 것을 막는다.
+  const [anonymousSession, setAnonymousSession] = useState<boolean | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    readWorkspaceAccessToken()
+      .then((token) => {
+        if (!cancelled) setAnonymousSession(!token);
+      })
+      .catch(() => {
+        if (!cancelled) setAnonymousSession(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [aiMode, setAiMode] = useState<"template" | "enhanced" | "full">(() => {
     if (typeof window === "undefined") return "enhanced";
     const stored = window.localStorage.getItem("safeclaw.aiMode");
@@ -2166,6 +2024,13 @@ export function SafeGuardCommandCenter({
                 {busy ? "근거 확인 중" : "안전 문서 생성"}
               </button>
             </div>
+            {anonymousSession ? (
+              // UX PR-0 ④: 익명 강등 사전 안내. 입력창 위에 줄을 더하면 1638×510 입력 화면 계약(composer.bottom ≤ viewport-8)을
+              // 넘기고, 첨부 안내 small 은 ≤720px·짧은 데스크톱에서 display:none 이라 생성 단추 아래 상태 줄에 둔다.
+              <p className="input-helper input-admission-status" data-testid="anonymous-mode-notice" role="status">
+                {ANONYMOUS_MESSAGE}
+              </p>
+            ) : null}
             {providerAdmissionState !== "ready" ? (
               <p className="input-helper input-admission-status" role="status">
                 {providerAdmissionState === "checking"
@@ -2363,7 +2228,7 @@ export function SafeGuardCommandCenter({
             <div className="compact-head document-workbench-head">
               <div>
                 <span className="eyebrow">문서 생성 완료</span>
-                <strong>{coreDocumentsReady ? "안전 문서팩 3종 준비 완료" : selectedOutputItem.title}</strong>
+                <strong>{coreDocumentsReady ? "확인할 항목을 먼저 보세요" : selectedOutputItem.title}</strong>
                 <small>{message || "선택 문서의 본문, 인용 근거, 원문 확인 상태를 함께 검토합니다."}</small>
               </div>
               <div className="document-progress-summary" aria-label={`문서팩 진행 ${generationProgress.primary}`}>
@@ -2371,6 +2236,25 @@ export function SafeGuardCommandCenter({
                 <b>{generationProgress.secondary}</b>
               </div>
             </div>
+            {data && (data.scenario.taskClassification?.status === "review_required" || requiresRevalidation) ? (
+              <div className="document-check-first" data-testid="document-check-first" aria-label="확인할 항목">
+                {data.scenario.taskClassification?.status === "review_required" ? (
+                  <p className="input-helper input-helper-error" role="alert" data-task-classification="review_required">
+                    <strong>작업 유형 확인 필요</strong> — {data.scenario.taskClassification.reason} 문서팩은 작업 유형이 확인될 때까지 보류됩니다.
+                  </p>
+                ) : null}
+                {requiresRevalidation ? (
+                  <button
+                    type="button"
+                    className="button command-primary workbench-primary-action document-revalidate-action"
+                    disabled={isRevalidating}
+                    onClick={() => void handleEditedWorkpackRevalidation()}
+                  >
+                    {isRevalidating ? "재검증 중" : "편집본 재검증"}
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
             {busy ? (
               <div className="generation-focus" role="status" aria-live="polite">
                 <span className="button-spinner" aria-hidden="true" />
@@ -2379,11 +2263,6 @@ export function SafeGuardCommandCenter({
                   <small>{generationProgress.detail}</small>
                 </div>
               </div>
-            ) : null}
-            {data?.scenario.taskClassification?.status === "review_required" ? (
-              <p className="input-helper input-helper-error" role="alert" data-task-classification="review_required">
-                <strong>작업 유형 확인 필요</strong> — {data.scenario.taskClassification.reason} 문서팩은 작업 유형이 확인될 때까지 보류됩니다.
-              </p>
             ) : null}
             {data ? (
               <section className="safety-brief-dashboard" aria-label="Safety Brief Dashboard">
@@ -2496,6 +2375,8 @@ export function SafeGuardCommandCenter({
                   </section>
                 </div>
               </details>
+              {/* UX PR-0 ②: 기본 펼침으로 두지 않는다 — 390×844·1440×723 문서 화면 한 화면 계약(workspace-layout-regression)과
+                  충돌한다. 확인 항목(review_required·재검증)은 머리 아래 블록에서 먼저 보인다. */}
               <details className="document-deep-review" data-testid="document-deep-review">
                 <summary>
                   <span>문서 깊게 보기</span>
@@ -2544,16 +2425,6 @@ export function SafeGuardCommandCenter({
                           ? selectedDocumentBody.slice(0, 1200)
                           : "현장 상황을 입력하고 문서팩을 생성하면 이곳에서 문서 본문과 근거를 바로 검토합니다."}
                       </pre>
-                      {requiresRevalidation ? (
-                        <button
-                          type="button"
-                          className="button command-primary workbench-primary-action"
-                          disabled={isRevalidating}
-                          onClick={() => void handleEditedWorkpackRevalidation()}
-                        >
-                          {isRevalidating ? "재검증 중" : "편집본 재검증"}
-                        </button>
-                      ) : null}
                       <button
                         type="button"
                         className="button command-primary document-next-button workbench-primary-action workbench-disabled-state"
