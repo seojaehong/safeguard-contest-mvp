@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { JumpButton } from "./JumpButton";
 import { HeroConsoleReplay } from "./HeroConsoleReplay";
+import { WORKSPACE_SAMPLE_AUTOGENERATE_HREF } from "@/lib/workspace-autogenerate";
 
 const navItems = [
   ["제품", "system"],
@@ -201,7 +202,7 @@ export function SafeClawLanding() {
           <pre>{`# 샘플 작업을 실제 API 조합으로 생성합니다
 질문: 서울 성수동 외벽 도장 · 이동식 비계 · 강풍 · 신규 작업자
 출력: 위험성평가표 / TBM / 안전교육 / 외국인 전송본 / 현장 전파 메시지`}</pre>
-          <Link href="/workspace?scenario=seoul-construction-windy">샘플 작업 생성으로 이동 →</Link>
+          <Link href={WORKSPACE_SAMPLE_AUTOGENERATE_HREF}>샘플 작업 생성으로 이동 →</Link>
         </div>
       </section>
 
