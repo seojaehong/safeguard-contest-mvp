@@ -25,9 +25,10 @@ describe("workspace auto-generate entry contract", () => {
     expect(shouldAutoGenerate({ autogen: "1" })).toBe(false);
   });
 
-  it("wires the landing sample link and the workspace page to the same contract", () => {
+  it("wires the landing example chips and the workspace page to the same contract", () => {
     expect(WORKSPACE_SAMPLE_AUTOGENERATE_HREF).toBe("/workspace?scenario=seoul-construction-windy&autogen=1");
-    expect(read("components/SafeClawLanding.tsx")).toContain("WORKSPACE_SAMPLE_AUTOGENERATE_HREF");
+    // UX PR-1(2026-10-27): 랜딩은 샘플 링크 1개 대신 예시 칩 3개(LANDING_EXAMPLE_CHIPS)를 같은 경로로 쓴다.
+    expect(read("components/SafeClawLanding.tsx")).toContain("LANDING_EXAMPLE_CHIPS");
     expect(read("components/SafeClawLanding.tsx")).not.toContain('href="/workspace?scenario=seoul-construction-windy"');
     const page = read("app/workspace/page.tsx");
     expect(page).toContain("shouldAutoGenerate(params)");

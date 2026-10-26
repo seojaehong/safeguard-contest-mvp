@@ -99,16 +99,19 @@ describe("⑤ 문구 교정 — 면책·자기 호칭·히어로 CTA", () => {
     expect(chat).not.toContain("안전관리자");
   });
 
-  it("stops the product calling itself 「안전관리자」 in the hero replay and the connect panel", () => {
-    expect(read("components/HeroConsoleReplay.tsx")).not.toContain("안전관리자");
+  it("stops the product calling itself 「안전관리자」 on the landing and the connect panel", () => {
+    // UX PR-1(2026-10-27): HeroConsoleReplay 는 삭제됐다. 같은 금지를 새 첫 화면에 건다.
+    expect(read("components/SafeClawLanding.tsx")).not.toContain("안전관리자");
     expect(read("components/AiConnectPanel.tsx")).not.toContain("안전관리자");
   });
 
-  it("keeps one hero CTA on the landing page and the two pinned sentences", () => {
+  it("keeps one hero action (the composer submit) on the landing page and the two pinned sentences", () => {
+    // UX PR-1(2026-10-27): 히어로 CTA 링크는 입력 폼의 「보내기」 하나로 바뀌었다(tests/ux-pr1-home-composer.test.ts).
     const landing = read("components/SafeClawLanding.tsx");
-    const cta = sliceBetween(landing, 'className="safeclaw-os-cta"', "</div>");
-    expect(cta.split("<Link").length - 1).toBe(1);
-    expect(cta).not.toContain('href="/documents"');
+    const form = sliceBetween(landing, 'className="safeclaw-home-composer"', "</form>");
+    expect(form.split('type="submit"').length - 1).toBe(1);
+    expect(form).not.toContain("<Link");
+    expect(landing).not.toContain('href="/documents"');
     expect(landing).toContain("현장관리자의 문서 준비를 돕습니다");
     expect(landing).toContain("안전 판단과 최종 확인은 사람이 맡습니다.");
   });

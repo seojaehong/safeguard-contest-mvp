@@ -1132,7 +1132,8 @@ describe("module route section hierarchy", () => {
   });
 
   it("keeps landing, preview, and ontology sections sequential", () => {
-    expect(read("components/SafeClawLanding.tsx").match(/<h2\b/g)?.length ?? 0).toBeGreaterThanOrEqual(6);
+    // UX PR-1(2026-10-27): 첫 화면은 「어떻게 만들어지나」 1섹션만 둔다(ux-direction-261026.md ⑥ PR-1 행).
+    expect(read("components/SafeClawLanding.tsx").match(/<h2\b/g)?.length ?? 0).toBe(1);
     expect(read("app/preview/page.tsx")).toContain('<h2 className="safeclaw-section-title">접어서 제공하는 8종</h2>');
     expect(read("app/ontology/page.tsx")).toContain('<h2 className="safeclaw-section-title">노드 리스트</h2>');
   });
