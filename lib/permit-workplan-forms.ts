@@ -533,6 +533,50 @@ export function buildWorkPlanLegalForm(input: WorkPlanFormInput): WorkPlanLegalF
   return { applicability, sections };
 }
 
+// ── 작업계획서 칸 존재 게이트(WP-06) ───────────────────────────────
+// 허가서 필수어 게이트(WP-14, buildPermitRequiredTerms)와 같은 방식. 작업 분류에서 만든 별표4 양식(buildWorkPlanLegalForm)의
+// 섹션 제목·항목 라벨·제38조① 대상 여부 줄이 본문(workPlanDraft)과 구조화본(workPlanStructured)에 모두 있어야 한다.
+// 값이 비어 있는 것(「(현장 기재)」)은 막지 않는다 — 칸이 없는 것을 막는다. 해당 호가 없는 작업은 기본 필수어만 본다.
+
+/** deliverable-integrity-policy 의 workPlanDraft 기본 필수어와 같다. */
+export const WORK_PLAN_BASE_REQUIRED_TERMS: readonly string[] = ["작업계획", "작업", "안전조치"];
+export const WORK_PLAN_APPLICABILITY_TERM = "제38조① 대상 여부";
+
+export function buildWorkPlanRequiredTerms(input: WorkPlanFormInput, form: WorkPlanLegalForm = buildWorkPlanLegalForm(input)): string[] {
+  const terms = [...WORK_PLAN_BASE_REQUIRED_TERMS];
+  if (form.applicability.length) terms.push(WORK_PLAN_APPLICABILITY_TERM);
+  for (const section of form.sections) {
+    terms.push(section.title);
+    for (const item of section.items) terms.push(item.label);
+  }
+  return [...new Set(terms)];
+}
+
+export type WorkPlanStructuredFormAudit = { verdict: "pass" | "blocked"; missing: string[] };
+
+/** 구조화 계획서에 양식의 섹션·항목 칸이 다 있는가. 구조화본이 없는 응답(template 모드)은 보지 않는다. */
+export function auditWorkPlanStructuredForm(
+  structured: { applicability?: WorkPlanApplicabilityLine[]; statutorySections?: WorkPlanStatutorySection[] } | null | undefined,
+  form: WorkPlanLegalForm
+): WorkPlanStructuredFormAudit {
+  if (!structured) return { verdict: "pass", missing: [] };
+  const missing: string[] = [];
+  if (form.applicability.length && !structured.applicability?.length) missing.push(WORK_PLAN_APPLICABILITY_TERM);
+  const sections = structured.statutorySections ?? [];
+  for (const expected of form.sections) {
+    const found = sections.find((section) => section.title === expected.title);
+    if (!found) {
+      missing.push(expected.title);
+      continue;
+    }
+    const labels = new Set(found.items.map((item) => item.label));
+    for (const item of expected.items) {
+      if (!labels.has(item.label)) missing.push(`${expected.title} / ${item.label}`);
+    }
+  }
+  return { verdict: missing.length ? "blocked" : "pass", missing };
+}
+
 export type WorkPlanTextInput = WorkPlanFormInput & {
   siteName: string;
   workName: string;
