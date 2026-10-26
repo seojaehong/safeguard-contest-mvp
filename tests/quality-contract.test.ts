@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { attachQualityContract, buildQualityContract } from "@/lib/quality-contract";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { attachWorkPlanLegalForm } from "@/lib/permit-workplan-forms";
 import type { AskResponse, TbmBriefingStructured, TbmLogStructured, WorkPlanStructured } from "@/lib/types";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
@@ -191,7 +192,14 @@ function makeLiveStructuredResponse(): AskResponse {
     },
     deliverables: {
       ...base.deliverables,
-      workPlanStructured,
+      // 운영 full 경로(lib/search.ts runAsk — workPlanTaskId → attachWorkPlanLegalForm → deliverables.workPlanStructured)와
+      // 같게, 구조화 계획서에는 서버 판정 법정 칸(applicability·statutorySections)이 늘 붙어 있다.
+      // 품질 계약의 별표4 칸 게이트(auditWorkPlanStructuredForm)는 그 붙은 뒤의 값을 본다.
+      workPlanStructured: attachWorkPlanLegalForm(workPlanStructured, {
+        taskId: base.scenario.taskClassification?.taskId,
+        question,
+        workerCount: base.scenario.workerCount
+      }),
       tbmBriefingStructured,
       tbmLogStructured
     },
