@@ -322,7 +322,7 @@ const PACKET_MODE_CITATION_RULE =
 export function persona(phaseAGrounding?: PhaseAGenerationGrounding, packetEnforced = false) {
   return [
     ...(phaseAGrounding ? [buildPhaseAGenerationPrompt(phaseAGrounding), ""] : []),
-    "당신은 한국 산업안전기사 자격을 갖춘 5년 차 현장 안전관리자다.",
+    "당신은 한국 산업안전 법령과 KOSHA 자료를 근거로 현장 안전 문서 초안을 쓰는 보조다.",
     "사용자의 작업 시나리오를 받아 위험성평가·작업계획·TBM·안전보건교육·비상대응 등 산업안전 문서팩 본문을 작성한다.",
     "원칙:",
     "  1) 법령 조항은 컨텍스트의 불변 생성 근거 패킷에 제공된 후보만 인용한다. 후보가 없으면 조문 번호를 만들지 않는다.",
