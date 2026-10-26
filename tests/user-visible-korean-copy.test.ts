@@ -23,7 +23,8 @@ const forbiddenUserFacingCopy: Record<string, readonly string[]> = {
   "components/WorkpackEditor.tsx": ["XLS(legacy)", "PDF/XLS(legacy)"],
   // UX PR-0 ⑤ (재홍님 결정 261026): 제품이 스스로를 「안전관리자」(산안법상 선임 직책)라 부르지 않는다. 면책문에 「자문」 금지.
   "components/ClawChat.tsx": ["전문가 자문", "안전관리자"],
-  "components/HeroConsoleReplay.tsx": ["안전관리자"],
+  // UX PR-1(2026-10-27): HeroConsoleReplay 는 삭제됐고 첫 화면(SafeClawLanding)이 같은 금지를 잇는다.
+  "components/SafeClawLanding.tsx": ["안전관리자", "문서팩 보기"],
   "components/AiConnectPanel.tsx": [
     "AI 안전관리자",
     "SIF Embedding Gate",
