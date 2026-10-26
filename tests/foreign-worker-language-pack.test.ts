@@ -402,3 +402,63 @@ describe("COPY-14 외국인 안내문 인쇄 코드", () => {
     expect(source).toMatch(/key === "foreignWorkerBriefing"\)\s*\{\s*return \{\s*code: "SC-FW-01"/u);
   });
 });
+
+// inventory 10-4 6번 — 원어민 검수 발주 전 라벨 정비.
+// ① pump-confined 는 기존 팩의 「지하 기계실 점검」(confinedInspection) 문장을 쓰지 않는다. 「지하 기계실 정화조 청소」가
+//   pump-confined 로 분류되면 다른 작업을 가리키는 문장이 나갈 수 있으므로, 검수 전(review_required) 밀폐공간 작업명으로 묶어
+//   검수가 끝나기 전까지 전송 금지 안내가 나가게 한다.
+// ② confinedSpaceWork 문장은 괄호 안 청소 설명을 빼고 「밀폐공간 작업」만 남긴다(탱크 용접 등에도 쓰이므로).
+describe("원어민 검수 발주 전 라벨 정비 (inventory 10-4 6번)", () => {
+  // 밀폐 낱말이 없는 pump-confined 입력 — 지하 기계실 정화조 청소 (정화조는 밀폐 위험을 켜지만, 작업명 사유를 따로 본다).
+  const pumpConfined = {
+    question: "서울 상가건물 지하 기계실 정화조 청소 작업. 작업자 2명(베트남어 1명), 배수펌프 주변 정비 포함. 오늘 작업 전 문서팩을 만들어줘.",
+    scenario: {
+      companyName: "이지시설관리",
+      companyType: "시설관리업",
+      siteName: "서울 시설관리 현장",
+      workSummary: "서울 상가건물 지하 기계실 정화조 청소 작업",
+      workerCount: 2,
+      weatherNote: "지하 협소공간, 미끄럼 및 감전 위험 동시 관리",
+      taskClassification: classified("pump-confined", "배수펌프 점검(밀폐 우려)")
+    },
+    riskSummary: {
+      title: "시설관리업 지하 기계실 점검 및 정비 작업",
+      riskLevel: "중" as const,
+      topRisk: "정화조 내부 산소결핍·황화수소 등 유해가스 체류로 인한 질식 위험",
+      immediateActions: [
+        "진입 전 산소·황화수소 농도 측정",
+        "감시인 배치와 연락체계 유지",
+        "송기마스크 등 보호구 착용 확인"
+      ]
+    }
+  };
+
+  it("pump-confined 는 모든 언어가 「작업명 번역 확인 전」 사유로 막힌다(지하 기계실 점검 문장을 쓰지 않는다)", () => {
+    const plan = buildForeignWorkerTransmissionPlan(pumpConfined);
+    expect(plan.emitted).toHaveLength(0);
+    expect(plan.blocked.length).toBeGreaterThan(0);
+    for (const blocked of plan.blocked) {
+      expect(blocked.reasons, blocked.language.code).toContain("작업명 번역 확인 전");
+    }
+    const text = buildForeignWorkerTransmission(pumpConfined);
+    expect(text).toContain(FOREIGN_WORKER_BLOCK_NOTICE);
+    expect(text).not.toContain("Kiểm tra phòng máy ngầm");
+    expect(text).not.toContain("地下机房检查");
+    expect(text).not.toContain("Underground machine-room inspection");
+  });
+
+  it("confinedSpaceWork 10개 언어 문장에 괄호 설명이 없다(「밀폐공간 작업」만 남긴다)", () => {
+    const table = getForeignWorkerTranslationTable();
+    const codes = Object.keys(table.packs).filter((code) => table.packs[code].workLabels.confinedSpaceWork);
+    expect(codes).toHaveLength(10);
+    for (const code of codes) {
+      const label = table.packs[code].workLabels.confinedSpaceWork;
+      expect(label, code).not.toMatch(/[()（）]/u);
+      expect(label, code).not.toMatch(/\s$/u);
+      expect(label, code).not.toMatch(/septic|cleaning|化粪池|清理|bể phốt|vệ sinh/iu);
+    }
+    expect(table.packs.en.workLabels.confinedSpaceWork).toBe("Confined-space work");
+    expect(table.packs.zh.workLabels.confinedSpaceWork).toBe("有限空间作业");
+    expect(table.packs.vi.workLabels.confinedSpaceWork).toBe("Làm việc trong không gian kín");
+  });
+});

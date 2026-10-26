@@ -109,7 +109,9 @@ const TASK_WORK_LABEL_KEYS: Record<string, string> = {
   "chemical-cleaning": "chemicalCleaning",
   electrical: "electricalInspection",
   excavation: "excavation",
-  "pump-confined": "confinedInspection",
+  // inventory 10-4 6번: 기존 팩 「지하 기계실 점검」(confinedInspection)을 쓰지 않는다. 「지하 기계실 정화조 청소」가
+  // pump-confined 로 분류되면 다른 작업을 가리키는 문장이 나가므로, 검수 전 밀폐공간 작업명으로 묶어 검수 전까지 전송을 막는다.
+  "pump-confined": "confinedSpaceWork",
   press: "pressDieChange",
   "confined-space": "confinedSpaceWork"
 };
@@ -718,7 +720,7 @@ const packAdditions: Record<string, PackAdditions> = {
   en: {
     workLabels: {
       pressDieChange: draft("Press die change and press operation"),
-      confinedSpaceWork: draft("Confined-space work (cleaning inside a septic tank, pit, or tank)")
+      confinedSpaceWork: draft("Confined-space work")
     },
     lifeSafety: {
       gasTest: draft("Before entry, measure oxygen and harmful gas (hydrogen sulfide, carbon monoxide). Do not enter if the reading is not safe."),
@@ -732,7 +734,7 @@ const packAdditions: Record<string, PackAdditions> = {
   vi: {
     workLabels: {
       pressDieChange: draft("Thay khuôn máy dập và vận hành máy dập"),
-      confinedSpaceWork: draft("Làm việc trong không gian kín (vệ sinh bên trong bể phốt, hố hoặc bồn chứa)")
+      confinedSpaceWork: draft("Làm việc trong không gian kín")
     },
     lifeSafety: {
       gasTest: draft("Trước khi vào, phải đo nồng độ oxy và khí độc (H2S, CO). Nếu kết quả không an toàn thì không được vào."),
@@ -750,7 +752,7 @@ const packAdditions: Record<string, PackAdditions> = {
   zh: {
     workLabels: {
       pressDieChange: draft("冲压模具更换及冲压作业"),
-      confinedSpaceWork: draft("有限空间作业（化粪池、地坑、储罐内部清理）")
+      confinedSpaceWork: draft("有限空间作业")
     },
     hazardLabels: {
       confined: draft("缺氧或有害气体导致窒息的危险"),
@@ -772,7 +774,7 @@ const packAdditions: Record<string, PackAdditions> = {
   th: {
     workLabels: {
       pressDieChange: draft("งานเปลี่ยนแม่พิมพ์เครื่องปั๊มและงานปั๊มโลหะ"),
-      confinedSpaceWork: draft("งานในพื้นที่อับอากาศ (ทำความสะอาดภายในบ่อเกรอะ บ่อ หรือถัง)")
+      confinedSpaceWork: draft("งานในพื้นที่อับอากาศ")
     },
     hazardLabels: {
       confined: draft("ความเสี่ยงขาดออกซิเจนหรือหายใจไม่ออกจากก๊าซอันตราย"),
@@ -794,7 +796,7 @@ const packAdditions: Record<string, PackAdditions> = {
   uz: {
     workLabels: {
       pressDieChange: draft("Press qolipini almashtirish va press ishi"),
-      confinedSpaceWork: draft("Yopiq joyda ishlash (septik, chuqur yoki idish ichini tozalash)")
+      confinedSpaceWork: draft("Yopiq joyda ishlash")
     },
     hazardLabels: {
       confined: draft("kislorod yetishmasligi yoki zararli gazdan bo'g'ilish xavfi"),
@@ -816,7 +818,7 @@ const packAdditions: Record<string, PackAdditions> = {
   mn: {
     workLabels: {
       pressDieChange: draft("Пресс хэв солих ба пресс ажил"),
-      confinedSpaceWork: draft("Битүү орчинд ажиллах (септик, нүх, сав дотор цэвэрлэх)")
+      confinedSpaceWork: draft("Битүү орчинд ажиллах")
     },
     hazardLabels: {
       confined: draft("хүчилтөрөгчийн дутагдал буюу хортой хийд амьсгал боогдох эрсдэл"),
@@ -838,7 +840,7 @@ const packAdditions: Record<string, PackAdditions> = {
   ne: {
     workLabels: {
       pressDieChange: draft("प्रेस डाइ परिवर्तन र प्रेस काम"),
-      confinedSpaceWork: draft("बन्द ठाउँमा काम (सेप्टिक ट्याङ्की, खाल्डो वा ट्याङ्की भित्र सफाई)")
+      confinedSpaceWork: draft("बन्द ठाउँमा काम")
     },
     hazardLabels: {
       confined: draft("अक्सिजन अभाव वा हानिकारक ग्यासले निसास्सिने जोखिम"),
@@ -860,7 +862,7 @@ const packAdditions: Record<string, PackAdditions> = {
   km: {
     workLabels: {
       pressDieChange: draft("ប្តូរពុម្ពម៉ាស៉ីនចុច និងការងារម៉ាស៉ីនចុច"),
-      confinedSpaceWork: draft("ការងារក្នុងកន្លែងបិទជិត (សម្អាតខាងក្នុងអាងសេបទិក រណ្តៅ ឬធុង)")
+      confinedSpaceWork: draft("ការងារក្នុងកន្លែងបិទជិត")
     },
     hazardLabels: {
       confined: draft("ហានិភ័យខ្វះអុកស៉ីសែន ឬស្ទះដង្ហើមដោយឧស្ម័នពុល"),
@@ -882,7 +884,7 @@ const packAdditions: Record<string, PackAdditions> = {
   id: {
     workLabels: {
       pressDieChange: draft("Penggantian cetakan mesin press dan pekerjaan press"),
-      confinedSpaceWork: draft("Pekerjaan ruang terbatas (pembersihan bagian dalam septic tank, lubang, atau tangki)")
+      confinedSpaceWork: draft("Pekerjaan ruang terbatas")
     },
     hazardLabels: {
       confined: draft("risiko kekurangan oksigen atau sesak napas akibat gas berbahaya"),
@@ -904,7 +906,7 @@ const packAdditions: Record<string, PackAdditions> = {
   my: {
     workLabels: {
       pressDieChange: draft("ပရက်စ်ပုံသွင်းကိရိယာ ပြောင်းခြင်းနှင့် ပရက်စ်လုပ်ငန်း"),
-      confinedSpaceWork: draft("ပိတ်ထားသောနေရာ လုပ်ငန်း (ဆက်ပ်တစ်ကန်၊ တွင်း သို့မဟုတ် ကန်အတွင်း သန့်ရှင်းရေး)")
+      confinedSpaceWork: draft("ပိတ်ထားသောနေရာ လုပ်ငန်း")
     },
     hazardLabels: {
       confined: draft("အောက်ဆီဂျင် မလုံလောက်ခြင်း သို့မဟုတ် အန္တရာယ်ရှိဓာတ်ငွေ့ကြောင့် အသက်ရှူကြပ်နိုင်သော အန္တရာယ်"),
