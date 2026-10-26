@@ -383,11 +383,11 @@ export type AskScenario = {
 };
 
 export type GenerationAnswerTrace = {
-  provider: "openai" | "vertex" | "mock" | "safeclaw";
+  provider: "anthropic" | "openai" | "vertex" | "mock" | "safeclaw";
   model: string | null;
   composition?: "provider" | "safeclaw_db_harness";
   upstream?: {
-    provider: "openai" | "vertex" | "mock";
+    provider: "anthropic" | "openai" | "vertex" | "mock";
     model: string | null;
     fallbackUsed: boolean;
     usedInFinal: boolean;

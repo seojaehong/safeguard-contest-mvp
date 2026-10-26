@@ -62,13 +62,13 @@ export function HeroConsoleReplay() {
   const active = !reduced && count < TOTAL;
 
   return (
-    <aside className="hero-console-replay" aria-label="AI 안전관리자 콘솔 데모">
+    <aside className="hero-console-replay" aria-label="문서 생성 콘솔 데모">
       <div className="hero-console-frame">
         <div className="hero-console-titlebar">
           <span className="hero-console-dot" aria-hidden="true" />
           <span className="hero-console-dot" aria-hidden="true" />
           <span className="hero-console-dot" aria-hidden="true" />
-          <b>safeclaw · AI 안전관리자</b>
+          <b>safeclaw · 문서 생성</b>
           <em>{active ? "생성 중" : "생성 완료"}</em>
         </div>
         <div className="hero-console-prompt">
