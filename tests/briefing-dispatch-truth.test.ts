@@ -44,13 +44,13 @@ describe("briefing dispatch truth contract", () => {
 
   it("keeps dispatch entry surfaces truthful while provider persistence is unavailable", () => {
     const dispatchPage = fs.readFileSync(path.join(rootDir, "app", "dispatch", "page.tsx"), "utf8");
+    // UX PR-1(2026-10-27): 첫 화면은 입력 폼 하나라 전파 모듈 설명(§05 productModules)이 없다. 부정 단언만 남긴다.
     const landing = fs.readFileSync(path.join(rootDir, "components", "SafeClawLanding.tsx"), "utf8");
     const prototype = fs.readFileSync(path.join(rootDir, "components", "SafeClawPrototype.tsx"), "utf8");
     const combined = [dispatchPage, landing, prototype].join("\n");
 
     expect(dispatchPage).toContain("실제 발송 가능 여부와 승인된 접수 결과를 구분해 기록합니다.");
-    expect(landing).toContain("승인된 전송 결과만 기록합니다.");
-    expect(landing).toContain('state: "준비"');
+    expect(landing).not.toContain("전송");
     expect(prototype).toContain('status: "partial"');
     expect(prototype).toContain("준비되지 않은 채널은 미리보기로 유지합니다.");
     expect(combined).not.toContain("메일과 문자로 현장 공지와 외국인 안내문을 보내고");

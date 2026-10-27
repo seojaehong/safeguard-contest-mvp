@@ -296,6 +296,7 @@ const semanticRoleOverrides = {
   ".command-center-shell.workspace-theme-day .field-workspace .remediation-textarea": "longform",
   ".safeclaw-module-shell.module-variant-document .document-textarea": "longform",
   ".safeclaw-module-shell.module-variant-document .remediation-textarea": "longform",
+  ".safeclaw-home-textarea": "longform",
   ".command-center-shell .command-primary": "control",
   ".safeclaw-module-primary": "control",
   ".safeclaw-module-actions a": "control",

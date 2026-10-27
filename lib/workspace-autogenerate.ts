@@ -14,6 +14,24 @@ export type WorkspaceEntryParams = {
 export const WORKSPACE_SAMPLE_SCENARIO_ID = "seoul-construction-windy";
 export const WORKSPACE_SAMPLE_AUTOGENERATE_HREF = `/workspace?scenario=${WORKSPACE_SAMPLE_SCENARIO_ID}&autogen=1`;
 
+// 첫 화면 예시 칩 (UX 권고 PR-1, 2026-10-27). lib/field-examples.ts 의 기존 예시만 쓴다 — 새 예시 추가 금지.
+// 칩은 ?scenario=&autogen=1 (PR-0 옵트인 경로)로 들어가 클릭 없이 바로 생성한다.
+export type LandingExampleChip = {
+  id: string;
+  label: string;
+  href: string;
+};
+
+function landingChip(id: string, label: string): LandingExampleChip {
+  return { id, label, href: `/workspace?scenario=${id}&autogen=1` };
+}
+
+export const LANDING_EXAMPLE_CHIPS: readonly LandingExampleChip[] = [
+  landingChip("seoul-construction-windy", "외벽 도장·비계·강풍"),
+  landingChip("daegu-warehouse-heat", "창고 적재·폭염"),
+  landingChip("ansan-manufacturing-foreign-hotwork", "용접 화기·외국인"),
+];
+
 export function shouldAutoGenerate(params: WorkspaceEntryParams): boolean {
   if (params.q) return true;
   return Boolean(params.scenario) && params.autogen === "1";

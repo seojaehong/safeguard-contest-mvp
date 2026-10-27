@@ -2059,11 +2059,10 @@ describe("documents editor layout", () => {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await page.goto(`${baseUrl}/`, { waitUntil: "networkidle" });
 
+    // UX PR-1(첫 화면 입력 폼) 뒤 랜딩의 라벨 격자는 「어떻게 만들어지나」 4단계 하나다.
+    // 구조 = .safeclaw-home-steps > li > article.safeclaw-home-step > span(①~④), 선택자 패턴은 `${selector} > * > span`.
     const grids = [
-      [".safeclaw-pipeline-grid", 5],
-      [".safeclaw-proof-matrix", 6],
-      [".safeclaw-language-matrix", 10],
-      [".safeclaw-module-map", 8],
+      [".safeclaw-home-steps > li", 4],
     ] as const;
 
     for (const [selector, expectedLabels] of grids) {

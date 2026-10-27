@@ -24986,3 +24986,274 @@ body:has(.safeclaw-landing) :is(
     align-content: start;
   }
 }
+
+/* ── 첫 화면 입력 폼 (UX 권고 PR-1, 2026-10-27 · ux-direction-261026.md ⑤) ──
+   한 열 720px 중앙. 색·글꼴·간격은 design-plan 토큰(--sc-*·--space-*·--text-*)만 쓴다.
+   지운 §01~§06·상태 띠·콘솔 리플레이의 .safeclaw-os-* 규칙은 route-coverage 선언 계약이 읽으므로 남겨 둔다. */
+.safeclaw-landing-nav.safeclaw-home-nav {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.safeclaw-home-nav .safeclaw-os-brand {
+  cursor: default;
+}
+
+.safeclaw-home-hero {
+  padding-block: clamp(var(--space-10), 6vw, var(--space-20));
+  padding-inline: var(--os-gutter);
+  border-bottom: 1px solid var(--os-line);
+}
+
+.safeclaw-home-column {
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+.safeclaw-home-title {
+  margin: 0;
+  max-width: 100%;
+  font-size: var(--text-page-title);
+  font-weight: 800;
+  line-height: var(--leading-page-title);
+  letter-spacing: var(--tracking-page-title);
+  overflow-wrap: anywhere;
+}
+
+.safeclaw-home-composer {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+  padding: var(--space-4);
+  background: var(--paper);
+}
+
+.safeclaw-home-composer-label {
+  color: var(--ink);
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-home-textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  padding: var(--space-3) var(--space-4);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-longform);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-home-textarea::placeholder {
+  color: var(--muted);
+}
+
+.safeclaw-home-textarea:focus {
+  border-color: var(--sc-black);
+  outline: 2px solid var(--hazard);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.safeclaw-home-composer-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.safeclaw-home-hint {
+  color: var(--muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+button.safeclaw-home-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 112px;
+  min-height: var(--control-height);
+  margin-left: auto;
+  border: 1px solid var(--sign-blue);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-5);
+  background: var(--sign-blue);
+  color: var(--on-sign);
+  cursor: pointer;
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
+}
+
+button.safeclaw-home-submit:hover {
+  border-color: var(--ink);
+  background: var(--ink);
+}
+
+.safeclaw-home-notice {
+  margin: var(--space-4) 0 0;
+  padding-left: var(--space-4);
+  border-left: 4px solid var(--rule);
+  color: var(--muted);
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-home-examples {
+  margin-top: var(--space-6);
+}
+
+.safeclaw-home-examples-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-home-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.safeclaw-home-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-4);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
+  text-decoration: none;
+}
+
+.safeclaw-home-chip:hover {
+  border-color: var(--sc-black);
+}
+
+.safeclaw-home-position {
+  max-width: 100%;
+  margin: var(--space-8) 0 0;
+  padding-left: var(--space-4);
+  border-left: 4px solid var(--rule);
+  color: var(--sc-black);
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-home-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.safeclaw-home-step {
+  height: 100%;
+  border: 1px solid var(--os-line);
+  padding: var(--space-4);
+  background: var(--os-panel);
+}
+
+.safeclaw-home-step span {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--sc-hazard-text);
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-home-step h3 {
+  margin: 0 0 var(--space-2);
+  color: var(--os-text);
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
+}
+
+.safeclaw-home-step p {
+  margin: 0;
+  color: var(--os-muted);
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-landing-footer.safeclaw-home-footer {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.safeclaw-home-footer nav {
+  justify-content: flex-start;
+}
+
+@media (max-width: 1180px) {
+  .safeclaw-landing-nav.safeclaw-home-nav {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--space-3);
+  }
+
+  .safeclaw-home-nav .safeclaw-os-brand {
+    justify-content: flex-start;
+  }
+
+  .safeclaw-home-nav .safeclaw-landing-actions {
+    justify-content: flex-end;
+  }
+
+  .safeclaw-home-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .safeclaw-home-nav .safeclaw-landing-actions {
+    display: flex;
+  }
+
+  .safeclaw-home-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .safeclaw-home-submit {
+    width: 100%;
+  }
+}
