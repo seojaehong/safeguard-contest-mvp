@@ -28,4 +28,9 @@ progress.txt
 .bkit/
 .worktrees/
 .cache/kosha-review/
-.claude/
+# .claude/ 는 세션 워크트리(.claude/worktrees)·로컬 설정이라 무시하되, 저장소 검증 스킬(.claude/skills/)은 커밋한다
+.claude/*
+!.claude/skills/
+
+# verify-safeclaw 증거(로컬 증명, 필요하면 sc-audit pr-evidence 로 복사)
+evaluation/verify-safeclaw/
