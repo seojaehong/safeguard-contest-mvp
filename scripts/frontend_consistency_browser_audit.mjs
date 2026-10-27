@@ -110,6 +110,35 @@ export function isEvidenceOnlyDescendant(verifiedSourceSha, currentHead, repoRoo
   }
 }
 
+// 브라우저 매트릭스(browser-report.json)가 현재 화면 지문보다 뒤처져도 되는지 판정한다.
+// 허용 근거는 browser-evidence-lag.json 의 명시 항목뿐이다(현재 identity · 그때의 browser-report identity · 사유 · 기록일).
+export function browserEvidenceLagDecision(entries, currentSourceIdentity, browserReportSourceIdentity) {
+  const entry = Array.isArray(entries)
+    ? entries.find((item) => item !== null
+      && typeof item === "object"
+      && /^[0-9a-f]{64}$/u.test(item.sourceIdentity)
+      && /^[0-9a-f]{64}$/u.test(item.browserReportSourceIdentity)
+      && typeof item.reason === "string"
+      && item.reason.trim() !== ""
+      && typeof item.recordedAt === "string"
+      && /^\d{4}-\d{2}-\d{2}$/u.test(item.recordedAt)
+      && item.sourceIdentity === currentSourceIdentity
+      && item.browserReportSourceIdentity === browserReportSourceIdentity)
+    : undefined;
+  if (entry) {
+    return { allowed: true, entry, message: `browser evidence lag accepted: ${entry.reason}` };
+  }
+  return {
+    allowed: false,
+    message: [
+      `Browser report sourceIdentity ${browserReportSourceIdentity} lags current sourceIdentity ${currentSourceIdentity} and is not listed.`,
+      "Regenerate the browser matrix (node ./scripts/frontend_consistency_browser_audit.mjs),",
+      "or add one entry to evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-evidence-lag.json:",
+      `{ "sourceIdentity": "${currentSourceIdentity}", "browserReportSourceIdentity": "${browserReportSourceIdentity}", "reason": "<한 줄 사유>", "recordedAt": "YYYY-MM-DD" }`,
+    ].join(" "),
+  };
+}
+
 export function validateStaticAuditPrerequisite(staticAudit, source, { now, reportMtime, evidenceOnlyDescendant = false }) {
   if (!/^[0-9a-f]{40}$/u.test(source.sourceSha)
     || !/^[0-9a-f]{64}$/u.test(source.sourceIdentity)

@@ -11,7 +11,7 @@
 | 기다리지 않는 스트림 cancel(`void reader.cancel()`·맨 문장·화살표 본문)은 `.catch(() => undefined)` 로 끝낸다 | `tests/stream-cancel-catch-contract.test.ts`(TypeScript AST 검사, `node scripts/check_stream_cancel.mjs`) | #124 — abort 리스너 2곳이 unhandledRejection |
 | 코드 파일은 작업본에서도 LF | `.gitattributes`(`*.ts`·`*.mjs` 등 `eol=lf`) + `tests/shebang-lf-worktree.test.ts`(셔뱅 첫 줄 CR 검사, `node scripts/check_shebang_lf.mjs`) | 261026·261027 CRLF 셔뱅 SyntaxError |
 | 타이포 역할 판정은 감사 스크립트 하나만 한다 | 표 = `lib/frontend-design-contract.ts`(`frontendTypographyRoles`·`frontendSemanticRoleOverrides`), 함수 = `scripts/frontend_typography_classifier.mjs`. vitest 계약은 판정을 따로 구현하지 않고 감사를 돌린다 | #121 — 같은 textarea 를 한쪽은 longform, 한쪽은 body |
-| 화면 지문 identity(`canonicalFrontendIdentityFiles()` 가 돌려주는 파일 — app·components 의 모든 TSX 포함)를 바꾸면 `static-audit.json` 을 다시 만들어 같은 PR 에 넣는다 | `tests/frontend-route-coverage.test.ts`(identity 불일치면 실패) | #121·#123 |
+| 화면 지문 identity(`canonicalFrontendIdentityFiles()` 가 돌려주는 파일 — app·components 의 모든 TSX 포함)를 바꾸면 `static-audit.json` 을 다시 만들어 같은 PR 에 넣는다. 그리고 브라우저 매트릭스를 다시 만들거나(`node ./scripts/frontend_consistency_browser_audit.mjs`), `evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-evidence-lag.json` 에 새 identity 와 사유 한 줄을 더한다(static-audit 재생성 뒤의 값으로) | `tests/frontend-route-coverage.test.ts`(identity 불일치면 실패, 브라우저 보고서가 뒤처졌는데 목록에 없으면 실패. 판정 = `browserEvidenceLagDecision`) | #121·#123 · 과제 22(07-18 보고서 문자열만 보고 통과하던 탈출구) |
 
 ## 고르는 도구(막지는 않는다)
 
