@@ -1,2 +1,14 @@
 evaluation/kosha-verified-subset-*/subset/**/*.jsonl text eol=lf
 evaluation/kosha-official-metadata-promotion-*/snapshots/**/*.jsonl text eol=lf
+
+# 코드 파일은 작업본에서도 LF 로 둔다(core.autocrlf=true 인 윈도우 작업본 포함).
+# CRLF 작업본에서는 vite 의 셔뱅 인식(hashbangRE)이 `#!/usr/bin/env node\r` 를 못 봐
+# scripts/prod_ask_smoke.mjs 를 import 하는 시험이 SyntaxError 로 죽었다(261026·261027).
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.js  text eol=lf
+*.mts text eol=lf
+*.cts text eol=lf
+*.ts  text eol=lf
+*.tsx text eol=lf
+*.sh  text eol=lf
