@@ -25052,7 +25052,7 @@ body:has(.safeclaw-landing) :is(
   color: var(--ink);
   font-size: var(--text-body);
   font-weight: 500;
-  line-height: var(--leading-body);
+  line-height: var(--leading-longform);
   letter-spacing: var(--tracking-body);
 }
 
