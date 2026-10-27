@@ -1,4 +1,4 @@
-// 아침 자동 브리핑 — "시키지 않아도 출근하는 안전관리자" (SafeClaw 2 기둥 4).
+// 아침 자동 브리핑 — "시키지 않아도 아침에 먼저 준비해 두는 안전 보조" (SafeClaw 2 기둥 4).
 //
 // Vercel cron이 매일 06:00 KST(21:00 UTC, vercel.json)에 이 라우트를 호출한다.
 // 대상 사이트는 DB 우선(sites.briefing_enabled=true, 고객 셀프서브) → env BRIEFING_SITES
