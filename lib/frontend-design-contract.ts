@@ -222,3 +222,44 @@ export const generatedSurfaceFiles = [
   "components/WorkpackEditor.tsx",
   "app/api/export/pdf/route.ts",
 ] as const;
+
+// 타이포 역할 분류의 단일 정본(/correct 261027). vitest 계약
+// (tests/frontend-design-contract.test.ts)과 감사 스크립트
+// (scripts/frontend_consistency_audit.mjs)가 이 두 표와
+// scripts/frontend_typography_classifier.mjs 하나를 같이 쓴다.
+// 예전에는 표와 분류 함수가 두 벌이라 #121 에서 같은 textarea 가
+// 한쪽은 longform, 한쪽은 body 로 갈렸다.
+export const frontendTypographyRoles = {
+  display: { size: "var(--text-display)", weight: "800", lineHeight: "var(--leading-display)", tracking: "var(--tracking-display)" },
+  pageTitle: { size: "var(--text-page-title)", weight: "800", lineHeight: "var(--leading-page-title)", tracking: "var(--tracking-page-title)" },
+  sectionTitle: { size: "var(--text-section-title)", weight: "800", lineHeight: "var(--leading-section-title)", tracking: "var(--tracking-section-title)" },
+  componentTitle: { size: "var(--text-component-title)", weight: "700", lineHeight: "var(--leading-component-title)", tracking: "var(--tracking-component-title)" },
+  bodyLarge: { size: "var(--text-body-lg)", weight: "500", lineHeight: "var(--leading-body-lg)", tracking: "var(--tracking-body)" },
+  body: { size: "var(--text-body)", weight: "500", lineHeight: "var(--leading-body)", tracking: "var(--tracking-body)" },
+  longform: { size: "var(--text-body)", weight: "500", lineHeight: "var(--leading-longform)", tracking: "var(--tracking-body)" },
+  support: { size: "var(--text-support)", weight: "500", lineHeight: "var(--leading-body)", tracking: "var(--tracking-body)" },
+  control: { size: "var(--text-control)", weight: "700", lineHeight: "var(--leading-control)", tracking: "var(--tracking-body)" },
+  table: { size: "var(--text-table)", weight: "500", lineHeight: "var(--leading-table)", tracking: "var(--tracking-body)" },
+  caption: { size: "var(--text-caption)", weight: "600", lineHeight: "var(--leading-caption)", tracking: "var(--tracking-body)" },
+  tableHeader: { size: "var(--text-caption)", weight: "700", lineHeight: "var(--leading-caption)", tracking: "var(--tracking-body)" },
+  hud: { size: "var(--text-hud)", weight: "700", lineHeight: "var(--leading-hud)", tracking: "var(--tracking-hud)", fontFamily: "var(--font-hud)" },
+} as const;
+
+export const frontendSemanticRoleOverrides = {
+  ".safeclaw-login": "control",
+  ".safeclaw-contact": "control",
+  ".law-section-lines p": "longform",
+  ".legal-reading-body": "longform",
+  ".knowledge-detail-card p": "longform",
+  ".knowledge-detail-card li": "longform",
+  ".command-center-shell .command-primary": "control",
+  ".safeclaw-os-cta button": "control",
+  ".safeclaw-os-cta a": "control",
+  ".safeclaw-module-primary": "control",
+  ".safeclaw-module-actions a": "control",
+  ".safeclaw-module-shell.module-variant-document .safeclaw-module-primary": "control",
+  ".safeclaw-module-shell.module-variant-document .safeclaw-module-actions a": "control",
+  ".command-center-shell .brand-lockup small": "caption",
+  ".command-center-shell .topbar-status span": "hud",
+  ".command-center-shell .step-copy small": "hud",
+} as const;

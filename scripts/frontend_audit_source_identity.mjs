@@ -9,6 +9,7 @@ const fixedIdentityPaths = [
   "next.config.mjs",
   "scripts/frontend_audit_source_identity.mjs",
   "scripts/frontend_consistency_audit.mjs",
+  "scripts/frontend_typography_classifier.mjs",
   "scripts/frontend_consistency_browser_audit.mjs",
   "scripts/frontend_audit_bundle_contract.mjs",
   "scripts/frontend_audit_clean_build.mjs",
