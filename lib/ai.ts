@@ -250,6 +250,7 @@ async function generateWithAnthropicAnswer(
       maxOutputTokens: budget.maxOutputTokens,
       timeoutMs: ANTHROPIC_ANSWER_TIMEOUT_MS,
       signal,
+      logLabel: "answer",
     }),
     1,
     `Anthropic response (${model})`,

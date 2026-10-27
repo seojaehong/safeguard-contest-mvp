@@ -17,6 +17,26 @@ export function isAnthropicConfigured(): boolean {
 }
 
 /**
+ * One structured line per Claude call so prompt-cache hit rates can be observed.
+ * Counts only — never the prompt, user input or key. A logging failure never blocks the response.
+ */
+function logUsage(model: string, label: string | undefined, usage: Anthropic.Messages.Usage | undefined): void {
+  if (!usage) return;
+  try {
+    log.info("anthropic_usage", {
+      model,
+      label: label ?? null,
+      input_tokens: usage.input_tokens,
+      output_tokens: usage.output_tokens,
+      cache_creation_input_tokens: usage.cache_creation_input_tokens ?? 0,
+      cache_read_input_tokens: usage.cache_read_input_tokens ?? 0,
+    });
+  } catch {
+    // Observation only.
+  }
+}
+
+/**
  * Generates text (JSON-demanding prompts included) via the Anthropic Messages API.
  * Mirrors generateWithVertex's contract: resolves with the text, throws on
  * timeout/refusal/empty so the caller's fallback chain can take over.
@@ -24,7 +44,7 @@ export function isAnthropicConfigured(): boolean {
 export async function generateWithAnthropic(
   model: string,
   prompt: string,
-  options: { maxOutputTokens: number; timeoutMs: number; signal?: AbortSignal }
+  options: { maxOutputTokens: number; timeoutMs: number; signal?: AbortSignal; logLabel?: string }
 ): Promise<string> {
   options.signal?.throwIfAborted();
   const client = getClient();
@@ -36,6 +56,7 @@ export async function generateWithAnthropic(
     },
     { timeout: options.timeoutMs, maxRetries: 0, signal: options.signal }
   );
+  logUsage(model, options.logLabel, response.usage);
 
   if (response.stop_reason === "refusal") {
     throw new Error(`Anthropic refusal (model=${model})`);

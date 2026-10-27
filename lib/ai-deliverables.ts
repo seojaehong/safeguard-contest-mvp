@@ -157,6 +157,7 @@ async function callGemini(
         maxOutputTokens: budget.maxOutputTokens,
         timeoutMs: budget.timeoutMs,
         signal,
+        logLabel: label,
       });
       return {
         text,
