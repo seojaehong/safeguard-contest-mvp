@@ -58,6 +58,7 @@ export function selectAffectedTests(changedFiles, testSources, identityFiles = [
   const commands = [];
   if (identityChanged.length) {
     commands.push(`npm.cmd run -s audit:frontend-consistency  (화면 지문 identity ${identityChanged.length}파일 변경 → static-audit.json 재생성·커밋)`);
+    commands.push("node ./scripts/frontend_consistency_browser_audit.mjs  (브라우저 매트릭스 재생성) 또는 browser-evidence-lag.json 에 재생성 뒤 identity·사유 한 줄");
   }
   if (entries.some(([test]) => LEAVE_TEST.test(test))) commands.push("npm.cmd run -s leave:test  (.mts 시험은 vitest 가 아니라 이 명령으로 돈다)");
   return {

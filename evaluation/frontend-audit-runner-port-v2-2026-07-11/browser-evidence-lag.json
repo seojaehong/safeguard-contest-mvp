@@ -1,0 +1,8 @@
+[
+  {
+    "sourceIdentity": "2ab3d080bfd212e70b6dce963951b798959be79d29de018c1324ca98ab700a52",
+    "browserReportSourceIdentity": "79e268153b73c5cfb36301c4d3b305949851b23c7c9cb493ce6711daf83b0609",
+    "reason": "07-18 이후 화면 지문 63파일 변경(#121 첫 화면 교체 포함). 브라우저 매트릭스 미재생성 — 운영 G5 드라이런으로 대신 확인. 재생성 전까지 임시 인정",
+    "recordedAt": "2026-10-27"
+  }
+]

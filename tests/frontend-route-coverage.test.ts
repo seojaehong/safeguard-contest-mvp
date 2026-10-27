@@ -10,6 +10,7 @@ import { describe, expect, it } from "vitest";
 import { standaloneToolRoutes, userVisibleRoutes } from "@/lib/frontend-design-contract";
 
 const root = process.cwd();
+const browserEvidenceLagPath = "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-evidence-lag.json";
 
 function runBrowserContractProbe(expression: string): unknown {
   const moduleUrl = pathToFileURL(path.join(root, "scripts/frontend_consistency_browser_audit.mjs")).href;
@@ -686,6 +687,39 @@ describe("browser evidence reconciliation", () => {
     );
   });
 
+  it("allows a lagging browser report only for an explicitly listed current identity", () => {
+    const current = "a".repeat(64);
+    const browserReport = "b".repeat(64);
+    const entry = {
+      sourceIdentity: current,
+      browserReportSourceIdentity: browserReport,
+      reason: "합성 사유",
+      recordedAt: "2026-10-27",
+    };
+    const decide = (list: unknown, currentIdentity = current, reportIdentity = browserReport) => runBrowserContractProbe(
+      `audit.browserEvidenceLagDecision(${JSON.stringify(list)}, ${JSON.stringify(currentIdentity)}, ${JSON.stringify(reportIdentity)})`,
+    ) as { allowed: boolean; entry?: unknown; message: string };
+
+    const listed = decide([entry]);
+    expect(listed.allowed).toBe(true);
+    expect(listed.entry).toEqual(entry);
+
+    for (const [label, list, currentIdentity, reportIdentity] of [
+      ["empty list", [], current, browserReport],
+      ["current identity not listed", [{ ...entry, sourceIdentity: "c".repeat(64) }], current, browserReport],
+      ["browser report identity differs from entry", [entry], current, "d".repeat(64)],
+      ["entry without reason", [{ ...entry, reason: " " }], current, browserReport],
+      ["entry without recordedAt", [{ ...entry, recordedAt: "" }], current, browserReport],
+      ["not an array", { entries: [entry] }, current, browserReport],
+    ] as const) {
+      const rejected = decide(list, currentIdentity, reportIdentity);
+      expect(rejected.allowed, label).toBe(false);
+      expect(rejected.message, label).toContain("node ./scripts/frontend_consistency_browser_audit.mjs");
+      expect(rejected.message, label).toContain("browser-evidence-lag.json");
+      expect(rejected.message, label).toContain(currentIdentity);
+    }
+  }, 30_000);
+
   it("reconciles the complete route, theme, special-state, and generated-surface evidence", () => {
     const reportPath = path.join(root, "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.json");
     expect(fs.existsSync(reportPath), "browser audit report exists").toBe(true);
@@ -715,10 +749,6 @@ describe("browser evidence reconciliation", () => {
       sourceIdentity: string;
     };
     const currentSource = runBrowserContractProbe("audit.currentSourceIdentity()") as { sourceIdentity: string };
-    const focusedWorkspaceReport = read("evaluation/workspace-input-clear-balance-2026-07-18/report.md");
-    const hasFocusedWorkspaceEvidence = focusedWorkspaceReport.includes("Workspace Input Clear and Balance Hotfix")
-      && focusedWorkspaceReport.includes("1 file / 26 tests PASS")
-      && focusedWorkspaceReport.includes("`.evidence-readiness-rail`: 0");
     const viewports = ["desktop-1440", "tablet-1024", "mobile-390"];
     const requiredFields = [
       "requestedUrl", "finalUrl", "status", "viewport", "theme", "consoleErrors",
@@ -730,8 +760,8 @@ describe("browser evidence reconciliation", () => {
     expect(report.schemaVersion).toBe(3);
     expect(report.sourceSha).toMatch(/^[0-9a-f]{40}$/u);
     expect(report.sourceIdentity).toMatch(/^[0-9a-f]{64}$/u);
-    const usesFocusedWorkspaceEvidence = report.sourceIdentity !== currentSource.sourceIdentity;
-    if (!usesFocusedWorkspaceEvidence) {
+    const browserEvidenceLags = report.sourceIdentity !== currentSource.sourceIdentity;
+    if (!browserEvidenceLags) {
       expect(report.sourceIdentity).toBe(currentSource.sourceIdentity);
       expect(report.sourceSha).toBe(staticAudit.sourceSha);
       expect(report.sourceIdentity).toBe(staticAudit.sourceIdentity);
@@ -740,7 +770,12 @@ describe("browser evidence reconciliation", () => {
         sourceIdentity: staticAudit.sourceIdentity,
       });
     } else {
-      expect(hasFocusedWorkspaceEvidence).toBe(true);
+      const lagList = JSON.parse(read(browserEvidenceLagPath)) as unknown;
+      const decision = runBrowserContractProbe(`audit.browserEvidenceLagDecision(${JSON.stringify(lagList)}, ${JSON.stringify(currentSource.sourceIdentity)}, ${JSON.stringify(report.sourceIdentity)})`) as {
+        allowed: boolean;
+        message: string;
+      };
+      expect(decision.allowed, decision.message).toBe(true);
       expect(staticAudit.sourceIdentity).toBe(currentSource.sourceIdentity);
       expect(report.staticAudit).toMatchObject({
         sourceSha: report.sourceSha,

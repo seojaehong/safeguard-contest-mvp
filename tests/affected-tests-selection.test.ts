@@ -39,6 +39,7 @@ describe("영향 시험 선택 (/correct 261027)", () => {
     const component: Selection = selectAffectedTests(["components/Only.tsx"], sources, []);
     expect(names(component)).toEqual(["tests/browser.test.ts", "tests/runs-audit.test.ts"]);
     expect(component.commands.join("\n")).toContain("audit:frontend-consistency");
+    expect(component.commands.join("\n")).toContain("browser-evidence-lag.json");
 
     expect(names(selectAffectedTests(["app/globals.css"], sources, []))).toContain("tests/reads-css.test.ts");
     expect(names(selectAffectedTests(["tests/helpers/isolated-next-browser-harness.ts"], sources, []))).toEqual(["tests/browser.test.ts"]);
