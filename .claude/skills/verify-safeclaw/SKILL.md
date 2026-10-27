@@ -47,7 +47,7 @@ node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON .claude/skills/verify-safecl
 | `[aria-label="Safety Brief Dashboard"]` | 생성 완료 신호(머리 「확인할 항목을 먼저 보세요」·핵심 위험 3개·위험성평가 상위) |
 | `data-testid=anonymous-mode-notice` | 익명 안내(`lib/ask-mode-messages.ts` `ANONYMOUS_MESSAGE` 원문) |
 | `data-testid=document-check-first` | review_required 알림·「편집본 재검증」 단추(없으면 분류 확정 상태) |
-| 단추 「위험성평가표 편집」 → `data-testid=editor-export-panel` | 편집기와 내보내기(`data-server-export-readiness`, 「Excel 표 양식(.xlsx)」·「한글 표 양식(.hwp)」·「PDF(브라우저 인쇄)」·베타 「HWPX…」) |
+| 단추 「위험성평가표 편집」 → `data-testid=editor-export-panel` | 편집기와 내보내기(`data-server-export-readiness` checking→ready, 「Excel 표 양식(.xlsx)」·「한글 표 양식(.hwp)」 = download 이벤트, 「PDF(브라우저 인쇄)」 = 팝업 창 + 팝업의 `window.print`, 베타 「.hwpx 텍스트 초안」 = rhwp 로 브라우저 안 생성) |
 | `data-testid=document-deep-review` → `[aria-label="문서 목록"]`, `.document-preview-pane` 「편집」 | 문서 깊게 보기(목록·미리보기). 문서별 조종석 `*-document-cockpit` 은 편집기 안 |
 | `getByLabel("이름과 입사일 붙여넣기")`, 「N명 계산」, 결과 `table` | 연차 도구 |
 

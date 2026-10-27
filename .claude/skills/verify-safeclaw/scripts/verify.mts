@@ -252,8 +252,9 @@ async function driveWorkspaceResult(ctx: DriveContext): Promise<void> {
 }
 
 async function driveExportFormats(ctx: DriveContext): Promise<void> {
-  const { page, base, check, shot, outDir } = ctx;
-  await page.addInitScript(() => {
+  const { page, base, context, check, shot, outDir } = ctx;
+  // PDF 는 파일이 아니라 팝업 창(window.open) + popup.print() 다. 컨텍스트 전체에 print 스텁을 깔아 팝업에서도 호출 수를 센다.
+  await context.addInitScript(() => {
     (window as unknown as { __verifyPrintCalls: number }).__verifyPrintCalls = 0;
     window.print = () => { (window as unknown as { __verifyPrintCalls: number }).__verifyPrintCalls += 1; };
   });
@@ -263,21 +264,32 @@ async function driveExportFormats(ctx: DriveContext): Promise<void> {
   const panel = page.getByTestId("editor-export-panel");
   await panel.waitFor({ state: "visible", timeout: 60_000 });
   await panel.locator("summary").first().click();
-  const readiness = await panel.locator("[data-server-export-readiness]").first().getAttribute("data-server-export-readiness");
-  check("서버 내보내기 준비 상태 data-server-export-readiness", readiness, "ready");
+  // 준비 상태는 「checking」으로 시작해 서버 확인 뒤 「ready」가 된다 — 최대 30초 기다린 값을 판정한다.
+  const readinessNode = panel.locator("[data-server-export-readiness]").first();
+  let readiness = await readinessNode.getAttribute("data-server-export-readiness");
+  for (let attempt = 0; attempt < 30 && readiness === "checking"; attempt += 1) {
+    await page.waitForTimeout(1_000);
+    readiness = await readinessNode.getAttribute("data-server-export-readiness");
+  }
+  check("서버 내보내기 준비 상태 data-server-export-readiness(30초 내)", readiness, "ready");
   await shot("export-panel");
   const downloadsDir = path.join(outDir, "downloads");
   fs.mkdirSync(downloadsDir, { recursive: true });
 
-  const download = async (label: string, buttonName: RegExp, magic: (bytes: Buffer) => boolean, magicName: string) => {
+  const download = async (label: string, buttonName: RegExp, magic: (bytes: Buffer) => boolean, magicName: string, timeoutMs = 90_000) => {
     const button = panel.getByRole("button", { name: buttonName }).first();
     if (!(await button.count())) { check(`${label} 단추 존재`, false, true); return; }
     // 「Excel 생성 중」·「한글 표 생성 중」 동안은 비활성이다 — 준비 상태 이름으로 잡았으니 최대 30초 활성화를 기다린다.
     for (let attempt = 0; attempt < 30 && (await button.isDisabled()); attempt += 1) await page.waitForTimeout(1_000);
     if (await button.isDisabled()) { check(`${label} 단추 활성(30초 대기 뒤)`, false, true, `readiness=${readiness}`); return; }
-    const waiting = page.waitForEvent("download", { timeout: 90_000 });
+    const waiting = page.waitForEvent("download", { timeout: timeoutMs }).catch(() => null);
     await button.click();
     const file = await waiting;
+    if (!file) {
+      const panelText = (await panel.innerText()).replace(/\s+/gu, " ").slice(0, 300);
+      check(`${label} 내려받기 이벤트(${Math.round(timeoutMs / 1000)}초 내)`, false, true, `패널 상태: ${panelText}`);
+      return;
+    }
     const target = path.join(downloadsDir, file.suggestedFilename());
     await file.saveAs(target);
     const bytes = fs.readFileSync(target);
@@ -289,13 +301,32 @@ async function driveExportFormats(ctx: DriveContext): Promise<void> {
   const isOle = (bytes: Buffer) => bytes.subarray(0, 4).toString("hex") === "d0cf11e0";
   await download("Excel 표 양식(.xlsx)", /Excel 표 양식/u, isZip, "PK(OOXML zip)");
   await download("한글 표 양식(.hwp)", /한글 표 양식/u, isOle, "D0CF11E0(OLE/HWP5)");
+  // PDF: 팝업이 열리고(「SafeClaw PDF 준비 중」) 서버 인쇄본 HTML 로 바뀐 뒤 popup.print() 가 불린다.
+  const popupPromise = context.waitForEvent("page", { timeout: 30_000 }).catch(() => null);
   await panel.getByRole("button", { name: "PDF(브라우저 인쇄)" }).click();
-  const printCalls = await page.evaluate(() => (window as unknown as { __verifyPrintCalls: number }).__verifyPrintCalls);
-  check("PDF(브라우저 인쇄) → window.print 1회", printCalls, 1);
+  const popup = await popupPromise;
+  check("PDF(브라우저 인쇄) → 인쇄용 팝업 창 열림", Boolean(popup));
+  if (popup) {
+    let printCalls = 0;
+    let popupTitle = "";
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      await page.waitForTimeout(1_000);
+      printCalls = await popup.evaluate(() => (window as unknown as { __verifyPrintCalls?: number }).__verifyPrintCalls ?? 0).catch(() => 0);
+      popupTitle = await popup.title().catch(() => "");
+      if (printCalls > 0) break;
+    }
+    check("팝업에서 window.print 호출(60초 내)", printCalls >= 1, true, `호출 ${printCalls}회 · 팝업 제목 「${popupTitle}」`);
+    check("팝업이 「준비 중」 자리표시자를 벗어남", popupTitle !== "SafeClaw PDF 준비 중", true, popupTitle);
+    const popupShot = path.join(outDir, "pdf-popup.jpg");
+    await popup.screenshot({ path: popupShot, type: "jpeg", quality: 55, fullPage: false }).catch(() => undefined);
+    ctx.report.artifacts.push(path.relative(process.cwd(), popupShot));
+    await popup.close().catch(() => undefined);
+  }
   const beta = panel.locator("details", { hasText: "베타 형식" }).first();
   if (await beta.count()) {
     await beta.locator("summary").first().click();
-    await download("HWPX 제출형 초안(베타)", /HWPX/u, isZip, "PK(HWPX zip)");
+    // 단추 이름은 「.hwpx 텍스트 초안」(생성 중 「HWPX 생성 중」). rhwp wasm 을 브라우저에서 처음 받으므로 150초.
+    await download("HWPX 텍스트 초안(베타, rhwp)", /hwpx/iu, isZip, "PK(HWPX zip)", 150_000);
   } else {
     check("베타 형식 접힘 상자 존재", false, true);
   }
