@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 import { ANONYMOUS_MESSAGE } from "@/lib/ask-mode-messages";
 import { LANDING_EXAMPLE_CHIPS } from "@/lib/workspace-autogenerate";
@@ -67,7 +68,7 @@ export function SafeClawLanding() {
             <ul className="safeclaw-home-chip-row">
               {LANDING_EXAMPLE_CHIPS.map((chip) => (
                 <li key={chip.id}>
-                  <Link href={chip.href} className="safeclaw-home-chip">{chip.label}</Link>
+                  <Link href={chip.href as Route} className="safeclaw-home-chip">{chip.label}</Link>
                 </li>
               ))}
             </ul>
