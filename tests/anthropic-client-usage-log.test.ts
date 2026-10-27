@@ -22,8 +22,8 @@ function textResponse(usage?: Record<string, unknown>) {
 
 function usageLines(spy: ReturnType<typeof vi.spyOn>): string[] {
   return spy.mock.calls
-    .map((call) => String(call[0]))
-    .filter((line) => line.includes("anthropic_usage"));
+    .map((call: unknown[]) => String(call[0]))
+    .filter((line: string) => line.includes("anthropic_usage"));
 }
 
 function parseContext(line: string): Record<string, unknown> {
@@ -139,7 +139,7 @@ describe("generateWithAnthropic usage log", () => {
     });
 
     expect(usageLines(logSpy)).toHaveLength(1);
-    const allLogged = logSpy.mock.calls.map((call) => String(call[0])).join("\n");
+    const allLogged = logSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n");
     expect(allLogged).not.toContain(PROMPT);
     expect(allLogged).not.toContain("test-key");
   });
