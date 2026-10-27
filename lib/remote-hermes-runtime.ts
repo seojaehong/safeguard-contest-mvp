@@ -336,7 +336,7 @@ export async function readRemoteHermesResponseBody(
   let total = 0;
   let completed = false;
   const cancelOnAbort = (): void => {
-    void reader.cancel(signal.reason);
+    void reader.cancel(signal.reason).catch(() => undefined);
   };
   signal.addEventListener("abort", cancelOnAbort, { once: true });
   try {

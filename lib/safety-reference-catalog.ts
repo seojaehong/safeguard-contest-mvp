@@ -2801,7 +2801,7 @@ async function readBoundedJson(
   const chunks: Uint8Array[] = [];
   let totalBytes = 0;
   const abortRead = () => {
-    void reader.cancel(signal.reason);
+    void reader.cancel(signal.reason).catch(() => undefined);
   };
   signal.addEventListener("abort", abortRead, { once: true });
   try {
