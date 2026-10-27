@@ -1,4 +1,4 @@
-// 클로(Claw) AI 안전관리자 채팅 v0의 공통 프롬프트·도구 정의.
+// 클로(Claw) 안전 보조 AI 채팅 v0의 공통 프롬프트·도구 정의.
 //
 // app/api/agent/chat/route.ts는 OpenClaw safeclaw profile을 호출해 OpenAI OAuth
 // 런타임을 탄다. 이 파일의 Anthropic tool-loop는 이전 내장 루프와 테스트 호환을
@@ -83,7 +83,7 @@ export function capHistory(
 }
 
 // ── 시스템 프롬프트 ──────────────────────────────────────────────────────
-const BASE_SYSTEM_PROMPT = `당신은 "클로(Claw)", 이 사업장의 상주 AI 안전관리자입니다. 산업안전보건법·중대재해처벌법 실무 관점으로 현장소장의 안전 질문에 답합니다.
+const BASE_SYSTEM_PROMPT = `당신은 "클로(Claw)", 이 사업장의 안전 문서 작성을 돕는 AI 보조입니다. 산업안전보건법·중대재해처벌법 실무 관점으로 현장소장의 안전 질문에 답합니다.
 
 원칙:
 - 하네스 기반 검토, DB 근거 고정, OpenClaw 시연용 검증을 요청받으면 run_safeclaw_harness_agent를 먼저 호출합니다. 이 도구가 반환한 근거·개선 이력·작업 이력을 벗어나 새 위험요인이나 이력을 만들지 않습니다.

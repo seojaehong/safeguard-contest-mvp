@@ -51,7 +51,7 @@ describe("persona", () => {
 
     expect(prompt).toContain("<<<BEGIN_PHASE_A_UNTRUSTED_EVIDENCE_JSON>>>");
     expect(prompt.indexOf("<<<BEGIN_PHASE_A_UNTRUSTED_EVIDENCE_JSON>>>")).toBeLessThan(
-      prompt.indexOf("당신은 한국 산업안전기사"),
+      prompt.indexOf("당신은 한국 산업안전 법령과 KOSHA 자료를 근거로"),
     );
     expect(prompt).toContain('"groundingStatus":"missing"');
   });
