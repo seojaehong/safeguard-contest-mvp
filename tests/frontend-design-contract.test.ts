@@ -7,16 +7,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   frontendScopedTypography,
-  frontendSemanticRoleOverrides,
   frontendShape,
   frontendSpacing,
   frontendTypography,
-  frontendTypographyRoles,
   generatedSurfaceFiles,
   specialSurfaceFiles,
   userVisibleRoutes,
 } from "@/lib/frontend-design-contract";
-import { createTypographyRoleClassifier } from "../scripts/frontend_typography_classifier.mjs";
 
 const root = process.cwd();
 
@@ -64,38 +61,6 @@ function ruleBlocks(source: string): CssRule[] {
     };
   });
 }
-const typographyRoles = frontendTypographyRoles;
-
-type TypographyRole = keyof typeof typographyRoles;
-
-function selectorText(rule: CssRule): string {
-  return rule.selectors.join(", ");
-}
-
-const typographyDeclarationProperties = new Set([
-  "font-family",
-  "font-size",
-  "font-weight",
-  "line-height",
-  "letter-spacing",
-]);
-
-function scopedTypographyRole(rule: CssRule) {
-  return Object.values(frontendScopedTypography.roles).find((role) => {
-    const selectors = frontendScopedTypography.selectors[role.selectorRole];
-    const actualTypographyDeclarations = Object.entries(rule.declarations).filter(
-      ([property]) => typographyDeclarationProperties.has(property),
-    );
-    return selectors.length === rule.selectors.length
-      && selectors.every((selector, index) => selector === rule.selectors[index])
-      && actualTypographyDeclarations.length === Object.keys(role.declarations).length
-      && Object.entries(role.declarations).every(
-        ([property, value]) => rule.declarations[property] === value,
-      );
-  });
-}
-
-const expectedTypographyRole = createTypographyRoleClassifier<TypographyRole>(frontendSemanticRoleOverrides);
 
 function effectiveDeclarations(source: string, selector: string): CssDeclarations {
   return Object.assign(
@@ -416,32 +381,15 @@ describe("frontend design contract", () => {
   });
 
   it("binds every font-size rule to a canonical tuple or exact scoped override", () => {
+    // 분류·튜플 판정은 감사 스크립트 하나만 한다(/correct 261027). 예전에는 이 시험이 같은 판정을
+    // 따로 구현해 #121 에서 두 답이 갈렸다. 여기서는 실제 globals.css 로 감사를 돌려 위반 0 을 본다.
     const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
     expect(css).not.toMatch(/font-size:\s*(?:11px|12px|13px|14px|15px|17px|20px|var\(--t-|clamp\()/);
-    const sizedRules = ruleBlocks(css).filter((rule) => rule.declarations["font-size"]);
-    expect(sizedRules.length).toBeGreaterThan(0);
-    for (const rule of sizedRules) {
-      const scopedRole = scopedTypographyRole(rule);
-      if (scopedRole && "font-size" in scopedRole.declarations) {
-        expect(rule.declarations, `${selectorText(rule)} => scoped`).toMatchObject(
-          scopedRole.declarations,
-        );
-        continue;
-      }
-      const roleNames = rule.selectors.map((selector) => expectedTypographyRole(rule, selector));
-      expect(roleNames, `${selectorText(rule)} => ${rule.declarations["font-size"]}`).not.toContain(undefined);
-      expect(new Set(roleNames).size, `${selectorText(rule)} => mixed roles ${roleNames.join(", ")}`).toBe(1);
-      const roleName = roleNames[0] as TypographyRole;
-      const role = typographyRoles[roleName as TypographyRole];
-      expect(rule.declarations, `${selectorText(rule)} => ${roleName}`).toMatchObject({
-        "font-size": role.size,
-        "font-weight": role.weight,
-        "line-height": role.lineHeight,
-        "letter-spacing": role.tracking,
-        ...(roleName === "hud" ? { "font-family": typographyRoles.hud.fontFamily } : {}),
-      });
-    }
-  });
+    const audit = runAudit(css);
+    expect(audit.report.violations.filter(
+      (violation) => violation.rule === "typography-tuple" || violation.rule === "mixed-typography-role",
+    )).toEqual([]);
+  }, 20_000);
 
   it("keeps noncanonical workspace typography bound to exact scoped roles", () => {
     const roles = Object.entries(frontendScopedTypography.roles);

@@ -223,10 +223,10 @@ export const generatedSurfaceFiles = [
   "app/api/export/pdf/route.ts",
 ] as const;
 
-// 타이포 역할 분류의 단일 정본(/correct 261027). vitest 계약
-// (tests/frontend-design-contract.test.ts)과 감사 스크립트
-// (scripts/frontend_consistency_audit.mjs)가 이 두 표와
-// scripts/frontend_typography_classifier.mjs 하나를 같이 쓴다.
+// 타이포 역할 분류의 단일 정본(/correct 261027).
+// 판정은 감사 스크립트(scripts/frontend_consistency_audit.mjs)가 이 두 표와
+// scripts/frontend_typography_classifier.mjs 로만 한다. vitest 계약
+// (tests/frontend-design-contract.test.ts)은 같은 판정을 따로 구현하지 않고 감사를 돌린다.
 // 예전에는 표와 분류 함수가 두 벌이라 #121 에서 같은 textarea 가
 // 한쪽은 longform, 한쪽은 body 로 갈렸다.
 export const frontendTypographyRoles = {
@@ -262,4 +262,4 @@ export const frontendSemanticRoleOverrides = {
   ".command-center-shell .brand-lockup small": "caption",
   ".command-center-shell .topbar-status span": "hud",
   ".command-center-shell .step-copy small": "hud",
-} as const;
+} as const satisfies Readonly<Record<string, keyof typeof frontendTypographyRoles>>;
