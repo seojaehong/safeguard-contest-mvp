@@ -78,7 +78,7 @@ describe("answer path recognises the Anthropic deliverables provider", () => {
     expect(mocks.anthropicGenerate).toHaveBeenCalledTimes(1);
     expect(mocks.anthropicGenerate.mock.calls[0]?.[0]).toBe("claude-sonnet-5-5");
     expect(String(mocks.anthropicGenerate.mock.calls[0]?.[1])).toContain("프레스 금형 교체 작업");
-    expect(mocks.anthropicGenerate.mock.calls[0]?.[2]).toMatchObject({ maxOutputTokens: 2_048 });
+    expect(mocks.anthropicGenerate.mock.calls[0]?.[2]).toMatchObject({ maxOutputTokens: 2_048, logLabel: "answer" });
     expect(mocks.openAiCreate).not.toHaveBeenCalled();
     expect(mocks.vertexGenerate).not.toHaveBeenCalled();
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"provider":"anthropic"'));

@@ -151,6 +151,11 @@ describe("deliverables generation trace", () => {
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"traceId":"trace-anthropic-documents"'));
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"model":"claude-opus-4-8"'));
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"model":"claude-haiku-5-5"'));
+    // anthropic_usage 를 문서별로 가르려면 호출마다 문서 label 이 넘어가야 한다(과제 23 1단계).
+    const labels = mocks.anthropicGenerate.mock.calls.map((call) => (call[2] as { logLabel?: string } | undefined)?.logLabel);
+    expect(labels.length).toBeGreaterThan(1);
+    expect(labels.every((label) => typeof label === "string" && label.length > 0)).toBe(true);
+    expect(new Set(labels).size).toBeGreaterThan(1);
   });
 
   test("rejects provider-authored control prose at the Phase A deliverables boundary", async () => {
