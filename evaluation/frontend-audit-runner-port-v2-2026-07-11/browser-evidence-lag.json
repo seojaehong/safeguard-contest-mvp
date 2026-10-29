@@ -10,5 +10,11 @@
     "browserReportSourceIdentity": "79e268153b73c5cfb36301c4d3b305949851b23c7c9cb493ce6711daf83b0609",
     "reason": "후보24·25 뒤 111행 재생성 실행 완료. 과거 Noto 검사와 현재 IBM 글꼴의 불일치 및 문서 편집기 높이·모서리·글자 역할 확인 사항으로 110행 실패. 새 실측은 evaluation/candidates-24-25-2026-10-29/browser-regeneration/browser-report.json 에 보존하고 기존 합격 보고서는 임시 참조만 유지한다. PR은 전체 감사 미통과로 취급한다.",
     "recordedAt": "2026-10-29"
+  },
+  {
+    "sourceIdentity": "9d4314d40ad5d516ef9f80df5f68e127ab19420b1a583599de6a4a1291d3064c",
+    "browserReportSourceIdentity": "79e268153b73c5cfb36301c4d3b305949851b23c7c9cb493ce6711daf83b0609",
+    "reason": "문서팩 링크의 Night 대비를 테마 토큰으로 추가 보정했다. 111행 실패 실측은 대비 보정 전 identity a92cdd5651f175c6d9bf387353724ecb2be54c710b21876678cda1202abb8570 판본으로 evaluation/candidates-24-25-2026-10-29/browser-regeneration/ 에 보존한다. 최종 판본은 별도 링크 이동·대비 회귀로 검증하며 전체 매트릭스 미통과 상태를 유지한다.",
+    "recordedAt": "2026-10-29"
   }
 ]
