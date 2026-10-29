@@ -12217,6 +12217,12 @@ body:has(.safeclaw-landing) :is(
   letter-spacing: var(--tracking-body);
 }
 
+.command-center-shell .topbar-v2-link {
+  border-color: var(--workspace-rule-strong);
+  background: var(--workspace-surface-1);
+  color: var(--workspace-ink);
+}
+
 .command-center-shell .command-viewport {
   min-height: calc(100vh - 92px);
   padding: 0;

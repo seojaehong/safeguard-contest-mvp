@@ -721,6 +721,28 @@ describe("workspace layout regression", () => {
       await page.goto(`${baseUrl}/workspace?theme=${theme}`, { waitUntil: "networkidle" });
       const link = page.locator('.command-topbar a[href="/documents"]');
       expect(await link.isVisible()).toBe(true);
+      const contrast = await link.evaluate((element) => {
+        const channels = (value: string): number[] => {
+          const parts = value.match(/[\d.]+/gu)?.map(Number);
+          if (!parts || parts.length < 3) throw new Error(`Unsupported color: ${value}`);
+          return [...parts.slice(0, 3), parts[3] ?? 1];
+        };
+        const ancestors: Element[] = [];
+        for (let current: Element | null = element; current; current = current.parentElement) ancestors.unshift(current);
+        let background = [255, 255, 255];
+        for (const ancestor of ancestors) {
+          const painted = channels(getComputedStyle(ancestor).backgroundColor);
+          background = background.map((under, index) => painted[index] * painted[3] + under * (1 - painted[3]));
+        }
+        const luminance = (color: number[]): number => color.slice(0, 3).reduce((sum, channel, index) => {
+          const value = channel / 255;
+          return sum + (value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4) * [0.2126, 0.7152, 0.0722][index];
+        }, 0);
+        const foreground = luminance(channels(getComputedStyle(element).color));
+        const surface = luminance(background);
+        return (Math.max(foreground, surface) + 0.05) / (Math.min(foreground, surface) + 0.05);
+      });
+      expect(contrast).toBeGreaterThanOrEqual(4.5);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
       await link.click();
       await page.waitForURL(`${baseUrl}/documents`);
