@@ -12224,6 +12224,7 @@ body:has(.safeclaw-landing) :is(
   grid-row: 1 / span 2;
   align-self: center;
   margin-top: 0;
+  min-height: var(--control-height);
   border-color: var(--workspace-rule-strong);
   background: var(--workspace-surface-1);
   color: var(--workspace-ink);
@@ -19632,7 +19633,7 @@ body:has(.safeclaw-landing) :is(
   justify-content: space-between;
   gap: 6px;
   width: auto;
-  min-height: 30px;
+  min-height: var(--control-height);
   border: 1px solid var(--workspace-rule-strong);
   border-radius: var(--radius-control);
   background: var(--workspace-surface-2);
@@ -20659,17 +20660,13 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
-/* Workspace edit mode is a bounded cockpit/editor pane. Theme bridges above can
-   intentionally set generated editors to overflow: visible; this launch guard
-   wins only in /workspace editor focus so long document utilities scroll inside
-   the editor instead of extending the whole page. */
+/* The focused workspace owns vertical scrolling. Inner grid/columns flow at
+   their content height so the same editor does not acquire a second scroller. */
 .command-center-shell .field-workspace.field-workspace-editor-focus .workpack-shell,
 .command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .workpack-shell,
 .command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .workpack-shell {
-  max-height: calc(100svh - 92px);
-  overflow-x: visible;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  max-height: none;
+  overflow: visible;
 }
 
 .command-center-shell .command-main.workspace-view-document:has(.field-workspace-editor-focus),
@@ -20684,6 +20681,7 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .field-workspace.field-workspace-editor-focus {
   min-height: 0;
   max-height: calc(100svh - 24px);
+  grid-auto-rows: max-content;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -20693,8 +20691,8 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .document-editor,
 .command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .document-editor {
   min-height: 0;
-  max-height: calc(100svh - 124px);
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
 }
 
 .command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .document-editor.editor-focus-cue {
@@ -20705,15 +20703,15 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .workpack-sidebar,
 .command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .workpack-sidebar {
   min-height: 0;
-  max-height: calc(100svh - 124px);
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
 }
 
 @media (max-width: 720px) {
   .command-center-shell .field-workspace.field-workspace-editor-focus .workpack-shell,
   .command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .workpack-shell,
   .command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .workpack-shell {
-    max-height: calc(100svh - 72px);
+    max-height: none;
   }
 
   .command-center-shell .command-main.workspace-view-document:has(.field-workspace-editor-focus),
@@ -20733,7 +20731,7 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell .field-workspace.field-workspace-editor-focus .workpack-sidebar,
   .command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .workpack-sidebar,
   .command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .workpack-sidebar {
-    max-height: calc(100svh - 96px);
+    max-height: none;
   }
 }
 
@@ -21652,6 +21650,22 @@ body:has(.safeclaw-landing) :is(
 }
 
 /* Document focus mode keeps review and editing as separate workspace surfaces. */
+.command-center-shell.workspace-page-document :is(
+  .command-viewport,
+  .command-main.workspace-view-document,
+  .workspace-step-page.workspace-document-page,
+  .document-editor-surface
+):has(.field-workspace-editor-focus),
+.command-center-shell.workspace-page-document .field-workspace-editor-focus .workspace-canvas {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+.command-center-shell.workspace-page-document .field-workspace-editor-focus .workspace-canvas {
+  min-height: min-content;
+  max-height: none;
+}
+
 .command-center-shell .document-editor-surface {
   display: grid;
   gap: 12px;
@@ -21725,18 +21739,14 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell .field-workspace-editor-focus .workpack-shell {
-  max-height: calc(100svh - 92px);
-  overflow-x: visible;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  max-height: none;
+  overflow: visible;
 }
 
 .command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .workpack-shell,
 .command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .workpack-shell {
-  max-height: calc(100svh - 92px);
-  overflow-x: visible;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  max-height: none;
+  overflow: visible;
 }
 
 .command-center-shell .field-workspace-editor-focus .document-editor {
@@ -24031,6 +24041,7 @@ body:has(.safeclaw-landing) :is(
   border-color: var(--workspace-rule);
   background: var(--workspace-surface-2);
   color: var(--workspace-ink);
+  min-height: var(--control-height);
 }
 
 .safeclaw-module-shell.module-variant-document :is(

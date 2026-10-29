@@ -148,7 +148,7 @@
 .moreButton,
 .graphDialog button {
   border: 1px solid var(--ontology-line);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   background: transparent;
   color: var(--ontology-ink);
   padding: 0 14px;
@@ -177,7 +177,7 @@
 .toolbar select {
   width: 100%;
   border: 1px solid var(--ontology-line);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   background: var(--ontology-surface);
   color: var(--ontology-ink);
   padding: 0 12px;

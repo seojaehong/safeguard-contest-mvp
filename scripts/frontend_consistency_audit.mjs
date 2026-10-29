@@ -3,10 +3,9 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import ts from "typescript";
 
 import { canonicalFrontendSourceIdentity } from "./frontend_audit_source_identity.mjs";
-import { createTypographyRoleClassifier } from "./frontend_typography_classifier.mjs";
+import { contractLiteral, createTypographyRoleClassifier } from "./frontend_typography_classifier.mjs";
 
 const root = process.cwd();
 const outputPath = path.resolve(
@@ -41,57 +40,6 @@ function standaloneContractRoutes(source) {
   const match = source.match(/export const standaloneToolRoutes = \[([\s\S]*?)\] as const;/);
   if (!match) throw new Error("standaloneToolRoutes contract was not found");
   return [...match[1].matchAll(/"([^"]+)"/g)].map((entry) => entry[1]);
-}
-
-function contractLiteral(source, exportName) {
-  const sourceFile = ts.createSourceFile(
-    contractPath,
-    source,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TS,
-  );
-  const declarations = sourceFile.statements
-    .filter(ts.isVariableStatement)
-    .flatMap((statement) => [...statement.declarationList.declarations]);
-  const declaration = declarations.find(
-    (candidate) => ts.isIdentifier(candidate.name) && candidate.name.text === exportName,
-  );
-  if (!declaration?.initializer) throw new Error(`${exportName} contract was not found`);
-
-  function literalValue(input) {
-    let node = input;
-    while (
-      ts.isAsExpression(node)
-      || ts.isParenthesizedExpression(node)
-      || ts.isSatisfiesExpression(node)
-    ) {
-      node = node.expression;
-    }
-    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text;
-    if (ts.isNumericLiteral(node)) return Number(node.text);
-    if (node.kind === ts.SyntaxKind.TrueKeyword) return true;
-    if (node.kind === ts.SyntaxKind.FalseKeyword) return false;
-    if (node.kind === ts.SyntaxKind.NullKeyword) return null;
-    if (ts.isArrayLiteralExpression(node)) return node.elements.map(literalValue);
-    if (ts.isObjectLiteralExpression(node)) {
-      return Object.fromEntries(node.properties.map((property) => {
-        if (!ts.isPropertyAssignment(property)) {
-          throw new Error(`${exportName} contains a non-literal property`);
-        }
-        const propertyName = ts.isIdentifier(property.name)
-          || ts.isStringLiteral(property.name)
-          || ts.isNumericLiteral(property.name)
-          ? property.name.text
-          : undefined;
-        if (!propertyName) throw new Error(`${exportName} contains an unsupported property name`);
-        return [propertyName, literalValue(property.initializer)];
-      }));
-    }
-    throw new Error(`${exportName} contains an unsupported literal value`);
-  }
-
-  return literalValue(declaration.initializer);
 }
 
 function isRecord(value) {

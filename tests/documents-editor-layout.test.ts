@@ -141,7 +141,8 @@ describe("documents editor layout", () => {
     harness = await startIsolatedNextBrowserHarness({
       slug: "documents-editor-layout",
       initialPath: "/documents",
-      portSalt: 3228
+      portSalt: 3228,
+      mode: process.env.SAFECLAW_BROWSER_TEST_MODE === "prod" ? "prod" : "dev"
     });
     baseUrl = harness.baseUrl;
     browser = harness.browser;
@@ -155,6 +156,23 @@ describe("documents editor layout", () => {
     if (!browser) return;
     await Promise.all(browser.contexts().map((context) => context.close()));
   }, 30_000);
+
+  it.each([1440, 1024, 390])("keeps document selection and risk inputs usable at %ipx", async (width) => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width, height: 1000 } });
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+    const controls = page.locator(".safeclaw-mobile-core-list button, .safeclaw-document-review-launch");
+    expect(await controls.count()).toBeGreaterThanOrEqual(4);
+    const heights = await controls.evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().height));
+    for (const height of heights) expect(height).toBeGreaterThanOrEqual(43.5);
+    const details = page.getByTestId("risk-row-details").first();
+    await details.locator(":scope > summary").click();
+    const fields = page.getByTestId("risk-row-editor-row").first().locator("input, select");
+    expect(await fields.count()).toBeGreaterThan(0);
+    const radii = await fields.evaluateAll((elements) => elements.map((element) => Number.parseFloat(getComputedStyle(element).borderTopLeftRadius)));
+    for (const radius of radii) expect(radius).toBeLessThanOrEqual(2.2);
+    await page.close();
+  }, 60_000);
 
   it("keeps operational format labels out of the default rendered document surface", async () => {
     if (!browser) throw new Error("Browser was not started");

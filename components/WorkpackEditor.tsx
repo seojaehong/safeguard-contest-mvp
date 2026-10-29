@@ -1143,6 +1143,7 @@ const documentPreviewCss = `
   .document-print-typography th,
   .document-print-typography td { font-family: inherit; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-variant-numeric: tabular-nums; }
   .document-print-typography th { font-weight: 700; }
+  .safeclaw-module-shell.module-variant-document .document-editor .submission-preview-panel .document-print-typography td { font-weight: 400; }
   .document-print-typography .safety-form-preview-head small,
   .document-print-typography .safety-form-preview-head span { font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; font-family: inherit; }
   .document-print-typography .approval-preview b { font-size: 8.5pt; font-weight: 700; line-height: 12pt; letter-spacing: 0; font-family: inherit; }

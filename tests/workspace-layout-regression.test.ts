@@ -2515,8 +2515,8 @@ describe("workspace layout regression", () => {
 
     expect.soft(metrics.backgroundImage).toBe("none");
     expect.soft(metrics.contrast).toBeGreaterThanOrEqual(4.5);
-    expect.soft(metrics.overflowX).toBe("auto");
-    expect.soft(metrics.overflowY).toBe("auto");
+    expect.soft(metrics.overflowX).toBe("visible");
+    expect.soft(metrics.overflowY).toBe("visible");
     expect(metrics.riskFieldVisible).toBe(true);
     expect(metrics.sourceTextareaCount).toBe(0);
   }, 90_000);

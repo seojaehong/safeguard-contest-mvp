@@ -98,6 +98,7 @@ productionBrowserSuite(productionBrowserSuiteName, () => {
       path.join(evaluationDirectory, "browser-metrics.json"),
       `${JSON.stringify({
         authorityBase: "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
+        criteriaRevision: "2026-10-30-current-editor-geometry",
         expectedRows: viewportCases.length,
         actualRows: metricRows.length,
         rows: metricRows
@@ -179,18 +180,18 @@ productionBrowserSuite(productionBrowserSuiteName, () => {
     const editorDrawer = page.getByTestId("editor-provenance-drawer");
     await expect.poll(() => editorDrawer.locator(":scope > summary").textContent()).toMatch(/^근거 \d+건 · 확인 필요 \d+건$/u);
     expect(await page.getByTestId("document-structured-editor").getAttribute("data-editor-kind")).toBe("risk-assessment");
-    expect(await page.locator('[data-section-kind="body"] .document-section-textarea').count()).toBeGreaterThanOrEqual(4);
-    const rowDisclosureMetrics = await page.getByTestId("risk-row-editor-row").evaluateAll((rows) => ({
-      total: rows.length,
-      open: rows.filter((row) => row instanceof HTMLDetailsElement && row.open).length
-    }));
-    if (rowDisclosureMetrics.total > 1) {
-      expect(rowDisclosureMetrics.open).toBe(0);
-      await page.getByTestId("risk-row-editor-row").first().locator("summary").click();
-      await expect.poll(() => page.getByTestId("risk-row-editor-row").first().evaluate((row) => (
-        row instanceof HTMLDetailsElement ? row.open : false
-      ))).toBe(true);
-    }
+    const riskSelectors = page.getByTestId("risk-row-selector");
+    expect(await riskSelectors.count()).toBeGreaterThanOrEqual(4);
+    expect(await page.getByTestId("risk-row-editor-row").count()).toBe(1);
+    const editedHazard = "이동식 비계 추락 위험 확인 — 합성 편집 시험";
+    const hazardInput = page.getByTestId("risk-row-editor-row").getByRole("textbox", { name: /유해·위험요인/u });
+    await hazardInput.fill(editedHazard);
+    await riskSelectors.nth(1).click();
+    expect(await page.getByTestId("risk-row-editor-row").count()).toBe(1);
+    await riskSelectors.last().click();
+    await expect.poll(() => riskSelectors.last().getAttribute("aria-selected")).toBe("true");
+    await riskSelectors.first().click();
+    await expect.poll(() => hazardInput.inputValue()).toBe(editedHazard);
     expect(await page.getByTestId("editor-provenance-appendices").count()).toBe(1);
     expect(await page.locator('select[aria-label="편집 문서 선택"] option').count()).toBe(12);
     const exactProvenanceSummaryCount = await page.locator("details > summary").evaluateAll((summaries) => (
@@ -199,6 +200,23 @@ productionBrowserSuite(productionBrowserSuiteName, () => {
     expect(exactProvenanceSummaryCount).toBe(1);
     await editorDrawer.locator(":scope > summary").click();
     await page.locator('[data-testid="editor-evidence-panel"] .knowledge-link').waitFor({ state: "visible" });
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise<void>((resolve, reject) => {
+        const timer = window.setTimeout(() => reject(new Error("Editor alignment did not settle")), 5_000);
+        let previous = "";
+        let stableSince = performance.now();
+        const sample = () => {
+          const key = JSON.stringify([window.scrollY, ...Array.from(document.querySelectorAll<HTMLElement>(".document-editor-surface, .field-workspace-editor-focus, .document-editor"))
+            .flatMap((element) => [element.scrollTop, ...[element.getBoundingClientRect().x, element.getBoundingClientRect().y, element.getBoundingClientRect().height].map((value) => Math.round(value))])]);
+          if (key !== previous) { previous = key; stableSince = performance.now(); }
+          // WorkpackEditor realigns after 80/240ms and after web fonts load.
+          if (performance.now() - stableSince >= 300) { window.clearTimeout(timer); resolve(); }
+          else window.requestAnimationFrame(sample);
+        };
+        window.requestAnimationFrame(sample);
+      });
+    });
 
     const editorMetrics = await page.evaluate(() => {
       const surface = document.querySelector<HTMLElement>(".document-editor-surface");
@@ -218,20 +236,44 @@ productionBrowserSuite(productionBrowserSuiteName, () => {
         }
         return false;
       };
+      const paintedRect = (element: HTMLElement) => {
+        const rect = element.getBoundingClientRect();
+        let left = Math.max(0, rect.left);
+        let right = Math.min(window.innerWidth, rect.right);
+        let top = Math.max(0, rect.top);
+        let bottom = Math.min(window.innerHeight, rect.bottom);
+        let ancestor = element.parentElement;
+        while (ancestor && ancestor !== document.body) {
+          const parentStyle = getComputedStyle(ancestor);
+          const parentRect = ancestor.getBoundingClientRect();
+          if (/^(?:hidden|clip|auto|scroll)$/u.test(parentStyle.overflowX)) {
+            left = Math.max(left, parentRect.left);
+            right = Math.min(right, parentRect.right);
+          }
+          if (/^(?:hidden|clip|auto|scroll)$/u.test(parentStyle.overflowY)) {
+            top = Math.max(top, parentRect.top);
+            bottom = Math.min(bottom, parentRect.bottom);
+          }
+          ancestor = ancestor.parentElement;
+        }
+        return { left, right, top, bottom };
+      };
       const isVisible = (element: HTMLElement) => {
         const style = getComputedStyle(element);
         const rect = element.getBoundingClientRect();
+        const painted = paintedRect(element);
         return !isInsideClosedDetails(element)
           && element.getClientRects().length > 0
           && style.display !== "none"
           && style.visibility !== "hidden"
           && Number.parseFloat(style.opacity) > 0
+          && painted.right > painted.left && painted.bottom > painted.top
           && rect.right > 0
           && rect.left < window.innerWidth
           && rect.bottom > 0
           && rect.top < window.innerHeight;
       };
-      const visibleTouchTargets = Array.from(document.querySelectorAll<HTMLElement>(
+      const visibleTouchTargets = Array.from(surface.querySelectorAll<HTMLElement>(
         'button, summary, select, a[href], input:not([type="hidden"]), textarea, [role="button"], [tabindex]:not([tabindex="-1"])'
       )).filter((element) => (
         !isInsideClosedDetails(element)
@@ -254,10 +296,10 @@ productionBrowserSuite(productionBrowserSuiteName, () => {
       const findOverlapPairs = (elements: HTMLElement[]) => {
         const pairs: string[] = [];
         elements.forEach((first, firstIndex) => {
-          const firstRect = first.getBoundingClientRect();
+          const firstRect = paintedRect(first);
           elements.slice(firstIndex + 1).forEach((second) => {
             if (first.contains(second) || second.contains(first)) return;
-            const secondRect = second.getBoundingClientRect();
+            const secondRect = paintedRect(second);
             const overlapWidth = Math.min(firstRect.right, secondRect.right) - Math.max(firstRect.left, secondRect.left);
             const overlapHeight = Math.min(firstRect.bottom, secondRect.bottom) - Math.max(firstRect.top, secondRect.top);
             if (overlapWidth > 1 && overlapHeight > 1) {
@@ -267,6 +309,13 @@ productionBrowserSuite(productionBrowserSuiteName, () => {
         });
         return pairs;
       };
+      const probes = [document.createElement("button"), document.createElement("button")];
+      for (const probe of probes) {
+        Object.assign(probe.style, { position: "fixed", left: "16px", top: "200px", width: "50px", height: "50px", padding: "0", margin: "0" });
+        document.body.append(probe);
+      }
+      const overlapCanaryCount = findOverlapPairs(probes).length;
+      probes.forEach((probe) => probe.remove());
       const positionedTargets = Array.from(document.querySelectorAll<HTMLElement>("body *"))
         .filter((element) => {
           const position = getComputedStyle(element).position;
@@ -276,8 +325,8 @@ productionBrowserSuite(productionBrowserSuiteName, () => {
       const overlayOverlaps = positionedTargets.flatMap((overlay) => visibleTouchTargets
         .filter((control) => !overlay.contains(control) && !control.contains(overlay))
         .filter((control) => {
-          const overlayRect = overlay.getBoundingClientRect();
-          const controlRect = control.getBoundingClientRect();
+          const overlayRect = paintedRect(overlay);
+          const controlRect = paintedRect(control);
           const overlapWidth = Math.min(overlayRect.right, controlRect.right) - Math.max(overlayRect.left, controlRect.left);
           const overlapHeight = Math.min(overlayRect.bottom, controlRect.bottom) - Math.max(overlayRect.top, controlRect.top);
           return overlapWidth > 1 && overlapHeight > 1;
@@ -285,36 +334,43 @@ productionBrowserSuite(productionBrowserSuiteName, () => {
         .map((control) => `${targetLabel(overlay)} <> ${targetLabel(control)}`));
       const clippedControls = visibleTouchTargets.filter((element) => {
         const rect = element.getBoundingClientRect();
-        if (rect.left < -1 || rect.right > window.innerWidth + 1) return true;
+        let left = rect.left;
+        let right = rect.right;
+        let top = rect.top;
+        let bottom = rect.bottom;
         let ancestor = element.parentElement;
         while (ancestor && ancestor !== document.body) {
           const style = getComputedStyle(ancestor);
-          if (/(?:hidden|clip)/u.test(`${style.overflowX} ${style.overflowY}`)) {
+          if (/^(?:hidden|clip)$/u.test(style.overflowX) || /^(?:hidden|clip)$/u.test(style.overflowY)) {
             const ancestorRect = ancestor.getBoundingClientRect();
             if (
-              rect.left < ancestorRect.left - 1
-              || rect.right > ancestorRect.right + 1
-              || rect.top < ancestorRect.top - 1
-              || rect.bottom > ancestorRect.bottom + 1
+              (/^(?:hidden|clip)$/u.test(style.overflowX) && (left < ancestorRect.left - 1 || right > ancestorRect.right + 1))
+              || (/^(?:hidden|clip)$/u.test(style.overflowY) && (top < ancestorRect.top - 1 || bottom > ancestorRect.bottom + 1))
             ) return true;
           }
+          const bounds = ancestor.getBoundingClientRect();
+          if (/^(?:auto|scroll)$/u.test(style.overflowX)) { left = Math.max(left, bounds.left); right = Math.min(right, bounds.right); }
+          if (/^(?:auto|scroll)$/u.test(style.overflowY)) { top = Math.max(top, bounds.top); bottom = Math.min(bottom, bounds.bottom); }
           ancestor = ancestor.parentElement;
         }
         return false;
       }).map(targetLabel);
-      const sectionTextareas = Array.from(structured.querySelectorAll<HTMLElement>(".document-section-textarea"))
+      const sectionTextareas = Array.from(structured.querySelectorAll<HTMLElement>("textarea"))
         .filter(isVisible);
       const sectionOverlaps = sectionTextareas.slice(1).filter((element, index) => {
         const previous = sectionTextareas[index];
         return previous.getBoundingClientRect().bottom > element.getBoundingClientRect().top + 0.5;
       }).length;
-      const nestedScrollContainers = Array.from(document.querySelectorAll<HTMLElement>("body *"))
+      const verticalScrollOwners = Array.from(surface.querySelectorAll<HTMLElement>("*"))
         .filter((element) => {
           const style = getComputedStyle(element);
           return isVisible(element)
             && /^(?:auto|scroll)$/u.test(style.overflowY)
             && element.scrollHeight > element.clientHeight + 1;
-        })
+        });
+      // Independent columns may scroll. A scroll owner inside another vertical owner is a trap.
+      const nestedScrollContainers = verticalScrollOwners
+        .filter((element) => verticalScrollOwners.some((ancestor) => ancestor !== element && ancestor.contains(element)))
         .map(targetLabel);
       const viewportGeometry: ViewportGeometry = {
         clippedControls,
@@ -331,10 +387,38 @@ productionBrowserSuite(productionBrowserSuiteName, () => {
         scrollWidth: document.documentElement.scrollWidth,
         bodyOffset: Math.round(bodyRect.top - surfaceRect.top),
         overlapPolicy: {
+          scope: "document-editor-surface",
+          scrollPolicy: "independent columns allowed; nested vertical owners rejected",
           documentedExcludedPairs: [],
           ignoredNonPairs: ["ancestor-descendant", "closed-details-content", "outside-current-viewport"]
         },
         viewportGeometry,
+        visibleControlCount: visibleTouchTargets.length,
+        layoutBoxes: [".workspace-canvas", ".workpack-shell", ".document-editor", ".editor-operations-disclosure", ".workspace-rail"].map((selector) => {
+          const element = surface.querySelector<HTMLElement>(selector);
+          if (!element) return null;
+          const style = getComputedStyle(element);
+          const rect = element.getBoundingClientRect();
+          return { selector, x: rect.x, y: rect.y, width: rect.width, height: rect.height, minHeight: style.minHeight,
+            maxHeight: style.maxHeight, gridRow: style.gridRow, rows: style.gridTemplateRows, scrollHeight: element.scrollHeight };
+        }),
+        overlapCanaryCount,
+        clippingEvidence: visibleTouchTargets.filter((element) => clippedControls.includes(targetLabel(element))).map((element) => {
+          const parents: Array<{ className: string; x: number; y: number; width: number; height: number; overflowX: string; overflowY: string }> = [];
+          let ancestor = element.parentElement;
+          while (ancestor && ancestor !== document.body) {
+            const style = getComputedStyle(ancestor);
+            if (/(?:hidden|clip)/u.test(`${style.overflowX} ${style.overflowY}`)) parents.push({ className: ancestor.className,
+              x: ancestor.getBoundingClientRect().x, y: ancestor.getBoundingClientRect().y,
+              width: ancestor.getBoundingClientRect().width, height: ancestor.getBoundingClientRect().height, overflowX: style.overflowX, overflowY: style.overflowY });
+            ancestor = ancestor.parentElement;
+          }
+          const rect = element.getBoundingClientRect();
+          return { label: targetLabel(element), x: rect.x, y: rect.y, width: rect.width, height: rect.height, parents };
+        }),
+        scrollOwners: verticalScrollOwners.map((element) => ({ label: targetLabel(element), className: element.className,
+          maxHeight: getComputedStyle(element).maxHeight, height: element.clientHeight, scrollHeight: element.scrollHeight,
+          parents: verticalScrollOwners.filter((ancestor) => ancestor !== element && ancestor.contains(element)).map(targetLabel) })),
         sectionOverlaps,
         sectionCount: sectionTextareas.length
       };
@@ -353,6 +437,8 @@ productionBrowserSuite(productionBrowserSuiteName, () => {
     expect(reviewMetrics.nestedScrollCount).toBe(0);
     expect(editorMetrics.scrollWidth).toBeLessThanOrEqual(width + 1);
     expect(editorMetrics.viewportGeometry.horizontalOverflow).toBe(0);
+    expect(editorMetrics.overlapCanaryCount).toBe(1);
+    expect(editorMetrics.visibleControlCount).toBeGreaterThan(0);
     expect(editorMetrics.viewportGeometry.nestedScrollContainers).toEqual([]);
     expect(editorMetrics.bodyOffset).toBeLessThanOrEqual(width === 391 ? 230 : 300);
     expect(editorMetrics.viewportGeometry.tooSmallTouchTargets).toEqual([]);
@@ -360,5 +446,7 @@ productionBrowserSuite(productionBrowserSuiteName, () => {
     expect(editorMetrics.viewportGeometry.interactionOverlaps).toEqual([]);
     expect(editorMetrics.viewportGeometry.overlayOverlaps).toEqual([]);
     expect(editorMetrics.sectionOverlaps).toBe(0);
+    await page.getByRole("button", { name: "문서 검토로 돌아가기", exact: true }).click();
+    await page.getByTestId("document-deep-review").waitFor({ state: "visible" });
   }, 90_000);
 });

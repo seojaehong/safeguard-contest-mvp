@@ -402,6 +402,7 @@ describe("browser evidence reconciliation", () => {
       "app/global-error.tsx",
       "app/not-found.tsx",
       "app/workspace/loading.tsx",
+      "components/WorkpackEditor.module.css",
     ];
 
     expect(identity.files.filter((filePath) => filePath.startsWith("app/") && filePath.endsWith(".tsx"))).toEqual(appTsxFiles);
@@ -428,7 +429,7 @@ describe("browser evidence reconciliation", () => {
 
       for (const relativePath of boundaryFiles) {
         const target = path.join(fixtureRoot, relativePath);
-        fs.appendFileSync(target, "\n// deterministic identity mutation\n", "utf8");
+        fs.appendFileSync(target, "\n/* deterministic identity mutation */\n", "utf8");
         const mutated = runFrontendIdentityProbe(fixtureRoot);
         expect(mutated.sourceIdentity, relativePath).not.toBe(fixtureIdentity.sourceIdentity);
         fs.copyFileSync(path.join(root, relativePath), target);
@@ -673,9 +674,9 @@ describe("browser evidence reconciliation", () => {
       consoleErrors: [], pageErrors: [], horizontalOverflow: 0,
       visiblePrimaryContent: "작업 화면을 준비하고 있습니다", boundaryMarker: "loading",
       boundaryMarkerCount: 1,
-      bodyFont: '"Noto Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px",
+      bodyFont: '"IBM Plex Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px",
       bodyFontWeight: "500", bodyLineHeight: "24px", bodyLetterSpacing: "0px", productFontLoaded: true,
-      primaryHeading: { fontFamily: '"Noto Sans KR"', fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
+      primaryHeading: { fontFamily: '"IBM Plex Sans KR"', fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
       renderedControls: [], keySurfaces: [], documentTypography: {},
     };
     const result = runBrowserContractProbe(
@@ -926,24 +927,44 @@ describe("browser evidence reconciliation", () => {
       route: "/workspace", viewport: "desktop-1440", theme: "Night", workspaceTheme: "Night",
       status: 200, consoleErrors: [], pageErrors: [],
       horizontalOverflow: 0, visiblePrimaryContent: "작업공간", boundaryMarker: "",
-      bodyFont: '"Noto Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px", bodyFontWeight: "500",
+      bodyFont: '"IBM Plex Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px", bodyFontWeight: "500",
       bodyLineHeight: "24px", bodyLetterSpacing: "0px", productFontLoaded: true,
-      primaryHeading: { tag: "h1", text: "작업공간", fontFamily: '"Noto Sans KR"', fontSize: "72px", fontWeight: "800", lineHeight: "82.8px", letterSpacing: "-3.24px" },
+      primaryHeading: { tag: "h1", text: "작업공간", fontFamily: '"IBM Plex Sans KR"', fontSize: "72px", fontWeight: "800", lineHeight: "82.8px", letterSpacing: "-3.24px" },
       renderedControls: [], keySurfaces: [], documentTypography: {},
     };
-    const probe = (row: object) => runBrowserContractProbe(`audit.numericalContractFindings(${JSON.stringify(row)})`) as { findings: string[] };
-
-    expect(probe(validRow).findings).toEqual([]);
-    for (const mutation of [
+    const mutations = [
       { primaryHeading: { ...validRow.primaryHeading, fontSize: "39px", lineHeight: "44.85px", letterSpacing: "-1.365px" } },
       { bodyFont: "Arial, sans-serif" },
       { bodyLineHeight: "23px" },
       { bodyLetterSpacing: "1px" },
       { productFontLoaded: false },
       { workspaceTheme: "Day" },
-    ]) {
-      expect(probe({ ...validRow, ...mutation }).findings, JSON.stringify(mutation)).not.toEqual([]);
-    }
+    ];
+    const results = runBrowserContractProbe(`${JSON.stringify([validRow, ...mutations.map((mutation) => ({ ...validRow, ...mutation }))])}.map(row => audit.numericalContractFindings(row))`) as Array<{ findings: string[] }>;
+    expect(results[0].findings).toEqual([]);
+    mutations.forEach((mutation, index) => expect(results[index + 1].findings, JSON.stringify(mutation)).not.toEqual([]));
+  }, 30_000);
+
+  it("uses the current product font and responsive heading roles without accepting legacy fonts or small controls", () => {
+    const row = {
+      route: "/", viewport: "desktop-1440", status: 200,
+      consoleErrors: [], pageErrors: [], horizontalOverflow: 0, visiblePrimaryContent: "작업",
+      bodyFont: '"IBM Plex Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px", bodyFontWeight: "500",
+      bodyLineHeight: "24px", bodyLetterSpacing: "0px", productFontLoaded: true,
+      primaryHeading: { fontFamily: '"IBM Plex Sans KR"', fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
+      renderedControls: [], keySurfaces: [], documentTypography: {},
+    };
+    const documentMobile = { ...row, route: "/documents", viewport: "mobile-390", primaryHeading: { ...row.primaryHeading, fontSize: "24px", lineHeight: "30px", letterSpacing: "-0.6px" } };
+    const invalidControls = [
+      { selector: "button.small", type: "button", height: 30, radius: 2 },
+      { selector: "input.round", type: "text", height: 44, radius: 6 },
+      { selector: "input.legacy", type: "text", height: 44, radius: 8 },
+    ];
+    const rows = [row, documentMobile, { ...row, bodyFont: '"Noto Sans KR", sans-serif' }, { ...row, productFontLoaded: false }, ...invalidControls.map((control) => ({ ...row, renderedControls: [control] }))];
+    const results = runBrowserContractProbe(`${JSON.stringify(rows)}.map(row => audit.numericalContractFindings(row))`) as Array<{ findings: string[] }>;
+    expect(results[0].findings).toEqual([]);
+    expect(results[1].findings).toEqual([]);
+    results.slice(2).forEach((result) => expect(result.findings).not.toEqual([]));
   }, 30_000);
 
   it("builds explicit Day and Night workspace audit routes", () => {
@@ -964,10 +985,10 @@ describe("browser evidence reconciliation", () => {
     const row = {
       route: "generated:document-preview", viewport: "desktop-1440", status: 200,
       consoleErrors: [], pageErrors: [], horizontalOverflow: 0, visiblePrimaryContent: "문서",
-      boundaryMarker: "", bodyFont: '"Noto Sans KR", "Malgun Gothic", sans-serif',
+      boundaryMarker: "", bodyFont: '"IBM Plex Sans KR", "Malgun Gothic", sans-serif',
       bodyFontSize: "15px", bodyFontWeight: "500", bodyLineHeight: "24px", bodyLetterSpacing: "0px",
       productFontLoaded: true,
-      primaryHeading: { fontFamily: '"Noto Sans KR"', fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
+      primaryHeading: { fontFamily: '"IBM Plex Sans KR"', fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
       renderedControls: [], keySurfaces: [],
       documentTypography: {
         title: { ...role(documentFamily), fontSize: "26.6667px", lineHeight: "32px", letterSpacing: "-0.533333px" },
@@ -1000,9 +1021,9 @@ describe("browser evidence reconciliation", () => {
       route: "/workspace", viewport: "desktop-1440", status: 200,
       expectedStatuses: [200], expectedFinalPath: "/workspace", finalUrl: "http://127.0.0.1:3011/workspace",
       consoleErrors: [], pageErrors: [], horizontalOverflow: 0, visiblePrimaryContent: "작업공간",
-      boundaryMarker: "", bodyFont: '"Noto Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px",
+      boundaryMarker: "", bodyFont: '"IBM Plex Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px",
       bodyFontWeight: "500", bodyLineHeight: "24px", bodyLetterSpacing: "0px", productFontLoaded: true,
-      primaryHeading: { fontFamily: '"Noto Sans KR"', fontSize: "72px", fontWeight: "800", lineHeight: "82.8px", letterSpacing: "-3.24px" },
+      primaryHeading: { fontFamily: '"IBM Plex Sans KR"', fontSize: "72px", fontWeight: "800", lineHeight: "82.8px", letterSpacing: "-3.24px" },
       renderedControls: [], keySurfaces: [], documentTypography: {},
     };
     const probe = (row: object) => runBrowserContractProbe(`audit.numericalContractFindings(${JSON.stringify(row)})`) as { findings: string[] };
@@ -1017,9 +1038,9 @@ describe("browser evidence reconciliation", () => {
       expectedStatuses: [500], expectedFinalPath: "/dryrun", finalUrl: "http://127.0.0.1:3011/dryrun",
       consoleErrors: [], pageErrors: [], horizontalOverflow: 0, visiblePrimaryContent: "일시적인 오류",
       boundaryMarker: "error", boundaryMarkerCount: 2,
-      bodyFont: '"Noto Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px",
+      bodyFont: '"IBM Plex Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px",
       bodyFontWeight: "500", bodyLineHeight: "24px", bodyLetterSpacing: "0px", productFontLoaded: true,
-      primaryHeading: { fontFamily: '"Noto Sans KR"', fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
+      primaryHeading: { fontFamily: '"IBM Plex Sans KR"', fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
       renderedControls: [], keySurfaces: [], documentTypography: {},
     };
     const result = runBrowserContractProbe(

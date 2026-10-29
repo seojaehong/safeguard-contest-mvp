@@ -1,5 +1,6 @@
 {
   "authorityBase": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
+  "criteriaRevision": "2026-10-30-current-editor-geometry",
   "expectedRows": 4,
   "actualRows": 4,
   "rows": [
@@ -11,11 +12,11 @@
       "review": {
         "viewportWidth": 1440,
         "viewportHeight": 900,
-        "pageHeight": 1503,
+        "pageHeight": 1543,
         "scrollWidth": 1440,
         "nestedScrollCount": 0,
         "previewClientHeight": 258,
-        "previewScrollHeight": 1012,
+        "previewScrollHeight": 1312,
         "previewOverflowY": "auto",
         "drawerHeight": 54
       },
@@ -23,8 +24,10 @@
         "viewportWidth": 1440,
         "viewportHeight": 900,
         "scrollWidth": 1440,
-        "bodyOffset": 73,
+        "bodyOffset": -2397,
         "overlapPolicy": {
+          "scope": "document-editor-surface",
+          "scrollPolicy": "independent columns allowed; nested vertical owners rejected",
           "documentedExcludedPairs": [],
           "ignoredNonPairs": [
             "ancestor-descendant",
@@ -41,6 +44,81 @@
           "overlayOverlaps": [],
           "tooSmallTouchTargets": []
         },
+        "visibleControlCount": 3,
+        "layoutBoxes": [
+          {
+            "selector": ".workspace-canvas",
+            "x": 186,
+            "y": -2161,
+            "width": 1068,
+            "height": 3075.03125,
+            "minHeight": "min-content",
+            "maxHeight": "none",
+            "gridRow": "1",
+            "rows": "3075.03px",
+            "scrollHeight": 3075
+          },
+          {
+            "selector": ".workpack-shell",
+            "x": 186,
+            "y": -2161,
+            "width": 1068,
+            "height": 3075.03125,
+            "minHeight": "auto",
+            "maxHeight": "none",
+            "gridRow": "auto",
+            "rows": "3075.03px",
+            "scrollHeight": 3075
+          },
+          {
+            "selector": ".document-editor",
+            "x": 482,
+            "y": -2161,
+            "width": 772,
+            "height": 3075.03125,
+            "minHeight": "0px",
+            "maxHeight": "none",
+            "gridRow": "auto",
+            "rows": "753.797px 2303.23px",
+            "scrollHeight": 3073
+          },
+          {
+            "selector": ".editor-operations-disclosure",
+            "x": 186,
+            "y": 1121.65625,
+            "width": 1068,
+            "height": 78,
+            "minHeight": "auto",
+            "maxHeight": "none",
+            "gridRow": "3",
+            "rows": "none",
+            "scrollHeight": 76
+          },
+          {
+            "selector": ".workspace-rail",
+            "x": 186,
+            "y": 926.03125,
+            "width": 1068,
+            "height": 183.625,
+            "minHeight": "auto",
+            "maxHeight": "none",
+            "gridRow": "2",
+            "rows": "61px 96.625px",
+            "scrollHeight": 182
+          }
+        ],
+        "overlapCanaryCount": 1,
+        "clippingEvidence": [],
+        "scrollOwners": [
+          {
+            "label": "section:운영 체크파일럿 체크리스트PLAN계획4건 근거 · 위험성평가·작업계획DO",
+            "className": "field-workspace field-workspace-editor-focus workbench-root",
+            "maxHeight": "876px",
+            "height": 742,
+            "scrollHeight": 3361,
+            "parents": []
+          }
+        ],
         "sectionOverlaps": 0,
         "sectionCount": 0
       }
@@ -53,11 +131,11 @@
       "review": {
         "viewportWidth": 1440,
         "viewportHeight": 900,
-        "pageHeight": 1503,
+        "pageHeight": 1543,
         "scrollWidth": 1440,
         "nestedScrollCount": 0,
         "previewClientHeight": 258,
-        "previewScrollHeight": 1012,
+        "previewScrollHeight": 1312,
         "previewOverflowY": "auto",
         "drawerHeight": 54
       },
@@ -65,8 +143,10 @@
         "viewportWidth": 1440,
         "viewportHeight": 900,
         "scrollWidth": 1440,
-        "bodyOffset": 93,
+        "bodyOffset": -2386,
         "overlapPolicy": {
+          "scope": "document-editor-surface",
+          "scrollPolicy": "independent columns allowed; nested vertical owners rejected",
           "documentedExcludedPairs": [],
           "ignoredNonPairs": [
             "ancestor-descendant",
@@ -83,6 +163,81 @@
           "overlayOverlaps": [],
           "tooSmallTouchTargets": []
         },
+        "visibleControlCount": 4,
+        "layoutBoxes": [
+          {
+            "selector": ".workspace-canvas",
+            "x": 186,
+            "y": -2399,
+            "width": 1068,
+            "height": 3154.46875,
+            "minHeight": "min-content",
+            "maxHeight": "none",
+            "gridRow": "1",
+            "rows": "3154.47px",
+            "scrollHeight": 3154
+          },
+          {
+            "selector": ".workpack-shell",
+            "x": 186,
+            "y": -2399,
+            "width": 1068,
+            "height": 3154.46875,
+            "minHeight": "auto",
+            "maxHeight": "none",
+            "gridRow": "auto",
+            "rows": "3154.47px",
+            "scrollHeight": 3154
+          },
+          {
+            "selector": ".document-editor",
+            "x": 482,
+            "y": -2399,
+            "width": 772,
+            "height": 3154.46875,
+            "minHeight": "0px",
+            "maxHeight": "none",
+            "gridRow": "auto",
+            "rows": "775.234px 2321.23px",
+            "scrollHeight": 3152
+          },
+          {
+            "selector": ".editor-operations-disclosure",
+            "x": 186,
+            "y": 963.09375,
+            "width": 1068,
+            "height": 78,
+            "minHeight": "auto",
+            "maxHeight": "none",
+            "gridRow": "3",
+            "rows": "none",
+            "scrollHeight": 76
+          },
+          {
+            "selector": ".workspace-rail",
+            "x": 186,
+            "y": 767.46875,
+            "width": 1068,
+            "height": 183.625,
+            "minHeight": "auto",
+            "maxHeight": "none",
+            "gridRow": "2",
+            "rows": "61px 96.625px",
+            "scrollHeight": 182
+          }
+        ],
+        "overlapCanaryCount": 1,
+        "clippingEvidence": [],
+        "scrollOwners": [
+          {
+            "label": "section:운영 체크파일럿 체크리스트PLAN계획4건 근거 · 위험성평가·작업계획DO",
+            "className": "field-workspace field-workspace-editor-focus workbench-root",
+            "maxHeight": "876px",
+            "height": 742,
+            "scrollHeight": 3440,
+            "parents": []
+          }
+        ],
         "sectionOverlaps": 0,
         "sectionCount": 0
       }
@@ -95,11 +250,11 @@
       "review": {
         "viewportWidth": 391,
         "viewportHeight": 844,
-        "pageHeight": 1841,
+        "pageHeight": 1445,
         "scrollWidth": 391,
         "nestedScrollCount": 0,
         "previewClientHeight": 358,
-        "previewScrollHeight": 1532,
+        "previewScrollHeight": 1732,
         "previewOverflowY": "auto",
         "drawerHeight": 46
       },
@@ -107,8 +262,10 @@
         "viewportWidth": 391,
         "viewportHeight": 844,
         "scrollWidth": 391,
-        "bodyOffset": 194,
+        "bodyOffset": -188,
         "overlapPolicy": {
+          "scope": "document-editor-surface",
+          "scrollPolicy": "independent columns allowed; nested vertical owners rejected",
           "documentedExcludedPairs": [],
           "ignoredNonPairs": [
             "ancestor-descendant",
@@ -125,8 +282,83 @@
           "overlayOverlaps": [],
           "tooSmallTouchTargets": []
         },
+        "visibleControlCount": 15,
+        "layoutBoxes": [
+          {
+            "selector": ".workspace-canvas",
+            "x": 27,
+            "y": -367,
+            "width": 337,
+            "height": 3931.21875,
+            "minHeight": "min-content",
+            "maxHeight": "none",
+            "gridRow": "1",
+            "rows": "3931.22px",
+            "scrollHeight": 3931
+          },
+          {
+            "selector": ".workpack-shell",
+            "x": 27,
+            "y": -367,
+            "width": 337,
+            "height": 3931.21875,
+            "minHeight": "auto",
+            "maxHeight": "none",
+            "gridRow": "auto",
+            "rows": "170px 3745.22px",
+            "scrollHeight": 3931
+          },
+          {
+            "selector": ".document-editor",
+            "x": 27,
+            "y": -181,
+            "width": 337,
+            "height": 3745.21875,
+            "minHeight": "0px",
+            "maxHeight": "none",
+            "gridRow": "auto",
+            "rows": "634px 3093.22px",
+            "scrollHeight": 3743
+          },
+          {
+            "selector": ".editor-operations-disclosure",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "minHeight": "0px",
+            "maxHeight": "none",
+            "gridRow": "3",
+            "rows": "none",
+            "scrollHeight": 0
+          },
+          {
+            "selector": ".workspace-rail",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "minHeight": "0px",
+            "maxHeight": "none",
+            "gridRow": "2",
+            "rows": "none",
+            "scrollHeight": 0
+          }
+        ],
+        "overlapCanaryCount": 1,
+        "clippingEvidence": [],
+        "scrollOwners": [
+          {
+            "label": "section:운영 체크파일럿 체크리스트PLAN계획4건 근거 · 위험성평가·작업계획DO",
+            "className": "field-workspace field-workspace-editor-focus workbench-root",
+            "maxHeight": "836px",
+            "height": 707,
+            "scrollHeight": 3931,
+            "parents": []
+          }
+        ],
         "sectionOverlaps": 0,
-        "sectionCount": 0
+        "sectionCount": 1
       }
     },
     {
@@ -137,11 +369,11 @@
       "review": {
         "viewportWidth": 391,
         "viewportHeight": 844,
-        "pageHeight": 1841,
+        "pageHeight": 1445,
         "scrollWidth": 391,
         "nestedScrollCount": 0,
         "previewClientHeight": 358,
-        "previewScrollHeight": 1328,
+        "previewScrollHeight": 1472,
         "previewOverflowY": "auto",
         "drawerHeight": 46
       },
@@ -149,8 +381,10 @@
         "viewportWidth": 391,
         "viewportHeight": 844,
         "scrollWidth": 391,
-        "bodyOffset": 198,
+        "bodyOffset": -208,
         "overlapPolicy": {
+          "scope": "document-editor-surface",
+          "scrollPolicy": "independent columns allowed; nested vertical owners rejected",
           "documentedExcludedPairs": [],
           "ignoredNonPairs": [
             "ancestor-descendant",
@@ -167,8 +401,83 @@
           "overlayOverlaps": [],
           "tooSmallTouchTargets": []
         },
+        "visibleControlCount": 15,
+        "layoutBoxes": [
+          {
+            "selector": ".workspace-canvas",
+            "x": 27,
+            "y": -391,
+            "width": 337,
+            "height": 3978.3125,
+            "minHeight": "min-content",
+            "maxHeight": "none",
+            "gridRow": "1",
+            "rows": "3978.31px",
+            "scrollHeight": 3978
+          },
+          {
+            "selector": ".workpack-shell",
+            "x": 27,
+            "y": -391,
+            "width": 337,
+            "height": 3978.3125,
+            "minHeight": "auto",
+            "maxHeight": "none",
+            "gridRow": "auto",
+            "rows": "154px 3808.31px",
+            "scrollHeight": 3978
+          },
+          {
+            "selector": ".document-editor",
+            "x": 27,
+            "y": -221,
+            "width": 337,
+            "height": 3808.3125,
+            "minHeight": "0px",
+            "maxHeight": "none",
+            "gridRow": "auto",
+            "rows": "634px 3116.31px",
+            "scrollHeight": 3806
+          },
+          {
+            "selector": ".editor-operations-disclosure",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "minHeight": "0px",
+            "maxHeight": "none",
+            "gridRow": "3",
+            "rows": "none",
+            "scrollHeight": 0
+          },
+          {
+            "selector": ".workspace-rail",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "minHeight": "0px",
+            "maxHeight": "none",
+            "gridRow": "2",
+            "rows": "none",
+            "scrollHeight": 0
+          }
+        ],
+        "overlapCanaryCount": 1,
+        "clippingEvidence": [],
+        "scrollOwners": [
+          {
+            "label": "section:운영 체크파일럿 체크리스트PLAN계획4건 근거 · 위험성평가·작업계획DO",
+            "className": "field-workspace field-workspace-editor-focus workbench-root",
+            "maxHeight": "836px",
+            "height": 707,
+            "scrollHeight": 3978,
+            "parents": []
+          }
+        ],
         "sectionOverlaps": 0,
-        "sectionCount": 0
+        "sectionCount": 1
       }
     }
   ]

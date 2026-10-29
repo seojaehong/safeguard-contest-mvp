@@ -1,9 +1,45 @@
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+
 // 타이포 역할 분류기 — 화면 감사 스크립트의 하나뿐인 구현(/correct 261027). vitest 계약은 감사를 돌린다.
 // 표(역할·덮어쓰기)는 lib/frontend-design-contract.ts 에 있고, 쓰는 쪽이 읽어 넘긴다
 // (감사 스크립트는 TS 를 실행하지 못해 AST 로 읽는다).
 
 export function isInteractiveSelector(selector) {
   return /(^|[\s.:#>+~])(a|button|input|select|textarea)(?=$|[\s.:#>+~[])|\b(action|button|control|tab|chip|nav|link|toggle|filter)\b/i.test(selector);
+}
+
+export function browserHeadingRole(route, width, policy) {
+  return policy.headingOverrides.find((entry) => entry.routes.includes(route)
+    && width >= entry.minWidth && width <= entry.maxWidth)?.role ?? policy.defaultHeadingRole;
+}
+
+export function contractLiteral(source, exportName) {
+  const ts = require("typescript");
+  const sourceFile = ts.createSourceFile("frontend-design-contract.ts", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const declaration = sourceFile.statements.filter(ts.isVariableStatement)
+    .flatMap((statement) => [...statement.declarationList.declarations])
+    .find((candidate) => ts.isIdentifier(candidate.name) && candidate.name.text === exportName);
+  if (!declaration?.initializer) throw new Error(`${exportName} contract was not found`);
+  function literalValue(input) {
+    let node = input;
+    while (ts.isAsExpression(node) || ts.isParenthesizedExpression(node) || ts.isSatisfiesExpression(node)) node = node.expression;
+    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text;
+    if (ts.isNumericLiteral(node)) return Number(node.text);
+    if (node.kind === ts.SyntaxKind.TrueKeyword) return true;
+    if (node.kind === ts.SyntaxKind.FalseKeyword) return false;
+    if (node.kind === ts.SyntaxKind.NullKeyword) return null;
+    if (ts.isArrayLiteralExpression(node)) return node.elements.map(literalValue);
+    if (ts.isObjectLiteralExpression(node)) return Object.fromEntries(node.properties.map((property) => {
+      if (!ts.isPropertyAssignment(property)) throw new Error(`${exportName} contains a non-literal property`);
+      const name = ts.isIdentifier(property.name) || ts.isStringLiteral(property.name) || ts.isNumericLiteral(property.name) ? property.name.text : undefined;
+      if (!name) throw new Error(`${exportName} contains an unsupported property name`);
+      return [name, literalValue(property.initializer)];
+    }));
+    throw new Error(`${exportName} contains an unsupported literal value`);
+  }
+  return literalValue(declaration.initializer);
 }
 
 export function isTableHeaderSelector(selector) {
