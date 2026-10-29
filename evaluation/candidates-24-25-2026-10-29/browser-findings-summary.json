@@ -1,0 +1,27 @@
+{
+  "sourceSha": "671189e97a90d0eed33b74a7cf09460dc372ddd0",
+  "sourceIdentity": "a92cdd5651f175c6d9bf387353724ecb2be54c710b21876678cda1202abb8570",
+  "totals": {
+    "routes": 33,
+    "routeRows": 99,
+    "workspaceThemeRows": 6,
+    "specialSurfaceRows": 4,
+    "generatedSurfaceRows": 2,
+    "screenshots": 111,
+    "successes": 1,
+    "failedRows": 110,
+    "recoveredRows": 0,
+    "findingCount": 322,
+    "failures": 110,
+    "elapsedMs": 115620
+  },
+  "groups": {
+    "fontRole": 220,
+    "headingTuple": 9,
+    "controlHeight": 36,
+    "controlRadius": 56,
+    "documentTable": 1,
+    "other": 0
+  },
+  "assessment": "Current browser measurements include legacy audit assumptions and document UI discrepancies; not a passing whole-product audit."
+}

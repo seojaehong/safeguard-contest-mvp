@@ -1,0 +1,31 @@
+{
+  "dateKst": "2026-10-29",
+  "status": "review_required",
+  "baseSha": "b1bf1f7846f8d12ded7724c1ed10b0d52672b8ef",
+  "implementationSha": "671189e97a90d0eed33b74a7cf09460dc372ddd0",
+  "sourceIdentity": "a92cdd5651f175c6d9bf387353724ecb2be54c710b21876678cda1202abb8570",
+  "pullRequest": "https://github.com/seojaehong/safeguard-contest-mvp/pull/128",
+  "candidate24": { "navigationCasesPassed": 4, "mobileBehaviorCasesPreserved": 2 },
+  "candidate25": { "removedRules": 51, "removedSelectors": 55, "preservedMixedSelectors": 27, "identicalLandingScreenshots": 3 },
+  "verification": {
+    "frontendContracts": { "files": 3, "passed": 80, "failed": 0, "log": "logs/frontend-contracts-final.log" },
+    "affectedSuites": { "files": 19, "passedAfterTargetedRerun": 185, "method": "18 files passed in the 19-file run; the single obsolete-selector assertion was corrected and its 17-test file rerun successfully", "logs": ["logs/affected-unit-tests-focused.log", "logs/shared-surfaces-green.log"] },
+    "workspaceSequential": { "passed": 6, "failed": 0, "log": "logs/workspace-sequential-final.log" },
+    "landingBrowser": { "passed": 1, "failed": 0, "log": "logs/landing-browser-final.log" },
+    "staticAudit": { "status": "pass", "pages": 38, "components": 31, "violations": 0, "coverageIssues": 0, "log": "logs/static-audit.log" },
+    "auditBuild": { "status": "pass", "log": "logs/audit-build.log" },
+    "normalBuild": { "status": "pass", "log": "logs/normal-build.log" },
+    "normalBundleAudit": { "status": "pass", "log": "logs/normal-bundle-audit.log" },
+    "typecheck": { "status": "pass", "log": "logs/typecheck-final.log" },
+    "shebang": { "files": 64, "failures": 0 },
+    "fullLinuxCi": { "statusAtEvidenceCommit": "pending", "note": "Refer to the PR checks for the latest run." }
+  },
+  "wholeBrowserAudit": {
+    "rows": 111, "passed": 1, "failed": 110, "findings": 322,
+    "report": "browser-regeneration/browser-report.json",
+    "findingGroups": { "fontRole": 220, "headingTuple": 9, "controlHeight": 36, "controlRadius": 56, "documentTable": 1 },
+    "assessment": "Requires comparison of legacy audit assumptions and current UI roles. The explicit lag allowance is not a whole-product quality pass."
+  },
+  "boundaries": { "candidate23Changed": false, "productionMerged": false, "productionDeployed": false },
+  "remaining": ["Reconcile the whole browser audit with current canonical typography and document editor control roles."]
+}
