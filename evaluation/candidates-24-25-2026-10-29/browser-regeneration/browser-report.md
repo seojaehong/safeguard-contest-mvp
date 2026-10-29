@@ -1,0 +1,351 @@
+# SafeClaw frontend consistency browser audit
+
+- Generated: 2026-10-29T08:04:44.023Z
+- Source SHA: 671189e97a90d0eed33b74a7cf09460dc372ddd0
+- Source identity: a92cdd5651f175c6d9bf387353724ecb2be54c710b21876678cda1202abb8570
+- Evidence HEAD: 671189e97a90d0eed33b74a7cf09460dc372ddd0
+- Evidence-only descendant: false
+- Routes: 33/33
+- Route matrix: 99/99
+- Workspace Day/Night: 6/6
+- Special surfaces: 4/4
+- Generated surfaces: 2/2
+- Total rows: 111/111
+- Successful rows: 1
+- Failed rows: 110
+- Recovered transient rows: 0
+- Findings: 322
+- Elapsed: 115620 ms
+
+## Executed verification
+
+- `node ./scripts/frontend_consistency_browser_audit.mjs`: fail, exit 1, 111 rows, failed 110, findings 322
+
+## Scope
+
+This report contains browser facts measured by this invocation only. External test, typecheck, build, and integration results are not provided. The validated static prerequisite identity is recorded separately in the JSON report.
+
+## Findings
+
+- / desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- / desktop-1440: primary heading size 40px, expected 72px
+- / desktop-1440: primary heading line-height 46px, expected 82.8px
+- / desktop-1440: primary heading tracking -1.4px, expected -3.2399999999999998px
+- / desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- / tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- / tablet-1024: primary heading size 40px, expected 61.44px
+- / tablet-1024: primary heading line-height 46px, expected 70.65599999999999px
+- / tablet-1024: primary heading tracking -1.4px, expected -2.7647999999999997px
+- / tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- / mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- / mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /archive desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /archive desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /archive tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /archive tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /archive mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /archive mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ask desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ask desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ask tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ask tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ask mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ask mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /auth/callback desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /auth/callback desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /auth/callback tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /auth/callback tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /auth/callback mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /auth/callback mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /demo desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /demo desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /demo tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /demo tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /demo mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /demo mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /dispatch desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /dispatch desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /dispatch tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /dispatch tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /dispatch mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /dispatch mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /documents desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /documents desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /documents desktop-1440: button[3] control height 30px below compact 36px
+- /documents desktop-1440: button[4] control height 30px below compact 36px
+- /documents desktop-1440: button[5] control height 30px below compact 36px
+- /documents desktop-1440: button[6] control height 30px below compact 36px
+- /documents desktop-1440: button[7] control height 30px below compact 36px
+- /documents desktop-1440: button[8] control height 30px below compact 36px
+- /documents desktop-1440: button[9] control height 30px below compact 36px
+- /documents desktop-1440: button[10] control height 30px below compact 36px
+- /documents desktop-1440: button[11] control height 30px below compact 36px
+- /documents desktop-1440: button[12] control height 30px below compact 36px
+- /documents desktop-1440: button[14] control height 30px below compact 36px
+- /documents desktop-1440: button.safeclaw-document-review-launch[15] control height 30px below compact 36px
+- /documents desktop-1440: input[26] control radius 6px outside control/micro/soft contract
+- /documents desktop-1440: input[27] control radius 6px outside control/micro/soft contract
+- /documents desktop-1440: select[28] control radius 6px outside control/micro/soft contract
+- /documents desktop-1440: select[29] control radius 6px outside control/micro/soft contract
+- /documents desktop-1440: select[30] control radius 6px outside control/micro/soft contract
+- /documents desktop-1440: select[31] control radius 6px outside control/micro/soft contract
+- /documents desktop-1440: input[32] control radius 6px outside control/micro/soft contract
+- /documents desktop-1440: input[33] control radius 6px outside control/micro/soft contract
+- /documents desktop-1440: input[34] control radius 6px outside control/micro/soft contract
+- /documents desktop-1440: input[35] control radius 6px outside control/micro/soft contract
+- /documents desktop-1440: input[36] control radius 6px outside control/micro/soft contract
+- /documents desktop-1440: select[37] control radius 6px outside control/micro/soft contract
+- /documents desktop-1440: input[38] control radius 6px outside control/micro/soft contract
+- /documents desktop-1440: input[39] control radius 6px outside control/micro/soft contract
+- /documents tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /documents tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /documents tablet-1024: button[3] control height 30px below compact 36px
+- /documents tablet-1024: button[4] control height 30px below compact 36px
+- /documents tablet-1024: button[5] control height 30px below compact 36px
+- /documents tablet-1024: button[6] control height 30px below compact 36px
+- /documents tablet-1024: button[7] control height 30px below compact 36px
+- /documents tablet-1024: button[8] control height 30px below compact 36px
+- /documents tablet-1024: button[9] control height 30px below compact 36px
+- /documents tablet-1024: button[10] control height 30px below compact 36px
+- /documents tablet-1024: button[11] control height 30px below compact 36px
+- /documents tablet-1024: button[12] control height 30px below compact 36px
+- /documents tablet-1024: button[14] control height 30px below compact 36px
+- /documents tablet-1024: button.safeclaw-document-review-launch[15] control height 30px below compact 36px
+- /documents tablet-1024: input[26] control radius 6px outside control/micro/soft contract
+- /documents tablet-1024: input[27] control radius 6px outside control/micro/soft contract
+- /documents tablet-1024: select[28] control radius 6px outside control/micro/soft contract
+- /documents tablet-1024: select[29] control radius 6px outside control/micro/soft contract
+- /documents tablet-1024: select[30] control radius 6px outside control/micro/soft contract
+- /documents tablet-1024: select[31] control radius 6px outside control/micro/soft contract
+- /documents tablet-1024: input[32] control radius 6px outside control/micro/soft contract
+- /documents tablet-1024: input[33] control radius 6px outside control/micro/soft contract
+- /documents tablet-1024: input[34] control radius 6px outside control/micro/soft contract
+- /documents tablet-1024: input[35] control radius 6px outside control/micro/soft contract
+- /documents tablet-1024: input[36] control radius 6px outside control/micro/soft contract
+- /documents tablet-1024: select[37] control radius 6px outside control/micro/soft contract
+- /documents tablet-1024: input[38] control radius 6px outside control/micro/soft contract
+- /documents tablet-1024: input[39] control radius 6px outside control/micro/soft contract
+- /documents mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /documents mobile-390: primary heading size 24px, expected 32px
+- /documents mobile-390: primary heading line-height 30px, expected 36.8px
+- /documents mobile-390: primary heading tracking -0.6px, expected -1.12px
+- /documents mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /documents mobile-390: input[26] control radius 6px outside control/micro/soft contract
+- /documents mobile-390: input[27] control radius 6px outside control/micro/soft contract
+- /documents mobile-390: select[28] control radius 6px outside control/micro/soft contract
+- /documents mobile-390: select[29] control radius 6px outside control/micro/soft contract
+- /documents mobile-390: select[30] control radius 6px outside control/micro/soft contract
+- /documents mobile-390: select[31] control radius 6px outside control/micro/soft contract
+- /documents mobile-390: input[32] control radius 6px outside control/micro/soft contract
+- /documents mobile-390: input[33] control radius 6px outside control/micro/soft contract
+- /documents mobile-390: input[34] control radius 6px outside control/micro/soft contract
+- /documents mobile-390: input[35] control radius 6px outside control/micro/soft contract
+- /documents mobile-390: input[36] control radius 6px outside control/micro/soft contract
+- /documents mobile-390: select[37] control radius 6px outside control/micro/soft contract
+- /documents mobile-390: input[38] control radius 6px outside control/micro/soft contract
+- /documents mobile-390: input[39] control radius 6px outside control/micro/soft contract
+- /dryrun desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /dryrun desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /dryrun tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /dryrun tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /dryrun mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /dryrun mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /evidence desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /evidence desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /evidence tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /evidence tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /evidence mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /evidence mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /evidence-file desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /evidence-file desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /evidence-file tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /evidence-file tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /evidence-file mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /evidence-file mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /home desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /home desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /home tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /home tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /home mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /home mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /interpretation/[id] desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /interpretation/[id] desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /interpretation/[id] tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /interpretation/[id] tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /interpretation/[id] mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /interpretation/[id] mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /knowledge desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /knowledge desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /knowledge tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /knowledge tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /knowledge mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /knowledge mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /knowledge/[section]/[slug] desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /knowledge/[section]/[slug] desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /knowledge/[section]/[slug] tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /knowledge/[section]/[slug] tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /knowledge/[section]/[slug] mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /knowledge/[section]/[slug] mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /law/[id] desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /law/[id] desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /law/[id] tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /law/[id] tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /law/[id] mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /law/[id] mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /login desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /login desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /login tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /login tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /login mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /login mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ontology desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ontology desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ontology tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ontology tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ontology mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ontology mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ops/api desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ops/api desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ops/api tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ops/api tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ops/api mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /ops/api mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /precedent/[id] desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /precedent/[id] desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /precedent/[id] tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /precedent/[id] tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /precedent/[id] mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /precedent/[id] mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /preview desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /preview desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /preview tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /preview tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /preview mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /preview mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /prototype desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /prototype desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /prototype tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /prototype tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /prototype mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /prototype mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /reports desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /reports desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /reports tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /reports tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /reports mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /reports mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /roadmap desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /roadmap desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /roadmap tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /roadmap tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /roadmap mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /roadmap mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /search desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /search desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /search tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /search tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /search mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /search mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /settings desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /settings desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /settings tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /settings tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /settings mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /settings mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /settings/ai-connect desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /settings/ai-connect desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /settings/ai-connect tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /settings/ai-connect tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /settings/ai-connect mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /settings/ai-connect mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /share/[sessionId] desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /share/[sessionId] desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /share/[sessionId] tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /share/[sessionId] tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /share/[sessionId] mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /share/[sessionId] mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /tbm desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /tbm desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /tbm tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /tbm tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /tbm mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /tbm mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /trust desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /trust desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /trust tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /trust tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /trust mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /trust mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /why desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /why desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /why tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /why tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /why mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /why mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /worker desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /worker desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /worker tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /worker tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /worker mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /worker mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workers desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workers desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workers tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workers tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workers mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workers mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace tablet-1024: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace tablet-1024: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace mobile-390: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- /workspace mobile-390: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- special:not-found desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- special:not-found desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- special:error desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- special:error desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- special:global-error desktop-1440: body font outside product role: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- special:global-error desktop-1440: heading font outside role: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- special:loading desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- special:loading desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- generated:document-preview desktop-1440: body font outside product role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- generated:document-preview desktop-1440: heading font outside role: "IBM Plex Sans KR", "IBM Plex Sans KR Fallback", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif
+- generated:document-preview desktop-1440: document table weight 800, expected 400
+- generated:document-preview desktop-1440: button[3] control height 30px below compact 36px
+- generated:document-preview desktop-1440: button[4] control height 30px below compact 36px
+- generated:document-preview desktop-1440: button[5] control height 30px below compact 36px
+- generated:document-preview desktop-1440: button[6] control height 30px below compact 36px
+- generated:document-preview desktop-1440: button[7] control height 30px below compact 36px
+- generated:document-preview desktop-1440: button[8] control height 30px below compact 36px
+- generated:document-preview desktop-1440: button[9] control height 30px below compact 36px
+- generated:document-preview desktop-1440: button[10] control height 30px below compact 36px
+- generated:document-preview desktop-1440: button[11] control height 30px below compact 36px
+- generated:document-preview desktop-1440: button[12] control height 30px below compact 36px
+- generated:document-preview desktop-1440: button[14] control height 30px below compact 36px
+- generated:document-preview desktop-1440: button.safeclaw-document-review-launch[15] control height 30px below compact 36px
+- generated:document-preview desktop-1440: input[26] control radius 6px outside control/micro/soft contract
+- generated:document-preview desktop-1440: input[27] control radius 6px outside control/micro/soft contract
+- generated:document-preview desktop-1440: select[28] control radius 6px outside control/micro/soft contract
+- generated:document-preview desktop-1440: select[29] control radius 6px outside control/micro/soft contract
+- generated:document-preview desktop-1440: select[30] control radius 6px outside control/micro/soft contract
+- generated:document-preview desktop-1440: select[31] control radius 6px outside control/micro/soft contract
+- generated:document-preview desktop-1440: input[32] control radius 6px outside control/micro/soft contract
+- generated:document-preview desktop-1440: input[33] control radius 6px outside control/micro/soft contract
+- generated:document-preview desktop-1440: input[34] control radius 6px outside control/micro/soft contract
+- generated:document-preview desktop-1440: input[35] control radius 6px outside control/micro/soft contract
+- generated:document-preview desktop-1440: input[36] control radius 6px outside control/micro/soft contract
+- generated:document-preview desktop-1440: select[37] control radius 6px outside control/micro/soft contract
+- generated:document-preview desktop-1440: input[38] control radius 6px outside control/micro/soft contract
+- generated:document-preview desktop-1440: input[39] control radius 6px outside control/micro/soft contract

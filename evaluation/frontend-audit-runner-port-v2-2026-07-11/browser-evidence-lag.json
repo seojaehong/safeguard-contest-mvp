@@ -4,5 +4,11 @@
     "browserReportSourceIdentity": "79e268153b73c5cfb36301c4d3b305949851b23c7c9cb493ce6711daf83b0609",
     "reason": "07-18 이후 화면 지문 63파일 변경(#121 첫 화면 교체 포함). 브라우저 매트릭스 미재생성 — 운영 G5 드라이런으로 대신 확인. 재생성 전까지 임시 인정",
     "recordedAt": "2026-10-27"
+  },
+  {
+    "sourceIdentity": "a92cdd5651f175c6d9bf387353724ecb2be54c710b21876678cda1202abb8570",
+    "browserReportSourceIdentity": "79e268153b73c5cfb36301c4d3b305949851b23c7c9cb493ce6711daf83b0609",
+    "reason": "후보24·25 뒤 111행 재생성 실행 완료. 과거 Noto 검사와 현재 IBM 글꼴의 불일치 및 문서 편집기 높이·모서리·글자 역할 확인 사항으로 110행 실패. 새 실측은 evaluation/candidates-24-25-2026-10-29/browser-regeneration/browser-report.json 에 보존하고 기존 합격 보고서는 임시 참조만 유지한다. PR은 전체 감사 미통과로 취급한다.",
+    "recordedAt": "2026-10-29"
   }
 ]
