@@ -612,21 +612,6 @@ ul {
   background: #ffffff;
 }
 
-.safeclaw-hero-section {
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(420px, 0.92fr);
-  min-height: 620px;
-  border-bottom: 1px solid var(--line);
-}
-
-.safeclaw-hero-copy {
-  display: grid;
-  align-content: center;
-  gap: var(--space-6);
-  padding: clamp(var(--space-10), 7vw, var(--space-24));
-  background: var(--sc-paper);
-}
-
 .sc-section-kicker {
   width: fit-content;
   border-left: 4px solid var(--rule);
@@ -637,41 +622,6 @@ ul {
   font-weight: 600;
   letter-spacing: var(--tracking-body);
   line-height: var(--leading-caption);
-}
-
-.safeclaw-hero-copy h1 {
-  max-width: 900px;
-  margin: 0;
-  color: var(--sc-black);
-  font-size: var(--text-display);
-  font-weight: 800;
-  letter-spacing: var(--tracking-display);
-  line-height: var(--leading-display);
-}
-
-.safeclaw-hero-copy p {
-  max-width: 740px;
-  margin: 0;
-  color: var(--sc-steel-650);
-  font-size: var(--text-component-title);
-  font-weight: 700;
-  letter-spacing: var(--tracking-component-title);
-  line-height: var(--leading-component-title);
-}
-
-.safeclaw-hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.safeclaw-hero-console {
-  display: grid;
-  align-content: center;
-  gap: var(--space-4);
-  border-left: 1px solid var(--line);
-  padding: clamp(32px, 5vw, 64px);
-  background: #ffffff;
 }
 
 .console-status-line {
@@ -776,25 +726,6 @@ ul {
   border-bottom: 1px solid var(--line);
 }
 
-.safeclaw-statement-card {
-  display: grid;
-  align-content: start;
-  gap: var(--space-6);
-  min-height: 390px;
-  padding: clamp(var(--space-8), 5vw, var(--space-16));
-  background: #ffffff;
-}
-
-.safeclaw-statement-card + .safeclaw-statement-card {
-  border-left: 1px solid var(--line);
-}
-
-.safeclaw-statement-card.strong {
-  background: var(--sc-black);
-  color: #ffffff;
-}
-
-.safeclaw-statement-card h2,
 .safeclaw-core-section h2,
 .safeclaw-operation-section h2 {
   margin: 0;
@@ -803,20 +734,6 @@ ul {
   font-weight: 800;
   letter-spacing: var(--tracking-page-title);
   line-height: var(--leading-page-title);
-}
-
-.safeclaw-statement-card p {
-  max-width: 680px;
-  margin: 0;
-  color: var(--sc-steel-650);
-  font-size: var(--text-component-title);
-  font-weight: 700;
-  line-height: var(--leading-component-title);
-  letter-spacing: var(--tracking-component-title);
-}
-
-.safeclaw-statement-card.strong p {
-  color: var(--sc-steel-300);
 }
 
 .safeclaw-core-section,
@@ -1201,11 +1118,6 @@ ul {
   cursor: pointer;
 }
 
-.safeclaw-os-hero {
-  min-height: calc(100svh - 88px);
-  border-bottom: 1px solid var(--os-line);
-}
-
 .safeclaw-os-status {
   display: grid;
   grid-template-columns: minmax(260px, auto) repeat(3, minmax(0, 1fr));
@@ -1241,16 +1153,6 @@ ul {
   box-shadow: none;
 }
 
-.safeclaw-os-hero-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(340px, 0.58fr);
-  gap: clamp(var(--space-8), 5vw, var(--space-20));
-  align-items: center;
-  min-height: calc(100svh - 148px);
-  padding: clamp(var(--space-12), 6vw, var(--space-20)) 0;
-  padding-inline: var(--os-gutter);
-}
-
 .safeclaw-os-tag {
   display: inline-flex;
   align-items: center;
@@ -1267,7 +1169,6 @@ ul {
   line-height: var(--leading-hud);
 }
 
-.safeclaw-os-hero h1,
 .safeclaw-os-section h2 {
   margin: 0;
   color: var(--os-text);
@@ -1278,15 +1179,6 @@ ul {
   word-break: keep-all;
 }
 
-.safeclaw-os-hero h1 {
-  max-width: min(1160px, calc(100vw - 56px));
-  font-size: var(--text-display);
-  font-weight: 800;
-  line-height: var(--leading-display);
-  letter-spacing: var(--tracking-display);
-}
-
-.safeclaw-os-hero mark,
 .safeclaw-os-section mark {
   display: inline-block;
   padding: 0;
@@ -1301,44 +1193,7 @@ ul {
   font-style: normal;
 }
 
-.safeclaw-hero-line {
-  display: block;
-  width: fit-content;
-  max-width: 100%;
-  white-space: nowrap;
-}
-
-.safeclaw-hero-line mark {
-  white-space: nowrap;
-}
-
-.safeclaw-os-hero p {
-  max-width: 760px;
-  margin: var(--space-6) 0 0;
-  color: var(--os-muted);
-  font-size: var(--text-body-lg);
-  font-weight: 500;
-  letter-spacing: var(--tracking-body);
-  line-height: var(--leading-body-lg);
-  text-wrap: balance;
-}
-
 /* Human-review boundary for the landing positioning line. */
-.safeclaw-os-hero .safeclaw-hero-position {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  max-width: 760px;
-  margin-top: var(--space-6);
-  padding-left: 16px;
-  border-left: 4px solid var(--rule);
-  color: var(--sc-black);
-  font-size: var(--text-body-lg);
-  font-weight: 500;
-  letter-spacing: var(--tracking-body);
-  line-height: var(--leading-body-lg);
-  text-wrap: balance;
-}
 
 .safeclaw-os-cta {
   display: flex;
@@ -1718,119 +1573,9 @@ ul {
 /* Hero AI console replay (Task D-1) — the one black "console panel" in the
    hero. Reuses the live workspace .agent-console markup so the landing preview
    and the real product read as the same instrument. */
-.hero-console-replay {
-  align-self: stretch;
-  display: grid;
-  align-content: center;
-  min-width: 0;
-}
-
-.hero-console-frame {
-  display: grid;
-  gap: 16px;
-  border: 1px solid var(--sc-black);
-  border-left: 6px solid var(--rule);
-  padding: var(--space-5) var(--space-6) var(--space-6);
-  background: var(--os-panel-ink);
-}
-
-.hero-console-titlebar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--os-panel-line);
-  color: var(--os-panel-text);
-  font-family: var(--font-hud);
-  font-size: var(--text-caption);
-  letter-spacing: var(--tracking-body);
-  font-weight: 600;
-  line-height: var(--leading-caption);
-}
-
-.hero-console-titlebar b {
-  margin-left: 8px;
-  font-weight: 900;
-}
-
-.hero-console-titlebar em {
-  margin-left: auto;
-  padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--rule);
-  background: rgba(255, 212, 0, 0.14);
-  color: var(--os-panel-text, #f6f5ef);
-  font-style: normal;
-  font-weight: 900;
-  letter-spacing: var(--tracking-hud);
-}
-
-.hero-console-dot {
-  width: 11px;
-  height: 11px;
-  border-radius: var(--radius-circle);
-  background: var(--os-panel-line);
-}
-
-.hero-console-dot:nth-child(1) { background: #ef695d; }
-.hero-console-dot:nth-child(2) { background: #f3c64f; }
-.hero-console-dot:nth-child(3) { background: #7fd26e; }
-
-.hero-console-prompt {
-  display: grid;
-  gap: 8px;
-  padding: var(--space-4);
-  border: 1px solid var(--os-panel-line);
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.hero-console-prompt span {
-  color: var(--os-panel-text, #f6f5ef);
-  font-family: var(--font-hud);
-  font-size: var(--text-hud);
-  font-weight: 700;
-  letter-spacing: var(--tracking-hud);
-  text-transform: none;
-  line-height: var(--leading-hud);
-}
-
-.hero-console-prompt p {
-  margin: 0;
-  color: var(--os-panel-text);
-  font-size: var(--text-body);
-  font-weight: 500;
-  line-height: var(--leading-body);
-  word-break: keep-all;
-  letter-spacing: var(--tracking-body);
-}
 
 /* Blend the shared console into the frame (no double panel) and give it more
    room than the compact workspace variant. */
-.hero-console-replay .agent-console {
-  border: 0;
-  border-radius: 0;
-  padding: 0;
-  background: transparent;
-}
-
-.hero-console-replay .agent-console-body {
-  /* Bounded (was max-height:none) — an unbounded list grows the whole hero
-     grid row as the replay accumulates lines, dragging the section far past
-     the viewport and leaving a blank gap under the (short) text column. */
-  max-height: 340px;
-  gap: var(--space-2);
-}
-
-.hero-console-replay .agent-console-line {
-  color: #c6ccd2;
-  font-size: var(--text-table);
-  font-weight: 500;
-  line-height: var(--leading-table);
-  letter-spacing: var(--tracking-body);
-}
-
-.hero-console-replay .agent-console-line-active .agent-console-label {
-  color: #cfd5dc;
-}
 
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -1846,7 +1591,6 @@ ul {
   .inline-progress.animated progress::-webkit-progress-value,
   .inline-progress.animated progress::-moz-progress-bar,
   .agent-console-live,
-  .hero-console-replay .agent-console-live,
   .loading-spinner,
   .sc-blink {
     animation: none;
@@ -7560,16 +7304,9 @@ ul {
     padding-bottom: 4px;
   }
 
-  .safeclaw-hero-section,
   .safeclaw-section-grid,
   .safeclaw-operation-section {
     grid-template-columns: 1fr;
-  }
-
-  .safeclaw-hero-console,
-  .safeclaw-statement-card + .safeclaw-statement-card {
-    border-left: 0;
-    border-top: 1px solid var(--line);
   }
 
   .safeclaw-core-grid {
@@ -7747,16 +7484,6 @@ ul {
     letter-spacing: var(--tracking-page-title);
   }
 
-  .safeclaw-hero-copy h1 {
-    font-size: var(--text-display);
-    font-weight: 800;
-    line-height: var(--leading-display);
-    letter-spacing: var(--tracking-display);
-  }
-
-  .safeclaw-hero-copy,
-  .safeclaw-hero-console,
-  .safeclaw-statement-card,
   .safeclaw-core-section,
   .safeclaw-operation-section {
     padding: var(--space-8);
@@ -8007,8 +7734,7 @@ body:has(.safeclaw-landing) :is(
     padding-right: 0;
   }
 
-  .safeclaw-os-status,
-  .safeclaw-os-hero-body {
+  .safeclaw-os-status {
     grid-template-columns: 1fr;
   }
 
@@ -8062,33 +7788,16 @@ body:has(.safeclaw-landing) :is(
     grid-template-columns: 1fr;
   }
 
-  .safeclaw-os-hero-body,
   .safeclaw-os-section {
     padding-right: var(--os-gutter);
     padding-left: var(--os-gutter);
-  }
-
-  .safeclaw-os-hero {
-    min-height: auto;
-  }
-
-  .safeclaw-os-hero-body {
-    gap: var(--space-6);
-    min-height: auto;
-    padding-block: var(--space-8);
   }
 
   .safeclaw-os-tag {
     margin-bottom: var(--space-5);
   }
 
-  .safeclaw-os-hero p {
-    margin-top: var(--space-4);
-  }
-
-  .safeclaw-os-hero p + p,
   .safeclaw-hero-position,
-  .hero-console-replay,
   .safeclaw-landing #execution,
   .safeclaw-landing #language,
   .safeclaw-landing #proof,
@@ -8121,17 +7830,6 @@ body:has(.safeclaw-landing) :is(
     font-family: var(--font-hud);
   }
 
-  .safeclaw-os-hero h1 {
-    font-size: var(--text-page-title);
-    font-weight: 800;
-    line-height: var(--leading-page-title);
-    letter-spacing: var(--tracking-page-title);
-  }
-
-  .safeclaw-hero-line {
-    white-space: nowrap;
-  }
-
   .safeclaw-os-section h2 {
     font-size: var(--text-section-title);
     font-weight: 800;
@@ -8140,7 +7838,6 @@ body:has(.safeclaw-landing) :is(
     margin-bottom: var(--space-5);
   }
 
-  .safeclaw-os-hero mark,
   .safeclaw-os-section mark {
     padding-right: 0;
     padding-left: 0;
@@ -12518,10 +12215,6 @@ body:has(.safeclaw-landing) :is(
   font-weight: 600;
   line-height: var(--leading-caption);
   letter-spacing: var(--tracking-body);
-}
-
-.command-center-shell .topbar-v2-link {
-  display: none;
 }
 
 .command-center-shell .command-viewport {

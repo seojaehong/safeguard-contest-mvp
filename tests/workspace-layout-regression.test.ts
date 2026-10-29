@@ -708,6 +708,28 @@ describe("workspace layout regression", () => {
     await page.close();
   }, 90_000);
 
+  it.each([
+    { width: 1440, theme: "day" },
+    { width: 1440, theme: "night" },
+    { width: 1024, theme: "day" },
+    { width: 1024, theme: "night" }
+  ] as const)("opens the document library from the $width $theme workspace header", async ({ width, theme }) => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width, height: 900 } });
+    try {
+      await page.addInitScript((storageKey) => window.localStorage.removeItem(storageKey), CURRENT_WORKPACK_STORAGE_KEY);
+      await page.goto(`${baseUrl}/workspace?theme=${theme}`, { waitUntil: "networkidle" });
+      const link = page.locator('.command-topbar a[href="/documents"]');
+      expect(await link.isVisible()).toBe(true);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+      await link.click();
+      await page.waitForURL(`${baseUrl}/documents`);
+      await page.getByTestId("workpack-editor-workspace").waitFor({ state: "visible" });
+    } finally {
+      await page.close();
+    }
+  }, 90_000);
+
   it("keeps the empty input topbar concise without duplicated waiting copy", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });

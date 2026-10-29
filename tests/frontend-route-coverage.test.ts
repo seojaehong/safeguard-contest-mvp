@@ -233,14 +233,9 @@ const justifiedResponsiveSpacingExpressions = new Set([
   // IBM Plex Sans KR 글자 상자(1.5em)가 줄높이보다 커서, 글자 2배 확대에서도 눈썹 라벨과 겹치지 않게 글자 크기 비례 여백을 둔다.
   ".safeclaw-module-shell[data-module-route=\"/reports\"] .safeclaw-page-decision-copy h1|margin-top|0.2em",
   ".safeclaw-landing-nav nav|gap|clamp(var(--space-4), 2.4vw, var(--space-10))",
-  ".safeclaw-hero-copy|padding|clamp(var(--space-10), 7vw, var(--space-24))",
-  ".safeclaw-hero-console|padding|clamp(32px, 5vw, 64px)",
-  ".safeclaw-statement-card|padding|clamp(var(--space-8), 5vw, var(--space-16))",
   ".safeclaw-core-section|padding|clamp(var(--space-10), 6vw, var(--space-20))",
   ".safeclaw-operation-section|padding|clamp(var(--space-10), 6vw, var(--space-20))",
   ".safeclaw-os-tag|margin-bottom|clamp(var(--space-8), 4vw, var(--space-16))",
-  ".safeclaw-os-hero-body|gap|clamp(var(--space-8), 5vw, var(--space-20))",
-  ".safeclaw-os-hero-body|padding|clamp(var(--space-12), 6vw, var(--space-20)) 0",
   ".safeclaw-os-section|padding-block|clamp(var(--space-16), 6vw, var(--space-24))",
   ".safeclaw-os-section.compact|padding-top|clamp(var(--space-12), 5vw, var(--space-20))",
   "#language|padding-bottom|clamp(var(--space-8), 3vw, var(--space-12))",
@@ -448,7 +443,7 @@ describe("browser evidence reconciliation", () => {
         sourceSha: "1".repeat(40),
         sourceIdentity: fixtureIdentity.sourceIdentity,
         status: "pass",
-        counts: { pageFiles: 33, componentFiles: 24 },
+        counts: { pageFiles: 38, componentFiles: 31 },
         coverageIssues: 0,
         violationCount: 0,
       };
@@ -470,6 +465,35 @@ describe("browser evidence reconciliation", () => {
     }
   }, 30_000);
 
+  it("validates current source inventory instead of retired page and component totals", () => {
+    const source = runBrowserContractProbe("audit.currentSourceIdentity()") as {
+      sourceSha: string; sourceIdentity: string; newestMtime: number;
+    };
+    const staticAudit = {
+      schemaVersion: 2,
+      generatedAt: new Date(source.newestMtime + 1_000).toISOString(),
+      sourceSha: source.sourceSha,
+      sourceIdentity: source.sourceIdentity,
+      status: "pass",
+      counts: { pageFiles: 38, componentFiles: 31 },
+      coverageIssues: 0,
+      violationCount: 0,
+    };
+    const timing = { now: source.newestMtime + 3_000, reportMtime: source.newestMtime + 2_000 };
+    const validate = (counts: typeof staticAudit.counts) => runBrowserContractProbe(`(() => {
+      try {
+        audit.validateStaticAuditPrerequisite(${JSON.stringify({ ...staticAudit, counts })}, ${JSON.stringify(source)}, ${JSON.stringify(timing)});
+        return "accepted";
+      } catch (error) {
+        return error instanceof Error ? error.message : String(error);
+      }
+    })()`);
+    expect(validate(staticAudit.counts)).toBe("accepted");
+    for (const counts of [{ pageFiles: 33, componentFiles: 24 }, { pageFiles: 38, componentFiles: 30 }]) {
+      expect(String(validate(counts))).toContain("Static audit prerequisite failed:");
+    }
+  }, 30_000);
+
   it("binds report provenance to the exact current source and validated static prerequisite", () => {
     const source = runBrowserContractProbe("audit.currentSourceIdentity()") as {
       sourceSha: string;
@@ -483,7 +507,7 @@ describe("browser evidence reconciliation", () => {
       sourceSha: source.sourceSha,
       sourceIdentity: source.sourceIdentity,
       status: "pass",
-      counts: { pageFiles: 33, componentFiles: 24 },
+      counts: { pageFiles: 38, componentFiles: 31 },
       coverageIssues: 0,
       violationCount: 0,
     };
@@ -536,7 +560,7 @@ describe("browser evidence reconciliation", () => {
       sourceSha: verifiedSourceSha,
       sourceIdentity,
       status: "pass",
-      counts: { pageFiles: 33, componentFiles: 24 },
+      counts: { pageFiles: 38, componentFiles: 31 },
       coverageIssues: 0,
       violationCount: 0,
     };
@@ -578,7 +602,7 @@ describe("browser evidence reconciliation", () => {
       sourceSha: source.sourceSha,
       sourceIdentity: source.sourceIdentity,
       status: "fail",
-      counts: { pageFiles: 33, componentFiles: 24 },
+      counts: { pageFiles: 38, componentFiles: 31 },
       coverageIssues: 0,
       violationCount: 1,
     };
@@ -1433,11 +1457,6 @@ describe("module route section hierarchy", () => {
       padding: "0 var(--space-6) 0 0",
     });
     expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-status")).toMatchObject({ gap: "var(--space-6)" });
-    expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-hero-body")).toMatchObject({
-      gap: "clamp(var(--space-8), 5vw, var(--space-20))",
-      padding: "clamp(var(--space-12), 6vw, var(--space-20)) 0",
-      "padding-inline": "var(--os-gutter)",
-    });
     expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-console")).toMatchObject({
       gap: "var(--space-4)",
       padding: "var(--space-6)",
@@ -1552,10 +1571,6 @@ describe("module route section hierarchy", () => {
       "letter-spacing": "var(--tracking-hud)",
     });
     // 형광 배경을 없앤 뒤로는 안쪽 여백·기울임이 첫 글자를 밀기만 하므로 둘 다 0 이다(디자인 1단계).
-    expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-hero mark")).toMatchObject({
-      padding: "0",
-      transform: "none",
-    });
     expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-section mark")).toMatchObject({
       padding: "0",
       transform: "none",

@@ -6,7 +6,7 @@ import process from "node:process";
 import { pathToFileURL } from "node:url";
 import { chromium } from "playwright";
 
-import { canonicalFrontendSourceIdentity } from "./frontend_audit_source_identity.mjs";
+import { canonicalFrontendIdentityFiles, canonicalFrontendSourceIdentity } from "./frontend_audit_source_identity.mjs";
 
 const root = process.cwd();
 const baseUrl = process.env.FRONTEND_AUDIT_BASE_URL ?? "http://127.0.0.1:3011";
@@ -156,11 +156,14 @@ export function validateStaticAuditPrerequisite(staticAudit, source, { now, repo
     || reportMtime < source.newestMtime) {
     throw new Error("Static audit prerequisite is stale.");
   }
+  const frontendFiles = canonicalFrontendIdentityFiles(root).map((filePath) => path.relative(root, filePath).replaceAll("\\", "/"));
+  const expectedPages = frontendFiles.filter((filePath) => filePath.startsWith("app/") && filePath.endsWith("/page.tsx")).length;
+  const expectedComponents = frontendFiles.filter((filePath) => filePath.startsWith("components/")).length;
   if (staticAudit.status !== "pass"
     || staticAudit.violationCount !== 0
     || staticAudit.coverageIssues !== 0
-    || staticAudit.counts?.pageFiles !== routes.length
-    || staticAudit.counts?.componentFiles !== 24) {
+    || staticAudit.counts?.pageFiles !== expectedPages
+    || staticAudit.counts?.componentFiles !== expectedComponents) {
     throw new Error(
       `Static audit prerequisite failed: status=${staticAudit.status}, violations=${staticAudit.violationCount}, coverage=${staticAudit.coverageIssues}, pages=${staticAudit.counts?.pageFiles}, components=${staticAudit.counts?.componentFiles}`,
     );
