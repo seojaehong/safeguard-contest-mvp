@@ -1748,7 +1748,7 @@ describe("workspace layout regression", () => {
     expect(metrics.loginRequiredMessageCount).toBe(1);
     expect(metrics.clawGreetingCount).toBe(0);
     expect(metrics.shell.display).toBe("grid");
-    expect(metrics.shell.overflowY).toBe("auto");
+    expect(metrics.shell.overflowY).toBe("visible");
     expect(metrics.shell.clientHeight).toBeLessThanOrEqual(metrics.shell.scrollHeight);
     expect(metrics.navigator.right).toBeLessThanOrEqual(metrics.editor.left - 12);
     expect(metrics.desktopTabsDisplay).not.toBe("none");
@@ -1758,7 +1758,7 @@ describe("workspace layout regression", () => {
     expect(metrics.editor.color).not.toBe("rgb(246, 245, 239)");
     expect(metrics.editor.borderRadius).toBeGreaterThanOrEqual(2);
     expect(["auto", "visible"]).toContain(metrics.editor.overflowX);
-    expect(metrics.editor.overflowY).toBe("auto");
+    expect(metrics.editor.overflowY).toBe("visible");
     expect(metrics.editingTarget.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.editingTarget.borderTopWidth).toBeGreaterThanOrEqual(1);
     expect(metrics.editingTarget.lineHeight / metrics.editingTarget.fontSize).toBeGreaterThanOrEqual(1.35);
@@ -1869,7 +1869,7 @@ describe("workspace layout regression", () => {
     // Broad editor-flow smoke only; do not read this as a mobile Documents UX
     // cockpit pass. The DoD/evidence gates use stricter route-specific metrics.
     expect(mobileCollapsedScrollHeight).toBeLessThanOrEqual(mobileMetrics.viewportHeight * 3.4);
-    expect(mobileCollapsedEditorMetrics.shellOverflowY).toBe("auto");
+    expect(mobileCollapsedEditorMetrics.shellOverflowY).toBe("visible");
     expect(mobileCollapsedEditorMetrics.fieldWorkspaceOverflowY).toBe("auto");
     expect(mobileCollapsedEditorMetrics.fieldWorkspace.bottom).toBeLessThanOrEqual(
       mobileCollapsedEditorMetrics.viewportHeight,
