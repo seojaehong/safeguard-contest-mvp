@@ -16,5 +16,11 @@
     "browserReportSourceIdentity": "79e268153b73c5cfb36301c4d3b305949851b23c7c9cb493ce6711daf83b0609",
     "reason": "문서팩 링크의 Night 대비를 테마 토큰으로 추가 보정했다. 111행 실패 실측은 대비 보정 전 identity a92cdd5651f175c6d9bf387353724ecb2be54c710b21876678cda1202abb8570 판본으로 evaluation/candidates-24-25-2026-10-29/browser-regeneration/ 에 보존한다. 최종 판본은 별도 링크 이동·대비 회귀로 검증하며 전체 매트릭스 미통과 상태를 유지한다.",
     "recordedAt": "2026-10-29"
+  },
+  {
+    "sourceIdentity": "f8349b3ae6d12de44294a08abb1d4b044c2c7ebc696d3f07d495e410ebf4a23a",
+    "browserReportSourceIdentity": "79e268153b73c5cfb36301c4d3b305949851b23c7c9cb493ce6711daf83b0609",
+    "reason": "문서팩 링크를 상태 두 줄 옆으로 배치해 짧은 화면의 헤더 높이 회귀를 추가 보정했다. 원시111행 실패 실측은 a92cdd 판본으로 browser-regeneration/ 에 보존하며 현재 배치·대비는 workspace-layout-regression 프로덕션 회귀로 별도 검증한다. 최종 전체 매트릭스 합격 상태가 아니다.",
+    "recordedAt": "2026-10-29"
   }
 ]
