@@ -6,9 +6,20 @@ import process from "node:process";
 import { pathToFileURL } from "node:url";
 import { chromium } from "playwright";
 
-import { canonicalFrontendSourceIdentity } from "./frontend_audit_source_identity.mjs";
+import { canonicalFrontendIdentityFiles, canonicalFrontendSourceIdentity } from "./frontend_audit_source_identity.mjs";
+import { browserHeadingRole, contractLiteral } from "./frontend_typography_classifier.mjs";
 
 const root = process.cwd();
+const designSource = fs.readFileSync(path.join(root, "lib/frontend-design-contract.ts"), "utf8");
+let parsedDesign;
+function browserDesign() {
+  parsedDesign ??= {
+    typography: contractLiteral(designSource, "frontendTypography"),
+    browserTypography: contractLiteral(designSource, "frontendBrowserTypography"),
+    shape: contractLiteral(designSource, "frontendShape"),
+  };
+  return parsedDesign;
+}
 const baseUrl = process.env.FRONTEND_AUDIT_BASE_URL ?? "http://127.0.0.1:3011";
 const outputDirectory = path.resolve(
   root,
@@ -156,11 +167,14 @@ export function validateStaticAuditPrerequisite(staticAudit, source, { now, repo
     || reportMtime < source.newestMtime) {
     throw new Error("Static audit prerequisite is stale.");
   }
+  const frontendFiles = canonicalFrontendIdentityFiles(root).map((filePath) => path.relative(root, filePath).replaceAll("\\", "/"));
+  const expectedPages = frontendFiles.filter((filePath) => filePath.startsWith("app/") && filePath.endsWith("/page.tsx")).length;
+  const expectedComponents = frontendFiles.filter((filePath) => filePath.startsWith("components/") && filePath.endsWith(".tsx")).length;
   if (staticAudit.status !== "pass"
     || staticAudit.violationCount !== 0
     || staticAudit.coverageIssues !== 0
-    || staticAudit.counts?.pageFiles !== routes.length
-    || staticAudit.counts?.componentFiles !== 24) {
+    || staticAudit.counts?.pageFiles !== expectedPages
+    || staticAudit.counts?.componentFiles !== expectedComponents) {
     throw new Error(
       `Static audit prerequisite failed: status=${staticAudit.status}, violations=${staticAudit.violationCount}, coverage=${staticAudit.coverageIssues}, pages=${staticAudit.counts?.pageFiles}, components=${staticAudit.counts?.componentFiles}`,
     );
@@ -231,16 +245,18 @@ function approximately(actual, expected, tolerance = 0.08) {
 }
 
 function expectedHeadingTuple(row, documentRole) {
+  const { typography, browserTypography } = browserDesign();
   if (documentRole) return { role: "document-title", size: 28, weight: 700, lineHeight: 43.4, tracking: -1.12 };
   const width = { "desktop-1440": 1440, "tablet-1024": 1024, "mobile-390": 390 }[row.viewport];
   if (!width) return null;
-  const displaySurface = row.route === "/" || row.route === "/workspace" || row.route === "/prototype";
-  if (displaySurface && width > 720) {
-    const size = Math.min(72, Math.max(44, width * 0.06));
-    return { role: "display", size, weight: 800, lineHeight: size * 1.15, tracking: size * -0.045 };
-  }
-  const size = Math.min(40, Math.max(32, width * 0.04));
-  return { role: "page-title", size, weight: 800, lineHeight: size * 1.15, tracking: size * -0.035 };
+  const role = browserHeadingRole(row.route, width, browserTypography);
+  const tuple = typography.screen[role];
+  if (!tuple) throw new Error(`Unknown browser heading role: ${role}`);
+  const clamp = tuple.size.match(/^clamp\(([\d.]+)px,\s*([\d.]+)vw,\s*([\d.]+)px\)$/u);
+  const size = clamp ? Math.min(Number(clamp[3]), Math.max(Number(clamp[1]), width * Number(clamp[2]) / 100)) : px(tuple.size);
+  return { role: role.replace(/[A-Z]/gu, (letter) => `-${letter.toLowerCase()}`), size, weight: tuple.weight,
+    lineHeight: tuple.lineHeight.endsWith("px") ? px(tuple.lineHeight) : size * Number(tuple.lineHeight),
+    tracking: tuple.tracking.endsWith("em") ? size * Number.parseFloat(tuple.tracking) : px(tuple.tracking) };
 }
 
 function tupleFindings(label, tuple, expected) {
@@ -301,6 +317,7 @@ export function loadingEvidenceFindings(row, resolvedWorkspaceRows) {
 }
 
 export function numericalContractFindings(row, { documentRole = false, expectedBoundary = "" } = {}) {
+  const { typography, shape } = browserDesign();
   const findings = [];
   if (row.expectedStatuses?.length && !row.expectedStatuses.includes(row.status)) {
     findings.push(`HTTP ${row.status} outside expected statuses ${row.expectedStatuses.join(",")}`);
@@ -318,7 +335,8 @@ export function numericalContractFindings(row, { documentRole = false, expectedB
     findings.push(`workspace rendered ${row.workspaceTheme || "unknown"} theme, expected ${row.theme}`);
   }
   if (!row.visiblePrimaryContent) findings.push("missing visible primary content");
-  const expectedFont = documentRole ? /^"?Malgun Gothic"?/i : /^"?Noto Sans KR"?/i;
+  const expectedFamily = (documentRole ? typography.fonts.document : typography.fonts.product).split(",")[0].replaceAll('"', "").trim().toLowerCase();
+  const expectedFont = { test: (family) => String(family).split(",")[0].replaceAll('"', "").trim().toLowerCase() === expectedFamily };
   if (!expectedFont.test(row.bodyFont)) findings.push(`body font outside ${documentRole ? "document" : "product"} role: ${row.bodyFont}`);
   const expectedHeading = expectedHeadingTuple(row, documentRole);
   const headingOptional = row.route === "/law/[id]" || row.route === "/precedent/[id]";
@@ -332,7 +350,7 @@ export function numericalContractFindings(row, { documentRole = false, expectedB
     fontSize: row.bodyFontSize, fontWeight: row.bodyFontWeight,
     lineHeight: row.bodyLineHeight, letterSpacing: row.bodyLetterSpacing,
   }, expectedBody));
-  if (!row.productFontLoaded) findings.push(`${documentRole ? "document" : "Noto Sans KR"} font check failed`);
+  if (!row.productFontLoaded) findings.push(`${documentRole ? "document" : "IBM Plex Sans KR"} font check failed`);
   const documentExpectations = documentRole ? {
     title: { size: 28, weight: 700, lineHeight: 43.4, tracking: -1.12 },
     section: { size: 18, weight: 700, lineHeight: 27.9, tracking: 0 },
@@ -358,14 +376,14 @@ export function numericalContractFindings(row, { documentRole = false, expectedB
   }
   for (const control of row.renderedControls) {
     if (["checkbox", "radio", "file", "hidden"].includes(control.type)) continue;
-    if (control.height < 35.5) findings.push(`${control.selector} control height ${control.height}px below compact 36px`);
-    if (![0, 2, 4, 8, 9999].some((allowed) => approximately(control.radius, allowed, 0.2))) {
+    if (control.height < px(shape.compactControlHeight) - 0.5) findings.push(`${control.selector} control height ${control.height}px below compact ${shape.compactControlHeight}`);
+    if (![px(shape.structuralRadius), px(shape.controlRadius)].some((allowed) => approximately(control.radius, allowed, 0.2))) {
       findings.push(`${control.selector} control radius ${control.radius}px outside control/micro/soft contract`);
     }
   }
   const spacing = [0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96];
   for (const surface of row.keySurfaces) {
-    if (![0, 2, 4, 8, 12, 14].some((allowed) => approximately(surface.radius, allowed, 0.2))) {
+    if (![px(shape.structuralRadius), px(shape.panelRadius)].some((allowed) => approximately(surface.radius, allowed, 0.2))) {
       findings.push(`${surface.selector} radius ${surface.radius}px outside contextual surface contract`);
     }
     for (const padding of surface.padding) {
@@ -427,6 +445,12 @@ async function capture(page, options) {
     const headingStyle = heading ? getComputedStyle(heading) : null;
     const primaryText = heading?.textContent?.trim() || document.querySelector("main")?.textContent?.trim() || document.body.textContent?.trim() || "";
     const visible = (element) => {
+      let ancestor = element.parentElement;
+      while (ancestor) {
+        if (ancestor instanceof HTMLDetailsElement && !ancestor.open
+          && !ancestor.querySelector(":scope > summary")?.contains(element)) return false;
+        ancestor = ancestor.parentElement;
+      }
       const rect = element.getBoundingClientRect();
       const style = getComputedStyle(element);
       return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
@@ -456,7 +480,8 @@ async function capture(page, options) {
       bodyFontWeight: bodyStyle.fontWeight,
       bodyLineHeight: bodyStyle.lineHeight,
       bodyLetterSpacing: bodyStyle.letterSpacing === "normal" ? "0px" : bodyStyle.letterSpacing,
-      productFontLoaded: true,
+      productFontLoaded: document.fonts.check(`${bodyStyle.fontWeight} ${bodyStyle.fontSize} ${bodyStyle.fontFamily.split(",")[0]}`)
+        && [...document.fonts].some((face) => face.family.replaceAll('"', "") === bodyStyle.fontFamily.split(",")[0].replaceAll('"', "").trim() && face.status === "loaded"),
       primaryHeading: headingStyle && heading ? {
         tag: heading.tagName.toLowerCase(), text: heading.textContent?.trim() ?? "",
         fontFamily: headingStyle.fontFamily, fontSize: headingStyle.fontSize,

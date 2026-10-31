@@ -256,10 +256,10 @@ describe("canonical shared surface styles", () => {
 
   it("keeps effective landing descriptions, actions, and cards canonical", () => {
     const desktopCss = withoutMediaBlocks(css);
-    expect(declarationsForExactSelector(css, ".safeclaw-os-hero p")).toMatchObject({
-      "font-size": "var(--text-body-lg)",
+    expect(declarationsForExactSelector(css, ".safeclaw-home-position")).toMatchObject({
+      "font-size": "var(--text-body)",
       "font-weight": "500",
-      "line-height": "var(--leading-body-lg)",
+      "line-height": "var(--leading-body)",
       "letter-spacing": "var(--tracking-body)",
     });
     expect(declarationsForExactSelector(css, ".safeclaw-shared-action")).toMatchObject({

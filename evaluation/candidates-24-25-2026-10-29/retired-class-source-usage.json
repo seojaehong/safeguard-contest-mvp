@@ -1,0 +1,57 @@
+{
+  "scannedFiles": 338,
+  "classes": [
+    {
+      "name": "hero-console-dot",
+      "files": []
+    },
+    {
+      "name": "hero-console-frame",
+      "files": []
+    },
+    {
+      "name": "hero-console-prompt",
+      "files": []
+    },
+    {
+      "name": "hero-console-replay",
+      "files": []
+    },
+    {
+      "name": "hero-console-titlebar",
+      "files": []
+    },
+    {
+      "name": "safeclaw-hero-actions",
+      "files": []
+    },
+    {
+      "name": "safeclaw-hero-console",
+      "files": []
+    },
+    {
+      "name": "safeclaw-hero-copy",
+      "files": []
+    },
+    {
+      "name": "safeclaw-hero-line",
+      "files": []
+    },
+    {
+      "name": "safeclaw-hero-section",
+      "files": []
+    },
+    {
+      "name": "safeclaw-os-hero",
+      "files": []
+    },
+    {
+      "name": "safeclaw-os-hero-body",
+      "files": []
+    },
+    {
+      "name": "safeclaw-statement-card",
+      "files": []
+    }
+  ]
+}

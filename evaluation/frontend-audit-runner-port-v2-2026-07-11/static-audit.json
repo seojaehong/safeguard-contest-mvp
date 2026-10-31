@@ -1,13 +1,13 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-27T11:54:08.807Z",
-  "sourceSha": "1cb27890086a32b43d32d2b7786853f28ee1570f",
-  "sourceIdentity": "2ab3d080bfd212e70b6dce963951b798959be79d29de018c1324ca98ab700a52",
+  "generatedAt": "2026-10-29T17:33:03.379Z",
+  "sourceSha": "37245a48136a4884eaac72b19546ab4119daf4cb",
+  "sourceIdentity": "594795c459e51f6fee39f6325366ba51d1bcff23bd0e5f779e3300cf3e549c6b",
   "status": "pass",
   "counts": {
     "pageFiles": 38,
     "componentFiles": 31,
-    "cssLines": 25260,
+    "cssLines": 24976,
     "importantDeclarations": 0
   },
   "coverage": {

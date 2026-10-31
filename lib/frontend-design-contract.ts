@@ -8,7 +8,7 @@ export const frontendTypography = {
     document: '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif',
   },
   screen: {
-    display: { size: "clamp(44px, 6vw, 72px)", weight: 800, lineHeight: "0.98", tracking: "-0.045em" },
+    display: { size: "clamp(44px, 6vw, 72px)", weight: 800, lineHeight: "1.15", tracking: "-0.045em" },
     pageTitle: { size: "clamp(32px, 4vw, 40px)", weight: 800, lineHeight: "1.15", tracking: "-0.035em" },
     sectionTitle: { size: "clamp(24px, 3vw, 28px)", weight: 800, lineHeight: "1.25", tracking: "-0.025em" },
     componentTitle: { size: "20px", weight: 700, lineHeight: "1.35", tracking: "-0.015em" },
@@ -122,6 +122,15 @@ export const frontendScopedTypography = {
       },
     },
   },
+} as const;
+
+// Responsive heading roles used by the current landing, command center and document shell.
+export const frontendBrowserTypography = {
+  defaultHeadingRole: "pageTitle",
+  headingOverrides: [
+    { routes: ["/workspace", "/prototype"], minWidth: 721, maxWidth: 10000, role: "display" },
+    { routes: ["/documents"], minWidth: 0, maxWidth: 720, role: "sectionTitle" },
+  ],
 } as const;
 
 export const frontendSpacing = {

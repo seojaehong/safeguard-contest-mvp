@@ -708,6 +708,50 @@ describe("workspace layout regression", () => {
     await page.close();
   }, 90_000);
 
+  it.each([
+    { width: 1440, theme: "day" },
+    { width: 1440, theme: "night" },
+    { width: 1024, theme: "day" },
+    { width: 1024, theme: "night" }
+  ] as const)("opens the document library from the $width $theme workspace header", async ({ width, theme }) => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width, height: 900 } });
+    try {
+      await page.addInitScript((storageKey) => window.localStorage.removeItem(storageKey), CURRENT_WORKPACK_STORAGE_KEY);
+      await page.goto(`${baseUrl}/workspace?theme=${theme}`, { waitUntil: "networkidle" });
+      const link = page.locator('.command-topbar a[href="/documents"]');
+      expect(await link.isVisible()).toBe(true);
+      const contrast = await link.evaluate((element) => {
+        const channels = (value: string): number[] => {
+          const parts = value.match(/[\d.]+/gu)?.map(Number);
+          if (!parts || parts.length < 3) throw new Error(`Unsupported color: ${value}`);
+          return [...parts.slice(0, 3), parts[3] ?? 1];
+        };
+        const ancestors: Element[] = [];
+        for (let current: Element | null = element; current; current = current.parentElement) ancestors.unshift(current);
+        let background = [255, 255, 255];
+        for (const ancestor of ancestors) {
+          const painted = channels(getComputedStyle(ancestor).backgroundColor);
+          background = background.map((under, index) => painted[index] * painted[3] + under * (1 - painted[3]));
+        }
+        const luminance = (color: number[]): number => color.slice(0, 3).reduce((sum, channel, index) => {
+          const value = channel / 255;
+          return sum + (value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4) * [0.2126, 0.7152, 0.0722][index];
+        }, 0);
+        const foreground = luminance(channels(getComputedStyle(element).color));
+        const surface = luminance(background);
+        return (Math.max(foreground, surface) + 0.05) / (Math.min(foreground, surface) + 0.05);
+      });
+      expect(contrast).toBeGreaterThanOrEqual(4.5);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+      await link.click();
+      await page.waitForURL(`${baseUrl}/documents`);
+      await page.getByTestId("workpack-editor-workspace").waitFor({ state: "visible" });
+    } finally {
+      await page.close();
+    }
+  }, 90_000);
+
   it("keeps the empty input topbar concise without duplicated waiting copy", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -1704,7 +1748,7 @@ describe("workspace layout regression", () => {
     expect(metrics.loginRequiredMessageCount).toBe(1);
     expect(metrics.clawGreetingCount).toBe(0);
     expect(metrics.shell.display).toBe("grid");
-    expect(metrics.shell.overflowY).toBe("auto");
+    expect(metrics.shell.overflowY).toBe("visible");
     expect(metrics.shell.clientHeight).toBeLessThanOrEqual(metrics.shell.scrollHeight);
     expect(metrics.navigator.right).toBeLessThanOrEqual(metrics.editor.left - 12);
     expect(metrics.desktopTabsDisplay).not.toBe("none");
@@ -1714,7 +1758,7 @@ describe("workspace layout regression", () => {
     expect(metrics.editor.color).not.toBe("rgb(246, 245, 239)");
     expect(metrics.editor.borderRadius).toBeGreaterThanOrEqual(2);
     expect(["auto", "visible"]).toContain(metrics.editor.overflowX);
-    expect(metrics.editor.overflowY).toBe("auto");
+    expect(metrics.editor.overflowY).toBe("visible");
     expect(metrics.editingTarget.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.editingTarget.borderTopWidth).toBeGreaterThanOrEqual(1);
     expect(metrics.editingTarget.lineHeight / metrics.editingTarget.fontSize).toBeGreaterThanOrEqual(1.35);
@@ -1825,7 +1869,7 @@ describe("workspace layout regression", () => {
     // Broad editor-flow smoke only; do not read this as a mobile Documents UX
     // cockpit pass. The DoD/evidence gates use stricter route-specific metrics.
     expect(mobileCollapsedScrollHeight).toBeLessThanOrEqual(mobileMetrics.viewportHeight * 3.4);
-    expect(mobileCollapsedEditorMetrics.shellOverflowY).toBe("auto");
+    expect(mobileCollapsedEditorMetrics.shellOverflowY).toBe("visible");
     expect(mobileCollapsedEditorMetrics.fieldWorkspaceOverflowY).toBe("auto");
     expect(mobileCollapsedEditorMetrics.fieldWorkspace.bottom).toBeLessThanOrEqual(
       mobileCollapsedEditorMetrics.viewportHeight,
@@ -2471,8 +2515,8 @@ describe("workspace layout regression", () => {
 
     expect.soft(metrics.backgroundImage).toBe("none");
     expect.soft(metrics.contrast).toBeGreaterThanOrEqual(4.5);
-    expect.soft(metrics.overflowX).toBe("auto");
-    expect.soft(metrics.overflowY).toBe("auto");
+    expect.soft(metrics.overflowX).toBe("visible");
+    expect.soft(metrics.overflowY).toBe("visible");
     expect(metrics.riskFieldVisible).toBe(true);
     expect(metrics.sourceTextareaCount).toBe(0);
   }, 90_000);

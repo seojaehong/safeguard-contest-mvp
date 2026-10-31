@@ -35,8 +35,8 @@ function listRelativeFiles(root, directory, predicate) {
 export function canonicalFrontendIdentityFiles(root) {
   const relativeFiles = [
     ...fixedIdentityPaths,
-    ...listRelativeFiles(root, "app", (filePath) => filePath.endsWith(".tsx")),
-    ...listRelativeFiles(root, "components", (filePath) => filePath.endsWith(".tsx")),
+    ...listRelativeFiles(root, "app", (filePath) => filePath.endsWith(".tsx") || filePath.endsWith(".css")),
+    ...listRelativeFiles(root, "components", (filePath) => filePath.endsWith(".tsx") || filePath.endsWith(".css")),
   ].sort();
   const uniqueRelativeFiles = [...new Set(relativeFiles)];
   const absoluteFiles = uniqueRelativeFiles.map((relativePath) => path.join(root, relativePath));

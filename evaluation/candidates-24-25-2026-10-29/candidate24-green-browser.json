@@ -1,0 +1,48 @@
+[
+  {
+    "width": 1440,
+    "theme": "day",
+    "visible": true,
+    "expectedVisible": true,
+    "overflow": false,
+    "destination": "/documents"
+  },
+  {
+    "width": 1440,
+    "theme": "night",
+    "visible": true,
+    "expectedVisible": true,
+    "overflow": false,
+    "destination": "/documents"
+  },
+  {
+    "width": 1024,
+    "theme": "day",
+    "visible": true,
+    "expectedVisible": true,
+    "overflow": false,
+    "destination": "/documents"
+  },
+  {
+    "width": 1024,
+    "theme": "night",
+    "visible": true,
+    "expectedVisible": true,
+    "overflow": false,
+    "destination": "/documents"
+  },
+  {
+    "width": 390,
+    "theme": "day",
+    "visible": false,
+    "expectedVisible": false,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "theme": "night",
+    "visible": false,
+    "expectedVisible": false,
+    "overflow": false
+  }
+]
