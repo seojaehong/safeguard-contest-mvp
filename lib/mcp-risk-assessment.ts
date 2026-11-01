@@ -7,10 +7,12 @@
 // - 파일: 편집기와 같은 요청 본문(buildRiskAssessmentExportBody)을 웹 라우트와 같은 렌더 함수에 넣는다
 //   (lib/document-export-xlsx.ts·document-export-hwp.ts, 주입: renderXlsx·renderHwp).
 // - SIF: 같은 생성이 쓴 dbHarness.packet.sifCases·sifSelection(관련성 거름은 패킷 단계). 따로 검색·거르지 않는다(파일과 목록이 어긋나지 않게).
+// - 공개 표면: 생성 응답에 웹 /api/ask 와 같은 정리 + 내보내기 게이트를 한 번 걸고 그 값으로 JSON·파일을 함께 만든다.
 // 작업공간에 저장하지 않는다(읽기 전용 산출물). 결과는 toToolResult 의 256KB 상한을 그대로 따른다.
 import { createHash } from "node:crypto";
 
 import type { AiMode } from "@/lib/ai-deliverables";
+import { sanitizeAskResponsePublicSurface } from "@/lib/ask-public-surface";
 import type { McpAuthContext } from "@/lib/mcp-auth";
 import { toToolResult, type McpToolResult } from "@/lib/mcp-tools";
 import {
@@ -34,6 +36,7 @@ import type { XlsxDocumentExportRender } from "@/lib/document-export-xlsx";
 import type { HwpDocumentExportRender } from "@/lib/document-export-hwp";
 import type { SifRelevance } from "@/lib/sif-case-relevance";
 import type { AskResponse } from "@/lib/types";
+import { gateExportPayload } from "@/lib/user-output-gate";
 
 export type GenerateRiskAssessmentInput = {
   question: string;
@@ -338,13 +341,24 @@ async function renderFile(
   };
 }
 
+/**
+ * 웹 /api/ask 공개 표면과 같은 정리(sanitizeAskResponsePublicSurface)와 내보내기 게이트(gateExportPayload)를 한 번 건다.
+ * 결과 JSON 과 서식 파일을 모두 이 값으로 만든다(MCP 만 내부 표지를 내보내지 않게).
+ * dbHarness 는 웹 응답처럼 정리하지 않고 그대로 둔다(SIF 출처 id·주소를 바꾸지 않게).
+ */
+function toPublicResponse(response: AskResponse): AskResponse {
+  const { dbHarness, ...rest } = sanitizeAskResponsePublicSurface(response);
+  const gated = gateExportPayload(rest) as AskResponse;
+  return dbHarness ? { ...gated, dbHarness } : gated;
+}
+
 export function createGenerateRiskAssessmentHandler(dependencies: Dependencies): GenerateRiskAssessmentHandler {
   return async ({ question, mode, format }, _authContext, execution) => {
     const signal = execution?.signal;
     signal?.throwIfAborted();
     const aiMode = mode ?? dependencies.defaultMode;
     const fileFormat = format ?? "xlsx";
-    const response = await dependencies.generateResponse(question, aiMode, signal);
+    const response = toPublicResponse(await dependencies.generateResponse(question, aiMode, signal));
     signal?.throwIfAborted();
 
     const main = toStructuredRiskRows(response.structured?.riskAssessmentRows ?? []);

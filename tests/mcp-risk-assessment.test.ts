@@ -12,7 +12,9 @@ import { describe, expect, it } from "vitest";
 
 import { POST as exportXlsx } from "@/app/api/export/xlsx/route";
 import { POST as exportHwp } from "@/app/api/export/hwp/route";
+import { sanitizeAskResponsePublicSurface } from "@/lib/ask-public-surface";
 import { buildDbHarnessPacket, buildPublicDbHarnessPacket } from "@/lib/db-harness";
+import { gateExportPayload } from "@/lib/user-output-gate";
 import { buildMockAskResponse } from "@/lib/mock-data";
 import { canonicalizeRiskAssessmentResponse, RISK_RECORD_ROW_HEADERS } from "@/lib/risk-assessment-record";
 import { MCP_TOOL_RESULT_MAX_BYTES } from "@/lib/mcp-tools";
@@ -262,7 +264,8 @@ describe("generate_risk_assessment 가 웹 내보내기와 같은 서식을 낸�
   it("구조화 행은 파일 본표와 같은 칸 순서·값이고 결재란은 작성/검토/승인이다", async () => {
     const response = opsResponse("con-excavation");
     const { payload } = await callTool(response, { question: ops["con-excavation"].question });
-    const main = response.structured?.riskAssessmentRows ?? [];
+    // 결과는 웹 /api/ask 공개 표면과 같은 정리·게이트를 지난 행이다(tests/mcp-risk-assessment-public-surface.test.ts).
+    const main = gateExportPayload(sanitizeAskResponsePublicSurface(response)).structured?.riskAssessmentRows ?? [];
     expect(payload.status).toBe("ok");
     expect(payload.mode).toBe("enhanced");
     expect(payload.riskAssessment.headers).toEqual([...RISK_RECORD_ROW_HEADERS]);
