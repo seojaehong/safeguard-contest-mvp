@@ -272,14 +272,17 @@ function insertHwpTable(
     }));
     if (layout.headerRow && rows.length > 1) {
       for (let cIdx = 0; cIdx < colCount; cIdx += 1) {
-        document.setCellProperties(0, table.paraIdx, controlIdx, cIdx, JSON.stringify({ isHeader: true }));
+        const header = parseJsonResult(document.setCellProperties(0, table.paraIdx as number, controlIdx, cIdx, JSON.stringify({ isHeader: true })));
+        if (!header.ok) throw new Error(`${label} 표 머리 행을 표시하지 못했습니다.`);
       }
-      document.setTableProperties(0, table.paraIdx, controlIdx, JSON.stringify({ repeatHeader: true }));
+      const repeat = parseJsonResult(document.setTableProperties(0, table.paraIdx as number, controlIdx, JSON.stringify({ repeatHeader: true })));
+      if (!repeat.ok) throw new Error(`${label} 표 머리 행 반복을 켜지 못했습니다.`);
     }
   }
   rows.forEach((row, rIdx) => {
     row.forEach((value, cIdx) => {
-      document.insertTextInCell(0, table.paraIdx as number, controlIdx, rIdx * colCount + cIdx, 0, 0, value);    });
+      document.insertTextInCell(0, table.paraIdx as number, controlIdx, rIdx * colCount + cIdx, 0, 0, value);
+    });
   });
   return document.getParagraphCount(0) - 1;
 }
@@ -308,7 +311,7 @@ function buildHwpBuffer(args: {
   try {
     document.createBlankDocument();
 
-    // 위험성평가 본표(13칸)는 엑셀처럼 A4 가로에 엑셀 열 비율로 싣는다. 다른 문서는 세로 기본 그대로다.
+    // 위험성평가 본표(13칸)는 엑셀처럼 A3 가로에 엑셀 열 비율로 싣는다. 다른 문서는 세로 기본 그대로다.
     let wide: ((weights: readonly number[], headerRow?: boolean) => HwpTableLayout) | undefined;
     if (riskRows.length) {
       const pageDef = parseJsonResult(document.getPageDef(0));
