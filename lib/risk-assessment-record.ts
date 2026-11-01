@@ -91,6 +91,54 @@ export const RISK_RECORD_ROW_HEADERS = [
   "잔여 위험성"
 ] as const;
 
+/**
+ * 위험성평가 엑셀 시트(lib/xlsx-builder.ts)의 열 머리와 너비(엑셀 열 너비 단위). 한글(hwp) 본표는 같은 머리를
+ * 이 표에서 찾아 같은 비율로 열을 나눈다(형식마다 너비를 따로 정하지 않는다).
+ */
+export const RISK_ASSESSMENT_COLUMNS = [
+  { header: "번호", width: 6 },
+  { header: "작업장소", width: 20 },
+  { header: "공정", width: 16 },
+  { header: "세부작업", width: 24 },
+  { header: "장비·도구", width: 20 },
+  { header: "유해·위험요인", width: 30 },
+  { header: "4M", width: 14 },
+  { header: "재해유형", width: 16 },
+  { header: "현재 안전조치", width: 30 },
+  { header: "가능성", width: 10 },
+  { header: "중대성", width: 10 },
+  { header: "위험성", width: 12 },
+  { header: "감소대책", width: 36 },
+  { header: "담당자", width: 14 },
+  { header: "조치기한", width: 14 },
+  { header: "이행 결과", width: 18 },
+  { header: "잔여 위험성", width: 10 },
+  { header: "확인상태", width: 14 },
+  { header: "확인일", width: 14 },
+  { header: "확인자", width: 14 },
+  { header: "근거", width: 28 }
+] as const;
+
+/** 엑셀 기록란 한 줄의 열 묶음(라벨·값·라벨·값)과 확인 필요 목록 한 줄의 열 묶음(번호·내용·참고자료). */
+export const RISK_RECORD_HEADER_SPANS = [3, 7, 3, 8] as const;
+export const RISK_REVIEW_ROW_SPANS = [1, 11, 9] as const;
+
+/** 머리 이름으로 엑셀 열 너비를 찾는다. 표에 없는 머리는 엑셀 기본 너비 10. */
+export function riskColumnWeights(headers: readonly string[]): number[] {
+  return headers.map((header) => RISK_ASSESSMENT_COLUMNS.find((column) => column.header === header)?.width ?? 10);
+}
+
+/** 엑셀에서 열을 묶은 칸(span)의 너비 합. 마지막 묶음은 남은 열 끝까지다(엑셀 writeRiskSpanRow 와 같다). */
+export function riskSpanWeights(spans: readonly number[]): number[] {
+  let column = 0;
+  return spans.map((span, index) => {
+    const end = index === spans.length - 1 ? RISK_ASSESSMENT_COLUMNS.length : Math.min(RISK_ASSESSMENT_COLUMNS.length, column + span);
+    const weight = RISK_ASSESSMENT_COLUMNS.slice(column, end).reduce((sum, item) => sum + item.width, 0);
+    column = end;
+    return weight;
+  });
+}
+
 export const RISK_APPROVAL_LABELS = ["작성", "검토", "승인"] as const;
 
 export const RISK_REVIEW_LIST_TITLE = "확인 필요 목록(본표에 넣지 않음)";
