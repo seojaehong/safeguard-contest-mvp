@@ -15,7 +15,8 @@ import { POST as exportHwp } from "@/app/api/export/hwp/route";
 import { sanitizeAskResponsePublicSurface } from "@/lib/ask-public-surface";
 import { buildDbHarnessPacket, buildPublicDbHarnessPacket } from "@/lib/db-harness";
 import { FORBIDDEN_USER_TERMS, findForbiddenUserTerms } from "@/lib/grounded-generation-contract";
-import { gateExportPayload } from "@/lib/user-output-gate";
+import { gateAskResponseUserOutput, gateExportPayload } from "@/lib/user-output-gate";
+import { buildInitialRiskRows } from "@/components/WorkpackEditor";
 import { buildMockAskResponse } from "@/lib/mock-data";
 import { canonicalizeRiskAssessmentResponse, RISK_RECORD_ROW_HEADERS } from "@/lib/risk-assessment-record";
 import { MCP_TOOL_RESULT_MAX_BYTES } from "@/lib/mcp-tools";
@@ -93,7 +94,8 @@ function opsResponse(id: (typeof SCENARIOS)[number], sifCases: SafetyReferenceIt
       riskAssessmentValidation: { ok: true, issueCount: 0, issues: [] },
     },
   };
-  const canonical = canonicalizeRiskAssessmentResponse(response);
+  // runAsk 의 마지막 단계(gateAskResponseUserOutput)를 지난 모양으로 둔다.
+  const canonical = gateAskResponseUserOutput(canonicalizeRiskAssessmentResponse(response));
   if (!sifCases.length) return canonical;
   const packet = buildPublicDbHarnessPacket(buildDbHarnessPacket({ question: packetQuestion, references: sifCases }));
   return {
@@ -106,8 +108,12 @@ function opsResponse(id: (typeof SCENARIOS)[number], sifCases: SafetyReferenceIt
   };
 }
 
-/** 편집기가 생성 직후 위험성평가표에서 「Excel 표 양식」「한글 표 양식」을 누를 때 보내는 본문. */
-function editorRequestBody(response: AskResponse, format: "xlsx" | "hwp"): Record<string, unknown> {
+/**
+ * 편집기가 생성 직후 위험성평가표에서 「Excel 표 양식」「한글 표 양식」을 누를 때 보내는 본문(실제 웹 경로).
+ * runAsk 응답 → /api/ask 공개 표면 정리 → 편집기 정본 행(buildInitialRiskRows).
+ */
+function editorRequestBody(runAskResponse: AskResponse, format: "xlsx" | "hwp"): Record<string, unknown> {
+  const response = sanitizeAskResponsePublicSurface(runAskResponse);
   const reviewItems = response.structured?.riskReviewItems;
   return {
     ...(format === "xlsx" ? { mode: "single" } : {}),
@@ -116,7 +122,7 @@ function editorRequestBody(response: AskResponse, format: "xlsx" | "hwp"): Recor
     rows: [],
     profile: EDITOR_RISK_PROFILE,
     scenario: response.scenario,
-    riskAssessmentRows: response.structured?.riskAssessmentRows,
+    riskAssessmentRows: buildInitialRiskRows(response),
     ...(reviewItems?.length ? { riskReviewItems: reviewItems } : {}),
   };
 }
@@ -271,8 +277,10 @@ describe("generate_risk_assessment 가 웹 내보내기와 같은 서식을 낸�
   it("구조화 행은 파일 본표와 같은 칸 순서·값이고 결재란은 작성/검토/승인이다", async () => {
     const response = opsResponse("con-excavation");
     const { payload } = await callTool(response, { question: ops["con-excavation"].question });
-    // 결과는 웹 /api/ask 공개 표면과 같은 정리·게이트를 지난 행이다(tests/mcp-risk-assessment-public-surface.test.ts).
-    const main = gateExportPayload(sanitizeAskResponsePublicSurface(response)).structured?.riskAssessmentRows ?? [];
+    // 결과 행 = 라우트가 렌더하는 게이트 뒤 본문 행, evidenceRefs 만 /api/ask 값(tests/mcp-risk-assessment-public-surface.test.ts).
+    const routeRows = (gateExportPayload(editorRequestBody(response, "xlsx")).riskAssessmentRows ?? []) as RiskAssessmentRow[];
+    const webRows = buildInitialRiskRows(sanitizeAskResponsePublicSurface(response));
+    const main = routeRows.map((row, index) => ({ ...row, evidenceRefs: webRows[index]?.evidenceRefs }));
     expect(payload.status).toBe("ok");
     expect(payload.mode).toBe("enhanced");
     expect(payload.riskAssessment.headers).toEqual([...RISK_RECORD_ROW_HEADERS]);

@@ -7,7 +7,8 @@
 // - 파일: 편집기와 같은 요청 본문(buildRiskAssessmentExportBody)을 웹 라우트와 같은 렌더 함수에 넣는다
 //   (lib/document-export-xlsx.ts·document-export-hwp.ts, 주입: renderXlsx·renderHwp).
 // - SIF: 같은 생성이 쓴 dbHarness.packet.sifCases·sifSelection(관련성 거름은 패킷 단계). 따로 검색·거르지 않는다(파일과 목록이 어긋나지 않게).
-// - 공개 표면: 생성 응답에 웹 /api/ask 와 같은 정리 + 내보내기 게이트를 한 번 걸고 그 값으로 JSON·파일을 함께 만든다.
+// - 공개 표면: 웹 경로대로 /api/ask 정리 → 편집기 내보내기 본문 → 라우트와 같은 게이트를 본문에만 한 번 걸고(exportView),
+//   JSON 의 행·칸·scenario 와 파일을 그 본문으로 만든다. evidenceRefs 만 runAsk 처럼 게이트 전 값.
 // 작업공간에 저장하지 않는다(읽기 전용 산출물). 결과는 256KB 상한(MCP_TOOL_RESULT_MAX_BYTES) 안에서 들여쓰기 없는 JSON 으로 싣고, 넘으면 cells → file 순서로 뺀다(fitRiskAssessmentToolResult).
 import { createHash } from "node:crypto";
 
@@ -317,10 +318,9 @@ class RiskAssessmentRenderError extends Error {}
 
 async function renderFile(
   dependencies: Dependencies,
-  response: AskResponse,
+  body: Record<string, unknown>,
   format: RiskAssessmentExportFormat
 ): Promise<NonNullable<RiskAssessmentToolResult["file"]>> {
-  const body = buildRiskAssessmentExportBody(response, format);
   let buffer: Buffer;
   let fileName: string;
   if (format === "xlsx") {
@@ -343,15 +343,30 @@ async function renderFile(
   };
 }
 
+type RiskRows = NonNullable<AskResponse["structured"]>["riskAssessmentRows"];
+
+/** 게이트를 지난 행에 게이트 전 행의 evidenceRefs 를 돌려 넣는다(같은 순서, 게이트는 행을 빼거나 바꾸지 않는다). */
+function withSourceEvidenceRefs(gated: unknown, source: RiskRows | undefined): RiskRows {
+  return (Array.isArray(gated) ? gated as RiskRows : []).map((row, index) => ({ ...row, evidenceRefs: source?.[index]?.evidenceRefs ?? row.evidenceRefs }));
+}
+
 /**
- * 웹 /api/ask 공개 표면과 같은 정리(sanitizeAskResponsePublicSurface)와 내보내기 게이트(gateExportPayload)를 한 번 건다.
- * 결과 JSON 과 서식 파일을 모두 이 값으로 만든다(MCP 만 내부 표지를 내보내지 않게).
- * dbHarness 는 웹 응답처럼 정리하지 않고 그대로 둔다(SIF 출처 id·주소를 바꾸지 않게).
+ * 웹 경로를 그대로 따른다. ① /api/ask 공개 표면 정리(sanitizeAskResponsePublicSurface) → ② 편집기와 같은 내보내기 본문
+ * (buildRiskAssessmentExportBody) → ③ /api/export 라우트와 같은 내보내기 게이트(gateExportPayload)를 본문에만 한 번.
+ * 결과 JSON 의 본표 행·칸·확인 필요 목록·scenario 는 ③ 의 본문에서 꺼내 파일과 같은 값이다. 다만 evidenceRefs 는 runAsk
+ * (gateAskResponseUserOutput)처럼 출처 추적 데이터라 게이트를 걸지 않은 ① 의 값을 둔다(웹 /api/ask 와 같다).
+ * dbHarness 는 ① 이 건드리지 않는다(SIF 출처 id·주소를 바꾸지 않게).
  */
-function toPublicResponse(response: AskResponse): AskResponse {
-  const { dbHarness, ...rest } = sanitizeAskResponsePublicSurface(response);
-  const gated = gateExportPayload(rest) as AskResponse;
-  return dbHarness ? { ...gated, dbHarness } : gated;
+function exportView(response: AskResponse, format: RiskAssessmentExportFormat) {
+  const publicResponse = sanitizeAskResponsePublicSurface(response);
+  const body = gateExportPayload(buildRiskAssessmentExportBody(publicResponse, format));
+  return {
+    publicResponse,
+    body,
+    scenario: body.scenario as AskResponse["scenario"],
+    mainRows: withSourceEvidenceRefs(body.riskAssessmentRows, publicResponse.structured?.riskAssessmentRows),
+    reviewRows: withSourceEvidenceRefs(body.riskReviewItems, publicResponse.structured?.riskReviewItems)
+  };
 }
 
 /** 서식 파일을 못 만든 이유. 렌더러 오류 문구(내부 경로가 섞일 수 있다)는 싣지 않는다. */
@@ -409,11 +424,12 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
     signal?.throwIfAborted();
     const aiMode = mode ?? dependencies.defaultMode;
     const fileFormat = format ?? "xlsx";
-    const response = toPublicResponse(await dependencies.generateResponse(question, aiMode, signal));
+    const view = exportView(await dependencies.generateResponse(question, aiMode, signal), fileFormat);
+    const response = view.publicResponse;
     signal?.throwIfAborted();
 
-    const main = toStructuredRiskRows(response.structured?.riskAssessmentRows ?? []);
-    const review = toStructuredRiskRows(response.structured?.riskReviewItems ?? []);
+    const main = toStructuredRiskRows(view.mainRows);
+    const review = toStructuredRiskRows(view.reviewRows);
     const sifSourceIds = [...new Set((response.dbHarness?.packet?.sifCases ?? []).map((item) => item.source_id))];
     const sources = sifSourceIds.length && dependencies.lookupSources ? await dependencies.lookupSources(sifSourceIds, signal) : new Map<string, SafetyReferenceSourceMeta>();
     signal?.throwIfAborted();
@@ -433,7 +449,7 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
       status: !hasRows ? "review_required" : generation.fallbackUsed ? "ok_fallback" : "ok",
       mode: aiMode,
       generation,
-      scenario: response.scenario,
+      scenario: view.scenario,
       riskSummary: { riskLevel: response.riskSummary.riskLevel, topRisk: response.riskSummary.topRisk },
       riskAssessment: {
         title: RISK_ASSESSMENT_EXPORT_TITLE,
@@ -447,7 +463,7 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
           evidenceRefs: displayEvidenceRefs(row.evidenceRefs)
         })),
         approvalLabels: [...RISK_APPROVAL_LABELS],
-        structuredRows: response.structured?.riskAssessmentRows ?? []
+        structuredRows: view.mainRows
       },
       reviewItems: {
         title: RISK_REVIEW_LIST_TITLE,
@@ -458,9 +474,9 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
           content: row.hazard,
           references: displayEvidenceRefs(row.evidenceRefs)
         })),
-        structuredRows: response.structured?.riskReviewItems ?? []
+        structuredRows: view.reviewRows
       },
-      recordItemsCheck: checkRiskRecordItems(response.structured?.riskAssessmentRows ?? []),
+      recordItemsCheck: checkRiskRecordItems(view.mainRows),
       sif: {
         ...(sifCases.length
           ? { count: sifCases.length, cases: sifCases }
@@ -478,7 +494,7 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
     if (hasRows) {
       signal?.throwIfAborted();
       try {
-        result.file = await renderFile(dependencies, response, fileFormat);
+        result.file = await renderFile(dependencies, view.body, fileFormat);
       } catch (error) {
         // 호출 취소는 결과로 바꾸지 않는다. 그 밖의 렌더 실패는 파일만 빼고 본표 결과는 돌려준다.
         signal?.throwIfAborted();
@@ -486,7 +502,7 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
       }
     } else {
       // 작업 분류의 내부 이유 문구는 그대로 옮기지 않는다(웹 화면용 문구라 도구 결과 금지 문구가 섞일 수 있다, 261101 run6 S4).
-      result.fileUnavailableReason = response.scenario.taskClassification?.status === "review_required"
+      result.fileUnavailableReason = view.scenario.taskClassification?.status === "review_required"
         ? "작업 유형을 확인하지 못해 위험성평가 행을 만들지 않았습니다. 작업 종류와 사용 장비를 더 구체적으로 적어 다시 호출하세요."
         : "위험성평가 본표 행이 없어 서식 파일을 만들지 않았습니다. 작업 내용을 더 구체적으로 적어 다시 호출하세요.";
     }
