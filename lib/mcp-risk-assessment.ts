@@ -484,8 +484,9 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
         result.fileUnavailableReason = renderFailureReason(error, fileFormat);
       }
     } else {
+      // 작업 분류의 내부 이유 문구는 그대로 옮기지 않는다(웹 화면용 문구라 도구 결과 금지 문구가 섞일 수 있다, 261101 run6 S4).
       result.fileUnavailableReason = response.scenario.taskClassification?.status === "review_required"
-        ? `작업 유형을 확인하지 못해 위험성평가 행을 만들지 않았습니다(${response.scenario.taskClassification.reason}). 작업 내용을 더 구체적으로 적어 다시 호출하세요.`
+        ? "작업 유형을 확인하지 못해 위험성평가 행을 만들지 않았습니다. 작업 종류와 사용 장비를 더 구체적으로 적어 다시 호출하세요."
         : "위험성평가 본표 행이 없어 서식 파일을 만들지 않았습니다. 작업 내용을 더 구체적으로 적어 다시 호출하세요.";
     }
 

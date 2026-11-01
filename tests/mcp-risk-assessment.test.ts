@@ -32,6 +32,7 @@ import {
 } from "@/lib/mcp-risk-assessment";
 import type { McpAuthContext } from "@/lib/mcp-auth";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
+import { buildTaskClassification } from "@/lib/task-scenario-profiles";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import type { AskResponse } from "@/lib/types";
 
@@ -465,7 +466,15 @@ describe("시행규칙 제37조의4 기재 항목 충족 검사", () => {
     const base = opsResponse("mfg-press");
     const noRows = (await callTool({ ...base, structured: { ...base.structured, riskAssessmentRows: [] } as AskResponse["structured"] }, { question: "무엇인가 하는 작업", format: "hwp" })).payload;
     const template = (await callTool(opsResponse("logistics-heat"), { question: ops["logistics-heat"].question, mode: "template" })).payload;
-    for (const payload of [ok, noRows, template]) expect(ownStrings(payload)).not.toMatch(BANNED_SURFACE);
+    // 실제 runAsk 처럼 작업 분류가 review_required 이유를 실은 응답(run6 S4 실측에서 이 이유가 결과 문구로 새어 나왔다).
+    const unclassifiedQuestion = "내일 오전에 사무실에서 할 일 정리";
+    const unclassified = (await callTool({
+      ...base,
+      scenario: { ...base.scenario, taskClassification: buildTaskClassification(unclassifiedQuestion) },
+      structured: { ...base.structured, riskAssessmentRows: [] } as AskResponse["structured"],
+    }, { question: unclassifiedQuestion })).payload;
+    expect(unclassified.fileUnavailableReason).toMatch(/작업 유형을 확인하지 못해/u);
+    for (const payload of [ok, noRows, template, unclassified]) expect(ownStrings(payload)).not.toMatch(BANNED_SURFACE);
   });
 });
 
