@@ -197,6 +197,14 @@ function handlerFor(response: AskResponse) {
     },
     renderXlsx: renderXlsxDocumentExport,
     renderHwp: renderHwpDocumentExport,
+    // 안전 지식 DB safety_reference_sources 대신(가상 값). 출처 메타는 코드가 아니라 DB 행에서 온다.
+    lookupSources: async (ids) => new Map(ids.filter((id) => id === "kosha-sif-archive-20260401").map((id) => [id, {
+      id,
+      agency: "한국산업안전보건공단",
+      title: "산업재해 고위험요인(SIF) 아카이브",
+      publishedAt: "2026-04-01",
+      originUrl: null,
+    }])),
   });
   return { handler, calls };
 }
@@ -307,24 +315,24 @@ describe("SIF 유사사례", () => {
         id: "sif-1",
         title: "굴착 사면 붕괴로 매몰",
         overview: "굴착 깊이 3m 사면이 무너져 작업자 1명이 매몰되었다.",
-        source: { id: "kosha-sif-archive-20260401", agency: "한국산업안전보건공단", title: "산업재해 고위험요인(SIF) 아카이브", publishedAt: "2026-04-01", baseYear: 2026, url: null },
+        source: { id: "kosha-sif-archive-20260401", agency: "한국산업안전보건공단", title: "산업재해 고위험요인(SIF) 아카이브", publishedAt: "2026-04-01", sourcePublishedYear: 2026, url: null },
         relevance: expect.objectContaining({ matchedWork: expect.arrayContaining(["굴착·토사"]) }),
       },
       {
         id: "sif-2",
         title: "굴착기 버킷 협착",
         overview: "후진하던 굴착기와 흙막이 사이에 끼였다.",
-        source: { id: "kosha-sif-archive-20260401", agency: "한국산업안전보건공단", title: "산업재해 고위험요인(SIF) 아카이브", publishedAt: "2026-04-01", baseYear: 2026, url: null },
+        source: { id: "kosha-sif-archive-20260401", agency: "한국산업안전보건공단", title: "산업재해 고위험요인(SIF) 아카이브", publishedAt: "2026-04-01", sourcePublishedYear: 2026, url: null },
         relevance: expect.objectContaining({ matchedWork: expect.arrayContaining(["굴착·토사"]) }),
       },
     ]);
     expect(payload.sif.reason).toBeUndefined();
   });
 
-  it("모르는 원천은 출처를 지어내지 않고 source_id 의 날짜만 기준일로 쓴다", async () => {
+  it("DB 에 없는 원천은 출처·날짜를 지어내지 않는다(source_id 꼬리 날짜로 추측하지 않음)", async () => {
     const unknown = { ...sifItem("sif-9", "굴착 사면 붕괴로 매몰", "개요"), source_id: "other-sif-20250115" };
     const { payload } = await callTool(opsResponse("con-excavation", [unknown]), { question: ops["con-excavation"].question });
-    expect(payload.sif.cases[0]?.source).toEqual({ id: "other-sif-20250115", agency: null, title: null, publishedAt: "2025-01-15", baseYear: 2025, url: null });
+    expect(payload.sif.cases[0]?.source).toEqual({ id: "other-sif-20250115", agency: null, title: null, publishedAt: null, sourcePublishedYear: null, url: null });
   });
 
   it("template 모드는 0건과 이유(DB 를 조회하지 않음)를 숨기지 않고 돌려준다", async () => {

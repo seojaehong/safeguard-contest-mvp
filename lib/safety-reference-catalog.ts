@@ -3615,6 +3615,57 @@ async function readItemTypeCounts(config: SupabaseConfig): Promise<Array<{ itemT
   return counts.filter((item) => item.count > 0);
 }
 
+/** 안전 지식 DB 원천 자료(safety_reference_sources) 행의 출처 메타. 모르는 칸은 null. */
+export type SafetyReferenceSourceMeta = {
+  id: string;
+  agency: string | null;
+  title: string | null;
+  /** 원천 자료 공개(수집) 기준일 YYYY-MM-DD. */
+  publishedAt: string | null;
+  originUrl: string | null;
+};
+
+/**
+ * source_id 로 원천 자료 행을 읽는다(스키마 변경 없음, 004 칸만). DB 가 없거나 실패하면 빈 Map —
+ * 호출하는 쪽은 출처를 지어내지 않고 null 로 둔다.
+ */
+export async function fetchSafetyReferenceSources(
+  ids: readonly string[],
+  signal?: AbortSignal
+): Promise<Map<string, SafetyReferenceSourceMeta>> {
+  const config = getSupabaseConfig();
+  const unique = [...new Set(ids.filter((id) => /^[A-Za-z0-9._-]{1,120}$/u.test(id)))];
+  if (!config || !unique.length) return new Map();
+  const params = new URLSearchParams({
+    select: "id,agency,title,published_at,origin_url",
+    id: `in.(${unique.join(",")})`
+  });
+  try {
+    const data = await fetchRest(config, "safety_reference_sources", params, signal, async (response, deadlineSignal) => (
+      response.ok ? await readBoundedJson(response, deadlineSignal) : null
+    ));
+    const rows = Array.isArray(data) ? data : [];
+    const text = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
+    return new Map(rows.flatMap((row): Array<[string, SafetyReferenceSourceMeta]> => {
+      if (!row || typeof row !== "object") return [];
+      const record = row as Record<string, unknown>;
+      const id = text(record.id);
+      if (!id) return [];
+      const publishedAt = text(record.published_at);
+      return [[id, {
+        id,
+        agency: text(record.agency),
+        title: text(record.title),
+        publishedAt: publishedAt && /^\d{4}-\d{2}-\d{2}/u.test(publishedAt) ? publishedAt.slice(0, 10) : null,
+        originUrl: text(record.origin_url)
+      }]];
+    }));
+  } catch {
+    signal?.throwIfAborted();
+    return new Map();
+  }
+}
+
 export async function getSafetyReferenceStats(): Promise<SafetyReferenceStats> {
   const config = getSupabaseConfig();
   if (!config) {

@@ -50,7 +50,7 @@ import {
 import { createGenerateRiskAssessmentHandler } from "@/lib/mcp-risk-assessment";
 import { renderXlsxDocumentExport } from "@/lib/document-export-xlsx";
 import { renderHwpDocumentExport } from "@/lib/document-export-hwp";
-import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
+import { fetchSafetyReferenceSources, type SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import { isEmbeddableSifReferenceItem } from "@/lib/sif-embedding-corpus";
 import { loadTenantHarnessMemoryForMcp } from "@/lib/tenant-harness-memory";
@@ -125,6 +125,7 @@ const generateRiskAssessmentHandler = createGenerateRiskAssessmentHandler({
   generateResponse: (question, mode, signal) => runAsk(question, { aiMode: mode, signal }),
   renderXlsx: renderXlsxDocumentExport,
   renderHwp: renderHwpDocumentExport,
+  lookupSources: fetchSafetyReferenceSources,
 });
 
 function uniqueReferences(items: SafetyReferenceItem[]): SafetyReferenceItem[] {

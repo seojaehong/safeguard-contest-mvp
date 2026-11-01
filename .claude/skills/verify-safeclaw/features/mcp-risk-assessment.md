@@ -9,7 +9,7 @@
 - `review-list` 「검토 필요:」 행은 본표에 없고 `reviewItems` 로 따로 온다. 파일에도 「확인 필요 목록(본표에 넣지 않음)」 절이 있다.
 - `record-items` `recordItemsCheck` 가 시행규칙 제37조의4① 기재 항목 8개(실시 시기·담당자·참여 근로자·근로자대표·유해·위험요인·위험성 수준 결정·개선대책 수립·이행 결과)를 채움/일부/빈칸으로 돌려준다. 머리 기록란 4개는 생성 직후 빈칸(현장 기재)이 정상이다.
 - `responsibility` `responsibilityNote` = 초안 작성 보조, 실시·최종 판단 책임은 사업주.
-- `sif-cases` enhanced·full 은 `sif.cases[]` 에 DB 사례(`source.id` 가 `safeclaw-offline-sif-cases` 가 아님)와 `source.agency`·`title`·`publishedAt`·`baseYear`. 0건이면 `sif.reason` 이 있다(template 은 항상 0건 + 「template 모드는 … 조회하지 않습니다」).
+- `sif-cases` enhanced·full 은 `sif.cases[]` 에 DB 사례(`source.id` 가 `safeclaw-offline-sif-cases` 가 아님)와 `source.agency`·`title`·`publishedAt`·`sourcePublishedYear`(원천 자료 공개 연도, DB safety_reference_sources 에서 읽음). 0건이면 `sif.reason` 이 있다(template 은 항상 0건 + 「template 모드는 … 조회하지 않습니다」).
 - `export-parity` `file.base64` 를 풀어 만든 파일이 같은 행으로 웹 라우트 `/api/export/{xlsx|hwp}` 에 편집기 모양 본문을 보낸 파일과 같다 — xlsx 는 칸 글자·서식·병합·열 너비, hwp 는 바이트.
 - `no-rows` 작업 유형을 확인하지 못하면 `status=review_required`, `file=null`, `fileUnavailableReason` 이 있다.
 

@@ -34,6 +34,7 @@ import {
 } from "@/lib/risk-assessment-export-body";
 import type { XlsxDocumentExportRender } from "@/lib/document-export-xlsx";
 import type { HwpDocumentExportRender } from "@/lib/document-export-hwp";
+import type { SafetyReferenceSourceMeta } from "@/lib/safety-reference-catalog";
 import type { SifRelevance } from "@/lib/sif-case-relevance";
 import type { AskResponse } from "@/lib/types";
 import { gateExportPayload } from "@/lib/user-output-gate";
@@ -50,8 +51,8 @@ export type RiskAssessmentSifSource = {
   title: string | null;
   /** 원천 자료 공개(수집) 기준일. 모르면 null. */
   publishedAt: string | null;
-  /** 기준연도(publishedAt 의 연도). 공단 SIF 수치는 출처·연도마다 달라 함께 적는다. */
-  baseYear: number | null;
+  /** 원천 자료 공개 연도(publishedAt 의 연도). 사례 발생 연도가 아니다. 공단 SIF 수치는 출처·연도마다 달라 함께 적는다. */
+  sourcePublishedYear: number | null;
   url: string | null;
 };
 
@@ -158,6 +159,8 @@ type Dependencies = {
   generateResponse: (question: string, mode: AiMode, signal?: AbortSignal) => Promise<AskResponse>;
   renderXlsx: (payload: unknown) => Promise<XlsxDocumentExportRender>;
   renderHwp: (payload: unknown) => HwpDocumentExportRender;
+  /** 안전 지식 DB safety_reference_sources 에서 출처 메타를 읽는다. 없으면 오프라인 원천 말고는 출처를 null 로 둔다. */
+  lookupSources?: (ids: readonly string[], signal?: AbortSignal) => Promise<Map<string, SafetyReferenceSourceMeta>>;
 };
 
 const MIME_TYPES: Record<RiskAssessmentExportFormat, string> = {
@@ -168,32 +171,26 @@ const MIME_TYPES: Record<RiskAssessmentExportFormat, string> = {
 export const RISK_ASSESSMENT_RESPONSIBILITY_NOTE =
   "초안 작성 보조 결과입니다. 위험성평가 실시와 최종 판단 책임은 사업주에게 있습니다.";
 
-// 안전 지식 DB 의 SIF 원천 자료(safety_reference_sources). 항목에는 출처 메타가 없어 source_id 로 찾는다.
-// 값은 scripts/ingest_safety_reference_catalog.py 의 원천 정의와 같다.
-const SIF_SOURCE_REGISTRY: Record<string, { agency: string; title: string; publishedAt: string | null }> = {
-  "kosha-sif-archive-20260401": {
-    agency: "한국산업안전보건공단",
-    title: "산업재해 고위험요인(SIF) 아카이브",
-    publishedAt: "2026-04-01"
-  },
-  "safeclaw-offline-sif-cases": {
-    agency: "SafeClaw",
-    title: "오프라인 SIF 유사사례(안전 지식 DB 미설정 시 대체 자료)",
-    publishedAt: null
-  }
+// SIF 사례 출처 메타는 안전 지식 DB safety_reference_sources 행(agency·title·published_at·origin_url)에서 읽는다.
+// 코드에 남는 것은 DB 가 없을 때 쓰는 번들 오프라인 원천 하나뿐이다. DB 에 없는 원천은 출처·날짜를 지어내지 않는다.
+const OFFLINE_SIF_SOURCE: SafetyReferenceSourceMeta = {
+  id: "safeclaw-offline-sif-cases",
+  agency: "SafeClaw",
+  title: "오프라인 SIF 유사사례(안전 지식 DB 미설정 시 대체 자료)",
+  publishedAt: null,
+  originUrl: null
 };
 
-function sifSourceOf(sourceId: string, url: string | null | undefined): RiskAssessmentSifSource {
-  const known = SIF_SOURCE_REGISTRY[sourceId];
-  const dated = sourceId.match(/-(\d{4})(\d{2})(\d{2})$/u);
-  const publishedAt = known ? known.publishedAt : dated ? `${dated[1]}-${dated[2]}-${dated[3]}` : null;
+function sifSourceOf(sourceId: string, url: string | null | undefined, meta: SafetyReferenceSourceMeta | undefined): RiskAssessmentSifSource {
+  const known = meta ?? (sourceId === OFFLINE_SIF_SOURCE.id ? OFFLINE_SIF_SOURCE : undefined);
+  const publishedAt = known?.publishedAt ?? null;
   return {
     id: sourceId,
     agency: known?.agency ?? null,
     title: known?.title ?? null,
     publishedAt,
-    baseYear: publishedAt ? Number(publishedAt.slice(0, 4)) : null,
-    url: url ?? null
+    sourcePublishedYear: publishedAt ? Number(publishedAt.slice(0, 4)) : null,
+    url: url ?? known?.originUrl ?? null
   };
 }
 
@@ -202,7 +199,7 @@ function sifSourceOf(sourceId: string, url: string | null | undefined): RiskAsse
  * 단계(lib/db-harness.ts buildDbHarnessPacket → lib/sif-case-relevance.ts)가 이미 했다. 여기서 다시 거르면
  * 생성이 본 근거와 돌려주는 목록이 어긋나므로, 패킷의 sifCases 순서·relevance·excluded 를 옮겨 적기만 한다.
  */
-function sifCasesOf(response: AskResponse): {
+function sifCasesOf(response: AskResponse, sources: ReadonlyMap<string, SafetyReferenceSourceMeta>): {
   relevanceApplied: boolean;
   relevanceNote?: string;
   retrievedCount: number;
@@ -223,7 +220,7 @@ function sifCasesOf(response: AskResponse): {
         id: item.id,
         title: item.display_title || item.title,
         overview: item.display_summary || item.short_summary || item.summary,
-        source: sifSourceOf(item.source_id, item.source_url),
+        source: sifSourceOf(item.source_id, item.source_url, sources.get(item.source_id)),
         ...(relevance ? { relevance } : {})
       };
     }),
@@ -411,7 +408,10 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
 
     const main = toStructuredRiskRows(response.structured?.riskAssessmentRows ?? []);
     const review = toStructuredRiskRows(response.structured?.riskReviewItems ?? []);
-    const sif = sifCasesOf(response);
+    const sifSourceIds = [...new Set((response.dbHarness?.packet?.sifCases ?? []).map((item) => item.source_id))];
+    const sources = sifSourceIds.length && dependencies.lookupSources ? await dependencies.lookupSources(sifSourceIds, signal) : new Map<string, SafetyReferenceSourceMeta>();
+    signal?.throwIfAborted();
+    const sif = sifCasesOf(response, sources);
     const sifCases = sif.cases;
     const hasRows = main.length > 0;
 
