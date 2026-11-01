@@ -8,7 +8,6 @@ import { initSync, HwpDocument } from "@rhwp/core";
 import { gateExportPayload } from "@/lib/user-output-gate";
 import { companyFilePrefix, formatCompanyName, formatWorkerCount } from "@/lib/scenario-display";
 import {
-  parseStructuredRiskAssessmentRows,
   resolveRiskAssessmentRows,
   type StructuredRiskAssessmentRow
 } from "@/lib/risk-assessment-renderer";
@@ -32,23 +31,17 @@ import {
   assertDocumentExportInputBudget,
   assertDocumentExportOutputBudget
 } from "@/lib/document-export-budget";
-
-type SheetRow = {
-  document: string;
-  section: string;
-  item: string;
-  content: string;
-};
-
-type SafetyFormProfile = {
-  code: string;
-  subtitle: string;
-  layout: "generic" | "risk" | "workPlan" | "permit" | "tbmBriefing" | "tbmLog" | "education" | "photo";
-  primaryColumn: string;
-  actionColumn: string;
-  confirmationRows: string[];
-  approvalLabels: string[];
-};
+import {
+  isRecord,
+  parseProfile,
+  parseRiskRowsFromBody,
+  parseRows,
+  parseScenario,
+  readString,
+  sanitizeFileName,
+  type SafetyFormProfile,
+  type SheetRow
+} from "@/lib/document-export-request";
 
 let wasmInitialized = false;
 
@@ -78,86 +71,6 @@ function ensureWasm() {
   }
   initSync({ module: wasmBytes });
   wasmInitialized = true;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function readString(value: unknown, fallback = "") {
-  return typeof value === "string" && value.trim() ? value.trim() : fallback;
-}
-
-function readNumber(value: unknown, fallback = 0) {
-  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
-}
-
-function sanitizeFileName(value: string) {
-  return value
-    .replace(/[\\/:*?"<>|]/g, "-")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .slice(0, 80) || "safeclaw-document";
-}
-
-function parseRows(value: unknown, fallbackDoc: string): SheetRow[] {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((item): SheetRow[] => {
-    if (!isRecord(item)) return [];
-    const content = readString(item.content);
-    if (!content && readString(item.item) === "") return [];
-    return [{
-      document: readString(item.document, fallbackDoc),
-      section: readString(item.section, "본문"),
-      item: readString(item.item, "확인"),
-      content
-    }];
-  });
-}
-
-function parseProfile(value: unknown): SafetyFormProfile {
-  const r = isRecord(value) ? value : {};
-  const layout = readString(r.layout, "generic");
-  const allowed = ["generic", "risk", "workPlan", "permit", "tbmBriefing", "tbmLog", "education", "photo"];
-  return {
-    code: readString(r.code, "generic"),
-    subtitle: readString(r.subtitle, "SafeClaw 안전 양식"),
-    layout: (allowed.includes(layout) ? layout : "generic") as SafetyFormProfile["layout"],
-    primaryColumn: readString(r.primaryColumn, "항목"),
-    actionColumn: readString(r.actionColumn, "내용"),
-    confirmationRows: Array.isArray(r.confirmationRows)
-      ? r.confirmationRows.filter((v): v is string => typeof v === "string")
-      : [],
-    approvalLabels: Array.isArray(r.approvalLabels)
-      ? r.approvalLabels.filter((v): v is string => typeof v === "string")
-      : []
-  };
-}
-
-function parseRiskRowsFromBody(body: Record<string, unknown>): StructuredRiskAssessmentRow[] {
-  const candidates = [
-    body.structuredRiskRows,
-    body.riskAssessmentRows,
-    body.structuredRows,
-    body.canonicalRows
-  ];
-  for (const candidate of candidates) {
-    const rows = parseStructuredRiskAssessmentRows(candidate);
-    if (rows.length) return rows;
-  }
-  return [];
-}
-
-function parseScenario(value: unknown) {
-  const r = isRecord(value) ? value : {};
-  return {
-    companyName: readString(r.companyName, ""),
-    companyType: readString(r.companyType, ""),
-    siteName: readString(r.siteName, "현장명 확인"),
-    workSummary: readString(r.workSummary, "작업내용 확인"),
-    workerCount: readNumber(r.workerCount, 0),
-    weatherNote: readString(r.weatherNote, "")
-  };
 }
 
 function deriveColumns(profile: SafetyFormProfile): string[] {

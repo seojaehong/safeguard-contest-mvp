@@ -15,112 +15,26 @@ import {
   assertDocumentExportInputBudget,
   assertDocumentExportOutputBudget
 } from "@/lib/document-export-budget";
-import { parseStructuredRiskAssessmentRows } from "@/lib/risk-assessment-renderer";
 import { resolveRiskExportRows } from "@/lib/risk-assessment-record";
 import { companyFilePrefix } from "@/lib/scenario-display";
-
-type SheetRow = {
-  document: string;
-  section: string;
-  item: string;
-  content: string;
-};
+import {
+  isRecord,
+  parseProfile,
+  parseRiskRowsFromBody,
+  parseRows,
+  parseScenario,
+  readString,
+  sanitizeFileName,
+  type SheetRow
+} from "@/lib/document-export-request";
 
 export type XlsxDocumentExportRender =
   | { ok: true; buffer: Buffer; fileName: string; fallbackName: string }
   | { ok: false; status: 400; error: string };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function readString(value: unknown, fallback = "") {
-  return typeof value === "string" && value.trim() ? value.trim() : fallback;
-}
-
-function readNumber(value: unknown, fallback = 0) {
-  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
-}
-
-function sanitizeFileName(value: string) {
-  return value
-    .replace(/[\\/:*?"<>|]/g, "-")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .slice(0, 80) || "safeclaw-document";
-}
-
 function rendered(buffer: Buffer, fileNameBase: string, fallbackName: string): XlsxDocumentExportRender {
   assertDocumentExportOutputBudget(buffer);
   return { ok: true, buffer, fileName: `${sanitizeFileName(fileNameBase)}.xlsx`, fallbackName };
-}
-
-function parseScenario(value: unknown) {
-  const r = isRecord(value) ? value : {};
-  return {
-    companyName: readString(r.companyName, ""),
-    companyType: readString(r.companyType, ""),
-    siteName: readString(r.siteName, "현장명 확인"),
-    workSummary: readString(r.workSummary, "작업내용 확인"),
-    workerCount: readNumber(r.workerCount, 0),
-    weatherNote: readString(r.weatherNote, "")
-  };
-}
-
-function parseRows(value: unknown, fallbackDoc: string): SheetRow[] {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((item): SheetRow[] => {
-    if (!isRecord(item)) return [];
-    const content = readString(item.content);
-    if (!content && readString(item.item) === "") return [];
-    return [{
-      document: readString(item.document, fallbackDoc),
-      section: readString(item.section, "본문"),
-      item: readString(item.item, "확인"),
-      content
-    }];
-  });
-}
-
-function parseProfile(value: unknown) {
-  const r = isRecord(value) ? value : {};
-  const layout = readString(r.layout, "generic");
-  const allowed = ["generic", "risk", "workPlan", "permit", "tbmBriefing", "tbmLog", "education", "photo"];
-  return {
-    code: readString(r.code, "generic"),
-    subtitle: readString(r.subtitle, "SafeClaw 안전 양식"),
-    layout: (allowed.includes(layout) ? layout : "generic") as
-      | "generic" | "risk" | "workPlan" | "permit" | "tbmBriefing" | "tbmLog" | "education" | "photo",
-    primaryColumn: readString(r.primaryColumn, "항목"),
-    actionColumn: readString(r.actionColumn, "내용"),
-    confirmationRows: Array.isArray(r.confirmationRows)
-      ? r.confirmationRows.filter((v): v is string => typeof v === "string")
-      : [],
-    approvalLabels: Array.isArray(r.approvalLabels)
-      ? r.approvalLabels.filter((v): v is string => typeof v === "string")
-      : []
-  };
-}
-
-function parseRiskRowsFromBody(body: Record<string, unknown>) {
-  const structured = isRecord(body.structured) ? body.structured : {};
-  const response = isRecord(body.response) ? body.response : {};
-  const responseStructured = isRecord(response.structured) ? response.structured : {};
-  const candidates = [
-    body.structuredRiskRows,
-    body.riskAssessmentRows,
-    body.structuredRows,
-    body.canonicalRows,
-    structured.riskAssessmentRows,
-    structured.structuredRiskRows,
-    responseStructured.riskAssessmentRows,
-    responseStructured.structuredRiskRows
-  ];
-  for (const candidate of candidates) {
-    const rows = parseStructuredRiskAssessmentRows(candidate);
-    if (rows.length) return rows;
-  }
-  return [];
 }
 
 function structuredFallbackTitle(mode: string) {
