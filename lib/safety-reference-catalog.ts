@@ -3227,7 +3227,9 @@ const SAFETY_REFERENCE_ROLE_OVERSAMPLE = 3;
 /**
  * data.go.kr 공개 자료(datagokr-2026-11) kind. kind·출처를 지정하지 않은 키워드(REST) 조회에서는 뺀다.
  * REST 조회는 item_type 알파벳순으로 limit 건을 자르므로, 알파벳이 앞서는 이 kind(위험요소 프로파일만 3만 행)가
- * 기존 사고사례·SIF 를 관련도와 무관하게 밀어낸다. 이 자료는 벡터 묶음이나 itemType 지정 호출로만 들어온다.
+ * 기존 사고사례·SIF 를 관련도와 무관하게 밀어낸다. 이 자료는 itemType 지정 호출로만 들어온다.
+ * 벡터는 safety_reference_embeddings_ext(벡터 인덱스 없음, 012 마이그레이션)에 따로 두어 벡터 RPC·묶음에 쓰지 않는다
+ * (261102 — 한 HNSW 에 넣자 675 MB 로 Micro 메모리를 넘었고, kind 로 거르는 기존 묶음이 0건 가까이 줄었다).
  */
 export const SAFETY_REFERENCE_KEYWORD_EXCLUDED_ITEM_TYPES: readonly string[] = Object.freeze([
   "construction-accident-case",
