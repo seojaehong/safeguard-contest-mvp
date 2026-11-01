@@ -368,7 +368,7 @@ describe("SIF 유사사례", () => {
 });
 
 describe("시행규칙 제37조의4 기재 항목 충족 검사", () => {
-  it("항목별 채움/일부/빈칸을 행 값으로 판정하고 책임 문구를 붙인다", async () => {
+  it("항목별 채움/일부/빈칸을 행 값으로 가르고 책임 문구를 붙인다", async () => {
     const base = opsResponse("con-excavation");
     const rows = base.structured?.riskAssessmentRows ?? [];
     expect(rows.length).toBeGreaterThan(1);

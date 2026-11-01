@@ -11,7 +11,7 @@
 - `responsibility` `responsibilityNote` = 초안 작성 보조, 실시·최종 판단 책임은 사업주.
 - `sif-cases` enhanced·full 은 `sif.cases[]` 에 DB 사례(`source.id` 가 `safeclaw-offline-sif-cases` 가 아님)와 `source.agency`·`title`·`publishedAt`·`baseYear`. 0건이면 `sif.reason` 이 있다(template 은 항상 0건 + 「template 모드는 … 조회하지 않습니다」).
 - `export-parity` `file.base64` 를 풀어 만든 파일이 같은 행으로 웹 라우트 `/api/export/{xlsx|hwp}` 에 편집기 모양 본문을 보낸 파일과 같다 — xlsx 는 칸 글자·서식·병합·열 너비, hwp 는 바이트.
-- `no-rows` 작업 유형을 판정하지 못하면 `status=review_required`, `file=null`, `fileUnavailableReason` 이 있다.
+- `no-rows` 작업 유형을 확인하지 못하면 `status=review_required`, `file=null`, `fileUnavailableReason` 이 있다.
 
 ## How to get to it (user POV)
 
@@ -27,7 +27,7 @@ Preconditions:
 - enhanced·full 은 안전 지식 DB(Supabase 읽기)와 AI 답변 생성(enhanced 는 답변 1회, full 은 문서 본문까지)을 쓴다. 운영에서 full 금지.
 
 - **서버.** 토큰 파일 하나를 만들고 같은 값을 `SAFECLAW_MCP_TOKENS` 로 준 채 `npm.cmd run dev -- -p <port> -H 127.0.0.1`.
-- **명령.** `node scripts/mcp_risk_assessment_live_check.mjs <repoRoot> http://127.0.0.1:<port> <outDir> <tokenFile>` — 시나리오 4개(SIF 있는 밀폐공간 enhanced / template 지게차 / 화재·폭발 enhanced / 작업 유형 판정 불가)를 부른다. S1~S3 은 형식 2개씩.
+- **명령.** `node scripts/mcp_risk_assessment_live_check.mjs <repoRoot> http://127.0.0.1:<port> <outDir> <tokenFile>` — 시나리오 4개(SIF 있는 밀폐공간 enhanced / template 지게차 / 화재·폭발 enhanced / 작업 유형 확인 불가)를 부른다. S1~S3 은 형식 2개씩.
 - **기대 종료 상태.** `<outDir>/summary.json` 의 S1~S3 행에서 `status=ok`, `magic` 이 xlsx `PK`·hwp `d0cf11e0`, `webStatus=200`, xlsx `cellParity=true`·`headersPresent=true`·`approvalPresent=true`, hwp `bytesIdentical=true`·`textParity=true`, `responseBytes < 262144`, `recordItems` 8항목(시행규칙 제37조의4①), `responsibilityNote` 있음. S1 `sifCount ≥ 1` + `sifSources` 에 기관·기준일 + `sifKept` 마다 `matchedWork` 1개 이상(`sifExcluded` 는 이유가 붙은 뺀 사례), S2 `sifCount=0` + `sifReason`, S3 `reviewCount ≥ 1`, S4 `status=review_required`·`fileUnavailableReason` 있음.
 - **증거.** `<outDir>/<시나리오>/mcp-*.xlsx|hwp`(MCP 파일)·`web-*`(웹 라우트 파일)·`*-result.json`(base64 생략)·`tools-list.json`·`summary.json`.
 

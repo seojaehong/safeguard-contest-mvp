@@ -42,7 +42,7 @@ const SCENARIOS = [
   { id: "S1-sif", label: "SIF 있는 작업(밀폐공간)", question: "가상 사업장 한빛정화 오수처리장 맨홀 내부 슬러지 제거 작업 3명, 밀폐공간 산소결핍·황화수소 우려, 주간", mode: "enhanced" },
   { id: "S2-template", label: "SIF 없는 작업(template, DB 조회 없음)", question: "가상 사업장 누리물류 경기 화성 물류창고 지게차 상하차 작업 4명, 비 예보, 야간", mode: "template" },
   { id: "S3-review", label: "확인 필요 행 생기는 작업(화재·폭발)", question: "가상 사업장 미래화학 도장공장 배기덕트 내부 용접 보수 작업 2명, 인화성 증기 잔류 가능, 화재감시자 배치", mode: "enhanced" },
-  { id: "S4-no-rows", label: "작업 유형을 판정하지 못하는 설명(행 0)", question: "내일 오전에 사무실에서 할 일 정리", mode: "enhanced", formats: ["xlsx"] }
+  { id: "S4-no-rows", label: "작업 유형을 확인하지 못하는 설명(행 0)", question: "내일 오전에 사무실에서 할 일 정리", mode: "enhanced", formats: ["xlsx"] }
 ];
 
 function editorBody(result, format) {
