@@ -168,6 +168,9 @@ const MIME_TYPES: Record<RiskAssessmentExportFormat, string> = {
   hwp: "application/x-hwp"
 };
 
+/** 기본 생성 깊이. 웹 /api/ask 기본값(resolveRunAskMode)과 같다. 입장 제어와 핸들러가 이 값 하나를 쓴다. */
+export const GENERATE_RISK_ASSESSMENT_DEFAULT_MODE: AiMode = "enhanced";
+
 export const RISK_ASSESSMENT_RESPONSIBILITY_NOTE =
   "초안 작성 보조 결과입니다. 위험성평가 실시와 최종 판단 책임은 사업주에게 있습니다.";
 

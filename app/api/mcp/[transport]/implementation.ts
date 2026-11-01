@@ -47,7 +47,7 @@ import {
   createGenerateReviewedSafetyDocpackHandler,
   createGenerateSafetyDocpackHandler,
 } from "@/lib/mcp-docpack-handler";
-import { createGenerateRiskAssessmentHandler } from "@/lib/mcp-risk-assessment";
+import { createGenerateRiskAssessmentHandler, GENERATE_RISK_ASSESSMENT_DEFAULT_MODE } from "@/lib/mcp-risk-assessment";
 import { renderXlsxDocumentExport } from "@/lib/document-export-xlsx";
 import { renderHwpDocumentExport } from "@/lib/document-export-hwp";
 import { fetchSafetyReferenceSources, type SafetyReferenceItem } from "@/lib/safety-reference-catalog";
@@ -121,7 +121,7 @@ const generateReviewedSafetyDocpackHandler = createGenerateReviewedSafetyDocpack
 
 // 웹 /api/ask 와 같은 runAsk(aiMode) 경로. 기본 enhanced 는 웹 기본값(resolveRunAskMode)과 같다.
 const generateRiskAssessmentHandler = createGenerateRiskAssessmentHandler({
-  defaultMode: "enhanced",
+  defaultMode: GENERATE_RISK_ASSESSMENT_DEFAULT_MODE,
   generateResponse: (question, mode, signal) => runAsk(question, { aiMode: mode, signal }),
   renderXlsx: renderXlsxDocumentExport,
   renderHwp: renderHwpDocumentExport,
@@ -397,7 +397,7 @@ export function registerTools(server: McpServer): void {
     async ({ question, mode, format }, authContext, { signal }) => {
       return withMcpProviderAdmission(
         authContext,
-        mode ?? "enhanced",
+        mode ?? GENERATE_RISK_ASSESSMENT_DEFAULT_MODE,
         () => generateRiskAssessmentHandler(
           { question, mode, format },
           authContext,
