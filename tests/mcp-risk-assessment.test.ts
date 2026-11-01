@@ -448,6 +448,7 @@ describe("시행규칙 제37조의4 기재 항목 충족 검사", () => {
       trimmed: payload.trimmed,
       recordItemsCheck: payload.recordItemsCheck,
       sif: { reason: payload.sif.reason, relevanceNote: payload.sif.relevanceNote, excluded: (payload.sif.excluded ?? []).map((item) => item.reason) },
+      taskClassification: payload.scenario?.taskClassification,
       titles: [payload.riskAssessment.title, payload.riskAssessment.headers, payload.riskAssessment.approvalLabels, payload.reviewItems.title],
     });
   }
