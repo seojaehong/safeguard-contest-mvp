@@ -19,9 +19,11 @@ import {
   RISK_RECORD_ROW_HEADERS,
   RISK_REVIEW_LIST_NOTE,
   RISK_REVIEW_LIST_TITLE,
+  riskRecordHeaderPairs,
   riskRecordRowCells,
   toStructuredRiskRows
 } from "@/lib/risk-assessment-record";
+import type { StructuredRiskAssessmentRow } from "@/lib/risk-assessment-renderer";
 import {
   buildRiskAssessmentExportBody,
   RISK_ASSESSMENT_EXPORT_TITLE,
@@ -38,12 +40,33 @@ export type GenerateRiskAssessmentInput = {
   format?: RiskAssessmentExportFormat;
 };
 
+export type RiskAssessmentSifSource = {
+  id: string;
+  agency: string | null;
+  title: string | null;
+  /** 원천 자료 공개(수집) 기준일. 모르면 null. */
+  publishedAt: string | null;
+  /** 기준연도(publishedAt 의 연도). 공단 SIF 수치는 출처·연도마다 달라 함께 적는다. */
+  baseYear: number | null;
+  url: string | null;
+};
+
 export type RiskAssessmentSifCase = {
   id: string;
   title: string;
   overview: string;
-  sourceId: string;
-  sourceUrl: string | null;
+  source: RiskAssessmentSifSource;
+};
+
+export type RiskRecordItemStatus = "filled" | "partial" | "blank";
+
+export type RiskRecordItemCheck = {
+  item: string;
+  basis: string;
+  status: RiskRecordItemStatus;
+  filledRows?: number;
+  totalRows?: number;
+  note: string;
 };
 
 export type RiskAssessmentToolResult = {
@@ -74,11 +97,20 @@ export type RiskAssessmentToolResult = {
     items: Array<{ number: number; content: string; references: string[] }>;
     structuredRows: NonNullable<AskResponse["structured"]>["riskAssessmentRows"];
   };
+  recordItemsCheck: {
+    basis: string;
+    filled: number;
+    partial: number;
+    blank: number;
+    items: RiskRecordItemCheck[];
+    note: string;
+  };
   sif: {
     count: number;
     cases: RiskAssessmentSifCase[];
     reason?: string;
   };
+  responsibilityNote: string;
   file: {
     format: RiskAssessmentExportFormat;
     fileName: string;
@@ -109,15 +141,120 @@ const MIME_TYPES: Record<RiskAssessmentExportFormat, string> = {
   hwp: "application/x-hwp"
 };
 
+export const RISK_ASSESSMENT_RESPONSIBILITY_NOTE =
+  "초안 작성 보조 결과입니다. 위험성평가 실시와 최종 판단 책임은 사업주에게 있습니다.";
+
+// 안전 지식 DB 의 SIF 원천 자료(safety_reference_sources). 항목에는 출처 메타가 없어 source_id 로 찾는다.
+// 값은 scripts/ingest_safety_reference_catalog.py 의 원천 정의와 같다.
+const SIF_SOURCE_REGISTRY: Record<string, { agency: string; title: string; publishedAt: string | null }> = {
+  "kosha-sif-archive-20260401": {
+    agency: "한국산업안전보건공단",
+    title: "산업재해 고위험요인(SIF) 아카이브",
+    publishedAt: "2026-04-01"
+  },
+  "safeclaw-offline-sif-cases": {
+    agency: "SafeClaw",
+    title: "오프라인 SIF 유사사례(안전 지식 DB 미설정 시 대체 자료)",
+    publishedAt: null
+  }
+};
+
+function sifSourceOf(sourceId: string, url: string | null | undefined): RiskAssessmentSifSource {
+  const known = SIF_SOURCE_REGISTRY[sourceId];
+  const dated = sourceId.match(/-(\d{4})(\d{2})(\d{2})$/u);
+  const publishedAt = known ? known.publishedAt : dated ? `${dated[1]}-${dated[2]}-${dated[3]}` : null;
+  return {
+    id: sourceId,
+    agency: known?.agency ?? null,
+    title: known?.title ?? null,
+    publishedAt,
+    baseYear: publishedAt ? Number(publishedAt.slice(0, 4)) : null,
+    url: url ?? null
+  };
+}
+
 function sifCasesOf(response: AskResponse): RiskAssessmentSifCase[] {
   const items = response.dbHarness?.packet?.sifCases ?? [];
   return items.map((item) => ({
     id: item.id,
     title: item.display_title || item.title,
     overview: item.display_summary || item.short_summary || item.summary,
-    sourceId: item.source_id,
-    sourceUrl: item.source_url ?? null
+    source: sifSourceOf(item.source_id, item.source_url)
   }));
+}
+
+// ── 시행규칙 제37조의4제1항 기재 항목 충족 검사 ──────────────────────────
+// 원문 확인: 산업안전보건법 시행규칙(2026-08-01 시행) 제37조의4①
+//   1. 위험성평가 실시 시기 및 담당자  2. 참여한 근로자 및 근로자대표
+//   3. 제37조의3제2호 — 파악한 유해·위험 요인, 위험성 수준 결정 결과, 개선대책 수립 내용 및 이행 결과
+const RECORD_ITEMS_BASIS = "산업안전보건법 시행규칙 제37조의4제1항(2026-08-01 시행)";
+const ROW_PLACEHOLDERS = new Set(["유해·위험요인 확인", "감소대책 현장 확인", "세부작업 확인", "현장 확인"]);
+const BLANK_PLACEHOLDER = /^[\s_□()（）:：년월일성명참여해당없음]*$/u;
+
+function headerItemCheck(
+  pairs: Array<[string, string]>,
+  label: string,
+  item: string,
+  basis: string
+): RiskRecordItemCheck {
+  const value = pairs.find(([key]) => key === label)?.[1] ?? "";
+  const filled = !BLANK_PLACEHOLDER.test(value);
+  return {
+    item,
+    basis,
+    status: filled ? "filled" : "blank",
+    note: filled ? `「${label}」 칸에 적혀 있습니다.` : `「${label}」 칸이 빈칸입니다. 현장에서 적습니다.`
+  };
+}
+
+function rowItemCheck(
+  rows: readonly StructuredRiskAssessmentRow[],
+  item: string,
+  basis: string,
+  column: string,
+  has: (row: StructuredRiskAssessmentRow) => boolean
+): RiskRecordItemCheck {
+  const filledRows = rows.filter(has).length;
+  const status: RiskRecordItemStatus = rows.length && filledRows === rows.length
+    ? "filled"
+    : filledRows > 0 ? "partial" : "blank";
+  const note = status === "filled"
+    ? `본표 ${rows.length}행 모두 「${column}」 칸이 채워져 있습니다.`
+    : status === "partial"
+      ? `본표 ${rows.length}행 중 ${filledRows}행만 「${column}」 칸이 채워져 있습니다.`
+      : `본표 「${column}」 칸이 비어 있습니다. 현장에서 적습니다.`;
+  return { item, basis, status, filledRows, totalRows: rows.length, note };
+}
+
+export function checkRiskRecordItems(
+  scenario: AskResponse["scenario"],
+  rows: readonly StructuredRiskAssessmentRow[]
+): RiskAssessmentToolResult["recordItemsCheck"] {
+  const pairs = riskRecordHeaderPairs(scenario);
+  // 행 파서(parseStructuredRiskAssessmentRows)가 빈 칸에 넣는 자리표시 문구는 채운 것으로 세지 않는다.
+  const text = (value: string | undefined) => {
+    const trimmed = value?.trim() ?? "";
+    return Boolean(trimmed) && !ROW_PLACEHOLDERS.has(trimmed);
+  };
+  const items: RiskRecordItemCheck[] = [
+    headerItemCheck(pairs, "평가 실시 시기", "위험성평가 실시 시기", "제37조의4제1항제1호"),
+    headerItemCheck(pairs, "평가 담당자(성명)", "위험성평가 담당자", "제37조의4제1항제1호"),
+    headerItemCheck(pairs, "참여 근로자(성명)", "위험성평가에 참여한 근로자", "제37조의4제1항제2호"),
+    headerItemCheck(pairs, "근로자대표 참여", "위험성평가에 참여한 근로자대표", "제37조의4제1항제2호"),
+    rowItemCheck(rows, "파악한 유해·위험 요인", "제37조의4제1항제3호·제37조의3제2호", "유해·위험요인", (row) => text(row.hazard)),
+    rowItemCheck(rows, "위험성 수준 결정 결과", "제37조의4제1항제3호·제37조의3제2호", "가능성·중대성·위험성",
+      (row) => text(row.likelihood) && text(row.severity) && text(row.riskLevel)),
+    rowItemCheck(rows, "개선대책 수립 내용", "제37조의4제1항제3호·제37조의3제2호", "감소대책", (row) => text(row.additionalControls)),
+    rowItemCheck(rows, "개선대책 이행 결과", "제37조의4제1항제3호·제37조의3제2호", "이행 결과", (row) => text(row.implementationResult))
+  ];
+  return {
+    basis: RECORD_ITEMS_BASIS,
+    filled: items.filter((entry) => entry.status === "filled").length,
+    partial: items.filter((entry) => entry.status === "partial").length,
+    blank: items.filter((entry) => entry.status === "blank").length,
+    items,
+    note: "빈칸·일부 항목은 현장에서 채운 뒤 기록합니다. 기록은 3년간 보존합니다(같은 조 제2항)."
+  };
 }
 
 function sifZeroReason(response: AskResponse, mode: AiMode): string {
@@ -207,9 +344,11 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
         })),
         structuredRows: response.structured?.riskReviewItems ?? []
       },
+      recordItemsCheck: checkRiskRecordItems(response.scenario, main),
       sif: sifCases.length
         ? { count: sifCases.length, cases: sifCases }
         : { count: 0, cases: [], reason: sifZeroReason(response, aiMode) },
+      responsibilityNote: RISK_ASSESSMENT_RESPONSIBILITY_NOTE,
       file: null,
       exportParity: "file 은 웹 「위험성평가표 편집 → 내보내기」의 Excel 표 양식(.xlsx)·한글 표 양식(.hwp)과 같은 요청 본문·같은 렌더 함수로 만들었습니다. 현장에서 빈칸(실시 시기·담당자·참여 근로자·결재)을 채운 뒤 사용하세요."
     };

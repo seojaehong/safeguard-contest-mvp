@@ -58,7 +58,7 @@ const EDITOR_RISK_PROFILE = {
 function sifItem(id: string, title: string, summary: string): SafetyReferenceItem {
   return {
     id,
-    source_id: "kosha-sif-cases",
+    source_id: "kosha-sif-archive-20260401",
     item_type: "sif-case",
     category: null,
     subcategory: null,
@@ -293,10 +293,26 @@ describe("SIF 유사사례", () => {
     const { payload } = await callTool(response, { question: ops["con-excavation"].question, mode: "enhanced" });
     expect(payload.sif.count).toBe(2);
     expect(payload.sif.cases).toEqual([
-      { id: "sif-1", title: "굴착 사면 붕괴로 매몰", overview: "굴착 깊이 3m 사면이 무너져 작업자 1명이 매몰되었다.", sourceId: "kosha-sif-cases", sourceUrl: "https://example.invalid/sif-1" },
-      { id: "sif-2", title: "굴착기 버킷 협착", overview: "후진하던 굴착기와 흙막이 사이에 끼였다.", sourceId: "kosha-sif-cases", sourceUrl: "https://example.invalid/sif-2" },
+      {
+        id: "sif-1",
+        title: "굴착 사면 붕괴로 매몰",
+        overview: "굴착 깊이 3m 사면이 무너져 작업자 1명이 매몰되었다.",
+        source: { id: "kosha-sif-archive-20260401", agency: "한국산업안전보건공단", title: "산업재해 고위험요인(SIF) 아카이브", publishedAt: "2026-04-01", baseYear: 2026, url: "https://example.invalid/sif-1" },
+      },
+      {
+        id: "sif-2",
+        title: "굴착기 버킷 협착",
+        overview: "후진하던 굴착기와 흙막이 사이에 끼였다.",
+        source: { id: "kosha-sif-archive-20260401", agency: "한국산업안전보건공단", title: "산업재해 고위험요인(SIF) 아카이브", publishedAt: "2026-04-01", baseYear: 2026, url: "https://example.invalid/sif-2" },
+      },
     ]);
     expect(payload.sif.reason).toBeUndefined();
+  });
+
+  it("모르는 원천은 출처를 지어내지 않고 source_id 의 날짜만 기준일로 쓴다", async () => {
+    const unknown = { ...sifItem("sif-9", "추락", "개요"), source_id: "other-sif-20250115" };
+    const { payload } = await callTool(opsResponse("con-excavation", [unknown]), { question: ops["con-excavation"].question });
+    expect(payload.sif.cases[0]?.source).toEqual({ id: "other-sif-20250115", agency: null, title: null, publishedAt: "2025-01-15", baseYear: 2025, url: "https://example.invalid/sif-9" });
   });
 
   it("template 모드는 0건과 이유(DB 를 조회하지 않음)를 숨기지 않고 돌려준다", async () => {
@@ -313,6 +329,52 @@ describe("SIF 유사사례", () => {
     const { payload } = await callTool(response, { question: ops["mfg-press"].question, mode: "enhanced" });
     expect(payload.sif.count).toBe(0);
     expect(payload.sif.reason).toMatch(/찾지 못했/u);
+  });
+});
+
+describe("시행규칙 제37조의4 기재 항목 충족 검사", () => {
+  it("항목별 채움/일부/빈칸을 행 값으로 판정하고 책임 문구를 붙인다", async () => {
+    const base = opsResponse("con-excavation");
+    const rows = base.structured?.riskAssessmentRows ?? [];
+    expect(rows.length).toBeGreaterThan(1);
+    // 첫 행만 이행 결과를 적고, 둘째 행은 감소대책을 지운다.
+    const edited = rows.map((row, index) => ({
+      ...row,
+      ...(index === 0 ? { implementationResult: "작업 전 조치 완료" } : {}),
+      ...(index === 1 ? { additionalControls: "" } : {}),
+    }));
+    const response: AskResponse = { ...base, structured: { ...base.structured, riskAssessmentRows: edited } as AskResponse["structured"] };
+    const { payload } = await callTool(response, { question: ops["con-excavation"].question });
+    const check = payload.recordItemsCheck;
+    expect(check.basis).toContain("제37조의4제1항");
+    const byItem = Object.fromEntries(check.items.map((entry) => [entry.item, entry]));
+    expect(Object.keys(byItem)).toEqual([
+      "위험성평가 실시 시기",
+      "위험성평가 담당자",
+      "위험성평가에 참여한 근로자",
+      "위험성평가에 참여한 근로자대표",
+      "파악한 유해·위험 요인",
+      "위험성 수준 결정 결과",
+      "개선대책 수립 내용",
+      "개선대책 이행 결과",
+    ]);
+    expect(byItem["위험성평가 실시 시기"].status).toBe("blank");
+    expect(byItem["위험성평가에 참여한 근로자대표"].status).toBe("blank");
+    expect(byItem["파악한 유해·위험 요인"]).toMatchObject({ status: "filled", filledRows: rows.length, totalRows: rows.length });
+    expect(byItem["위험성 수준 결정 결과"].status).toBe("filled");
+    expect(byItem["개선대책 수립 내용"]).toMatchObject({ status: "partial", filledRows: rows.length - 1 });
+    expect(byItem["개선대책 이행 결과"]).toMatchObject({ status: "partial", filledRows: 1 });
+    expect(check.filled + check.partial + check.blank).toBe(8);
+    expect(payload.responsibilityNote).toMatch(/초안 작성 보조.*사업주/u);
+  });
+
+  it("도구 설명과 결과 문구에 「정본 서식」「고시 서식」을 쓰지 않는다", async () => {
+    const source = fs.readFileSync(path.join(process.cwd(), "app/api/mcp/[transport]/implementation.ts"), "utf8");
+    const block = source.slice(source.indexOf("\"generate_risk_assessment\""));
+    expect(block).toMatch(/초안 작성 보조 도구이며, 위험성평가 실시와 최종 판단 책임은 사업주에게 있다/u);
+    const { payload } = await callTool(opsResponse("logistics-heat"), { question: ops["logistics-heat"].question });
+    const text = JSON.stringify({ ...payload, file: null }) + block;
+    expect(text).not.toMatch(/정본\s*서식|고시\s*서식/u);
   });
 });
 
