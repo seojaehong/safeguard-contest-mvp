@@ -3221,6 +3221,54 @@ export function selectSafetyReferenceVectorBuckets(
   return SAFETY_REFERENCE_VECTOR_BUCKETS.filter((bucket) => !evidenceRole || bucket.evidenceRoles.includes(evidenceRole));
 }
 
+/** 근거 등급을 지정한 호출은 등급 후처리로 버려지는 몫만큼 더 뽑는다. 키워드 조회 limit 과 벡터 묶음 k 에 같은 배수를 쓴다. */
+const SAFETY_REFERENCE_ROLE_OVERSAMPLE = 3;
+
+/**
+ * data.go.kr 공개 자료(datagokr-2026-11) kind. kind·출처를 지정하지 않은 키워드(REST) 조회에서는 뺀다.
+ * REST 조회는 item_type 알파벳순으로 limit 건을 자르므로, 알파벳이 앞서는 이 kind(위험요소 프로파일만 3만 행)가
+ * 기존 사고사례·SIF 를 관련도와 무관하게 밀어낸다. 이 자료는 벡터 묶음이나 itemType 지정 호출로만 들어온다.
+ */
+export const SAFETY_REFERENCE_KEYWORD_EXCLUDED_ITEM_TYPES: readonly string[] = Object.freeze([
+  "construction-accident-case",
+  "construction-risk-profile",
+  "risk-assessment-row",
+  "chemical-risk-assessment",
+  "hazard-prediction-training"
+]);
+
+/**
+ * 키워드(REST ilike·ranked) 결과를 그대로 앞에 두고 벡터 결과는 남는 칸만 채운다(보충, 대체 아님).
+ * - 키워드 몫은 벡터를 끈 결과와 같다: 같은 어휘 필터·순서·상한(limit).
+ * - 벡터 몫은 키워드 후보에 없는 id 만, 같은 어휘 필터를 거쳐 limit 까지 채운다.
+ * - 두 쪽에 다 나온 행은 키워드 행의 칸을 그대로 쓰고 출처만 hybrid 로 적는다.
+ *   RPC 행은 칸이 적어(kosha_guide 등 없음) 칸을 섞으면 근거 등급이 바뀔 수 있다.
+ */
+export function mergeKeywordAndVectorSafetyReferences(input: {
+  query: string;
+  keywordItems: SafetyReferenceItem[];
+  vectorItems: SafetyReferenceItem[];
+  limit: number;
+  evidenceRole?: "direct" | "supporting";
+}): SafetyReferenceItem[] {
+  const vectorById = new Map<string, SafetyReferenceItem>();
+  for (const item of filterByEvidenceRole(input.vectorItems, input.evidenceRole)) {
+    if (!vectorById.has(item.id)) vectorById.set(item.id, item);
+  }
+  const keywordCandidates = filterByEvidenceRole(input.keywordItems, input.evidenceRole);
+  const keywordIds = new Set(keywordCandidates.map((item) => item.id));
+  const keyword = filterAndRankSafetyReferencesByQuery(input.query, keywordCandidates, input.limit).map((item) => {
+    const vector = vectorById.get(item.id);
+    return vector ? { ...item, retrieval_source: "hybrid" as const, vector_similarity: vector.vector_similarity } : item;
+  });
+  const room = input.limit - keyword.length;
+  if (room <= 0) return keyword;
+  const vectorOnly = [...vectorById.values()]
+    .filter((item) => !keywordIds.has(item.id))
+    .map((item) => withRetrievalSource(item, "vector", item.vector_similarity));
+  return [...keyword, ...filterAndRankSafetyReferencesByQuery(input.query, vectorOnly, room)];
+}
+
 /** 묶음 안에서는 유사도 순으로 k 건, 묶음 사이에서는 선언 순서대로 한 건씩 번갈아 놓는다. kind 마다 유사도 분포가 달라 묶음 사이 유사도는 비교하지 않는다. */
 export function mergeSafetyReferenceVectorBuckets(
   buckets: ReadonlyArray<{ bucket: SafetyReferenceVectorBucket; items: readonly SafetyReferenceItem[] }>
@@ -3337,10 +3385,13 @@ async function fetchVectorReferences(
   }
 
   // kind 를 지정한 호출은 그 kind 한 번. 지정하지 않으면 묶음의 kind 마다 따로 부르고 질의 임베딩은 위에서 한 번만 만든다.
+  // 근거 등급을 지정하면 limit(= 호출부 fetchLimit) 과 같은 배수로 묶음 k 도 늘린다(등급 후처리로 버려지는 몫).
+  const oversample = evidenceRole ? SAFETY_REFERENCE_ROLE_OVERSAMPLE : 1;
   const targets: Array<{ bucket: SafetyReferenceVectorBucket | null; itemType: string; matchCount: number }> = itemType
     ? [{ bucket: null, itemType, matchCount: limit }]
-    : selectSafetyReferenceVectorBuckets(evidenceRole).flatMap((bucket) =>
-      bucket.itemTypes.map((bucketItemType) => ({ bucket, itemType: bucketItemType, matchCount: bucket.k })));
+    : selectSafetyReferenceVectorBuckets(evidenceRole)
+      .map((bucket) => ({ ...bucket, k: bucket.k * oversample }))
+      .flatMap((bucket) => bucket.itemTypes.map((bucketItemType) => ({ bucket, itemType: bucketItemType, matchCount: bucket.k })));
   const outcomes = await Promise.all(targets.map((target) =>
     callMatchSafetyReferenceEmbeddings(config, embedding.embedding, target.matchCount, target.itemType, signal)));
 
@@ -3467,7 +3518,7 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
   const config = getSupabaseConfig();
   const query = options.query.trim();
   const limit = Math.min(Math.max(options.limit || 12, 1), 50);
-  const fetchLimit = options.evidenceRole ? Math.min(limit * 3, 50) : limit;
+  const fetchLimit = options.evidenceRole ? Math.min(limit * SAFETY_REFERENCE_ROLE_OVERSAMPLE, 50) : limit;
   const vectorRuntime = resolveSafetyReferenceVectorSearchState();
   let vectorSearch = vectorRuntime.status;
   if (!config) {
@@ -3486,41 +3537,85 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
   // Track E-3: try the ranked RPC first when no specialised filters block it.
   // RPC handles only `query` + `itemType`. For sourceId/riskTag/taskIds we still use the
   // legacy REST path. evidenceRole is post-filtered on returned items.
+  // 벡터 결과는 키워드(ranked, 없으면 REST ilike) 결과를 대체하지 않고 남는 칸을 보충한다(mergeKeywordAndVectorSafetyReferences).
+  let vectorItems: SafetyReferenceItem[] = [];
+  let rankedKeywordItems: SafetyReferenceItem[] | null = null;
   if (query && !options.sourceId && !options.riskTag && !sanitizeTaskIds(options.taskIds).length) {
     const vector = await fetchVectorReferences(config, query, fetchLimit, options.itemType, vectorRuntime, options.signal, options.evidenceRole);
     vectorSearch = vector.status;
     const ranked = await fetchRankedReferences(config, query, fetchLimit, options.itemType, options.signal);
-    if ((ranked && ranked.ok && ranked.items.length) || vector.items.length) {
-      // RPC(010 match_safety_reference_embeddings)는 review_status 를 거르지도 돌려주지도 않는다.
-      // id 로 011 칸을 보강한 뒤 published 만 남긴다(TS 후처리 — RPC 교체 마이그레이션은 만들지 않는다).
-      const [publishedVector, publishedRanked] = await Promise.all([
-        enrichProvenanceColumns(config, vector.items, options.signal),
-        enrichProvenanceColumns(config, ranked?.ok ? ranked.items : [], options.signal)
-      ]);
-      const merged = mergeSafetyReferenceHybridResults({
-        vectorItems: publishedVector.filter(isPublishedSafetyReference),
-        rankedItems: publishedRanked.filter(isPublishedSafetyReference),
-        limit,
-        evidenceRole: options.evidenceRole
-      });
-      const filtered = filterAndRankSafetyReferencesByQuery(query, merged, limit);
-      return {
-        ok: true,
-        configured: true,
-        query,
-        count: filtered.length,
-        items: filtered,
-        retrievalMode: vector.items.length > 0 ? "hybrid-vector-rpc" : "ranked-rpc",
-        vectorSearch,
-        koshaGrounding: summarizeKoshaGrounding({ items: filtered }),
-        message: vector.items.length > 0
-          ? "Supabase 안전 지식 DB vector+ranked 하이브리드 결과를 사용했습니다."
-          : "Supabase 안전 지식 DB ranked RPC 결과를 사용했습니다."
-      };
+    const rankedItems = ranked && ranked.ok ? ranked.items : [];
+    // RPC(010 match_safety_reference_embeddings)는 review_status 를 거르지도 돌려주지도 않는다.
+    // id 로 011 칸을 보강한 뒤 published 만 남긴다(TS 후처리 — RPC 교체 마이그레이션은 만들지 않는다).
+    const [publishedVector, publishedRanked] = await Promise.all([
+      enrichProvenanceColumns(config, vector.items, options.signal),
+      enrichProvenanceColumns(config, rankedItems, options.signal)
+    ]);
+    vectorItems = publishedVector.filter(isPublishedSafetyReference);
+    if (rankedItems.length) {
+      rankedKeywordItems = publishedRanked
+        .filter(isPublishedSafetyReference)
+        .map((item) => withRetrievalSource(item, "ranked", item.vector_similarity));
     }
-    // Otherwise fall through to legacy ilike path (RPC missing or empty).
   }
 
+  let keywordItems: SafetyReferenceItem[];
+  let keywordMode: SafetyReferenceRetrievalMode;
+  if (rankedKeywordItems) {
+    keywordItems = rankedKeywordItems;
+    keywordMode = "ranked-rpc";
+  } else {
+    const rest = await fetchRestKeywordReferences(config, options, query, limit, fetchLimit);
+    if (!rest.ok && !vectorItems.length) {
+      return {
+        ok: false,
+        configured: true,
+        errorCode: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
+        query,
+        count: 0,
+        items: [],
+        retrievalMode: "rest-ilike",
+        vectorSearch,
+        message: SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE
+      };
+    }
+    keywordItems = rest.ok ? rest.items : [];
+    keywordMode = "rest-ilike";
+  }
+
+  const items = mergeKeywordAndVectorSafetyReferences({
+    query,
+    keywordItems,
+    vectorItems,
+    limit,
+    evidenceRole: options.evidenceRole
+  });
+  const usedVector = items.some((item) => item.retrieval_source === "vector" || item.retrieval_source === "hybrid");
+  return {
+    ok: true,
+    configured: true,
+    query,
+    count: items.length,
+    items,
+    retrievalMode: usedVector ? "hybrid-vector-rpc" : keywordMode,
+    vectorSearch,
+    koshaGrounding: summarizeKoshaGrounding({ items }),
+    message: usedVector
+      ? "Supabase 안전 지식 DB 키워드 결과에 벡터 결과를 보충했습니다."
+      : keywordMode === "ranked-rpc"
+        ? "Supabase 안전 지식 DB ranked RPC 결과를 사용했습니다."
+        : "Supabase 안전 지식 DB에서 참고자료를 조회했습니다."
+  };
+}
+
+/** REST(ilike·taskIds·sourceId·riskTag) 키워드 후보. published·근거 등급 거름까지 하고 어휘 필터·상한은 호출부가 합친 뒤 건다. */
+async function fetchRestKeywordReferences(
+  config: SupabaseConfig,
+  options: SafetyReferenceSearchOptions,
+  query: string,
+  limit: number,
+  fetchLimit: number
+): Promise<{ ok: true; items: SafetyReferenceItem[] } | { ok: false }> {
   const params = new URLSearchParams();
   params.set("select", SELECT_FIELDS);
   params.set("limit", String(fetchLimit));
@@ -3528,6 +3623,7 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
   // PR-12: review_required·rejected 행은 검색·생성에 쓰지 않는다(011 주석의 조회 쪽 필터).
   params.set("review_status", "eq.published");
   if (options.itemType) params.set("item_type", `eq.${options.itemType}`);
+  else if (!options.sourceId) params.set("item_type", `not.in.(${SAFETY_REFERENCE_KEYWORD_EXCLUDED_ITEM_TYPES.join(",")})`);
   if (options.sourceId) params.set("source_id", `eq.${options.sourceId}`);
   if (options.riskTag) params.set("risk_tags", `cs.{"${options.riskTag}"}`);
   const taskIds = sanitizeTaskIds(options.taskIds);
@@ -3546,19 +3642,7 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
   }
 
   const firstPass = await fetchReferenceItemsCompat(config, params, options.signal);
-  if (!firstPass.ok) {
-    return {
-      ok: false,
-      configured: true,
-      errorCode: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
-      query,
-      count: 0,
-      items: [],
-      retrievalMode: "rest-ilike",
-      vectorSearch,
-      message: SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE
-    };
-  }
+  if (!firstPass.ok) return { ok: false };
 
   let items = filterByEvidenceRole(
     firstPass.items.filter(isPublishedSafetyReference).map((item) => withRetrievalSource(item, "rest")),
@@ -3590,19 +3674,7 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
     }
     items = Array.from(byId.values());
   }
-  items = filterAndRankSafetyReferencesByQuery(query, items, limit);
-
-  return {
-    ok: true,
-    configured: true,
-    query,
-    count: items.slice(0, limit).length,
-    items: items.slice(0, limit),
-    retrievalMode: "rest-ilike",
-    vectorSearch,
-    koshaGrounding: summarizeKoshaGrounding({ items: items.slice(0, limit) }),
-    message: "Supabase 안전 지식 DB에서 참고자료를 조회했습니다."
-  };
+  return { ok: true, items };
 }
 
 function sanitizeTaskIds(values: readonly string[] | undefined): string[] {

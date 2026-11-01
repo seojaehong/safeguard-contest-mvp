@@ -1,8 +1,10 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   mergeSafetyReferenceHybridResults,
   mergeSafetyReferenceVectorBuckets,
+  resetSafetyReferenceRankedRpcStateForTests,
+  SAFETY_REFERENCE_KEYWORD_EXCLUDED_ITEM_TYPES,
   SAFETY_REFERENCE_VECTOR_BUCKETS,
   searchSafetyReferences,
   selectSafetyReferenceVectorBuckets,
@@ -279,6 +281,200 @@ describe("searchSafetyReferences 벡터 kind 분할", () => {
 
     expect(result.vectorSearch.reason).toBe("rpc-failed");
     expect(result.items.some((entry) => entry.retrieval_source === "vector" || entry.retrieval_source === "hybrid")).toBe(false);
+  });
+});
+
+// 키워드(REST ilike) 응답과 벡터 RPC 응답을 함께 흉내 낸다. 운영 DB 처럼 ranked RPC 는 없다(404).
+function installKeywordAndVectorEnvironment(input: {
+  vectorEnabled: boolean;
+  keywordRows: ReturnType<typeof rpcRow>[];
+  rowsByType: Record<string, ReturnType<typeof rpcRow>[]>;
+}): FetchCall[] {
+  const report = { ...fixture.report };
+  const { fingerprint } = inspectSifVectorVerificationReceipt(report, {
+    model: "text-embedding-3-small",
+    dimensions: 1536,
+  });
+  vi.stubEnv("SUPABASE_URL", "https://fixture.supabase.co");
+  vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-fixture");
+  vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", input.vectorEnabled ? "1" : "0");
+  vi.stubEnv("SAFETY_REFERENCE_VECTOR_VERIFICATION_SHA256", fingerprint);
+  vi.stubEnv("OPENAI_API_KEY", "openai-fixture");
+
+  const calls: FetchCall[] = [];
+  vi.stubGlobal("fetch", vi.fn(async (request: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(request);
+    const body = typeof init?.body === "string" ? JSON.parse(init.body) as Record<string, unknown> : undefined;
+    calls.push({ url, body });
+    if (url.startsWith("https://api.openai.com/v1/embeddings")) {
+      return jsonResponse({ data: [{ index: 0, embedding: Array.from({ length: 1536 }, () => 0.01) }] });
+    }
+    if (url.includes("/rpc/match_safety_reference_embeddings")) {
+      const filter = typeof body?.item_type_filter === "string" ? body.item_type_filter : "";
+      return jsonResponse((input.rowsByType[filter] || []).slice(0, Number(body?.match_count || 0)));
+    }
+    if (url.includes("/rpc/search_safety_references_ranked")) return jsonResponse({ code: "PGRST202" }, 404);
+    if (url.includes("/rest/v1/safety_reference_items?")) {
+      const params = new URL(url).searchParams;
+      if ((params.get("or") || "").includes("ilike")) {
+        return jsonResponse(input.keywordRows.slice(0, Number(params.get("limit") || 0)));
+      }
+      return jsonResponse([]);
+    }
+    return jsonResponse([], 404);
+  }));
+  return calls;
+}
+
+function keywordRestCalls(calls: FetchCall[]) {
+  return calls
+    .filter((call) => call.url.includes("/rest/v1/safety_reference_items?") && (new URL(call.url).searchParams.get("or") || "").includes("ilike"))
+    .map((call) => new URL(call.url).searchParams);
+}
+
+function conveyorRow(id: string, itemType: string, similarity: number, title = `${id} 컨베이어 끼임`) {
+  return { ...rpcRow(id, itemType, similarity), title, review_status: "published" as const };
+}
+
+describe("searchSafetyReferences 벡터 보충 (키워드 결과 유지)", () => {
+  beforeEach(() => resetSafetyReferenceRankedRpcStateForTests());
+
+  const keywordRows = [
+    conveyorRow("kw-inc-1", "incident-case", 0),
+    conveyorRow("kw-inc-2", "incident-case", 0),
+    conveyorRow("kw-proc-1", "construction-process", 0),
+  ];
+  const vectorRows = {
+    "sif-case": [rpcRow("sif-1", "sif-case", 0.34), rpcRow("sif-2", "sif-case", 0.31)],
+    // kw-inc-1 은 키워드에도 나온다. 벡터 쪽 제목을 달리 두어 어느 행의 칸이 남는지 본다.
+    "incident-case": [rpcRow("kw-inc-1", "incident-case", 0.45), rpcRow("inc-1", "incident-case", 0.40)],
+    // 질의와 어휘가 겹치지 않는 벡터 결과 — 합친 뒤 어휘 필터에서 빠져야 한다.
+    machinery: [{ ...rpcRow("far-1", "machinery", 0.33), title: "천장크레인 와이어로프 낙하", summary: "인양물 낙하", keywords: ["크레인"], risk_tags: ["낙하"], controls: ["줄걸이 점검"], primary_documents: [] }],
+  };
+  vectorRows["incident-case"][0] = { ...vectorRows["incident-case"][0], title: "벡터 쪽 제목 컨베이어 끼임" };
+
+  it("플래그를 켜도 키워드 결과는 플래그를 끈 결과와 같은 순서로 앞에 남고, 벡터는 같은 id 를 빼고 뒤에 더한다", async () => {
+    installKeywordAndVectorEnvironment({ vectorEnabled: false, keywordRows, rowsByType: vectorRows });
+    const off = await searchSafetyReferences({ query: "컨베이어 끼임", limit: 6 });
+    vi.unstubAllGlobals();
+    resetSafetyReferenceRankedRpcStateForTests();
+    installKeywordAndVectorEnvironment({ vectorEnabled: true, keywordRows, rowsByType: vectorRows });
+    const on = await searchSafetyReferences({ query: "컨베이어 끼임", limit: 6 });
+
+    const offIds = off.items.map((entry) => entry.id);
+    expect(offIds).toEqual(["kw-inc-1", "kw-inc-2", "kw-proc-1"]);
+    const onIds = on.items.map((entry) => entry.id);
+    expect(onIds.slice(0, offIds.length)).toEqual(offIds);
+    expect(onIds.slice(offIds.length)).toEqual(expect.arrayContaining(["sif-1", "inc-1"]));
+    expect(new Set(onIds).size).toBe(onIds.length);
+    expect(onIds).not.toContain("far-1");
+    expect(on.items.length).toBeLessThanOrEqual(6);
+    expect(on.retrievalMode).toBe("hybrid-vector-rpc");
+  });
+
+  it("두 쪽에 다 나온 행은 키워드 행의 칸과 근거 등급을 그대로 두고 출처만 hybrid 로 적는다", async () => {
+    installKeywordAndVectorEnvironment({ vectorEnabled: false, keywordRows, rowsByType: vectorRows });
+    const off = await searchSafetyReferences({ query: "컨베이어 끼임", limit: 6 });
+    vi.unstubAllGlobals();
+    resetSafetyReferenceRankedRpcStateForTests();
+    installKeywordAndVectorEnvironment({ vectorEnabled: true, keywordRows, rowsByType: vectorRows });
+    const on = await searchSafetyReferences({ query: "컨베이어 끼임", limit: 6 });
+
+    const overlap = on.items.filter((entry) => entry.id === "kw-inc-1");
+    expect(overlap).toHaveLength(1);
+    expect(overlap[0].title).toBe("kw-inc-1 컨베이어 끼임");
+    expect(overlap[0].retrieval_source).toBe("hybrid");
+    expect(overlap[0].vector_similarity).toBe(0.45);
+    for (const entry of off.items) {
+      const same = on.items.find((candidate) => candidate.id === entry.id);
+      expect(same?.evidence_role, entry.id).toBe(entry.evidence_role);
+    }
+  });
+
+  it("키워드가 limit 을 다 채우면 벡터 결과를 더하지 않는다", async () => {
+    const full = Array.from({ length: 6 }, (_, index) => conveyorRow(`kw-${index + 1}`, "incident-case", 0));
+    installKeywordAndVectorEnvironment({ vectorEnabled: true, keywordRows: full, rowsByType: vectorRows });
+
+    const on = await searchSafetyReferences({ query: "컨베이어 끼임", limit: 6 });
+
+    expect(on.items.map((entry) => entry.id)).toEqual(full.map((row) => row.id));
+  });
+
+  it("direct 지정 호출은 키워드 direct 를 먼저 두고 벡터 direct 로 남는 칸을 채운다", async () => {
+    installKeywordAndVectorEnvironment({
+      vectorEnabled: true,
+      keywordRows,
+      rowsByType: {
+        machinery: [rpcRow("mach-1", "machinery", 0.34)],
+        "construction-process": [rpcRow("kw-proc-1", "construction-process", 0.5), rpcRow("proc-2", "construction-process", 0.31)],
+      },
+    });
+
+    const on = await searchSafetyReferences({ query: "컨베이어 끼임", limit: 6, evidenceRole: "direct" });
+
+    expect(on.items.map((entry) => entry.id)).toEqual(["kw-proc-1", "mach-1", "proc-2"]);
+    expect(on.items.every((entry) => entry.evidence_role === "direct")).toBe(true);
+  });
+
+  it("근거 등급을 지정한 호출은 묶음 k 에도 limit 과 같은 3배 오버샘플링을 적용한다", async () => {
+    const calls = installKeywordAndVectorEnvironment({ vectorEnabled: true, keywordRows: [], rowsByType: vectorRows });
+
+    await searchSafetyReferences({ query: "컨베이어 끼임", limit: 6, evidenceRole: "direct" });
+
+    expect(rpcCalls(calls)).toEqual(expect.arrayContaining([
+      { filter: "technical-guideline", count: bucket("kosha").k * 3 },
+      { filter: "technical-support-regulation", count: bucket("kosha").k * 3 },
+      { filter: "machinery", count: bucket("equipment-process").k * 3 },
+      { filter: "construction-process", count: bucket("equipment-process").k * 3 },
+    ]));
+    expect(rpcCalls(calls)).toHaveLength(4);
+  });
+
+  it("키워드 조회가 실패해도 벡터 결과는 그대로 쓴다", async () => {
+    const calls = installKeywordAndVectorEnvironment({ vectorEnabled: true, keywordRows: [], rowsByType: vectorRows });
+    const baseFetch = globalThis.fetch;
+    vi.stubGlobal("fetch", vi.fn(async (request: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(request);
+      if (url.includes("/rest/v1/safety_reference_items?") && (new URL(url).searchParams.get("or") || "").includes("ilike")) {
+        calls.push({ url, body: undefined });
+        return jsonResponse({ message: "boom" }, 500);
+      }
+      return baseFetch(request, init);
+    }));
+
+    const on = await searchSafetyReferences({ query: "컨베이어 끼임", limit: 6 });
+
+    expect(on.ok).toBe(true);
+    expect(on.items.map((entry) => entry.id)).toEqual(expect.arrayContaining(["sif-1", "inc-1"]));
+  });
+});
+
+describe("data.go.kr 새 kind 는 키워드(REST) 경로에서 뺀다", () => {
+  beforeEach(() => resetSafetyReferenceRankedRpcStateForTests());
+
+  it("kind·출처를 지정하지 않은 키워드 조회는 새 kind 를 제외한다", async () => {
+    const calls = installKeywordAndVectorEnvironment({ vectorEnabled: false, keywordRows: [], rowsByType: {} });
+
+    await searchSafetyReferences({ query: "거푸집 해체", limit: 6 });
+
+    const [first] = keywordRestCalls(calls);
+    expect(first.get("item_type")).toBe(`not.in.(${SAFETY_REFERENCE_KEYWORD_EXCLUDED_ITEM_TYPES.join(",")})`);
+    expect([...SAFETY_REFERENCE_KEYWORD_EXCLUDED_ITEM_TYPES].sort()).toEqual([
+      "chemical-risk-assessment",
+      "construction-accident-case",
+      "construction-risk-profile",
+      "hazard-prediction-training",
+      "risk-assessment-row",
+    ]);
+  });
+
+  it("kind 를 지정한 조회는 그 kind 를 그대로 찾는다", async () => {
+    const calls = installKeywordAndVectorEnvironment({ vectorEnabled: false, keywordRows: [], rowsByType: {} });
+
+    await searchSafetyReferences({ query: "거푸집 해체", limit: 6, itemType: "construction-risk-profile" });
+
+    const [first] = keywordRestCalls(calls);
+    expect(first.get("item_type")).toBe("eq.construction-risk-profile");
   });
 });
 
