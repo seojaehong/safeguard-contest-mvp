@@ -34,12 +34,13 @@ describe("SIF embedding approval packet", () => {
       }
     });
     expect(packet.operatorGate.forbiddenBeforeApproval).toContain("전체 SIF 임베딩 생성");
+    // 2026-11-01 운영 DB 검증기 결과(전 kind 11,496건). SIF 준비 보고서의 6,032건과는 따로 본다.
     expect(packet.postMigrationVerification).toMatchObject({
-      status: "migration-required",
-      uploadedCount: 0,
-      expectedCorpusCount: 6032,
-      tableReady: false,
-      rpcReady: false
+      status: "ready",
+      uploadedCount: 11496,
+      expectedCorpusCount: 11496,
+      tableReady: true,
+      rpcReady: true
     });
     expect(packet.fileName).toBe("safeclaw-sif-embedding-approval-apply-sif-only-migration.md");
     expect(packet.approvalFingerprint).toHaveLength(64);
@@ -59,7 +60,7 @@ describe("SIF embedding approval packet", () => {
     expect(packet.markdown).toContain("Non-approval fallback:");
     expect(packet.markdown).toContain("## Post-Migration Verification");
     expect(packet.markdown).toContain("Status: 마이그레이션 필요");
-    expect(packet.markdown).toContain("Uploaded rows: 0 / 6,032");
+    expect(packet.markdown).toContain("Uploaded rows: 11,496 / 11,496");
     expect(packet.markdown).toContain("## Canary Embedding Evidence");
     expect(packet.markdown).toContain("소규모 검증 임베딩 완료 · 업로드 전");
     expect(packet.markdown).toContain("Embedded count: 3");

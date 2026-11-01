@@ -2323,6 +2323,12 @@ function buildSourceKindLabel(itemType: string): string {
   if (itemType === "work_plan") return "작업계획 기준";
   if (itemType === "construction-process") return "공정 분류 기준";
   if (itemType === "machinery") return "장비 위험 기준";
+  // data.go.kr 공개 자료(datagokr-2026-11). 근거 등급은 기본값(보조 근거)이다.
+  if (itemType === "construction-accident-case") return "건설 사고사례";
+  if (itemType === "construction-risk-profile") return "건설 위험요소 프로파일";
+  if (itemType === "risk-assessment-row") return "공개 위험성평가 예시";
+  if (itemType === "chemical-risk-assessment") return "화학물질 위험성평가 예시";
+  if (itemType === "hazard-prediction-training") return "위험예지훈련 사례";
   return "안전 참고자료";
 }
 
@@ -3188,13 +3194,122 @@ async function fetchQueryEmbedding(
   return { ok: false, message: "OpenAI embedding 생성에 실패했습니다." };
 }
 
+/**
+ * kind 를 지정하지 않은 벡터 검색은 kind 묶음마다 따로 뽑아 합친다.
+ * 전 kind 를 한 풀에서 뽑으면 짧은 사고 제목(incident-case)이 상위를 차지한다
+ * (261101 smoke — 질의 5개 상위 25건 중 SIF 1건, 「고소작업 추락」 상위 20건은 전부 incident-case).
+ * k 는 같은 smoke 에서 kind 마다 상위 2~3건 뒤로 관련도가 떨어지는 것을 보고 정했다.
+ * evidenceRoles 는 그 묶음의 kind 가 deriveEvidenceRole 에서 받을 수 있는 등급이다.
+ */
+export type SafetyReferenceVectorBucket = {
+  id: "sif" | "incident" | "kosha" | "equipment-process";
+  itemTypes: readonly string[];
+  k: number;
+  evidenceRoles: readonly ("direct" | "supporting")[];
+};
+
+export const SAFETY_REFERENCE_VECTOR_BUCKETS: readonly SafetyReferenceVectorBucket[] = Object.freeze([
+  { id: "sif", itemTypes: ["sif-case"], k: 3, evidenceRoles: ["supporting"] },
+  { id: "incident", itemTypes: ["incident-case"], k: 3, evidenceRoles: ["supporting"] },
+  { id: "kosha", itemTypes: ["technical-guideline", "technical-support-regulation"], k: 2, evidenceRoles: ["direct", "supporting"] },
+  { id: "equipment-process", itemTypes: ["machinery", "construction-process"], k: 2, evidenceRoles: ["direct"] }
+]);
+
+export function selectSafetyReferenceVectorBuckets(
+  evidenceRole?: "direct" | "supporting"
+): SafetyReferenceVectorBucket[] {
+  return SAFETY_REFERENCE_VECTOR_BUCKETS.filter((bucket) => !evidenceRole || bucket.evidenceRoles.includes(evidenceRole));
+}
+
+/** 묶음 안에서는 유사도 순으로 k 건, 묶음 사이에서는 선언 순서대로 한 건씩 번갈아 놓는다. kind 마다 유사도 분포가 달라 묶음 사이 유사도는 비교하지 않는다. */
+export function mergeSafetyReferenceVectorBuckets(
+  buckets: ReadonlyArray<{ bucket: SafetyReferenceVectorBucket; items: readonly SafetyReferenceItem[] }>
+): SafetyReferenceItem[] {
+  const lanes = buckets.map(({ bucket, items }) => {
+    const lane: SafetyReferenceItem[] = [];
+    const ordered = [...items].sort((left, right) =>
+      (right.vector_similarity ?? Number.NEGATIVE_INFINITY) - (left.vector_similarity ?? Number.NEGATIVE_INFINITY));
+    for (const candidate of ordered) {
+      if (lane.length >= bucket.k) break;
+      if (lane.some((entry) => entry.id === candidate.id)) continue;
+      lane.push(candidate);
+    }
+    return lane;
+  });
+  const seen = new Set<string>();
+  const merged: SafetyReferenceItem[] = [];
+  const depth = Math.max(0, ...lanes.map((lane) => lane.length));
+  for (let rank = 0; rank < depth; rank += 1) {
+    for (const lane of lanes) {
+      const candidate = lane[rank];
+      if (!candidate || seen.has(candidate.id)) continue;
+      seen.add(candidate.id);
+      merged.push(candidate);
+    }
+  }
+  return merged;
+}
+
+type MatchRpcOutcome =
+  | { outcome: "ok"; items: SafetyReferenceItem[] }
+  | { outcome: "missing" }
+  | { outcome: "failed" };
+
+async function callMatchSafetyReferenceEmbeddings(
+  config: SupabaseConfig,
+  embedding: number[],
+  matchCount: number,
+  itemType: string | undefined,
+  signal?: AbortSignal
+): Promise<MatchRpcOutcome> {
+  const url = `${config.url}/rest/v1/rpc/match_safety_reference_embeddings`;
+  let response: Response;
+  let data: unknown;
+  try {
+    ({ response, data } = await fetchWithDeadline(url, {
+      method: "POST",
+      headers: {
+        apikey: config.serviceRoleKey,
+        Authorization: `Bearer ${config.serviceRoleKey}`,
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        query_embedding: embedding,
+        match_count: matchCount,
+        item_type_filter: itemType ?? null
+      }),
+      cache: "no-store"
+    }, signal, async (nextResponse, deadlineSignal) => ({
+      response: nextResponse,
+      data: nextResponse.ok ? await readBoundedJson(nextResponse, deadlineSignal) : undefined,
+    })));
+  } catch (error) {
+    signal?.throwIfAborted();
+    if (error instanceof SyntaxError) throw error;
+    log.error("safety reference vector RPC failed", {
+      event: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
+      errorCode: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
+      errorType: error instanceof Error ? error.name : typeof error,
+      reason: "rpc-failed"
+    });
+    return { outcome: "failed" };
+  }
+
+  if (response.status === 404) return { outcome: "missing" };
+  if (!response.ok) return { outcome: "failed" };
+
+  const parsed = Array.isArray(data) ? await Promise.all(data.map(normalizeVectorReferenceRow)) : [];
+  return { outcome: "ok", items: parsed.filter((item): item is SafetyReferenceItem => item !== null) };
+}
+
 async function fetchVectorReferences(
   config: SupabaseConfig,
   query: string,
   limit: number,
   itemType: string | undefined,
   runtime: SafetyReferenceVectorRuntime,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  evidenceRole?: "direct" | "supporting"
 ): Promise<VectorFetchResult> {
   if (!runtime.enabled) {
     return { status: runtime.status, items: [] };
@@ -3221,51 +3336,15 @@ async function fetchVectorReferences(
     };
   }
 
-  const url = `${config.url}/rest/v1/rpc/match_safety_reference_embeddings`;
-  let response: Response;
-  let data: unknown;
-  try {
-    ({ response, data } = await fetchWithDeadline(url, {
-      method: "POST",
-      headers: {
-        apikey: config.serviceRoleKey,
-        Authorization: `Bearer ${config.serviceRoleKey}`,
-        "content-type": "application/json"
-      },
-      body: JSON.stringify({
-        query_embedding: embedding.embedding,
-        match_count: limit,
-        item_type_filter: itemType ?? null
-      }),
-      cache: "no-store"
-    }, signal, async (nextResponse, deadlineSignal) => ({
-      response: nextResponse,
-      data: nextResponse.ok ? await readBoundedJson(nextResponse, deadlineSignal) : undefined,
-    })));
-  } catch (error) {
-    signal?.throwIfAborted();
-    if (error instanceof SyntaxError) throw error;
-    log.error("safety reference vector RPC failed", {
-      event: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
-      errorCode: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
-      errorType: error instanceof Error ? error.name : typeof error,
-      reason: "rpc-failed"
-    });
-    return {
-      status: {
-        ...runtime.status,
-        attempted: true,
-        ok: false,
-        errorCode: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
-        reason: "rpc-failed",
-        count: 0,
-        message: SAFETY_REFERENCE_VECTOR_FAILURE_MESSAGE
-      },
-      items: []
-    };
-  }
+  // kind 를 지정한 호출은 그 kind 한 번. 지정하지 않으면 묶음의 kind 마다 따로 부르고 질의 임베딩은 위에서 한 번만 만든다.
+  const targets: Array<{ bucket: SafetyReferenceVectorBucket | null; itemType: string; matchCount: number }> = itemType
+    ? [{ bucket: null, itemType, matchCount: limit }]
+    : selectSafetyReferenceVectorBuckets(evidenceRole).flatMap((bucket) =>
+      bucket.itemTypes.map((bucketItemType) => ({ bucket, itemType: bucketItemType, matchCount: bucket.k })));
+  const outcomes = await Promise.all(targets.map((target) =>
+    callMatchSafetyReferenceEmbeddings(config, embedding.embedding, target.matchCount, target.itemType, signal)));
 
-  if (response.status === 404) {
+  if (outcomes.some((result) => result.outcome === "missing")) {
     return {
       status: {
         ...runtime.status,
@@ -3279,7 +3358,8 @@ async function fetchVectorReferences(
     };
   }
 
-  if (!response.ok) {
+  // kind 하나라도 실패하면 묶음 비율이 깨지므로 벡터 결과를 통째로 버린다(ranked/text 는 그대로 돈다).
+  if (outcomes.some((result) => result.outcome === "failed")) {
     return {
       status: {
         ...runtime.status,
@@ -3294,8 +3374,18 @@ async function fetchVectorReferences(
     };
   }
 
-  const parsed = Array.isArray(data) ? await Promise.all(data.map(normalizeVectorReferenceRow)) : [];
-  const items = parsed.filter((item): item is SafetyReferenceItem => item !== null);
+  const itemsPerTarget = outcomes.map((result) => result.outcome === "ok" ? result.items : []);
+  let items: SafetyReferenceItem[];
+  if (itemType) {
+    items = itemsPerTarget[0] || [];
+  } else {
+    const byBucket = new Map<SafetyReferenceVectorBucket, SafetyReferenceItem[]>();
+    targets.forEach((target, index) => {
+      if (!target.bucket) return;
+      byBucket.set(target.bucket, [...(byBucket.get(target.bucket) || []), ...itemsPerTarget[index]]);
+    });
+    items = mergeSafetyReferenceVectorBuckets([...byBucket].map(([bucket, bucketItems]) => ({ bucket, items: bucketItems })));
+  }
   return {
     status: {
       ...runtime.status,
@@ -3397,7 +3487,7 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
   // RPC handles only `query` + `itemType`. For sourceId/riskTag/taskIds we still use the
   // legacy REST path. evidenceRole is post-filtered on returned items.
   if (query && !options.sourceId && !options.riskTag && !sanitizeTaskIds(options.taskIds).length) {
-    const vector = await fetchVectorReferences(config, query, fetchLimit, options.itemType, vectorRuntime, options.signal);
+    const vector = await fetchVectorReferences(config, query, fetchLimit, options.itemType, vectorRuntime, options.signal, options.evidenceRole);
     vectorSearch = vector.status;
     const ranked = await fetchRankedReferences(config, query, fetchLimit, options.itemType, options.signal);
     if ((ranked && ranked.ok && ranked.items.length) || vector.items.length) {

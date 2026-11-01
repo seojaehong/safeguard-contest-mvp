@@ -1354,8 +1354,19 @@ type CompressedSafetyReference = {
   groundingReason?: KoshaGroundingReason;
 };
 
-function classifySafetyReferenceKind(itemType: string | undefined): { kind: CompressedSafetyReference["kind"]; kindLabel: string } {
+export function classifySafetyReferenceKind(itemType: string | undefined): { kind: CompressedSafetyReference["kind"]; kindLabel: string } {
   switch (itemType) {
+    // data.go.kr 공개 자료(datagokr-2026-11). 내부 kind 코드가 문서에 그대로 나가지 않게 이름을 붙인다.
+    case "construction-accident-case":
+      return { kind: "other", kindLabel: "국토안전관리원 건설 사고사례" };
+    case "construction-risk-profile":
+      return { kind: "other", kindLabel: "국토안전관리원 위험요소 프로파일" };
+    case "risk-assessment-row":
+      return { kind: "other", kindLabel: "공개 위험성평가 예시" };
+    case "chemical-risk-assessment":
+      return { kind: "other", kindLabel: "화학물질 위험성평가 예시" };
+    case "hazard-prediction-training":
+      return { kind: "other", kindLabel: "위험예지훈련 사례" };
     case "technical-support-regulation":
       return { kind: "kosha-support-regulation", kindLabel: "KOSHA 기술지원규정" };
     case "technical-guideline":

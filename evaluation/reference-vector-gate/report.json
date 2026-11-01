@@ -1,0 +1,39 @@
+{
+  "schema": "safeclaw-reference-vector-corpus/v1",
+  "generatedAt": "2026-11-01T12:10:43.702Z",
+  "source": "safety_reference_items:all-kinds",
+  "corpusTag": "reference-all-261101",
+  "note": "벡터 검증기(scripts/sif_embedding_post_migration_verify.mjs)의 기본 게이트. 검증기는 embedding_model 기준 전체 행을 세므로 기대 행 수는 전 kind 코퍼스여야 한다. SIF 전용 준비 보고서는 evaluation/sif-embedding-gate/report.json 에 그대로 둔다. 코퍼스는 저장소 밖 스크립트 embed_all_261101.mjs 로 만들었고 임베딩 행의 metadata.corpus 가 corpusTag 와 같다.",
+  "itemCount": 12444,
+  "skippedCount": 948,
+  "skippedReasons": {
+    "photo_filename_only": 926,
+    "sif_spreadsheet_header": 1,
+    "duplicate_embedding_text": 21
+  },
+  "corpusCount": 11496,
+  "corpusHash": "9e72c37e7c2854bb024d976c57b6a89cc18d5984bb0667d2ed2fde81bc2baa3e",
+  "embeddingModel": "text-embedding-3-small",
+  "embeddingDimensions": 1536,
+  "capChars": 3500,
+  "perKind": {
+    "sif-case": 6032,
+    "incident-case": 2485,
+    "technical-guideline": 803,
+    "machinery": 730,
+    "construction-process": 620,
+    "technical-support-regulation": 237,
+    "risk_assessment": 230,
+    "tbm": 225,
+    "technical_reference": 49,
+    "guidance-sheet": 22,
+    "work_plan": 20,
+    "safety_education_log": 12,
+    "permit": 12,
+    "emergency_response": 7,
+    "photo_evidence": 5,
+    "incident-alert": 5,
+    "risk-manual": 1,
+    "jsa-training": 1
+  }
+}

@@ -2,11 +2,11 @@
   "schema": "safeclaw-sif-vector-runtime-verification/v1",
   "model": "text-embedding-3-small",
   "dimensions": 1536,
-  "expectedCorpusCount": 6032,
-  "fixedCorpusHash": "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e",
+  "expectedCorpusCount": 11496,
+  "fixedCorpusHash": "9e72c37e7c2854bb024d976c57b6a89cc18d5984bb0667d2ed2fde81bc2baa3e",
   "verificationReceipt": {
     "algorithm": "sha256",
-    "fingerprint": "56cfd394a957233d81e94ff2e164e2bce4f4012d54b4852ea3b81dfd6f89654e",
-    "machineVerified": false
+    "fingerprint": "77bc5dde687bac5eb369a4e805c1130a42fff0f9c0687a21ba89882659d064c8",
+    "machineVerified": true
   }
 }
