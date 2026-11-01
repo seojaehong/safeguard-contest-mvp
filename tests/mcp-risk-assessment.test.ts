@@ -413,6 +413,23 @@ describe("시행규칙 제37조의4 기재 항목 충족 검사", () => {
     expect(payload.responsibilityNote).toMatch(/초안 작성 보조.*사업주/u);
   });
 
+  it("정본 행 원본으로 센다 — 등급 숫자가 빠진 행(0)은 위험성 수준 결정을 채운 것으로 보지 않는다", async () => {
+    const base = opsResponse("con-excavation");
+    const rows = base.structured?.riskAssessmentRows ?? [];
+    const edited = rows.map((row, index) => (index === 0 ? { ...row, likelihood: 0, severity: 0 } : row));
+    const response: AskResponse = { ...base, structured: { ...base.structured, riskAssessmentRows: edited } as AskResponse["structured"] };
+    const { payload } = await callTool(response, { question: ops["con-excavation"].question });
+    const byItem = Object.fromEntries(payload.recordItemsCheck.items.map((entry) => [entry.item, entry]));
+    expect(byItem["위험성 수준 결정 결과"]).toMatchObject({ status: "partial", filledRows: rows.length - 1, totalRows: rows.length });
+  });
+
+  it("머리 기록란 4항목은 생성 결과에 값이 없으므로 늘 빈칸(현장 기재)이다", async () => {
+    const { payload } = await callTool(opsResponse("logistics-heat"), { question: ops["logistics-heat"].question });
+    const header = payload.recordItemsCheck.items.slice(0, 4);
+    expect(header.map((entry) => entry.status)).toEqual(["blank", "blank", "blank", "blank"]);
+    for (const entry of header) expect(entry.note).toMatch(/현장에서 적습니다/u);
+  });
+
   it("도구 설명과 결과 문구에 「정본 서식」「고시 서식」을 쓰지 않는다", async () => {
     const source = fs.readFileSync(path.join(process.cwd(), "app/api/mcp/[transport]/implementation.ts"), "utf8");
     const block = source.slice(source.indexOf("\"generate_risk_assessment\""));

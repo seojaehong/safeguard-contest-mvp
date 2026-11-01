@@ -22,11 +22,10 @@ import {
   RISK_RECORD_ROW_HEADERS,
   RISK_REVIEW_LIST_NOTE,
   RISK_REVIEW_LIST_TITLE,
-  riskRecordHeaderPairs,
   riskRecordRowCells,
   toStructuredRiskRows
 } from "@/lib/risk-assessment-record";
-import type { StructuredRiskAssessmentRow } from "@/lib/risk-assessment-renderer";
+import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import {
   buildRiskAssessmentExportBody,
   RISK_ASSESSMENT_EXPORT_TITLE,
@@ -237,31 +236,22 @@ function sifCasesOf(response: AskResponse): {
 //   1. 위험성평가 실시 시기 및 담당자  2. 참여한 근로자 및 근로자대표
 //   3. 제37조의3제2호 — 파악한 유해·위험 요인, 위험성 수준 결정 결과, 개선대책 수립 내용 및 이행 결과
 const RECORD_ITEMS_BASIS = "산업안전보건법 시행규칙 제37조의4제1항(2026-08-01 시행)";
-const ROW_PLACEHOLDERS = new Set(["유해·위험요인 확인", "감소대책 현장 확인", "세부작업 확인", "현장 확인"]);
-const BLANK_PLACEHOLDER = /^[\s_□()（）:：년월일성명참여해당없음]*$/u;
 
-function headerItemCheck(
-  pairs: Array<[string, string]>,
-  label: string,
-  item: string,
-  basis: string
-): RiskRecordItemCheck {
-  const value = pairs.find(([key]) => key === label)?.[1] ?? "";
-  const filled = !BLANK_PLACEHOLDER.test(value);
-  return {
-    item,
-    basis,
-    status: filled ? "filled" : "blank",
-    note: filled ? `「${label}」 칸에 적혀 있습니다.` : `「${label}」 칸이 빈칸입니다. 현장에서 적습니다.`
-  };
-}
+// 머리 기록란 4항목(실시 시기·담당자·참여 근로자·근로자대표)은 생성 결과에 값이 없다. 파일에도 빈칸·선택 상자로만
+// 나가므로(riskRecordHeaderPairs) 늘 빈칸(현장 기재)으로 둔다.
+const HEADER_RECORD_ITEMS: ReadonlyArray<{ item: string; basis: string; label: string }> = [
+  { item: "위험성평가 실시 시기", basis: "제37조의4제1항제1호", label: "평가 실시 시기" },
+  { item: "위험성평가 담당자", basis: "제37조의4제1항제1호", label: "평가 담당자(성명)" },
+  { item: "위험성평가에 참여한 근로자", basis: "제37조의4제1항제2호", label: "참여 근로자(성명)" },
+  { item: "위험성평가에 참여한 근로자대표", basis: "제37조의4제1항제2호", label: "근로자대표 참여" }
+];
 
 function rowItemCheck(
-  rows: readonly StructuredRiskAssessmentRow[],
+  rows: readonly RiskAssessmentRow[],
   item: string,
   basis: string,
   column: string,
-  has: (row: StructuredRiskAssessmentRow) => boolean
+  has: (row: RiskAssessmentRow) => boolean
 ): RiskRecordItemCheck {
   const filledRows = rows.filter(has).length;
   const status: RiskRecordItemStatus = rows.length && filledRows === rows.length
@@ -275,26 +265,23 @@ function rowItemCheck(
   return { item, basis, status, filledRows, totalRows: rows.length, note };
 }
 
-export function checkRiskRecordItems(
-  scenario: AskResponse["scenario"],
-  rows: readonly StructuredRiskAssessmentRow[]
-): RiskAssessmentToolResult["recordItemsCheck"] {
-  const pairs = riskRecordHeaderPairs(scenario);
-  // 행 파서(parseStructuredRiskAssessmentRows)가 빈 칸에 넣는 자리표시 문구는 채운 것으로 세지 않는다.
-  const text = (value: string | undefined) => {
-    const trimmed = value?.trim() ?? "";
-    return Boolean(trimmed) && !ROW_PLACEHOLDERS.has(trimmed);
-  };
+/** 정본 행 원본(structured.riskAssessmentRows)으로 센다. 표시용으로 다시 읽은 행의 자리표시 문구에 기대지 않는다. */
+export function checkRiskRecordItems(rows: readonly RiskAssessmentRow[]): RiskAssessmentToolResult["recordItemsCheck"] {
+  const text = (value: string | undefined) => Boolean(value?.trim());
+  const grade = (value: number | undefined) => typeof value === "number" && value >= 1;
+  const rowBasis = "제37조의4제1항제3호·제37조의3제2호";
   const items: RiskRecordItemCheck[] = [
-    headerItemCheck(pairs, "평가 실시 시기", "위험성평가 실시 시기", "제37조의4제1항제1호"),
-    headerItemCheck(pairs, "평가 담당자(성명)", "위험성평가 담당자", "제37조의4제1항제1호"),
-    headerItemCheck(pairs, "참여 근로자(성명)", "위험성평가에 참여한 근로자", "제37조의4제1항제2호"),
-    headerItemCheck(pairs, "근로자대표 참여", "위험성평가에 참여한 근로자대표", "제37조의4제1항제2호"),
-    rowItemCheck(rows, "파악한 유해·위험 요인", "제37조의4제1항제3호·제37조의3제2호", "유해·위험요인", (row) => text(row.hazard)),
-    rowItemCheck(rows, "위험성 수준 결정 결과", "제37조의4제1항제3호·제37조의3제2호", "가능성·중대성·위험성",
-      (row) => text(row.likelihood) && text(row.severity) && text(row.riskLevel)),
-    rowItemCheck(rows, "개선대책 수립 내용", "제37조의4제1항제3호·제37조의3제2호", "감소대책", (row) => text(row.additionalControls)),
-    rowItemCheck(rows, "개선대책 이행 결과", "제37조의4제1항제3호·제37조의3제2호", "이행 결과", (row) => text(row.implementationResult))
+    ...HEADER_RECORD_ITEMS.map(({ item, basis, label }): RiskRecordItemCheck => ({
+      item,
+      basis,
+      status: "blank",
+      note: `「${label}」 칸이 빈칸입니다. 현장에서 적습니다.`
+    })),
+    rowItemCheck(rows, "파악한 유해·위험 요인", rowBasis, "유해·위험요인", (row) => text(row.hazard)),
+    rowItemCheck(rows, "위험성 수준 결정 결과", rowBasis, "가능성·중대성·위험성",
+      (row) => grade(row.likelihood) && grade(row.severity) && text(row.riskLevel)),
+    rowItemCheck(rows, "개선대책 수립 내용", rowBasis, "감소대책", (row) => text(row.additionalControls)),
+    rowItemCheck(rows, "개선대책 이행 결과", rowBasis, "이행 결과", (row) => text(row.implementationResult))
   ];
   return {
     basis: RECORD_ITEMS_BASIS,
@@ -467,7 +454,7 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
         })),
         structuredRows: response.structured?.riskReviewItems ?? []
       },
-      recordItemsCheck: checkRiskRecordItems(response.scenario, main),
+      recordItemsCheck: checkRiskRecordItems(response.structured?.riskAssessmentRows ?? []),
       sif: {
         ...(sifCases.length
           ? { count: sifCases.length, cases: sifCases }
