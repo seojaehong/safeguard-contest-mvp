@@ -1195,6 +1195,74 @@ describe("photo vision analysis contract", () => {
     );
   });
 
+  // 261101 2차 교차 검토 4: 사진 후보의 근거도 SIF 관련성 거름 뒤 패킷으로 정한다. 작업 묶음이 다른 사례는 근거 목록에 없다.
+  it("keeps a SIF case excluded by the relevance filter out of the candidate evidence", async () => {
+    const weldControl = safetyReference({
+      id: "v-weld-fire-control",
+      title: "외벽 용접 불티 화재 예방 통제",
+      keywords: ["외벽", "용접", "불티", "화재"],
+      riskTags: ["화재"],
+      controls: ["용접 불티 비산 방지포 설치 확인"]
+    });
+    const facadeFallSif: SafetyReferenceItem = {
+      ...safetyReference({
+        id: "v-sif-facade-fall",
+        title: "가상 사례 — 외벽 작업발판에서 균형을 잃고 추락",
+        keywords: ["외벽", "추락"],
+        riskTags: ["추락"],
+        controls: ["작업발판 난간 설치"]
+      }),
+      item_type: "sif-case",
+      evidence_role: "supporting"
+    };
+    vi.mocked(searchSafetyReferences).mockReset();
+    vi.mocked(searchSafetyReferences).mockResolvedValue({
+      ok: true,
+      configured: true,
+      query: "외벽 용접 불티 화재",
+      count: 2,
+      items: [weldControl, facadeFallSif],
+      retrievalMode: "ranked-rpc",
+      vectorSearch: {
+        enabled: false,
+        attempted: false,
+        ok: false,
+        reason: "disabled",
+        count: 0,
+        model: "text-embedding-3-small",
+        message: "disabled"
+      },
+      message: "sif relevance fixture"
+    });
+    const provider = {
+      name: "contract-stub",
+      model: "vision-contract-v1",
+      mode: "mock" as const,
+      analyze: vi.fn(async () => JSON.stringify({
+        summary: "외벽 철골에서 용접 불꽃이 보입니다.",
+        observations: [{ kind: "visual", text: "외벽 철골에서 용접 불꽃이 보입니다." }],
+        candidates: [{
+          label: "외벽 용접 불티 화재 위험 후보",
+          observation: "외벽 철골에서 용접 불꽃이 보입니다.",
+          inference: "불티 화재 위험 가능성을 현장에서 확인해야 합니다."
+        }],
+        ocrText: "",
+        siteSignals: ["외벽", "용접"]
+      }))
+    };
+
+    const analysis = await analyzeHazardPhotos({
+      question: "외벽 철골 용접 작업 구역 점검",
+      photos: [createPhoto("facade-weld.jpg", "image/jpeg")]
+    }, { provider });
+
+    const harness = analysis.candidates[0]?.harness;
+    expect(harness?.status).toBe("confirmed");
+    const sourceIds = harness?.evidence.map((item) => item.sourceId) ?? [];
+    expect(sourceIds).toContain("v-weld-fire-control");
+    expect(sourceIds).not.toContain("v-sif-facade-fall");
+  });
+
   it("does not ground a candidate from generic review vocabulary alone", async () => {
     const genericReference = safetyReference({
       id: "generic-review",

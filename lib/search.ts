@@ -849,6 +849,7 @@ function getSupportingKoshaEvidenceRef(item: SafetyReferenceItem): string {
 }
 
 function buildKoshaParentEvidenceReadyIds(packet: DbHarnessPacket): Set<string> {
+  // packet.sifCases 는 관련성 거름 뒤 목록이다. 뺀 사례(packet.sifSelection.excluded)는 상위 근거가 되지 않는다(2차 검토 4).
   const parentCandidates = [...packet.sifCases, ...packet.directEvidence];
   const exactDirectIds = packet.directEvidence
     .filter(isKoshaTechnicalReference)
