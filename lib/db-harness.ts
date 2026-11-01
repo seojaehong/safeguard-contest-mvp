@@ -17,6 +17,10 @@ import {
   isSafetyReferenceDirectEligible,
   isSafetyReferenceCompatibleWithQuery
 } from "@/lib/safety-reference-catalog";
+import { koshaHazardFamiliesFromText, type KoshaHazardFamily } from "@/lib/kosha-hazard-families";
+import { rankSifCases, type SifRelevance } from "@/lib/sif-case-relevance";
+
+export { koshaHazardFamiliesFromText, type KoshaHazardFamily } from "@/lib/kosha-hazard-families";
 
 export type HarnessImprovement = {
   id: string;
@@ -142,6 +146,15 @@ export type DbHarnessPacket = {
   question: string;
   directEvidence: SafetyReferenceItem[];
   sifCases: SafetyReferenceItem[];
+  /**
+   * SIF 관련성 거름 결과. sifCases 는 relevance 순서 그대로다. excluded 는 검색이 돌려줬지만
+   * 작업·장소·기인물이 달라 생성 입력에서 뺀 사례(제목·이유만, 본문 없음).
+   */
+  sifSelection?: {
+    retrievedCount: number;
+    relevance: Array<{ id: string; relevance: SifRelevance }>;
+    excluded: Array<{ id: string; title: string; reason: string }>;
+  };
   supportingEvidence: SafetyReferenceItem[];
   improvementMemory: HarnessImprovement[];
   workpackMemory: HarnessWorkpackMemory[];
@@ -298,6 +311,21 @@ function buildRetrievalContract(input: {
   };
 }
 
+/**
+ * 검색이 돌려준 SIF 사례 중 이 작업과 작업·장소·기인물이 겹치는 것만 관련 높은 순으로 남긴다(lib/sif-case-relevance.ts).
+ * 생성(웹 /api/ask·MCP 공용)이 받는 근거부터 거르려고 패킷 단계에서 한다. 작업 키는 질문에서만 뽑는다.
+ */
+function selectSifCases(question: string, items: readonly SafetyReferenceItem[]) {
+  const retrieved = items.filter((item) => item.item_type === "sif-case");
+  const { kept, dropped } = rankSifCases(retrieved, { workText: question });
+  return {
+    retrievedCount: retrieved.length,
+    keptIds: new Set(kept.map(({ item }) => item.id)),
+    relevance: kept.map(({ item, relevance }) => ({ id: item.id, relevance })),
+    excluded: dropped.map(({ item, reason }) => ({ id: item.id, title: item.display_title || item.title, reason }))
+  };
+}
+
 export function buildDbHarnessPacket(input: {
   question: string;
   references: SafetyReferenceItem[];
@@ -309,9 +337,12 @@ export function buildDbHarnessPacket(input: {
   const improvements = input.improvements || [];
   const workpackMemory = input.workpackMemory || [];
   const queryHazardFamilies = classifyKoshaQueryHazardFamilies(input.question);
-  const references = input.references
+  const compatible = input.references
     .filter((item) => isSafetyReferenceCompatibleWithQuery(input.question, item))
-    .filter((item) => isDirectEvidenceCompatibleWithQueryHazard(item, queryHazardFamilies))
+    .filter((item) => isDirectEvidenceCompatibleWithQueryHazard(item, queryHazardFamilies));
+  const sifSelection = selectSifCases(input.question, compatible);
+  const references = compatible
+    .filter((item) => item.item_type !== "sif-case" || sifSelection.keptIds.has(item.id))
     .map((item) => {
       const exactDirectKosha = isKoshaTechnicalReference(item)
         && isSafetyReferenceDirectEligible(item);
@@ -330,7 +361,8 @@ export function buildDbHarnessPacket(input: {
   const directEvidence = references.filter((item) => (
     item.evidence_role === "direct" && isSafetyReferenceDirectEligible(item)
   ));
-  const sifCases = references.filter((item) => item.item_type === "sif-case");
+  const sifById = new Map(references.filter((item) => item.item_type === "sif-case").map((item) => [item.id, item]));
+  const sifCases = sifSelection.relevance.flatMap(({ id }) => sifById.get(id) ?? []);
   const classifiedIds = new Set([
     ...directEvidence.map((item) => item.id),
     ...sifCases.map((item) => item.id)
@@ -359,6 +391,11 @@ export function buildDbHarnessPacket(input: {
     question: input.question.trim(),
     directEvidence,
     sifCases,
+    sifSelection: {
+      retrievedCount: sifSelection.retrievedCount,
+      relevance: sifSelection.relevance,
+      excluded: sifSelection.excluded
+    },
     supportingEvidence,
     improvementMemory: improvements,
     workpackMemory,
@@ -645,57 +682,11 @@ export function parseHarnessMemoryInput(value: unknown): Required<HarnessMemoryI
 
 const MAX_KOSHA_PROMPT_METADATA_CHARS = 240;
 
-export type KoshaHazardFamily =
-  | "asphyxiation"
-  | "burn"
-  | "caught_in"
-  | "chemical_exposure"
-  | "collision"
-  | "collapse_or_overturn"
-  | "cut"
-  | "drowning"
-  | "electrical"
-  | "ergonomic"
-  | "fall"
-  | "falling_object"
-  | "fire_or_explosion"
-  | "heat_illness"
-  | "noise"
-  | "slip_or_trip";
-
 type KoshaQueryHazardFamilies = {
   state: "none" | "single" | "multiple";
   families: ReadonlySet<KoshaHazardFamily>;
 };
 
-const KOSHA_HAZARD_FAMILY_PATTERNS: ReadonlyArray<{
-  family: KoshaHazardFamily;
-  pattern: RegExp;
-}> = [
-  { family: "collision", pattern: /충돌|교통사고|차량\s*충돌|부딪|접촉\s*사고/u },
-  { family: "fire_or_explosion", pattern: /화재|폭발|점화|발화|연료\s*누출|연료누출|가스\s*누출|인화성|가연물|용탕/u },
-  { family: "fall", pattern: /추락|떨어짐|낙상/u },
-  { family: "caught_in", pattern: /끼임|협착|말림|불시기동|가동부/u },
-  { family: "electrical", pattern: /감전|누전|충전부|활선|전기.*접촉/u },
-  { family: "asphyxiation", pattern: /질식|산소결핍|밀폐공간|유해가스/u },
-  { family: "falling_object", pattern: /낙하|비래|인양|양중/u },
-  { family: "collapse_or_overturn", pattern: /붕괴|도괴|전복|전도/u },
-  { family: "slip_or_trip", pattern: /미끄|넘어짐|걸려\s*넘어/u },
-  { family: "chemical_exposure", pattern: /중독|화학물질|유해물질|분진|가스\s*노출|세정제/u },
-  { family: "burn", pattern: /화상|고온|용탕/u },
-  { family: "cut", pattern: /절단|베임/u },
-  { family: "heat_illness", pattern: /폭염|온열|열사병/u },
-  { family: "drowning", pattern: /익사|물에\s*빠/u },
-  { family: "noise", pattern: /소음|청력/u },
-  { family: "ergonomic", pattern: /근골격|중량물|요통/u }
-];
-
-export function koshaHazardFamiliesFromText(text: string): Set<KoshaHazardFamily> {
-  const semanticText = text.normalize("NFC").toLowerCase();
-  return new Set(KOSHA_HAZARD_FAMILY_PATTERNS
-    .filter(({ pattern }) => pattern.test(semanticText))
-    .map(({ family }) => family));
-}
 
 function classifyKoshaQueryHazardFamilies(text: string): KoshaQueryHazardFamilies {
   const families = koshaHazardFamiliesFromText(text);

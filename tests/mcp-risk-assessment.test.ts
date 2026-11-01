@@ -12,6 +12,7 @@ import { describe, expect, it } from "vitest";
 
 import { POST as exportXlsx } from "@/app/api/export/xlsx/route";
 import { POST as exportHwp } from "@/app/api/export/hwp/route";
+import { buildDbHarnessPacket, buildPublicDbHarnessPacket } from "@/lib/db-harness";
 import { buildMockAskResponse } from "@/lib/mock-data";
 import { canonicalizeRiskAssessmentResponse, RISK_RECORD_ROW_HEADERS } from "@/lib/risk-assessment-record";
 import { MCP_TOOL_RESULT_MAX_BYTES } from "@/lib/mcp-tools";
@@ -64,6 +65,8 @@ function sifItem(id: string, title: string, summary: string): SafetyReferenceIte
     subcategory: null,
     title,
     summary,
+    // 검색 단계(normalizeReferenceItem)가 원문 사례에서 뽑아 두는 사고개요 칸.
+    display_summary: summary,
     keywords: [],
     risk_tags: [],
     primary_documents: [],
@@ -72,7 +75,8 @@ function sifItem(id: string, title: string, summary: string): SafetyReferenceIte
   };
 }
 
-function opsResponse(id: (typeof SCENARIOS)[number], sifCases: SafetyReferenceItem[] = []): AskResponse {
+/** sifCases 는 검색 결과로 보고 runAsk 와 같은 buildDbHarnessPacket(질문 = 생성에 들어간 질문)을 거친다. */
+function opsResponse(id: (typeof SCENARIOS)[number], sifCases: SafetyReferenceItem[] = [], packetQuestion = ops[id].question): AskResponse {
   const fixture = ops[id];
   const base = buildMockAskResponse(fixture.question, [], "mock", "fixture");
   const response: AskResponse = {
@@ -87,12 +91,13 @@ function opsResponse(id: (typeof SCENARIOS)[number], sifCases: SafetyReferenceIt
   };
   const canonical = canonicalizeRiskAssessmentResponse(response);
   if (!sifCases.length) return canonical;
+  const packet = buildPublicDbHarnessPacket(buildDbHarnessPacket({ question: packetQuestion, references: sifCases }));
   return {
     ...canonical,
     dbHarness: {
-      packet: { sifCases } as unknown as NonNullable<AskResponse["dbHarness"]>["packet"],
+      packet,
       promptContext: "",
-      summary: { sifCases: sifCases.length } as unknown as NonNullable<AskResponse["dbHarness"]>["summary"],
+      summary: { sifCases: packet.sifCases.length } as unknown as NonNullable<AskResponse["dbHarness"]>["summary"],
     },
   };
 }
@@ -299,14 +304,14 @@ describe("SIF 유사사례", () => {
         id: "sif-1",
         title: "굴착 사면 붕괴로 매몰",
         overview: "굴착 깊이 3m 사면이 무너져 작업자 1명이 매몰되었다.",
-        source: { id: "kosha-sif-archive-20260401", agency: "한국산업안전보건공단", title: "산업재해 고위험요인(SIF) 아카이브", publishedAt: "2026-04-01", baseYear: 2026, url: "https://example.invalid/sif-1" },
+        source: { id: "kosha-sif-archive-20260401", agency: "한국산업안전보건공단", title: "산업재해 고위험요인(SIF) 아카이브", publishedAt: "2026-04-01", baseYear: 2026, url: null },
         relevance: expect.objectContaining({ matchedWork: expect.arrayContaining(["굴착·토사"]) }),
       },
       {
         id: "sif-2",
         title: "굴착기 버킷 협착",
         overview: "후진하던 굴착기와 흙막이 사이에 끼였다.",
-        source: { id: "kosha-sif-archive-20260401", agency: "한국산업안전보건공단", title: "산업재해 고위험요인(SIF) 아카이브", publishedAt: "2026-04-01", baseYear: 2026, url: "https://example.invalid/sif-2" },
+        source: { id: "kosha-sif-archive-20260401", agency: "한국산업안전보건공단", title: "산업재해 고위험요인(SIF) 아카이브", publishedAt: "2026-04-01", baseYear: 2026, url: null },
         relevance: expect.objectContaining({ matchedWork: expect.arrayContaining(["굴착·토사"]) }),
       },
     ]);
@@ -316,7 +321,7 @@ describe("SIF 유사사례", () => {
   it("모르는 원천은 출처를 지어내지 않고 source_id 의 날짜만 기준일로 쓴다", async () => {
     const unknown = { ...sifItem("sif-9", "굴착 사면 붕괴로 매몰", "개요"), source_id: "other-sif-20250115" };
     const { payload } = await callTool(opsResponse("con-excavation", [unknown]), { question: ops["con-excavation"].question });
-    expect(payload.sif.cases[0]?.source).toEqual({ id: "other-sif-20250115", agency: null, title: null, publishedAt: "2025-01-15", baseYear: 2025, url: "https://example.invalid/sif-9" });
+    expect(payload.sif.cases[0]?.source).toEqual({ id: "other-sif-20250115", agency: null, title: null, publishedAt: "2025-01-15", baseYear: 2025, url: null });
   });
 
   it("template 모드는 0건과 이유(DB 를 조회하지 않음)를 숨기지 않고 돌려준다", async () => {
@@ -328,17 +333,18 @@ describe("SIF 유사사례", () => {
     expect(payload.sif.reason).toMatch(/template/u);
   });
 
-  // 261101 MCP 실측(run3)에서 실제로 붙은 사례 제목. 밀폐공간 작업에 열처리로 폭발, 화재 작업에 리프트 추락이 붙었다.
+  // 261101 MCP 실측(run3)에서 밀폐공간 작업에 열처리로 폭발, 화재 작업에 리프트 추락 사례가 붙었다.
+  // 아래 제목·개요는 그 결을 본뜬 가상 문장이다(공단 사례 원문을 시험에 두지 않는다).
   const S1_QUESTION = "가상 사업장 한빛정화 오수처리장 맨홀 내부 슬러지 제거 작업 3명, 밀폐공간 산소결핍·황화수소 우려, 주간";
   const S3_QUESTION = "가상 사업장 미래화학 도장공장 배기덕트 내부 용접 보수 작업 2명, 인화성 증기 잔류 가능, 화재감시자 배치";
-  const HEAT_FURNACE = sifItem("sif-furnace", "OO사업장 화학제품 제조공정에서 열처리로 시험 운전 중 열처리로 내부에 설치된 내화물에 포함된 물이 누출되어 수증기로 변하면서 팽창 폭발하여 다수의 사망 사례", "재해개요: OO사업장 화학제품 제조공정에서 열처리로 시험 운전 중 내화물에 포함된 물이 누출되어 수증기로 변하면서 팽창 폭발하여 다수의 사망");
-  const PIPE_TIG = sifItem("sif-pipe", "도금업체에서 약 2m 정도의 배관을 TIG용접을 하던 중 배관안에서 쓰러져 동료 발견, 병원으로 이송후 사망 사례", "재해개요: 도금업체에서 약 2m 정도의 배관을 TIG용접을 하던 중 배관안에서 쓰러져 동료 발견, 병원으로 이송후 사망");
-  const CISTERN_FIRE = sifItem("sif-cistern", "○○현장에서 작업자 2명이 지하2층 소화저수조 내부 방수공사 보수작업 중 화재가 발생하여 화상으로 2명이 사망 사례", "재해종류: 화재 재해개요: 지하2층 소화저수조 내부 방수공사 보수작업 중 화재가 발생하여 화상으로 2명이 사망");
-  const LPG_CUTTING = sifItem("sif-lpg", "OO 작업장 내에서 LPG-산소를 이용하여 용단작업중 불씨가 재해자에 옮겨붙어 화상을 입고 사망 사례", "재해개요: LPG-산소를 이용하여 용단작업중 불씨가 재해자에 옮겨붙어 화상을 입고 사망");
-  const LIFT_FALL = sifItem("sif-lift", "OO사업장에서 화물용 리프트에 제품을 싣는 작업 중 리프트와 작업장 사이의 개구부로 떨어져 사망 사례", "재해개요: 화물용 리프트에 제품을 싣는 작업 중 리프트와 작업장 사이의 개구부로 떨어져 사망");
+  const HEAT_FURNACE = sifItem("sif-furnace", "가상 사례 — 열처리로 가동 중 내화물 속 물이 끓어 폭발", "가상 개요: 새로 쌓은 내화물이 덜 말라 가동 직후 증기 압력으로 터졌다.");
+  const PIPE_WELD = sifItem("sif-pipe", "가상 사례 — 좁은 배관 안 용접 작업자가 산소결핍으로 의식 잃음", "가상 개요: 환기 없이 배관 안에 들어가 용접하다 의식을 잃었다.");
+  const CISTERN_FIRE = sifItem("sif-cistern", "가상 사례 — 지하 물탱크 내부 방수 작업 중 화재로 화상", "가상 개요: 물탱크 내부에서 용접 불티가 도료 증기에 붙어 불이 났다.");
+  const LPG_CUT = sifItem("sif-lpg", "가상 사례 — 프로판 가스 절단 중 불꽃이 작업복에 붙어 화상", "가상 개요: 프로판 토치로 철판을 자르다 작업복에 불이 붙었다.");
+  const LIFT_FALL = sifItem("sif-lift", "가상 사례 — 승강기 출입구 개구부에서 작업자 추락", "가상 개요: 안전난간이 없는 승강기 출입구 개구부로 떨어졌다.");
 
-  it("밀폐공간 작업: 배관 안 쓰러짐 사례는 남기고 열처리로 폭발 사례는 이유와 함께 뺀다", async () => {
-    const { payload } = await callTool(opsResponse("confined-space", [HEAT_FURNACE, PIPE_TIG]), { question: S1_QUESTION, mode: "enhanced" });
+  it("밀폐공간 작업: 생성 입력 단계에서 뺀 열처리로 폭발 사례를 이유와 함께 그대로 돌려준다", async () => {
+    const { payload } = await callTool(opsResponse("confined-space", [HEAT_FURNACE, PIPE_WELD], S1_QUESTION), { question: S1_QUESTION, mode: "enhanced" });
     expect(payload.sif.cases.map((item) => item.id)).toEqual(["sif-pipe"]);
     expect(payload.sif.cases[0]?.relevance?.matchedWork).toContain("밀폐공간");
     expect(payload.sif.excluded).toEqual([expect.objectContaining({ id: "sif-furnace", reason: expect.stringMatching(/작업·장소·기인물이 다름/u) })]);
@@ -346,13 +352,14 @@ describe("SIF 유사사례", () => {
   });
 
   it("화재·용접 작업: 저수조 화재·용단 화상 사례는 남기고 리프트 개구부 추락 사례는 뺀다", async () => {
-    const { payload } = await callTool(opsResponse("mfg-press", [CISTERN_FIRE, LPG_CUTTING, LIFT_FALL]), { question: S3_QUESTION, mode: "enhanced" });
-    expect(payload.sif.cases.map((item) => item.id).sort()).toEqual(["sif-cistern", "sif-lpg"]);
+    const { payload } = await callTool(opsResponse("mfg-press", [CISTERN_FIRE, LPG_CUT, LIFT_FALL], S3_QUESTION), { question: S3_QUESTION, mode: "enhanced" });
+    expect(payload.sif.cases.map((item) => item.id)).toEqual(["sif-cistern", "sif-lpg"]);
     expect(payload.sif.excluded?.map((item) => item.id)).toEqual(["sif-lift"]);
+    expect(payload.sif.retrievedCount).toBe(3);
   });
 
   it("검색된 사례가 모두 작업과 맞지 않으면 0건과 그 이유를 돌려준다", async () => {
-    const { payload } = await callTool(opsResponse("confined-space", [HEAT_FURNACE, LIFT_FALL]), { question: S1_QUESTION, mode: "enhanced" });
+    const { payload } = await callTool(opsResponse("confined-space", [HEAT_FURNACE, LIFT_FALL], S1_QUESTION), { question: S1_QUESTION, mode: "enhanced" });
     expect(payload.sif.count).toBe(0);
     expect(payload.sif.cases).toEqual([]);
     expect(payload.sif.reason).toMatch(/2건.*맞지 않아/u);

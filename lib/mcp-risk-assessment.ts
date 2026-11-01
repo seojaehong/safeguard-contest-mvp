@@ -6,7 +6,7 @@
 // - 행: runAsk 가 정본화한 structured.riskAssessmentRows / riskReviewItems 그대로. 칸은 riskRecordRowCells(파일 본표와 같은 함수).
 // - 파일: 편집기와 같은 요청 본문(buildRiskAssessmentExportBody)을 웹 라우트와 같은 렌더 함수에 넣는다
 //   (lib/document-export-xlsx.ts·document-export-hwp.ts, 주입: renderXlsx·renderHwp).
-// - SIF: 같은 생성이 쓴 dbHarness.packet.sifCases. 따로 검색하지 않는다(파일과 목록이 어긋나지 않게).
+// - SIF: 같은 생성이 쓴 dbHarness.packet.sifCases·sifSelection(관련성 거름은 패킷 단계). 따로 검색·거르지 않는다(파일과 목록이 어긋나지 않게).
 // 작업공간에 저장하지 않는다(읽기 전용 산출물). 결과는 toToolResult 의 256KB 상한을 그대로 따른다.
 import { createHash } from "node:crypto";
 
@@ -32,8 +32,7 @@ import {
 } from "@/lib/risk-assessment-export-body";
 import type { XlsxDocumentExportRender } from "@/lib/document-export-xlsx";
 import type { HwpDocumentExportRender } from "@/lib/document-export-hwp";
-import { accidentTypeLabel } from "@/lib/risk-labels";
-import { rankSifCases, type SifRelevance } from "@/lib/sif-case-relevance";
+import type { SifRelevance } from "@/lib/sif-case-relevance";
 import type { AskResponse } from "@/lib/types";
 
 export type GenerateRiskAssessmentInput = {
@@ -184,29 +183,32 @@ function sifSourceOf(sourceId: string, url: string | null | undefined): RiskAsse
 }
 
 /**
- * 생성에 쓰인 SIF 사례 중 이 작업과 작업·장소·기인물, 재해형태가 맞는 것만 관련 높은 순으로 돌려준다.
- * 작업 키는 호출 질문과 시나리오 작업 요약에서만 뽑는다(생성된 행이 엉뚱한 사례에 끌려 만든 행일 수 있다).
+ * 생성에 쓰인 SIF 사례를 그대로 돌려준다. 작업·장소·기인물로 거르고 관련 순으로 세우는 일은 생성 입력
+ * 단계(lib/db-harness.ts buildDbHarnessPacket → lib/sif-case-relevance.ts)가 이미 했다. 여기서 다시 거르면
+ * 생성이 본 근거와 돌려주는 목록이 어긋나므로, 패킷의 sifCases 순서·relevance·excluded 를 옮겨 적기만 한다.
  */
-function sifCasesOf(response: AskResponse, question: string, rows: readonly StructuredRiskAssessmentRow[]): {
+function sifCasesOf(response: AskResponse): {
   retrievedCount: number;
   cases: RiskAssessmentSifCase[];
   excluded: RiskAssessmentSifExcluded[];
 } {
-  const items = response.dbHarness?.packet?.sifCases ?? [];
-  const { kept, dropped } = rankSifCases(items, {
-    workText: `${question} ${response.scenario.workSummary || ""}`,
-    accidentTypeText: rows.map((row) => accidentTypeLabel(row.accidentType)).join(" ")
-  });
+  const packet = response.dbHarness?.packet;
+  const items = packet?.sifCases ?? [];
+  const relevanceById = new Map((packet?.sifSelection?.relevance ?? []).map(({ id, relevance }) => [id, relevance]));
+  const excluded = packet?.sifSelection?.excluded ?? [];
   return {
-    retrievedCount: items.length,
-    cases: kept.map(({ item, relevance }) => ({
-      id: item.id,
-      title: item.display_title || item.title,
-      overview: item.display_summary || item.short_summary || item.summary,
-      source: sifSourceOf(item.source_id, item.source_url),
-      relevance
-    })),
-    excluded: dropped.map(({ item, reason }) => ({ id: item.id, title: item.display_title || item.title, reason }))
+    retrievedCount: packet?.sifSelection?.retrievedCount ?? items.length,
+    cases: items.map((item) => {
+      const relevance = relevanceById.get(item.id);
+      return {
+        id: item.id,
+        title: item.display_title || item.title,
+        overview: item.display_summary || item.short_summary || item.summary,
+        source: sifSourceOf(item.source_id, item.source_url),
+        ...(relevance ? { relevance } : {})
+      };
+    }),
+    excluded: excluded.map(({ id, title, reason }) => ({ id, title, reason }))
   };
 }
 
@@ -340,7 +342,7 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
 
     const main = toStructuredRiskRows(response.structured?.riskAssessmentRows ?? []);
     const review = toStructuredRiskRows(response.structured?.riskReviewItems ?? []);
-    const sif = sifCasesOf(response, question, main);
+    const sif = sifCasesOf(response);
     const sifCases = sif.cases;
     const hasRows = main.length > 0;
 

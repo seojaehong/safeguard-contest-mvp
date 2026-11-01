@@ -4,11 +4,13 @@
 //
 // 매칭 키(조사 문서 SIF 소스 조사 종합(261101) §4): 업종·작업·기인물·재해형태.
 // - 작업·기인물(장소·설비) = WORK_CONTEXTS. 사례와 작업 설명이 하나도 겹치지 않으면 제외한다.
-// - 재해형태 = lib/db-harness.ts koshaHazardFamiliesFromText(KOSHA 지침 근거 고르기와 같은 사전).
-//   순서(점수)에만 쓰고 제외 근거로 쓰지 않는다. 작업 설명에는 재해형태가 잘 안 적히고(「굴착공사」에 「붕괴」 없음),
+//   다만 작업 설명이 직접 적은 재해형태(「추락 위험을 점검」)가 사례와 같으면 남긴다.
+// - 재해형태 = lib/kosha-hazard-families.ts koshaHazardFamiliesFromText(KOSHA 지침 근거 고르기와 같은 사전).
+//   점수와 위 「남기는」 근거에만 쓰고 제외 근거로 쓰지 않는다. 작업 설명에는 재해형태가 잘 안 적히고(「굴착공사」에 「붕괴」 없음),
 //   행의 재해유형은 생성 결과라 굴착 작업의 붕괴 사례를 잘못 뺀다(261101 시험).
+// - 호출처: lib/db-harness.ts buildDbHarnessPacket(생성 입력 단계, 웹 /api/ask·MCP 공용).
 // - 업종: 지금 항목에는 제조업등 시트의 업종 칸이 요약 260자 안에 남지 않는 경우가 많아 키로 쓰지 않는다.
-import { koshaHazardFamiliesFromText, type KoshaHazardFamily } from "@/lib/db-harness";
+import { koshaHazardFamiliesFromText, type KoshaHazardFamily } from "@/lib/kosha-hazard-families";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import { CHEMICAL_SUBSTANCE, CONFINED_IDENTITY } from "@/lib/task-scenario-profiles";
 
@@ -86,8 +88,12 @@ export function judgeSifCase(item: SafetyReferenceItem, query: SifRelevanceQuery
   const caseTypes = familyGroupsOf(text);
   const matchedWork = [...caseWork].filter((label) => queryWork.has(label));
   const matchedAccidentTypes = [...caseTypes].filter((label) => queryTypes.has(label));
+  // 작업 설명이 재해형태를 직접 적었으면(「외벽 도장 작업의 추락 위험」) 그 재해형태가 같은 사례는 남긴다.
+  // 생성된 행(accidentTypeText)의 재해형태로는 살리지 않는다 — 엉뚱한 사례에 끌려 만든 행일 수 있다.
+  const workTextTypes = familyGroupsOf(query.workText);
+  const statedTypeMatch = [...caseTypes].some((label) => workTextTypes.has(label));
 
-  if (queryWork.size && !matchedWork.length) {
+  if (queryWork.size && !matchedWork.length && !statedTypeMatch) {
     return {
       kept: false,
       item,
