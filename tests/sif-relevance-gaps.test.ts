@@ -63,6 +63,32 @@ describe("포크리프트·테일리프트는 승강 리프트가 아니다", ()
   });
 });
 
+// 작업 묶음이 안 겹쳐도 질문이 적은 재해형태로 사례를 남기는 예외(261101 2차 교차 검토 1).
+// 「화재감시자 배치」「낙하 우려」처럼 질문의 작업 묶음이 이미 설명하는 재해형태로는 장소가 다른 사례를 살리지 않는다.
+describe("질문이 적은 재해형태로 사례를 남기는 예외", () => {
+  const DUCT_WELD_Q = "가상 사업장 미래화학 도장공장 배기덕트 내부 용접 보수 작업 2명, 인화성 증기 잔류 가능, 화재감시자 배치";
+  const TOWER_CRANE_Q = "가상 사업장 타워크레인으로 철골 자재 인양 작업 3명, 낙하 우려, 신호수 배치";
+  const SHAFT_FALL = sifItem("v-shaft", "가상 사례 — 승강로 개구부에서 인양 자재를 받다가 추락", "가상 개요: 난간이 없는 승강로 개구부에서 낙하하는 자재를 피하다 떨어졌다.");
+  const SCAFFOLD_FALL = sifItem("v-scaffold", "가상 사례 — 작업발판 위에서 균형을 잃고 추락", "가상 개요: 난간이 없는 작업발판에서 떨어졌다.");
+
+  it("덕트 용접(화재감시자 배치) 작업에 작업 묶음이 없는 열처리로 폭발 사례는 빠진다", () => {
+    const packet = buildDbHarnessPacket({ question: DUCT_WELD_Q, references: [FURNACE] });
+    expect(packet.sifCases).toEqual([]);
+    expect(packet.sifSelection?.excluded.map((item) => item.id)).toEqual(["v-furnace"]);
+  });
+
+  it("타워크레인 인양(낙하 우려) 작업에 승강로 개구부 추락 사례는 빠진다", () => {
+    const decision = judgeSifCase(SHAFT_FALL, { workText: TOWER_CRANE_Q });
+    expect(decision.kept).toBe(false);
+  });
+
+  it("작업 묶음이 그 재해형태를 설명하지 못하는 질문(외벽 도장의 추락)은 고소 작업 추락 사례를 남긴다", () => {
+    const decision = judgeSifCase(SCAFFOLD_FALL, { workText: "외벽 도장 작업의 추락 위험을 점검해줘" });
+    expect(decision.kept).toBe(true);
+    expect(decision.kept && decision.relevance.matchedAccidentTypes).toEqual(["추락"]);
+  });
+});
+
 describe("MCP 결과에도 거름 적용 여부가 드러난다", () => {
   async function sifOf(question: string, references: SafetyReferenceItem[]) {
     const { buildPublicDbHarnessPacket } = await import("@/lib/db-harness");

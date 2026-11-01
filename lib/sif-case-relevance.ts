@@ -4,7 +4,8 @@
 //
 // 매칭 키(조사 문서 SIF 소스 조사 종합(261101) §4): 업종·작업·기인물·재해형태.
 // - 작업·기인물(장소·설비) = WORK_CONTEXTS. 사례와 작업 설명이 하나도 겹치지 않으면 제외한다.
-//   다만 작업 설명이 직접 적은 재해형태(「추락 위험을 점검」)가 사례와 같으면 남긴다.
+//   다만 작업 설명이 직접 적은 재해형태(「추락 위험을 점검」)를 그 작업 묶음이 설명하지 못하면(작업 장소를 사전이 못 잡았다)
+//   그 재해형태를 낳는 작업 묶음에서 난 같은 재해형태 사례는 남긴다(statedTypeKeeps).
 // - 재해형태 = lib/kosha-hazard-families.ts koshaHazardFamiliesFromText(KOSHA 지침 근거 고르기와 같은 사전).
 //   점수와 위 「남기는」 근거에만 쓰고 제외 근거로 쓰지 않는다. 작업 설명에는 재해형태가 잘 안 적히고(「굴착공사」에 「붕괴」 없음),
 //   행의 재해유형은 생성 결과라 굴착 작업의 붕괴 사례를 잘못 뺀다(261101 시험).
@@ -51,6 +52,33 @@ const FAMILY_GROUP: Readonly<Partial<Record<KoshaHazardFamily, string>>> = {
   ergonomic: "근골격계"
 };
 
+// 재해형태 묶음 → 그 재해형태를 흔히 낳는 작업 묶음. 질문이 적은 재해형태로 사례를 남길지 가를 때만 쓴다.
+// 여기 없는 재해형태(넘어짐·익사·소음·근골격계)는 예외를 걸지 않는다.
+const ACCIDENT_TYPE_WORK: Readonly<Record<string, readonly string[]>> = {
+  "추락": ["고소·개구부"],
+  "화재·폭발·화상": ["화기·용접", "화학물질·인화성", "밀폐공간"],
+  "질식·유해물질": ["밀폐공간", "화학물질·인화성"],
+  "낙하·맞음": ["차량·운반기계", "고소·개구부"],
+  "끼임": ["기계·설비", "차량·운반기계"],
+  "충돌": ["차량·운반기계"],
+  "붕괴·전도": ["굴착·토사", "차량·운반기계"],
+  "감전": ["전기"],
+  "베임·절단": ["기계·설비"],
+  "온열질환": ["폭염·온열"]
+};
+
+/**
+ * 질문이 적은 재해형태 type 으로 작업 묶음이 안 겹친 사례를 남기는가.
+ * ① 질문의 작업 묶음이 그 재해형태를 이미 설명하면 남기지 않는다(덕트 용접의 「화재감시자 배치」, 타워크레인의 「낙하 우려」).
+ * ② 사례에 그 재해형태를 낳는 작업 묶음이 있어야 한다(작업 묶음이 없는 열처리로 폭발 사례는 남기지 않는다).
+ */
+function statedTypeKeeps(type: string, queryWork: ReadonlySet<string>, caseWork: ReadonlySet<string>): boolean {
+  const typicalWork = ACCIDENT_TYPE_WORK[type] ?? [];
+  return typicalWork.length > 0
+    && !typicalWork.some((label) => queryWork.has(label))
+    && typicalWork.some((label) => caseWork.has(label));
+}
+
 function workContextsOf(text: string): Set<string> {
   return new Set(WORK_CONTEXTS.filter(({ pattern }) => pattern.test(text)).map(({ label }) => label));
 }
@@ -94,10 +122,11 @@ export function judgeSifCase(item: SafetyReferenceItem, query: SifRelevanceQuery
   const caseTypes = familyGroupsOf(text);
   const matchedWork = [...caseWork].filter((label) => queryWork.has(label));
   const matchedAccidentTypes = [...caseTypes].filter((label) => queryTypes.has(label));
-  // 작업 설명이 재해형태를 직접 적었으면(「외벽 도장 작업의 추락 위험」) 그 재해형태가 같은 사례는 남긴다.
+  // 작업 설명이 재해형태를 직접 적었고(「외벽 도장 작업의 추락 위험」) 그 작업 묶음이 그 재해형태를 설명하지 못하면
+  // 그 재해형태를 낳는 작업 묶음의 같은 재해형태 사례는 남긴다(statedTypeKeeps).
   // 생성된 행(accidentTypeText)의 재해형태로는 살리지 않는다 — 엉뚱한 사례에 끌려 만든 행일 수 있다.
   const workTextTypes = familyGroupsOf(query.workText);
-  const statedTypeMatch = [...caseTypes].some((label) => workTextTypes.has(label));
+  const statedTypeMatch = [...caseTypes].some((label) => workTextTypes.has(label) && statedTypeKeeps(label, queryWork, caseWork));
 
   if (queryWork.size && !matchedWork.length && !statedTypeMatch) {
     return {
