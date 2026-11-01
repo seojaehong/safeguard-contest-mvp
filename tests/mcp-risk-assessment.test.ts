@@ -438,13 +438,37 @@ describe("시행규칙 제37조의4 기재 항목 충족 검사", () => {
     for (const entry of header) expect(entry.note).toMatch(/현장에서 적습니다/u);
   });
 
-  it("도구 설명과 결과 문구에 「정본 서식」「고시 서식」을 쓰지 않는다", async () => {
+  // 우리 도구가 직접 쓰는 문구(도구 설명·docs·기능 지도·결과의 안내·이유·검사 문구)에 금지 문구가 없어야 한다(261101 N3).
+  // 생성된 본표 행·SIF 사례 제목은 생성·원천 자료 몫이라 여기서 보지 않는다.
+  const BANNED_SURFACE = /정본\s*서식|고시\s*서식|노무사|상담|진단|판정|지도|대리|자문/u;
+
+  function ownStrings(payload: RiskAssessmentToolResult): string {
+    return JSON.stringify({
+      status: payload.status,
+      responsibilityNote: payload.responsibilityNote,
+      fileUnavailableReason: payload.fileUnavailableReason,
+      trimmed: payload.trimmed,
+      recordItemsCheck: payload.recordItemsCheck,
+      sif: { reason: payload.sif.reason, relevanceNote: payload.sif.relevanceNote, excluded: (payload.sif.excluded ?? []).map((item) => item.reason) },
+      titles: [payload.riskAssessment.title, payload.riskAssessment.headers, payload.riskAssessment.approvalLabels, payload.reviewItems.title],
+    });
+  }
+
+  it("도구 설명과 결과 문구에 금지 문구(「정본 서식」「고시 서식」·노무사·상담·진단·판정·지도·대리·자문)를 쓰지 않는다", async () => {
     const source = fs.readFileSync(path.join(process.cwd(), "app/api/mcp/[transport]/implementation.ts"), "utf8");
-    const block = source.slice(source.indexOf("\"generate_risk_assessment\""));
+    const start = source.indexOf("\"generate_risk_assessment\",");
+    const block = source.slice(start, source.indexOf("withMcpProviderAdmission", start));
     expect(block).toMatch(/초안 작성 보조 도구이며, 위험성평가 실시와 최종 판단 책임은 사업주에게 있다/u);
-    const { payload } = await callTool(opsResponse("logistics-heat"), { question: ops["logistics-heat"].question });
-    const text = JSON.stringify({ ...payload, file: null }) + block;
-    expect(text).not.toMatch(/정본\s*서식|고시\s*서식/u);
+    const docsRow = fs.readFileSync(path.join(process.cwd(), "docs/mcp-server.md"), "utf8").split("\n").find((line) => line.startsWith("| `generate_risk_assessment`")) ?? "";
+    const feature = fs.readFileSync(path.join(process.cwd(), ".claude/skills/verify-safeclaw/features/mcp-risk-assessment.md"), "utf8");
+    expect(docsRow).not.toBe("");
+    for (const text of [block, docsRow, feature]) expect(text).not.toMatch(BANNED_SURFACE);
+
+    const ok = (await callTool(opsResponse("logistics-heat"), { question: ops["logistics-heat"].question })).payload;
+    const base = opsResponse("mfg-press");
+    const noRows = (await callTool({ ...base, structured: { ...base.structured, riskAssessmentRows: [] } as AskResponse["structured"] }, { question: "무엇인가 하는 작업", format: "hwp" })).payload;
+    const template = (await callTool(opsResponse("logistics-heat"), { question: ops["logistics-heat"].question, mode: "template" })).payload;
+    for (const payload of [ok, noRows, template]) expect(ownStrings(payload)).not.toMatch(BANNED_SURFACE);
   });
 });
 
