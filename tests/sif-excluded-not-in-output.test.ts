@@ -57,7 +57,7 @@ function generatedResponse(): AskResponse {
   const rows = buildSafetyReferenceRiskRows(base, publicEvidenceItems, "맑음", QUESTION);
   return canonicalizeRiskAssessmentResponse({
     ...base,
-    structured: { ...base.structured, riskAssessmentRows: rows },
+    structured: { ...base.structured, riskAssessmentRows: rows } as AskResponse["structured"],
     dbHarness: { packet, promptContext: "", summary: { sifCases: packet.sifCases.length } as unknown as NonNullable<AskResponse["dbHarness"]>["summary"] },
   });
 }

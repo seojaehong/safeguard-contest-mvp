@@ -18,7 +18,7 @@ import {
   isSafetyReferenceCompatibleWithQuery
 } from "@/lib/safety-reference-catalog";
 import { koshaHazardFamiliesFromText, type KoshaHazardFamily } from "@/lib/kosha-hazard-families";
-import { rankSifCases, type SifRelevance } from "@/lib/sif-case-relevance";
+import { hasSifWorkContext, rankSifCases, type SifRelevance } from "@/lib/sif-case-relevance";
 
 export { koshaHazardFamiliesFromText, type KoshaHazardFamily } from "@/lib/kosha-hazard-families";
 
@@ -152,6 +152,9 @@ export type DbHarnessPacket = {
    */
   sifSelection?: {
     retrievedCount: number;
+    /** false = 작업 설명에서 작업 묶음을 못 뽑아 거르지 않았다(reason 에 이유). 이때 relevance 는 비어 있다. */
+    relevanceApplied: boolean;
+    reason?: string;
     relevance: Array<{ id: string; relevance: SifRelevance }>;
     excluded: Array<{ id: string; title: string; reason: string }>;
   };
@@ -317,14 +320,29 @@ function buildRetrievalContract(input: {
  */
 function selectSifCases(question: string, items: readonly SafetyReferenceItem[]) {
   const retrieved = items.filter((item) => item.item_type === "sif-case");
+  if (!hasSifWorkContext(question)) {
+    // 거름을 걸 수 없다. 사례는 검색 순서대로 두되 「관련 있음」 근거(relevance)는 붙이지 않는다.
+    return {
+      retrievedCount: retrieved.length,
+      relevanceApplied: false,
+      reason: SIF_RELEVANCE_NOT_APPLIED_REASON,
+      orderedIds: retrieved.map((item) => item.id),
+      relevance: [],
+      excluded: []
+    };
+  }
   const { kept, dropped } = rankSifCases(retrieved, { workText: question });
   return {
     retrievedCount: retrieved.length,
-    keptIds: new Set(kept.map(({ item }) => item.id)),
+    relevanceApplied: true,
+    orderedIds: kept.map(({ item }) => item.id),
     relevance: kept.map(({ item, relevance }) => ({ id: item.id, relevance })),
     excluded: dropped.map(({ item, reason }) => ({ id: item.id, title: item.display_title || item.title, reason }))
   };
 }
+
+export const SIF_RELEVANCE_NOT_APPLIED_REASON =
+  "작업 설명에서 작업·장소·기인물을 찾지 못해 SIF 사례 관련성 거름을 걸지 않았습니다(검색 순서 그대로, 관련 근거 없음).";
 
 export function buildDbHarnessPacket(input: {
   question: string;
@@ -341,8 +359,9 @@ export function buildDbHarnessPacket(input: {
     .filter((item) => isSafetyReferenceCompatibleWithQuery(input.question, item))
     .filter((item) => isDirectEvidenceCompatibleWithQueryHazard(item, queryHazardFamilies));
   const sifSelection = selectSifCases(input.question, compatible);
+  const keptSifIds = new Set(sifSelection.orderedIds);
   const references = compatible
-    .filter((item) => item.item_type !== "sif-case" || sifSelection.keptIds.has(item.id))
+    .filter((item) => item.item_type !== "sif-case" || keptSifIds.has(item.id))
     .map((item) => {
       const exactDirectKosha = isKoshaTechnicalReference(item)
         && isSafetyReferenceDirectEligible(item);
@@ -362,7 +381,7 @@ export function buildDbHarnessPacket(input: {
     item.evidence_role === "direct" && isSafetyReferenceDirectEligible(item)
   ));
   const sifById = new Map(references.filter((item) => item.item_type === "sif-case").map((item) => [item.id, item]));
-  const sifCases = sifSelection.relevance.flatMap(({ id }) => sifById.get(id) ?? []);
+  const sifCases = sifSelection.orderedIds.flatMap((id) => sifById.get(id) ?? []);
   const classifiedIds = new Set([
     ...directEvidence.map((item) => item.id),
     ...sifCases.map((item) => item.id)
@@ -393,6 +412,8 @@ export function buildDbHarnessPacket(input: {
     sifCases,
     sifSelection: {
       retrievedCount: sifSelection.retrievedCount,
+      relevanceApplied: sifSelection.relevanceApplied,
+      ...(sifSelection.reason ? { reason: sifSelection.reason } : {}),
       relevance: sifSelection.relevance,
       excluded: sifSelection.excluded
     },

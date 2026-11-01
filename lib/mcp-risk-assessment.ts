@@ -118,6 +118,9 @@ export type RiskAssessmentToolResult = {
     retrievedCount?: number;
     /** 작업·재해형태가 맞지 않아 뺀 사례. */
     excluded?: RiskAssessmentSifExcluded[];
+    /** 관련성 거름을 걸었는가. false 면 cases 는 검색 순서 그대로이고 relevance 가 없다(relevanceNote 에 이유). */
+    relevanceApplied: boolean;
+    relevanceNote?: string;
   };
   responsibilityNote: string;
   file: {
@@ -188,6 +191,8 @@ function sifSourceOf(sourceId: string, url: string | null | undefined): RiskAsse
  * 생성이 본 근거와 돌려주는 목록이 어긋나므로, 패킷의 sifCases 순서·relevance·excluded 를 옮겨 적기만 한다.
  */
 function sifCasesOf(response: AskResponse): {
+  relevanceApplied: boolean;
+  relevanceNote?: string;
   retrievedCount: number;
   cases: RiskAssessmentSifCase[];
   excluded: RiskAssessmentSifExcluded[];
@@ -197,6 +202,8 @@ function sifCasesOf(response: AskResponse): {
   const relevanceById = new Map((packet?.sifSelection?.relevance ?? []).map(({ id, relevance }) => [id, relevance]));
   const excluded = packet?.sifSelection?.excluded ?? [];
   return {
+    relevanceApplied: packet?.sifSelection?.relevanceApplied ?? false,
+    ...(packet?.sifSelection?.reason ? { relevanceNote: packet.sifSelection.reason } : {}),
     retrievedCount: packet?.sifSelection?.retrievedCount ?? items.length,
     cases: items.map((item) => {
       const relevance = relevanceById.get(item.id);
@@ -383,7 +390,9 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
           ? { count: sifCases.length, cases: sifCases }
           : { count: 0, cases: [], reason: sifZeroReason(response, aiMode, sif.excluded.length) }),
         ...(sif.retrievedCount ? { retrievedCount: sif.retrievedCount } : {}),
-        ...(sif.excluded.length ? { excluded: sif.excluded } : {})
+        ...(sif.excluded.length ? { excluded: sif.excluded } : {}),
+        relevanceApplied: sif.relevanceApplied,
+        ...(sif.relevanceNote ? { relevanceNote: sif.relevanceNote } : {})
       },
       responsibilityNote: RISK_ASSESSMENT_RESPONSIBILITY_NOTE,
       file: null,

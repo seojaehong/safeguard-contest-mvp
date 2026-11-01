@@ -22,8 +22,9 @@ const WORK_CONTEXTS: readonly WorkContext[] = [
   { label: "밀폐공간", pattern: new RegExp(`${CONFINED_IDENTITY.source}|밀폐|(?:배관|덕트|탱크|용기|저수조|맨홀)\\s*(?:안|내부)|피트|사일로`, "u") },
   { label: "화기·용접", pattern: /용접|용단|화기\s*작업|불꽃|불티|토치|그라인더|가스\s*절단/u },
   { label: "화학물질·인화성", pattern: new RegExp(`${CHEMICAL_SUBSTANCE.source}|도장|도료|희석제|유증기|가연성\\s*증기|LPG|프로판`, "u") },
-  { label: "고소·개구부", pattern: /고소|사다리|비계|지붕|개구부|단부|작업발판|달비계|리프트|승강기/u },
-  { label: "차량·운반기계", pattern: /지게차|화물차|트럭|덤프|굴착기|크레인|차량|컨베이어|운반대차/u },
+  // 「리프트」는 승강 설비다. 포크리프트(지게차)·테일리프트(화물차 적재함 승강판)는 차량·운반기계로 본다.
+  { label: "고소·개구부", pattern: /고소|사다리|비계|지붕|개구부|단부|작업발판|달비계|(?<!포크|테일)리프트|승강기/u },
+  { label: "차량·운반기계", pattern: /지게차|포크리프트|테일리프트|화물차|트럭|덤프|굴착기|크레인|차량|컨베이어|운반대차/u },
   { label: "기계·설비", pattern: /프레스|롤러|사출|성형기|금형|분쇄기|혼합기|회전체|가동부/u },
   { label: "굴착·토사", pattern: /굴착|흙막이|토사|사면|터파기/u },
   { label: "전기", pattern: /전기\s*(?:작업|설비)|분전반|배전|충전부|활선|고압선/u },
@@ -52,6 +53,11 @@ const FAMILY_GROUP: Readonly<Partial<Record<KoshaHazardFamily, string>>> = {
 
 function workContextsOf(text: string): Set<string> {
   return new Set(WORK_CONTEXTS.filter(({ pattern }) => pattern.test(text)).map(({ label }) => label));
+}
+
+/** 작업 설명에서 작업·장소·기인물 묶음을 하나라도 뽑았는가. 못 뽑으면 관련성 거름을 걸 수 없다. */
+export function hasSifWorkContext(workText: string): boolean {
+  return workContextsOf(workText).size > 0;
 }
 
 function familyGroupsOf(text: string): Set<string> {
