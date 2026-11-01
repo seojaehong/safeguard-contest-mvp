@@ -1,4 +1,4 @@
-import { createLogger } from "@/lib/logger";
+import { createLogger, safeFailureContext } from "@/lib/logger";
 import runtimeVerificationJson from "@/evaluation/sif-embedding-gate/runtime-vector-verification.json";
 import { evaluateSifVectorRuntimeReceipt } from "@/lib/sif-vector-verification-contract.mjs";
 import { readBoundedResponseText } from "@/lib/server/upstream-http";
@@ -3661,8 +3661,9 @@ export async function fetchSafetyReferenceSources(
         originUrl: normalizeApprovedSafetyReferenceProvenanceUrl(text(record.origin_url))
       }]];
     }));
-  } catch {
+  } catch (error) {
     signal?.throwIfAborted();
+    log.error("safety_reference_sources lookup failed", safeFailureContext(error));
     return new Map();
   }
 }

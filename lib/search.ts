@@ -70,7 +70,7 @@ import { splitDocumentMeta } from "./doc-meta-split";
 import { verificationStatusLabel } from "./document-display-labels";
 import { gateAskResponseUserOutput } from "./user-output-gate";
 import { buildEvidenceLabels } from "./smsa-mapping";
-import { createLogger } from "@/lib/logger";
+import { createLogger, safeFailureContext } from "@/lib/logger";
 import { attachProgressListeners, safeEmit, type OnAskProgress } from "./ask-progress";
 import { resolveRunAskMode } from "./run-ask-mode";
 import {
@@ -274,10 +274,6 @@ function buildParentlessKoshaReviewDeliverables(
 /** 최종 응답에 본표 행이 남았을 때만 그 분기를 적는다(경계·정본화로 비었으면 none). */
 function finalRowsOrigin(response: AskResponse, origin: RiskRowsOrigin): RiskRowsOrigin {
   return response.structured?.riskAssessmentRows?.length ? origin : "none";
-}
-
-function safeFailureContext(error: unknown): { errorType: string } {
-  return { errorType: error instanceof Error ? error.name : typeof error };
 }
 
 /** 작업계획서 구조화본의 응급조치 칸을 작업유형별 고정 절차로 채운다. 절차가 없으면 「현장 확인 필요」를 유지한다. */

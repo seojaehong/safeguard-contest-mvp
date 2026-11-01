@@ -17,6 +17,7 @@ import { sanitizeAskResponsePublicSurface } from "@/lib/ask-public-surface";
 import type { McpAuthContext } from "@/lib/mcp-auth";
 import { MCP_TOOL_RESULT_MAX_BYTES, toToolResult, type McpToolResult } from "@/lib/mcp-tools";
 import { DocumentExportLimitError } from "@/lib/document-export-budget";
+import { createLogger, safeFailureContext } from "@/lib/logger";
 import {
   displayEvidenceRefs,
   RISK_APPROVAL_LABELS,
@@ -184,6 +185,8 @@ export const GENERATE_RISK_ASSESSMENT_DEFAULT_MODE: AiMode = "enhanced";
 /** status=ok 로 보는 본표 행 출처. 그 밖의 행(작업 유형 기본 행으로 대신함 등)은 ok_fallback. */
 const GROUNDED_ROWS_ORIGINS: ReadonlySet<RiskRowsOrigin> = new Set(["ai", "db_harness", "template"]);
 
+const log = createLogger("mcp-risk-assessment");
+
 export const RISK_ASSESSMENT_RESPONSIBILITY_NOTE =
   "초안 작성 보조 결과입니다. 위험성평가 실시와 최종 판단 책임은 사업주에게 있습니다.";
 
@@ -323,7 +326,10 @@ function sifZeroReason(response: AskResponse, mode: AiMode, excludedCount = 0): 
   return "안전 지식 DB에서 이 작업과 맞는 SIF 유사사례를 찾지 못했습니다.";
 }
 
-class RiskAssessmentRenderError extends Error {}
+/** 렌더러가 본문을 거절했다(ok:false). 이름이 실패 기록의 errorType 으로 남아 던진 오류와 구분된다. */
+class RiskAssessmentRenderError extends Error {
+  override readonly name = "RiskAssessmentRenderError";
+}
 
 async function renderFile(
   dependencies: Dependencies,
@@ -507,6 +513,7 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
       } catch (error) {
         // 호출 취소는 결과로 바꾸지 않는다. 그 밖의 렌더 실패는 파일만 빼고 본표 결과는 돌려준다.
         signal?.throwIfAborted();
+        log.error("generate_risk_assessment file render failed", { format: fileFormat, ...safeFailureContext(error) });
         result.fileUnavailableReason = renderFailureReason(error, fileFormat);
       }
     } else {

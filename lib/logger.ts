@@ -35,6 +35,14 @@ function serializeContext(context: LogContext | undefined): string {
 }
 
 /**
+ * 실패 기록용 문맥: 오류 종류만 남기고 메시지 본문은 남기지 않는다
+ * (상류·렌더러 오류 문구에 사용자 입력이나 주소가 섞일 수 있다).
+ */
+export function safeFailureContext(error: unknown): { errorType: string } {
+  return { errorType: error instanceof Error ? error.name : typeof error };
+}
+
+/**
  * Structured console logger with scope prefix and level gating.
  * Default level: LOG_LEVEL env, else "debug" in dev / "info" in production.
  */
