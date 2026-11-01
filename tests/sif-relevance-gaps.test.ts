@@ -57,6 +57,26 @@ describe("포크리프트·테일리프트는 승강 리프트가 아니다", ()
     expect(decision.kept).toBe(false);
   });
 
+  // 띄어 쓴 표기·화물차 적재함 승강판(리프트게이트·파워게이트)·핸드리프트도 승강 리프트가 아니다(2차 검토 2).
+  for (const question of [
+    "물류창고 포크 리프트 상하차 작업 3명",
+    "화물차 테일 리프트로 상하차 작업",
+    "택배 화물차 리프트게이트로 상하차 작업",
+    "택배 화물차 파워게이트로 상하차 작업",
+    "창고 핸드 리프트로 팔레트 운반 작업",
+  ]) {
+    it(`「${question}」은 고소·개구부로 보지 않고 리프트 개구부 사례를 뺀다`, () => {
+      const decision = judgeSifCase(LIFT_OPENING, { workText: question });
+      expect(decision.kept).toBe(false);
+    });
+  }
+
+  it("띄어 쓴 「포크 리프트」 사례도 지게차 작업의 차량·운반기계 사례로 남는다", () => {
+    const spacedFork = sifItem("v-fork-spaced", "가상 사례 — 후진하던 포크 리프트에 보행자가 부딪힘", "가상 개요: 상하차 중 포크 리프트가 후진하다 보행자와 충돌했다.");
+    const decision = judgeSifCase(spacedFork, { workText: "물류창고 지게차 상하차 작업 3명" });
+    expect(decision.kept && decision.relevance.matchedWork).toEqual(["차량·운반기계"]);
+  });
+
   it("승강 리프트 작업은 여전히 리프트 개구부 사례와 맞는다", () => {
     const decision = judgeSifCase(LIFT_OPENING, { workText: "화물용 리프트에 자재를 싣는 작업" });
     expect(decision.kept).toBe(true);
