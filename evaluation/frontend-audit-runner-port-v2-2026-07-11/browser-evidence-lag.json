@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "sourceIdentity": "12dd144309843aaa2eee6e16f5a624bd57219c0d6decab31e070b66f1d4fe8c2",
+    "browserReportSourceIdentity": "594795c459e51f6fee39f6325366ba51d1bcff23bd0e5f779e3300cf3e549c6b",
+    "reason": "WorkpackEditor 위험성평가 양식 값·단일 문서 내보내기 본문을 lib/risk-assessment-export-body.ts 공용 함수로 교체(화면·본문 값 변화 없음, 교차 검토 C3). 브라우저 매트릭스 미재생성 — 병합 전 재생성 또는 운영 G5 드라이런으로 확인",
+    "recordedAt": "2026-11-01"
+  }
+]

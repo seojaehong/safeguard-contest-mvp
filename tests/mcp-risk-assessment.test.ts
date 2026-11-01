@@ -47,7 +47,7 @@ const SCENARIOS = ["mfg-press", "con-excavation", "confined-space", "logistics-h
 
 const AUTH: McpAuthContext = { siteId: null, orgId: null, scopes: ["tools:*"], source: "env", tokenId: null };
 
-// 편집기 getSafetyFormProfile("riskAssessmentDraft") 를 그대로 옮겨 적은 값(아래 「편집기 원문」 시험이 원문과 대조한다).
+// 위험성평가 양식 설정의 기대값(편집기·MCP 가 함께 쓰는 lib/risk-assessment-export-body.ts 값과 대조한다).
 const EDITOR_RISK_PROFILE = {
   code: "SC-RISK-01",
   subtitle: "위험성평가 및 감소대책 확인서",
@@ -218,13 +218,10 @@ async function callTool(response: AskResponse, args: { question: string; mode?: 
 }
 
 describe("위험성평가 내보내기 요청 본문(편집기와 같은 값)", () => {
-  it("편집기 원문의 위험성평가 양식 설정·문서 제목과 같다", () => {
+  // 편집기는 lib 의 양식 값·본문 함수를 그대로 쓴다(tests/workpack-editor-risk-export-body.test.ts). 여기서는 값 자체를 본다.
+  it("위험성평가 양식 설정·문서 제목이 정해 둔 값과 같다", () => {
     const source = fs.readFileSync(path.join(process.cwd(), "components/WorkpackEditor.tsx"), "utf8");
-    const branch = source.match(/if \(key === "riskAssessmentDraft"\) \{\s*return (\{[\s\S]*?\});\s*\}/u);
-    if (!branch) throw new Error("편집기 getSafetyFormProfile 의 위험성평가 분기를 찾지 못했다");
-    const editorProfile = new Function(`return ${branch[1]};`)() as unknown;
-    expect(editorProfile).toEqual(EDITOR_RISK_PROFILE);
-    expect(RISK_ASSESSMENT_FORM_PROFILE).toEqual(editorProfile);
+    expect(RISK_ASSESSMENT_FORM_PROFILE).toEqual(EDITOR_RISK_PROFILE);
     expect(source).toMatch(/key: "riskAssessmentDraft",\s*title: "위험성평가표"/u);
     expect(RISK_ASSESSMENT_EXPORT_TITLE).toBe("위험성평가표");
   });

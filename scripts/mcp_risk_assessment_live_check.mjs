@@ -1,6 +1,6 @@
 // 로컬 next 인스턴스에 실제 MCP 클라이언트(@modelcontextprotocol/sdk streamable-http)로 붙어
 // generate_risk_assessment 를 부르고, 받은 서식 파일을 웹 내보내기 라우트(/api/export/{xlsx,hwp})에
-// 편집기와 같은 모양의 본문(이 스크립트가 따로 적는다)을 보내 받은 파일과 대조한다.
+// 편집기와 같은 본문(lib/risk-assessment-export-body.ts 의 같은 함수)을 보내 받은 파일과 대조한다.
 //
 // 사용: node scripts/mcp_risk_assessment_live_check.mjs <repoRoot> <baseUrl> <outDir> [tokenFile]
 // 토큰은 tokenFile(한 줄) 또는 환경변수 MCP_TEST_TOKEN 에서만 읽고 출력하지 않는다. 가상 작업 설명만 쓴다.
@@ -27,16 +27,9 @@ const { readFileSync } = await import("node:fs");
 globalThis.measureTextWidth = (_font, text) => text.length * 12;
 initSync({ module: readFileSync(path.join(worktree, "public", "rhwp_bg.wasm")) });
 
-// 편집기 getSafetyFormProfile("riskAssessmentDraft") 원문 값.
-const EDITOR_RISK_PROFILE = {
-  code: "SC-RISK-01",
-  subtitle: "위험성평가 및 감소대책 확인서",
-  layout: "risk",
-  primaryColumn: "위험요인",
-  actionColumn: "감소대책 / 잔여위험",
-  confirmationRows: ["위험요인 확인", "감소대책 담당 지정", "작업 전 공유", "잔여위험 승인"],
-  approvalLabels: ["작성", "검토", "승인"]
-};
+// 편집기와 같은 양식 값·본문 함수(lib/risk-assessment-export-body.ts, 타입 import 만 있어 Node 타입 제거로 바로 읽는다).
+const { buildSingleDocumentExportBody, riskAssessmentFormProfile, RISK_ASSESSMENT_EXPORT_TITLE } =
+  await import(pathToFileURL(path.join(worktree, "lib", "risk-assessment-export-body.ts")).href);
 
 const SCENARIOS = [
   { id: "S1-sif", label: "SIF 있는 작업(밀폐공간)", question: "가상 사업장 한빛정화 오수처리장 맨홀 내부 슬러지 제거 작업 3명, 밀폐공간 산소결핍·황화수소 우려, 주간", mode: "enhanced" },
@@ -46,17 +39,16 @@ const SCENARIOS = [
 ];
 
 function editorBody(result, format) {
-  const review = result.reviewItems.structuredRows;
-  return {
-    ...(format === "xlsx" ? { mode: "single" } : {}),
+  return buildSingleDocumentExportBody({
+    format,
     edited: false,
-    title: "위험성평가표",
+    title: RISK_ASSESSMENT_EXPORT_TITLE,
     rows: [],
-    profile: EDITOR_RISK_PROFILE,
+    profile: riskAssessmentFormProfile(),
     scenario: result.scenario,
     riskAssessmentRows: result.riskAssessment.structuredRows,
-    ...(review.length ? { riskReviewItems: review } : {})
-  };
+    riskReviewItems: result.reviewItems.structuredRows
+  });
 }
 
 async function workbookSnapshot(buffer) {
