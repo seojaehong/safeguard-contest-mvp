@@ -1888,7 +1888,7 @@ function applyTaskClassificationHold(response: AskResponse): AskResponse {
     ...response,
     answer: [
       "작업 유형 확인 필요",
-      `입력한 내용(${workSummary})에서 작업 유형을 판정하지 못해 문서팩을 만들지 않았습니다.`,
+      `입력한 내용(${workSummary})에서 작업 유형을 확인하지 못해 문서팩을 만들지 않았습니다.`,
       "오늘 하는 작업의 종류와 사용 장비를 적어 다시 요청하면 그 작업 기준으로 위험성평가·작업계획서·TBM·교육 기록을 만듭니다."
     ].join("\n\n"),
     practicalPoints: [holdLine],

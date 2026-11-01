@@ -14,6 +14,7 @@ import { POST as exportXlsx } from "@/app/api/export/xlsx/route";
 import { POST as exportHwp } from "@/app/api/export/hwp/route";
 import { sanitizeAskResponsePublicSurface } from "@/lib/ask-public-surface";
 import { buildDbHarnessPacket, buildPublicDbHarnessPacket } from "@/lib/db-harness";
+import { FORBIDDEN_USER_TERMS, findForbiddenUserTerms } from "@/lib/grounded-generation-contract";
 import { gateExportPayload } from "@/lib/user-output-gate";
 import { buildMockAskResponse } from "@/lib/mock-data";
 import { canonicalizeRiskAssessmentResponse, RISK_RECORD_ROW_HEADERS } from "@/lib/risk-assessment-record";
@@ -436,21 +437,33 @@ describe("시행규칙 제37조의4 기재 항목 충족 검사", () => {
     for (const entry of header) expect(entry.note).toMatch(/현장에서 적습니다/u);
   });
 
-  // 우리 도구가 직접 쓰는 문구(도구 설명·docs·기능 지도·결과의 안내·이유·검사 문구)에 금지 문구가 없어야 한다(261101 N3).
-  // 생성된 본표 행·SIF 사례 제목은 생성·원천 자료 몫이라 여기서 보지 않는다.
-  const BANNED_SURFACE = /정본\s*서식|고시\s*서식|노무사|상담|진단|판정|지도|대리|자문/u;
+  // 도구 설명·docs·기능 지도와 결과 payload 에 금지 문구가 없어야 한다(261101 N3, 2차 검토 8).
+  // 공용 금지어는 lib/grounded-generation-contract.ts FORBIDDEN_USER_TERMS 하나를 쓰고, 도구 표면 전용 낱말만 여기서 더한다.
+  const MCP_SURFACE_EXTRA = /정본\s*서식|고시\s*서식|지도|대리|자문/u;
+  const BANNED_SURFACE = new RegExp(`${FORBIDDEN_USER_TERMS.source}|${MCP_SURFACE_EXTRA.source}`, "u");
 
-  function ownStrings(payload: RiskAssessmentToolResult): string {
-    return JSON.stringify({
-      status: payload.status,
-      responsibilityNote: payload.responsibilityNote,
-      fileUnavailableReason: payload.fileUnavailableReason,
-      trimmed: payload.trimmed,
-      recordItemsCheck: payload.recordItemsCheck,
-      sif: { reason: payload.sif.reason, relevanceNote: payload.sif.relevanceNote, excluded: (payload.sif.excluded ?? []).map((item) => item.reason) },
-      taskClassification: payload.scenario?.taskClassification,
-      titles: [payload.riskAssessment.title, payload.riskAssessment.headers, payload.riskAssessment.approvalLabels, payload.reviewItems.title],
-    });
+  /** 결과 payload 에서 생성문(위험 요약·본표 행·확인 필요 목록)·DB 원문(SIF 사례 제목·개요·출처, 뺀 사례 제목)·파일 바이트만 뺀 나머지 전부. */
+  function toolOwnSurface(payload: RiskAssessmentToolResult): Record<string, unknown> {
+    const { riskSummary: _summary, riskAssessment, reviewItems, sif, file, ...rest } = payload;
+    const { rows: _rows, structuredRows: _main, ...riskOwn } = riskAssessment;
+    const { items: _items, structuredRows: _review, ...reviewOwn } = reviewItems;
+    return {
+      ...rest,
+      riskAssessment: riskOwn,
+      reviewItems: reviewOwn,
+      sif: {
+        ...sif,
+        cases: sif.cases.map(({ title: _title, overview: _overview, source: _source, ...own }) => own),
+        excluded: (sif.excluded ?? []).map(({ title: _title, ...own }) => own),
+      },
+      file: file ? { ...file, base64: "" } : null,
+    };
+  }
+
+  function expectNoBannedSurface(payload: RiskAssessmentToolResult) {
+    const surface = toolOwnSurface(payload);
+    expect(findForbiddenUserTerms(surface)).toEqual([]);
+    expect(JSON.stringify(surface)).not.toMatch(MCP_SURFACE_EXTRA);
   }
 
   it("도구 설명과 결과 문구에 금지 문구(「정본 서식」「고시 서식」·노무사·상담·진단·판정·지도·대리·자문)를 쓰지 않는다", async () => {
@@ -466,17 +479,37 @@ describe("시행규칙 제37조의4 기재 항목 충족 검사", () => {
     const ok = (await callTool(opsResponse("logistics-heat"), { question: ops["logistics-heat"].question })).payload;
     const base = opsResponse("mfg-press");
     const noRows = (await callTool({ ...base, structured: { ...base.structured, riskAssessmentRows: [] } as AskResponse["structured"] }, { question: "무엇인가 하는 작업", format: "hwp" })).payload;
-    const template = (await callTool(opsResponse("logistics-heat"), { question: ops["logistics-heat"].question, mode: "template" })).payload;
-    // 실제 runAsk 처럼 작업 분류가 review_required 이유를 실은 응답(run6 S4 실측에서 이 이유가 결과 문구로 새어 나왔다).
-    const unclassifiedQuestion = "내일 오전에 사무실에서 할 일 정리";
-    const unclassified = (await callTool({
-      ...base,
-      scenario: { ...base.scenario, taskClassification: buildTaskClassification(unclassifiedQuestion) },
-      structured: { ...base.structured, riskAssessmentRows: [] } as AskResponse["structured"],
-    }, { question: unclassifiedQuestion })).payload;
-    expect(unclassified.fileUnavailableReason).toMatch(/작업 유형을 확인하지 못해/u);
-    for (const payload of [ok, noRows, template, unclassified]) expect(ownStrings(payload)).not.toMatch(BANNED_SURFACE);
+    const withSif = (await callTool(opsResponse("confined-space", [
+      sifItem("sif-furnace", "가상 사례 — 열처리로 가동 중 내화물 속 물이 끓어 폭발", "가상 개요: 내화물이 덜 말라 터졌다."),
+      sifItem("sif-pipe", "가상 사례 — 좁은 배관 안 용접 작업자가 산소결핍으로 의식 잃음", "가상 개요: 환기 없이 배관 안에 들어갔다."),
+    ], ops["confined-space"].question), { question: ops["confined-space"].question })).payload;
+    for (const payload of [ok, noRows, withSif]) expectNoBannedSurface(payload);
   });
+
+  // run6 S4: 작업 분류 이유 「…판정하지 못했습니다」가 결과로 새어 나왔다. 문구는 원천(작업 분류)에서 고치고
+  // 결과 scenario 는 웹 /api/ask 와 같은 값(이유 포함)을 그대로 싣는다.
+  it("실제 runAsk 보류·template 응답도 결과 payload 전체에 금지 문구가 없고, 작업 분류 이유를 그대로 싣는다", async () => {
+    const { runAsk } = await import("@/lib/search");
+    const run = async (question: string, mode: "template" | "enhanced") => {
+      const handler = createGenerateRiskAssessmentHandler({
+        defaultMode: "enhanced",
+        generateResponse: (q, m) => runAsk(q, { aiMode: m }),
+        renderXlsx: renderXlsxDocumentExport,
+        renderHwp: renderHwpDocumentExport,
+      });
+      const result = await handler({ question, mode }, AUTH, { signal: new AbortController().signal });
+      return JSON.parse(result.content[0]?.text ?? "{}") as RiskAssessmentToolResult;
+    };
+    const unclassifiedQuestion = "내일 오전에 사무실에서 할 일 정리";
+    const held = await run(unclassifiedQuestion, "enhanced");
+    expect(held.status).toBe("review_required");
+    expect(held.fileUnavailableReason).toMatch(/작업 유형을 확인하지 못해/u);
+    expect(held.scenario.taskClassification).toEqual(buildTaskClassification(unclassifiedQuestion));
+    expect(held.scenario.taskClassification?.reason).toMatch(/작업 유형을 확인하지 못했습니다/u);
+    const template = await run(ops["logistics-heat"].question, "template");
+    expect(template.scenario.taskClassification?.reason).toBeTruthy();
+    for (const payload of [held, template]) expectNoBannedSurface(payload);
+  }, 60_000);
 });
 
 describe("위험성평가 행이 없을 때", () => {

@@ -45,10 +45,6 @@ export type GenerateRiskAssessmentInput = {
   format?: RiskAssessmentExportFormat;
 };
 
-export type RiskAssessmentScenario = Omit<AskResponse["scenario"], "taskClassification"> & {
-  taskClassification?: Omit<NonNullable<AskResponse["scenario"]["taskClassification"]>, "reason">;
-};
-
 export type RiskAssessmentSifSource = {
   id: string;
   agency: string | null;
@@ -93,8 +89,8 @@ export type RiskAssessmentToolResult = {
     fallbackUsed: boolean | null;
     answerProvider: string | null;
   };
-  /** 작업 분류는 이유 문구(웹 화면용) 없이 상태·작업 유형만. */
-  scenario: RiskAssessmentScenario;
+  /** 웹 /api/ask 와 같은 시나리오(작업 분류 상태·작업 유형·이유 포함). */
+  scenario: AskResponse["scenario"];
   riskSummary: { riskLevel: string; topRisk: string };
   riskAssessment: {
     title: string;
@@ -407,12 +403,6 @@ export function fitRiskAssessmentToolResult(result: RiskAssessmentToolResult, ma
   };
 }
 
-function withoutClassificationReason(scenario: AskResponse["scenario"]): RiskAssessmentScenario {
-  if (!scenario.taskClassification) return scenario;
-  const { reason: _reason, ...classification } = scenario.taskClassification;
-  return { ...scenario, taskClassification: classification };
-}
-
 export function createGenerateRiskAssessmentHandler(dependencies: Dependencies): GenerateRiskAssessmentHandler {
   return async ({ question, mode, format }, _authContext, execution) => {
     const signal = execution?.signal;
@@ -443,8 +433,7 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
       status: !hasRows ? "review_required" : generation.fallbackUsed ? "ok_fallback" : "ok",
       mode: aiMode,
       generation,
-      // 작업 분류의 이유 문구(웹 화면용)는 빼고 상태·작업 유형만 싣는다. 이유는 fileUnavailableReason 이 도구 문장으로 말한다.
-      scenario: withoutClassificationReason(response.scenario),
+      scenario: response.scenario,
       riskSummary: { riskLevel: response.riskSummary.riskLevel, topRisk: response.riskSummary.topRisk },
       riskAssessment: {
         title: RISK_ASSESSMENT_EXPORT_TITLE,

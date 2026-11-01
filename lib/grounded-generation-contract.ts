@@ -52,7 +52,8 @@ export type GroundingViolation = Readonly<{
 
 // 사용자 노출 금지어(판정·진단·상담·노무사). AI 생성 묶음에만 적용하며 치환하지 않고 묶음을 거절해 결정론 틀로 떨어뜨린다.
 // 복합어 허용 목록은 법정 용어·기관명만 — 결정론 틀의 「고용노동부 고객상담센터 1350」 등은 이 검사 밖(결정론 틀은 여기를 지나지 않는다).
-const FORBIDDEN_USER_TERMS = /판정|진단|상담|노무사/u;
+/** 사용자에게 나가는 글의 공용 금지어. AI 생성 거절 게이트와 도구 결과 시험이 이 목록 하나를 쓴다. */
+export const FORBIDDEN_USER_TERMS = /판정|진단|상담|노무사/u;
 const ALLOWED_COMPOUND_TERMS: readonly string[] = [
   "안전보건진단", // 산업안전보건법 제47조
   "건강진단", // 특수·일반·배치전·수시·임시건강진단(법 제129조~제131조)
