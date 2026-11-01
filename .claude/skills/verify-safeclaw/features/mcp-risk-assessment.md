@@ -5,7 +5,7 @@
 ## Sub-features
 
 - `tool-listed` `tools/list` 에 `generate_risk_assessment` 가 있고 입력은 `question`(필수)·`mode`(template·enhanced·full, 기본 enhanced)·`format`(xlsx·hwp, 기본 xlsx).
-- `risk-rows` 결과 `status` 가 `ok`(답변 생성이 대체 경로로 내려갔으면 `ok_fallback`, `generation.fallbackUsed=true`·`answerProvider` 로 드러남), `riskAssessment.headers` 13칸(한글 본표, 번호…잔여 위험성. 엑셀 21칸은 `structuredRows` 로 확인), `rowCount` ≥ 1, `approvalLabels` = 작성·검토·승인.
+- `risk-rows` 결과 `status` 가 `ok`(본표 행이 작업 유형 기본 행으로 대신 만들어졌으면 `ok_fallback` — `generation.rowsOrigin=fallback_baseline` 로 드러남. `generation.fallbackUsed` 는 답변·문서 보조 응답 여부일 뿐 status 근거가 아니다), `riskAssessment.headers` 13칸(한글 본표, 번호…잔여 위험성. 엑셀 21칸은 `structuredRows` 로 확인), `rowCount` ≥ 1, `approvalLabels` = 작성·검토·승인.
 - `review-list` 「검토 필요:」 행은 본표에 없고 `reviewItems` 로 따로 온다. 파일에도 「확인 필요 목록(본표에 넣지 않음)」 절이 있다.
 - `record-items` `recordItemsCheck` 가 시행규칙 제37조의4① 기재 항목 8개(실시 시기·담당자·참여 근로자·근로자대표·유해·위험요인·위험성 수준 결정·개선대책 수립·이행 결과)를 채움/일부/빈칸으로 돌려준다. 머리 기록란 4개는 생성 직후 빈칸(현장 기재)이 정상이다.
 - `responsibility` `responsibilityNote` = 초안 작성 보조, 실시·최종 판단 책임은 사업주.

@@ -37,7 +37,7 @@ import type { XlsxDocumentExportRender } from "@/lib/document-export-xlsx";
 import type { HwpDocumentExportRender } from "@/lib/document-export-hwp";
 import type { SafetyReferenceSourceMeta } from "@/lib/safety-reference-catalog";
 import type { SifRelevance } from "@/lib/sif-case-relevance";
-import type { AskResponse } from "@/lib/types";
+import type { AskResponse, RiskRowsOrigin } from "@/lib/types";
 import { gateExportPayload } from "@/lib/user-output-gate";
 
 export type GenerateRiskAssessmentInput = {
@@ -81,14 +81,20 @@ export type RiskRecordItemCheck = {
 
 export type RiskAssessmentToolResult = {
   engine: "safeclaw-runAsk";
-  /** ok_fallback = 행은 만들었지만 생성이 보조 응답(모델 대신 규칙 기반)으로 끝났다. generation 참고. */
+  /**
+   * 본표 행을 만든 분기(generation.rowsOrigin)로 정한다. ok = 모델 생성·안전 지식 DB 근거·요청한 template 행,
+   * ok_fallback = DB 근거·모델 행이 없어 작업 유형 기본 행으로 대신함(fallback_baseline·photo_seed), review_required = 본표 행 없음.
+   */
   status: "ok" | "ok_fallback" | "review_required";
   mode: AiMode;
-  /** 생성 품질 신호(runAsk generationTrace). fallbackUsed·answerProvider 가 null 이면 생성 기록이 없어 모른다는 뜻. */
+  /**
+   * 생성 품질 신호(runAsk generationTrace). rowsOrigin = 본표 행을 만든 분기(status 의 근거).
+   * fallbackUsed = 답변·문서 어느 하나라도 보조 응답으로 끝났는가(본표 행과 무관할 수 있다). null 이면 생성 기록이 없어 모른다는 뜻.
+   */
   generation: {
     askMode: AiMode;
+    rowsOrigin: RiskRowsOrigin | null;
     fallbackUsed: boolean | null;
-    answerProvider: string | null;
   };
   /** 웹 /api/ask 와 같은 시나리오(작업 분류 상태·작업 유형·이유 포함). */
   scenario: AskResponse["scenario"];
@@ -174,6 +180,9 @@ const MIME_TYPES: Record<RiskAssessmentExportFormat, string> = {
 
 /** 기본 생성 깊이. 웹 /api/ask 기본값(resolveRunAskMode)과 같다. 입장 제어와 핸들러가 이 값 하나를 쓴다. */
 export const GENERATE_RISK_ASSESSMENT_DEFAULT_MODE: AiMode = "enhanced";
+
+/** status=ok 로 보는 본표 행 출처. 그 밖의 행(작업 유형 기본 행으로 대신함 등)은 ok_fallback. */
+const GROUNDED_ROWS_ORIGINS: ReadonlySet<RiskRowsOrigin> = new Set(["ai", "db_harness", "template"]);
 
 export const RISK_ASSESSMENT_RESPONSIBILITY_NOTE =
   "초안 작성 보조 결과입니다. 위험성평가 실시와 최종 판단 책임은 사업주에게 있습니다.";
@@ -440,13 +449,13 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
     const trace = response.generationTrace;
     const generation: RiskAssessmentToolResult["generation"] = {
       askMode: trace?.askMode ?? aiMode,
-      fallbackUsed: trace ? trace.fallbackUsed : null,
-      answerProvider: trace?.answer.provider ?? null
+      rowsOrigin: trace?.rowsOrigin ?? null,
+      fallbackUsed: trace ? trace.fallbackUsed : null
     };
 
     const result: RiskAssessmentToolResult = {
       engine: "safeclaw-runAsk",
-      status: !hasRows ? "review_required" : generation.fallbackUsed ? "ok_fallback" : "ok",
+      status: !hasRows ? "review_required" : generation.rowsOrigin && !GROUNDED_ROWS_ORIGINS.has(generation.rowsOrigin) ? "ok_fallback" : "ok",
       mode: aiMode,
       generation,
       scenario: view.scenario,

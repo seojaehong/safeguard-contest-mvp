@@ -401,6 +401,13 @@ export type GenerationDeliverableModelTrace = {
   fallbackUsed?: boolean;
 };
 
+/**
+ * 본표 정본 행(structured.riskAssessmentRows)을 만든 분기(lib/search.ts runAsk).
+ * ai = 모델 생성 행(full), db_harness = 안전 지식 DB 근거 행, template = template 모드로 요청한 작업 유형 기본 행,
+ * fallback_baseline = DB 근거·모델 행이 없어(또는 처리 실패로) 작업 유형 기본 행으로 대신함, photo_seed = 사진 위험요인 행만, none = 행 없음.
+ */
+export type RiskRowsOrigin = "ai" | "db_harness" | "template" | "fallback_baseline" | "photo_seed" | "none";
+
 export type GenerationTrace = {
   traceId: string;
   askMode: "template" | "enhanced" | "full";
@@ -410,7 +417,9 @@ export type GenerationTrace = {
     provider: "anthropic" | "vertex" | "safeclaw" | "mixed" | null;
     modelPerDocument: Record<string, GenerationDeliverableModelTrace>;
   };
+  /** 답변·문서 어느 하나라도 보조 응답으로 끝났는가(본표 행과 무관할 수 있다 — 행은 rowsOrigin). */
   fallbackUsed: boolean;
+  rowsOrigin?: RiskRowsOrigin;
 };
 
 export type GenerationEvidenceSnapshot = {
