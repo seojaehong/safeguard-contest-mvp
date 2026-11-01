@@ -47,6 +47,9 @@ import {
   createGenerateReviewedSafetyDocpackHandler,
   createGenerateSafetyDocpackHandler,
 } from "@/lib/mcp-docpack-handler";
+import { createGenerateRiskAssessmentHandler } from "@/lib/mcp-risk-assessment";
+import { renderXlsxDocumentExport } from "@/lib/document-export-xlsx";
+import { renderHwpDocumentExport } from "@/lib/document-export-hwp";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import { isEmbeddableSifReferenceItem } from "@/lib/sif-embedding-corpus";
@@ -114,6 +117,14 @@ const generateReviewedSafetyDocpackHandler = createGenerateReviewedSafetyDocpack
     };
   },
   getGenerationEvidenceSecret: () => process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+});
+
+// 웹 /api/ask 와 같은 runAsk(aiMode) 경로. 기본 enhanced 는 웹 기본값(resolveRunAskMode)과 같다.
+const generateRiskAssessmentHandler = createGenerateRiskAssessmentHandler({
+  defaultMode: "enhanced",
+  generateResponse: (question, mode, signal) => runAsk(question, { aiMode: mode, signal }),
+  renderXlsx: renderXlsxDocumentExport,
+  renderHwp: renderHwpDocumentExport,
 });
 
 function uniqueReferences(items: SafetyReferenceItem[]): SafetyReferenceItem[] {
@@ -361,6 +372,37 @@ export function registerTools(server: McpServer): void {
     },
     async ({ task, document_text }) => {
       return toToolResult(await reviewDocpack(task, document_text));
+    }
+  );
+
+  registerScopedTool(server,
+    "generate_risk_assessment",
+    {
+      title: "위험성평가표 생성(서식 파일 포함)",
+      description:
+        "오늘 작업을 설명하면 SafeClaw 문서 엔진(웹 /api/ask 와 같은 runAsk)으로 위험성평가 본표 행(세부작업·유해·위험요인·재해유형·가능성·중대성·위험성·감소대책·근거)과 확인 필요 목록, 생성에 쓰인 SIF(중대재해) 유사사례를 만들고, 웹 「위험성평가표 편집 → 내보내기」와 같은 서식 파일(Excel 표 양식 .xlsx 또는 한글 표 양식 .hwp)을 base64 로 돌려준다. SIF 사례가 0건이면 이유를 함께 돌려준다. 작업공간에 저장하지 않는다.",
+      inputSchema: {
+        question: z.string().max(MCP_GENERATION_QUESTION_MAX_CHARS).describe("현장 작업 상황 설명 (예: 경기 화성 물류창고 지게차 상하차 작업 4명, 비 예보, 야간)"),
+        mode: z
+          .enum(["template", "enhanced", "full"])
+          .optional()
+          .describe("생성 깊이 (기본 enhanced — 웹 기본값과 같음, 안전 지식 DB·SIF 사례 반영. template 은 DB 조회 없음)"),
+        format: z
+          .enum(["xlsx", "hwp"])
+          .optional()
+          .describe("서식 파일 형식 (기본 xlsx — Excel 표 양식, hwp — 한글 표 양식). 한 번에 한 형식"),
+      },
+    },
+    async ({ question, mode, format }, authContext, { signal }) => {
+      return withMcpProviderAdmission(
+        authContext,
+        mode ?? "enhanced",
+        () => generateRiskAssessmentHandler(
+          { question, mode, format },
+          authContext,
+          { signal },
+        ),
+      );
     }
   );
 }

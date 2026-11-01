@@ -212,6 +212,7 @@ describe("MCP tool scope enforcement", () => {
       "get_evidence_mapping",
       "query_safety_knowledge",
       "qa_review_docpack",
+      "generate_risk_assessment",
     ]);
   });
 
@@ -221,6 +222,7 @@ describe("MCP tool scope enforcement", () => {
     expect(isReadOnlyMcpTool("query_safety_knowledge")).toBe(true);
     expect(isReadOnlyMcpTool("generate_reviewed_safety_docpack")).toBe(false);
     expect(isReadOnlyMcpTool("generate_safety_docpack")).toBe(false);
+    expect(isReadOnlyMcpTool("generate_risk_assessment")).toBe(false);
   });
 });
 

@@ -195,6 +195,7 @@ describe("MCP tool work budgets", () => {
     ["run_safeclaw_harness_agent", {}],
     ["generate_reviewed_safety_docpack", { task: "용접" }],
     ["generate_safety_docpack", {}],
+    ["generate_risk_assessment", {}],
   ] as const)("rejects oversized generation questions in %s", (toolName, extra) => {
     const schema = schemaFor(captureToolConfigs(), toolName);
 
@@ -234,6 +235,7 @@ describe("MCP tool work budgets", () => {
   it.each([
     ["generate_safety_docpack", { question: "용접", mode: "full" }],
     ["generate_reviewed_safety_docpack", { question: "용접", task: "용접", mode: "enhanced" }],
+    ["generate_risk_assessment", { question: "용접", mode: "enhanced" }],
   ] as const)("fails %s closed before provider work without durable production admission", async (toolName, args) => {
     vi.stubEnv("VERCEL_ENV", "production");
     vi.stubEnv("UPSTASH_REDIS_REST_URL", "");

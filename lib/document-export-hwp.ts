@@ -1,0 +1,326 @@
+// /api/export/hwp 의 본문 → 한컴 HWP(5.0 바이너리) 변환. 웹 라우트(app/api/export/hwp/route.ts)와
+// MCP generate_risk_assessment 가 같은 함수를 쓴다(채널마다 서식 코드를 복제하지 않는다).
+// 받은 본문은 여기서 PR-14 출력 게이트(gateExportPayload)와 입력·출력 예산을 지난다.
+import fs from "node:fs";
+import path from "node:path";
+// Use the WASM init for server runtime. exportHwp() supports tables; exportHwpx() does NOT.
+import { initSync, HwpDocument } from "@rhwp/core";
+import { gateExportPayload } from "@/lib/user-output-gate";
+import { companyFilePrefix, formatCompanyName, formatWorkerCount } from "@/lib/scenario-display";
+import {
+  parseStructuredRiskAssessmentRows,
+  resolveRiskAssessmentRows,
+  type StructuredRiskAssessmentRow
+} from "@/lib/risk-assessment-renderer";
+import { RISK_RETENTION_NOTE, RISK_SCALE_LINES } from "@/lib/risk-labels";
+import {
+  displayEvidenceRefs,
+  resolveRiskExportRows,
+  RISK_APPROVAL_LABELS,
+  RISK_RECORD_ROW_HEADERS,
+  RISK_REVIEW_LIST_NOTE,
+  RISK_REVIEW_LIST_TITLE,
+  riskRecordHeaderPairs,
+  riskRecordRowCells
+} from "@/lib/risk-assessment-record";
+import {
+  assertDocumentExportInputBudget,
+  assertDocumentExportOutputBudget
+} from "@/lib/document-export-budget";
+
+type SheetRow = {
+  document: string;
+  section: string;
+  item: string;
+  content: string;
+};
+
+type SafetyFormProfile = {
+  code: string;
+  subtitle: string;
+  layout: "generic" | "risk" | "workPlan" | "permit" | "tbmBriefing" | "tbmLog" | "education" | "photo";
+  primaryColumn: string;
+  actionColumn: string;
+  confirmationRows: string[];
+  approvalLabels: string[];
+};
+
+let wasmInitialized = false;
+
+function ensureWasm() {
+  if (wasmInitialized) return;
+  (globalThis as unknown as { measureTextWidth?: (font: string, text: string) => number }).measureTextWidth = (_font, text) =>
+    text.length * 12;
+  // Vercel serverless does NOT bundle node_modules/@rhwp/core/rhwp_bg.wasm into
+  // the function tracing graph (4MB binary, dynamic fs.readFileSync). The same
+  // WASM is already published under public/rhwp_bg.wasm for the browser path.
+  // public/ files DO get traced into the function bundle.
+  const candidates = [
+    path.join(process.cwd(), "public", "rhwp_bg.wasm"),
+    path.join(process.cwd(), "node_modules", "@rhwp", "core", "rhwp_bg.wasm")
+  ];
+  let wasmBytes: Buffer | null = null;
+  for (const candidate of candidates) {
+    try {
+      wasmBytes = fs.readFileSync(candidate);
+      break;
+    } catch {
+      /* keep trying */
+    }
+  }
+  if (!wasmBytes) {
+    throw new Error(`rhwp WASM not found in any of: ${candidates.join(", ")}`);
+  }
+  initSync({ module: wasmBytes });
+  wasmInitialized = true;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function readString(value: unknown, fallback = "") {
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function readNumber(value: unknown, fallback = 0) {
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function sanitizeFileName(value: string) {
+  return value
+    .replace(/[\\/:*?"<>|]/g, "-")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .slice(0, 80) || "safeclaw-document";
+}
+
+function parseRows(value: unknown, fallbackDoc: string): SheetRow[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item): SheetRow[] => {
+    if (!isRecord(item)) return [];
+    const content = readString(item.content);
+    if (!content && readString(item.item) === "") return [];
+    return [{
+      document: readString(item.document, fallbackDoc),
+      section: readString(item.section, "본문"),
+      item: readString(item.item, "확인"),
+      content
+    }];
+  });
+}
+
+function parseProfile(value: unknown): SafetyFormProfile {
+  const r = isRecord(value) ? value : {};
+  const layout = readString(r.layout, "generic");
+  const allowed = ["generic", "risk", "workPlan", "permit", "tbmBriefing", "tbmLog", "education", "photo"];
+  return {
+    code: readString(r.code, "generic"),
+    subtitle: readString(r.subtitle, "SafeClaw 안전 양식"),
+    layout: (allowed.includes(layout) ? layout : "generic") as SafetyFormProfile["layout"],
+    primaryColumn: readString(r.primaryColumn, "항목"),
+    actionColumn: readString(r.actionColumn, "내용"),
+    confirmationRows: Array.isArray(r.confirmationRows)
+      ? r.confirmationRows.filter((v): v is string => typeof v === "string")
+      : [],
+    approvalLabels: Array.isArray(r.approvalLabels)
+      ? r.approvalLabels.filter((v): v is string => typeof v === "string")
+      : []
+  };
+}
+
+function parseRiskRowsFromBody(body: Record<string, unknown>): StructuredRiskAssessmentRow[] {
+  const candidates = [
+    body.structuredRiskRows,
+    body.riskAssessmentRows,
+    body.structuredRows,
+    body.canonicalRows
+  ];
+  for (const candidate of candidates) {
+    const rows = parseStructuredRiskAssessmentRows(candidate);
+    if (rows.length) return rows;
+  }
+  return [];
+}
+
+function parseScenario(value: unknown) {
+  const r = isRecord(value) ? value : {};
+  return {
+    companyName: readString(r.companyName, ""),
+    companyType: readString(r.companyType, ""),
+    siteName: readString(r.siteName, "현장명 확인"),
+    workSummary: readString(r.workSummary, "작업내용 확인"),
+    workerCount: readNumber(r.workerCount, 0),
+    weatherNote: readString(r.weatherNote, "")
+  };
+}
+
+function deriveColumns(profile: SafetyFormProfile): string[] {
+  switch (profile.layout) {
+    case "risk":
+      return ["구분", profile.primaryColumn || "유해·위험요인", profile.actionColumn || "감소대책", "확인"];
+    case "workPlan":
+      return ["순번", profile.primaryColumn || "작업개요", profile.actionColumn || "장비·인원", "확인"];
+    case "permit":
+      return ["순번", profile.primaryColumn || "허가항목", profile.actionColumn || "조건/조치", "확인"];
+    case "tbmLog":
+    case "tbmBriefing":
+      return ["연번", profile.primaryColumn || "항목", profile.actionColumn || "전달 문구", "확인"];
+    case "education":
+      return ["연번", profile.primaryColumn || "교육항목", profile.actionColumn || "내용", "확인"];
+    default:
+      return ["연번", "항목", "내용", "확인"];
+  }
+}
+
+function parseJsonResult(raw: string) {
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    return isRecord(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function insertHwpTable(document: HwpDocument, paraIdx: number, rows: readonly (readonly string[])[], label: string): number {
+  const colCount = rows[0]?.length ?? 0;
+  if (!rows.length || !colCount || rows.some((row) => row.length !== colCount)) {
+    throw new Error(`${label} 표 데이터가 올바르지 않습니다.`);
+  }
+  const table = parseJsonResult(document.createTable(0, paraIdx, 0, rows.length, colCount));
+  if (!table?.ok || typeof table.paraIdx !== "number") {
+    throw new Error(`${label} 표를 만들지 못했습니다.`);
+  }
+  const controlIdx = typeof table.controlIdx === "number" ? table.controlIdx : 0;
+  rows.forEach((row, rIdx) => {
+    row.forEach((value, cIdx) => {
+      document.insertTextInCell(0, table.paraIdx as number, controlIdx, rIdx * colCount + cIdx, 0, 0, value);
+    });
+  });
+  return document.getParagraphCount(0) - 1;
+}
+
+function insertHwpParagraph(document: HwpDocument, paraIdx: number, text: string): number {
+  document.insertText(0, paraIdx, 0, text);
+  document.splitParagraph(0, paraIdx, document.getParagraphLength(0, paraIdx));
+  return document.getParagraphCount(0) - 1;
+}
+
+function buildHwpBuffer(args: {
+  title: string;
+  rows: SheetRow[];
+  profile: SafetyFormProfile;
+  scenario: ReturnType<typeof parseScenario>;
+  structuredRiskRows?: StructuredRiskAssessmentRow[];
+  riskReviewItems?: StructuredRiskAssessmentRow[];
+}): Buffer {
+  ensureWasm();
+  const { title, rows, profile, scenario, structuredRiskRows } = args;
+  const isRisk = profile.layout === "risk";
+  const document = HwpDocument.createEmpty();
+  try {
+    document.createBlankDocument();
+
+    document.insertText(0, 0, 0, `${title}(공식자료 기반 표 양식)\nSafeClaw · 현장 검토 후 사용`);
+    const titleLength = document.getParagraphLength(0, 0);
+    document.splitParagraph(0, 0, titleLength);
+    let nextParaIdx = document.getParagraphCount(0) - 1;
+
+    // Metadata table (4 col x 2 row)
+    {
+      const meta: string[][] = [
+        ["사업장", formatCompanyName(scenario.companyName), "현장/공정", scenario.siteName],
+        ["작업내용", scenario.workSummary, "인원/조건", `${formatWorkerCount(scenario.workerCount)} · ${scenario.weatherNote}`]
+      ];
+      nextParaIdx = insertHwpTable(document, nextParaIdx, meta, "기본정보");
+    }
+
+    // 위험성평가: 시행규칙 제37조의4 기록란과 위험성 결정 기준. 모르는 값은 빈칸이다.
+    if (isRisk) {
+      nextParaIdx = insertHwpParagraph(document, nextParaIdx, "평가 기록(산업안전보건법 시행규칙 제37조의4)");
+      const pairs = riskRecordHeaderPairs(scenario);
+      const recordRows: string[][] = [];
+      for (let index = 0; index < pairs.length; index += 2) {
+        const right = pairs[index + 1] || ["", ""];
+        recordRows.push([pairs[index][0], pairs[index][1], right[0], right[1]]);
+      }
+      nextParaIdx = insertHwpTable(document, nextParaIdx, recordRows, "평가 기록");
+      nextParaIdx = insertHwpParagraph(document, nextParaIdx, "위험성 결정 기준");
+      nextParaIdx = insertHwpTable(document, nextParaIdx, RISK_SCALE_LINES.map((line) => ["결정 기준", line]), "위험성 결정 기준");
+    }
+
+    // Body table
+    const riskRows = profile.layout === "risk" && structuredRiskRows?.length
+      ? resolveRiskAssessmentRows({ structuredRows: structuredRiskRows, fallbackRows: rows })
+      : [];
+    // 정본 행을 그대로 싣는다. 모르는 값은 빈칸이다(「현장 확인」「작업반장」을 채우지 않는다).
+    const cols = riskRows.length
+      ? [...RISK_RECORD_ROW_HEADERS]
+      : deriveColumns(profile);
+    const bodyRows: string[][] = riskRows.length
+      ? riskRows.map((riskRow, index) => riskRecordRowCells(riskRow, index))
+      : rows.map((r, idx) => [
+        profile.layout === "risk" ? (r.section || String(idx + 1)) : String(idx + 1),
+        r.item || "",
+        r.content || "",
+        "□"
+      ]);
+    const allRows = [cols, ...bodyRows];
+    nextParaIdx = insertHwpTable(document, nextParaIdx, allRows, "본문");
+
+    // 「검토 필요:」 자리표시 행은 본표가 아니라 확인 필요 목록으로 싣는다(RA-11).
+    const reviewItems = isRisk ? args.riskReviewItems || [] : [];
+    if (reviewItems.length) {
+      nextParaIdx = insertHwpParagraph(document, nextParaIdx, `${RISK_REVIEW_LIST_TITLE} — ${RISK_REVIEW_LIST_NOTE}`);
+      nextParaIdx = insertHwpTable(document, nextParaIdx, [
+        ["번호", "확인할 내용", "참고자료"],
+        ...reviewItems.map((item, index) => [String(index + 1), item.hazard, displayEvidenceRefs(item.evidenceRefs).join(" / ")])
+      ], "확인 필요 목록");
+    }
+
+    document.insertText(0, nextParaIdx, 0, "확인 및 서명");
+    const approvalLabelLength = document.getParagraphLength(0, nextParaIdx);
+    document.splitParagraph(0, nextParaIdx, approvalLabelLength);
+    nextParaIdx = document.getParagraphCount(0) - 1;
+    const approvalRows = isRisk
+      ? [
+        [...RISK_APPROVAL_LABELS],
+        RISK_APPROVAL_LABELS.map(() => "성명/서명: ____________________")
+      ]
+      : [
+        ["작성자", "관리감독자", "교육/TBM 확인자", "확인일시"],
+        ["성명/서명: ____________________", "성명/서명: ____________________", "성명/서명: ____________________", "____년 ____월 ____일 ____시 ____분"]
+      ];
+    nextParaIdx = insertHwpTable(document, nextParaIdx, approvalRows, "확인·서명");
+    if (isRisk) document.insertText(0, nextParaIdx, 0, RISK_RETENTION_NOTE);
+
+    return Buffer.from(document.exportHwp());
+  } finally {
+    document.free();
+  }
+}
+
+export type HwpDocumentExportRender = { buffer: Buffer; fileName: string };
+
+/** 내보내기 요청 본문(게이트 전 JSON)을 HWP 로 만든다. 예산 초과는 DocumentExportLimitError 를 던진다. */
+export function renderHwpDocumentExport(payload: unknown): HwpDocumentExportRender {
+  // PR-14: 받은 본문의 내부 문구·통째 enum 칸을 사용자용으로 거른 뒤 렌더한다.
+  const parsed = gateExportPayload(payload);
+  const body = isRecord(parsed) ? parsed : {};
+  assertDocumentExportInputBudget(body);
+  const title = readString(body.title, "SafeClaw 안전 문서");
+  const rows = parseRows(body.rows, title);
+  const profile = parseProfile(body.profile);
+  const scenario = parseScenario(body.scenario);
+  const riskExport = resolveRiskExportRows(body.edited === true ? [] : parseRiskRowsFromBody(body), body);
+  const buffer = buildHwpBuffer({
+    title,
+    rows,
+    profile,
+    scenario,
+    structuredRiskRows: riskExport.main,
+    riskReviewItems: riskExport.review
+  });
+  assertDocumentExportOutputBudget(buffer);
+  return { buffer, fileName: `${sanitizeFileName(companyFilePrefix(scenario.companyName, title))}.hwp` };
+}
