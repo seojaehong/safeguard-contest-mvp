@@ -32,6 +32,8 @@ import {
 } from "@/lib/risk-assessment-export-body";
 import type { XlsxDocumentExportRender } from "@/lib/document-export-xlsx";
 import type { HwpDocumentExportRender } from "@/lib/document-export-hwp";
+import { accidentTypeLabel } from "@/lib/risk-labels";
+import { rankSifCases, type SifRelevance } from "@/lib/sif-case-relevance";
 import type { AskResponse } from "@/lib/types";
 
 export type GenerateRiskAssessmentInput = {
@@ -56,7 +58,11 @@ export type RiskAssessmentSifCase = {
   title: string;
   overview: string;
   source: RiskAssessmentSifSource;
+  /** 이 작업과 겹친 작업·장소·기인물 묶음과 재해형태 묶음(lib/sif-case-relevance.ts). */
+  relevance?: SifRelevance;
 };
+
+export type RiskAssessmentSifExcluded = { id: string; title: string; reason: string };
 
 export type RiskRecordItemStatus = "filled" | "partial" | "blank";
 
@@ -109,6 +115,10 @@ export type RiskAssessmentToolResult = {
     count: number;
     cases: RiskAssessmentSifCase[];
     reason?: string;
+    /** 안전 지식 DB 가 이 생성에 돌려준 사례 수(제외 전). */
+    retrievedCount?: number;
+    /** 작업·재해형태가 맞지 않아 뺀 사례. */
+    excluded?: RiskAssessmentSifExcluded[];
   };
   responsibilityNote: string;
   file: {
@@ -173,14 +183,31 @@ function sifSourceOf(sourceId: string, url: string | null | undefined): RiskAsse
   };
 }
 
-function sifCasesOf(response: AskResponse): RiskAssessmentSifCase[] {
+/**
+ * 생성에 쓰인 SIF 사례 중 이 작업과 작업·장소·기인물, 재해형태가 맞는 것만 관련 높은 순으로 돌려준다.
+ * 작업 키는 호출 질문과 시나리오 작업 요약에서만 뽑는다(생성된 행이 엉뚱한 사례에 끌려 만든 행일 수 있다).
+ */
+function sifCasesOf(response: AskResponse, question: string, rows: readonly StructuredRiskAssessmentRow[]): {
+  retrievedCount: number;
+  cases: RiskAssessmentSifCase[];
+  excluded: RiskAssessmentSifExcluded[];
+} {
   const items = response.dbHarness?.packet?.sifCases ?? [];
-  return items.map((item) => ({
-    id: item.id,
-    title: item.display_title || item.title,
-    overview: item.display_summary || item.short_summary || item.summary,
-    source: sifSourceOf(item.source_id, item.source_url)
-  }));
+  const { kept, dropped } = rankSifCases(items, {
+    workText: `${question} ${response.scenario.workSummary || ""}`,
+    accidentTypeText: rows.map((row) => accidentTypeLabel(row.accidentType)).join(" ")
+  });
+  return {
+    retrievedCount: items.length,
+    cases: kept.map(({ item, relevance }) => ({
+      id: item.id,
+      title: item.display_title || item.title,
+      overview: item.display_summary || item.short_summary || item.summary,
+      source: sifSourceOf(item.source_id, item.source_url),
+      relevance
+    })),
+    excluded: dropped.map(({ item, reason }) => ({ id: item.id, title: item.display_title || item.title, reason }))
+  };
 }
 
 // ── 시행규칙 제37조의4제1항 기재 항목 충족 검사 ──────────────────────────
@@ -257,7 +284,10 @@ export function checkRiskRecordItems(
   };
 }
 
-function sifZeroReason(response: AskResponse, mode: AiMode): string {
+function sifZeroReason(response: AskResponse, mode: AiMode, excludedCount = 0): string {
+  if (excludedCount) {
+    return `안전 지식 DB가 돌려준 SIF 사례 ${excludedCount}건이 모두 이 작업의 작업·장소·기인물과 맞지 않아 붙이지 않았습니다(excluded 에 이유).`;
+  }
   if (response.scenario.taskClassification?.status === "review_required") {
     return "작업 유형을 확인하지 못해 안전 지식 DB를 조회하지 않았습니다. 작업 내용을 더 구체적으로 적어 다시 호출하세요.";
   }
@@ -310,7 +340,8 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
 
     const main = toStructuredRiskRows(response.structured?.riskAssessmentRows ?? []);
     const review = toStructuredRiskRows(response.structured?.riskReviewItems ?? []);
-    const sifCases = sifCasesOf(response);
+    const sif = sifCasesOf(response, question, main);
+    const sifCases = sif.cases;
     const hasRows = main.length > 0;
 
     const result: RiskAssessmentToolResult = {
@@ -345,9 +376,13 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
         structuredRows: response.structured?.riskReviewItems ?? []
       },
       recordItemsCheck: checkRiskRecordItems(response.scenario, main),
-      sif: sifCases.length
-        ? { count: sifCases.length, cases: sifCases }
-        : { count: 0, cases: [], reason: sifZeroReason(response, aiMode) },
+      sif: {
+        ...(sifCases.length
+          ? { count: sifCases.length, cases: sifCases }
+          : { count: 0, cases: [], reason: sifZeroReason(response, aiMode, sif.excluded.length) }),
+        ...(sif.retrievedCount ? { retrievedCount: sif.retrievedCount } : {}),
+        ...(sif.excluded.length ? { excluded: sif.excluded } : {})
+      },
       responsibilityNote: RISK_ASSESSMENT_RESPONSIBILITY_NOTE,
       file: null,
       exportParity: "file 은 웹 「위험성평가표 편집 → 내보내기」의 Excel 표 양식(.xlsx)·한글 표 양식(.hwp)과 같은 요청 본문·같은 렌더 함수로 만들었습니다. 현장에서 빈칸(실시 시기·담당자·참여 근로자·결재)을 채운 뒤 사용하세요."

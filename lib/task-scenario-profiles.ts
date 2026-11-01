@@ -125,8 +125,8 @@ export function hasScaffoldAssemblyIdentity(question: string) {
 }
 
 const PUMP_IDENTITY = /배수\s*펌프|배수펌프|지하\s*기계실/;
-const CONFINED_IDENTITY = /밀폐\s*공간|정화조|분뇨|저장조|맨홀|하수관로|오수조|집수정|저수조|탱크\s*내부|선박.{0,12}탱크|황화수소|산소\s*결핍/;
-const CHEMICAL_SUBSTANCE = /염산|황산|질산|불산|가성소다|수산화나트륨|암모니아|인화성|유기용제|약품|화학물질|독성/;
+export const CONFINED_IDENTITY = /밀폐\s*공간|정화조|분뇨|저장조|맨홀|하수관로|오수조|집수정|저수조|탱크\s*내부|선박.{0,12}탱크|황화수소|산소\s*결핍/;
+export const CHEMICAL_SUBSTANCE = /염산|황산|질산|불산|가성소다|수산화나트륨|암모니아|인화성|유기용제|약품|화학물질|독성/;
 const CHEMICAL_HANDLING_VERB = /희석|투입|배관|플랜지|누출|충전|이송|취급|반응기/;
 const MACHINE_NOUN = /사출\s*성형기|사출성형기|분쇄기|혼합기|배합기|믹서|롤러기|절단기|방호장치|설비|기계/;
 

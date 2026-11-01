@@ -645,7 +645,7 @@ export function parseHarnessMemoryInput(value: unknown): Required<HarnessMemoryI
 
 const MAX_KOSHA_PROMPT_METADATA_CHARS = 240;
 
-type KoshaHazardFamily =
+export type KoshaHazardFamily =
   | "asphyxiation"
   | "burn"
   | "caught_in"
@@ -690,7 +690,7 @@ const KOSHA_HAZARD_FAMILY_PATTERNS: ReadonlyArray<{
   { family: "ergonomic", pattern: /근골격|중량물|요통/u }
 ];
 
-function koshaHazardFamiliesFromText(text: string): Set<KoshaHazardFamily> {
+export function koshaHazardFamiliesFromText(text: string): Set<KoshaHazardFamily> {
   const semanticText = text.normalize("NFC").toLowerCase();
   return new Set(KOSHA_HAZARD_FAMILY_PATTERNS
     .filter(({ pattern }) => pattern.test(semanticText))

@@ -28,7 +28,7 @@ Preconditions:
 
 - **서버.** 토큰 파일 하나를 만들고 같은 값을 `SAFECLAW_MCP_TOKENS` 로 준 채 `npm.cmd run dev -- -p <port> -H 127.0.0.1`.
 - **명령.** `node scripts/mcp_risk_assessment_live_check.mjs <repoRoot> http://127.0.0.1:<port> <outDir> <tokenFile>` — 시나리오 4개(SIF 있는 밀폐공간 enhanced / template 지게차 / 화재·폭발 enhanced / 작업 유형 판정 불가)를 부른다. S1~S3 은 형식 2개씩.
-- **기대 종료 상태.** `<outDir>/summary.json` 의 S1~S3 행에서 `status=ok`, `magic` 이 xlsx `PK`·hwp `d0cf11e0`, `webStatus=200`, xlsx `cellParity=true`·`headersPresent=true`·`approvalPresent=true`, hwp `bytesIdentical=true`·`textParity=true`, `responseBytes < 262144`, `recordItems` 8항목(시행규칙 제37조의4①), `responsibilityNote` 있음. S1 `sifCount ≥ 1` + `sifSources` 에 기관·기준일, S2 `sifCount=0` + `sifReason`, S3 `reviewCount ≥ 1`, S4 `status=review_required`·`fileUnavailableReason` 있음.
+- **기대 종료 상태.** `<outDir>/summary.json` 의 S1~S3 행에서 `status=ok`, `magic` 이 xlsx `PK`·hwp `d0cf11e0`, `webStatus=200`, xlsx `cellParity=true`·`headersPresent=true`·`approvalPresent=true`, hwp `bytesIdentical=true`·`textParity=true`, `responseBytes < 262144`, `recordItems` 8항목(시행규칙 제37조의4①), `responsibilityNote` 있음. S1 `sifCount ≥ 1` + `sifSources` 에 기관·기준일 + `sifKept` 마다 `matchedWork` 1개 이상(`sifExcluded` 는 이유가 붙은 뺀 사례), S2 `sifCount=0` + `sifReason`, S3 `reviewCount ≥ 1`, S4 `status=review_required`·`fileUnavailableReason` 있음.
 - **증거.** `<outDir>/<시나리오>/mcp-*.xlsx|hwp`(MCP 파일)·`web-*`(웹 라우트 파일)·`*-result.json`(base64 생략)·`tools-list.json`·`summary.json`.
 
 ## Gotchas
