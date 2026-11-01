@@ -3657,7 +3657,8 @@ export async function fetchSafetyReferenceSources(
         agency: text(record.agency),
         title: text(record.title),
         publishedAt: publishedAt && /^\d{4}-\d{2}-\d{2}/u.test(publishedAt) ? publishedAt.slice(0, 10) : null,
-        originUrl: text(record.origin_url)
+        // 결과 출처 주소로 그대로 나가므로 항목 source_url 과 같은 거름을 건다(승인 공공 출처 https 만).
+        originUrl: normalizeApprovedSafetyReferenceProvenanceUrl(text(record.origin_url))
       }]];
     }));
   } catch {
