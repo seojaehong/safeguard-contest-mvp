@@ -8,13 +8,14 @@
 //   (lib/document-export-xlsx.ts·document-export-hwp.ts, 주입: renderXlsx·renderHwp).
 // - SIF: 같은 생성이 쓴 dbHarness.packet.sifCases·sifSelection(관련성 거름은 패킷 단계). 따로 검색·거르지 않는다(파일과 목록이 어긋나지 않게).
 // - 공개 표면: 생성 응답에 웹 /api/ask 와 같은 정리 + 내보내기 게이트를 한 번 걸고 그 값으로 JSON·파일을 함께 만든다.
-// 작업공간에 저장하지 않는다(읽기 전용 산출물). 결과는 toToolResult 의 256KB 상한을 그대로 따른다.
+// 작업공간에 저장하지 않는다(읽기 전용 산출물). 결과는 256KB 상한(MCP_TOOL_RESULT_MAX_BYTES) 안에서 들여쓰기 없는 JSON 으로 싣고, 넘으면 cells → file 순서로 뺀다(fitRiskAssessmentToolResult).
 import { createHash } from "node:crypto";
 
 import type { AiMode } from "@/lib/ai-deliverables";
 import { sanitizeAskResponsePublicSurface } from "@/lib/ask-public-surface";
 import type { McpAuthContext } from "@/lib/mcp-auth";
-import { toToolResult, type McpToolResult } from "@/lib/mcp-tools";
+import { MCP_TOOL_RESULT_MAX_BYTES, toToolResult, type McpToolResult } from "@/lib/mcp-tools";
+import { DocumentExportLimitError } from "@/lib/document-export-budget";
 import {
   displayEvidenceRefs,
   RISK_APPROVAL_LABELS,
@@ -142,6 +143,8 @@ export type RiskAssessmentToolResult = {
     base64: string;
   } | null;
   fileUnavailableReason?: string;
+  /** 응답 크기 상한 때문에 뺀 칸(차례대로). riskAssessment.rows[].cells → file. structuredRows 는 빼지 않는다. */
+  trimmed?: string[];
   exportParity: string;
 };
 
@@ -320,6 +323,8 @@ function sifZeroReason(response: AskResponse, mode: AiMode, excludedCount = 0): 
   return "안전 지식 DB에서 이 작업과 맞는 SIF 유사사례를 찾지 못했습니다.";
 }
 
+class RiskAssessmentRenderError extends Error {}
+
 async function renderFile(
   dependencies: Dependencies,
   response: AskResponse,
@@ -330,7 +335,7 @@ async function renderFile(
   let fileName: string;
   if (format === "xlsx") {
     const rendered = await dependencies.renderXlsx(body);
-    if (!rendered.ok) throw new Error(rendered.error);
+    if (!rendered.ok) throw new RiskAssessmentRenderError(rendered.error);
     buffer = rendered.buffer;
     fileName = rendered.fileName;
   } else {
@@ -357,6 +362,55 @@ function toPublicResponse(response: AskResponse): AskResponse {
   const { dbHarness, ...rest } = sanitizeAskResponsePublicSurface(response);
   const gated = gateExportPayload(rest) as AskResponse;
   return dbHarness ? { ...gated, dbHarness } : gated;
+}
+
+/** 서식 파일을 못 만든 이유. 렌더러 오류 문구(내부 경로가 섞일 수 있다)는 싣지 않는다. */
+function renderFailureReason(error: unknown, format: RiskAssessmentExportFormat): string {
+  const label = format === "xlsx" ? "Excel 표 양식(.xlsx)" : "한글 표 양식(.hwp)";
+  if (error instanceof DocumentExportLimitError) {
+    return `${label} 서식 파일을 만들지 못했습니다(내보내기 크기 상한 초과). 본표 행·structuredRows 는 그대로 돌려줍니다.`;
+  }
+  return `${label} 서식 파일을 만들지 못했습니다. 본표 행·structuredRows 로 웹 「위험성평가표 편집 → 내보내기」에서 다시 만드세요.`;
+}
+
+function toolResultBytes(text: string): number {
+  return new TextEncoder().encode(JSON.stringify({ content: [{ type: "text", text }] })).byteLength;
+}
+
+/**
+ * 결과를 들여쓰기 없는 JSON 한 덩이로 싣는다. 응답 크기 상한을 넘으면 결과를 버리지 않고
+ * ① rows[].cells(structuredRows 로 다시 만들 수 있는 중복) ② file 순서로 빼고 trimmed 에 적는다.
+ * 그래도 넘으면 toToolResult 의 크기 초과 오류를 낸다.
+ */
+export function fitRiskAssessmentToolResult(result: RiskAssessmentToolResult, maxBytes = MCP_TOOL_RESULT_MAX_BYTES): McpToolResult {
+  const fits = (value: unknown) => {
+    const text = JSON.stringify(value);
+    return toolResultBytes(text) <= maxBytes ? text : null;
+  };
+  const full = fits(result);
+  if (full !== null) return { content: [{ type: "text", text: full }] };
+
+  const withoutCells = {
+    ...result,
+    riskAssessment: { ...result.riskAssessment, rows: result.riskAssessment.rows.map(({ cells: _cells, ...row }) => row) },
+    trimmed: ["riskAssessment.rows[].cells"]
+  };
+  const lighter = fits(withoutCells);
+  if (lighter !== null) return { content: [{ type: "text", text: lighter }] };
+
+  const withoutFile = {
+    ...withoutCells,
+    file: null,
+    fileUnavailableReason: "결과가 응답 크기 상한을 넘어 서식 파일을 뺐습니다. structuredRows 로 웹 「위험성평가표 편집 → 내보내기」에서 다시 만드세요.",
+    trimmed: ["riskAssessment.rows[].cells", "file"]
+  };
+  const lightest = fits(withoutFile);
+  if (lightest !== null) return { content: [{ type: "text", text: lightest }] };
+  if (maxBytes === MCP_TOOL_RESULT_MAX_BYTES) return toToolResult(withoutFile);
+  return {
+    content: [{ type: "text", text: JSON.stringify({ code: "MCP_TOOL_RESULT_TOO_LARGE", error: "도구 결과가 UTF-8 응답 크기 제한을 초과해 반환되지 않았습니다.", limit: maxBytes }) }],
+    isError: true
+  };
 }
 
 export function createGenerateRiskAssessmentHandler(dependencies: Dependencies): GenerateRiskAssessmentHandler {
@@ -430,13 +484,19 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
 
     if (hasRows) {
       signal?.throwIfAborted();
-      result.file = await renderFile(dependencies, response, fileFormat);
+      try {
+        result.file = await renderFile(dependencies, response, fileFormat);
+      } catch (error) {
+        // 호출 취소는 결과로 바꾸지 않는다. 그 밖의 렌더 실패는 파일만 빼고 본표 결과는 돌려준다.
+        signal?.throwIfAborted();
+        result.fileUnavailableReason = renderFailureReason(error, fileFormat);
+      }
     } else {
       result.fileUnavailableReason = response.scenario.taskClassification?.status === "review_required"
         ? `작업 유형을 확인하지 못해 위험성평가 행을 만들지 않았습니다(${response.scenario.taskClassification.reason}). 작업 내용을 더 구체적으로 적어 다시 호출하세요.`
         : "위험성평가 본표 행이 없어 서식 파일을 만들지 않았습니다. 작업 내용을 더 구체적으로 적어 다시 호출하세요.";
     }
 
-    return toToolResult(result);
+    return fitRiskAssessmentToolResult(result);
   };
 }
