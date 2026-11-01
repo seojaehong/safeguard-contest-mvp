@@ -412,6 +412,12 @@ async function protectedBaseHandler(request: Request): Promise<Response> {
 
   const bodyBudget = await enforceMcpRequestBodyBudget(request, MCP_REQUEST_BODY_MAX_BYTES);
   if (!bodyBudget.ok) return bodyBudget.response;
+  // 본문 예산이 요청을 new Request(...) 로 다시 만들면 withMcpAuth 가 붙인 req.auth 가 빠진다.
+  // 빠지면 도구 처리기가 authInfo 를 못 받아 모든 호출이 MCP_TOOL_FORBIDDEN 이 된다(tests/mcp-auth-propagation).
+  const authenticated = request as Request & { auth?: AuthInfo };
+  if (bodyBudget.request !== request && authenticated.auth) {
+    (bodyBudget.request as Request & { auth?: AuthInfo }).auth = authenticated.auth;
+  }
 
   const response = await baseHandler(bodyBudget.request);
   return applyPublicRateLimitHeader(response, rateDecision);
