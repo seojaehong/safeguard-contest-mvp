@@ -79,8 +79,15 @@ export type RiskRecordItemCheck = {
 
 export type RiskAssessmentToolResult = {
   engine: "safeclaw-runAsk";
-  status: "ok" | "review_required";
+  /** ok_fallback = 행은 만들었지만 생성이 보조 응답(모델 대신 규칙 기반)으로 끝났다. generation 참고. */
+  status: "ok" | "ok_fallback" | "review_required";
   mode: AiMode;
+  /** 생성 품질 신호(runAsk generationTrace). fallbackUsed·answerProvider 가 null 이면 생성 기록이 없어 모른다는 뜻. */
+  generation: {
+    askMode: AiMode;
+    fallbackUsed: boolean | null;
+    answerProvider: string | null;
+  };
   scenario: AskResponse["scenario"];
   riskSummary: { riskLevel: string; topRisk: string };
   riskAssessment: {
@@ -367,10 +374,18 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
     const sifCases = sif.cases;
     const hasRows = main.length > 0;
 
+    const trace = response.generationTrace;
+    const generation: RiskAssessmentToolResult["generation"] = {
+      askMode: trace?.askMode ?? aiMode,
+      fallbackUsed: trace ? trace.fallbackUsed : null,
+      answerProvider: trace?.answer.provider ?? null
+    };
+
     const result: RiskAssessmentToolResult = {
       engine: "safeclaw-runAsk",
-      status: hasRows ? "ok" : "review_required",
+      status: !hasRows ? "review_required" : generation.fallbackUsed ? "ok_fallback" : "ok",
       mode: aiMode,
+      generation,
       scenario: response.scenario,
       riskSummary: { riskLevel: response.riskSummary.riskLevel, topRisk: response.riskSummary.topRisk },
       riskAssessment: {
