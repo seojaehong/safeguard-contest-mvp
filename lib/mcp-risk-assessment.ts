@@ -94,16 +94,18 @@ export type RiskAssessmentToolResult = {
   riskAssessment: {
     title: string;
     formCode: string;
+    /** 한글(hwp) 본표 13칸 머리(번호…잔여 위험성). 엑셀(xlsx) 서식은 21칸이고, 엑셀에만 있는 칸(4M·담당자·조치기한·확인상태 등)은 structuredRows 에 전부 있다. */
     headers: string[];
     rowCount: number;
     rows: Array<{
+      /** headers 와 같은 13칸 값. 응답 크기 상한에 걸리면 맨 먼저 뺀다(structuredRows 로 다시 만들 수 있다). */
       cells: string[];
       whyLikelihood: string;
       whySeverity: string;
       evidenceRefs: string[];
     }>;
     approvalLabels: string[];
-    /** 파일 본표가 쓴 정본 행 원본(structured.riskAssessmentRows). 다른 서식으로 다시 내보낼 때 쓴다. */
+    /** 파일 본표가 쓴 정본 행 원본(structured.riskAssessmentRows). 엑셀 21칸·한글 13칸 모두 여기서 만든다. 다른 서식으로 다시 내보낼 때 쓴다. */
     structuredRows: NonNullable<AskResponse["structured"]>["riskAssessmentRows"];
   };
   reviewItems: {
