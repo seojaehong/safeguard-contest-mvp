@@ -16,6 +16,8 @@ import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import { buildSafetyReferenceRiskRows } from "@/lib/search";
 import type { AskResponse } from "@/lib/types";
 
+import { hwpText } from "./helpers/hwp-text";
+
 const QUESTION = "가상 사업장 한빛정화 오수처리장 맨홀 내부 슬러지 제거 작업 3명, 밀폐공간 산소결핍·황화수소 우려, 주간";
 
 function sifItem(id: string, title: string, summary: string, controls: string[]): SafetyReferenceItem {
@@ -92,5 +94,22 @@ describe("뺀 SIF 사례는 본표·근거 칸·파일에 남지 않는다", () 
       expect(fileText).not.toContain(needle);
     }
     expect(payload.sif.excluded?.map((item) => item.id)).toEqual(["v-furnace"]);
+  });
+
+  it("hwp 파일에도 뺀 사례 제목·내용이 없다", async () => {
+    const handler = createGenerateRiskAssessmentHandler({
+      defaultMode: "enhanced",
+      generateResponse: async () => generatedResponse(),
+      renderXlsx: renderXlsxDocumentExport,
+      renderHwp: renderHwpDocumentExport,
+    });
+    const result = await handler({ question: QUESTION, format: "hwp" }, { siteId: null, orgId: null, scopes: ["tools:*"], source: "env", tokenId: null }, { signal: new AbortController().signal });
+    const payload = JSON.parse(result.content[0]?.text ?? "{}") as RiskAssessmentToolResult;
+    expect(payload.file?.format).toBe("hwp");
+    const fileText = hwpText(Buffer.from(payload.file?.base64 ?? "", "base64"));
+
+    // 빈 파일로 통과하지 않도록, 남긴 사례로 만든 글자는 파일에 있어야 한다.
+    expect(fileText).toContain("배관 안 용접");
+    for (const needle of ["열처리로", "내화물", "example.invalid/v-furnace"]) expect(fileText).not.toContain(needle);
   });
 });

@@ -6,9 +6,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import ExcelJS from "exceljs";
-import { HwpDocument } from "@rhwp/core";
 import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
+
+import { hwpText } from "./helpers/hwp-text";
 
 import { POST as exportXlsx } from "@/app/api/export/xlsx/route";
 import { POST as exportHwp } from "@/app/api/export/hwp/route";
@@ -161,38 +162,6 @@ async function workbookSnapshot(buffer: Buffer): Promise<SheetSnapshot[]> {
       pageSetup: { ...sheet.pageSetup },
     };
   });
-}
-
-function hwpAllText(document: HwpDocument): string {
-  const texts: string[] = [];
-  for (let paraIdx = 0; paraIdx < document.getParagraphCount(0); paraIdx += 1) {
-    texts.push(document.getTextRange(0, paraIdx, 0, document.getParagraphLength(0, paraIdx)));
-    const positions = JSON.parse(document.getControlTextPositions(0, paraIdx)) as unknown;
-    if (!Array.isArray(positions)) continue;
-    positions.forEach((_position, controlIdx) => {
-      let dims: { rowCount: number; colCount: number } | null = null;
-      try {
-        dims = JSON.parse(document.getTableDimensions(0, paraIdx, controlIdx)) as { rowCount: number; colCount: number };
-      } catch {
-        dims = null;
-      }
-      if (!dims) return;
-      for (let cellIdx = 0; cellIdx < dims.rowCount * dims.colCount; cellIdx += 1) {
-        const length = document.getCellParagraphLength(0, paraIdx, controlIdx, cellIdx, 0);
-        texts.push(document.getTextInCell(0, paraIdx, controlIdx, cellIdx, 0, 0, length));
-      }
-    });
-  }
-  return texts.join("\n");
-}
-
-function hwpText(buffer: Buffer): string {
-  const document = new HwpDocument(new Uint8Array(buffer));
-  try {
-    return hwpAllText(document);
-  } finally {
-    document.free();
-  }
 }
 
 function handlerFor(response: AskResponse) {
