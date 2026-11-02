@@ -196,6 +196,7 @@ describe("review-required hold through runAsk (decision 1)", () => {
     expect(held.scenario.taskClassification?.status).toBe("review_required");
     expect(held.structured?.riskAssessmentRows ?? []).toHaveLength(0);
     expect(held.qualityContract?.items.find((item) => item.key === "taskClassification")?.status).toBe("blocked");
+    expect(held.qualityContract?.items.find((item) => item.key === "taskClassification")?.detail).not.toMatch(/판정/);
 
     const heldEnhanced = await runAsk("강원 산림 벌목 작업, 체인톱 사용, 작업자 4명", { aiMode: "enhanced" });
     expect(heldEnhanced.scenario.taskClassification?.status).toBe("review_required");

@@ -366,7 +366,7 @@ function taskClassificationItems(response: AskResponse): QualityContractItem[] {
     key: "taskClassification",
     label: "작업 유형 확인",
     status: "blocked",
-    detail: "작업 유형 확인 필요 — 입력에서 작업 유형을 판정하지 못해 문서 생성을 보류했습니다. 작업 종류와 사용 장비를 적어 다시 생성하세요."
+    detail: "작업 유형 확인 필요 — 입력만으로는 작업 유형을 특정하지 못해 문서 생성을 보류했습니다. 작업 종류와 사용 장비를 적어 다시 생성하세요."
   }];
 }
 
