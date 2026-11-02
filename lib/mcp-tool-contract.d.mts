@@ -9,6 +9,7 @@ export const MCP_TOOL_NAMES: readonly [
   "get_evidence_mapping",
   "query_safety_knowledge",
   "qa_review_docpack",
+  "generate_risk_assessment",
 ];
 
 export const MCP_TOOL_SCOPES: readonly string[];

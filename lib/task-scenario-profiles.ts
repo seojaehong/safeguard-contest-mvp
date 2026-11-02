@@ -125,8 +125,8 @@ export function hasScaffoldAssemblyIdentity(question: string) {
 }
 
 const PUMP_IDENTITY = /배수\s*펌프|배수펌프|지하\s*기계실/;
-const CONFINED_IDENTITY = /밀폐\s*공간|정화조|분뇨|저장조|맨홀|하수관로|오수조|집수정|저수조|탱크\s*내부|선박.{0,12}탱크|황화수소|산소\s*결핍/;
-const CHEMICAL_SUBSTANCE = /염산|황산|질산|불산|가성소다|수산화나트륨|암모니아|인화성|유기용제|약품|화학물질|독성/;
+export const CONFINED_IDENTITY = /밀폐\s*공간|정화조|분뇨|저장조|맨홀|하수관로|오수조|집수정|저수조|탱크\s*내부|선박.{0,12}탱크|황화수소|산소\s*결핍/;
+export const CHEMICAL_SUBSTANCE = /염산|황산|질산|불산|가성소다|수산화나트륨|암모니아|인화성|유기용제|약품|화학물질|독성/;
 const CHEMICAL_HANDLING_VERB = /희석|투입|배관|플랜지|누출|충전|이송|취급|반응기/;
 const MACHINE_NOUN = /사출\s*성형기|사출성형기|분쇄기|혼합기|배합기|믹서|롤러기|절단기|방호장치|설비|기계/;
 
@@ -188,7 +188,7 @@ export function buildTaskClassification(question: string): TaskClassification {
       taskId: null,
       taskLabel: null,
       layers,
-      reason: "입력에서 작업 유형을 판정하지 못했습니다. 작업 종류와 사용 장비를 확인한 뒤 다시 생성해야 합니다."
+      reason: "입력에서 작업 유형을 확인하지 못했습니다. 작업 종류와 사용 장비를 확인한 뒤 다시 생성해야 합니다."
     };
   }
   return {
@@ -916,7 +916,7 @@ export function heldDeliverableNotice(documentLabel: string, workSummary: string
   return [
     `${documentLabel} — 작업 유형 확인 필요`,
     "",
-    "입력한 내용에서 작업 유형을 판정하지 못해 이 문서를 만들지 않았습니다.",
+    "입력한 내용에서 작업 유형을 확인하지 못해 이 문서를 만들지 않았습니다.",
     `- 입력 내용: ${workSummary}`,
     "- 확인할 것: 오늘 하는 작업의 종류와 사용 장비(예: 밀폐공간 청소, 프레스 금형 교체, 굴착, 크레인 양중, 지게차 하역, 고소작업대, 용접·절단)",
     "- 작업 유형을 적어 다시 생성하면 그 작업 기준의 문서를 만듭니다.",

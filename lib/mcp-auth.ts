@@ -63,6 +63,7 @@ const READ_TOOL_NAMES: ReadonlySet<McpToolName> = new Set([
 const WRITE_TOOL_NAMES: ReadonlySet<McpToolName> = new Set([
   "generate_reviewed_safety_docpack",
   "generate_safety_docpack",
+  "generate_risk_assessment",
 ]);
 const KNOWN_MCP_SCOPES = new Set<string>([
   ...DEFAULT_SCOPES,

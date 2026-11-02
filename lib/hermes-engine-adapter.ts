@@ -437,6 +437,7 @@ function readEvidencePacket(
     || sourceCounts.directEvidence !== directEvidence.length
     || sourceCounts.sifCases !== sifCases.length
     || sourceCounts.supportingEvidence !== supportingEvidence.length
+    // sifCases 는 관련성 거름 뒤 목록이다. 사례가 모두 빠지면 근거 미증명(503)으로 본다(2차 검토 4).
     || sifCases.length === 0
     || !sifCases.some((item) => isRecord(item) && item.item_type === "sif-case")
     || ![...directEvidence, ...supportingEvidence].some((item) => (

@@ -493,6 +493,53 @@ describe("experimental Hermes EngineAdapter", () => {
     expect(plannerCalls).toBe(1);
   });
 
+  // 261101 2차 교차 검토 4: SIF 관련성 거름이 사례를 모두 빼면 Hermes 는 근거 미증명으로 503 을 낸다(뺀 사례는 근거가 아니다).
+  it("fails closed with 503 when the SIF relevance filter excludes every retrieved case", async () => {
+    const adminSpy = vi.spyOn(supabaseAdmin, "createSupabaseAdminClient").mockReturnValue(null);
+    const searchSpy = vi.spyOn(safetyReferenceServer, "searchSafetyReferences").mockImplementation(
+      async (options) => {
+        if (options.itemType === "sif-case") return searchResult(options.query, [sifReference()]);
+        if (options.evidenceRole === "supporting") return searchResult(options.query, [recoveredKoshaReference()]);
+        return searchResult(options.query, []);
+      },
+    );
+    const harnessPackets: Array<ReturnType<typeof buildDbHarnessPacket>> = [];
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockImplementation(
+      async (toolName, input, authContext, options) => {
+        const result = await executeClawTool(toolName, input, authContext, options);
+        if (toolName === "run_safeclaw_harness_agent") {
+          harnessPackets.push((result as { packet: ReturnType<typeof buildDbHarnessPacket> }).packet);
+        }
+        return result;
+      },
+    );
+    const planner = vi.fn<HermesPlanner>();
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(planner),
+    });
+
+    try {
+      // 작업 묶음 = 화학물질·인화성(도장). 사례는 작업발판 추락(고소·개구부)이고 질문은 추락을 적지 않았다.
+      await expect(engine.run({ ...runInput(), prompt: "외벽 도장 작업의 화재 위험을 점검해줘" })).rejects.toMatchObject({
+        code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+        status: 503,
+      });
+    } finally {
+      executeSpy.mockRestore();
+      searchSpy.mockRestore();
+      adminSpy.mockRestore();
+    }
+
+    expect(planner).not.toHaveBeenCalled();
+    expect(harnessPackets).toHaveLength(1);
+    const packet = harnessPackets[0]!;
+    expect(packet.sifCases).toEqual([]);
+    expect(packet.sifSelection?.excluded.map((item) => item.id)).toEqual(["sif-1"]);
+    // 지침은 남아 있다 — 503 의 원인은 사례 없음이다.
+    expect(packet.supportingEvidence.some((item) => item.item_type === "technical-guideline")).toBe(true);
+  });
+
   it("excludes review-required KOSHA controls from a mixed evidence claim allowlist", async () => {
     const mixedResult = structuredClone(groundedHarnessResult());
     const reviewRequired = recoveredKoshaReference();

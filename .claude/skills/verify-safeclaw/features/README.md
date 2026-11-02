@@ -33,6 +33,7 @@ H1 제목과 사용자에게 보이는 동작 한 문단, 그 뒤 H2 네 개를 
 - [작업공간 결과](./workspace-result.md) `workspace-result` — 머리 「확인할 항목을 먼저 보세요」, 핵심 위험·위험성평가 상위, 문서 깊게 보기, 문서 조종석.
 - [내보내기 4형식](./export-formats.md) `export-formats` — 편집기에서 xlsx·hwp 내려받기, PDF 인쇄 호출, HWPX 베타. inventory 의 「닫힘(운영) 미확인 = 내보내기 4형식」을 닫는 경로.
 - [연차 일수 계산](./leave-tool.md) `leave-tool` — 명단 붙여넣기 → 자동 계산 표.
+- [MCP 위험성평가표](./mcp-risk-assessment.md) `mcp-risk-assessment` — MCP `generate_risk_assessment` → 본표 행·확인 필요 목록·SIF 사례·웹 내보내기와 같은 xlsx/hwp. 브라우저가 아니라 MCP 클라이언트로 구동.
 
 ## 아직 지도가 없는 표면
 

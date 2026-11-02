@@ -146,7 +146,7 @@ OAuth `code` 교환을 모두 처리한다.
 둔다. 1만 사용자 전 인덱스 SQL은 승인 전 적용하지 않고
 `evaluation/final-release-scale-audit/mcp-token-query-indexes-approval.sql`에 후보로만 보관한다.
 
-## 도구 10종
+## 도구 11종
 
 | 도구 | 입력 | 반환 요약 |
 |------|------|-----------|
@@ -160,6 +160,7 @@ OAuth `code` 교환을 모두 처리한다.
 | `get_evidence_mapping` | `docType?` | `lib/smsa-mapping.ts` 중대재해처벌법 시행령 제4조 증빙 매핑(지정 시 단건, 생략 시 전체) |
 | `query_safety_knowledge` | `query`(작업유형 또는 위험요인) | `lib/ontology/knowledge-tool.ts` 안전 온톨로지(published) 조회 — 위험요인→안전조치→법조문→중처법 의무 연결. 조문 인용 전 근거 확보용 |
 | `qa_review_docpack` | `task`, `document_text`(≤20000자) | `lib/ontology/qa-review.ts` 2층 검수 — 문서 본문을 작업유형의 법정 필수 조치와 대조해 누락 검출. `{covered, missing(근거 조문 병기), coverageRate, verdict}` |
+| `generate_risk_assessment` | `question`, `mode?`(template\|enhanced\|full, 기본 enhanced), `format?`(xlsx\|hwp, 기본 xlsx) | 웹 `/api/ask` 와 같은 `runAsk` 로 위험성평가 본표 행(JSON `headers`/`cells` = 한글 본표 13칸, 엑셀 서식은 21칸이고 엑셀에만 있는 칸은 `structuredRows` 에 전부)·확인 필요 목록·생성에 쓰인 SIF 유사사례(출처 기관·자료 기준일·원천 자료 공개 연도 `sourcePublishedYear` — 안전 지식 DB `safety_reference_sources` 행에서 읽고 DB 에 없는 원천은 null, 작업 설명과 작업·장소·기인물이 겹치는 사례(작업 설명이 적은 재해형태를 그 작업 묶음이 설명하지 못하면 그 재해형태를 낳는 작업의 같은 재해형태 사례도)만 관련 높은 순으로 `relevance` 와 함께, 뺀 사례는 `sif.excluded` 에 이유와 함께, 0건이면 `sif.reason`. 이 거름은 생성 입력 단계(dbHarness 패킷, 웹 `/api/ask` 공용)에서 걸려 뺀 사례는 생성 근거에도 들어가지 않는다. 패킷을 읽는 KOSHA 지침 상위 근거 고르기·Hermes·사진 분석·`run_safeclaw_harness_agent`·KOSHA 검색 감사도 거른 뒤 사례만 보므로, 뺀 사례 하나에만 기대던 KOSHA 지침은 상위 근거 없음(확인 필요)이 되고 Hermes 는 사례가 모두 빠지면 503 을 낸다)·시행규칙 제37조의4① 기재 항목 충족 검사(`recordItemsCheck`)를 만들고, 웹 「위험성평가표 편집 → 내보내기」와 같은 요청 본문·같은 렌더 함수(`lib/document-export-xlsx.ts`·`lib/document-export-hwp.ts`)로 만든 서식 파일(한글은 엑셀과 같은 A3 가로·엑셀 열 비율)을 `file.base64` 로 반환한다. 작업공간에 저장하지 않는다. `status` 는 본표 행을 만든 분기(`generation.rowsOrigin`: ai·db_harness·template → `ok`, 작업 유형 기본 행으로 대신한 fallback_baseline·photo_seed → `ok_fallback`)로 정하고 행이 없으면 `review_required`·`file=null`. `generation.fallbackUsed` 는 답변·문서 어느 하나라도 보조 응답이었는지일 뿐 status 근거가 아니다. 렌더 실패·응답 256KB 초과면 행 JSON 은 두고 `file=null`·`fileUnavailableReason`, 뺀 칸은 `trimmed`. `structuredRows[].evidenceRefs` 는 웹 `/api/ask` 처럼 게이트 전 출처 추적 값이다 |
 
 각 도구 description은 **"현장 안전관리자 에이전트가 언제 호출해야 하는지"**를 서술형으로
 기술한다(MCP 클라이언트의 도구 선택률 최적화).

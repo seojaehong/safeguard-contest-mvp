@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { AskResponse, type AccidentCase, type GenerationDeliverableModelTrace, type GenerationTrace, type PermitInspectionStructured, type TbmBriefingStructured, type TbmLogStructured, type TbmRiskLink, type WorkPlanStructured } from "./types";
+import { AskResponse, type AccidentCase, type GenerationDeliverableModelTrace, type GenerationTrace, type PermitInspectionStructured, type RiskRowsOrigin, type TbmBriefingStructured, type TbmLogStructured, type TbmRiskLink, type WorkPlanStructured } from "./types";
 import {
   applyPhaseAAnswerBoundary,
   enhanceLegalEvidenceMappings,
@@ -70,7 +70,7 @@ import { splitDocumentMeta } from "./doc-meta-split";
 import { verificationStatusLabel } from "./document-display-labels";
 import { gateAskResponseUserOutput } from "./user-output-gate";
 import { buildEvidenceLabels } from "./smsa-mapping";
-import { createLogger } from "@/lib/logger";
+import { createLogger, safeFailureContext } from "@/lib/logger";
 import { attachProgressListeners, safeEmit, type OnAskProgress } from "./ask-progress";
 import { resolveRunAskMode } from "./run-ask-mode";
 import {
@@ -271,8 +271,9 @@ function buildParentlessKoshaReviewDeliverables(
   ).deliverables;
 }
 
-function safeFailureContext(error: unknown): { errorType: string } {
-  return { errorType: error instanceof Error ? error.name : typeof error };
+/** 최종 응답에 본표 행이 남았을 때만 그 분기를 적는다(경계·정본화로 비었으면 none). */
+function finalRowsOrigin(response: AskResponse, origin: RiskRowsOrigin): RiskRowsOrigin {
+  return response.structured?.riskAssessmentRows?.length ? origin : "none";
 }
 
 /** 작업계획서 구조화본의 응급조치 칸을 작업유형별 고정 절차로 채운다. 절차가 없으면 「현장 확인 필요」를 유지한다. */
@@ -844,6 +845,7 @@ function getSupportingKoshaEvidenceRef(item: SafetyReferenceItem): string {
 }
 
 function buildKoshaParentEvidenceReadyIds(packet: DbHarnessPacket): Set<string> {
+  // packet.sifCases 는 관련성 거름 뒤 목록이다. 뺀 사례(packet.sifSelection.excluded)는 상위 근거가 되지 않는다(2차 검토 4).
   const parentCandidates = [...packet.sifCases, ...packet.directEvidence];
   const exactDirectIds = packet.directEvidence
     .filter(isKoshaTechnicalReference)
@@ -2137,7 +2139,9 @@ async function runAskUngated(question: string, options: RunAskOptions = {}): Pro
         provider: deliverablesTrace.provider,
         modelPerDocument: deliverablesTrace.modelPerDocument
       },
-      fallbackUsed: deliverablesTrace.fallbackUsed
+      fallbackUsed: deliverablesTrace.fallbackUsed,
+      // 보류(작업 유형 미확인) 응답은 기본 행이 없으므로 남은 행은 사진 위험요인 행뿐이다.
+      rowsOrigin: finalRowsOrigin(response, taskHeld ? "photo_seed" : "template")
     };
     return { ...response, generationTrace };
   }
@@ -2741,6 +2745,13 @@ async function runAskUngated(question: string, options: RunAskOptions = {}): Pro
       : fallbackStructuredRiskRows;
     const structuredRiskRows = appendPhotoSeedRiskRows(baseStructuredRiskRows, photoSeedRiskRows);
     const acceptedPhotoSeedRiskRows = structuredRiskRows.slice(baseStructuredRiskRows.length);
+    const baseRowsOrigin: RiskRowsOrigin = generatedStructuredRiskRows.length
+      ? "ai"
+      : harnessStructuredRiskRows.length
+        ? "db_harness"
+        : fallbackStructuredRiskRows.length
+          ? "fallback_baseline"
+          : acceptedPhotoSeedRiskRows.length ? "photo_seed" : "none";
     const structuredValidation = validateRiskAssessmentRows(structuredRiskRows);
     const structuredRiskIssues = structuredValidation.issues;
     if (aiMode === "enhanced") {
@@ -3093,7 +3104,8 @@ async function runAskUngated(question: string, options: RunAskOptions = {}): Pro
           provider: finalDeliverablesTrace.provider,
           modelPerDocument: finalDeliverablesTrace.modelPerDocument
         },
-        fallbackUsed: answerResult.trace.fallbackUsed || finalDeliverablesTrace.fallbackUsed
+        fallbackUsed: answerResult.trace.fallbackUsed || finalDeliverablesTrace.fallbackUsed,
+        rowsOrigin: finalRowsOrigin(finalResponse, baseRowsOrigin)
       }
     };
   } catch (error) {
@@ -3133,7 +3145,8 @@ async function runAskUngated(question: string, options: RunAskOptions = {}): Pro
           provider: finalDeliverablesTrace.provider,
           modelPerDocument: finalDeliverablesTrace.modelPerDocument
         },
-        fallbackUsed: true
+        fallbackUsed: true,
+        rowsOrigin: finalRowsOrigin(response, "fallback_baseline")
       }
     };
   }

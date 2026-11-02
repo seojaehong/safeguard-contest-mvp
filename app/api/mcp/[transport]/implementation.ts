@@ -47,7 +47,10 @@ import {
   createGenerateReviewedSafetyDocpackHandler,
   createGenerateSafetyDocpackHandler,
 } from "@/lib/mcp-docpack-handler";
-import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
+import { createGenerateRiskAssessmentHandler, GENERATE_RISK_ASSESSMENT_DEFAULT_MODE } from "@/lib/mcp-risk-assessment";
+import { renderXlsxDocumentExport } from "@/lib/document-export-xlsx";
+import { renderHwpDocumentExport } from "@/lib/document-export-hwp";
+import { fetchSafetyReferenceSources, type SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import { isEmbeddableSifReferenceItem } from "@/lib/sif-embedding-corpus";
 import { loadTenantHarnessMemoryForMcp } from "@/lib/tenant-harness-memory";
@@ -114,6 +117,15 @@ const generateReviewedSafetyDocpackHandler = createGenerateReviewedSafetyDocpack
     };
   },
   getGenerationEvidenceSecret: () => process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+});
+
+// 웹 /api/ask 와 같은 runAsk(aiMode) 경로. 기본 enhanced 는 웹 기본값(resolveRunAskMode)과 같다.
+const generateRiskAssessmentHandler = createGenerateRiskAssessmentHandler({
+  defaultMode: GENERATE_RISK_ASSESSMENT_DEFAULT_MODE,
+  generateResponse: (question, mode, signal) => runAsk(question, { aiMode: mode, signal }),
+  renderXlsx: renderXlsxDocumentExport,
+  renderHwp: renderHwpDocumentExport,
+  lookupSources: fetchSafetyReferenceSources,
 });
 
 function uniqueReferences(items: SafetyReferenceItem[]): SafetyReferenceItem[] {
@@ -361,6 +373,37 @@ export function registerTools(server: McpServer): void {
     },
     async ({ task, document_text }) => {
       return toToolResult(await reviewDocpack(task, document_text));
+    }
+  );
+
+  registerScopedTool(server,
+    "generate_risk_assessment",
+    {
+      title: "위험성평가표 생성(서식 파일 포함)",
+      description:
+        "오늘 작업을 설명하면 SafeClaw 문서 엔진(웹 /api/ask 와 같은 runAsk)으로 위험성평가 본표 행(JSON headers/cells 는 한글 본표 13칸: 세부작업·유해·위험요인·재해유형·가능성·중대성·위험성·감소대책 등. 엑셀 서식은 21칸이며 엑셀에만 있는 칸은 structuredRows 에 전부 있다)과 확인 필요 목록, 생성에 쓰인 SIF(중대재해) 유사사례를 만들고, 웹 「위험성평가표 편집 → 내보내기」와 같은 서식 파일(Excel 표 양식 .xlsx 또는 한글 표 양식 .hwp)을 base64 로 돌려준다. SIF 사례는 출처·원천 자료 공개 연도와 함께, 0건이면 이유를 함께 돌려주고, 시행규칙 제37조의4 기재 항목 충족 검사(항목별 채움·빈칸)를 붙인다. 결과 status 는 ok(본표 행을 모델 생성·안전 지식 DB 근거·요청한 template 으로 만듦), ok_fallback(DB 근거·모델 행이 없어 작업 유형 기본 행으로 대신함, generation.rowsOrigin 참고), review_required(본표 행 없음) 중 하나다. sif.relevanceApplied=false 면 작업 설명에서 작업·장소·기인물을 찾지 못해 SIF 사례를 거르지 않은 것이다(relevanceNote). 서식 파일을 만들지 못했거나 응답 크기 상한(256KB)을 넘으면 행 JSON 은 그대로 두고 file=null·fileUnavailableReason 을 돌려주며, 상한 때문에 뺀 칸은 trimmed 에 적는다(rows[].cells 다음 file). 작업공간에 저장하지 않는다. 초안 작성 보조 도구이며, 위험성평가 실시와 최종 판단 책임은 사업주에게 있다.",
+      inputSchema: {
+        question: z.string().max(MCP_GENERATION_QUESTION_MAX_CHARS).describe("현장 작업 상황 설명 (예: 경기 화성 물류창고 지게차 상하차 작업 4명, 비 예보, 야간)"),
+        mode: z
+          .enum(["template", "enhanced", "full"])
+          .optional()
+          .describe("생성 깊이 (기본 enhanced — 웹 기본값과 같음, 안전 지식 DB·SIF 사례 반영. template 은 DB 조회 없음)"),
+        format: z
+          .enum(["xlsx", "hwp"])
+          .optional()
+          .describe("서식 파일 형식 (기본 xlsx — Excel 표 양식, hwp — 한글 표 양식). 한 번에 한 형식"),
+      },
+    },
+    async ({ question, mode, format }, authContext, { signal }) => {
+      return withMcpProviderAdmission(
+        authContext,
+        mode ?? GENERATE_RISK_ASSESSMENT_DEFAULT_MODE,
+        () => generateRiskAssessmentHandler(
+          { question, mode, format },
+          authContext,
+          { signal },
+        ),
+      );
     }
   );
 }

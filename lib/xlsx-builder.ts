@@ -20,8 +20,11 @@ import {
   displayEquipment,
   displayEvidenceRefs,
   RISK_APPROVAL_LABELS,
+  RISK_ASSESSMENT_COLUMNS,
+  RISK_RECORD_HEADER_SPANS,
   RISK_REVIEW_LIST_NOTE,
   RISK_REVIEW_LIST_TITLE,
+  RISK_REVIEW_ROW_SPANS,
   riskRecordHeaderPairs
 } from "@/lib/risk-assessment-record";
 import { formatCompanyName, formatWorkerCount } from "@/lib/scenario-display";
@@ -52,29 +55,6 @@ const SECTION_FONT = { name: "Malgun Gothic", size: 11, bold: true, color: { arg
 const COVER_FILL = { type: "pattern" as const, pattern: "solid" as const, fgColor: { argb: "FFE8F1ED" } };
 const BORDER_THIN = { style: "thin" as const, color: { argb: "FF9AA4B2" } };
 const ALL_BORDERS = { top: BORDER_THIN, left: BORDER_THIN, bottom: BORDER_THIN, right: BORDER_THIN };
-const RISK_ASSESSMENT_COLUMNS = [
-  { header: "번호", width: 6 },
-  { header: "작업장소", width: 20 },
-  { header: "공정", width: 16 },
-  { header: "세부작업", width: 24 },
-  { header: "장비·도구", width: 20 },
-  { header: "유해·위험요인", width: 30 },
-  { header: "4M", width: 14 },
-  { header: "재해유형", width: 16 },
-  { header: "현재 안전조치", width: 30 },
-  { header: "가능성", width: 10 },
-  { header: "중대성", width: 10 },
-  { header: "위험성", width: 12 },
-  { header: "감소대책", width: 36 },
-  { header: "담당자", width: 14 },
-  { header: "조치기한", width: 14 },
-  { header: "이행 결과", width: 18 },
-  { header: "잔여 위험성", width: 10 },
-  { header: "확인상태", width: 14 },
-  { header: "확인일", width: 14 },
-  { header: "확인자", width: 14 },
-  { header: "근거", width: 28 }
-] as const;
 
 const DISPLAY_HEADER_LABELS: Readonly<Record<string, string>> = {
   "No.": "번호",
@@ -374,10 +354,10 @@ function writeRiskRecordHeader(ws: ExcelJS.Worksheet, startRow: number, scenario
     const [leftLabel, leftValue] = pairs[index];
     const [rightLabel, rightValue] = pairs[index + 1] || ["", ""];
     row = writeRiskSpanRow(ws, row, lastColumn, [
-      { text: leftLabel, span: 3, label: true },
-      { text: leftValue, span: 7 },
-      { text: rightLabel, span: 3, label: true },
-      { text: rightValue, span: 8 }
+      { text: leftLabel, span: RISK_RECORD_HEADER_SPANS[0], label: true },
+      { text: leftValue, span: RISK_RECORD_HEADER_SPANS[1] },
+      { text: rightLabel, span: RISK_RECORD_HEADER_SPANS[2], label: true },
+      { text: rightValue, span: RISK_RECORD_HEADER_SPANS[3] }
     ]);
   }
   row = writeRiskSectionTitle(ws, row, lastColumn, "위험성 결정 기준");
@@ -400,9 +380,9 @@ function writeRiskRecordFooter(
     row = writeRiskSpanRow(ws, row, lastColumn, [{ text: RISK_REVIEW_LIST_NOTE, span: lastColumn }]);
     reviewRows.forEach((reviewRow, index) => {
       row = writeRiskSpanRow(ws, row, lastColumn, [
-        { text: String(index + 1), span: 1, label: true },
-        { text: reviewRow.hazard, span: 11 },
-        { text: displayEvidenceRefs(reviewRow.evidenceRefs).join(" / "), span: 9 }
+        { text: String(index + 1), span: RISK_REVIEW_ROW_SPANS[0], label: true },
+        { text: reviewRow.hazard, span: RISK_REVIEW_ROW_SPANS[1] },
+        { text: displayEvidenceRefs(reviewRow.evidenceRefs).join(" / "), span: RISK_REVIEW_ROW_SPANS[2] }
       ]);
     });
   }

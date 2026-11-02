@@ -50,6 +50,7 @@ import {
   toStructuredRiskRows
 } from "@/lib/risk-assessment-record";
 import { RISK_RETENTION_NOTE, RISK_SCALE_LINES } from "@/lib/risk-labels";
+import { buildSingleDocumentExportBody, riskAssessmentFormProfile } from "@/lib/risk-assessment-export-body";
 import styles from "./WorkpackEditor.module.css";
 
 declare global {
@@ -978,15 +979,8 @@ function withSubmitReadiness(title: string, body: string, data: AskResponse) {
 
 function getSafetyFormProfile(key: DocumentKey): SafetyFormProfile {
   if (key === "riskAssessmentDraft") {
-    return {
-      code: "SC-RISK-01",
-      subtitle: "위험성평가 및 감소대책 확인서",
-      layout: "risk",
-      primaryColumn: "위험요인",
-      actionColumn: "감소대책 / 잔여위험",
-      confirmationRows: ["위험요인 확인", "감소대책 담당 지정", "작업 전 공유", "잔여위험 승인"],
-      approvalLabels: ["작성", "검토", "승인"]
-    };
+    // MCP 도구(generate_risk_assessment)와 같은 양식 값(lib/risk-assessment-export-body.ts RISK_ASSESSMENT_FORM_PROFILE 사본).
+    return riskAssessmentFormProfile();
   }
 
   if (key === "workPlanDraft") {
@@ -2870,6 +2864,18 @@ export function WorkpackEditor({
     ? { ...data, structured: { ...data.structured, riskAssessmentRows: selectedRiskExportRows ?? [] } }
     : data;
   const selectedFormProfile = getSafetyFormProfile(selected.key);
+  // 단일 문서 내보내기 본문 재료(xlsx·hwp 공용, lib/risk-assessment-export-body.ts — MCP 도구도 같은 함수로 본문을 만든다).
+  const singleExportBodyInput = {
+    edited: selectedUsesEditedText && !selectedUsesCanonicalRiskRows,
+    title: selected.title,
+    rows: selectedRows,
+    profile: selectedFormProfile,
+    scenario: data.scenario,
+    riskAssessmentRows: selectedUsesCanonicalRiskRows
+      ? canonicalRiskRows
+      : selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows,
+    riskReviewItems: selectedRiskReviewItems
+  };
   const rubricEvaluation = useMemo(() => evaluatePublicSafetyRubric(values), [values]);
   const selectedRubricItems = useMemo(() => {
     const key = selected.key;
@@ -3825,18 +3831,7 @@ export function WorkpackEditor({
             structured: structuredPayload,
             rows: selectedRows
           }
-        : {
-            mode: "single",
-            edited: selectedUsesEditedText && !selectedUsesCanonicalRiskRows,
-            title: selected.title,
-            rows: selectedRows,
-            profile: selectedFormProfile,
-            scenario: data.scenario,
-            riskAssessmentRows: selectedUsesCanonicalRiskRows
-              ? canonicalRiskRows
-              : selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows,
-            ...(selectedRiskReviewItems?.length ? { riskReviewItems: selectedRiskReviewItems } : {})
-          };
+        : buildSingleDocumentExportBody({ format: "xlsx", ...singleExportBodyInput });
       const response = await fetch("/api/export/xlsx", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -3860,17 +3855,7 @@ export function WorkpackEditor({
       const response = await fetch("/api/export/hwp", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          edited: selectedUsesEditedText && !selectedUsesCanonicalRiskRows,
-          title: selected.title,
-          rows: selectedRows,
-          profile: selectedFormProfile,
-          scenario: data.scenario,
-          riskAssessmentRows: selectedUsesCanonicalRiskRows
-            ? canonicalRiskRows
-            : selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows,
-          ...(selectedRiskReviewItems?.length ? { riskReviewItems: selectedRiskReviewItems } : {})
-        })
+        body: JSON.stringify(buildSingleDocumentExportBody({ format: "hwp", ...singleExportBodyInput }))
       });
       if (!response.ok) {
         throw new Error(`hwp export failed (${response.status})`);

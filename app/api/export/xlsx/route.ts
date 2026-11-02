@@ -1,60 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { gateExportPayload } from "@/lib/user-output-gate";
 import {
-  buildEducationRecordStructuredXlsx,
-  buildPermitInspectionStructuredXlsx,
-  buildTbmBriefingStructuredXlsx,
-  buildTbmLogStructuredXlsx,
-  buildWorkpackXlsx,
-  buildWorkPlanStructuredXlsx,
-  buildXlsxForDocument
-} from "@/lib/xlsx-builder";
-import {
-  assertDocumentExportInputBudget,
-  assertDocumentExportOutputBudget,
   createDocumentExportInternalErrorPayload,
   DocumentExportLimitError,
   DocumentExportRequestError,
   readDocumentExportRequestJson
 } from "@/lib/document-export-budget";
 import { withPublicDocumentExportAdmission } from "@/lib/public-distributed-rate-limit";
-import { parseStructuredRiskAssessmentRows } from "@/lib/risk-assessment-renderer";
-import { resolveRiskExportRows } from "@/lib/risk-assessment-record";
-import { companyFilePrefix } from "@/lib/scenario-display";
+import { renderXlsxDocumentExport } from "@/lib/document-export-xlsx";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-type SheetRow = {
-  document: string;
-  section: string;
-  item: string;
-  content: string;
-};
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function readString(value: unknown, fallback = "") {
-  return typeof value === "string" && value.trim() ? value.trim() : fallback;
-}
-
-function readNumber(value: unknown, fallback = 0) {
-  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
-}
-
-function sanitizeFileName(value: string) {
-  return value
-    .replace(/[\\/:*?"<>|]/g, "-")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .slice(0, 80) || "safeclaw-document";
-}
-
-function xlsxResponse(buffer: Buffer, fileNameBase: string, fallbackName: string) {
-  assertDocumentExportOutputBudget(buffer);
-  const fileName = `${sanitizeFileName(fileNameBase)}.xlsx`;
+function xlsxResponse(buffer: Buffer, fileName: string, fallbackName: string) {
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -62,83 +19,6 @@ function xlsxResponse(buffer: Buffer, fileNameBase: string, fallbackName: string
       "cache-control": "no-store"
     }
   });
-}
-
-function parseScenario(value: unknown) {
-  const r = isRecord(value) ? value : {};
-  return {
-    companyName: readString(r.companyName, ""),
-    companyType: readString(r.companyType, ""),
-    siteName: readString(r.siteName, "현장명 확인"),
-    workSummary: readString(r.workSummary, "작업내용 확인"),
-    workerCount: readNumber(r.workerCount, 0),
-    weatherNote: readString(r.weatherNote, "")
-  };
-}
-
-function parseRows(value: unknown, fallbackDoc: string): SheetRow[] {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((item): SheetRow[] => {
-    if (!isRecord(item)) return [];
-    const content = readString(item.content);
-    if (!content && readString(item.item) === "") return [];
-    return [{
-      document: readString(item.document, fallbackDoc),
-      section: readString(item.section, "본문"),
-      item: readString(item.item, "확인"),
-      content
-    }];
-  });
-}
-
-function parseProfile(value: unknown) {
-  const r = isRecord(value) ? value : {};
-  const layout = readString(r.layout, "generic");
-  const allowed = ["generic", "risk", "workPlan", "permit", "tbmBriefing", "tbmLog", "education", "photo"];
-  return {
-    code: readString(r.code, "generic"),
-    subtitle: readString(r.subtitle, "SafeClaw 안전 양식"),
-    layout: (allowed.includes(layout) ? layout : "generic") as
-      | "generic" | "risk" | "workPlan" | "permit" | "tbmBriefing" | "tbmLog" | "education" | "photo",
-    primaryColumn: readString(r.primaryColumn, "항목"),
-    actionColumn: readString(r.actionColumn, "내용"),
-    confirmationRows: Array.isArray(r.confirmationRows)
-      ? r.confirmationRows.filter((v): v is string => typeof v === "string")
-      : [],
-    approvalLabels: Array.isArray(r.approvalLabels)
-      ? r.approvalLabels.filter((v): v is string => typeof v === "string")
-      : []
-  };
-}
-
-function parseRiskRowsFromBody(body: Record<string, unknown>) {
-  const structured = isRecord(body.structured) ? body.structured : {};
-  const response = isRecord(body.response) ? body.response : {};
-  const responseStructured = isRecord(response.structured) ? response.structured : {};
-  const candidates = [
-    body.structuredRiskRows,
-    body.riskAssessmentRows,
-    body.structuredRows,
-    body.canonicalRows,
-    structured.riskAssessmentRows,
-    structured.structuredRiskRows,
-    responseStructured.riskAssessmentRows,
-    responseStructured.structuredRiskRows
-  ];
-  for (const candidate of candidates) {
-    const rows = parseStructuredRiskAssessmentRows(candidate);
-    if (rows.length) return rows;
-  }
-  return [];
-}
-
-function structuredFallbackTitle(mode: string) {
-  if (mode === "workPlanStructured") return "작업계획서";
-  if (mode === "permitInspectionStructured") return "안전작업허가 확인서";
-  if (mode === "tbmBriefingStructured") return "TBM 브리핑";
-  if (mode === "tbmLogStructured") return "TBM 일지";
-  if (mode === "educationRecordStructured") return "안전보건교육 기록";
-  return "SafeClaw 안전 문서";
 }
 
 export async function GET() {
@@ -175,88 +55,15 @@ export async function GET() {
 
 async function exportXlsx(request: NextRequest) {
   try {
-    // PR-14: 받은 본문의 내부 문구·통째 enum 칸을 사용자용으로 거른 뒤 렌더한다.
-    const parsed = gateExportPayload(await readDocumentExportRequestJson(request));
-    const body = isRecord(parsed) ? parsed : {};
-    assertDocumentExportInputBudget(body);
-    const mode = readString(body.mode, "single");
-    const scenario = parseScenario(body.scenario);
-
-    if (mode === "workPlanStructured" || mode === "permitInspectionStructured" || mode === "tbmBriefingStructured" || mode === "tbmLogStructured" || mode === "educationRecordStructured") {
-      if (!isRecord(body.structured)) {
-        return NextResponse.json(
-          { ok: false, error: "structured must be a non-array object for structured xlsx export" },
-          { status: 400, headers: { "cache-control": "no-store" } }
-        );
-      }
-      const editedRows = body.edited === true
-        ? parseRows(body.rows, structuredFallbackTitle(mode))
-        : undefined;
-
-      if (mode === "workPlanStructured") {
-        const buffer = await buildWorkPlanStructuredXlsx(scenario, body.structured, { editedRows });
-        return xlsxResponse(buffer, companyFilePrefix(scenario.companyName, "작업계획서"), "safeclaw-work-plan");
-      }
-
-      if (mode === "permitInspectionStructured") {
-        const buffer = await buildPermitInspectionStructuredXlsx(scenario, body.structured, { editedRows });
-        return xlsxResponse(buffer, companyFilePrefix(scenario.companyName, "안전작업허가-확인서"), "safeclaw-work-permit");
-      }
-
-      if (mode === "tbmBriefingStructured") {
-        const buffer = await buildTbmBriefingStructuredXlsx(scenario, body.structured, { editedRows });
-        return xlsxResponse(buffer, companyFilePrefix(scenario.companyName, "TBM-브리핑"), "safeclaw-tbm-briefing");
-      }
-
-      if (mode === "tbmLogStructured") {
-        const buffer = await buildTbmLogStructuredXlsx(scenario, body.structured, { editedRows });
-        return xlsxResponse(buffer, companyFilePrefix(scenario.companyName, "TBM-일지"), "safeclaw-tbm-log");
-      }
-
-      const buffer = await buildEducationRecordStructuredXlsx(scenario, body.structured, { editedRows });
-      return xlsxResponse(buffer, companyFilePrefix(scenario.companyName, "안전보건교육-기록"), "safeclaw-education-record");
+    // 게이트·예산·렌더는 lib/document-export-xlsx.ts(MCP generate_risk_assessment 와 공용)에서 한다.
+    const result = await renderXlsxDocumentExport(await readDocumentExportRequestJson(request));
+    if (!result.ok) {
+      return NextResponse.json(
+        { ok: false, error: result.error },
+        { status: result.status, headers: { "cache-control": "no-store" } }
+      );
     }
-
-    if (mode === "workpack") {
-      const docs = Array.isArray(body.documents) ? body.documents : [];
-      const documents = docs
-        .map((d) => {
-          if (!isRecord(d)) return null;
-          const title = readString(d.title);
-          if (!title) return null;
-          const riskExport = resolveRiskExportRows(d.edited === true ? [] : parseRiskRowsFromBody(d), d);
-          return {
-            title,
-            rows: parseRows(d.rows, title),
-            profile: parseProfile(d.profile),
-            structuredRiskRows: riskExport.main,
-            riskReviewItems: riskExport.review
-          };
-        })
-        .filter((d): d is {
-          title: string;
-          rows: SheetRow[];
-          profile: ReturnType<typeof parseProfile>;
-          structuredRiskRows: ReturnType<typeof parseRiskRowsFromBody>;
-          riskReviewItems: ReturnType<typeof parseRiskRowsFromBody>;
-        } => Boolean(d));
-      const buffer = await buildWorkpackXlsx(scenario, documents);
-      return xlsxResponse(buffer, companyFilePrefix(scenario.companyName, "safeclaw-workpack"), "safeclaw-workpack");
-    }
-
-    const title = readString(body.title, "SafeClaw 안전 문서");
-    const rows = parseRows(body.rows, title);
-    const profile = parseProfile(body.profile);
-    const riskExport = resolveRiskExportRows(body.edited === true ? [] : parseRiskRowsFromBody(body), body);
-    const buffer = await buildXlsxForDocument({
-      title,
-      rows,
-      profile,
-      scenario,
-      structuredRiskRows: riskExport.main,
-      riskReviewItems: riskExport.review
-    });
-    return xlsxResponse(buffer, companyFilePrefix(scenario.companyName, title), "safeclaw-document");
+    return xlsxResponse(result.buffer, result.fileName, result.fallbackName);
   } catch (error) {
     if (error instanceof DocumentExportRequestError) return error.response;
     if (error instanceof DocumentExportLimitError) {
