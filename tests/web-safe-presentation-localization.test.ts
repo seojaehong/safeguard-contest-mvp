@@ -242,12 +242,12 @@ describe("web-safe presentation localization", () => {
     expect(status.operatorGate.evidenceSummary.map((item) => formatSifTextForPresentation(item))).toEqual(expect.arrayContaining([
       "소규모 검증은 3건 임베딩만 생성 방식으로 확인했고 DB 업로드는 0건입니다.",
       "운영 DB 점검은 마이그레이션 필요이며 테이블 없음, RPC 없음입니다.",
-      "마이그레이션 후 검증은 마이그레이션 필요이며 업로드 0 / 6,032건을 보고합니다."
+      "마이그레이션 후 검증은 준비됨이며 업로드 11,496 / 11,496건을 보고합니다."
     ]));
 
     const verifierEvidence = status.operatorGate.checklist.find((item) => item.id === "post-migration-verifier")?.evidence;
     expect(formatSifTextForPresentation(verifierEvidence)).toBe(
-      "evaluation/sif-embedding-gate/post-migration-verify.json · 현재 마이그레이션 필요"
+      "evaluation/sif-embedding-gate/post-migration-verify.json · 현재 준비됨"
     );
   });
 

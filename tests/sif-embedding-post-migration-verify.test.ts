@@ -40,7 +40,11 @@ function runVerifierAllowFailure(args: string[], env: Record<string, string | un
   }
 }
 
-function writeReadyFixture(filePath: string, embeddingCount = 6032) {
+// 기본 게이트 = 전 kind 참고자료 코퍼스(evaluation/reference-vector-gate/report.json). 행 수는 그 파일에서 읽는다.
+const DEFAULT_GATE_REPORT = asRecord(JSON.parse(readFileSync(join(process.cwd(), "evaluation", "reference-vector-gate", "report.json"), "utf8")));
+const DEFAULT_CORPUS_COUNT = Number(DEFAULT_GATE_REPORT.corpusCount);
+
+function writeReadyFixture(filePath: string, embeddingCount = DEFAULT_CORPUS_COUNT) {
   writeFileSync(filePath, JSON.stringify({
     safetyReferenceItems: {
       ok: true,
@@ -106,8 +110,8 @@ describe("SIF embedding post-migration verifier", () => {
     expect(result.ok).toBe(true);
     expect(result.status).toBe("ready");
     expect(result.dbMutationPerformed).toBe(false);
-    expect(result.expectedCorpusCount).toBe(6032);
-    expect(asRecord(result.safetyReferenceEmbeddings).count).toBe(6032);
+    expect(result.expectedCorpusCount).toBe(DEFAULT_CORPUS_COUNT);
+    expect(asRecord(result.safetyReferenceEmbeddings).count).toBe(DEFAULT_CORPUS_COUNT);
     expect(asRecord(result.matchRpc).rowCount).toBe(3);
     expect((result.failedCheckIds as unknown[])).toEqual([]);
     const checks = result.checks as Array<Record<string, unknown>>;
@@ -131,7 +135,7 @@ describe("SIF embedding post-migration verifier", () => {
     const outDir = mkdtempSync(join(tmpdir(), "safeclaw-sif-post-verify-mismatch-"));
     const fixturePath = join(outDir, "fixture.json");
     const outPath = join(outDir, "post-migration-verify.json");
-    writeReadyFixture(fixturePath, 6031);
+    writeReadyFixture(fixturePath, DEFAULT_CORPUS_COUNT - 1);
 
     const stdout = runVerifierAllowFailure(["--no-env-file", "--fixture", fixturePath, "--output", outPath], {
       SAFETY_REFERENCE_VECTOR_SEARCH: "1"
@@ -144,5 +148,35 @@ describe("SIF embedding post-migration verifier", () => {
     expect(result.failedCheckIds as unknown[]).toContain("vector_feature_flag_allowed");
     expect(result.nextAction).toContain("Do not enable vector search");
     expect(asRecord(result.verificationReceipt).machineVerified).toBe(false);
+  });
+
+  it("fails closed instead of assuming 6,032 rows when the gate report has no corpus count", () => {
+    const outDir = mkdtempSync(join(tmpdir(), "safeclaw-sif-post-verify-no-gate-"));
+    const gateDir = mkdtempSync(join(tmpdir(), "safeclaw-sif-post-verify-empty-gate-"));
+    const fixturePath = join(outDir, "fixture.json");
+    const outPath = join(outDir, "post-migration-verify.json");
+    writeReadyFixture(fixturePath, 6032);
+
+    const stdout = runVerifierAllowFailure(["--no-env-file", "--gate-dir", gateDir, "--fixture", fixturePath, "--output", outPath]);
+    const result = asRecord(JSON.parse(stdout));
+
+    expect(result.ok).toBe(false);
+    expect(result.status).not.toBe("ready");
+    expect(result.expectedCorpusCount).toBe(0);
+    expect(asRecord(result.verificationReceipt).machineVerified).toBe(false);
+  });
+});
+
+describe("bundled vector runtime receipt", () => {
+  it("is machine-verified for the default all-kinds gate corpus", () => {
+    const receipt = asRecord(JSON.parse(readFileSync(join(process.cwd(), "evaluation", "sif-embedding-gate", "runtime-vector-verification.json"), "utf8")));
+    const verifyReport = asRecord(JSON.parse(readFileSync(join(process.cwd(), "evaluation", "sif-embedding-gate", "post-migration-verify.json"), "utf8")));
+
+    expect(DEFAULT_GATE_REPORT.corpusHash).toMatch(/^[a-f0-9]{64}$/u);
+    expect(receipt.expectedCorpusCount).toBe(DEFAULT_CORPUS_COUNT);
+    expect(receipt.fixedCorpusHash).toBe(DEFAULT_GATE_REPORT.corpusHash);
+    expect(asRecord(receipt.verificationReceipt).machineVerified).toBe(true);
+    expect(verifyReport.status).toBe("ready");
+    expect(asRecord(verifyReport.verificationReceipt)).toEqual(receipt.verificationReceipt);
   });
 });

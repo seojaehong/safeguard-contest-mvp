@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T16:39:44.951Z",
+  "generatedAt": "2026-11-01T22:45:34.513Z",
   "scope": "sif_embedding_post_migration_verify",
   "dbMutationPerformed": false,
   "configured": true,
@@ -9,10 +9,10 @@
   ],
   "model": "text-embedding-3-small",
   "dimensions": 1536,
-  "expectedCorpusCount": 6032,
-  "fixedCorpusHash": "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e",
-  "status": "migration-required",
-  "ok": false,
+  "expectedCorpusCount": 11496,
+  "fixedCorpusHash": "9e72c37e7c2854bb024d976c57b6a89cc18d5984bb0667d2ed2fde81bc2baa3e",
+  "status": "ready",
+  "ok": true,
   "checks": [
     {
       "id": "sif_source_count_still_matches",
@@ -24,33 +24,33 @@
     },
     {
       "id": "embedding_table_ready",
-      "passed": false,
+      "passed": true,
       "evidence": {
-        "status": 404,
-        "count": 0
+        "status": 206,
+        "count": 11496
       }
     },
     {
       "id": "uploaded_row_count_matches_corpus",
-      "passed": false,
+      "passed": true,
       "evidence": {
-        "expected": 6032,
-        "actual": 0
+        "expected": 11496,
+        "actual": 11496
       }
     },
     {
       "id": "match_rpc_ready",
-      "passed": false,
+      "passed": true,
       "evidence": {
-        "status": 404,
-        "rowCount": 0
+        "status": 200,
+        "rowCount": 3
       }
     },
     {
       "id": "embedding_samples_have_metadata",
-      "passed": false,
+      "passed": true,
       "evidence": {
-        "sampleCount": 0
+        "sampleCount": 3
       }
     },
     {
@@ -58,17 +58,12 @@
       "passed": true,
       "evidence": {
         "vectorFeatureFlagEnabled": false,
-        "uploadedCount": 0,
-        "rpcOk": false
+        "uploadedCount": 11496,
+        "rpcOk": true
       }
     }
   ],
-  "failedCheckIds": [
-    "embedding_table_ready",
-    "uploaded_row_count_matches_corpus",
-    "match_rpc_ready",
-    "embedding_samples_have_metadata"
-  ],
+  "failedCheckIds": [],
   "safetyReferenceItems": {
     "ok": true,
     "status": 206,
@@ -76,28 +71,74 @@
     "error": null
   },
   "safetyReferenceEmbeddings": {
-    "ok": false,
-    "status": 404,
-    "count": null,
-    "error": "{\"code\":\"PGRST205\",\"details\":null,\"hint\":\"Perhaps you meant the table 'public.safety_reference_items'\",\"message\":\"Could not find the table 'public.safety_reference_embeddings' in the schema cache\"}"
+    "ok": true,
+    "status": 206,
+    "count": 11496,
+    "error": null
   },
   "embeddingSamples": {
-    "ok": false,
-    "status": 404,
-    "rows": [],
-    "error": "{\"code\":\"PGRST205\",\"details\":null,\"hint\":\"Perhaps you meant the table 'public.safety_reference_items'\",\"message\":\"Could not find the table 'public.safety_reference_embeddings' in the schema cache\"}"
+    "ok": true,
+    "status": 200,
+    "rows": [
+      {
+        "reference_item_id": "construction-process-0001",
+        "embedding_model": "text-embedding-3-small",
+        "metadata": {
+          "title": "아파트 · 기초파일작업 · 기초파일 자재·장비반입",
+          "corpus": "reference-all-261101",
+          "itemType": "construction-process",
+          "textChars": 54,
+          "contentHash": "c352a7eed0ada925c867f60d791cc26373352f7ae946360760e1901fce75263e"
+        },
+        "created_at": "2026-11-01T11:56:03.260574+00:00"
+      },
+      {
+        "reference_item_id": "construction-process-0002",
+        "embedding_model": "text-embedding-3-small",
+        "metadata": {
+          "title": "아파트 · 기초파일작업 · 기초파일 천공",
+          "corpus": "reference-all-261101",
+          "itemType": "construction-process",
+          "textChars": 49,
+          "contentHash": "f3f615f319bbaa88f20e3e2cccbc46402ca6c49fc10037278657fa6c3227a5e9"
+        },
+        "created_at": "2026-11-01T11:56:03.260574+00:00"
+      },
+      {
+        "reference_item_id": "construction-process-0003",
+        "embedding_model": "text-embedding-3-small",
+        "metadata": {
+          "title": "아파트 · 기초파일작업 · 기초 파일항타",
+          "corpus": "reference-all-261101",
+          "itemType": "construction-process",
+          "textChars": 49,
+          "contentHash": "2593dd1c3b39cc8cf1692dd0ada4447a8efb7d217f91c295757c2d1477071768"
+        },
+        "created_at": "2026-11-01T11:56:03.260574+00:00"
+      }
+    ],
+    "error": null
   },
   "matchRpc": {
-    "ok": false,
-    "status": 404,
-    "rowCount": 0,
-    "sampleTitles": [],
+    "ok": true,
+    "status": 200,
+    "rowCount": 3,
+    "sampleTitles": [
+      "1183 / 4. 마감공사 / 4.4 도장작업",
+      "1200 / 4. 마감공사 / 4.4 도장작업",
+      "2716 / 12. 철거 및 해체 공사 / 12.1 철거 및 해체공사"
+    ],
     "model": "text-embedding-3-small",
-    "error": "{\"code\":\"PGRST202\",\"details\":\"Searched for the function public.match_safety_reference_embeddings with parameters item_type_filter, match_count, query_embedding or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.\",\"hint\":\"Perhaps you meant to call the function public.search_safety_references_ranked\",\"message\":\"Could not find the function public.match_safety_reference_embeddings(item_type_filter, match_count, query_embedding) in the schema cache\"}"
+    "error": null
   },
   "featureFlag": {
     "vectorSearchEnabled": false,
     "requireVectorFlag": false
   },
-  "nextAction": "Apply the approved SIF-only migration before upload verification."
+  "nextAction": "Vector retrieval is ready for runtime use after operator approval.",
+  "verificationReceipt": {
+    "algorithm": "sha256",
+    "fingerprint": "77bc5dde687bac5eb369a4e805c1130a42fff0f9c0687a21ba89882659d064c8",
+    "machineVerified": true
+  }
 }

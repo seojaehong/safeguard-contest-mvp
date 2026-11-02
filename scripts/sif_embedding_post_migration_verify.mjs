@@ -4,7 +4,9 @@ import process from "node:process";
 import { createSifVectorRuntimeEvidence } from "../lib/sif-vector-verification-contract.mjs";
 
 const DEFAULT_OUTPUT = "evaluation/sif-embedding-gate/post-migration-verify.json";
-const DEFAULT_GATE_DIR = "evaluation/sif-embedding-gate";
+// 검증기는 embedding_model 기준 전체 행을 센다. 그래서 기대 행 수도 전 kind 코퍼스 보고서에서 읽는다
+// (SIF 전용 준비 보고서 evaluation/sif-embedding-gate/report.json 은 6,032건이라 전 kind 업로드와 맞지 않는다).
+const DEFAULT_GATE_DIR = "evaluation/reference-vector-gate";
 const DEFAULT_MODEL = "text-embedding-3-small";
 const DEFAULT_DIMENSIONS = 1536;
 const DEFAULT_ENV_FILES = [".env.local"];
@@ -255,7 +257,8 @@ async function main() {
   const envFilesLoaded = Array.from(new Set(options.envFiles)).filter(readEnvFile);
   const reportPath = path.join(options.gateDir, "report.json");
   const fixedReport = fileExists(reportPath) ? readJson(reportPath) : {};
-  const expectedCount = Number(fixedReport.corpusCount || 6032);
+  // 게이트 보고서에 행 수가 없으면 0 으로 두어 ready 가 나오지 않게 한다(옛 6,032 가정 제거).
+  const expectedCount = Number(fixedReport.corpusCount) || 0;
   const config = options.fixture ? { ok: true, reason: "fixture", url: null, serviceRoleKey: null } : resolveConfig();
   const runtime = config.ok
     ? options.fixture

@@ -1022,16 +1022,18 @@ export function getSifEmbeddingGateStatus(
     dimensions: runtimeDimensions,
     fingerprint: env.SAFETY_REFERENCE_VECTOR_VERIFICATION_SHA256,
   });
+  const postMigrationVerification = buildPostMigrationVerification();
+  // 업로드 검증은 검증기 결과(전 kind 코퍼스 기대 행 수 vs 실제 행 수)로 본다.
+  // SIF 전용 준비 보고서(report.json)의 6,032·업로드 0 은 7월 승인 전 기록이라 운영 벡터 상태를 말하지 않는다.
   const vectorGuard = buildVectorGuard(
     vectorFeatureFlagEnabled,
-    uploadedCount,
-    readNumber(report, "corpusCount"),
+    postMigrationVerification.uploadedCount,
+    postMigrationVerification.expectedCorpusCount,
     vectorVerification.ok,
   );
   const runtimeExecutionReadyAfterApproval = openaiApiKeyPresent && supabaseUrlPresent && supabaseServiceRolePresent;
   const runtimeDbProbe = buildRuntimeDbProbeStatus();
   const canary = buildCanaryStatus();
-  const postMigrationVerification = buildPostMigrationVerification();
   const artifacts = {
     reportPath: readString(preflight, "reportPath", "evaluation/sif-embedding-gate/report.json"),
     manifestPath: readString(preflight, "manifestPath", "evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json"),

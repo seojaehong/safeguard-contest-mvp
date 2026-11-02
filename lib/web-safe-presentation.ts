@@ -61,7 +61,8 @@ const SIF_APPROVAL_DECISION_LABELS: LabelMap = {
   "Run embedding upload only with --embed --approved-embedding --upload --approved-upload.":
     "임베딩 업로드는 --embed --approved-embedding --upload --approved-upload 승인 플래그로만 실행합니다.",
   "Verify uploaded row count equals 6032 before enabling SAFETY_REFERENCE_VECTOR_SEARCH=1.":
-    "SAFETY_REFERENCE_VECTOR_SEARCH=1 활성화 전에 업로드 행 수가 6,032건인지 확인합니다.",
+    // 키는 7월 SIF 사전점검 산출물의 원문이라 그대로 둔다. 기대 행 수는 이제 검증기 게이트(전 kind 코퍼스)가 정한다.
+    "SAFETY_REFERENCE_VECTOR_SEARCH=1 활성화 전에 업로드 행 수가 검증기의 기대 행 수와 같은지 확인합니다.",
   "Enable runtime vector retrieval after RPC smoke test passes.":
     "RPC 연결 점검을 통과한 뒤 운영 벡터 검색을 활성화합니다."
 };

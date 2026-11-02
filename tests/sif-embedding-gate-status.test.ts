@@ -62,13 +62,14 @@ describe("SIF embedding gate status", () => {
       missingPrimaryDocumentsCount: 0,
       duplicateContentHashCount: 0
     });
+    // 업로드 검증은 검증기 결과(전 kind 코퍼스)로 본다. 플래그와 지문이 없으면 여전히 잠금이다.
     expect(status.vectorGuard).toMatchObject({
       status: "locked",
       flagEnabled: false,
-      uploadVerified: false,
+      uploadVerified: true,
       verificationReceiptValid: false,
-      uploadedCount: 0,
-      requiredUploadCount: 6032
+      uploadedCount: postMigrationFixture.safetyReferenceEmbeddings.count,
+      requiredUploadCount: postMigrationFixture.expectedCorpusCount
     });
     expect(status.runtimeDbProbe).toMatchObject({
       status: "migration-required",
@@ -98,18 +99,19 @@ describe("SIF embedding gate status", () => {
     });
     expect(status.readinessVerdict.answer).toContain("6,032건은 준비");
     expect(status.readinessVerdict.answer).toContain("임베딩 생성과 DB 업로드는 아직 실행되지 않았습니다");
+    // 업로드 검증은 검증기(전 kind) 결과다. fullEmbeddingGenerated 는 SIF 준비 보고서(7월 기록) 값이라 그대로다.
     expect(status.learningLifecycle).toMatchObject({
       productTerm: "retrieval_embedding_index",
-      label: "코퍼스 준비 · 임베딩 전",
+      label: "업로드 검증 완료",
       modelFineTuningPerformed: false,
       corpusPrepared: true,
       fullEmbeddingGenerated: false,
-      dbUploadVerified: false,
+      dbUploadVerified: true,
       vectorSearchUsable: false,
       nextGateId: "apply-sif-only-migration",
       nextGateLabel: "SIF-only DB migration 승인"
     });
-    expect(status.learningLifecycle.answer).toContain("모델 가중치 변경이나 전체 임베딩 생성은 아직 실행하지 않았습니다");
+    expect(status.learningLifecycle.answer).toContain("DB row count는 검증됐고, vector 검색 flag 활성 승인만 남았습니다");
     expect(status.nextApprovalGate).toMatchObject({
       id: "apply-sif-only-migration",
       label: "SIF-only DB migration 승인",
@@ -136,7 +138,7 @@ describe("SIF embedding gate status", () => {
     expect(status.operatorGate.migrationArtifact.sha256).toHaveLength(64);
     expect(status.operatorGate.evidenceSummary.join("\n")).toContain("전체 SIF 코퍼스 6,032건");
     expect(status.operatorGate.evidenceSummary.join("\n")).toContain("Canary는 3건 embed-only");
-    expect(status.operatorGate.evidenceSummary.join("\n")).toContain("Post-migration verifier는 migration-required");
+    expect(status.operatorGate.evidenceSummary.join("\n")).toContain(`Post-migration verifier는 ${postMigrationFixture.status}`);
     expect(status.operatorGate.allowedBeforeApproval).toContain("승인 패킷과 migration SQL diff 검토");
     expect(status.operatorGate.forbiddenBeforeApproval).toEqual([
       "운영 DB migration 적용",
@@ -148,23 +150,20 @@ describe("SIF embedding gate status", () => {
     expect(status.operatorGate.checklist.find((item) => item.id === "post-migration-verifier")?.evidence).toContain("post-migration-verify.json");
     expect(status.operatorGate.heldCommands).toContain(status.commandHeldUntilApproval);
     expect(status.operatorGate.heldCommands).toContain("npm.cmd run knowledge:sif-embedding-post-migration-verify -- --output evaluation/sif-embedding-gate/post-migration-verify.json");
+    // 2026-11-01 운영 DB 검증기 결과(전 kind 11,496건 업로드·RPC 정상). 값은 커밋된 검증 파일에서 읽는다.
     expect(status.postMigrationVerification).toMatchObject({
       reportPath: "evaluation/sif-embedding-gate/post-migration-verify.json",
-      ok: false,
-      status: "migration-required",
-      expectedCorpusCount: 6032,
-      uploadedCount: 0,
-      tableReady: false,
-      rpcReady: false,
+      ok: true,
+      status: "ready",
+      expectedCorpusCount: postMigrationFixture.expectedCorpusCount,
+      uploadedCount: postMigrationFixture.safetyReferenceEmbeddings.count,
+      tableReady: true,
+      rpcReady: true,
       vectorFeatureFlagEnabled: false,
       dbMutationPerformed: false
     });
-    expect(status.postMigrationVerification.failedCheckIds).toEqual([
-      "embedding_table_ready",
-      "uploaded_row_count_matches_corpus",
-      "match_rpc_ready",
-      "embedding_samples_have_metadata"
-    ]);
+    expect(status.postMigrationVerification.uploadedCount).toBe(status.postMigrationVerification.expectedCorpusCount);
+    expect(status.postMigrationVerification.failedCheckIds).toEqual([]);
     expect(status.approvalPacket).toMatchObject({
       scope: "sif_embedding_next_approval_gate",
       decisionCount: 6
@@ -215,10 +214,12 @@ describe("SIF embedding gate status", () => {
     expect(readyRuntime.ok).toBe(false);
     expect(readyRuntime.runtime.executionReadyAfterApproval).toBe(true);
     expect(readyRuntime.runtime.vectorFeatureFlagEnabled).toBe(true);
+    // 업로드 수는 맞아도 운영 지문(SAFETY_REFERENCE_VECTOR_VERIFICATION_SHA256)이 없으면 차단한다.
     expect(readyRuntime.vectorGuard).toMatchObject({
       status: "blocked",
       flagEnabled: true,
-      uploadVerified: false
+      uploadVerified: true,
+      verificationReceiptValid: false
     });
     expect(readyRuntime.readinessVerdict).toMatchObject({
       state: "blocked",
@@ -235,7 +236,7 @@ describe("SIF embedding gate status", () => {
     });
     expect(readyRuntime.operatorGate.forbiddenBeforeApproval).toContain("SAFETY_REFERENCE_VECTOR_SEARCH=1 활성화");
     expect(readyRuntime.learningLifecycle).toMatchObject({
-      label: "코퍼스 준비 · 임베딩 전",
+      label: "업로드 검증 완료",
       vectorSearchUsable: false,
       nextGateId: "disable-vector-flag"
     });
@@ -359,6 +360,27 @@ describe("SIF embedding gate status", () => {
     const canonicalFixture = JSON.stringify(canonicalizeMachineFixture(jsonValue));
     const fixtureHash = createHash("sha256").update(canonicalFixture).digest("hex");
 
-    expect(fixtureHash).toBe("a6c5b19166df45141806b59f873002f1ee6e87ebc27f2a78f2eb4ac184e3cfe4");
+    // 261101: post-migration-verify.json 을 운영 DB 결과(전 kind 11,496건 ready)로 다시 만들고 vectorGuard 를 검증기 수로 바꿔 값이 바뀌었다.
+    expect(fixtureHash).toBe("7dfa0f36117bd29b4cad3f88eb9c69618eebe4a4d9c679db9b2712a17664156c");
+  });
+
+  it("judges the vector guard from the post-migration verifier counts, not the SIF-only prep report", () => {
+    const fingerprint = String(postMigrationFixture.verificationReceipt.fingerprint);
+    const status = getSifEmbeddingGateStatus({
+      OPENAI_API_KEY: "sk-test",
+      SUPABASE_URL: "https://example.supabase.co",
+      SUPABASE_SERVICE_ROLE_KEY: "service-role-placeholder",
+      SAFETY_REFERENCE_VECTOR_SEARCH: "1",
+      SAFETY_REFERENCE_VECTOR_VERIFICATION_SHA256: fingerprint
+    });
+
+    expect(status.vectorGuard).toMatchObject({
+      status: "active",
+      flagEnabled: true,
+      uploadVerified: true,
+      verificationReceiptValid: true,
+      uploadedCount: postMigrationFixture.safetyReferenceEmbeddings.count,
+      requiredUploadCount: postMigrationFixture.expectedCorpusCount
+    });
   });
 });
