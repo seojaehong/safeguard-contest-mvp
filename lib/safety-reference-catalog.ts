@@ -3641,9 +3641,11 @@ export async function fetchSafetyReferenceSources(
     id: `in.(${unique.join(",")})`
   });
   try {
-    const data = await fetchRest(config, "safety_reference_sources", params, signal, async (response, deadlineSignal) => (
-      response.ok ? await readBoundedJson(response, deadlineSignal) : null
-    ));
+    const data = await fetchRest(config, "safety_reference_sources", params, signal, async (response, deadlineSignal) => {
+      if (response.ok) return readBoundedJson(response, deadlineSignal);
+      log.error("safety_reference_sources lookup failed", { status: response.status });
+      return null;
+    });
     const rows = Array.isArray(data) ? data : [];
     const text = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
     return new Map(rows.flatMap((row): Array<[string, SafetyReferenceSourceMeta]> => {

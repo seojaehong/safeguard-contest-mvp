@@ -116,6 +116,14 @@ describe("MCP 결과는 실제 웹 경로(편집기 → /api/export)와 같은 �
     for (const marker of ["DB 하네스", "deterministic", "fallback", "검색:"]) expect(display).not.toContain(marker);
   });
 
+  it("riskSummary.topRisk 도 본표 칸과 같은 내보내기 게이트를 지난다(261102 3차 검토)", async () => {
+    const base = markedRunAskResponse();
+    const response = { ...base, riskSummary: { ...base.riskSummary, topRisk: `${base.riskSummary.topRisk} (DB 하네스 deterministic fallback)` } };
+    const payload = await mcpPayload(response, "xlsx");
+    expect(payload.riskSummary.topRisk).toBe(gateExportPayload({ topRisk: sanitizeAskResponsePublicSurface(response).riskSummary.topRisk }).topRisk);
+    expect(payload.riskSummary.topRisk).not.toContain("DB 하네스");
+  });
+
   it("본표 글자 칸(현재 안전조치 등)·scenario 는 라우트가 렌더하는 게이트 뒤 본문 값과 같다", async () => {
     const response = markedRunAskResponse();
     const web = sanitizeAskResponsePublicSurface(response);

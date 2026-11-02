@@ -76,4 +76,18 @@ describe("fetchSafetyReferenceSources 조회 실패 기록", () => {
     expect(lines).toContain("\"errorType\":\"TypeError\"");
     expect(lines).not.toContain(SECRET);
   });
+
+  it("오류 응답(500)이면 빈 Map 을 돌려주고 상태 코드만 남긴다(261102 3차 검토)", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://v-test-project.supabase.invalid");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "v-test-service-role-key");
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(SECRET, { status: 500 })));
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const sources = await fetchSafetyReferenceSources(["v-source"]);
+    expect(sources.size).toBe(0);
+    const lines = errorLines(errorSpy);
+    expect(lines).toMatch(/safety_reference_sources/u);
+    expect(lines).toContain("\"status\":500");
+    expect(lines).not.toContain(SECRET);
+  });
 });

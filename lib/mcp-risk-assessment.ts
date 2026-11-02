@@ -465,7 +465,8 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
       mode: aiMode,
       generation,
       scenario: view.scenario,
-      riskSummary: { riskLevel: response.riskSummary.riskLevel, topRisk: response.riskSummary.topRisk },
+      // 본표 칸과 같은 내보내기 게이트를 지난 값이다(enhanced 모드에서는 모델 문장이라 내부 표지가 섞일 수 있다).
+      riskSummary: gateExportPayload({ riskLevel: view.publicResponse.riskSummary.riskLevel, topRisk: view.publicResponse.riskSummary.topRisk }),
       riskAssessment: {
         title: RISK_ASSESSMENT_EXPORT_TITLE,
         formCode: RISK_ASSESSMENT_FORM_PROFILE.code,
