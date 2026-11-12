@@ -255,7 +255,15 @@ export function computeEnablement(input: { hasEnvTokens: boolean; hasSupabase: b
 export function asAuthContext(value: unknown): McpAuthContext | null {
   if (!value || typeof value !== "object") return null;
   const v = value as Record<string, unknown>;
-  if (v.source !== "db" && v.source !== "env" && v.source !== "broker") return null;
+  // 🔴 261112 — "public" 을 여기 빠뜨려서 공개 티어가 **문을 열고도 아무 도구가 안 됐다.**
+  //   asAuthContext 가 null 을 주면 requireMcpToolScope 가 MCP_TOOL_FORBIDDEN 을 던진다.
+  //   타입(McpAuthSource)만 넓히고 이 런타임 검사를 안 고쳤다. 배포 뒤 실측으로 잡았다.
+  if (
+    v.source !== "db"
+    && v.source !== "env"
+    && v.source !== "broker"
+    && v.source !== "public"
+  ) return null;
   if (!Array.isArray(v.scopes)) return null;
   const admissionIdentity = typeof v.admissionIdentity === "string"
     && /^[a-f0-9]{64}$/u.test(v.admissionIdentity)
