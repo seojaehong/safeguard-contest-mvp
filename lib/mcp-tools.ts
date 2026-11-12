@@ -289,7 +289,9 @@ export type HarnessAgentSearchSummary = Pick<
 };
 
 export type HarnessAgentAuthSummary = {
-  source: "db" | "env" | "broker" | "none";
+  // 261112 — McpAuthSource 에 "public" 이 생겼다. 이 요약은 McpAuthSource 를 그대로 받으므로
+  // 같이 넓힌다(좁혀 두면 공개 컨텍스트가 타입에서 막힌다).
+  source: "db" | "env" | "broker" | "none" | "public";
   siteId: string | null;
   orgId: string | null;
   tokenBound: boolean;

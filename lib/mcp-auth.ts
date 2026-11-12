@@ -20,7 +20,7 @@ export { MCP_TOOL_NAMES } from "@/lib/mcp-tool-contract.mjs";
 
 const log = createLogger("mcp-auth");
 
-export type McpAuthSource = "db" | "env" | "broker";
+export type McpAuthSource = "db" | "env" | "broker" | "public";
 
 /** MCP 도구 핸들러에 전달되는 인증 컨텍스트. 평문 토큰을 포함하지 않는다. */
 export interface McpAuthContext {
@@ -65,6 +65,43 @@ const WRITE_TOOL_NAMES: ReadonlySet<McpToolName> = new Set([
   "generate_safety_docpack",
   "generate_risk_assessment",
 ]);
+/** 🔴 토큰 없이 열어 주는 도구와 그 이유 (261112).
+ *
+ * 공개 기준은 둘을 **동시에** 만족하는 것이다.
+ *   ① 테넌트 데이터에 닿지 않는다 — site/org 를 읽지도 쓰지도 않는다
+ *   ② 우리 돈이 나가는 모델·공급자 호출이 없다
+ *
+ * 그래서 아래가 빠졌다.
+ *   generate_safety_docpack · generate_reviewed_safety_docpack  결과를 현장에 귀속 저장한다(①)
+ *   run_safeclaw_harness_agent                                  테넌트 harness 기억을 읽는다(①)
+ *   qa_review_docpack                                           현장 산출물 검수다(①)
+ *   get_weather_signals · search_accident_cases                 공급자 fanout 가중치가 있다(②)
+ *                                                               MCP_READ_PROVIDER_ADMISSION_POLICY.weights
+ *
+ * generate_risk_assessment 는 들어 있는데, **mode=template 일 때만** 열린다.
+ * template 은 외부 호출도 AI 호출도 하지 않는 경로다(lib/search.ts 2107행 주석·admission weight 0).
+ * 모드 강제는 app/api/mcp/[transport]/implementation.ts 가 한다.
+ */
+export const PUBLIC_MCP_TOOL_SCOPES: readonly string[] = Object.freeze([
+  "tools:query_safety_knowledge",
+  "tools:get_evidence_mapping",
+  "tools:validate_safety_citations",
+  "tools:sanitize_emergency_contacts",
+  "tools:generate_risk_assessment",
+]);
+
+/** 토큰 없는 호출에 주는 컨텍스트. 현장·조직이 없으므로 테넌트 도구는 스코프에서 막힌다. */
+export function buildPublicContext(admissionIdentity: string): McpAuthContext {
+  return {
+    siteId: null,
+    orgId: null,
+    scopes: [...PUBLIC_MCP_TOOL_SCOPES],
+    source: "public",
+    tokenId: null,
+    admissionIdentity,
+  };
+}
+
 const KNOWN_MCP_SCOPES = new Set<string>([
   ...DEFAULT_SCOPES,
   "tools:read",

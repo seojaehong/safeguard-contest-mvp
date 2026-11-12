@@ -21,6 +21,42 @@ claude mcp add --transport http safeclaw \
 > `[transport]` 동적 세그먼트가 있어야 라우팅되기 때문이다. 즉 마지막 `mcp`는
 > transport 세그먼트다. (`/api/mcp` 단독 경로는 404.)
 
+## 공개 티어 (토큰 없이 쓰는 범위) — 261112 신설
+
+토큰 없이도 **일부 도구**를 쓸 수 있다. `claude mcp add` 에 `Authorization` 헤더를 주지 않으면
+공개 컨텍스트(`source: "public"`, `siteId`·`orgId`·`tokenId` 전부 `null`)로 붙는다.
+
+```bash
+claude mcp add --transport http safeclaw https://www.safeclaw.kr/api/mcp/mcp
+```
+
+| | 공개 | 토큰 |
+|---|---|---|
+| `query_safety_knowledge` · `get_evidence_mapping` · `validate_safety_citations` · `sanitize_emergency_contacts` | ✅ | ✅ |
+| `generate_risk_assessment` | ✅ **`mode=template` 고정** | 모드 자유 |
+| `generate_safety_docpack` · `generate_reviewed_safety_docpack` · `qa_review_docpack` · `run_safeclaw_harness_agent` | ❌ `MCP_TOOL_FORBIDDEN` | ✅ |
+| `get_weather_signals` · `search_accident_cases` | ❌ | ✅ |
+| 분당 한도 | **IP 당 20회**(`mcp-public`) | 토큰당 20회(`mcp-authenticated`) |
+
+고른 기준은 둘을 **동시에** 만족하는 것이다.
+
+1. **테넌트 데이터에 닿지 않는다** — `site`·`org` 를 읽지도 쓰지도 않는다.
+   `generate_safety_docpack` 계열은 결과를 현장에 귀속 저장하고, `run_safeclaw_harness_agent` 는
+   테넌트 harness 기억을 읽는다. 그래서 빠졌다.
+2. **우리 돈이 나가는 공급자 호출이 없다** — `MCP_READ_PROVIDER_ADMISSION_POLICY.weights` 에
+   가중치가 있는 도구(`get_weather_signals`·`search_accident_cases`·`run_safeclaw_harness_agent`)는 빠졌다.
+   `generate_risk_assessment` 는 `template` 일 때 외부 호출·AI 호출이 없어서(`lib/search.ts` template
+   fast path, admission weight 0) 그 모드로만 열었다.
+
+🔴 **틀린 토큰은 공개로 강등되지 않는다.** 토큰이 없으면 공개, 토큰이 있는데 안 맞으면 종전처럼 `401` 이다.
+만료된 고객이 「왜 내 현장이 안 보이지」로 헤매지 않게 하려는 것이다.
+
+🔴 **공개에서 `enhanced`·`full` 을 열지 않는다.** 그건 우리 Anthropic 비용이다. 같은 품질이 필요하면
+토큰을 발급해 쓴다(아래 **토큰 발급**).
+
+허용 목록은 `PUBLIC_MCP_TOOL_SCOPES`(`lib/mcp-auth.ts`) 한 곳에만 있고,
+`tests/mcp-public-tier.test.ts` 가 도구 전수와 대조한다.
+
 ## 인증 · rate limiting
 
 | 조건 | 응답 |

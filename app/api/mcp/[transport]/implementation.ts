@@ -59,7 +59,10 @@ import { reviewDocpack } from "@/lib/ontology/qa-review-tool";
 import {
   isMcpEnabled,
   resolveMcpAuth,
+  buildPublicContext,
+  PUBLIC_MCP_TOOL_SCOPES,
 } from "@/lib/mcp-auth";
+import { getClientIp } from "@/lib/api-guard";
 import {
   withMcpProviderAdmission,
   withMcpReadProviderAdmission,
@@ -395,11 +398,19 @@ export function registerTools(server: McpServer): void {
       },
     },
     async ({ question, mode, format }, authContext, { signal }) => {
+      // 🔴 261112 — 공개(토큰 없음) 호출은 **template 로 고정**한다.
+      //   template 은 외부 호출도 AI 호출도 없는 경로다(lib/search.ts 2107행,
+      //   MCP_PROVIDER_ADMISSION_POLICY.weights.template === 0). enhanced·full 을 열면
+      //   토큰 없는 사람이 우리 모델 비용을 쓴다. 요청한 모드를 조용히 바꾸지 않고
+      //   무엇이 적용됐는지 결과에 남기는 일은 아래 핸들러의 status·generation 이 한다.
+      const effectiveMode = authContext.source === "public"
+        ? "template" as const
+        : mode;
       return withMcpProviderAdmission(
         authContext,
-        mode ?? GENERATE_RISK_ASSESSMENT_DEFAULT_MODE,
+        effectiveMode ?? GENERATE_RISK_ASSESSMENT_DEFAULT_MODE,
         () => generateRiskAssessmentHandler(
-          { question, mode, format },
+          { question, mode: effectiveMode, format },
           authContext,
           { signal },
         ),
@@ -416,8 +427,19 @@ const baseHandler = createMcpHandler(
 
 // Bearer → {siteId, orgId, scopes} 컨텍스트. DB(mcp_tokens) 우선, env 레거시 폴백.
 // 컨텍스트를 AuthInfo.extra에 실어 보내면 transport가 도구 핸들러의 extra.authInfo로 전달한다.
-const verifyToken = async (_req: Request, bearerToken?: string): Promise<AuthInfo | undefined> => {
-  if (!bearerToken) return undefined;
+const verifyToken = async (req: Request, bearerToken?: string): Promise<AuthInfo | undefined> => {
+  // 🔴 261112 — 토큰이 **없으면** 공개 티어로 내려준다. 토큰이 있는데 틀리면 종전처럼 401 이다.
+  //   틀린 토큰을 공개로 조용히 강등하면, 만료된 고객이 「왜 내 현장이 안 보이지」로 헤맨다.
+  if (!bearerToken) {
+    return {
+      token: "",
+      clientId: "safeclaw-mcp:public",
+      scopes: [...PUBLIC_MCP_TOOL_SCOPES],
+      extra: buildPublicContext(
+        createHash("sha256").update(`public:${getClientIp(req)}`).digest("hex"),
+      ) as unknown as Record<string, unknown>,
+    };
+  }
   const context = await resolveMcpAuth(bearerToken);
   if (!context) return undefined;
   return {
@@ -440,11 +462,16 @@ async function protectedBaseHandler(request: Request): Promise<Response> {
     .get("authorization")
     ?.replace(/^Bearer\s+/i, "")
     .trim();
-  const identifier = createHash("sha256").update(bearer || "missing-bearer").digest("hex");
+  // 🔴 261112 — 공개 호출은 베어러가 없다. 종전 식별자는 "missing-bearer" 한 덩이라
+  //   공개 사용자 전체가 분당 20회를 **같이** 썼다. 공개는 IP 로 가른다
+  //   (identifier 를 비우면 checkPublicRateLimit 이 getClientIp 로 떨어진다).
+  const identifier = bearer
+    ? createHash("sha256").update(bearer).digest("hex")
+    : undefined;
   const rateDecision = await checkPublicRateLimit({
     request,
     identifier,
-    namespace: "mcp-authenticated",
+    namespace: bearer ? "mcp-authenticated" : "mcp-public",
     limit: 20,
     windowMs: 60_000,
     instanceLimiter,
@@ -466,7 +493,9 @@ async function protectedBaseHandler(request: Request): Promise<Response> {
   return applyPublicRateLimitHeader(response, rateDecision);
 }
 
-const authHandler = withMcpAuth(protectedBaseHandler, verifyToken, { required: true });
+// 261112 — 공개 티어가 생겨서 required 를 내렸다. 토큰 없는 호출은 verifyToken 이
+// 공개 컨텍스트를 주고, 틀린 토큰은 undefined 를 돌려 401 로 남는다.
+const authHandler = withMcpAuth(protectedBaseHandler, verifyToken, { required: false });
 
 export async function handler(request: Request): Promise<Response> {
   // 활성화 조건: env 레거시 토큰이 있거나 Supabase 서비스 롤(DB 토큰)이 설정된 경우.
