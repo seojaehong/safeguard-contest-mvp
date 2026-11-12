@@ -7,6 +7,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  asAuthContext,
   buildPublicContext,
   isMcpToolAllowed,
   MCP_TOOL_NAMES,
@@ -56,6 +57,24 @@ describe("MCP 공개 티어", () => {
     for (const scope of PUBLIC_MCP_TOOL_SCOPES) {
       const name = scope.replace(/^tools:/u, "");
       expect(MCP_TOOL_NAMES as readonly string[], scope).toContain(name);
+    }
+  });
+
+  // 🔴 261112 — 처음 판은 buildPublicContext 를 **직접** isMcpToolAllowed 에 넣어 통과했는데,
+  //   실제 요청은 AuthInfo.extra → asAuthContext → requireMcpToolScope 를 지난다.
+  //   그 사이 런타임 검사가 source="public" 을 버려서 배포 뒤 모든 도구가 FORBIDDEN 이었다.
+  //   그래서 이 검사는 **요청이 실제로 지나는 길**로 확인한다.
+  it("공개 컨텍스트가 asAuthContext 를 통과한다 (요청이 지나는 길)", () => {
+    const roundTripped = asAuthContext({ ...context } as unknown);
+    expect(roundTripped).not.toBeNull();
+    expect(roundTripped?.source).toBe("public");
+    expect(roundTripped?.scopes).toEqual(context.scopes);
+    for (const scope of PUBLIC_MCP_TOOL_SCOPES) {
+      const tool = scope.replace(/^tools:/u, "") as McpToolName;
+      expect(isMcpToolAllowed(roundTripped, tool), tool).toBe(true);
+    }
+    for (const tool of TENANT_TOOLS) {
+      expect(isMcpToolAllowed(roundTripped, tool), tool).toBe(false);
     }
   });
 
