@@ -33,6 +33,8 @@ const TASK_LABELS_BY_ID: Readonly<Partial<Record<TaskId, readonly string[]>>> = 
   "work-at-height": ["고소작업"],
   "aerial-work-platform": ["고소작업"],
   roof: ["고소작업"],
+  "steel-erection": ["고소작업"],
+  "ladder-lighting": ["고소작업", "전기 작업"],
   electrical: ["전기 작업"]
 };
 

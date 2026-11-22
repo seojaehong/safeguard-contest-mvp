@@ -35,7 +35,8 @@ const CASES: CoverageCase[] = [
   { id: "mobile-crane", q: "김포 이동식 크레인으로 자재 인양 작업, 신호수 1명", task: "crane-lifting", first: /인양|양중|낙하/, rows: /인양|양중|낙하|크레인|신호|전도|아웃트리거|줄걸이/ },
   { id: "food-grinder", q: "식품공장 분쇄기 내부 청소 작업, 작업자 2명", task: "machine-isolation", first: /끼임|불시|기동|말려/, rows: /끼임|기동|운전|말려|칼날|방호|절단/, forbidden: /화학세제|젖은 바닥/ },
   { id: "robot-teach", q: "아산 자동차 부품 산업용 로봇 티칭 작업, 작업자 2명", task: "review_required" },
-  { id: "ladder-light", q: "사무실 형광등 교체, 사다리 작업, 작업자 1명", task: "review_required" },
+  // 2026-11-22 MCP 점검 ⑤: 조명 교체(사다리·전기) 틀을 더해 보류에서 분류로 바뀌었다.
+  { id: "ladder-light", q: "사무실 형광등 교체, 사다리 작업, 작업자 1명", task: "ladder-lighting", first: /사다리.*추락|추락/, rows: /사다리|추락|감전|검전|등기구|형광등|전원/, forbidden: /누수|배전반|젖은 바닥/ },
   { id: "dump-truck", q: "건설현장 덤프트럭 후진 토사 반출 작업, 유도자 1명", task: "vehicle-haulage", first: /덤프|후진|충돌|차량/, rows: /덤프|후진|충돌|차량|전도|적재|유도/, forbidden: /비계|외벽 도장/, companyType: "건설업" },
   { id: "formwork", q: "공사장 거푸집 동바리 설치 후 콘크리트 타설 작업", task: "review_required" },
   { id: "tank-weld", q: "탱크 내부 용접 작업, 밀폐공간, 화재감시자 1명", task: "confined-space", first: /산소|질식|유해가스/, rows: /산소|질식|유해가스|용접|불티|화재|감시인|구출|구조/ },

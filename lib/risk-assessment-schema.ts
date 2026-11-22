@@ -15,6 +15,9 @@ export const ACCIDENT_TYPE_VALUES = [
   "traffic",
   "collapse",
   "fireExplosion",
+  // 부딪힘(지게차·차량이 사람에 부딪힘)·깔림·뒤집힘(크레인·지게차·고소작업대가 넘어짐). 맞음(낙하·비래)·추락과 구분한다(2026-11-22 MCP 점검).
+  "collision",
+  "overturn",
   "other"
 ] as const;
 export const RISK_LEVEL_VALUES = ["low", "medium", "high"] as const;

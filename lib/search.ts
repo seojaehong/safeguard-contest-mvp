@@ -17,7 +17,7 @@ import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiDeliverablesDiagnostics, type AiMode } from "./ai-deliverables";
 import { buildGroundedGenerationPacket, type GroundedGenerationPacket } from "./grounded-generation-contract";
 import { assembleInjectionGraph, buildOntologyGroundingSources, loadInjectionGraph, resolveInjectionTaskLabels } from "./grounding-ontology-injection";
-import { classifyWorkTask, inferConditionLayers } from "./task-scenario-profiles";
+import { classifyWorkTask, hasLeakMaintenanceIdentity, inferConditionLayers } from "./task-scenario-profiles";
 import {
   buildPhaseACanonicalAnswer,
   type PhaseAGenerationGrounding,
@@ -561,7 +561,8 @@ function buildFallbackRiskAssessmentRows(response: AskResponse, weatherSummary: 
       location,
       process,
       task: "장비·도구 안전점검",
-      equipment: /누수|천장/.test(workText) ? "사다리, 전동공구, 누수 점검 장비" : "작업 장비, 공구, 방호장치",
+      // 「천장」만으로는 누수 작업이 아니다(천장 조명 교체 등, 2026-11-22 MCP 점검 ⑤). 누수 판정은 분류기와 같은 함수를 쓴다.
+      equipment: hasLeakMaintenanceIdentity(workText) ? "사다리, 전동공구, 누수 점검 장비" : "작업 장비, 공구, 방호장치",
       hazard: "장비·도구 상태 불량 또는 방호조치 미흡으로 인한 사고 위험",
       currentControls: "사용 전 외관, 고정상태, 전원·잠금·방호장치 상태를 점검합니다.",
       likelihood: 3,

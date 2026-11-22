@@ -41,7 +41,11 @@ const PERMIT_CATEGORY_BY_TASK: Record<string, PermitCategory> = {
   "manual-loading-heat": "일반 위험작업",
   "simultaneous-work": "일반 위험작업",
   "floor-cleaning": "일반 위험작업",
-  "leak-maintenance": "일반 위험작업"
+  "leak-maintenance": "일반 위험작업",
+  "steel-erection": "고소작업",
+  // 조명 교체는 정전작업(제319조) 절차가 허가의 핵심이다. 사다리 추락은 본표 행에서 다룬다.
+  "ladder-lighting": "전기작업",
+  "kitchen-cooking": "일반 위험작업"
 };
 
 // 동시작업은 여러 작업이 겹치는 유형이라 그 안에 화기작업이 있으면 화기작업 허가를 받는다.

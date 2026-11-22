@@ -1,8 +1,11 @@
+import type { AccidentType } from "./risk-assessment-schema";
 import type { AskResponse, TaskClassification } from "./types";
 
 // 위험요인과 감소대책은 한 쌍으로만 다룬다. hazards[i] 와 actions[i] 를 따로 고치면
 // 행이 밀려 다른 위험에 다른 대책이 붙는다(RA-06·EF-11). basis 는 본문에 섞지 않는 근거 표시다.
-export type RiskPair = { hazard: string; action: string; basis?: string };
+// accidentType·equipment 는 그 행에서 정해 둔 값이다. 없으면 위험요인 문장에서 추정한다(mock-data accidentTypeForHazard).
+// 문장 추정은 「전도」를 추락으로, 「지게차·크레인」을 지게차로 읽는 등 틀리기 쉬워 새 행은 값을 직접 적는다(2026-11-22 MCP 점검).
+export type RiskPair = { hazard: string; action: string; basis?: string; accidentType?: AccidentType; equipment?: string };
 
 export type ScenarioProfile = {
   id: string;
@@ -68,7 +71,10 @@ export type TaskId =
   | "exterior-painting"
   | "hotwork"
   | "floor-cleaning"
-  | "leak-maintenance";
+  | "leak-maintenance"
+  | "steel-erection"
+  | "ladder-lighting"
+  | "kitchen-cooking";
 
 const TASK_LABELS: Record<TaskId, string> = {
   roof: "지붕 작업",
@@ -94,7 +100,10 @@ const TASK_LABELS: Record<TaskId, string> = {
   "exterior-painting": "외벽 도장(이동식 비계)",
   hotwork: "용접·절단 화기작업",
   "floor-cleaning": "바닥 세척(세제)",
-  "leak-maintenance": "천장 누수 보수"
+  "leak-maintenance": "천장 누수 보수",
+  "steel-erection": "철골 조립·볼트 체결(고소)",
+  "ladder-lighting": "조명기구 교체(사다리·전기)",
+  "kitchen-cooking": "주방 조리"
 };
 
 // 제92조① 의 정비·청소·급유·검사·수리·교체·조정 작업 동사. 「사용 중」인 설비와 가른다(WP-07·RA-07).
@@ -104,8 +113,24 @@ export function hasRoofRepairWorkIdentity(question: string) {
   return /지붕.{0,20}(?:보수|수리|점검|작업|공사|교체)|(?:보수|수리|점검|작업|공사).{0,20}지붕/.test(question);
 }
 
+// 「터파기」·「흙막이」·「굴착 깊이」는 접미어(작업·공사) 없이도 굴착 작업이다. 「굴착기」만 적힌 문장(철거 등)은 굴착 작업으로 보지 않는다.
 export function hasExcavationWorkIdentity(question: string) {
-  return [/(?:굴착|터파기)\s*(?:공사|작업)/, /굴착\s+보수\s+작업/].some((pattern) => pattern.test(question));
+  return [/(?:굴착|터파기)\s*(?:공사|작업)/, /굴착\s+보수\s+작업/, /터파기|흙막이/, /굴착\s*(?:깊이|심도)/].some((pattern) => pattern.test(question));
+}
+
+// 철골 접합부 볼트 체결·철골 조립(안전보건규칙 제380조). 「철골 양중」만 적힌 문장은 크레인 양중이다.
+export function hasSteelErectionIdentity(question: string) {
+  return /철골.{0,40}(?:볼트|체결|조립|접합부)|(?:볼트|체결|조립|접합부).{0,40}철골/.test(question);
+}
+
+// 조명기구 교체. 고소작업대로 하는 작업은 고소작업대 틀로 둔다.
+export function hasLightingReplacementIdentity(question: string) {
+  if (/고소\s*작업대|시저형|시저\s*리프트|스카이차/.test(question)) return false;
+  return /(?:조명|등기구|형광등|전등|LED|전구|램프).{0,20}(?:교체|교환|설치|수리|보수)/i.test(question);
+}
+
+export function hasKitchenCookingIdentity(question: string) {
+  return /주방|조리실|급식실|조리원|튀김기|조리\s*작업/.test(question);
 }
 
 export function hasElectricalWorkIdentity(question: string) {
@@ -136,6 +161,8 @@ const TASK_RULES: Array<[TaskId, (question: string) => boolean]> = [
   ["excavation", hasExcavationWorkIdentity],
   ["pump-confined", (q) => PUMP_IDENTITY.test(q)],
   ["confined-space", (q) => CONFINED_IDENTITY.test(q)],
+  // 조명 교체는 「전기 작업」이라 적어도 배전반 점검이 아니다(사다리 추락·감전·등기구 낙하). 전기작업보다 앞선다.
+  ["ladder-lighting", hasLightingReplacementIdentity],
   ["electrical", hasElectricalWorkIdentity],
   ["chemical-cleaning", hasHighRiskChemicalCleaningIdentity],
   ["chemical-handling", (q) => CHEMICAL_SUBSTANCE.test(q) && CHEMICAL_HANDLING_VERB.test(q)],
@@ -146,6 +173,8 @@ const TASK_RULES: Array<[TaskId, (question: string) => boolean]> = [
   ["conveyor", (q) => /컨베이어/.test(q) && MACHINE_SERVICE_VERB.test(q)],
   ["automation-equipment", (q) => /자동화\s*설비|자동화설비/.test(q)],
   ["machine-isolation", (q) => MACHINE_NOUN.test(q) && MACHINE_SERVICE_VERB.test(q) && !/전기\s*설비/.test(q)],
+  // 철골 볼트 체결의 주 위험은 추락이다. 부재를 크레인으로 올린다는 언급보다 앞선다(작업 정체 > 주변 장비).
+  ["steel-erection", hasSteelErectionIdentity],
   ["crane-lifting", (q) => /크레인|양중|인양|줄걸이/.test(q)],
   ["aerial-work-platform", (q) => /고소\s*작업대|시저형|시저\s*리프트|스카이차/.test(q)],
   ["work-at-height", (q) => /고소\s*작업(?!대)/.test(q)],
@@ -154,10 +183,16 @@ const TASK_RULES: Array<[TaskId, (question: string) => boolean]> = [
   ["forklift-logistics", (q) => /지게차/.test(q)],
   ["manual-loading-heat", (q) => /상하차|하역|적재|운반|피킹|출하|고중량/.test(q) && hasHeatCondition(q)],
   ["forklift-logistics", (q) => /상하차|하역|피킹|출하/.test(q)],
+  ["kitchen-cooking", hasKitchenCookingIdentity],
   ["hotwork", (q) => /용접|용단|절단|화기/.test(q)],
   ["floor-cleaning", (q) => /바닥\s*세척|화학\s*세제|세제/.test(q)],
-  ["leak-maintenance", (q) => /누수|비가\s*새|천장.{0,10}(?:보수|수리)/.test(q)]
+  ["leak-maintenance", hasLeakMaintenanceIdentity]
 ];
+
+// 「천장」만으로는 누수 보수가 아니다(천장 조명 교체·천장 배관 설치). mock-data 의 시나리오 칸도 이 판정을 쓴다(MCP 점검 ⑤).
+export function hasLeakMaintenanceIdentity(question: string) {
+  return /누수|비가\s*새|천장.{0,10}(?:보수|수리)/.test(question);
+}
 
 export function hasHeatCondition(question: string) {
   return /폭염|체감\s*(?:온도\s*)?\d|온열|무더위|실내\s*고온|고온\s*(?:작업|환경|노출|창고)/.test(question);
@@ -315,32 +350,58 @@ export function buildConfinedSpaceProfile({ question, companyName }: ProfileCont
 
 export function buildPressProfile({ question, companyName }: ProfileContext): ScenarioProfile {
   const isDieChange = /금형/.test(question) && !/보전|정비|수리/.test(question) || /금형.{0,6}(?:교체|부착|해체|조정|교환)/.test(question);
-  const withTransport = /지게차|크레인|운반|인양/.test(question);
+  // 금형을 무엇으로 옮기는지는 입력에 적힌 장비로만 정한다. 제172조는 차량계 하역운반기계등(지게차)의 접촉 방지라
+  // 크레인 인양에는 제146조(크레인 작업 시의 조치)·제163조(달기구)를 쓴다(2026-11-22 MCP 점검 ⑥).
+  const hasForklift = /지게차/.test(question);
+  const craneName = /천장\s*크레인/.test(question) ? "천장크레인" : /호이스트/.test(question) ? "호이스트" : /크레인/.test(question) ? "크레인" : "";
+  const withTransport = hasForklift || Boolean(craneName) || /운반|인양/.test(question);
+  const transportPair: RiskPair = craneName && !hasForklift
+    ? {
+        hazard: `금형 인양(${craneName}) 중 줄걸이 이탈·달기구 파손에 따른 금형 낙하로 작업자가 맞거나 깔리는 위험`,
+        action: "금형 중량에 맞고 최대허용하중이 표시된 달기구를 쓰고 작업 전 와이어로프·훅 상태를 점검하며(안전보건규칙 제163조), 미리 출입을 통제해 인양 중인 금형이 작업자 머리 위로 지나가지 않게 함(안전보건규칙 제146조①4호)",
+        basis: "안전보건규칙 제146조·제163조",
+        accidentType: "struckBy",
+        equipment: craneName
+      }
+    : hasForklift
+      ? {
+          hazard: `금형 운반(지게차${craneName ? `·${craneName}` : ""}) 중 금형 낙하와 운반 동선 충돌 위험`,
+          action: `금형 중량에 맞는 운반기구를 쓰고 운반 동선${craneName ? "과 인양 하부" : ""}의 출입을 통제하며 작업지휘자 또는 유도자 지시에 따라 운반(안전보건규칙 제172조${craneName ? ", 제146조①4호" : ""})`,
+          basis: craneName ? "안전보건규칙 제146조·제172조" : "안전보건규칙 제172조",
+          accidentType: "struckBy",
+          equipment: craneName ? `지게차, ${craneName}` : "지게차"
+        }
+      : withTransport
+        ? {
+            hazard: "금형 운반·인양 중 금형 낙하로 작업자가 맞거나 깔리는 위험",
+            action: "금형 중량에 맞는 운반기구를 쓰고 운반 동선과 인양 하부의 출입을 통제하며 작업지휘자 지시에 따라 운반",
+            accidentType: "struckBy"
+          }
+        : {
+            hazard: "금형 운반·취급 중 금형 낙하로 발·손이 깔리는 위험",
+            action: "금형 중량에 맞는 운반기구와 받침대를 쓰고 금형 하부에 손발을 넣지 않음",
+            accidentType: "struckBy"
+          };
   const pairs: RiskPair[] = isDieChange
     ? [
         {
           hazard: "금형 부착·해체·조정 중 슬라이드가 갑자기 하강해 손·상체가 금형 사이에 끼이는 위험",
           action: "신체가 위험한계에 들어가기 전에 슬라이드 하강을 막는 안전블록을 설치하고 사용 상태를 확인한 뒤 금형 작업 시작(안전보건규칙 제104조)",
-          basis: "안전보건규칙 제104조"
+          basis: "안전보건규칙 제104조",
+          accidentType: "caughtIn"
         },
         {
           hazard: "운전정지·잠금 없이 작업하던 중 다른 사람의 조작이나 잔압으로 프레스가 불시기동하는 위험",
           action: "프레스 운전을 정지하고 기동장치에 잠금장치(LOTO)를 한 뒤 열쇠를 작업자가 따로 관리하거나 표지판을 달고, 공압·유압 잔압을 미리 방출(안전보건규칙 제92조①②④)",
-          basis: "안전보건규칙 제92조"
+          basis: "안전보건규칙 제92조",
+          accidentType: "caughtIn"
         },
-        {
-          hazard: withTransport
-            ? "금형 운반·인양(지게차·크레인) 중 금형 낙하·전도와 운반 동선 충돌 위험"
-            : "금형 운반·취급 중 금형 낙하로 발·손이 깔리는 위험",
-          action: withTransport
-            ? "금형 중량에 맞는 운반기구를 쓰고 운반 동선과 인양 하부의 출입을 통제하며 작업지휘자 또는 유도자 지시에 따라 운반(안전보건규칙 제92조③, 제172조)"
-            : "금형 중량에 맞는 운반기구와 받침대를 쓰고 금형 하부에 손발을 넣지 않음",
-          basis: withTransport ? "안전보건규칙 제92조③·제172조" : undefined
-        },
+        transportPair,
         {
           hazard: "금형 교체 후 방호장치·전환스위치 미복구 상태로 시운전해 끼임",
           action: "시운전 전에 방호장치와 전환스위치를 유효한 상태로 되돌리고 1행정 시험으로 확인한 뒤 생산 재개(안전보건규칙 제103조)",
-          basis: "안전보건규칙 제103조"
+          basis: "안전보건규칙 제103조",
+          accidentType: "caughtIn"
         }
       ]
     : [
@@ -553,6 +614,37 @@ export function buildMachineIsolationProfile({ question, companyName }: ProfileC
   });
 }
 
+// 크레인 양중 행. 철골 조립 등 다른 작업 틀이 크레인을 함께 쓸 때도 같은 행을 쓴다.
+export function craneLiftingPairs(question: string, load: string): RiskPair[] {
+  const isTower = /타워\s*크레인|타워크레인/.test(question);
+  const equipment = isTower ? "타워크레인" : "이동식 크레인";
+  return [
+    {
+      hazard: `${load} 인양 중 하물 낙하로 하부 작업자가 맞는 위험`,
+      action: "인양 하부와 선회 반경의 출입을 통제해 하물이 작업자 머리 위로 지나가지 않게 하고(안전보건규칙 제146조①4호) 줄걸이 용구 상태를 작업 전 점검",
+      basis: "안전보건규칙 제146조",
+      accidentType: "struckBy",
+      equipment
+    },
+    {
+      hazard: "신호 불일치·시야 사각으로 인한 하물 충돌·협착",
+      action: isTower
+        ? "신호방법을 정해 근로자와 조종자 사이 신호업무 담당자를 두고(안전보건규칙 제146조③) 하물이 보이지 않으면 신호 없이 움직이지 않음(안전보건규칙 제40조, 제146조①5호)"
+        : "신호방법을 정해 신호수 1인이 지휘하고 하물이 보이지 않으면 신호 없이 움직이지 않음(안전보건규칙 제40조, 제146조①5호)",
+      basis: "안전보건규칙 제40조·제146조",
+      accidentType: "struckBy",
+      equipment
+    },
+    {
+      hazard: "지반 침하·아웃트리거 미설치·정격하중 초과로 인한 크레인 전도",
+      action: "아웃트리거를 완전히 펴고 받침을 설치하며 정격하중과 작업반경을 확인하고 강풍 시 작업을 멈춤",
+      // 크레인이 넘어져 사람이 깔리는 재해다. 사람이 떨어지는 추락이 아니다.
+      accidentType: "overturn",
+      equipment
+    }
+  ];
+}
+
 export function buildCraneLiftingProfile({ question, companyName }: ProfileContext): ScenarioProfile {
   const isTower = /타워\s*크레인|타워크레인/.test(question);
   const isMobile = /이동식\s*크레인/.test(question) || !isTower;
@@ -568,24 +660,7 @@ export function buildCraneLiftingProfile({ question, companyName }: ProfileConte
     weatherNote: UNKNOWN_FIELD_CONDITION,
     riskLevel: "상",
     topRisk: `${load} 인양 중 하물이 떨어지거나 크레인이 넘어져 작업자가 맞거나 깔릴 위험`,
-    pairs: [
-      {
-        hazard: `${load} 인양 중 하물 낙하로 하부 작업자가 맞는 위험`,
-        action: "인양 하부와 선회 반경의 출입을 통제해 하물이 작업자 머리 위로 지나가지 않게 하고(안전보건규칙 제146조①4호) 줄걸이 용구 상태를 작업 전 점검",
-        basis: "안전보건규칙 제146조"
-      },
-      {
-        hazard: "신호 불일치·시야 사각으로 인한 하물 충돌·협착",
-        action: isTower
-          ? "신호방법을 정해 근로자와 조종자 사이 신호업무 담당자를 두고(안전보건규칙 제146조③) 하물이 보이지 않으면 신호 없이 움직이지 않음(안전보건규칙 제40조, 제146조①5호)"
-          : "신호방법을 정해 신호수 1인이 지휘하고 하물이 보이지 않으면 신호 없이 움직이지 않음(안전보건규칙 제40조, 제146조①5호)",
-        basis: "안전보건규칙 제40조·제146조"
-      },
-      {
-        hazard: "지반 침하·아웃트리거 미설치·정격하중 초과로 인한 크레인 전도",
-        action: "아웃트리거를 완전히 펴고 받침을 설치하며 정격하중과 작업반경을 확인하고 강풍 시 작업을 멈춤"
-      }
-    ],
+    pairs: craneLiftingPairs(question, load),
     educationName: "크레인 양중 작업 신호·줄걸이·하부 통제 교육",
     educationTargets: "크레인 운전원, 신호수, 줄걸이 작업자, 관리감독자",
     questions: [
@@ -602,6 +677,33 @@ export function buildCraneLiftingProfile({ question, companyName }: ProfileConte
   });
 }
 
+// 고소작업대 행(안전보건규칙 제186조). 비계 해체 등 다른 작업 틀이 고소작업대를 함께 쓸 때도 같은 행을 쓴다.
+export function aerialWorkPlatformPairs(): RiskPair[] {
+  return [
+    {
+      hazard: "고소작업대 작업대에서 안전대를 체결하지 않아 추락",
+      action: "안전모·안전대를 착용해 작업대 안전대 부착설비에 체결하고 붐을 올린 상태에서 작업대를 벗어나지 않음(안전보건규칙 제186조④1·8호)",
+      basis: "안전보건규칙 제186조④",
+      accidentType: "fall",
+      equipment: "고소작업대"
+    },
+    {
+      hazard: "고소작업대 상승 중 천장·배관 구조물과 작업대 사이 끼임(협착)",
+      action: "과상승방지장치·가드 작동을 확인하고 상승 경로의 장애물을 미리 점검(안전보건규칙 제186조①6호)",
+      basis: "안전보건규칙 제186조①",
+      accidentType: "caughtIn",
+      equipment: "고소작업대"
+    },
+    {
+      hazard: "아웃트리거·브레이크 미사용이나 경사 바닥에서 고소작업대 전도",
+      action: "수평 바닥에 설치하고 아웃트리거·브레이크를 확실히 쓰며 이동할 때는 작업대를 가장 낮게 내리고 사람을 태운 채 이동하지 않음(안전보건규칙 제186조②③)",
+      basis: "안전보건규칙 제186조②③",
+      accidentType: "overturn",
+      equipment: "고소작업대"
+    }
+  ];
+}
+
 export function buildAerialWorkPlatformProfile({ question, companyName }: ProfileContext): ScenarioProfile {
   return withPairs({
     id: "aerial-work-platform",
@@ -613,23 +715,7 @@ export function buildAerialWorkPlatformProfile({ question, companyName }: Profil
     weatherNote: UNKNOWN_FIELD_CONDITION,
     riskLevel: "상",
     topRisk: "고소작업대에서 추락하거나 상부 구조물 사이에 끼이거나 작업대가 넘어질 위험",
-    pairs: [
-      {
-        hazard: "고소작업대 작업대에서 안전대를 체결하지 않아 추락",
-        action: "안전모·안전대를 착용해 작업대 안전대 부착설비에 체결하고 붐을 올린 상태에서 작업대를 벗어나지 않음(안전보건규칙 제186조④1·8호)",
-        basis: "안전보건규칙 제186조④"
-      },
-      {
-        hazard: "고소작업대 상승 중 천장·배관 구조물과 작업대 사이 끼임(협착)",
-        action: "과상승방지장치·가드 작동을 확인하고 상승 경로의 장애물을 미리 점검(안전보건규칙 제186조①6호)",
-        basis: "안전보건규칙 제186조①"
-      },
-      {
-        hazard: "아웃트리거·브레이크 미사용이나 경사 바닥에서 고소작업대 전도",
-        action: "수평 바닥에 설치하고 아웃트리거·브레이크를 확실히 쓰며 이동할 때는 작업대를 가장 낮게 내리고 사람을 태운 채 이동하지 않음(안전보건규칙 제186조②③)",
-        basis: "안전보건규칙 제186조②③"
-      }
-    ],
+    pairs: aerialWorkPlatformPairs(),
     educationName: "고소작업대 추락·끼임·전도 예방 교육",
     educationTargets: "고소작업대 운전·탑승 작업자, 관리감독자",
     questions: [
@@ -688,6 +774,15 @@ export function buildWorkAtHeightProfile({ question, companyName }: ProfileConte
   });
 }
 
+// 덤프트럭 후진 행. 굴착 틀이 덤프트럭을 함께 쓸 때도 같은 행을 쓴다.
+export const DUMP_TRUCK_REVERSING_PAIR: RiskPair = {
+  hazard: "덤프트럭 후진 중 사각지대 작업자 충돌·협착",
+  action: "후진 구간 출입을 통제하고 유도자를 배치해 정해진 신호에 따라서만 후진(안전보건규칙 제172조①, 제40조)",
+  basis: "안전보건규칙 제40조·제172조",
+  accidentType: "collision",
+  equipment: "덤프트럭"
+};
+
 export function buildVehicleHaulageProfile({ question, companyName }: ProfileContext): ScenarioProfile {
   return withPairs({
     id: "vehicle-haulage",
@@ -700,15 +795,13 @@ export function buildVehicleHaulageProfile({ question, companyName }: ProfileCon
     riskLevel: "상",
     topRisk: "덤프트럭 후진 중 사각지대 작업자 충돌이나 갓길 붕괴로 차량이 넘어질 위험",
     pairs: [
-      {
-        hazard: "덤프트럭 후진 중 사각지대 작업자 충돌·협착",
-        action: "후진 구간 출입을 통제하고 유도자를 배치해 정해진 신호에 따라서만 후진(안전보건규칙 제172조①, 제40조)",
-        basis: "안전보건규칙 제40조·제172조"
-      },
+      DUMP_TRUCK_REVERSING_PAIR,
       {
         hazard: "상차·하역 위치 갓길 붕괴·지반 침하로 인한 차량 전도",
         action: "유도자를 배치하고 지반의 부동침하와 갓길 붕괴를 막는 조치를 한 뒤 운행(안전보건규칙 제171조)",
-        basis: "안전보건규칙 제171조"
+        basis: "안전보건규칙 제171조",
+        accidentType: "overturn",
+        equipment: "덤프트럭"
       },
       {
         hazard: "과적·적재 불량으로 인한 토사 낙하와 주행 중 보행자 충돌",
@@ -864,6 +957,350 @@ export function buildChemicalHandlingProfile({ question, companyName }: ProfileC
 
 // ── 조건층 ────────────────────────────────────────────────────
 // 폭염·외국인·신규·고령 같은 조건은 작업 프로필을 바꾸지 않고 행을 덧붙인다.
+
+// ── 2026-11-22 MCP 점검으로 더한 작업 틀 ─────────────────────────
+// 조문은 「산업안전보건기준에 관한 규칙」(고용노동부령 제450호, 2025-09-01 공포, 2026-03-02 시행) 법제처 원문으로 확인했다.
+// 원문으로 확인하지 못한 대책은 조문을 달지 않는다.
+
+const WEATHER_WORDS = /강풍|돌풍|비\s*(?:예보|소식|옴|온다)|우천|강우|눈\s*(?:예보|옴)|강설|악천후/;
+
+// 비계 조립·해체. 이동식 비계(제68조)와 그 밖의 비계(시스템비계·강관비계 등, 제57조)를 가른다.
+// 이동식이라고 적지 않은 외벽 비계에 바퀴 잠금 대책을 붙이지 않는다(MCP 점검 ②).
+export function buildScaffoldAssemblyProfile({ question, companyName }: ProfileContext): ScenarioProfile {
+  const isMobile = /이동식\s*비계/.test(question);
+  const isDismantle = /해체/.test(question) && !/조립/.test(question);
+  const verb = isDismantle ? "해체" : /해체/.test(question) ? "조립·해체" : "조립";
+  if (isMobile) {
+    const workName = `이동식 비계 ${verb} 작업`;
+    return withPairs({
+      id: "scaffold-assembly-mobile",
+      companyName,
+      companyType: inferIndustry(question, "건설업"),
+      siteName: siteFor(question, workName),
+      workName,
+      processName: `이동식 비계 ${verb}, 작업발판·안전난간 설치, 바퀴 잠금·전도 방지, 하부 출입통제`,
+      weatherNote: UNKNOWN_FIELD_CONDITION,
+      riskLevel: "상",
+      topRisk: "이동식 비계에서 작업자가 추락하거나 바퀴가 풀려 비계가 흔들리고 넘어질 위험",
+      pairs: [
+        {
+          hazard: `이동식 비계 ${verb} 중 작업발판 또는 구조부에서 추락`,
+          action: "조립·해체 순서와 작업반경을 정하고 작업발판·안전난간 설치 상태를 관리감독자가 확인",
+          accidentType: "fall",
+          equipment: "이동식 비계"
+        },
+        {
+          hazard: "연결부·바퀴 잠금·전도 방지 조치 미흡으로 비계가 흔들리거나 전도",
+          action: "브레이크·쐐기로 바퀴를 고정하고 비계 일부를 견고한 시설물에 고정하거나 아웃트리거를 설치하며 연결부·고정핀 상태를 점검한 뒤 사용(안전보건규칙 제68조1호)",
+          basis: "안전보건규칙 제68조",
+          accidentType: "fall",
+          equipment: "이동식 비계"
+        },
+        {
+          hazard: "부재·공구 낙하와 하부 출입통제 미흡으로 작업자 충돌",
+          action: "하부 출입을 통제하고 부재·공구 낙하 방지와 보호구 체결 상태를 상호 확인",
+          accidentType: "struckBy"
+        }
+      ],
+      educationName: `이동식 비계 ${verb} 추락·전도 예방 교육`,
+      educationTargets: "비계 작업자, 관리감독자",
+      questions: [
+        "바퀴 고정과 아웃트리거·시설물 고정 상태를 누가 확인했는가?",
+        "작업발판·안전난간 설치 상태를 작업 전 확인했는가?",
+        "하부 출입통제 구역을 정했는가?"
+      ],
+      educationPoints: [
+        "바퀴를 고정하지 않은 이동식 비계에 오르지 않기",
+        "작업발판 위에서 안전난간을 딛거나 사다리를 놓고 작업하지 않기",
+        "사람이 탄 채 비계를 옮기지 않기"
+      ],
+      keywords: ["이동식 비계", "비계"]
+    });
+  }
+
+  const scaffold = /시스템\s*비계/.test(question) ? "시스템비계" : /강관\s*비계/.test(question) ? "강관비계" : "비계";
+  const workName = `${/외벽/.test(question) ? "외벽 " : ""}${scaffold} ${verb} 작업`;
+  const nearWalkway = /보행로|보도|인도|통행로|도로/.test(question);
+  const hasAerial = /고소\s*작업대|스카이차|시저형/.test(question);
+  const hasWeather = WEATHER_WORDS.test(question);
+  const pairs: RiskPair[] = [
+    {
+      hazard: `${scaffold} ${verb} 중 작업발판 끝·연결부에서 작업자가 추락하는 위험`,
+      action: "비계재료를 연결·해체할 때는 폭 20센티미터 이상의 발판을 설치하고 안전대를 걸어 사용하며, 관리감독자 지휘에 따라 작업(안전보건규칙 제57조①1·5호)",
+      basis: "안전보건규칙 제57조",
+      accidentType: "fall",
+      equipment: scaffold
+    },
+    isDismantle
+      ? {
+          hazard: "벽 연결재(벽이음)를 해체 순서보다 먼저 떼어 비계가 기울거나 무너지는 위험",
+          action: "해체 시기·범위·절차를 작업자에게 알리고 위층부터 차례로 해체하며, 벽 연결재는 그 단을 해체할 때 떼어냄(안전보건규칙 제57조①2호)",
+          basis: "안전보건규칙 제57조",
+          accidentType: "collapse",
+          equipment: scaffold
+        }
+      : {
+          hazard: "수직재·수평재·가새재 연결이 약하거나 벽 연결재가 빠져 비계가 기울거나 무너지는 위험",
+          action: scaffold === "시스템비계"
+            ? "수직재·수평재·가새재를 견고하게 연결하고 벽 연결재를 제조사가 정한 간격으로 설치(안전보건규칙 제69조)"
+            : "조립 시기·범위·절차를 작업자에게 알리고 각 부재 연결과 벽 연결재 설치 상태를 단마다 확인(안전보건규칙 제57조①2호)",
+          basis: scaffold === "시스템비계" ? "안전보건규칙 제69조" : "안전보건규칙 제57조",
+          accidentType: "collapse",
+          equipment: scaffold
+        },
+    {
+      hazard: nearWalkway
+        ? `${verb} 중 비계 부재·공구가 떨어져 하부 보행로 통행자·작업자가 맞는 위험`
+        : `${verb} 중 비계 부재·공구가 떨어져 하부 작업자가 맞는 위험`,
+      action: `작업구역에 해당 작업자가 아닌 사람의 출입을 금지하고 게시하며, 부재·공구는 달줄·달포대로 올리고 내림(안전보건규칙 제57조①3·6호)${nearWalkway ? ". 하부 보행로는 통행을 우회시키거나 낙하물 방지망·방호선반을 설치(안전보건규칙 제14조②)" : ""}`,
+      basis: nearWalkway ? "안전보건규칙 제14조·제57조" : "안전보건규칙 제57조",
+      accidentType: "struckBy",
+      equipment: scaffold
+    }
+  ];
+  if (hasWeather) {
+    pairs.push({
+      hazard: `강풍 등 악천후 속에서 ${verb} 작업을 계속해 작업자가 균형을 잃거나 부재가 날리는 위험`,
+      action: "비·눈·강풍 등 기상상태가 불안정하면 비계 작업을 중지하고 작업자를 지상으로 대피(안전보건규칙 제57조①4호)",
+      basis: "안전보건규칙 제57조",
+      accidentType: "fall",
+      equipment: scaffold
+    });
+  }
+  if (hasAerial) pairs.push(...aerialWorkPlatformPairs());
+  return withPairs({
+    id: "scaffold-assembly",
+    companyName,
+    companyType: inferIndustry(question, "건설업"),
+    siteName: siteFor(question, workName),
+    workName,
+    processName: `관리감독자 지휘, ${verb} 시기·범위·절차 공지, 작업구역 출입금지, ${scaffold} ${verb}${isDismantle ? "(벽 연결재는 해당 단 해체 때 제거)" : ""}, 달줄·달포대로 자재 운반${hasAerial ? ", 고소작업대 설치·사용" : ""}`,
+    weatherNote: UNKNOWN_FIELD_CONDITION,
+    riskLevel: "상",
+    topRisk: `${scaffold} ${verb} 중 작업자가 추락하거나 비계가 무너지고 부재가 떨어져 하부 사람이 맞을 위험`,
+    pairs,
+    educationName: `${scaffold} ${verb} 작업 추락·붕괴·낙하물 예방 교육`,
+    educationTargets: `비계 ${verb} 작업자${hasAerial ? ", 고소작업대 운전·탑승 작업자" : ""}, 관리감독자`,
+    questions: [
+      `${verb} 시기·범위·절차와 관리감독자를 작업자 전원이 알고 있는가?`,
+      "발판 폭과 안전대 체결 상태를 누가 확인했는가?",
+      "작업구역 출입금지 표시와 달줄·달포대 준비를 마쳤는가?"
+    ],
+    educationPoints: [
+      "비계재료 연결·해체 때는 안전대를 항상 체결",
+      isDismantle ? "벽 연결재는 정해진 해체 순서에 따라서만 떼어내기" : "부재 연결과 벽 연결재 설치를 확인한 뒤 위 단으로 올라가기",
+      "자재·공구는 던지지 말고 달줄·달포대로 내리기"
+    ],
+    keywords: [scaffold, "비계", verb]
+  });
+}
+
+// 철골 조립·접합부 볼트 체결(제380조·제381조·제383조). 크레인을 함께 쓰면 크레인 행을 덧붙인다(MCP 점검 ④).
+export function buildSteelErectionProfile({ question, companyName }: ProfileContext): ScenarioProfile {
+  const height = /(?:높이|고소)\s*(?:약\s*)?(\d+(?:\.\d+)?)\s*m/i.exec(question)?.[1];
+  const heightText = height ? `높이 ${height}m ` : "";
+  const missingAnchor = /(?:안전대\s*)?부착\s*설비.{0,12}(?:미설치|없|부족|일부)|구명\s*줄.{0,12}(?:미설치|없|부족)/.test(question);
+  const hasCrane = /크레인|양중|인양/.test(question);
+  const toolName = /임팩트\s*렌치/.test(question) ? "임팩트렌치" : "";
+  const pairs: RiskPair[] = [
+    {
+      hazard: `${heightText}철골 보·기둥 접합부에서 볼트를 체결하다 작업자가 추락하는 위험`,
+      action: "수평 철골과 수직 철골이 연결되는 접합부에 작업발판을 설치하고(안전보건규칙 제381조), 작업발판 설치가 곤란하면 추락방호망을 치며, 그것도 곤란하면 안전대를 걸 수 있는 부착설비를 설치해 안전대를 걸고 작업(안전보건규칙 제42조②, 제44조①)",
+      basis: "안전보건규칙 제42조·제44조·제381조",
+      accidentType: "fall"
+    },
+    missingAnchor
+      ? {
+          hazard: "안전대 부착설비가 일부 설치되지 않은 구간에서 안전대를 걸 곳이 없어 추락하는 위험",
+          action: "부착설비(지지로프 등)를 설치하기 전에는 그 구간의 고소 작업을 하지 않고, 작업 시작 전 안전대와 부착설비의 이상 유무를 점검(안전보건규칙 제44조)",
+          basis: "안전보건규칙 제44조",
+          accidentType: "fall"
+        }
+      : {
+          hazard: "철골 위를 이동하거나 오르내리다 안전대를 걸지 않은 채 추락하는 위험",
+          action: "수직 철골은 답단 간격 30센티미터 이내의 고정된 승강로로 오르내리고(안전보건규칙 제381조) 이동 중에도 안전대를 부착설비에 걸며, 작업 시작 전 안전대와 부착설비를 점검(안전보건규칙 제44조)",
+          basis: "안전보건규칙 제44조·제381조",
+          accidentType: "fall"
+        },
+    {
+      hazard: "볼트를 체결하기 전에 들어 올린 철골을 걸이로프에서 풀어 부재가 떨어지거나 넘어지는 위험",
+      action: "접합부가 충분히 지지되도록 볼트를 체결하기 전에는 들어 올린 철골을 걸이로프 등에서 분리하지 않음(안전보건규칙 제380조)",
+      basis: "안전보건규칙 제380조",
+      accidentType: "struckBy"
+    },
+    {
+      hazard: `볼트·${toolName || "공구"} 등이 떨어져 하부 작업자가 맞는 위험`,
+      action: "공구는 떨어지지 않게 끈으로 묶어 쓰고 볼트는 주머니에 담으며, 하부에 출입금지구역을 정하거나 낙하물 방지망을 설치(안전보건규칙 제14조②)",
+      basis: "안전보건규칙 제14조",
+      accidentType: "struckBy",
+      equipment: toolName || undefined
+    }
+  ];
+  if (WEATHER_WORDS.test(question)) {
+    pairs.push({
+      hazard: "강풍·비·눈 속에서 철골 작업을 계속해 균형을 잃고 추락하는 위험",
+      action: "풍속 초당 10미터 이상, 강우량 시간당 1밀리미터 이상, 강설량 시간당 1센티미터 이상이면 철골작업을 중지(안전보건규칙 제383조)",
+      basis: "안전보건규칙 제383조",
+      accidentType: "fall"
+    });
+  }
+  if (hasCrane) pairs.push(...craneLiftingPairs(question, "철골 부재"));
+  const workName = `철골 ${/볼트|체결/.test(question) ? "접합부 볼트 체결" : "조립"} 작업`;
+  return withPairs({
+    id: "steel-erection",
+    companyName,
+    companyType: inferIndustry(question, "건설업"),
+    siteName: siteFor(question, workName),
+    workName,
+    processName: `작업발판·추락방호망·안전대 부착설비 확인, ${hasCrane ? "철골 부재 인양, " : ""}접합부 볼트 체결 후 걸이로프 분리, 하부 출입금지`,
+    weatherNote: UNKNOWN_FIELD_CONDITION,
+    riskLevel: "상",
+    topRisk: `${heightText}철골 접합부 작업 중 작업자가 추락하거나 철골·공구가 떨어져 하부 작업자가 맞을 위험`,
+    pairs,
+    educationName: "철골 접합부 작업 추락·낙하물 예방 교육",
+    educationTargets: `철골 작업자${hasCrane ? ", 크레인 운전원, 신호수" : ""}, 관리감독자`,
+    questions: [
+      "접합부 작업발판·추락방호망·안전대 부착설비 설치 상태를 누가 확인했는가?",
+      "볼트 체결 전에 걸이로프를 풀지 않는다는 것을 전원이 알고 있는가?",
+      "풍속·강우·강설 작업중지 기준(안전보건규칙 제383조)과 하부 출입금지구역을 공유했는가?"
+    ],
+    educationPoints: [
+      "높은 곳에서는 안전대를 항상 부착설비에 걸기",
+      "볼트 체결 전에는 걸이로프를 풀지 않기",
+      "공구는 끈으로 묶고 아래로 던지지 않기"
+    ],
+    keywords: ["철골", "볼트", "추락"]
+  });
+}
+
+// 조명기구 교체(이동식 사다리 제42조④, 정전작업 제319조). 「천장」이라는 낱말로 누수 보수로 보내지 않는다(MCP 점검 ⑤).
+export function buildLightingReplacementProfile({ question, companyName }: ProfileContext): ScenarioProfile {
+  const ladder = /A형\s*사다리/i.test(question) ? "A형 사다리" : /사다리/.test(question) ? "이동식 사다리" : "";
+  const fixture = /형광등/.test(question) ? "형광등" : /LED/i.test(question) ? "LED 등기구" : "조명기구";
+  // 받침이 있으면 「을」(형광등을), 없으면 「를」(등기구를).
+  const lastCode = fixture.charCodeAt(fixture.length - 1) - 0xac00;
+  const fixtureObject = `${fixture}${lastCode >= 0 && lastCode % 28 !== 0 ? "을" : "를"}`;
+  const workName = `${/천장/.test(question) ? "천장 " : ""}조명기구 교체 작업`;
+  return withPairs({
+    id: "ladder-lighting",
+    companyName,
+    companyType: inferIndustry(question, "시설관리·유지보수"),
+    siteName: siteFor(question, workName),
+    workName,
+    processName: `조명 회로 차단·잠금·검전, ${ladder || "사다리·작업발판"} 설치·고정, ${fixture} 분리·교체, 작업자 퇴거 확인 후 전원 투입`,
+    weatherNote: UNKNOWN_FIELD_CONDITION,
+    riskLevel: "상",
+    topRisk: `${ladder || "사다리"} 위에서 ${fixtureObject} 교체하다 추락하거나 전원을 차단하지 않아 감전될 위험`,
+    pairs: [
+      {
+        hazard: `${ladder || "사다리·작업대"} 위에서 ${fixtureObject} 교체하다 균형을 잃거나 사다리가 넘어져 추락하는 위험`,
+        action: "작업발판 설치가 곤란해 이동식 사다리를 쓰면 3개 이상의 버팀대로 안정적으로 서는 사다리를 평탄하고 미끄럽지 않은 바닥에 펴고, 아웃트리거를 설치하거나 다른 근로자가 붙잡아 넘어지지 않게 하며, 높이 3.5미터 이하에서 최상부 발판과 그 아래 디딤대에 올라서지 않고 안전모를 쓰고 작업(안전보건규칙 제42조④)",
+        basis: "안전보건규칙 제42조④",
+        accidentType: "fall",
+        equipment: ladder ? `이동식 사다리(${ladder})` : undefined
+      },
+      {
+        hazard: "전원을 차단하지 않고 등기구·배선을 만져 감전되는 위험",
+        action: "작업 전 해당 조명 회로의 차단기를 내리고 잠금장치와 꼬리표를 붙인 뒤 검전기로 전기가 없는지 확인하고 작업(안전보건규칙 제319조①②)",
+        basis: "안전보건규칙 제319조",
+        accidentType: "electricShock"
+      },
+      {
+        hazard: `떼어낸 ${fixture}·덮개가 떨어져 아래 사람이 맞거나 깨진 램프에 베이는 위험`,
+        action: "사다리 아래 작업구역에 다른 사람이 들어오지 않게 하고 떼어낸 등기구는 아래 작업자에게 건네 받으며, 깨진 램프는 장갑을 끼고 별도 용기에 담음",
+        accidentType: "struckBy"
+      },
+      {
+        hazard: "작업이 끝나기 전에 다른 사람이 전원을 넣어 감전되는 위험",
+        action: "잠금장치와 꼬리표는 설치한 사람이 직접 떼고, 모든 작업자가 등기구에서 떨어진 것을 확인한 뒤 전원을 넣음(안전보건규칙 제319조③)",
+        basis: "안전보건규칙 제319조",
+        accidentType: "electricShock"
+      }
+    ],
+    educationName: "조명기구 교체 작업 사다리 추락·감전 예방 교육",
+    educationTargets: "조명 교체 작업자, 사다리 지지 작업자, 관리감독자",
+    questions: [
+      "조명 회로 차단·잠금·꼬리표와 검전을 누가 확인했는가?",
+      "사다리를 평탄한 바닥에 펴고 붙잡아 줄 사람 또는 아웃트리거를 정했는가?",
+      "작업을 마친 뒤 전원을 넣을 사람과 퇴거 확인 방법을 정했는가?"
+    ],
+    educationPoints: [
+      "사다리 최상부 발판과 그 아래 디딤대에 올라서지 않기",
+      "검전으로 전기가 없는 것을 확인하기 전에는 등기구를 만지지 않기",
+      "잠금장치·꼬리표는 붙인 사람이 직접 떼기"
+    ],
+    keywords: ["사다리", "조명", "감전", "추락"]
+  });
+}
+
+// 음식점·급식 주방 조리(바닥 제3조①). 화상·베임·가스 대책은 확인한 조문이 없어 조문을 달지 않는다(MCP 점검 ⑤).
+export function buildKitchenProfile({ question, companyName }: ProfileContext): ScenarioProfile {
+  const hasFryer = /튀김|기름/.test(question);
+  const hasKnife = /칼|도마|손질|슬라이서/.test(question);
+  const hasGas = /가스|버너|화구|레인지/.test(question);
+  const pairs: RiskPair[] = [
+    hasFryer
+      ? {
+          hazard: "튀김기 고온 기름이 튀거나 넘쳐 화상을 입는 위험",
+          action: "튀김기에는 정해진 양 이하로 기름을 채우고 물기를 뺀 재료를 천천히 넣으며, 긴소매 조리복·앞치마·내열장갑을 착용하고 기름은 충분히 식힌 뒤 교체. 기름에 불이 붙으면 물을 붓지 말고 뚜껑을 덮거나 주방용(K급) 소화기로 끔",
+          accidentType: "burn",
+          equipment: "튀김기"
+        }
+      : {
+          hazard: "끓는 국물·뜨거운 조리기구에 닿거나 쏟아 화상을 입는 위험",
+          action: "뜨거운 용기는 내열장갑을 끼고 손잡이를 잡아 옮기며, 조리 중인 화구 주변 통로를 비워 둠",
+          accidentType: "burn"
+        }
+  ];
+  if (hasKnife) {
+    pairs.push({
+      hazard: "칼로 재료를 손질하다 손을 베이는 위험",
+      action: "도마는 미끄럼 방지 받침 위에 고정하고 칼은 정해진 칼꽂이에 보관하며, 칼을 들고 이동하거나 떨어지는 칼을 잡지 않음. 필요하면 베임 방지 장갑을 착용",
+      accidentType: "cut",
+      equipment: "칼·도마"
+    });
+  }
+  pairs.push({
+    hazard: "기름·물이 묻은 주방 바닥에서 미끄러져 넘어지는 위험",
+    action: "바닥에 흘린 기름·물기를 바로 닦아 바닥을 청결하게 유지하고 미끄럼 방지 매트와 미끄럼방지 조리화를 사용(안전보건규칙 제3조①)",
+    basis: "안전보건규칙 제3조",
+    accidentType: "slip"
+  });
+  if (hasGas) {
+    pairs.push({
+      hazard: "가스레인지 가스 누출·점화 불량으로 화재·폭발이 나는 위험",
+      action: "사용 전 호스·연결부 누출을 비눗물 등으로 점검하고, 가스 냄새가 나면 불을 켜거나 전기 스위치를 조작하지 말고 중간밸브를 잠근 뒤 환기하며, 사용 후에는 밸브를 잠금",
+      accidentType: "fireExplosion",
+      equipment: "가스레인지"
+    });
+  }
+  const workName = "주방 조리 작업";
+  return withPairs({
+    id: "kitchen-cooking",
+    companyName,
+    companyType: inferIndustry(question, /급식/.test(question) ? "단체급식" : "음식점업"),
+    siteName: siteFor(question, workName),
+    workName,
+    processName: `식재료 손질${hasKnife ? "(칼·도마)" : ""}, ${hasFryer ? "튀김기 조리, " : ""}${hasGas ? "가스레인지 조리, " : ""}바닥 정리·청소`,
+    weatherNote: UNKNOWN_FIELD_CONDITION,
+    riskLevel: "중",
+    topRisk: `${hasFryer ? "튀김 기름 화상, " : ""}${hasKnife ? "칼 베임, " : ""}미끄러운 바닥에서 넘어짐${hasGas ? ", 가스 화재" : ""} 위험`,
+    pairs,
+    educationName: "주방 조리 작업 화상·베임·넘어짐 예방 교육",
+    educationTargets: "조리원, 주방 관리자",
+    questions: [
+      "바닥의 기름·물기를 누가 언제 닦는지 정했는가?",
+      hasFryer ? "튀김기 기름 양과 기름 화재 때 쓸 소화기 위치를 전원이 알고 있는가?" : "뜨거운 용기를 옮길 때 쓸 내열장갑을 준비했는가?",
+      hasGas ? "가스 냄새가 날 때 밸브 차단·환기 순서를 전원이 알고 있는가?" : "칼·조리도구 보관 위치를 정했는가?"
+    ],
+    educationPoints: [
+      "흘린 기름·물기는 바로 닦기",
+      hasFryer ? "기름에 불이 붙으면 물을 붓지 않기" : "뜨거운 용기는 내열장갑을 끼고 옮기기",
+      hasKnife ? "칼을 들고 이동하지 않고 떨어지는 칼을 잡지 않기" : "통로에 물건을 두지 않기"
+    ],
+    keywords: ["주방", "조리", "화상", "미끄러짐"]
+  });
+}
 
 export function parseFeelsLikeTemperature(question: string): number | null {
   const match = /체감\s*(?:온도\s*)?(\d{2}(?:\.\d)?)\s*(?:도|℃)/.exec(question);
