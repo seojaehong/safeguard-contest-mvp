@@ -7,7 +7,7 @@
 
 import { resolveEvidenceChain } from "@/lib/ontology/evidence-chain";
 import { loadGraph, type OntologyGraph } from "@/lib/ontology/graph-store";
-import { queryKnowledge, listTaskLabels } from "@/lib/ontology/query";
+import { queryKnowledge, queryKnowledgeExact, listTaskLabels } from "@/lib/ontology/query";
 import { buildSafetyKnowledgeResult, type SafetyKnowledgeResult } from "@/lib/mcp-tools";
 
 /**
@@ -21,9 +21,14 @@ export function buildPublishedSafetyKnowledge(
   const evidenceResolution = resolveEvidenceChain(graph, query);
   const hasPublishedGraphPack =
     evidenceResolution.graphPublicationState === "published" && "pack" in evidenceResolution;
-  const failClosed = !hasPublishedGraphPack;
-  const coreQuery = hasPublishedGraphPack ? evidenceResolution.pack.task.label : query;
-  const result = failClosed ? null : queryKnowledge(graph, coreQuery);
+  // Phase A 체인이 있으면 그 canonical Task 로 조회한다. 체인에 등록되지 않은 질의(not_registered)는
+  // published 라벨과 정확히 같을 때만 핵심 지식을 낸다(evidenceContract·phaseAProduct 는 null 이라
+  // 문서 생성 grounding 은 열리지 않는다). 체인 후보는 있는데 검증이 끊긴 경우는 계속 fail-closed.
+  const result = hasPublishedGraphPack
+    ? queryKnowledge(graph, evidenceResolution.pack.task.label)
+    : evidenceResolution.reason === "not_registered"
+      ? queryKnowledgeExact(graph, query)
+      : null;
   return buildSafetyKnowledgeResult(
     query,
     result,
