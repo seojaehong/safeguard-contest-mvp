@@ -126,7 +126,8 @@ export function hasSteelErectionIdentity(question: string) {
 // 조명기구 교체. 고소작업대로 하는 작업은 고소작업대 틀로 둔다.
 export function hasLightingReplacementIdentity(question: string) {
   if (/고소\s*작업대|시저형|시저\s*리프트|스카이차/.test(question)) return false;
-  return /(?:조명|등기구|형광등|전등|LED|전구|램프).{0,20}(?:교체|교환|설치|수리|보수)/i.test(question);
+  // 「램프」(주차장 경사로)·「조명 설치」(야간 조명 설치 후 다른 작업)는 잡지 않는다.
+  return /(?:조명|등기구|형광등|전등|LED|전구).{0,20}(?:교체|교환)/i.test(question);
 }
 
 export function hasKitchenCookingIdentity(question: string) {
@@ -358,7 +359,7 @@ export function buildPressProfile({ question, companyName }: ProfileContext): Sc
   const transportPair: RiskPair = craneName && !hasForklift
     ? {
         hazard: `금형 인양(${craneName}) 중 줄걸이 이탈·달기구 파손에 따른 금형 낙하로 작업자가 맞거나 깔리는 위험`,
-        action: "금형 중량에 맞고 최대허용하중이 표시된 달기구를 쓰고 작업 전 와이어로프·훅 상태를 점검하며(안전보건규칙 제163조), 미리 출입을 통제해 인양 중인 금형이 작업자 머리 위로 지나가지 않게 함(안전보건규칙 제146조①4호)",
+        action: "금형 중량에 맞고 최대허용하중이 표시된 달기구를 쓰며(안전보건규칙 제163조) 작업 전 와이어로프·훅 상태를 점검하고, 미리 출입을 통제해 인양 중인 금형이 작업자 머리 위로 지나가지 않게 함(안전보건규칙 제146조①4호)",
         basis: "안전보건규칙 제146조·제163조",
         accidentType: "struckBy",
         equipment: craneName
@@ -1034,7 +1035,7 @@ export function buildScaffoldAssemblyProfile({ question, companyName }: ProfileC
     isDismantle
       ? {
           hazard: "벽 연결재(벽이음)를 해체 순서보다 먼저 떼어 비계가 기울거나 무너지는 위험",
-          action: "해체 시기·범위·절차를 작업자에게 알리고 위층부터 차례로 해체하며, 벽 연결재는 그 단을 해체할 때 떼어냄(안전보건규칙 제57조①2호)",
+          action: "해체 시기·범위·절차를 작업자에게 알리고(안전보건규칙 제57조①2호), 위층부터 차례로 해체하며 벽 연결재는 그 단을 해체할 때 떼어냄",
           basis: "안전보건규칙 제57조",
           accidentType: "collapse",
           equipment: scaffold
@@ -1052,7 +1053,7 @@ export function buildScaffoldAssemblyProfile({ question, companyName }: ProfileC
       hazard: nearWalkway
         ? `${verb} 중 비계 부재·공구가 떨어져 하부 보행로 통행자·작업자가 맞는 위험`
         : `${verb} 중 비계 부재·공구가 떨어져 하부 작업자가 맞는 위험`,
-      action: `작업구역에 해당 작업자가 아닌 사람의 출입을 금지하고 게시하며, 부재·공구는 달줄·달포대로 올리고 내림(안전보건규칙 제57조①3·6호)${nearWalkway ? ". 하부 보행로는 통행을 우회시키거나 낙하물 방지망·방호선반을 설치(안전보건규칙 제14조②)" : ""}`,
+      action: `작업구역에 해당 작업자가 아닌 사람의 출입을 금지하고 게시하며, 부재·공구는 달줄·달포대로 올리고 내림(안전보건규칙 제57조①3·6호)${nearWalkway ? ". 하부 보행로에는 낙하물 방지망·방호선반을 설치하거나 출입금지구역을 설정하고(안전보건규칙 제14조②) 통행자는 우회시킴" : ""}`,
       basis: nearWalkway ? "안전보건규칙 제14조·제57조" : "안전보건규칙 제57조",
       accidentType: "struckBy",
       equipment: scaffold
@@ -1061,7 +1062,7 @@ export function buildScaffoldAssemblyProfile({ question, companyName }: ProfileC
   if (hasWeather) {
     pairs.push({
       hazard: `강풍 등 악천후 속에서 ${verb} 작업을 계속해 작업자가 균형을 잃거나 부재가 날리는 위험`,
-      action: "비·눈·강풍 등 기상상태가 불안정하면 비계 작업을 중지하고 작업자를 지상으로 대피(안전보건규칙 제57조①4호)",
+      action: "비·눈·강풍 등 기상상태가 불안정하면 비계 작업을 중지하고(안전보건규칙 제57조①4호) 작업자를 지상으로 대피시킴",
       basis: "안전보건규칙 제57조",
       accidentType: "fall",
       equipment: scaffold
@@ -1112,13 +1113,13 @@ export function buildSteelErectionProfile({ question, companyName }: ProfileCont
     missingAnchor
       ? {
           hazard: "안전대 부착설비가 일부 설치되지 않은 구간에서 안전대를 걸 곳이 없어 추락하는 위험",
-          action: "부착설비(지지로프 등)를 설치하기 전에는 그 구간의 고소 작업을 하지 않고, 작업 시작 전 안전대와 부착설비의 이상 유무를 점검(안전보건규칙 제44조)",
+          action: "안전대를 걸 수 있는 부착설비(지지로프 등)를 설치하고 작업 시작 전 안전대와 부착설비의 이상 유무를 점검하며(안전보건규칙 제44조), 부착설비를 설치하기 전에는 그 구간의 고소 작업을 하지 않음",
           basis: "안전보건규칙 제44조",
           accidentType: "fall"
         }
       : {
           hazard: "철골 위를 이동하거나 오르내리다 안전대를 걸지 않은 채 추락하는 위험",
-          action: "수직 철골은 답단 간격 30센티미터 이내의 고정된 승강로로 오르내리고(안전보건규칙 제381조) 이동 중에도 안전대를 부착설비에 걸며, 작업 시작 전 안전대와 부착설비를 점검(안전보건규칙 제44조)",
+          action: "수직 철골은 답단 간격 30센티미터 이내의 고정된 승강로로 오르내리고(안전보건규칙 제381조), 작업 시작 전 안전대와 부착설비를 점검하며(안전보건규칙 제44조②) 이동 중에도 안전대를 부착설비에 걺",
           basis: "안전보건규칙 제44조·제381조",
           accidentType: "fall"
         },
@@ -1130,7 +1131,7 @@ export function buildSteelErectionProfile({ question, companyName }: ProfileCont
     },
     {
       hazard: `볼트·${toolName || "공구"} 등이 떨어져 하부 작업자가 맞는 위험`,
-      action: "공구는 떨어지지 않게 끈으로 묶어 쓰고 볼트는 주머니에 담으며, 하부에 출입금지구역을 정하거나 낙하물 방지망을 설치(안전보건규칙 제14조②)",
+      action: "하부에 출입금지구역을 정하거나 낙하물 방지망을 설치하고(안전보건규칙 제14조②), 공구는 떨어지지 않게 끈으로 묶어 쓰며 볼트는 주머니에 담음",
       basis: "안전보건규칙 제14조",
       accidentType: "struckBy",
       equipment: toolName || undefined
@@ -1194,7 +1195,7 @@ export function buildLightingReplacementProfile({ question, companyName }: Profi
     pairs: [
       {
         hazard: `${ladder || "사다리·작업대"} 위에서 ${fixtureObject} 교체하다 균형을 잃거나 사다리가 넘어져 추락하는 위험`,
-        action: "작업발판 설치가 곤란해 이동식 사다리를 쓰면 3개 이상의 버팀대로 안정적으로 서는 사다리를 평탄하고 미끄럽지 않은 바닥에 펴고, 아웃트리거를 설치하거나 다른 근로자가 붙잡아 넘어지지 않게 하며, 높이 3.5미터 이하에서 최상부 발판과 그 아래 디딤대에 올라서지 않고 안전모를 쓰고 작업(안전보건규칙 제42조④)",
+        action: "작업발판 설치가 곤란해 이동식 사다리를 쓰면 3개 이상의 버팀대로 안정적으로 서는 사다리를 평탄하고 미끄럽지 않은 바닥에 펴고, 아웃트리거를 설치하거나 다른 근로자가 붙잡아 넘어지지 않게 하며, 높이 3.5미터 이하에서 최상부 발판과 그 아래 디딤대에 올라서지 않고 안전모를 쓰고(작업 높이 2미터 이상이면 안전대도 함께 착용) 작업(안전보건규칙 제42조④)",
         basis: "안전보건규칙 제42조④",
         accidentType: "fall",
         equipment: ladder ? `이동식 사다리(${ladder})` : undefined
@@ -1262,7 +1263,7 @@ export function buildKitchenProfile({ question, companyName }: ProfileContext): 
   }
   pairs.push({
     hazard: "기름·물이 묻은 주방 바닥에서 미끄러져 넘어지는 위험",
-    action: "바닥에 흘린 기름·물기를 바로 닦아 바닥을 청결하게 유지하고 미끄럼 방지 매트와 미끄럼방지 조리화를 사용(안전보건규칙 제3조①)",
+    action: "바닥에 흘린 기름·물기를 바로 닦아 바닥을 안전하고 청결하게 유지하고(안전보건규칙 제3조①) 미끄럼 방지 매트와 미끄럼방지 조리화를 사용",
     basis: "안전보건규칙 제3조",
     accidentType: "slip"
   });

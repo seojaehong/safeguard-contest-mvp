@@ -541,9 +541,12 @@ function inferKnownLocationPrefix(question: string) {
 }
 
 // 굴착 대상은 질문에 적힌 관로 이름으로만 정한다. 고정 현장명(열수송관)을 붙이지 않는다.
+// 관로가 굴착 대상일 때(「상수도관 터파기」·「가스 배관 굴착공사」)만 작업명에 쓴다. 「인접 상수도관 매설」처럼
+// 주변 매설물로만 적힌 관로는 작업명이 아니다(2026-11-22 MCP 점검 ③ — 오피스텔 터파기가 「상수도관 굴착공사」가 됐다).
 function inferExcavationWorkName(question: string) {
-  const conduit = /(도시가스\s*배관|가스\s*배관|상수도관|하수도관|하수관로|열수송관|통신\s*관로|전력구|우수관|오수관)/.exec(question)?.[1];
-  return conduit ? `${conduit.replace(/\s+/g, " ")} 굴착공사` : "굴착공사";
+  const conduit = /(도시가스\s*배관|가스\s*배관|상수도관|하수도관|하수관로|열수송관|통신\s*관로|전력구|우수관|오수관)\s*(?:\S{0,6}\s*)?(?:굴착|터파기|공사|교체|이설|부설|보수)/.exec(question)?.[1];
+  if (conduit) return `${conduit.replace(/\s+/g, " ")} 굴착공사`;
+  return /흙막이/.test(question) ? "터파기·흙막이 굴착공사" : "굴착공사";
 }
 
 function inferCustomWorkName(question: string) {
@@ -1012,10 +1015,10 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
   // 덮어쓰면 외벽 시스템비계 해체에도 바퀴 잠금 대책이 붙는다(2026-11-22 MCP 점검 ②).
 
   // 지게차 하역 틀: 입력에 도크·경사로·화물차가 있으면 지게차 전도·굴러떨어짐 행을 더한다(MCP 점검 ①, 안전보건규칙 제171조·제178조 원문 확인).
-  if (source.id === "logistics-forklift" && /도크|경사로|화물차|트럭/.test(question)) {
+  if (source.id === "logistics-forklift" && /도크|경사로/.test(question)) {
     layerPairs.push({
       hazard: "도크 경사로·단부에서 지게차가 넘어지거나 출발한 화물차와 도크 사이로 굴러떨어지는 위험",
-      action: "하역 중에는 화물차 시동을 끄고 바퀴에 고임목을 받쳐 움직이지 않게 하며, 경사로·도크 단부에는 유도자를 배치하고 허용하중 이내로 화물을 실어 운행(안전보건규칙 제171조, 제178조①)",
+      action: "경사로·도크 단부에는 유도자를 배치하고 지반의 부동침하와 갓길 붕괴를 막는 조치를 하며(안전보건규칙 제171조) 허용하중 이내로 화물을 실어 운행(안전보건규칙 제178조①). 하역 중에는 화물차 시동을 끄고 바퀴에 고임목을 받쳐 움직이지 않게 함",
       basis: "안전보건규칙 제171조·제178조",
       accidentType: "overturn",
       equipment: "지게차"

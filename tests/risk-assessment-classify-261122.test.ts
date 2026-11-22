@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { renderHwpDocumentExport } from "@/lib/document-export-hwp";
+import { renderXlsxDocumentExport } from "@/lib/document-export-xlsx";
+import type { McpAuthContext } from "@/lib/mcp-auth";
+import { createGenerateRiskAssessmentHandler, type RiskAssessmentToolResult } from "@/lib/mcp-risk-assessment";
 import { buildMockAskResponse } from "@/lib/mock-data";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 
@@ -218,6 +222,62 @@ describe("⑥ 프레스 금형 교체(천장크레인) — 금형 낙하는 추�
     expect(drop.additionalControls).toMatch(/제172조/);
     expect(drop.accidentType).toBe("struckBy");
   });
+});
+
+describe("분류 반례 — 새 틀이 다른 작업을 끌어오지 않는다", () => {
+  it("주차장 램프(경사로) 보수 공사는 조명 교체가 아니다", () => {
+    expect(run("주차장 램프 보수 공사, 작업자 3명").taskId).not.toBe("ladder-lighting");
+  });
+
+  it("야간 조명 설치 후 크레인 양중은 크레인 양중이다", () => {
+    expect(run("야간 조명 설치 후 이동식 크레인으로 자재 인양 작업, 신호수 1명").taskId).toBe("crane-lifting");
+  });
+
+  it("관로가 주변 매설물로만 적힌 터파기는 그 관로 굴착공사로 부르지 않는다", () => {
+    const { scenario } = run("가상02 오피스텔 신축현장 지하 터파기, 굴착 깊이 4m, H-pile+토류판 흙막이 설치 중, 굴착기(0.8㎥) 1대와 덤프트럭 2대, 작업자 6명, 인접 도로와 상수도관 매설, 전날 비");
+    expect(scenario.siteName).not.toMatch(/상수도관 굴착공사/);
+    expect(run("광주 상수도관 터파기 작업, 깊이 3m, 굴착기 1대").scenario.siteName).toMatch(/상수도관 굴착공사/);
+  });
+
+  it.each(["급식실 조리원 튀김 작업", "식당 주방에서 칼로 채소 손질 작업 2명"])("%s → 주방 조리", (q) => {
+    const { taskId, rows } = run(q);
+    expect(taskId).toBe("kitchen-cooking");
+    rowWith(rows, /미끄러/);
+  });
+});
+
+describe("MCP generate_risk_assessment 처리기(공개 template) — 재현 문장이 그대로 나간다", () => {
+  const AUTH: McpAuthContext = { siteId: null, orgId: null, scopes: ["tools:*"], source: "env", tokenId: null };
+  const call = async (question: string) => {
+    const { runAsk } = await import("@/lib/search");
+    const handler = createGenerateRiskAssessmentHandler({
+      defaultMode: "template",
+      generateResponse: (q, m) => runAsk(q, { aiMode: m }),
+      renderXlsx: renderXlsxDocumentExport,
+      renderHwp: renderHwpDocumentExport
+    });
+    const result = await handler({ question, mode: "template" }, AUTH, { signal: new AbortController().signal });
+    return JSON.parse(result.content[0]?.text ?? "{}") as RiskAssessmentToolResult;
+  };
+
+  it.each([
+    ["테스트상사 물류창고 지게차로 화물차 팔레트 하역 작업, 작업자 3명(지게차 운전 1, 신호수 1, 검수 1), 도크 경사로, 보행자 통로 인접", "forklift-logistics", /보행자 충돌/, "collision"],
+    ["테스트건설 가상01 현장, 지상 5층 근린생활시설 외벽 시스템비계 해체 작업. 작업자 5명, 고소작업대(차량탑재형 붐형) 1대 사용, 비계 높이 약 18m, 하부 보행로 인접, 오후 강풍 예보", "scaffold-assembly", /벽 연결재/, "collapse"],
+    ["가상02 오피스텔 신축현장 지하 터파기, 굴착 깊이 4m, H-pile+토류판 흙막이 설치 중, 굴착기(0.8㎥) 1대와 덤프트럭 2대, 작업자 6명, 인접 도로와 상수도관 매설, 전날 비", "excavation", /흙막이/, "collapse"],
+    ["테스트상사 물류창고 철골 공사, 높이 12m 보-기둥 접합부 고장력 볼트 체결 작업, 작업자 4명, 이동식 크레인으로 부재 양중, 안전대 부착설비 일부 미설치, 임팩트렌치 사용", "steel-erection", /부착설비/, "fall"],
+    ["A형 사다리 위에서 사무실 천장 형광등 교체, 작업자 2명", "ladder-lighting", /사다리/, "fall"],
+    ["음식점 주방 조리 작업: 튀김기로 튀김 조리, 칼·도마로 채소 손질, 가스레인지 사용, 조리원 3명", "kitchen-cooking", /튀김/, "burn"],
+    ["테스트상사 프레스 공정 200톤 기계식 프레스 금형 교체 작업, 작업자 2명, 천장크레인으로 금형 인양, 슬라이드 하강 상태에서 볼트 체결", "press", /금형 낙하/, "struckBy"]
+  ] as const)("%s", async (question, taskId, hazard, accidentType) => {
+    const payload = await call(question);
+    expect(payload.status).not.toBe("review_required");
+    expect(payload.scenario.taskClassification?.taskId).toBe(taskId);
+    const row = payload.riskAssessment.structuredRows.find((candidate) => hazard.test(candidate.hazard));
+    expect(row?.accidentType).toBe(accidentType);
+    // 공개 경로의 출력 게이트를 지나도 대책 문장(조문 표기 포함)이 기본 틀 그대로다.
+    const source = rowWith(run(question).rows, hazard);
+    expect(row?.additionalControls).toBe(source.additionalControls);
+  }, 60_000);
 });
 
 describe("크레인 전도 행의 재해유형", () => {
