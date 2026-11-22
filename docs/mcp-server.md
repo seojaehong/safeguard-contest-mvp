@@ -52,14 +52,22 @@ claude mcp add --transport http safeclaw https://www.safeclaw.kr/api/mcp/mcp
 만료된 고객이 「왜 내 현장이 안 보이지」로 헤매지 않게 하려는 것이다.
 
 🔴 **공개에서 `enhanced`·`full` 을 열지 않는다.** 그건 우리 Anthropic 비용이다. 같은 품질이 필요하면
-토큰을 발급해 쓴다(아래 **토큰 발급**).
+쓰기 권한(`tools:write` 또는 `tools:generate_risk_assessment`)이 있는 토큰으로 쓴다(아래 바로 다음 문단 —
+기본 발급 토큰은 읽기 전용이다).
 
 261122 — 공개 호출이 `enhanced`·`full` 을 요청했거나 `mode` 를 생략해(기본 `enhanced`) `template` 로
 내렸으면 결과에 `modeDowngrade: { requestedMode, appliedMode: "template", reason }` 를 붙이고, SIF 0건
-이유도 「토큰으로 호출하라」고 적는다(종전에는 적용 모드만 남아 내린 사실이 보이지 않았다).
+이유도 「쓰기 권한(`tools:write` 또는 `tools:generate_risk_assessment`)이 있는 토큰으로 호출하라」고 적는다
+(종전에는 적용 모드만 남아 내린 사실이 보이지 않았다).
+
+🔴 `generate_risk_assessment`·`generate_safety_docpack`·`generate_reviewed_safety_docpack` 은 **쓰기 도구**다
+(`WRITE_TOOL_NAMES`). 웹 「내 AI 연결」·`scripts/issue-mcp-token.mjs` 로 발급한 토큰은 `MCP_DEFAULT_SCOPES`
+(`tools:read`) 뿐이라 이 셋을 부르면 `MCP_TOOL_FORBIDDEN` 이다. 그래서 안내 문구는 발급 경로가 아니라
+필요한 스코프를 적는다(PR #135 검토).
 
 `tools/list` 는 세션마다 거르지 않고 11종을 모두 보인다(권한은 호출 때 본다). 대신 공개 스코프에 없는
-도구는 설명 첫 줄이 `인증 필요 — …` 다(`lib/mcp-scoped-tool.ts` 가 `PUBLIC_MCP_TOOL_SCOPES` 로 붙인다).
+도구는 설명 첫 줄이 `인증 필요 — …` 이고 그 도구를 부를 수 있는 스코프(읽기 도구 `tools:read`, 쓰기 도구
+`tools:write`, 또는 `tools:<도구명>`)를 적는다(`lib/mcp-scoped-tool.ts` 가 `mcpAuthRequiredNotice` 로 붙인다).
 
 ### 작업 설명(`question`) 입력 계약 — 261122
 

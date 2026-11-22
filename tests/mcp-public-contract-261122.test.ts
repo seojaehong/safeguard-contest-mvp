@@ -20,9 +20,13 @@ import { registerTools } from "@/app/api/mcp/[transport]/implementation";
 import { findForbiddenUserTerms } from "@/lib/grounded-generation-contract";
 import {
   buildPublicContext,
+  isMcpToolAllowed,
   MCP_TOOL_NAMES,
+  type McpAuthContext,
+  type McpToolName,
   PUBLIC_MCP_TOOL_SCOPES,
 } from "@/lib/mcp-auth";
+import { MCP_DEFAULT_SCOPES } from "@/lib/mcp-tool-contract.mjs";
 import { PUBLIC_ASK_QUESTION_MAX_CHARS } from "@/lib/public-work-budget";
 
 const PUBLIC_AUTH: AuthInfo = {
@@ -165,6 +169,53 @@ describe("④ 토큰이 있어야 하는 도구는 설명 첫 줄에 「인증 �
     }
     for (const name of publicTools) {
       expect(listed.get(name) ?? "", name).not.toMatch(/^인증 필요/u);
+    }
+  });
+});
+
+// ⑤ (PR #135 검토 지적) 안내 문구가 가리키는 해결 경로가 실제로 통해야 한다.
+//   웹 「내 AI 연결」·발급 CLI 토큰은 MCP_DEFAULT_SCOPES(tools:read) 뿐이라 쓰기 도구(위험성평가·문서팩)를 못 부른다.
+//   그런데 안내는 「SafeClaw MCP 토큰으로 호출하세요(토큰 발급: 웹 AI 연결)」라고만 적어, 따라 하면 MCP_TOOL_FORBIDDEN 이었다.
+//   문구 낱말이 아니라 「문구에 적힌 스코프로 그 도구를 실제로 부를 수 있는가」를 isMcpToolAllowed 로 본다.
+describe("⑤ 안내 문구가 가리키는 토큰은 그 도구를 실제로 부를 수 있다", () => {
+  const tokenContext = (scopes: readonly string[]): McpAuthContext => ({
+    siteId: "site-test",
+    orgId: "org-test",
+    scopes: [...scopes],
+    source: "db",
+    tokenId: "token-test",
+  });
+  const scopesIn = (text: string): string[] => [...text.matchAll(/tools:[a-z_*]+/gu)].map((match) => match[0]);
+  const expectGuidancePointsToWorkingScope = (text: string, tool: McpToolName) => {
+    const named = scopesIn(text);
+    expect(named.length, `${tool}: 필요한 스코프를 적지 않았다 — ${text}`).toBeGreaterThan(0);
+    for (const scope of named) {
+      expect(isMcpToolAllowed(tokenContext([scope]), tool), `${tool}: ${scope} 로는 부를 수 없다`).toBe(true);
+    }
+  };
+
+  it("전제 — 웹·CLI 기본 발급 토큰(MCP_DEFAULT_SCOPES)으로는 generate_risk_assessment 를 부를 수 없다", () => {
+    expect(isMcpToolAllowed(tokenContext(MCP_DEFAULT_SCOPES), "generate_risk_assessment")).toBe(false);
+  });
+
+  it("modeDowngrade.reason 과 공개 SIF 0건 이유는 쓰기 권한 스코프를 적고, 읽기 전용 토큰이 나오는 웹 「AI 연결」로 보내지 않는다", async () => {
+    const result = await call("generate_risk_assessment", { question: QUESTION, mode: "full" });
+    const payload = JSON.parse(textOf(result)) as { modeDowngrade?: { reason: string }; sif: { count: number; reason?: string } };
+    const reason = payload.modeDowngrade?.reason ?? "";
+    expectGuidancePointsToWorkingScope(reason, "generate_risk_assessment");
+    expect(reason).not.toMatch(/AI 연결/u);
+    expect(payload.sif.count).toBe(0);
+    expectGuidancePointsToWorkingScope(payload.sif.reason ?? "", "generate_risk_assessment");
+    expect(payload.sif.reason ?? "").not.toMatch(/AI 연결/u);
+  });
+
+  it("토큰이 있어야 하는 도구의 「인증 필요」 첫 줄은 그 도구를 부를 수 있는 스코프를 적는다", async () => {
+    const { tools } = await client.listTools();
+    const publicTools = new Set(PUBLIC_MCP_TOOL_SCOPES.map((scope) => scope.replace(/^tools:/u, "")));
+    for (const name of MCP_TOOL_NAMES.filter((item) => !publicTools.has(item))) {
+      const firstLine = (tools.find((tool) => tool.name === name)?.description ?? "").split("\n")[0] ?? "";
+      expectGuidancePointsToWorkingScope(firstLine, name);
+      expect(findForbiddenUserTerms(firstLine), name).toEqual([]);
     }
   });
 });

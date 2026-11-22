@@ -100,9 +100,18 @@ export function isPublicMcpTool(toolName: McpToolName): boolean {
  * tools/list 는 세션마다 거르지 않고 모든 도구를 보인다(권한은 호출 때 requireMcpToolScope 가 본다).
  * 그래서 토큰 없이 붙은 호출자가 부르기 전에 알 수 있게 설명 첫 줄에 적는다.
  * 붙이는 곳은 registerScopedTool 한 곳이다(PUBLIC_MCP_TOOL_SCOPES 와 어긋나지 않게).
+ *
+ * 도구마다 부를 수 있는 스코프를 적는다(PR #135 검토). 웹 「내 AI 연결」·발급 CLI 토큰은
+ * MCP_DEFAULT_SCOPES(tools:read) 뿐이라 쓰기 도구를 못 부른다. 「토큰으로 호출」만 적으면
+ * 읽기 토큰을 받아 와 다시 MCP_TOOL_FORBIDDEN 을 만난다. 적은 스코프가 실제로 통하는지는
+ * tests/mcp-public-contract-261122.test.ts ⑤ 가 isMcpToolAllowed 로 본다.
  */
-export const MCP_AUTH_REQUIRED_NOTICE =
-  "인증 필요 — SafeClaw MCP 토큰(Authorization: Bearer)으로 호출해야 합니다. 토큰 없이 부르면 MCP_TOOL_FORBIDDEN 으로 거절됩니다.";
+export function mcpAuthRequiredNotice(toolName: McpToolName): string {
+  if (WRITE_TOOL_NAMES.has(toolName)) {
+    return `인증 필요 — 쓰기 권한(tools:write 또는 tools:${toolName})이 있는 SafeClaw MCP 토큰(Authorization: Bearer)으로 호출해야 합니다. 토큰이 없거나 읽기 전용 토큰이면 MCP_TOOL_FORBIDDEN 으로 거절됩니다.`;
+  }
+  return `인증 필요 — 읽기 권한(tools:read 또는 tools:${toolName})이 있는 SafeClaw MCP 토큰(Authorization: Bearer)으로 호출해야 합니다. 토큰 없이 부르면 MCP_TOOL_FORBIDDEN 으로 거절됩니다.`;
+}
 
 /** 토큰 없는 호출에 주는 컨텍스트. 현장·조직이 없으므로 테넌트 도구는 스코프에서 막힌다. */
 export function buildPublicContext(admissionIdentity: string): McpAuthContext {

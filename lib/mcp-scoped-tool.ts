@@ -4,7 +4,7 @@ import { z } from "zod";
 import {
   asAuthContext,
   isPublicMcpTool,
-  MCP_AUTH_REQUIRED_NOTICE,
+  mcpAuthRequiredNotice,
   McpToolScopeError,
   requireMcpToolScope,
   type McpAuthContext,
@@ -88,7 +88,7 @@ export function registerScopedTool<InputShape extends z.ZodRawShape>(
     }
   };
   const description = config.description && !isPublicMcpTool(toolName)
-    ? `${MCP_AUTH_REQUIRED_NOTICE}\n${config.description}`
+    ? `${mcpAuthRequiredNotice(toolName)}\n${config.description}`
     : config.description;
   server.registerTool(toolName, { ...config, description, inputSchema }, invoke);
   return Object.freeze({

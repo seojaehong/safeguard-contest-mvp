@@ -323,9 +323,10 @@ export function checkRiskRecordItems(rows: readonly RiskAssessmentRow[]): RiskAs
   };
 }
 
-/** 공개 호출에서 모드를 내린 이유. 결과 modeDowngrade.reason 에 그대로 싣는다. */
+/** 공개 호출에서 모드를 내린 이유. 결과 modeDowngrade.reason 에 그대로 싣는다.
+ * 이 도구는 쓰기 도구라 웹 「내 AI 연결」의 읽기 전용(tools:read) 토큰으로는 못 부른다 — 그 경로로 보내지 않는다(PR #135 검토). */
 export const PUBLIC_MODE_DOWNGRADE_REASON =
-  "토큰 없는 공개 호출은 외부·AI 호출이 없는 template 모드만 쓸 수 있어 template 로 만들었습니다(안전 지식 DB·SIF 사례 미반영). enhanced·full 은 SafeClaw MCP 토큰으로 호출하세요(토큰 발급: SafeClaw 웹 「AI 연결」 설정).";
+  "토큰 없는 공개 호출은 외부·AI 호출이 없는 template 모드만 쓸 수 있어 template 로 만들었습니다(안전 지식 DB·SIF 사례 미반영). enhanced·full 은 쓰기 권한(tools:write 또는 tools:generate_risk_assessment)이 있는 SafeClaw MCP 토큰으로 호출하세요. 읽기 전용 토큰으로는 이 도구를 부를 수 없습니다.";
 
 function sifZeroReason(response: AskResponse, mode: AiMode, excludedCount = 0, publicCall = false): string {
   if (excludedCount) {
@@ -335,7 +336,7 @@ function sifZeroReason(response: AskResponse, mode: AiMode, excludedCount = 0, p
     return "작업 유형을 확인하지 못해 안전 지식 DB를 조회하지 않았습니다. 작업 내용을 더 구체적으로 적어 다시 호출하세요.";
   }
   if (mode === "template" && publicCall) {
-    return "토큰 없는 공개 호출은 template 모드로만 만들어 안전 지식 DB를 조회하지 않습니다. SIF 유사사례가 필요하면 SafeClaw MCP 토큰으로 mode=enhanced 또는 full 을 호출하세요.";
+    return "토큰 없는 공개 호출은 template 모드로만 만들어 안전 지식 DB를 조회하지 않습니다. SIF 유사사례가 필요하면 쓰기 권한(tools:write 또는 tools:generate_risk_assessment)이 있는 SafeClaw MCP 토큰으로 mode=enhanced 또는 full 을 호출하세요.";
   }
   if (mode === "template") {
     return "template 모드는 안전 지식 DB를 조회하지 않습니다. SIF 유사사례가 필요하면 mode=enhanced 또는 full 로 호출하세요.";
