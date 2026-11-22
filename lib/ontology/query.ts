@@ -77,7 +77,11 @@ function sorted(map: Map<string, OntologyNode>): OntologyNode[] {
  * 대표 task는 라벨이 가장 짧은(가장 특정한) 노드를 반환한다.
  */
 export function queryByTask(graph: QueryableGraph, taskLabel: string): TaskQueryResult | null {
-  const tasks = matchTaskNodes(graph, taskLabel);
+  return expandFromTasks(graph, matchTaskNodes(graph, taskLabel));
+}
+
+/** 매칭된 Task 노드들에서 1~2홉 확장. 대표 task 는 라벨이 가장 짧은 노드. */
+function expandFromTasks(graph: QueryableGraph, tasks: OntologyNode[]): TaskQueryResult | null {
   if (tasks.length === 0) return null;
   const primary = [...tasks].sort(
     (a, b) => a.label.length - b.label.length || a.node_id.localeCompare(b.node_id, "ko")
@@ -242,6 +246,58 @@ export function queryKnowledge(graph: QueryableGraph, query: string): KnowledgeR
     };
   }
   const hazardNodes = matchHazardNodes(graph, query);
+  if (hazardNodes.length === 0) return null;
+  return expandFromHazards(graph, hazardNodes);
+}
+
+// ── 정확 일치 조회 (Phase A evidence chain 밖의 query_safety_knowledge 경로) ──────
+//
+// queryKnowledge 의 양방향 포함 매칭은 「용접흄·유해가스 중독」을 용접 작업으로, 「부두·상하차 추락」에
+// 고소작업 조치를 붙인다. 07-16 output-boundary 결정(퍼지 추론 금지)을 지키면서 등록 라벨은 열기 위해
+// 여기서는 정규화한 라벨이 같은 노드 하나만 잡는다. 작업유형은 끝의 「작업」 유무만 같게 본다
+// (「밀폐공간」 = 「밀폐공간 작업」, 「용접 작업」 = 「용접」).
+
+function stripTaskSuffix(normalized: string): string {
+  return normalized.endsWith("작업") ? normalized.slice(0, -"작업".length) : normalized;
+}
+
+/** 정규화 라벨(끝 「작업」 무시)이 같은 Task 노드. 빈 질의·「작업」 단독은 잡지 않는다. */
+export function matchTaskNodesExact(graph: QueryableGraph, taskLabel: string): OntologyNode[] {
+  const query = stripTaskSuffix(normalizeLabel(taskLabel));
+  if (!query) return [];
+  return graph.nodes.filter(
+    (node) => node.kind === "Task" && stripTaskSuffix(normalizeLabel(node.label)) === query,
+  );
+}
+
+/** 정규화 라벨이 같은 Hazard 노드. */
+export function matchHazardNodesExact(graph: QueryableGraph, hazardLabel: string): OntologyNode[] {
+  const query = normalizeLabel(hazardLabel);
+  if (!query) return [];
+  return graph.nodes.filter(
+    (node) => node.kind === "Hazard" && normalizeLabel(node.label) === query,
+  );
+}
+
+/**
+ * 작업유형 또는 위험요인 라벨이 published 노드 라벨과 정확히 같을 때만 조회한다.
+ * Task 정확 일치 → matchedBy:"task", 없으면 Hazard 정확 일치 → matchedBy:"hazard", 둘 다 없으면 null.
+ */
+export function queryKnowledgeExact(graph: QueryableGraph, query: string): KnowledgeResult | null {
+  const byTask = expandFromTasks(graph, matchTaskNodesExact(graph, query));
+  if (byTask) {
+    return {
+      matchedBy: "task",
+      task: byTask.task,
+      hazards: byTask.hazards,
+      controls: attachControlArticles(graph, byTask.controls),
+      articles: byTask.articles,
+      accidents: byTask.accidents,
+      documents: byTask.documents,
+      duties: byTask.duties
+    };
+  }
+  const hazardNodes = matchHazardNodesExact(graph, query);
   if (hazardNodes.length === 0) return null;
   return expandFromHazards(graph, hazardNodes);
 }
