@@ -26,7 +26,7 @@ export const PHASE_A_CONTROL_IDS = [
   "electrical-grounding"
 ];
 // 값 전체가 내부 enum 이면 노출이다(부분 일치는 보지 않는다 — 「low」가 문장 속 영어일 수 있다).
-const INTERNAL_ENUM_VALUE = /^(high|medium|low|planned|needsReview|fireExplosion|struckBy|electricShock)$/u;
+const INTERNAL_ENUM_VALUE = /^(high|medium|low|planned|needsReview|fireExplosion|struckBy|electricShock|collision|overturn)$/u;
 // 값 안에 들어 있으면 노출이다(대소문자 무시).
 const INTERNAL_SUBSTRINGS = [
   { rule: "riskAssessmentDraft", pattern: /riskAssessmentDraft/iu },

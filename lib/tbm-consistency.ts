@@ -27,7 +27,10 @@ const TASK_SIGNATURE_TERMS: Record<TaskId, RegExp> = {
   "exterior-painting": /비계|외벽|도장/,
   hotwork: /용접|용단|절단|화기|불티/,
   "floor-cleaning": /세척|세제|바닥|미끄/,
-  "leak-maintenance": /누수|천장|배관/
+  "leak-maintenance": /누수|천장|배관/,
+  "steel-erection": /철골|볼트|추락|안전대/,
+  "ladder-lighting": /사다리|조명|등기구|형광등|감전|검전/,
+  "kitchen-cooking": /주방|조리|화상|튀김|칼|베임|미끄/
 };
 
 export function isTbmTextForTask(taskId: TaskId | string | null | undefined, text: string): boolean {

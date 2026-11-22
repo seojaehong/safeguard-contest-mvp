@@ -61,6 +61,8 @@ const expectedAccidentTypeLabels = {
   traffic: "교통사고",
   collapse: "붕괴",
   fireExplosion: "화재·폭발",
+  collision: "부딪힘",
+  overturn: "깔림·뒤집힘",
   other: "기타"
 } satisfies Readonly<Record<AccidentType, string>>;
 

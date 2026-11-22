@@ -21,6 +21,8 @@ const accidentTypeValues = [
   "traffic",
   "collapse",
   "fireExplosion",
+  "collision",
+  "overturn",
   "other"
 ];
 const riskLevelValues = ["low", "medium", "high"];

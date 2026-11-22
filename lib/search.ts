@@ -17,7 +17,7 @@ import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiDeliverablesDiagnostics, type AiMode } from "./ai-deliverables";
 import { buildGroundedGenerationPacket, type GroundedGenerationPacket } from "./grounded-generation-contract";
 import { assembleInjectionGraph, buildOntologyGroundingSources, loadInjectionGraph, resolveInjectionTaskLabels } from "./grounding-ontology-injection";
-import { classifyWorkTask, inferConditionLayers } from "./task-scenario-profiles";
+import { classifyWorkTask, hasLeakMaintenanceIdentity, inferConditionLayers } from "./task-scenario-profiles";
 import {
   buildPhaseACanonicalAnswer,
   type PhaseAGenerationGrounding,
@@ -436,7 +436,9 @@ function inferFourM(text: string): FourM {
 function inferAccidentType(text: string): AccidentType {
   if (/추락|고소|비계|개구부|사다리/.test(text)) return "fall";
   if (/미끄|우천|바닥|전도/.test(text)) return "slip";
-  if (/지게차|차량|동선|충돌|교통/.test(text)) return "traffic";
+  // 지게차·차량이 사람에 부딪히는 것은 부딪힘이다. 교통사고는 「교통」이 적힌 경우만(mock-data accidentTypeForHazard 와 같은 축, 2026-11-22 MCP 점검 ①).
+  if (/교통/.test(text)) return "traffic";
+  if (/지게차|차량|동선|충돌/.test(text)) return "collision";
   if (/끼임|협착|말림/.test(text)) return "caughtIn";
   if (/화학|세정|유해|누출|가스|분진/.test(text)) return "chemicalExposure";
   if (/폭염|온열|열사병|자외선/.test(text)) return "heatIllness";
@@ -561,7 +563,8 @@ function buildFallbackRiskAssessmentRows(response: AskResponse, weatherSummary: 
       location,
       process,
       task: "장비·도구 안전점검",
-      equipment: /누수|천장/.test(workText) ? "사다리, 전동공구, 누수 점검 장비" : "작업 장비, 공구, 방호장치",
+      // 「천장」만으로는 누수 작업이 아니다(천장 조명 교체 등, 2026-11-22 MCP 점검 ⑤). 누수 판정은 분류기와 같은 함수를 쓴다.
+      equipment: hasLeakMaintenanceIdentity(workText) ? "사다리, 전동공구, 누수 점검 장비" : "작업 장비, 공구, 방호장치",
       hazard: "장비·도구 상태 불량 또는 방호조치 미흡으로 인한 사고 위험",
       currentControls: "사용 전 외관, 고정상태, 전원·잠금·방호장치 상태를 점검합니다.",
       likelihood: 3,

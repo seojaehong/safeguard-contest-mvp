@@ -26,6 +26,8 @@ export const ACCIDENT_TYPE_DISPLAY_LABELS: Readonly<Record<AccidentType, string>
   burn: "화상",
   collapse: "붕괴",
   fireExplosion: "화재·폭발",
+  collision: "부딪힘",
+  overturn: "깔림·뒤집힘",
   electricShock: "감전",
   chemicalExposure: "화학물질 노출",
   asphyxiation: "질식",

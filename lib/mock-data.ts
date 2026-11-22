@@ -27,8 +27,14 @@ import {
   buildChemicalHandlingProfile,
   buildConfinedSpaceProfile,
   buildConveyorProfile,
+  DUMP_TRUCK_REVERSING_PAIR,
   buildCraneLiftingProfile,
   buildForeignWorkerPair,
+  buildKitchenProfile,
+  buildLightingReplacementProfile,
+  buildScaffoldAssemblyProfile,
+  buildSteelErectionProfile,
+  hasLeakMaintenanceIdentity,
   buildHeatPair,
   buildMachineIsolationProfile,
   buildNewWorkerPair,
@@ -202,10 +208,11 @@ const legacyFieldScenarioProfiles: LegacyScenarioProfile[] = [
       "상부 랙 피킹 중 적재물 낙하",
       "출하 집중 시간대 교차동선 혼잡"
     ],
+    // hazards[i] 와 actions[i] 가 한 행이다. 2·3행 대책이 서로 바뀌어 있던 것을 바로잡았다(2026-11-22 MCP 점검 ①).
     actions: [
       "지게차 전용 동선과 보행 동선을 바닥표시와 차단봉으로 분리",
-      "상하차 구간 진입 전 신호수 배치와 후진 경보 확인",
-      "고중량 적재물 하역 전 작업반경을 비우고 낙하위험 구역을 통제"
+      "고중량 적재물 하역 전 작업반경을 비우고 낙하위험 구역을 통제",
+      "상하차 구간 진입 전 신호수 배치와 후진 경보 확인"
     ],
     educationName: "물류센터 지게차 동선 및 적재물 낙하 예방 교육",
     educationTargets: "지게차 운전자, 피킹 작업자, 신규 출하 인력",
@@ -534,9 +541,12 @@ function inferKnownLocationPrefix(question: string) {
 }
 
 // 굴착 대상은 질문에 적힌 관로 이름으로만 정한다. 고정 현장명(열수송관)을 붙이지 않는다.
+// 관로가 굴착 대상일 때(「상수도관 터파기」·「가스 배관 굴착공사」)만 작업명에 쓴다. 「인접 상수도관 매설」처럼
+// 주변 매설물로만 적힌 관로는 작업명이 아니다(2026-11-22 MCP 점검 ③ — 오피스텔 터파기가 「상수도관 굴착공사」가 됐다).
 function inferExcavationWorkName(question: string) {
-  const conduit = /(도시가스\s*배관|가스\s*배관|상수도관|하수도관|하수관로|열수송관|통신\s*관로|전력구|우수관|오수관)/.exec(question)?.[1];
-  return conduit ? `${conduit.replace(/\s+/g, " ")} 굴착공사` : "굴착공사";
+  const conduit = /(도시가스\s*배관|가스\s*배관|상수도관|하수도관|하수관로|열수송관|통신\s*관로|전력구|우수관|오수관)\s*(?:\S{0,6}\s*)?(?:굴착|터파기|공사|교체|이설|부설|보수)/.exec(question)?.[1];
+  if (conduit) return `${conduit.replace(/\s+/g, " ")} 굴착공사`;
+  return /흙막이/.test(question) ? "터파기·흙막이 굴착공사" : "굴착공사";
 }
 
 function inferCustomWorkName(question: string) {
@@ -545,7 +555,7 @@ function inferCustomWorkName(question: string) {
   if (/배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도/.test(question)) {
     return "지하 기계실 배수펌프 점검";
   }
-  if (/누수|비가\s*새|천장/.test(question)) return "천장 누수 유지보수 작업";
+  if (hasLeakMaintenanceIdentity(question)) return "천장 누수 유지보수 작업";
   if (/점검|정비|유지보수/.test(question)) return "비정형 유지보수 작업";
   if (/화기|용접|절단/.test(question)) return "화기작업";
   if (/지게차|상하차|운반/.test(question)) return "운반·상하차 작업";
@@ -553,7 +563,7 @@ function inferCustomWorkName(question: string) {
 }
 
 function hasRainCondition(question: string) {
-  return /우천|강수|비\s*(?:예보|소식|온|옴|내림|오는|내리는|가\s*옴)|젖은?\s*(?:바닥|노면)|바닥\s*젖음/.test(question);
+  return /우천|강수|비\s*(?:예보|소식|온|옴|내림|오는|내리는|가\s*옴)|(?:전날|어제|간밤|밤사이)\s*비|비가\s*(?:온|왔)|젖은?\s*(?:바닥|노면)|바닥\s*젖음/.test(question);
 }
 
 function inferSpecialContext(question: string): string[] {
@@ -593,6 +603,36 @@ function buildExcavationScenarioProfile(question: string, companyName: string): 
   const isGasConduit = /가스/.test(question);
   const depth = Number(/(?:깊이|심도)\s*(\d+(?:\.\d+)?)\s*m/i.exec(question)?.[1] ?? NaN);
   const planNote = Number.isFinite(depth) && depth >= 2 ? `, 굴착 깊이 ${depth}m — 작업계획서 작성 대상(안전보건규칙 제38조①6호)` : "";
+  // 입력에 적힌 흙막이·덤프트럭·비·굴착 깊이(2m 이상)는 행으로 더한다(2026-11-22 MCP 점검 ③). 조문은 법제처 원문 확인.
+  const hasRetainingWall = /흙막이|H-?pile|토류판|버팀보|어스\s*앵커/i.test(question);
+  const hasDumpTruck = /덤프/.test(question);
+  const rainedBefore = hasRainCondition(question);
+  const extraPairs: RiskPair[] = [];
+  if (hasRetainingWall) {
+    extraPairs.push({
+      hazard: "흙막이 지보공(H-pile·토류판·버팀대) 변형·탈락으로 흙막이가 무너지는 위험",
+      action: "흙막이 지보공 부재의 손상·변형·변위·탈락, 버팀대 긴압 정도, 접속부 상태와 침하를 정기적으로 점검해 이상이 있으면 즉시 보수하고 설계도서에 따른 계측 결과 이상이 있으면 즉시 보강(안전보건규칙 제347조)",
+      basis: "안전보건규칙 제347조",
+      accidentType: "collapse"
+    });
+  }
+  if (rainedBefore) {
+    extraPairs.push({
+      hazard: "비가 온 뒤 굴착면·흙막이 배면 지반이 물을 머금어 무너지는 위험",
+      action: "비가 온 뒤에는 작업 전 굴착면의 부석·균열과 함수·용수 상태를 다시 점검하고(안전보건규칙 제338조) 측구를 설치하거나 굴착 경사면에 비닐을 덮어 빗물 침투를 막음(안전보건규칙 제339조②)",
+      basis: "안전보건규칙 제338조·제339조",
+      accidentType: "collapse"
+    });
+  }
+  if (Number.isFinite(depth) && depth >= 2) {
+    extraPairs.push({
+      hazard: `굴착 깊이 ${depth}m 굴착 단부에서 작업자가 굴착부 안으로 추락하는 위험`,
+      // 굴착 단부에 바로 맞는 조문을 원문으로 확정하지 못해 조문을 달지 않는다.
+      action: "굴착 단부에 안전난간·울타리 등을 튼튼하게 설치해 어두운 곳에서도 알아볼 수 있게 표시하고, 굴착부 안팎은 정해진 승강설비로만 오르내림",
+      accidentType: "fall"
+    });
+  }
+  if (hasDumpTruck) extraPairs.push(DUMP_TRUCK_REVERSING_PAIR);
 
   return withPairs({
     id: "construction-excavation",
@@ -624,7 +664,8 @@ function buildExcavationScenarioProfile(question: string, companyName: string): 
             hazard: "굴착기 회전반경·후진 구간에서 작업자 충돌",
             action: "굴착기 작업반경의 출입을 통제하고 정해진 신호에 따라서만 장비를 움직임(안전보건규칙 제40조)",
             basis: "안전보건규칙 제40조"
-          }
+          },
+      ...extraPairs
     ],
     educationName: `${workName} 전 붕괴·매설물·중장비 충돌 예방 교육`,
     educationTargets: `굴착 작업자, 굴착기${hasCrane ? "·이동식 크레인" : ""} 운전자, 신호수`,
@@ -654,7 +695,7 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
 
   const isElectricalWork = hasElectricalWorkIdentity(question);
   const isPumpConfinedSpace = /배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도/.test(question);
-  const isLeakMaintenance = /누수|비가\s*새|천장/.test(question);
+  const isLeakMaintenance = hasLeakMaintenanceIdentity(question);
   const workName = inferCustomWorkName(question);
   const companyType = isElectricalWork
     ? "전기설비 점검"
@@ -716,11 +757,12 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
           "작업구역 통제 미흡으로 인한 충돌·끼임",
           "2인 1조 감시·비상연락 미흡으로 인한 구조 지연"
         ],
+    // hazards[i] 와 actions[i] 가 한 행이다. 전기 2·3행, 누수 1~3행 대책이 다른 위험에 붙어 있던 것을 바로잡았다(2026-11-22 MCP 점검 ①의 형제).
     actions: isElectricalWork
       ? [
           "작업 전 정전 범위와 차단 위치를 표시하고 전원 차단·잠금표지 상태를 관리감독자가 확인",
-          "검전기로 무전압을 확인하고 잔류전하 방전 후 배전반 점검을 시작",
-          "절연장갑·절연화·안면보호구 등 절연보호구와 접근통제선을 작업 전 상호 확인"
+          "절연장갑·절연화·안면보호구 등 절연보호구와 접근통제선을 작업 전 상호 확인",
+          "검전기로 무전압을 확인하고 잔류전하 방전 후 배전반 점검을 시작"
         ]
       : isPumpConfinedSpace
       ? [
@@ -730,9 +772,9 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
         ]
       : isLeakMaintenance
       ? [
-          "작업 전 전원 차단·검전, 누수 차단, 젖은 바닥 보양과 출입통제 실시",
           "사다리 대신 안정된 작업발판을 우선 사용하고 2인 1조 감시자를 지정",
-          "안전모·미끄럼방지 안전화·보안경·절연장갑 착용 후 천장재 낙하구역을 통제"
+          "누수를 차단하고 젖은 바닥을 보양한 뒤 미끄럼 위험 구역의 출입을 통제",
+          "작업 전 누수 부위 주변 조명·배선의 전원을 차단·검전하고, 안전모·보안경·절연장갑 착용 후 천장재 낙하구역을 통제"
         ]
       : [
           "작업 전 작업방법, 위험구역, 작업중지 기준을 작업반장 승인으로 확정",
@@ -838,9 +880,16 @@ function pickScenarioProfile(question: string, taskId: TaskId | null): ScenarioP
 
   switch (taskId) {
     case "roof":
-    case "scaffold-assembly":
     case "exterior-painting":
       return industryOverride(fieldProfile("construction-painting"));
+    case "scaffold-assembly":
+      return buildScaffoldAssemblyProfile(context);
+    case "steel-erection":
+      return buildSteelErectionProfile(context);
+    case "ladder-lighting":
+      return buildLightingReplacementProfile(context);
+    case "kitchen-cooking":
+      return buildKitchenProfile(context);
     case "excavation":
     case "pump-confined":
     case "electrical":
@@ -961,24 +1010,19 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
       hazard: "지붕 위 자재·공구가 낙하해 하부 작업자와 통행자가 맞는 위험",
       action: "자재·공구를 고정하고 하부 낙하위험 구역을 출입 통제하며 감시자를 배치"
     });
-  } else if (hasScaffoldAssemblyIdentity(question)) {
-    workName = "이동식 비계 조립·해체 작업";
-    processName = "이동식 비계 조립·해체, 작업발판·안전난간 설치, 바퀴 잠금·전도 방지, 하부 출입통제";
-    replaceBaseRisk = true;
-    taskPairs.push(
-      {
-        hazard: "이동식 비계 조립·해체 중 작업발판 또는 구조부에서 추락",
-        action: "조립·해체 순서와 작업반경을 정하고 작업발판·안전난간 설치 상태를 관리감독자가 확인"
-      },
-      {
-        hazard: "연결부·바퀴 잠금·전도 방지 조치 미흡으로 비계가 흔들리거나 전도",
-        action: "연결부·고정핀·바퀴 잠금과 전도 방지 지지 상태를 점검한 뒤 사용"
-      },
-      {
-        hazard: "부재·공구 낙하와 하부 출입통제 미흡으로 작업자 충돌",
-        action: "하부 출입을 통제하고 부재·공구 낙하 방지와 보호구 체결 상태를 상호 확인"
-      }
-    );
+  }
+  // 비계 조립·해체 행은 buildScaffoldAssemblyProfile 이 정한다(이동식·시스템비계 구분). 여기서 이동식 비계 행으로
+  // 덮어쓰면 외벽 시스템비계 해체에도 바퀴 잠금 대책이 붙는다(2026-11-22 MCP 점검 ②).
+
+  // 지게차 하역 틀: 입력에 도크·경사로·화물차가 있으면 지게차 전도·굴러떨어짐 행을 더한다(MCP 점검 ①, 안전보건규칙 제171조·제178조 원문 확인).
+  if (source.id === "logistics-forklift" && /도크|경사로/.test(question)) {
+    layerPairs.push({
+      hazard: "도크 경사로·단부에서 지게차가 넘어지거나 출발한 화물차와 도크 사이로 굴러떨어지는 위험",
+      action: "경사로·도크 단부에는 유도자를 배치하고 지반의 부동침하와 갓길 붕괴를 막는 조치를 하며(안전보건규칙 제171조) 허용하중 이내로 화물을 실어 운행(안전보건규칙 제178조①). 하역 중에는 화물차 시동을 끄고 바퀴에 고임목을 받쳐 움직이지 않게 함",
+      basis: "안전보건규칙 제171조·제178조",
+      accidentType: "overturn",
+      equipment: "지게차"
+    });
   }
 
   if (hasHighRiskChemicalCleaningIdentity(question)) {
@@ -1131,7 +1175,7 @@ function applyQuestionSpecificity(question: string, source: ScenarioProfile): Sc
 }
 
 function sanitizeWorkSummary(question: string, fallback: string) {
-  if (/누수|비가\s*새|천장/.test(question)) return fallback;
+  if (hasLeakMaintenanceIdentity(question)) return fallback;
   if (/비정형|유지보수|정비|점검/.test(question) && fallback) return fallback;
 
   const normalized = (question.trim() || fallback)
@@ -1158,7 +1202,10 @@ function accidentTypeForHazard(hazard: string): RiskAssessmentRow["accidentType"
   if (/질식|산소결핍|유해가스|황화수소/.test(hazard)) return "asphyxiation";
   if (/붕괴|매몰/.test(hazard)) return "collapse";
   if (/온열|열사병|폭염/.test(hazard)) return "heatIllness";
+  // 장비가 넘어지는 것은 깔림·뒤집힘, 차량·장비가 사람에 부딪히는 것은 부딪힘이다(맞음·추락과 구분, 2026-11-22 MCP 점검 ①④).
+  if (!/추락/.test(hazard) && /(?:크레인|지게차|고소작업대|차량|덤프|트럭|굴착기|장비).{0,15}전도/.test(hazard)) return "overturn";
   if (/추락|전도/.test(hazard)) return "fall";
+  if (/(?:지게차|차량|덤프|트럭|굴착기|장비).{0,20}(?:충돌|부딪)|보행자\s*충돌/.test(hazard)) return "collision";
   if (/충돌|동선|회차/.test(hazard)) return "struckBy";
   if (/끼임|끼이|말려|말림|협착/.test(hazard)) return "caughtIn";
   if (/낙하|적재물/.test(hazard)) return "struckBy";
@@ -1180,7 +1227,7 @@ function fourMForHazard(hazard: string): RiskAssessmentRow["fourM"] {
 
 function buildScenarioRiskAssessmentRows(scenario: ReturnType<typeof inferScenario>): RiskAssessmentRow[] {
   const { profile } = scenario;
-  return profile.pairs.map(({ hazard, action }, index) => {
+  return profile.pairs.map(({ hazard, action, accidentType, equipment }, index) => {
     const likelihood = index === 0 ? 3 : 2;
     const severity = profile.riskLevel === "상" || index === 0 ? 4 : 3;
     return {
@@ -1190,17 +1237,19 @@ function buildScenarioRiskAssessmentRows(scenario: ReturnType<typeof inferScenar
       process: profile.processName,
       // 세부작업 칸에는 작업명을 쓴다(위험요인 문장을 넣지 않는다, 편집기 점검 D-11).
       task: profile.workName,
-      // 위험요인에 장비가 드러날 때만 적고, 모르면 빈칸으로 둔다.
-      equipment: /비계/.test(hazard)
+      // 행에서 정한 장비가 있으면 그것을 쓴다. 없으면 위험요인에 장비가 드러날 때만 적고, 모르면 빈칸으로 둔다.
+      // (추정의 「비계 → 이동식 비계」는 이동식 비계 틀(외벽 도장) 행만 남아 있어서 둔다. 다른 비계 행은 장비를 직접 적는다.)
+      equipment: equipment ?? (/비계/.test(hazard)
         ? "이동식 비계"
         : /지게차/.test(hazard)
           ? "지게차"
           : /용접|절단|화기/.test(hazard)
             ? "용접기·절단기"
-            : "",
+            : ""),
       hazard,
       fourM: fourMForHazard(hazard),
-      accidentType: accidentTypeForHazard(hazard),
+      // 행에서 정한 재해유형이 있으면 그것을 쓴다(위험요인 문장 추정은 「전도」를 추락으로 읽는 등 틀리기 쉽다).
+      accidentType: accidentType ?? accidentTypeForHazard(hazard),
       // 현재 안전조치는 입력에 없으므로 빈칸이다. 기본 틀의 조치는 「감소대책」 칸에만 둔다(RA-09).
       currentControls: "",
       likelihood,
