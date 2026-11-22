@@ -13,6 +13,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 
+import { EVIDENCE_CHAIN_REGISTRY } from "@/lib/ontology/evidence-chain-registry";
 import { assembleGraph } from "@/lib/ontology/graph-store";
 import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
 import { listTaskLabels } from "@/lib/ontology/query";
@@ -23,7 +24,9 @@ const publishedGraph = assembleGraph(
   SEED_EDGES.filter((edge) => edge.review_state === "published"),
 );
 
-const PHASE_A_TASKS = new Set(["고소작업", "지게차 상하차", "전기 작업"]);
+const PHASE_A_TASKS = new Set(
+  EVIDENCE_CHAIN_REGISTRY.map((definition) => definition.canonicalTaskLabel),
+);
 
 // 시드 감수본에 조문이 붙지 않은 안전조치(알려진 결함, 보고 대상). 새로 생기면 시험이 잡는다.
 const KNOWN_CONTROLS_WITHOUT_ARTICLE = new Set(["발끝막이판 설치"]);
