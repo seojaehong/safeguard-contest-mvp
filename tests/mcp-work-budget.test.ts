@@ -12,6 +12,7 @@ import {
   AUTHENTICATED_JSON_BODY_READ_TIMEOUT_MS,
   enforceAuthenticatedJsonRequestBodyBudget,
   enforcePublicJsonRequestBodyBudget,
+  PUBLIC_ASK_QUESTION_MAX_CHARS,
   PUBLIC_JSON_BODY_READ_TIMEOUT_MS,
 } from "@/lib/public-work-budget";
 
@@ -191,22 +192,38 @@ describe("MCP tool work budgets", () => {
     expect(mocks.baseHandler).not.toHaveBeenCalled();
   });
 
+  // 261122 — runAsk 를 쓰는 도구는 runAsk 처리 한도(PUBLIC_ASK_QUESTION_MAX_CHARS)가 상한이다.
+  //   종전에는 네 도구 모두 4,000 이라 1,201~4,000자가 MCP_TOOL_INTERNAL_ERROR 였다.
+  //   run_safeclaw_harness_agent 는 runAsk 를 쓰지 않아 4,000 그대로다.
+  it.each([
+    ["run_safeclaw_harness_agent", {}, MCP_GENERATION_QUESTION_MAX_CHARS],
+    ["generate_reviewed_safety_docpack", { task: "용접" }, PUBLIC_ASK_QUESTION_MAX_CHARS],
+    ["generate_safety_docpack", {}, PUBLIC_ASK_QUESTION_MAX_CHARS],
+    ["generate_risk_assessment", {}, PUBLIC_ASK_QUESTION_MAX_CHARS],
+  ] as const)("rejects oversized generation questions in %s", (toolName, extra, maxChars) => {
+    const schema = schemaFor(captureToolConfigs(), toolName);
+
+    expect(schema.safeParse({
+      ...extra,
+      question: "가".repeat(maxChars),
+    }).success).toBe(true);
+    expect(schema.safeParse({
+      ...extra,
+      question: "가".repeat(maxChars + 1),
+    }).success).toBe(false);
+  });
+
   it.each([
     ["run_safeclaw_harness_agent", {}],
     ["generate_reviewed_safety_docpack", { task: "용접" }],
     ["generate_safety_docpack", {}],
     ["generate_risk_assessment", {}],
-  ] as const)("rejects oversized generation questions in %s", (toolName, extra) => {
+  ] as const)("rejects empty or whitespace-only questions in %s", (toolName, extra) => {
     const schema = schemaFor(captureToolConfigs(), toolName);
 
-    expect(schema.safeParse({
-      ...extra,
-      question: "가".repeat(MCP_GENERATION_QUESTION_MAX_CHARS),
-    }).success).toBe(true);
-    expect(schema.safeParse({
-      ...extra,
-      question: "가".repeat(MCP_GENERATION_QUESTION_MAX_CHARS + 1),
-    }).success).toBe(false);
+    expect(schema.safeParse({ ...extra, question: "" }).success).toBe(false);
+    expect(schema.safeParse({ ...extra, question: "  \n\t" }).success).toBe(false);
+    expect(schema.safeParse({ ...extra, question: "비계 해체" }).success).toBe(true);
   });
 
   it("bounds reviewed task labels and QA document text", () => {

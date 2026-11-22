@@ -3,6 +3,8 @@ import { z } from "zod";
 
 import {
   asAuthContext,
+  isPublicMcpTool,
+  mcpAuthRequiredNotice,
   McpToolScopeError,
   requireMcpToolScope,
   type McpAuthContext,
@@ -85,7 +87,10 @@ export function registerScopedTool<InputShape extends z.ZodRawShape>(
       return toToolError(error);
     }
   };
-  server.registerTool(toolName, { ...config, inputSchema }, invoke);
+  const description = config.description && !isPublicMcpTool(toolName)
+    ? `${mcpAuthRequiredNotice(toolName)}\n${config.description}`
+    : config.description;
+  server.registerTool(toolName, { ...config, description, inputSchema }, invoke);
   return Object.freeze({
     toolName,
     async invoke(args, authContext, signal = new AbortController().signal): Promise<McpToolResult> {
