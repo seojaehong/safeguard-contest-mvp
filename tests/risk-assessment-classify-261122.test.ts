@@ -244,6 +244,35 @@ describe("분류 반례 — 새 틀이 다른 작업을 끌어오지 않는다",
     expect(taskId).toBe("kitchen-cooking");
     rowWith(rows, /미끄러/);
   });
+
+  // 「주방」은 장소다. 주방에서 하는 용접·누수 보수·바닥 세척은 그 작업 틀로 간다(기준 a0fc6338 과 같은 분류).
+  it.each([
+    ["식당 주방 후드 덕트 용접 작업", "hotwork"],
+    ["식당 주방 후드 덕트 용접 작업, 화재감시자 1명", "hotwork"],
+    ["주방 가스 배관 교체 용접", "hotwork"],
+    ["주방 천장 누수 보수 작업", "leak-maintenance"],
+    ["식당 주방 천장 누수 보수 작업", "leak-maintenance"],
+    ["급식실 바닥 세척 세제 사용 작업", "floor-cleaning"],
+    ["급식실 바닥 세척 세제 작업", "floor-cleaning"]
+  ])("%s → %s(주방 조리가 아니다)", (q, expected) => {
+    expect(run(q).taskId).toBe(expected);
+  });
+
+  // 조리 문장의 「화기」·「절단」은 화기작업이 아니다(주방 규칙이 화기작업보다 앞에 있는 이유).
+  it.each(["주방 조리 작업, 가스레인지 화기 사용", "식당 주방에서 칼로 식재료 절단 작업"])("%s → 주방 조리", (q) => {
+    expect(run(q).taskId).toBe("kitchen-cooking");
+  });
+
+  it("주방 용접은 화재·불티 행을 잃지 않는다", () => {
+    const { rows } = run("식당 주방 후드 덕트 용접 작업, 화재감시자 1명");
+    expect(rows.some((row) => /불티|화재/.test(row.hazard))).toBe(true);
+    expect(rows.some((row) => /튀김|기름/.test(row.hazard))).toBe(false);
+  });
+
+  it("급식실 바닥 세척은 세제 노출 행을, 주방 천장 누수 보수는 감전 행을 잃지 않는다", () => {
+    expect(run("급식실 바닥 세척 세제 사용 작업").rows.some((row) => /세제|세척제|화학/.test(row.hazard))).toBe(true);
+    expect(run("주방 천장 누수 보수 작업").rows.some((row) => /감전|전기/.test(row.hazard))).toBe(true);
+  });
 });
 
 describe("MCP generate_risk_assessment 처리기(공개 template) — 재현 문장이 그대로 나간다", () => {

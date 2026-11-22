@@ -130,8 +130,14 @@ export function hasLightingReplacementIdentity(question: string) {
   return /(?:조명|등기구|형광등|전등|LED|전구).{0,20}(?:교체|교환)/i.test(question);
 }
 
+// 「주방·급식실·조리실」은 장소다. 조리 행위(조리·튀김·칼·도마·손질·가스레인지)가 함께 있어야 주방 조리다.
+// 주방에서 하는 용접·용단은 화기작업(불티·화재감시) 틀로 간다. 누수 보수·바닥 세척은 조리 행위가 없으면 그 틀로 내려간다.
+// 이 규칙이 화기작업보다 앞에 있는 것은 조리 문장의 「화기」·「(칼로) 절단」을 화기작업으로 보내지 않기 위해서다.
+const KITCHEN_PLACE = /주방|조리실|급식실|조리원|튀김기|조리\s*작업/;
+const COOKING_ACT = /조리(?![실원])|튀김|칼|도마|손질|가스\s*레인지/;
 export function hasKitchenCookingIdentity(question: string) {
-  return /주방|조리실|급식실|조리원|튀김기|조리\s*작업/.test(question);
+  if (/용접|용단/.test(question)) return false;
+  return KITCHEN_PLACE.test(question) && COOKING_ACT.test(question);
 }
 
 export function hasElectricalWorkIdentity(question: string) {
