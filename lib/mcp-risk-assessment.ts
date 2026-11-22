@@ -43,8 +43,20 @@ import { gateExportPayload } from "@/lib/user-output-gate";
 
 export type GenerateRiskAssessmentInput = {
   question: string;
+  /** 실제로 적용할 모드(공개 호출이면 라우트가 template 로 고정해 넘긴다). */
   mode?: AiMode;
+  /**
+   * 호출자가 요청한 모드(생략했으면 undefined). 라우트가 이 키를 넘기면 핸들러는 적용 모드와 비교해
+   * 내렸을 때 modeDowngrade 를 붙인다. 키 자체가 없으면(직접 호출) 요청 = 적용으로 본다.
+   */
+  requestedMode?: AiMode;
   format?: RiskAssessmentExportFormat;
+};
+
+export type RiskAssessmentModeDowngrade = {
+  requestedMode: AiMode;
+  appliedMode: AiMode;
+  reason: string;
 };
 
 export type RiskAssessmentSifSource = {
@@ -88,6 +100,8 @@ export type RiskAssessmentToolResult = {
    */
   status: "ok" | "ok_fallback" | "review_required";
   mode: AiMode;
+  /** 요청한 모드(생략하면 기본 enhanced)보다 낮은 모드로 만들었을 때만 붙는다. 지금은 토큰 없는 공개 호출의 template 고정 하나뿐이다. */
+  modeDowngrade?: RiskAssessmentModeDowngrade;
   /**
    * 생성 품질 신호(runAsk generationTrace). rowsOrigin = 본표 행을 만든 분기(status 의 근거).
    * fallbackUsed = 답변·문서 어느 하나라도 보조 응답으로 끝났는가(본표 행과 무관할 수 있다). null 이면 생성 기록이 없어 모른다는 뜻.
@@ -309,12 +323,19 @@ export function checkRiskRecordItems(rows: readonly RiskAssessmentRow[]): RiskAs
   };
 }
 
-function sifZeroReason(response: AskResponse, mode: AiMode, excludedCount = 0): string {
+/** 공개 호출에서 모드를 내린 이유. 결과 modeDowngrade.reason 에 그대로 싣는다. */
+export const PUBLIC_MODE_DOWNGRADE_REASON =
+  "토큰 없는 공개 호출은 외부·AI 호출이 없는 template 모드만 쓸 수 있어 template 로 만들었습니다(안전 지식 DB·SIF 사례 미반영). enhanced·full 은 SafeClaw MCP 토큰으로 호출하세요(토큰 발급: SafeClaw 웹 「AI 연결」 설정).";
+
+function sifZeroReason(response: AskResponse, mode: AiMode, excludedCount = 0, publicCall = false): string {
   if (excludedCount) {
     return `안전 지식 DB가 돌려준 SIF 사례 ${excludedCount}건이 모두 이 작업의 작업·장소·기인물과 맞지 않아 붙이지 않았습니다(excluded 에 이유).`;
   }
   if (response.scenario.taskClassification?.status === "review_required") {
     return "작업 유형을 확인하지 못해 안전 지식 DB를 조회하지 않았습니다. 작업 내용을 더 구체적으로 적어 다시 호출하세요.";
+  }
+  if (mode === "template" && publicCall) {
+    return "토큰 없는 공개 호출은 template 모드로만 만들어 안전 지식 DB를 조회하지 않습니다. SIF 유사사례가 필요하면 SafeClaw MCP 토큰으로 mode=enhanced 또는 full 을 호출하세요.";
   }
   if (mode === "template") {
     return "template 모드는 안전 지식 DB를 조회하지 않습니다. SIF 유사사례가 필요하면 mode=enhanced 또는 full 로 호출하세요.";
@@ -434,10 +455,20 @@ export function fitRiskAssessmentToolResult(result: RiskAssessmentToolResult, ma
 }
 
 export function createGenerateRiskAssessmentHandler(dependencies: Dependencies): GenerateRiskAssessmentHandler {
-  return async ({ question, mode, format }, _authContext, execution) => {
+  return async (input, authContext, execution) => {
+    const { question, mode, format } = input;
     const signal = execution?.signal;
     signal?.throwIfAborted();
     const aiMode = mode ?? dependencies.defaultMode;
+    const requestedMode = "requestedMode" in input ? input.requestedMode ?? dependencies.defaultMode : aiMode;
+    const publicCall = authContext.source === "public";
+    const modeDowngrade: RiskAssessmentModeDowngrade | undefined = requestedMode !== aiMode
+      ? {
+        requestedMode,
+        appliedMode: aiMode,
+        reason: publicCall ? PUBLIC_MODE_DOWNGRADE_REASON : `요청한 ${requestedMode} 대신 ${aiMode} 모드로 만들었습니다.`
+      }
+      : undefined;
     const fileFormat = format ?? "xlsx";
     const view = exportView(await dependencies.generateResponse(question, aiMode, signal), fileFormat);
     const response = view.publicResponse;
@@ -463,6 +494,7 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
       engine: "safeclaw-runAsk",
       status: !hasRows ? "review_required" : generation.rowsOrigin && !GROUNDED_ROWS_ORIGINS.has(generation.rowsOrigin) ? "ok_fallback" : "ok",
       mode: aiMode,
+      ...(modeDowngrade ? { modeDowngrade } : {}),
       generation,
       scenario: view.scenario,
       // 본표 칸과 같은 내보내기 게이트를 지난 값이다(enhanced 모드에서는 모델 문장이라 내부 표지가 섞일 수 있다).
@@ -496,7 +528,7 @@ export function createGenerateRiskAssessmentHandler(dependencies: Dependencies):
       sif: {
         ...(sifCases.length
           ? { count: sifCases.length, cases: sifCases }
-          : { count: 0, cases: [], reason: sifZeroReason(response, aiMode, sif.excluded.length) }),
+          : { count: 0, cases: [], reason: sifZeroReason(response, aiMode, sif.excluded.length, publicCall) }),
         ...(sif.retrievedCount ? { retrievedCount: sif.retrievedCount } : {}),
         ...(sif.excluded.length ? { excluded: sif.excluded } : {}),
         relevanceApplied: sif.relevanceApplied,

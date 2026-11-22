@@ -63,6 +63,7 @@ import {
   PUBLIC_MCP_TOOL_SCOPES,
 } from "@/lib/mcp-auth";
 import { getClientIp } from "@/lib/api-guard";
+import { PUBLIC_ASK_QUESTION_MAX_CHARS } from "@/lib/public-work-budget";
 import {
   withMcpProviderAdmission,
   withMcpReadProviderAdmission,
@@ -131,6 +132,23 @@ const generateRiskAssessmentHandler = createGenerateRiskAssessmentHandler({
   lookupSources: fetchSafetyReferenceSources,
 });
 
+// 🔴 261122 — 작업 설명(question) 입력 계약. 네 도구가 같은 조각을 쓴다.
+//   · 빈·공백만 있는 설명은 거절한다. 종전에는 runAsk 가 내장 예시(성수동 외벽 도장)로 채워 status ok 를 냈다.
+//   · runAsk 를 쓰는 도구의 상한은 runAsk 처리 한도(PUBLIC_ASK_QUESTION_MAX_CHARS)와 같아야 한다.
+//     종전 스키마 상한 4,000 과 처리 한도 1,200 이 어긋나 1,201~4,000자가 MCP_TOOL_INTERNAL_ERROR 였다.
+//   오류 문구는 zod 메시지가 그대로 호출자에게 간다(SDK validateToolInput) — 사람이 고칠 수 있게 적는다.
+const RUN_ASK_QUESTION_MAX_CHARS = PUBLIC_ASK_QUESTION_MAX_CHARS;
+
+function workQuestionSchema(maxChars: number, description: string) {
+  const limit = maxChars.toLocaleString("en-US");
+  return z
+    .string()
+    .trim()
+    .min(1, "작업 설명(question)이 비어 있습니다. 오늘 할 작업·장소·사용 장비·인원을 적어 다시 호출하세요.")
+    .max(maxChars, `작업 설명(question)은 ${limit}자까지 받습니다. 작업·장소·사용 장비·인원 등 핵심만 남겨 줄인 뒤 다시 호출하세요.`)
+    .describe(`${description} — 비워 둘 수 없음, 최대 ${limit}자`);
+}
+
 function uniqueReferences(items: SafetyReferenceItem[]): SafetyReferenceItem[] {
   const byId = new Map<string, SafetyReferenceItem>();
   for (const item of items) byId.set(item.id, item);
@@ -145,7 +163,8 @@ export function registerTools(server: McpServer): void {
       description:
         "OpenClaw/Codex 시연용 SafeClaw DB harness engineering 전용 도구. 오늘 작업을 입력하면 safety_reference_items, SIF 사례, 최근 workpack, 개선 이력을 먼저 고정한 패킷을 반환한다. 이 도구는 문서를 마음대로 생성하지 않고, LLM이 문장화만 하도록 naturalize_only 계약과 누락 근거를 함께 제공한다.",
       inputSchema: {
-        question: z.string().max(MCP_GENERATION_QUESTION_MAX_CHARS).describe("현장 작업 상황 설명"),
+        // runAsk 를 쓰지 않는다(searchSafetyReferences) — 상한은 종전 4,000 그대로.
+        question: workQuestionSchema(MCP_GENERATION_QUESTION_MAX_CHARS, "현장 작업 상황 설명"),
       },
     },
     async ({ question }, authContext, { signal }) => withMcpReadProviderAdmission(
@@ -197,7 +216,7 @@ export function registerTools(server: McpServer): void {
       description:
         "사업장의 오늘 작업을 설명하면 SafeClaw 문서 엔진(/api/ask runAsk)으로 위험성평가·작업계획서·TBM·교육기록 등 문서팩을 생성하고, 같은 호출에서 온톨로지 QA 검수까지 수행한다. OpenClaw/Codex 같은 외부 AI가 SafeClaw 작업공간 품질의 산출물을 한 번에 받아야 할 때 generate_safety_docpack과 qa_review_docpack을 따로 엮지 말고 이 도구를 우선 호출한다.",
       inputSchema: {
-        question: z.string().max(MCP_GENERATION_QUESTION_MAX_CHARS).describe("현장 작업 상황 설명"),
+        question: workQuestionSchema(RUN_ASK_QUESTION_MAX_CHARS, "현장 작업 상황 설명"),
         task: z
           .string()
           .max(MCP_TASK_MAX_CHARS)
@@ -232,7 +251,7 @@ export function registerTools(server: McpServer): void {
       description:
         "사업장의 오늘 작업을 한 줄로 설명하면 위험성평가·작업계획서·TBM·비상대응 등 법정 안전 문서팩 초안 세트를 생성한다. 현장 안전 보조 에이전트가 '오늘 이런 작업을 한다'는 상황 설명만으로 제출용 문서 초안이 필요할 때 호출한다. 기본은 문서별 프리뷰(앞 500자)+메타이며, 전체 본문은 includeFull=true로 받는다.",
       inputSchema: {
-        question: z.string().max(MCP_GENERATION_QUESTION_MAX_CHARS).describe("현장 작업 상황 한 줄 설명 (예: 3층 외벽 비계 해체 작업)"),
+        question: workQuestionSchema(RUN_ASK_QUESTION_MAX_CHARS, "현장 작업 상황 한 줄 설명 (예: 3층 외벽 비계 해체 작업)"),
         mode: z
           .enum(["template", "enhanced", "full"])
           .optional()
@@ -384,13 +403,13 @@ export function registerTools(server: McpServer): void {
     {
       title: "위험성평가표 생성(서식 파일 포함)",
       description:
-        "오늘 작업을 설명하면 SafeClaw 문서 엔진(웹 /api/ask 와 같은 runAsk)으로 위험성평가 본표 행(JSON headers/cells 는 한글 본표 13칸: 세부작업·유해·위험요인·재해유형·가능성·중대성·위험성·감소대책 등. 엑셀 서식은 21칸이며 엑셀에만 있는 칸은 structuredRows 에 전부 있다)과 확인 필요 목록, 생성에 쓰인 SIF(중대재해) 유사사례를 만들고, 웹 「위험성평가표 편집 → 내보내기」와 같은 서식 파일(Excel 표 양식 .xlsx 또는 한글 표 양식 .hwp)을 base64 로 돌려준다. SIF 사례는 출처·원천 자료 공개 연도와 함께, 0건이면 이유를 함께 돌려주고, 시행규칙 제37조의4 기재 항목 충족 검사(항목별 채움·빈칸)를 붙인다. 결과 status 는 ok(본표 행을 모델 생성·안전 지식 DB 근거·요청한 template 으로 만듦), ok_fallback(DB 근거·모델 행이 없어 작업 유형 기본 행으로 대신함, generation.rowsOrigin 참고), review_required(본표 행 없음) 중 하나다. sif.relevanceApplied=false 면 작업 설명에서 작업·장소·기인물을 찾지 못해 SIF 사례를 거르지 않은 것이다(relevanceNote). 서식 파일을 만들지 못했거나 응답 크기 상한(256KB)을 넘으면 행 JSON 은 그대로 두고 file=null·fileUnavailableReason 을 돌려주며, 상한 때문에 뺀 칸은 trimmed 에 적는다(rows[].cells 다음 file). 작업공간에 저장하지 않는다. 초안 작성 보조 도구이며, 위험성평가 실시와 최종 판단 책임은 사업주에게 있다.",
+        "오늘 작업을 설명하면 SafeClaw 문서 엔진(웹 /api/ask 와 같은 runAsk)으로 위험성평가 본표 행(JSON headers/cells 는 한글 본표 13칸: 세부작업·유해·위험요인·재해유형·가능성·중대성·위험성·감소대책 등. 엑셀 서식은 21칸이며 엑셀에만 있는 칸은 structuredRows 에 전부 있다)과 확인 필요 목록, 생성에 쓰인 SIF(중대재해) 유사사례를 만들고, 웹 「위험성평가표 편집 → 내보내기」와 같은 서식 파일(Excel 표 양식 .xlsx 또는 한글 표 양식 .hwp)을 base64 로 돌려준다. SIF 사례는 출처·원천 자료 공개 연도와 함께, 0건이면 이유를 함께 돌려주고, 시행규칙 제37조의4 기재 항목 충족 검사(항목별 채움·빈칸)를 붙인다. 결과 status 는 ok(본표 행을 모델 생성·안전 지식 DB 근거·요청한 template 으로 만듦), ok_fallback(DB 근거·모델 행이 없어 작업 유형 기본 행으로 대신함, generation.rowsOrigin 참고), review_required(본표 행 없음) 중 하나다. sif.relevanceApplied=false 면 작업 설명에서 작업·장소·기인물을 찾지 못해 SIF 사례를 거르지 않은 것이다(relevanceNote). 서식 파일을 만들지 못했거나 응답 크기 상한(256KB)을 넘으면 행 JSON 은 그대로 두고 file=null·fileUnavailableReason 을 돌려주며, 상한 때문에 뺀 칸은 trimmed 에 적는다(rows[].cells 다음 file). 토큰 없는 공개 호출은 mode 와 관계없이 template(안전 지식 DB·SIF·AI 조회 없음)로 만들고, 요청한 모드(생략하면 enhanced)보다 내렸으면 modeDowngrade(requestedMode·appliedMode·reason)를 붙인다. 작업공간에 저장하지 않는다. 초안 작성 보조 도구이며, 위험성평가 실시와 최종 판단 책임은 사업주에게 있다.",
       inputSchema: {
-        question: z.string().max(MCP_GENERATION_QUESTION_MAX_CHARS).describe("현장 작업 상황 설명 (예: 경기 화성 물류창고 지게차 상하차 작업 4명, 비 예보, 야간)"),
+        question: workQuestionSchema(RUN_ASK_QUESTION_MAX_CHARS, "현장 작업 상황 설명 (예: 경기 화성 물류창고 지게차 상하차 작업 4명, 비 예보, 야간)"),
         mode: z
           .enum(["template", "enhanced", "full"])
           .optional()
-          .describe("생성 깊이 (기본 enhanced — 웹 기본값과 같음, 안전 지식 DB·SIF 사례 반영. template 은 DB 조회 없음)"),
+          .describe("생성 깊이. 토큰 호출의 기본은 enhanced(웹 기본값과 같음, 안전 지식 DB·SIF 사례 반영)이고 template 은 DB 조회가 없다. 토큰 없는 공개 호출은 요청과 관계없이 template 로 만들고, 내렸으면 결과 modeDowngrade 에 적는다"),
         format: z
           .enum(["xlsx", "hwp"])
           .optional()
@@ -401,8 +420,9 @@ export function registerTools(server: McpServer): void {
       // 🔴 261112 — 공개(토큰 없음) 호출은 **template 로 고정**한다.
       //   template 은 외부 호출도 AI 호출도 없는 경로다(lib/search.ts 2107행,
       //   MCP_PROVIDER_ADMISSION_POLICY.weights.template === 0). enhanced·full 을 열면
-      //   토큰 없는 사람이 우리 모델 비용을 쓴다. 요청한 모드를 조용히 바꾸지 않고
-      //   무엇이 적용됐는지 결과에 남기는 일은 아래 핸들러의 status·generation 이 한다.
+      //   토큰 없는 사람이 우리 모델 비용을 쓴다.
+      //   🔴 261122 — 종전 주석은 「조용히 바꾸지 않는다」였으나 결과에는 적용 모드만 남아 내린 사실이 안 보였다.
+      //   요청 모드(requestedMode)를 핸들러에 함께 넘겨, 내렸으면 결과 modeDowngrade 에 요청·적용 모드와 이유를 적는다.
       const effectiveMode = authContext.source === "public"
         ? "template" as const
         : mode;
@@ -410,7 +430,7 @@ export function registerTools(server: McpServer): void {
         authContext,
         effectiveMode ?? GENERATE_RISK_ASSESSMENT_DEFAULT_MODE,
         () => generateRiskAssessmentHandler(
-          { question, mode: effectiveMode, format },
+          { question, mode: effectiveMode, requestedMode: mode, format },
           authContext,
           { signal },
         ),

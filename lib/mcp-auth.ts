@@ -90,6 +90,20 @@ export const PUBLIC_MCP_TOOL_SCOPES: readonly string[] = Object.freeze([
   "tools:generate_risk_assessment",
 ]);
 
+/** 공개(토큰 없음) 스코프에 든 도구인가. */
+export function isPublicMcpTool(toolName: McpToolName): boolean {
+  return PUBLIC_MCP_TOOL_SCOPES.includes(`tools:${toolName}`);
+}
+
+/**
+ * 공개 스코프에 없는 도구의 설명 첫 줄(261122).
+ * tools/list 는 세션마다 거르지 않고 모든 도구를 보인다(권한은 호출 때 requireMcpToolScope 가 본다).
+ * 그래서 토큰 없이 붙은 호출자가 부르기 전에 알 수 있게 설명 첫 줄에 적는다.
+ * 붙이는 곳은 registerScopedTool 한 곳이다(PUBLIC_MCP_TOOL_SCOPES 와 어긋나지 않게).
+ */
+export const MCP_AUTH_REQUIRED_NOTICE =
+  "인증 필요 — SafeClaw MCP 토큰(Authorization: Bearer)으로 호출해야 합니다. 토큰 없이 부르면 MCP_TOOL_FORBIDDEN 으로 거절됩니다.";
+
 /** 토큰 없는 호출에 주는 컨텍스트. 현장·조직이 없으므로 테넌트 도구는 스코프에서 막힌다. */
 export function buildPublicContext(admissionIdentity: string): McpAuthContext {
   return {

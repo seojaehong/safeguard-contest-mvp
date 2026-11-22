@@ -54,6 +54,20 @@ claude mcp add --transport http safeclaw https://www.safeclaw.kr/api/mcp/mcp
 🔴 **공개에서 `enhanced`·`full` 을 열지 않는다.** 그건 우리 Anthropic 비용이다. 같은 품질이 필요하면
 토큰을 발급해 쓴다(아래 **토큰 발급**).
 
+261122 — 공개 호출이 `enhanced`·`full` 을 요청했거나 `mode` 를 생략해(기본 `enhanced`) `template` 로
+내렸으면 결과에 `modeDowngrade: { requestedMode, appliedMode: "template", reason }` 를 붙이고, SIF 0건
+이유도 「토큰으로 호출하라」고 적는다(종전에는 적용 모드만 남아 내린 사실이 보이지 않았다).
+
+`tools/list` 는 세션마다 거르지 않고 11종을 모두 보인다(권한은 호출 때 본다). 대신 공개 스코프에 없는
+도구는 설명 첫 줄이 `인증 필요 — …` 다(`lib/mcp-scoped-tool.ts` 가 `PUBLIC_MCP_TOOL_SCOPES` 로 붙인다).
+
+### 작업 설명(`question`) 입력 계약 — 261122
+
+- 빈 문자열·공백만 있는 설명은 입력 오류로 거절한다(종전에는 내장 예시 시나리오로 `status: ok` 를 냈다).
+- `runAsk` 를 쓰는 `generate_risk_assessment`·`generate_safety_docpack`·`generate_reviewed_safety_docpack` 은
+  **1,200자**(`PUBLIC_ASK_QUESTION_MAX_CHARS`, `runAsk` 처리 한도)까지다. 스키마 상한이 4,000 이라
+  1,201~4,000자가 `MCP_TOOL_INTERNAL_ERROR` 였던 것을 맞췄다. `run_safeclaw_harness_agent` 는 4,000 그대로다.
+
 허용 목록은 `PUBLIC_MCP_TOOL_SCOPES`(`lib/mcp-auth.ts`) 한 곳에만 있고,
 `tests/mcp-public-tier.test.ts` 가 도구 전수와 대조한다.
 
@@ -187,8 +201,8 @@ OAuth `code` 교환을 모두 처리한다.
 | 도구 | 입력 | 반환 요약 |
 |------|------|-----------|
 | `run_safeclaw_harness_agent` | `question` | OpenClaw/Codex 시연용 DB harness engineering 전용 도구. `safety_reference_items`, SIF 사례, 최근 `workpacks`, 개선 이력을 먼저 조회해 `db_harness_first` 패킷과 `naturalize_only` 생성 계약을 반환한다. 일반 문서 생성보다 먼저 호출해 근거를 고정한다 |
-| `generate_reviewed_safety_docpack` | `question`, `task`, `mode?`(template\|enhanced\|full, 기본 full), `includeFull?` | `runAsk`로 SafeClaw 문서팩을 생성하고, 생성 본문을 `qa_review_docpack` 계층으로 즉시 검수한 복합 결과. OpenClaw/Codex가 SafeClaw 작업공간 품질 산출물을 한 번에 받아야 할 때 우선 사용 |
-| `generate_safety_docpack` | `question`, `mode?`(template\|enhanced\|full, 기본 full), `includeFull?` | `lib/search.ts` runAsk 호출. `summary`·`scenario`·`evidenceLabels`(있으면)·문서별 프리뷰(앞 500자+총길이). `includeFull=true` 시 전체 본문 |
+| `generate_reviewed_safety_docpack` | `question`(1~1,200자), `task`, `mode?`(template\|enhanced\|full, 기본 full), `includeFull?` | `runAsk`로 SafeClaw 문서팩을 생성하고, 생성 본문을 `qa_review_docpack` 계층으로 즉시 검수한 복합 결과. OpenClaw/Codex가 SafeClaw 작업공간 품질 산출물을 한 번에 받아야 할 때 우선 사용 |
+| `generate_safety_docpack` | `question`(1~1,200자), `mode?`(template\|enhanced\|full, 기본 full), `includeFull?` | `lib/search.ts` runAsk 호출. `summary`·`scenario`·`evidenceLabels`(있으면)·문서별 프리뷰(앞 500자+총길이). `includeFull=true` 시 전체 본문 |
 | `get_weather_signals` | `region` | `lib/weather.ts` 기상청 실황·특보 요약 + 작업 대응 조치 |
 | `validate_safety_citations` | `text` | `lib/law-citation-gate.ts` 게이트. `{ gatedText, removedCitations[] }` — 미검증(환각) 조문 인용 제거·치환 |
 | `sanitize_emergency_contacts` | `text` | `lib/safety-contacts.ts` 정화. 허위 기관+번호를 플레이스홀더로 치환 + 공식 연락처 목록 반환 |
@@ -196,7 +210,7 @@ OAuth `code` 교환을 모두 처리한다.
 | `get_evidence_mapping` | `docType?` | `lib/smsa-mapping.ts` 중대재해처벌법 시행령 제4조 증빙 매핑(지정 시 단건, 생략 시 전체) |
 | `query_safety_knowledge` | `query`(작업유형 또는 위험요인) | `lib/ontology/knowledge-tool.ts` 안전 온톨로지(published) 조회 — 위험요인→안전조치→법조문→중처법 의무 연결. 조문 인용 전 근거 확보용 |
 | `qa_review_docpack` | `task`, `document_text`(≤20000자) | `lib/ontology/qa-review.ts` 2층 검수 — 문서 본문을 작업유형의 법정 필수 조치와 대조해 누락 검출. `{covered, missing(근거 조문 병기), coverageRate, verdict}` |
-| `generate_risk_assessment` | `question`, `mode?`(template\|enhanced\|full, 기본 enhanced), `format?`(xlsx\|hwp, 기본 xlsx) | 웹 `/api/ask` 와 같은 `runAsk` 로 위험성평가 본표 행(JSON `headers`/`cells` = 한글 본표 13칸, 엑셀 서식은 21칸이고 엑셀에만 있는 칸은 `structuredRows` 에 전부)·확인 필요 목록·생성에 쓰인 SIF 유사사례(출처 기관·자료 기준일·원천 자료 공개 연도 `sourcePublishedYear` — 안전 지식 DB `safety_reference_sources` 행에서 읽고 DB 에 없는 원천은 null, 작업 설명과 작업·장소·기인물이 겹치는 사례(작업 설명이 적은 재해형태를 그 작업 묶음이 설명하지 못하면 그 재해형태를 낳는 작업의 같은 재해형태 사례도)만 관련 높은 순으로 `relevance` 와 함께, 뺀 사례는 `sif.excluded` 에 이유와 함께, 0건이면 `sif.reason`. 이 거름은 생성 입력 단계(dbHarness 패킷, 웹 `/api/ask` 공용)에서 걸려 뺀 사례는 생성 근거에도 들어가지 않는다. 패킷을 읽는 KOSHA 지침 상위 근거 고르기·Hermes·사진 분석·`run_safeclaw_harness_agent`·KOSHA 검색 감사도 거른 뒤 사례만 보므로, 뺀 사례 하나에만 기대던 KOSHA 지침은 상위 근거 없음(확인 필요)이 되고 Hermes 는 사례가 모두 빠지면 503 을 낸다)·시행규칙 제37조의4① 기재 항목 충족 검사(`recordItemsCheck`)를 만들고, 웹 「위험성평가표 편집 → 내보내기」와 같은 요청 본문·같은 렌더 함수(`lib/document-export-xlsx.ts`·`lib/document-export-hwp.ts`)로 만든 서식 파일(한글은 엑셀과 같은 A3 가로·엑셀 열 비율)을 `file.base64` 로 반환한다. 작업공간에 저장하지 않는다. `status` 는 본표 행을 만든 분기(`generation.rowsOrigin`: ai·db_harness·template → `ok`, 작업 유형 기본 행으로 대신한 fallback_baseline·photo_seed → `ok_fallback`)로 정하고 행이 없으면 `review_required`·`file=null`. `generation.fallbackUsed` 는 답변·문서 어느 하나라도 보조 응답이었는지일 뿐 status 근거가 아니다. 렌더 실패·응답 256KB 초과면 행 JSON 은 두고 `file=null`·`fileUnavailableReason`, 뺀 칸은 `trimmed`. `structuredRows[].evidenceRefs` 는 웹 `/api/ask` 처럼 게이트 전 출처 추적 값이다 |
+| `generate_risk_assessment` | `question`(1~1,200자), `mode?`(template\|enhanced\|full, 토큰 호출 기본 enhanced · 공개 호출은 template 고정 + `modeDowngrade`), `format?`(xlsx\|hwp, 기본 xlsx) | 웹 `/api/ask` 와 같은 `runAsk` 로 위험성평가 본표 행(JSON `headers`/`cells` = 한글 본표 13칸, 엑셀 서식은 21칸이고 엑셀에만 있는 칸은 `structuredRows` 에 전부)·확인 필요 목록·생성에 쓰인 SIF 유사사례(출처 기관·자료 기준일·원천 자료 공개 연도 `sourcePublishedYear` — 안전 지식 DB `safety_reference_sources` 행에서 읽고 DB 에 없는 원천은 null, 작업 설명과 작업·장소·기인물이 겹치는 사례(작업 설명이 적은 재해형태를 그 작업 묶음이 설명하지 못하면 그 재해형태를 낳는 작업의 같은 재해형태 사례도)만 관련 높은 순으로 `relevance` 와 함께, 뺀 사례는 `sif.excluded` 에 이유와 함께, 0건이면 `sif.reason`. 이 거름은 생성 입력 단계(dbHarness 패킷, 웹 `/api/ask` 공용)에서 걸려 뺀 사례는 생성 근거에도 들어가지 않는다. 패킷을 읽는 KOSHA 지침 상위 근거 고르기·Hermes·사진 분석·`run_safeclaw_harness_agent`·KOSHA 검색 감사도 거른 뒤 사례만 보므로, 뺀 사례 하나에만 기대던 KOSHA 지침은 상위 근거 없음(확인 필요)이 되고 Hermes 는 사례가 모두 빠지면 503 을 낸다)·시행규칙 제37조의4① 기재 항목 충족 검사(`recordItemsCheck`)를 만들고, 웹 「위험성평가표 편집 → 내보내기」와 같은 요청 본문·같은 렌더 함수(`lib/document-export-xlsx.ts`·`lib/document-export-hwp.ts`)로 만든 서식 파일(한글은 엑셀과 같은 A3 가로·엑셀 열 비율)을 `file.base64` 로 반환한다. 작업공간에 저장하지 않는다. `status` 는 본표 행을 만든 분기(`generation.rowsOrigin`: ai·db_harness·template → `ok`, 작업 유형 기본 행으로 대신한 fallback_baseline·photo_seed → `ok_fallback`)로 정하고 행이 없으면 `review_required`·`file=null`. `generation.fallbackUsed` 는 답변·문서 어느 하나라도 보조 응답이었는지일 뿐 status 근거가 아니다. 렌더 실패·응답 256KB 초과면 행 JSON 은 두고 `file=null`·`fileUnavailableReason`, 뺀 칸은 `trimmed`. `structuredRows[].evidenceRefs` 는 웹 `/api/ask` 처럼 게이트 전 출처 추적 값이다 |
 
 각 도구 description은 **"현장 안전관리자 에이전트가 언제 호출해야 하는지"**를 서술형으로
 기술한다(MCP 클라이언트의 도구 선택률 최적화).
