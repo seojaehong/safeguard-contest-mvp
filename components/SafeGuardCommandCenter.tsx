@@ -2427,7 +2427,7 @@ export function SafeGuardCommandCenter({
                       </pre>
                       <button
                         type="button"
-                        className="button command-primary document-next-button workbench-primary-action workbench-disabled-state"
+                        className={`button command-primary document-next-button workbench-primary-action${data ? "" : " workbench-disabled-state"}`}
                         disabled={!data}
                         onClick={() => moveToWorkspacePage("share")}
                       >

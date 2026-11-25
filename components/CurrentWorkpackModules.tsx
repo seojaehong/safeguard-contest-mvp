@@ -2402,7 +2402,7 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
           <article>
             <strong>서버 아카이브</strong>
             <code>workpacks · dispatch_logs</code>
-            <p>관리자 로그인 세션이 있으면 Supabase에 저장된 문서팩과 전파 이력을 같은 화면에서 불러옵니다.</p>
+            <p>관리자 로그인 세션이 있으면 서버에 저장된 문서팩과 전파 이력을 같은 화면에서 불러옵니다.</p>
           </article>
         </div>
         <p className="muted small">전파 대상 기준: {hasDispatchSnapshot ? `작업공간 전파 저장본 ${dispatchTargets.length}명` : "전파 저장본 없음, 현재 작업자 명단에서 재계산"} · 갱신 시각: {savedLabel || "대기"}.</p>

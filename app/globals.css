@@ -24685,6 +24685,111 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+/* ── 작업 화면 디자인 검수 B (2026-11-25) ──
+   범위: /share·/dispatch·/documents·/workers·/evidence·/evidence-file·/archive 작업 화면만.
+   공용 토큰(:root)·모듈 셸 머리·메뉴는 건드리지 않는다. 규칙마다 경로로 범위를 묶는다. */
+
+/* 공유 수신 화면: 다른 모듈 본문과 같은 24px 안쪽 여백. 셸 본문 폭을 넘지 않는다. */
+@media (min-width: 900px) {
+  .safeclaw-module-shell[data-module-route="/share"] .safeclaw-module-content > .safeclaw-share-recipient-page {
+    width: auto;
+    max-width: none;
+    margin: 0 var(--space-6);
+  }
+}
+
+/* 현장 전파: 화면 제목이 말줄임으로 잘리지 않게 하고, 줄어드는 쪽은 인계 상태 목록으로 넘긴다. */
+@media (min-width: 960px) {
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-workflow-header > div:first-child {
+    flex: 0 0 auto;
+  }
+
+  .safeclaw-module-shell[data-module-route="/dispatch"] .share-workflow-header > .review-propagation-handoff {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+/* 미리보기 전용일 때 막힌 주 행동 단추는 흐린 파랑 막대 대신 조용한 상태 칸으로 보인다(파랑 = 누를 수 있는 지시). */
+.share-panel.workflow-panel .share-primary-action-row [data-share-primary]:disabled {
+  border: 1px solid var(--rule);
+  background: var(--desk);
+  color: var(--ink-2);
+  opacity: 1;
+}
+
+/* 문서 편집 왼쪽 칸의 「핵심 3종」은 좁은 칸의 소제목이다. 화면 제목 크기로 두 줄 접히지 않게 한다. */
+.safeclaw-module-shell[data-module-route="/documents"] .safeclaw-mobile-document-priority > h2 {
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
+}
+
+/* 상태 문장·패널 제목이 화면 제목(h1)과 같은 크기로 서지 않게 한 단계 낮춘다. */
+.safeclaw-module-shell:is([data-module-route="/workers"], [data-module-route="/evidence"], [data-module-route="/archive"], [data-module-route="/evidence-file"]) .safeclaw-module-content .safeclaw-module-panel h2 {
+  font-size: var(--text-section-title);
+  font-weight: 800;
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
+}
+
+.safeclaw-module-shell:is([data-module-route="/workers"], [data-module-route="/evidence"], [data-module-route="/archive"]) .safeclaw-module-content .safeclaw-module-grid.four > article strong {
+  font-size: var(--text-section-title);
+  font-weight: 800;
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
+}
+
+/* 숫자 칸용 `.safeclaw-module-grid article strong`(화면 제목 크기)이 패널 안 목록 항목 제목까지 번지지 않게 한다. */
+.safeclaw-module-shell:is([data-module-route="/workers"], [data-module-route="/archive"], [data-module-route="/tbm"]) .safeclaw-module-content .safeclaw-module-panel :is(.safeclaw-archive-list, .safeclaw-worker-table, .safeclaw-tbm-board) article strong {
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
+}
+
+/* 이력 목록의 짧은 분류 표시는 브라우저 기본 고정폭 글꼴로 한글 자간이 벌어지지 않게 본문 글꼴을 쓴다. */
+.safeclaw-module-shell[data-module-route="/archive"] .safeclaw-module-content :is(.safeclaw-archive-list, .safeclaw-module-panel) code {
+  color: var(--ink-3);
+  font-family: inherit;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+/* 인쇄: 작업 화면을 브라우저로 인쇄하면 메뉴·상단 띠·화면 단추 없이 본문만 흰 종이에 싣는다.
+   문서 서식 인쇄는 편집기의 「PDF(브라우저 인쇄)」 창이 따로 맡는다. */
+@media print {
+  .safeclaw-module-shell:is([data-module-route="/share"], [data-module-route="/reports"], [data-module-route="/archive"], [data-module-route="/evidence-file"], [data-module-route="/workers"], [data-module-route="/tbm"], [data-module-route="/worker"]) {
+    display: block;
+    background: var(--paper);
+  }
+
+  .safeclaw-module-shell:is([data-module-route="/share"], [data-module-route="/reports"], [data-module-route="/archive"], [data-module-route="/evidence-file"], [data-module-route="/workers"], [data-module-route="/tbm"], [data-module-route="/worker"]) :is(.safeclaw-skip-link, .safeclaw-module-rail, .safeclaw-module-nav, .safeclaw-page-decision-action) {
+    display: none;
+  }
+
+  .safeclaw-module-shell:is([data-module-route="/share"], [data-module-route="/reports"], [data-module-route="/archive"], [data-module-route="/evidence-file"], [data-module-route="/workers"], [data-module-route="/tbm"], [data-module-route="/worker"]) .safeclaw-module-main {
+    background: var(--paper);
+  }
+}
+
+/* 휴대폰: 숫자 칸 넷을 한 줄에 하나씩 쌓지 않고 두 칸씩 놓는다. */
+@media (max-width: 720px) {
+  .safeclaw-module-shell:is([data-module-route="/workers"], [data-module-route="/evidence"], [data-module-route="/archive"]) .safeclaw-module-content .safeclaw-module-grid.four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .safeclaw-module-shell:is([data-module-route="/workers"], [data-module-route="/evidence"], [data-module-route="/archive"]) .safeclaw-module-content .safeclaw-module-grid.four > article strong {
+    font-size: var(--text-component-title);
+    font-weight: 700;
+    line-height: var(--leading-component-title);
+    letter-spacing: var(--tracking-component-title);
+  }
+}
+
 /* Workspace Documents review cockpit final guard: production theme media rules
    appear after the route-scoped rules above, so keep the generated Documents
    review step sized by its cockpit content instead of the generic workspace

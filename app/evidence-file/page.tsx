@@ -92,7 +92,7 @@ function excerpt(text: string, maxLength = 90) {
   return `${normalized.slice(0, maxLength).trim()}...`;
 }
 
-const DEMO_ORGANIZATION_NAME = "SafeClaw 데모 사업장";
+const DEMO_ORGANIZATION_NAME = "예시 사업장";
 
 export default function EvidenceFilePage() {
   const [state, setState] = useState<LoadState>({
@@ -110,7 +110,7 @@ export default function EvidenceFilePage() {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       setState({
         status: "unconfigured",
-        message: "서버 저장소 연결 전입니다. 지금은 데모 문서팩으로 화면 구성을 확인할 수 있고, 로그인하면 실제 사업장 이력이 쌓입니다.",
+        message: "서버 저장소 연결 전입니다. 지금은 예시 문서팩으로 화면 구성을 확인할 수 있고, 로그인하면 실제 사업장 이력이 쌓입니다.",
         organizationName: DEMO_ORGANIZATION_NAME,
         siteName: null,
         workpacks: buildDemoEvidenceWorkpacks(),
@@ -123,7 +123,7 @@ export default function EvidenceFilePage() {
     if (!session) {
       setState({
         status: "login-required",
-        message: "관리자 로그인 후에는 실제 사업장의 문서팩 이력이 항목별로 쌓입니다. 지금은 데모 문서팩으로 화면 구성을 확인할 수 있습니다.",
+        message: "관리자 로그인 후에는 실제 사업장의 문서팩 이력이 항목별로 쌓입니다. 지금은 예시 문서팩으로 화면 구성을 확인할 수 있습니다.",
         organizationName: DEMO_ORGANIZATION_NAME,
         siteName: null,
         workpacks: buildDemoEvidenceWorkpacks(),
@@ -154,7 +154,7 @@ export default function EvidenceFilePage() {
       if (!workpacks.length) {
         setState({
           status: "empty",
-          message: "아직 저장된 문서팩이 없습니다. 작업공간에서 문서팩을 생성·저장하면 이 화면에 자동으로 쌓입니다. 지금은 데모 문서팩으로 화면 구성을 확인할 수 있습니다.",
+          message: "아직 저장된 문서팩이 없습니다. 작업공간에서 문서팩을 생성·저장하면 이 화면에 자동으로 쌓입니다. 지금은 예시 문서팩으로 화면 구성을 확인할 수 있습니다.",
           organizationName: DEMO_ORGANIZATION_NAME,
           siteName: null,
           workpacks: buildDemoEvidenceWorkpacks(),
@@ -175,7 +175,7 @@ export default function EvidenceFilePage() {
       console.error("evidence-file fetch failed", error);
       setState({
         status: "error",
-        message: "증빙 파일철 저장소 응답을 확인하지 못했습니다. 지금은 데모 문서팩으로 화면 구성을 확인할 수 있습니다.",
+        message: "증빙 파일철 저장소 응답을 확인하지 못했습니다. 지금은 예시 문서팩으로 화면 구성을 확인할 수 있습니다.",
         organizationName: DEMO_ORGANIZATION_NAME,
         siteName: null,
         workpacks: buildDemoEvidenceWorkpacks(),
@@ -207,7 +207,7 @@ export default function EvidenceFilePage() {
         <h2>중대재해처벌법 시행령 제4조 증빙 현황</h2>
         <p className={state.status === "error" ? "export-error" : "muted small"}>{state.message}</p>
         {state.usingDemo ? (
-          <p className="muted small">지금 보이는 항목은 데모 문서팩입니다. 로그인하면 사업장 이력이 쌓입니다.</p>
+          <p className="muted small">지금 보이는 항목은 예시 문서팩입니다. 로그인하면 사업장 이력이 쌓입니다.</p>
         ) : null}
       </section>
 
@@ -245,7 +245,7 @@ export default function EvidenceFilePage() {
                       <code>{formatDate(doc.createdAt)}</code>
                       <p>{doc.siteName} · {excerpt(doc.question)}</p>
                       <p className="muted small">{section.article}{section.related ? ` · 병기: ${section.related}` : ""}</p>
-                      <span className="doc-card-evidence-badge">{state.usingDemo ? "데모" : "저장됨"}</span>
+                      <span className="doc-card-evidence-badge">{state.usingDemo ? "예시" : "저장됨"}</span>
                       <a href={doc.reopenHref}>문서팩 열기</a>
                     </article>
                   ))}

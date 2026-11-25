@@ -99,7 +99,7 @@ export function WorkerSampleAwareBoard() {
                 aria-pressed={language.code === selectedLanguage.code}
               >
                 <b>{language.label}</b>
-                <small>{language.nativeLabel}</small>
+                {language.nativeLabel && language.nativeLabel !== language.label ? <small>{language.nativeLabel}</small> : null}
               </button>
             ))}
           </div>

@@ -667,12 +667,16 @@ export default function ShareRecipientPage() {
           >
             {question}
           </p>
-          {sessionPayload?.expiresAt ? <p>{copy.expiresPrefix}: {formatIsoTime(sessionPayload.expiresAt)}</p> : null}
-          <p>
-            {copy.statusPrefix}: {formatShareStatus(sessionPayload?.status || "active", copy)}
-          </p>
-          <p>{copy.scopePrefix}: {sessionPayload?.shareScope === "organization" ? copy.scopeOrganization : copy.scopeInvited}</p>
-          {sessionPayload?.status !== "active" ? (
+          {sessionPayload ? (
+            <>
+              {sessionPayload.expiresAt ? <p>{copy.expiresPrefix}: {formatIsoTime(sessionPayload.expiresAt)}</p> : null}
+              <p>
+                {copy.statusPrefix}: {formatShareStatus(sessionPayload.status, copy)}
+              </p>
+              <p>{copy.scopePrefix}: {sessionPayload.shareScope === "organization" ? copy.scopeOrganization : copy.scopeInvited}</p>
+            </>
+          ) : null}
+          {(sessionPayload && sessionPayload.status !== "active") || (!sessionPayload && fetchState !== "loading") ? (
             <p>{copy.inactiveHelp}</p>
           ) : null}
         </article>
