@@ -24692,9 +24692,11 @@ body:has(.safeclaw-landing) :is(
 /* 공유 수신 화면: 다른 모듈 본문과 같은 24px 안쪽 여백. 셸 본문 폭을 넘지 않는다. */
 @media (min-width: 900px) {
   .safeclaw-module-shell[data-module-route="/share"] .safeclaw-module-content > .safeclaw-share-recipient-page {
-    width: auto;
+    box-sizing: border-box;
+    width: 100%;
     max-width: none;
-    margin: 0 var(--space-6);
+    margin: 0;
+    padding-inline: var(--space-6);
   }
 }
 
