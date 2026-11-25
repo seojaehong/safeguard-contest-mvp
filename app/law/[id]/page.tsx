@@ -65,7 +65,7 @@ export default async function LawDetailPage({ params }: { params: Promise<{ id: 
         <ul>{item.points.map((p) => <li key={p}>{p}</li>)}</ul>
         <hr />
         <h2 className="h2">법령 전문 및 문서 반영</h2>
-        <div className="muted small">Law.go 상세 호출이 조문을 반환하면 전체 조문을 표시합니다. 상세 호출이 실패한 경우에만 기초 조문 스냅샷과 원문 출처를 함께 표시합니다.</div>
+        <div className="muted small">법제처 원문을 불러오면 조문 전체를 보여 줍니다. 불러오지 못하면 기초 조문과 원문 출처 링크를 함께 보여 줍니다.</div>
         <div className="law-body-viewer">
           {sections.map((section) => (
             <section className="law-body-section" key={section.title}>
@@ -80,7 +80,7 @@ export default async function LawDetailPage({ params }: { params: Promise<{ id: 
             </section>
           ))}
         </div>
-        {item.sourceUrl ? <a className="button secondary" href={item.sourceUrl} target="_blank">원문 출처</a> : null}
+        {item.sourceUrl ? <a className="button secondary" href={item.sourceUrl} target="_blank" rel="noopener noreferrer">원문 출처</a> : null}
       </section>
     </main>
   );

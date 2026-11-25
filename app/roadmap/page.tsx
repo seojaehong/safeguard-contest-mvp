@@ -8,10 +8,10 @@ export const metadata: Metadata = {
 };
 
 const roadmap = [
-  ["1단계", "제품 셸", "작업공간, 문서팩, 근거, 전파, 이력 화면을 실제 업무 메뉴로 정리합니다."],
-  ["2단계", "재방문", "Site와 DailyEntry로 같은 현장을 다음 날 다시 열 수 있게 합니다."],
-  ["3단계", "SSOT", "SharedContext에서 공통 필드를 한 번 수정하고 문서에 반영합니다."],
-  ["4단계", "증빙", "EvidenceLibrary와 AuditTrail로 기록과 확인 흐름을 남깁니다."],
+  ["1단계", "업무 화면", "작업공간, 문서팩, 근거, 전파, 이력 화면을 실제 업무 메뉴로 정리합니다."],
+  ["2단계", "재방문", "현장과 날짜별 작업 기록으로 같은 현장을 다음 날 다시 열 수 있게 합니다."],
+  ["3단계", "공통 항목", "여러 문서에 들어가는 공통 항목을 한 곳에서 한 번 고치면 문서에 반영합니다."],
+  ["4단계", "증빙", "증빙 보관함과 변경 기록으로 기록과 확인 흐름을 남깁니다."],
   ["5단계", "팀 운영", "결재선, 다현장 대시보드, 월간 리포트로 확장합니다."]
 ];
 
@@ -20,9 +20,9 @@ export default function RoadmapPage() {
     <SafeClawModuleShell
       eyebrow="실행 로드맵"
       title="제품 로드맵."
-      description="제품 셸은 실제 작업 흐름을 먼저 고정하고, 운영 로드맵은 재방문과 이력을 완성합니다."
+      description="업무 화면으로 실제 작업 흐름을 먼저 고정하고, 다음 단계에서 재방문과 이력을 완성합니다."
       status="partial"
-      mappedTo="제품 셸 · 재방문 · SSOT · 증빙"
+      mappedTo="업무 화면 · 재방문 · 공통 항목 · 증빙"
       activeHref="/roadmap"
       actions={<Link href="/workspace">작업공간 열기</Link>}
     >

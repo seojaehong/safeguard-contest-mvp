@@ -73,7 +73,6 @@ export default function PrivacyPage() {
 
       <section className="safeclaw-module-panel">
         <div className="compact-head">
-          <span className="eyebrow">처리 항목</span>
           <h2>무엇을 왜 처리하는가</h2>
         </div>
         <ul>
@@ -87,7 +86,6 @@ export default function PrivacyPage() {
 
       <section className="safeclaw-module-panel">
         <div className="compact-head">
-          <span className="eyebrow">보유기간</span>
           <h2>얼마 동안 두는가</h2>
         </div>
         <ul>
@@ -101,7 +99,6 @@ export default function PrivacyPage() {
 
       <section className="safeclaw-module-panel">
         <div className="compact-head">
-          <span className="eyebrow">외부 전송</span>
           <h2>누구에게 보내는가</h2>
         </div>
         <ul>
@@ -116,7 +113,6 @@ export default function PrivacyPage() {
 
       <section className="safeclaw-module-panel">
         <div className="compact-head">
-          <span className="eyebrow">확인 중</span>
           <h2>아직 확인하지 못한 사항</h2>
         </div>
         <p>아래 사항은 확인이 끝나는 대로 이 방침에 반영합니다.</p>

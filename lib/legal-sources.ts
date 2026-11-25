@@ -147,6 +147,7 @@ export async function searchLegalSources(query: string, signal?: AbortSignal): P
     signal
   ).catch((error) => {
     signal?.throwIfAborted();
+    console.error("Law.go search failed; serving labeled mock evidence", error);
     return filterMockResults(query);
   });
   const fallbackPrimary =

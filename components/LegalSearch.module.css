@@ -1,0 +1,79 @@
+/* 근거 검색(/search) 전용 — 검색창과 결과 카드.
+   2026-11-25 디자인 검수: 셸 안에서 `.card` 가 여백 없이 그려져 검색창·결과가 화면 끝에 붙어 있었다.
+   셸 공용 규칙(app/globals.css)을 건드리지 않고 이 화면 요소만 다시 잡는다. */
+
+.searchForm {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.searchLabel {
+  color: var(--ink);
+  font-size: var(--text-body);
+  font-weight: 600;
+}
+
+.searchRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.searchRow input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--control-height, 44px);
+  font-size: 16px;
+}
+
+.searchRow button {
+  flex: 0 0 auto;
+  min-height: var(--control-height, 44px);
+  min-width: 88px;
+}
+
+.searchHint {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: var(--text-support);
+}
+
+.resultCard h3 {
+  margin: var(--space-3) 0 var(--space-2);
+  font-size: var(--text-component-title);
+  line-height: var(--leading-component-title);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.resultCard h3 a {
+  color: var(--sign-blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.resultSummary {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.resultMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.resultMeta :global(.badge) {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+@media (max-width: 480px) {
+  .searchRow {
+    flex-direction: column;
+  }
+}

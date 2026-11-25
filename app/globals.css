@@ -9812,8 +9812,8 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-login-page {
   min-height: 100vh;
-  background: #08090b;
-  color: var(--os-text, #f6f5ef);
+  background: var(--desk);
+  color: var(--ink);
 }
 
 .safeclaw-login-topbar {
@@ -9822,7 +9822,8 @@ body:has(.safeclaw-landing) :is(
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  border-bottom: 1px solid rgba(246, 245, 239, 0.13);
+  border-bottom: 1px solid var(--rule-soft);
+  background: var(--paper);
   padding: 0 clamp(24px, 4vw, 64px);
 }
 
@@ -9836,7 +9837,7 @@ body:has(.safeclaw-landing) :is(
   display: inline-flex;
   min-height: var(--control-height);
   align-items: center;
-  color: rgba(246, 245, 239, 0.62);
+  color: var(--ink-2);
   font-family: var(--font-product);
   font-size: var(--text-control);
   font-weight: 700;
@@ -9846,7 +9847,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-login-topbar nav a:hover {
-  color: var(--os-yellow, var(--sign-blue));
+  color: var(--sign-blue);
 }
 
 .safeclaw-login-panel {
@@ -9854,16 +9855,16 @@ body:has(.safeclaw-landing) :is(
   width: min(920px, calc(100% - 40px));
   gap: var(--space-6);
   margin: clamp(var(--space-16), 10vh, var(--space-24)) auto;
-  border: 1px solid rgba(246, 245, 239, 0.18);
+  border: 1px solid var(--rule);
   border-radius: var(--radius-panel);
-  background: rgba(14, 15, 19, 0.88);
+  background: var(--paper);
   padding: clamp(var(--space-8), 5vw, var(--space-16));
 }
 
 .safeclaw-login-panel h1 {
   max-width: 780px;
   margin: 0;
-  color: var(--os-text, #f6f5ef);
+  color: var(--ink);
   font-size: var(--text-page-title);
   font-weight: 800;
   letter-spacing: var(--tracking-page-title);
@@ -9873,7 +9874,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-login-panel p {
   max-width: 760px;
   margin: 0;
-  color: rgba(246, 245, 239, 0.68);
+  color: var(--ink-2);
   font-size: var(--text-body-lg);
   font-weight: 500;
   line-height: var(--leading-body-lg);
@@ -9884,7 +9885,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-login-session {
   display: grid;
   gap: var(--space-4);
-  border-top: 1px solid rgba(246, 245, 239, 0.14);
+  border-top: 1px solid var(--rule-soft);
   padding-top: var(--space-6);
 }
 
@@ -9900,10 +9901,10 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-login-form input {
   min-height: var(--control-height);
-  border: 1px solid rgba(246, 245, 239, 0.22);
+  border: 1px solid var(--rule);
   border-radius: var(--radius-control);
-  background: #0b0c10;
-  color: var(--os-text, #f6f5ef);
+  background: var(--paper);
+  color: var(--ink);
   padding: 0 var(--space-4);
   font-family: var(--font-product);
   font-size: var(--text-control);
@@ -9913,9 +9914,9 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-login-form input:focus {
-  border-color: var(--os-yellow, var(--sign-blue));
-  outline: 2px solid rgba(29, 90, 166, 0.18);
-  outline-offset: 0;
+  border-color: var(--sign-blue);
+  outline: 2px solid var(--sign-blue);
+  outline-offset: 2px;
 }
 
 .safeclaw-login-form button,
@@ -9925,10 +9926,10 @@ body:has(.safeclaw-landing) :is(
   min-height: var(--control-height);
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(246, 245, 239, 0.2);
+  border: 1px solid var(--rule);
   border-radius: var(--radius-control);
-  background: rgba(8, 9, 11, 0.72);
-  color: rgba(246, 245, 239, 0.78);
+  background: var(--paper);
+  color: var(--ink);
   padding: 0 var(--space-4);
   font-family: var(--font-product);
   font-size: var(--text-control);
@@ -9940,8 +9941,8 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-login-form button,
 .safeclaw-login-actions a.primary {
-  border-color: var(--os-yellow, var(--sign-blue));
-  background: var(--os-yellow, var(--sign-blue));
+  border-color: var(--sign-blue);
+  background: var(--sign-blue);
   color: var(--on-sign);
 }
 
@@ -9949,7 +9950,7 @@ body:has(.safeclaw-landing) :is(
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  color: rgba(246, 245, 239, 0.46);
+  color: var(--ink-3);
   font-family: var(--font-hud);
   font-size: var(--text-caption);
   font-weight: 600;
@@ -9961,7 +9962,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-login-divider::after {
   height: 1px;
   flex: 1;
-  background: rgba(246, 245, 239, 0.14);
+  background: var(--rule-soft);
   content: "";
 }
 
@@ -9987,20 +9988,20 @@ body:has(.safeclaw-landing) :is(
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
   overflow: hidden;
-  border: 1px solid rgba(246, 245, 239, 0.16);
+  border: 1px solid var(--rule-soft);
   border-radius: 2px;
-  background: rgba(246, 245, 239, 0.1);
+  background: var(--rule-soft);
 }
 
 .safeclaw-login-session dl div {
   display: grid;
   gap: var(--space-2);
-  background: #0b0c10;
+  background: var(--paper);
   padding: var(--space-4);
 }
 
 .safeclaw-login-session dt {
-  color: rgba(246, 245, 239, 0.5);
+  color: var(--ink-3);
   font-family: var(--font-hud);
   font-size: var(--text-caption);
   font-weight: 600;
@@ -10010,7 +10011,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-login-session dd {
   margin: 0;
-  color: var(--os-text, #f6f5ef);
+  color: var(--ink);
   font-size: var(--text-component-title);
   font-weight: 700;
   overflow-wrap: anywhere;
@@ -25078,5 +25079,94 @@ button.safeclaw-home-submit:hover {
 
   .safeclaw-home-submit {
     width: 100%;
+  }
+}
+
+/* ── 첫 화면·진입 다듬기 (2026-11-25 디자인 검수 A) ──
+   DESIGN.md §2·§4: 왼쪽 4px 띠는 상태색(목록 선택·문서 상태)에만 쓴다. 회색 띠 안내문 두 개를 평문으로 돌린다.
+   파랑은 「지시」라 단계 번호에서 뺀다. 720px 이하에서 숨던 상단 「작업공간」 링크를 되살린다(ux-direction 마찰 #5).
+   공개 화면(/why·/trust·/roadmap·/privacy) 머리는 휴대폰 폭에서 한 열로 쌓는다(/home 은 첫 화면 높이 시험 때문에 제외). 이 블록 밖 규칙은 건드리지 않는다. */
+.safeclaw-home-title {
+  text-wrap: balance;
+}
+
+/* 첫 화면 꼬리표(UX PR-1 고정 문구)는 테두리 상자라 단추처럼 보였다. 상자를 걷고 제목 위 보조 글자로 둔다. */
+.safeclaw-home-column > .safeclaw-home-tag {
+  margin-bottom: var(--space-3);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--ink-2);
+}
+
+.safeclaw-home-notice {
+  margin-top: var(--space-3);
+  border-left: 0;
+  padding-left: 0;
+  color: var(--ink-2);
+}
+
+.safeclaw-home-position {
+  margin-top: var(--space-8);
+  border-top: 1px solid var(--rule-soft);
+  border-left: 0;
+  padding-top: var(--space-4);
+  padding-left: 0;
+  color: var(--ink-2);
+}
+
+.safeclaw-home-step span {
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.safeclaw-landing-nav.safeclaw-home-nav nav {
+  justify-content: flex-end;
+  padding-inline-end: var(--space-3);
+}
+
+.safeclaw-landing-nav.safeclaw-home-nav nav a,
+.safeclaw-module-shell:is([data-module-route="/why"], [data-module-route="/roadmap"]) .v2-link-band .button {
+  white-space: nowrap;
+}
+
+/* 입력 테두리는 DESIGN.md §2 대로 --rule(옅은 --rule-soft 가 아니다). */
+.safeclaw-home-textarea {
+  border-color: var(--rule);
+}
+
+/* /home 「핵심 위험」·「다음 작업」 제목은 문장이 길게 들어오므로 쪽 제목이 아니라 구획 제목 크기로 둔다. */
+.safeclaw-module-shell[data-module-route="/home"] .safeclaw-module-grid.two .safeclaw-module-panel h2 {
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
+}
+
+/* 어두운 꼬리말 위 초점 고리는 파랑이 2.49:1 이라 야간 파랑(8.09:1)으로 그린다. */
+.safeclaw-landing-footer a:focus-visible {
+  outline-color: var(--night-sign-blue);
+}
+
+@media (max-width: 720px) {
+  .safeclaw-landing-nav.safeclaw-home-nav nav {
+    display: flex;
+  }
+
+  /* 휴대폰 폭에서는 강제 줄바꿈을 풀어 마지막 줄에 「맞춥니다.」 한 낱말만 남지 않게 한다(text-wrap: balance). */
+  .safeclaw-home-title br {
+    display: none;
+  }
+
+  .safeclaw-module-shell:is([data-module-route="/why"], [data-module-route="/trust"], [data-module-route="/roadmap"], [data-module-route="/privacy"]) .safeclaw-page-decision-header {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+
+  .safeclaw-module-shell:is([data-module-route="/why"], [data-module-route="/trust"], [data-module-route="/roadmap"], [data-module-route="/privacy"]) .safeclaw-page-decision-action {
+    border-top: 1px solid var(--workspace-rule);
+    border-left: 0;
+    padding-top: var(--space-4);
+    padding-left: 0;
   }
 }

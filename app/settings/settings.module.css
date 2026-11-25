@@ -1,0 +1,6 @@
+/* 설정 카드 제목 중 바로 갈 화면이 있는 것만 링크로 보인다(2026-11-25 디자인 검수). */
+.cardLink {
+  color: var(--sign-blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

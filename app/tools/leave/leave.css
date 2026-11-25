@@ -41,11 +41,9 @@
 /* --- 헤더 --- */
 .lv-head__eyebrow {
   margin: 0;
-  font-size: 11.5px;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--accent);
-  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink-2);
+  font-weight: 600;
 }
 
 .lv-head__title {
@@ -73,13 +71,13 @@
 }
 
 .lv-conclusion--action {
-  border-left: 6px solid var(--accent-warm);
-  background: var(--danger-soft);
+  border-left: 6px solid var(--sign-yellow);
+  background: var(--sign-yellow-soft);
 }
 
 .lv-conclusion--clear {
-  border-left: 6px solid var(--accent);
-  background: var(--accent-soft);
+  border-left: 6px solid var(--sign-green);
+  background: var(--sign-green-soft);
 }
 
 .lv-conclusion--unknown {
@@ -123,7 +121,7 @@
 }
 
 .lv-stat--emphasis {
-  border-color: var(--accent-warm);
+  border-color: var(--sign-yellow);
   background: var(--danger-soft);
 }
 
@@ -377,13 +375,13 @@
 .lv-how__num {
   display: inline-block;
   font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--accent);
+  font-weight: 600;
+  color: var(--ink-2);
   margin-bottom: 7px;
 }
 .lv-how__item p { margin: 0; font-size: 13.5px; line-height: 1.66; color: var(--muted); }
 .lv-how__item strong { color: var(--ink); }
+.lv-how__item a { color: var(--sign-blue); text-decoration: underline; text-underline-offset: 3px; }
 
 @media (max-width: 680px) {
   .lv-nav { padding: 12px 14px; }
@@ -424,8 +422,11 @@
 .lv-input__btn {
   border: 1px solid var(--accent);
   background: var(--accent);
-  color: #fff;
+  color: var(--on-sign);
   border-radius: var(--radius-sm);
+  min-height: var(--control-height, 44px);
+  display: inline-flex;
+  align-items: center;
   padding: 8px 14px;
   font-size: 13px;
   font-weight: 600;
@@ -446,7 +447,7 @@
   resize: vertical;
 }
 .lv-input__summary { display: flex; gap: 14px; flex-wrap: wrap; margin: 12px 0 10px; font-size: 13px; color: var(--muted); }
-.lv-input__summary .is-diff { color: var(--accent-warm); font-weight: 650; }
+.lv-input__summary .is-diff { color: var(--sign-red); font-weight: 600; }
 .lv-input__muted { color: var(--muted); font-size: 12.5px; }
 .lv-input__note { margin: 10px 0 0; font-size: 12.5px; line-height: 1.66; color: var(--muted); }
 .lv-input__export { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
@@ -532,11 +533,11 @@
    흰 화면에서 사실상 보이지 않았다. WCAG 2.4.11 은 인접 대비 3:1 을 요구한다.
    파일 입력은 opacity:0 이라 자기 outline 이 투명하므로 감싼 라벨에 표시한다. */
 .lv-page :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
-  outline: 2px solid var(--sc-steel-950, #14171a);
+  outline: 2px solid var(--sign-blue);
   outline-offset: 2px;
 }
 .lv-input__file:focus-within {
-  outline: 2px solid var(--sc-steel-950, #14171a);
+  outline: 2px solid var(--sign-blue);
   outline-offset: 2px;
 }
 
@@ -550,7 +551,7 @@
   }
 }
 
-/* 사업장 막대 (2026-09-24) — 노무사는 자문사 여러 개, 담당자는 우리 회사 하나 */
+/* 사업장 막대 (2026-09-24) — 여러 사업장을 맡는 사람과 한 사업장 담당자를 함께 받는다 */
 .lv-ws {
   border: 1px solid var(--line-strong); border-radius: var(--radius-md);
   background: var(--panel); padding: 13px 15px;
@@ -603,7 +604,18 @@
 
 .lv-terms {
   margin: 0; padding: 11px 14px; font-size: 13px; line-height: 1.66;
-  border: 1px solid var(--line); border-left: 4px solid var(--accent);
-  border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--muted);
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--radius-sm); background: var(--desk); color: var(--ink-2);
 }
 .lv-terms strong { color: var(--ink); }
+
+/* 2026-11-25 디자인 검수 — 터치 대상 44px(DESIGN.md §4), 휴대폰 입력칸 16px(iOS 확대 방지) */
+.lv-input__field input,
+.lv-input__field select,
+.lv-ws__add input { min-height: var(--control-height, 44px); }
+@media (max-width: 680px) {
+  .lv-input__field input,
+  .lv-input__field select,
+  .lv-input__area,
+  .lv-ws__add input { font-size: 16px; }
+}
