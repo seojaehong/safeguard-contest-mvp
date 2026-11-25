@@ -25015,6 +25015,7 @@ button.safeclaw-home-submit:hover {
 
 .safeclaw-landing-nav.safeclaw-home-nav nav {
   justify-content: flex-end;
+  padding-inline-end: var(--space-3);
 }
 
 .safeclaw-landing-nav.safeclaw-home-nav nav a,
