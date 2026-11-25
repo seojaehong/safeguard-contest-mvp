@@ -7,10 +7,36 @@ export const LAWGO_RESPONSE_MAX_BYTES = 1024 * 1024;
 const oc = process.env.LAWGO_OC?.trim() || process.env.LAW_OC?.trim() || "";
 const mockMode = process.env.LAWGO_MOCK_MODE === "force" || !oc;
 const baseUrl = "https://www.law.go.kr/DRF";
+// Law.go DRF verifies the OC against a registered server IP or domain. Serverless egress IPs change,
+// so the registered domain has to arrive as the Referer.
+const lawGoReferer = process.env.LAWGO_REFERER?.trim() || "https://www.safeclaw.kr/";
 const lawGoHeaders = {
   Accept: "application/json, application/xml, text/xml, */*",
-  "User-Agent": "SafeClaw/1.0 (+https://safeclaw.kr; evidence-fetch)"
+  "User-Agent": "SafeClaw/1.0 (+https://safeclaw.kr; evidence-fetch)",
+  Referer: lawGoReferer
 };
+
+export class LawGoVerificationError extends Error {
+  constructor(detail: string) {
+    super(`Law.go rejected OC user verification (register the server domain or IP): ${detail}`);
+    this.name = "LawGoVerificationError";
+  }
+}
+
+// Law.go answers HTTP 200 with this body when the caller is not registered for the OC.
+function assertLawGoVerified(text: string) {
+  if (text.includes("사용자 정보 검증에 실패")) {
+    throw new LawGoVerificationError(stripLawGoMarkup(text).slice(0, 160));
+  }
+}
+
+function stripLawGoMarkup(text: string) {
+  return text.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function rethrowUnlessRecoverable(error: unknown, signal?: AbortSignal) {
+  if (signal?.aborted || error instanceof LawGoVerificationError) throw error;
+}
 
 type JsonRecord = Record<string, unknown>;
 
@@ -428,6 +454,7 @@ async function fetchLawGo(endpoint: string, params: Record<string, string>, sign
   if (!response.ok) {
     throw new Error(text.slice(0, 160));
   }
+  assertLawGoVerified(text);
   return text;
 }
 
@@ -466,15 +493,15 @@ export async function searchAll(query: string, signal?: AbortSignal): Promise<Se
   for (const candidate of candidates) {
     const [laws, precedents, interpretations] = await Promise.all([
       fetchLawGo("lawSearch.do", { target: "law", query: candidate }, signal).then(parseLawResults).catch((error) => {
-        if (signal?.aborted) throw error;
+        rethrowUnlessRecoverable(error, signal);
         return [];
       }),
       fetchLawGo("lawSearch.do", { target: "prec", query: candidate }, signal).then(parsePrecResults).catch((error) => {
-        if (signal?.aborted) throw error;
+        rethrowUnlessRecoverable(error, signal);
         return [];
       }),
       fetchLawGo("lawSearch.do", { target: "expc", query: candidate }, signal).then(parseExpcResults).catch((error) => {
-        if (signal?.aborted) throw error;
+        rethrowUnlessRecoverable(error, signal);
         return [];
       })
     ]);
@@ -489,7 +516,7 @@ export async function searchAll(query: string, signal?: AbortSignal): Promise<Se
   }
 
   const precedentResults = await searchLawGoPrecedents(query, 4, signal).catch((error) => {
-    if (signal?.aborted) throw error;
+    rethrowUnlessRecoverable(error, signal);
     return [];
   });
   if (precedentResults.length) {
@@ -513,7 +540,7 @@ export async function searchLawGoPrecedents(
     const precedents = await fetchLawGo("lawSearch.do", { target: "prec", query: candidate }, signal)
       .then(parsePrecResults)
       .catch((error) => {
-        if (signal?.aborted) throw error;
+        rethrowUnlessRecoverable(error, signal);
         return [];
       });
 
