@@ -4,5 +4,11 @@
     "browserReportSourceIdentity": "594795c459e51f6fee39f6325366ba51d1bcff23bd0e5f779e3300cf3e549c6b",
     "reason": "WorkpackEditor 위험성평가 양식 값·단일 문서 내보내기 본문을 lib/risk-assessment-export-body.ts 공용 함수로 교체(화면·본문 값 변화 없음, 교차 검토 C3). 브라우저 매트릭스 미재생성 — 병합 전 재생성 또는 운영 G5 드라이런으로 확인",
     "recordedAt": "2026-11-01"
+  },
+  {
+    "sourceIdentity": "e35764fa19fa26a9951ab4eedd3ff18142ee6aad03d86a8eb791c53b013f9529",
+    "browserReportSourceIdentity": "594795c459e51f6fee39f6325366ba51d1bcff23bd0e5f779e3300cf3e549c6b",
+    "reason": "도구·지식 화면 디자인 검수(design/tools-polish) — 근거 검색 검색창·결과 카드·0건 안내, 지식 DB 작업 보기 탭, 연차 도구 색 뜻·터치 대상, 설정 카드 링크, 법령 상세 문구. 로컬 1440·390 렌더로 확인, 브라우저 매트릭스 미재생성 — 병합 전 재생성 또는 운영 G5 드라이런으로 확인",
+    "recordedAt": "2026-11-25"
   }
 ]

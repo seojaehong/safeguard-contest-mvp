@@ -78,7 +78,7 @@ export function SettlementInput() {
   return (
     <section className="lv-input">
       <div className="lv-input__privacy">
-        🔒 입력한 내용은 <strong>브라우저 안에서만</strong> 계산됩니다 — 서버로 올라가지 않습니다. 페이지 방문·버튼 클릭 횟수만 집계합니다.
+        입력한 내용은 <strong>브라우저 안에서만</strong> 계산됩니다 — 서버로 올라가지 않습니다. 페이지 방문·버튼 클릭 횟수만 집계합니다.
       </div>
 
       {roster.length === 0 && (
@@ -182,7 +182,7 @@ export function SettlementInput() {
         </div>
         <p className="lv-clause__hint">
           회계연도로 부여한 누계에 이 일수가 들어가 있다면 <strong>포함</strong>해야 같은
-          기준으로 비교됩니다. 적법한 사용촉진으로 이미 소멸했다면 제외합니다.
+          기준으로 비교됩니다. 법정 절차를 갖춘 사용촉진으로 이미 소멸했다면 제외합니다.
           근속 1년 미만이면 이 선택과 무관하게 항상 포함합니다.
         </p>
       </fieldset>
@@ -385,7 +385,7 @@ export function SettlementInput() {
                       "· 퇴직 시 총 휴가일수가 입사일 기준에 미달하면 부족분을 정산합니다.",
                       "· 수당 금액은 산출하지 않습니다. 통상임금 기준은 별도 확인이 필요합니다.",
                       "· 1년 미만 월 단위 연차(11일)는 회계연도 산정과 별개로 발생합니다.",
-                      "· 적법한 사용촉진, 소멸시효, 특수 출결은 별도 확인이 필요합니다.",
+                      "· 사용촉진 절차를 갖췄는지, 소멸시효, 특수 출결은 별도 확인이 필요합니다.",
                     ],
                   },
                   {
