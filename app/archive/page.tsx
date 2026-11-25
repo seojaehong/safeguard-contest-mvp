@@ -397,7 +397,7 @@ export default function ArchivePage() {
           <div className="safeclaw-archive-list">
             <article>
               <strong>문서팩 다시 열기</strong>
-              <code>/documents</code>
+              <code>문서팩</code>
               <p>위험성평가표, TBM, 교육기록, 제출 문서 편집을 이어갑니다.</p>
               <Link href="/documents">문서팩 보기</Link>
             </article>

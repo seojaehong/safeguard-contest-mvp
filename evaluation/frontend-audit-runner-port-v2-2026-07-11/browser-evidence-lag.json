@@ -16,5 +16,11 @@
     "browserReportSourceIdentity": "594795c459e51f6fee39f6325366ba51d1bcff23bd0e5f779e3300cf3e549c6b",
     "reason": "첫 화면·진입 디자인 검수 A(design/entry-polish, #139 위에 rebase) — 눈썹 라벨·회색 왼쪽 띠·장식 파랑 제거, /login 밝은 서식 바탕, 공개 화면 머리 휴대폰 한 열(/home 제외), 셸 「기본 현장」. 로컬 1440·390 렌더로 확인, 브라우저 매트릭스 미재생성 — 병합 전 재생성 또는 운영 G5 드라이런으로 확인",
     "recordedAt": "2026-11-25"
+  },
+  {
+    "sourceIdentity": "41876adb62253f38db17e36a9e4ad4a74f1d8e256b1e5a7a44182e1e6ecf8869",
+    "browserReportSourceIdentity": "594795c459e51f6fee39f6325366ba51d1bcff23bd0e5f779e3300cf3e549c6b",
+    "reason": "작업 화면 디자인 검수 B(design/workspace-polish, #139·#140·#141 위에 병합) — 공유 수신 화면 상태 문구·여백(작업대 폭 82% 유지), 「공유 단계로 이동」 비활성 표시 오류, 근거·증빙·이력 화면 내부 명칭 문구, 「참고 자료 제안」, 언어 단추 중복. 브라우저 매트릭스 미재생성 — 운영 G5 드라이런으로 확인",
+    "recordedAt": "2026-11-25"
   }
 ]
