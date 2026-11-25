@@ -48,8 +48,10 @@ export default function ProductHomePage() {
   }, []);
 
   const siteName = workpack?.data.scenario.siteName || "첫 작업을 생성하세요";
-  const topRisk = workpack?.data.riskSummary.topRisk || "작업 입력 후 위험요인, 기상 신호, 문서팩 상태가 홈에 표시됩니다.";
-  const weather = workpack?.data.externalData.weather?.summary || "작업 생성 후 현재 기상 신호를 반영합니다.";
+  const topRisk = workpack?.data.riskSummary.topRisk || "아직 만든 작업이 없습니다.";
+  const weather = workpack
+    ? workpack.data.externalData.weather?.summary || "작업 생성 후 현재 기상 신호를 반영합니다."
+    : "작업을 입력하면 위험요인, 기상 신호, 문서팩 상태가 여기에 표시됩니다.";
 
   return (
     <SafeClawModuleShell

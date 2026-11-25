@@ -11,7 +11,8 @@ export default function LoginPage() {
     <main className="safeclaw-login-page" aria-label="SafeClaw 관리자 로그인">
       <header className="safeclaw-login-topbar">
         <a href="/" className="safeclaw-os-brand" aria-label="SafeClaw 홈">
-          <span className="safeclaw-os-mark">SC</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/ClawMark.svg" alt="" className="safeclaw-os-mark" width={28} height={28} />
           <strong>safeclaw/<em>os</em></strong>
         </a>
         <nav aria-label="로그인 보조 메뉴">

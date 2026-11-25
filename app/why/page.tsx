@@ -39,7 +39,6 @@ export default function WhyPage() {
       <section className="safeclaw-module-grid four api-pulse-showcase">
         {apiCards.map(([title, body]) => (
           <article key={title} className="api-proof-card">
-            <i aria-hidden="true" />
             <h2>{title}</h2>
             <p>{body}</p>
           </article>
@@ -48,7 +47,6 @@ export default function WhyPage() {
 
       <section className={`safeclaw-module-panel ${styles.comparisonPanel}`}>
         <div className="compact-head">
-          <span className="eyebrow">비교</span>
           <h2>대안별 차이</h2>
         </div>
         <div className={styles.tableFrame}>

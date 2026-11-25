@@ -39,7 +39,7 @@ const defaultChromeLabels: ModuleChromeLabels = {
   productSubtitle: "현장 안전 문서팩",
   mappedTo: "업무 범위",
   decisionAria: "현재 모듈 결정",
-  siteContext: "SITE 기본 현장",
+  siteContext: "기본 현장",
   evidenceContext: "공공 근거",
   weatherContext: "기상청",
   themeAria: "화면 테마",

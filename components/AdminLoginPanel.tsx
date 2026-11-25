@@ -129,7 +129,6 @@ export function AdminLoginPanel() {
   if (!client) {
     return (
       <section className="safeclaw-login-panel" aria-label="관리자 로그인 설정 상태">
-        <span className="safeclaw-os-tag">관리자 계정</span>
         <h1>로그인 설정이 필요합니다.</h1>
         <p>NEXT_PUBLIC_SUPABASE_URL과 NEXT_PUBLIC_SUPABASE_ANON_KEY가 없으면 브라우저 로그인 UI를 열 수 없습니다.</p>
         <div className="safeclaw-login-actions">
@@ -142,7 +141,6 @@ export function AdminLoginPanel() {
 
   return (
     <section className="safeclaw-login-panel" aria-label="관리자 로그인">
-      <span className="safeclaw-os-tag">관리자 계정</span>
       <h1>이력을 남기는 작업공간으로 들어갑니다.</h1>
       <p>
         비회원은 브라우저 임시 저장으로 기본 문서(템플릿)만 만듭니다. 관리자 계정은 초대·승인제이며,

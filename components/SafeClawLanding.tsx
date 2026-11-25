@@ -35,9 +35,9 @@ export function SafeClawLanding() {
 
       <section className="safeclaw-home-hero" id="composer" aria-labelledby="home-title">
         <div className="safeclaw-home-column">
-          <span className="safeclaw-os-tag">산업안전 · 현장 문서</span>
+          <span className="safeclaw-os-tag safeclaw-home-tag">산업안전 · 현장 문서</span>
           <h1 id="home-title" className="safeclaw-shared-page-title safeclaw-home-title">
-            오늘 작업을 한 줄로 적으면
+            오늘 작업을 한 줄로 적으면{" "}
             <br />
             안전 서식을 만들고 근거와 맞춥니다.
           </h1>
