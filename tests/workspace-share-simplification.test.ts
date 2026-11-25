@@ -202,8 +202,9 @@ describe("workspace share simplification", () => {
     expect(sharePanel).toContain("브라우저 저장 · 승인 아님");
     expect(sharePanel).toContain('href="/documents"');
     expect(sharePanel).toContain("문서 검토 확인 필요");
-    expect(sharePanel).toContain("Hermes 지식 후보");
-    expect(sharePanel).toContain("별도 검토 · 문서 승인 아님");
+    expect(sharePanel).toContain("참고 자료 제안");
+    expect(sharePanel).not.toContain("Hermes");
+    expect(sharePanel).toContain("별도 검토 · 문서 승인과 무관");
     expect(sharePanel).toContain("<dt>전송 이력</dt>");
     expect(sharePanel).not.toContain("<dt>검수</dt>");
   });

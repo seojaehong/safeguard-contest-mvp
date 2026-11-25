@@ -6,7 +6,7 @@
     "recordedAt": "2026-11-01"
   },
   {
-    "sourceIdentity": "0e6aaf37bd53baf7d44a873c5524a6141965f6b75577269be2f840dc10d52d8f",
+    "sourceIdentity": "f2492c9e106ac986bf94a67581520f720a53bb6d486c842f2fab97e64e4ceec9",
     "browserReportSourceIdentity": "594795c459e51f6fee39f6325366ba51d1bcff23bd0e5f779e3300cf3e549c6b",
     "reason": "작업 화면 디자인 검수 B — 공유 수신 화면 상태 문구·여백, 작업공간 「공유 단계로 이동」 비활성 표시 오류, 근거·증빙·이력 화면 내부 명칭(Supabase·데모·경로) 문구, 작업자 언어 단추 중복 표기. 브라우저 매트릭스 미재생성 — 로컬 1440·390 캡처와 verify-safeclaw drive 로 확인, 병합 전 재생성 필요",
     "recordedAt": "2026-11-25"

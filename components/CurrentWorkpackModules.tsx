@@ -1223,8 +1223,8 @@ function DocumentCockpit({
             <dd>{reviewedDocumentCount}/{launchDocuments.length} · 브라우저 저장</dd>
           </div>
           <div>
-            <dt>Hermes 지식 후보</dt>
-            <dd>별도 검토 · 문서 승인 아님</dd>
+            <dt>참고 자료 제안</dt>
+            <dd>별도 검토 · 문서 승인과 무관</dd>
           </div>
           <div>
             <dt>공유·전송</dt>
