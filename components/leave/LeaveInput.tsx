@@ -202,7 +202,7 @@ export function LeaveInput() {
   return (
     <section className="lv-input">
       <div className="lv-input__privacy">
-        🔒 붙여넣은 내용과 엑셀 파일은 <strong>브라우저 안에서만</strong> 처리됩니다 — 서버로 올라가지 않습니다. 페이지 방문·버튼 클릭 횟수만 집계하며 <strong>이름·입사일·파일명은 집계에 포함되지 않습니다.</strong>
+        붙여넣은 내용과 엑셀 파일은 <strong>브라우저 안에서만</strong> 처리됩니다 — 서버로 올라가지 않습니다. 페이지 방문·버튼 클릭 횟수만 집계하며 <strong>이름·입사일·파일명은 집계에 포함되지 않습니다.</strong>
       </div>
 
       <div className="lv-input__controls">

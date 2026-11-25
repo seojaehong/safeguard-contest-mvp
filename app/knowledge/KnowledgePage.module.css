@@ -58,7 +58,6 @@
   font-size: var(--text-hud);
   font-weight: 700;
   line-height: var(--leading-hud);
-  text-transform: uppercase;
 }
 
 .tabList {
@@ -179,7 +178,6 @@
   font-weight: 700;
   line-height: var(--leading-hud);
   letter-spacing: var(--tracking-hud);
-  text-transform: uppercase;
 }
 
 .section {
@@ -1085,7 +1083,6 @@
   font-weight: 700;
   line-height: var(--leading-hud);
   letter-spacing: var(--tracking-hud);
-  text-transform: uppercase;
 }
 
 .stageState {
@@ -1957,4 +1954,46 @@
     overflow-x: auto;
   }
 
+}
+
+/* 2026-11-25 디자인 검수 — 작업 보기 탭.
+   공용 셸의 버튼 규칙(.safeclaw-module-shell.module-variant-document button:not(...))이
+   .sectionTab 을 이겨 여섯 탭이 모두 파란 주 행동 버튼으로 그려졌다. 고른 탭과 나머지가
+   구분되지 않았다. 셸 규칙보다 구체적인 선택자로 탭 모양을 되찾는다.
+   파랑 = 선택 상태(DESIGN.md §2), 나머지는 종이 바탕·보조 글자. */
+.sectionNavigator .tabList .sectionTab {
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+.sectionNavigator .tabList .sectionTab:hover {
+  border-color: var(--sign-blue);
+  color: var(--ink);
+}
+
+.sectionNavigator .tabList .sectionTab[aria-selected="true"] {
+  border-color: var(--sign-blue);
+  background: var(--sign-blue);
+  color: var(--on-sign);
+}
+
+.sectionNavigator .tabList .sectionTab:focus-visible {
+  outline: 2px solid var(--sign-blue);
+  outline-offset: 2px;
+}
+
+/* 휴대폰: 가로 스크롤로 탭 절반이 잘려 「검토 흐름」「진단」이 보이지 않았다. 3열 두 줄로 모두 보인다. */
+@media (max-width: 720px) {
+  .sectionNavigator .tabList {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow: visible;
+  }
+
+  .sectionNavigator .tabList .sectionTab {
+    flex: none;
+    min-height: 44px;
+  }
 }

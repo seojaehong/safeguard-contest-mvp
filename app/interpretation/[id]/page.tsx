@@ -22,7 +22,7 @@ export default async function InterpretationDetailPage({ params }: { params: Pro
         <hr />
         <h2 className="h2">요약 본문</h2>
         <pre className="legal-reading-body">{item.body}</pre>
-        {item.sourceUrl ? <a className="button secondary" href={item.sourceUrl} target="_blank">원문 출처</a> : null}
+        {item.sourceUrl ? <a className="button secondary" href={item.sourceUrl} target="_blank" rel="noopener noreferrer">원문 출처</a> : null}
       </section>
     </main>
   );

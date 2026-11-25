@@ -69,10 +69,20 @@ export function SearchLivePage({ query }: { query: string }) {
       activeHref="/search"
     >
       <SearchBox initialQuery={query} />
-      <section className="safeclaw-module-panel">
+      {/* 검색 결과 칸 하나가 대기·0건 안내까지 맡는다(같은 뜻의 칸을 두 번 쌓지 않는다). */}
+      <section className="safeclaw-module-panel" aria-live="polite">
         <span>검색 결과</span>
-        <h2>{state.status === "ready" ? `${results.length}건` : state.status === "idle" ? "검색어 입력 전" : "확인 중"}</h2>
-        <p>법제처 법령정보를 우선 확인하고, 설정된 보조 근거가 있으면 판례·해석례를 함께 정리합니다.</p>
+        <h2>{state.status === "ready" ? `${results.length}건` : state.status === "idle" ? "검색어를 입력해 주세요." : "확인 중"}</h2>
+        {state.status === "idle" ? (
+          <p>작업명·위험요인·조문 번호로 검색하면 관련 법령·판례·해석례를 찾습니다.</p>
+        ) : state.status === "ready" && results.length === 0 ? (
+          <p>
+            「{trimmedQuery}」에 맞는 근거를 찾지 못했습니다. 낱말을 줄이거나 바꿔 다시 검색해 보세요.
+            작업명(비계 조립), 위험요인(추락), 조문 번호(제38조)처럼 짧게 넣으면 찾기 쉽습니다.
+          </p>
+        ) : (
+          <p>법제처 법령정보를 우선 확인하고, 설정된 보조 근거가 있으면 판례·해석례를 함께 정리합니다.</p>
+        )}
         {exampleCount ? (
           <p className="muted small" role="status">
             {exampleCount === results.length
@@ -81,13 +91,7 @@ export function SearchLivePage({ query }: { query: string }) {
           </p>
         ) : null}
       </section>
-      {state.status === "idle" ? (
-        <section className="safeclaw-module-panel" role="status" aria-live="polite">
-          <span>검색 대기</span>
-          <h2>검색어를 입력해 주세요.</h2>
-          <p>작업명·위험요인·조문 번호로 검색하면 관련 법령·판례·해석례를 찾습니다.</p>
-        </section>
-      ) : state.status === "ready" ? (
+      {state.status === "idle" || (state.status === "ready" && results.length === 0) ? null : state.status === "ready" ? (
         <section className="safeclaw-module-grid two">
           {results.map((item) => <ResultCard key={item.id} item={item} />)}
         </section>
