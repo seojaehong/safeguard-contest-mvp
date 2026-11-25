@@ -24978,7 +24978,7 @@ button.safeclaw-home-submit:hover {
 /* ── 첫 화면·진입 다듬기 (2026-11-25 디자인 검수 A) ──
    DESIGN.md §2·§4: 왼쪽 4px 띠는 상태색(목록 선택·문서 상태)에만 쓴다. 회색 띠 안내문 두 개를 평문으로 돌린다.
    파랑은 「지시」라 단계 번호에서 뺀다. 720px 이하에서 숨던 상단 「작업공간」 링크를 되살린다(ux-direction 마찰 #5).
-   공개 화면(/why·/trust·/roadmap·/privacy·/home) 머리는 휴대폰 폭에서 한 열로 쌓는다. 이 블록 밖 규칙은 건드리지 않는다. */
+   공개 화면(/why·/trust·/roadmap·/privacy) 머리는 휴대폰 폭에서 한 열로 쌓는다(/home 은 첫 화면 높이 시험 때문에 제외). 이 블록 밖 규칙은 건드리지 않는다. */
 .safeclaw-home-title {
   text-wrap: balance;
 }
@@ -25051,12 +25051,12 @@ button.safeclaw-home-submit:hover {
     display: none;
   }
 
-  .safeclaw-module-shell:is([data-module-route="/why"], [data-module-route="/trust"], [data-module-route="/roadmap"], [data-module-route="/privacy"], [data-module-route="/home"]) .safeclaw-page-decision-header {
+  .safeclaw-module-shell:is([data-module-route="/why"], [data-module-route="/trust"], [data-module-route="/roadmap"], [data-module-route="/privacy"]) .safeclaw-page-decision-header {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-4);
   }
 
-  .safeclaw-module-shell:is([data-module-route="/why"], [data-module-route="/trust"], [data-module-route="/roadmap"], [data-module-route="/privacy"], [data-module-route="/home"]) .safeclaw-page-decision-action {
+  .safeclaw-module-shell:is([data-module-route="/why"], [data-module-route="/trust"], [data-module-route="/roadmap"], [data-module-route="/privacy"]) .safeclaw-page-decision-action {
     border-top: 1px solid var(--workspace-rule);
     border-left: 0;
     padding-top: var(--space-4);
