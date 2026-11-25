@@ -46,9 +46,11 @@
 }
 
 .comparisonTable thead th {
-  background: var(--workspace-accent);
-  color: var(--workspace-accent-ink, var(--on-sign));
-  font-weight: 760;
+  /* 파랑은 「지시」(DESIGN.md §2) — 표 머리는 서식 머리 칸처럼 책상색 바탕 + 굵은 아래 선 */
+  border-bottom: 2px solid var(--workspace-ink);
+  background: var(--workspace-surface-2);
+  color: var(--workspace-ink);
+  font-weight: 600;
 }
 
 .comparisonTable tbody th {
@@ -58,8 +60,8 @@
 }
 
 .comparisonTable tbody td:first-of-type {
-  color: var(--workspace-accent-text);
-  font-weight: 680;
+  color: var(--workspace-ink);
+  font-weight: 600;
 }
 
 .srOnly {

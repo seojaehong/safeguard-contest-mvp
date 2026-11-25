@@ -38,12 +38,11 @@ export default function TrustPage() {
 
       <section className="safeclaw-module-panel interview-card">
         <div className="compact-head">
-          <span className="eyebrow">인터뷰 스크립트</span>
           <h2>검증할 질문</h2>
         </div>
         <div className="interview-question-list">
-          {interviewQuestions.map((question, index) => (
-            <span key={question}>{String(index + 1).padStart(2, "0")} · {question}</span>
+          {interviewQuestions.map((question) => (
+            <span key={question}>{question}</span>
           ))}
         </div>
       </section>
