@@ -8,7 +8,10 @@ import { describe, expect, it } from "vitest";
 const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
 const implementation = read("app/api/mcp/[transport]/implementation.ts");
 const toolBlock = implementation.slice(implementation.indexOf("\"generate_risk_assessment\","), implementation.indexOf("inputSchema", implementation.indexOf("\"generate_risk_assessment\",")));
-const docsRow = read("docs/mcp-server.md").split("\n").find((line) => line.startsWith("| `generate_risk_assessment`")) ?? "";
+// 🔴 docs 에는 이 이름으로 시작하는 표가 둘이다 — 공개 티어 모드 비교 표(PR #132, 261112)와 도구 명세 표.
+// 접두사만 보면 먼저 오는 모드 비교 표가 집혀 261112 부터 CI 가 빨갰다. 명세 표는 둘째 칸이 `question` 이라
+// 그걸로 고른다. 단언하는 말(13칸·21칸)로 고르면 시험이 자기를 증명하게 되므로 쓰지 않는다.
+const docsRow = read("docs/mcp-server.md").split("\n").find((line) => line.startsWith("| `generate_risk_assessment` |") && line.includes("`question`")) ?? "";
 const libSource = read("lib/mcp-risk-assessment.ts");
 
 describe("본표 칸 수 설명", () => {
